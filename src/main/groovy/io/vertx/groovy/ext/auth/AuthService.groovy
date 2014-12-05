@@ -18,6 +18,7 @@ package io.vertx.groovy.ext.auth;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.groovy.core.Vertx
+import java.util.Set
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -41,14 +42,20 @@ public class AuthService {
     def ret= AuthService.FACTORY.apply(io.vertx.ext.auth.AuthService.createEventBusProxy((io.vertx.core.Vertx)vertx.getDelegate(), address));
     return ret;
   }
-  public void login(Map<String, Object> credentials, Handler<AsyncResult<Void>> resultHandler) {
+  public void login(Map<String, Object> credentials, Handler<AsyncResult<Boolean>> resultHandler) {
     this.delegate.login(credentials != null ? new io.vertx.core.json.JsonObject(credentials) : null, resultHandler);
   }
-  public void hasRole(String subject, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasRole(subject, resultHandler);
+  public void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasRole(principal, role, resultHandler);
   }
-  public void hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasPermission(permission, resultHandler);
+  public void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasRoles(principal, roles, resultHandler);
+  }
+  public void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasPermission(principal, permission, resultHandler);
+  }
+  public void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasPermissions(principal, permissions, resultHandler);
   }
   public void start() {
     this.delegate.start();

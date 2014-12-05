@@ -10,6 +10,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthServiceImpl;
 import io.vertx.serviceproxy.ProxyHelper;
 
+import java.util.Set;
+
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -26,11 +28,15 @@ public interface AuthService {
     return ProxyHelper.createProxy(AuthService.class, vertx, address);
   }
 
-  void login(JsonObject credentials, Handler<AsyncResult<Void>> resultHandler);
+  void login(JsonObject credentials, Handler<AsyncResult<Boolean>> resultHandler);
 
-  void hasRole(String subject, Handler<AsyncResult<Boolean>> resultHandler);
+  void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
 
-  void hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler);
+  void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
+
+  void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler);
+
+  void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler);
 
   @ProxyIgnore
   void start();

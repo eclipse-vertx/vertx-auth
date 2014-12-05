@@ -17,7 +17,6 @@
 package io.vertx.ext.auth.test;
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthService;
 
 import java.util.concurrent.CountDownLatch;
@@ -30,8 +29,7 @@ public class AuthServiceVerticleTest extends AuthServiceTest {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    JsonObject config = new JsonObject();
-    DeploymentOptions options = new DeploymentOptions().setConfig(config);
+    DeploymentOptions options = new DeploymentOptions().setConfig(getConfig());
     CountDownLatch latch = new CountDownLatch(1);
     vertx.deployVerticle("service:io.vertx:auth-service", options, onSuccess(id -> {
       authService = AuthService.createEventBusProxy(vertx, "vertx.auth");

@@ -29,6 +29,7 @@ import java.util.ArrayList;import java.util.HashSet;import java.util.List;import
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.core.Vertx;
+import java.util.Set;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -64,11 +65,19 @@ public class AuthServiceVertxProxyHandler extends ProxyHandler {
         break;
       }
       case "hasRole": {
-        service.hasRole((java.lang.String)json.getValue("subject"), createHandler(msg));
+        service.hasRole((java.lang.String)json.getValue("principal"), (java.lang.String)json.getValue("role"), createHandler(msg));
+        break;
+      }
+      case "hasRoles": {
+        service.hasRoles((java.lang.String)json.getValue("principal"), convertSet(json.getJsonArray("roles").getList()), createHandler(msg));
         break;
       }
       case "hasPermission": {
-        service.hasPermission((java.lang.String)json.getValue("permission"), createHandler(msg));
+        service.hasPermission((java.lang.String)json.getValue("principal"), (java.lang.String)json.getValue("permission"), createHandler(msg));
+        break;
+      }
+      case "hasPermissions": {
+        service.hasPermissions((java.lang.String)json.getValue("principal"), convertSet(json.getJsonArray("permissions").getList()), createHandler(msg));
         break;
       }
       case "start": {

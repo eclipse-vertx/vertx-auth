@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.core.Vertx;
+import java.util.Set;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -44,13 +45,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
     this._address = address;
   }
 
-  public void login(JsonObject credentials, Handler<AsyncResult<Void>> resultHandler) {
+  public void login(JsonObject credentials, Handler<AsyncResult<Boolean>> resultHandler) {
     checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("credentials", credentials);
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "login");
-    _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -59,10 +60,11 @@ public class AuthServiceVertxEBProxy implements AuthService {
     });
   }
 
-  public void hasRole(String subject, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
     checkClosed();
     JsonObject _json = new JsonObject();
-    _json.put("subject", subject);
+    _json.put("principal", principal);
+    _json.put("role", role);
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "hasRole");
     _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
@@ -74,12 +76,45 @@ public class AuthServiceVertxEBProxy implements AuthService {
     });
   }
 
-  public void hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
     checkClosed();
     JsonObject _json = new JsonObject();
+    _json.put("principal", principal);
+    _json.put("roles", new JsonArray(new ArrayList<>(roles)));
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "hasRoles");
+    _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+    checkClosed();
+    JsonObject _json = new JsonObject();
+    _json.put("principal", principal);
     _json.put("permission", permission);
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "hasPermission");
+    _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
+    checkClosed();
+    JsonObject _json = new JsonObject();
+    _json.put("principal", principal);
+    _json.put("permissions", new JsonArray(new ArrayList<>(permissions)));
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "hasPermissions");
     _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));

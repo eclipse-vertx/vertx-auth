@@ -21,6 +21,10 @@ import io.vertx.ext.auth.AuthService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -31,8 +35,14 @@ public class AuthServiceTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authService = AuthService.create(vertx, new JsonObject());
+    authService = AuthService.create(vertx, getConfig());
     authService.start();
+  }
+
+  protected JsonObject getConfig() {
+    JsonObject config = new JsonObject();
+    config.put("properties_path", "classpath:test-auth.properties");
+    return config;
   }
 
   @Override
@@ -45,6 +55,7 @@ public class AuthServiceTest extends VertxTestBase {
   public void testSimpleLogin() {
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
+      assertTrue(res);
       testComplete();
     }));
     await();
@@ -53,7 +64,84 @@ public class AuthServiceTest extends VertxTestBase {
   @Test
   public void testSimpleLoginFail() {
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongpassword");
-    authService.login(credentials, onFailure(res -> {
+    authService.login(credentials, onSuccess(res -> {
+      assertFalse(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testHasRole() {
+    authService.hasRole("tim", "administrator", onSuccess(res -> {
+      assertTrue(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testNotHasRole() {
+    authService.hasRole("tim", "manager", onSuccess(res -> {
+      assertFalse(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testHasRoles() {
+    Set<String> roles = new HashSet<>(Arrays.asList("administrator", "developer"));
+    authService.hasRoles("tim", roles, onSuccess(res -> {
+      assertTrue(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testNotHasRoles() {
+    Set<String> roles = new HashSet<>(Arrays.asList("administrator", "developer"));
+    authService.hasRoles("bob", roles, onSuccess(res -> {
+      assertFalse(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testHasPermission() {
+    authService.hasPermission("tim", "do_actual_work", onSuccess(res -> {
+      assertTrue(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testNotHasPermission() {
+    authService.hasPermission("bob", "play_golf", onSuccess(res -> {
+      assertFalse(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testHasPermissions() {
+    Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "play_golf"));
+    authService.hasPermissions("tim", permissions, onSuccess(res -> {
+      assertTrue(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testNotHasPermissions() {
+    Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "play_golf"));
+    authService.hasPermissions("bob", permissions, onSuccess(res -> {
+      assertFalse(res);
       testComplete();
     }));
     await();
