@@ -19,7 +19,6 @@ package io.vertx.ext.auth.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
-import io.vertx.ext.auth.EmbeddedADSVer157;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
 import org.junit.Rule;
