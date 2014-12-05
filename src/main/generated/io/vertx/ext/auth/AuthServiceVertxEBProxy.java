@@ -26,6 +26,7 @@ import java.util.ArrayList;import java.util.HashSet;import java.util.List;import
 import io.vertx.core.Vertx;
 import java.util.Set;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.AuthService;

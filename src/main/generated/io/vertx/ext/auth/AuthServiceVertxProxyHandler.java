@@ -31,6 +31,7 @@ import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.core.Vertx;
 import java.util.Set;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.AuthService;
@@ -58,6 +59,7 @@ public class AuthServiceVertxProxyHandler extends ProxyHandler {
       throw new IllegalStateException("action not specified");
     }
     switch (action) {
+
 
 
       case "login": {

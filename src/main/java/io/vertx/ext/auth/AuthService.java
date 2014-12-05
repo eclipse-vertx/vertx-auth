@@ -1,5 +1,6 @@
 package io.vertx.ext.auth;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
 import io.vertx.codegen.annotations.VertxGen;
@@ -12,7 +13,6 @@ import io.vertx.serviceproxy.ProxyHelper;
 
 import java.util.Set;
 
-
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -20,8 +20,17 @@ import java.util.Set;
 @ProxyGen
 public interface AuthService {
 
-  static AuthService create(Vertx vertx, JsonObject config) {
-    return new AuthServiceImpl(vertx, config);
+  static AuthService create(Vertx vertx, AuthRealmType authRealmType, JsonObject config) {
+    return new AuthServiceImpl(vertx, authRealmType, config);
+  }
+
+  static AuthService createWithRealmClassName(Vertx vertx, String authRealmClassName, JsonObject config) {
+    return new AuthServiceImpl(vertx, authRealmClassName, config);
+  }
+
+  @GenIgnore
+  static AuthService createWithRealm(Vertx vertx, AuthRealm authRealm, JsonObject config) {
+    return new AuthServiceImpl(vertx, authRealm, config);
   }
 
   static AuthService createEventBusProxy(Vertx vertx, String address) {

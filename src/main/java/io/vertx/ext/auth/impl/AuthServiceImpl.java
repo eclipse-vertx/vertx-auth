@@ -6,7 +6,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthRealm;
+import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
+import io.vertx.ext.auth.impl.realms.LDAPAuthRealm;
 import io.vertx.ext.auth.impl.realms.PropertiesAuthRealm;
 
 import java.util.Set;
@@ -21,11 +23,41 @@ public class AuthServiceImpl implements AuthService {
   protected final AuthRealm realm;
   protected final JsonObject config;
 
-  public AuthServiceImpl(Vertx vertx, JsonObject config) {
+  public AuthServiceImpl(Vertx vertx, AuthRealmType type, JsonObject config) {
     this.vertx = vertx;
     this.config = config;
-    // FIXME - do not hardcode
-    this.realm = new PropertiesAuthRealm();
+    switch (type) {
+      case PROPERTIES:
+        this.realm = new PropertiesAuthRealm();
+        break;
+      case JDBC:
+        // TODO
+        throw new UnsupportedOperationException();
+      case LDAP:
+        this.realm = new LDAPAuthRealm();
+        break;
+      default:
+        throw new IllegalArgumentException("type: " + type);
+    }
+    realm.init(config);
+  }
+
+  public AuthServiceImpl(Vertx vertx, String authRealmClassName, JsonObject config) {
+    this.vertx = vertx;
+    this.config = config;
+    try {
+      Class clazz = getClassLoader().loadClass(authRealmClassName);
+      this.realm = (AuthRealm)clazz.newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    realm.init(config);
+  }
+
+  public AuthServiceImpl(Vertx vertx, AuthRealm authRealm, JsonObject config) {
+    this.vertx = vertx;
+    this.config = config;
+    this.realm = authRealm;
     realm.init(config);
   }
 
@@ -85,5 +117,11 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public void stop() {
   }
+
+  private ClassLoader getClassLoader() {
+    ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+    return tccl == null ? getClass().getClassLoader(): tccl;
+  }
+
 
 }

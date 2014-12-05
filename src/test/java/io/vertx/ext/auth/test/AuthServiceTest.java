@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.test;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -35,7 +36,7 @@ public class AuthServiceTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authService = AuthService.create(vertx, getConfig());
+    authService = AuthService.create(vertx, AuthRealmType.PROPERTIES, getConfig());
     authService.start();
   }
 
@@ -146,4 +147,5 @@ public class AuthServiceTest extends VertxTestBase {
     }));
     await();
   }
+
 }

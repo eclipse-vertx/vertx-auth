@@ -17,9 +17,15 @@
 package io.vertx.ext.auth.impl.realms;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.AuthRealm;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.ExcessiveAttemptsException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.LockedAccountException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.mgt.DefaultSecurityManager;
@@ -41,9 +47,18 @@ import java.util.Set;
  */
 public abstract class ShiroAuthRealm implements AuthRealm {
 
+  private static final Logger log = LoggerFactory.getLogger(ShiroAuthRealm.class);
+
   protected DefaultSecurityManager securityManager;
   protected Realm realm;
   protected JsonObject config;
+
+  protected ShiroAuthRealm() {
+  }
+
+  public ShiroAuthRealm(Realm realm) {
+    this.realm = realm;
+  }
 
   @Override
   public boolean login(JsonObject credentials) {
@@ -55,7 +70,11 @@ public abstract class ShiroAuthRealm implements AuthRealm {
     try {
       subject.login(token);
       return true;
+    } catch (UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException e) {
+      return false;
     } catch (AuthenticationException ae) {
+      // Unexpected exception - log it
+      log.error("Unexpected exception when logging in", ae.getCause());
       return false;
     }
   }
