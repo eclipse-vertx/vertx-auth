@@ -95,12 +95,18 @@
       <artifactId>apacheds-all</artifactId>
       <version>1.5.7</version>
       <exclusions>
-        <!-- shared-ldap-schema module needs to be excluded to avoid multiple schema resources on the classpath-->
+        <!-- shared-ldap-schema module needs to be excluded to avoid multiple schema resources on the classpath -->
         <exclusion>
           <groupId>org.apache.directory.shared</groupId>
           <artifactId>shared-ldap-schema</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.unboundid</groupId>
+      <artifactId>unboundid-ldapsdk</artifactId>
+      <version>2.3.7</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

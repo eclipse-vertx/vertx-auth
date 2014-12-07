@@ -20,10 +20,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Ignore;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -43,9 +50,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     return config;
   }
 
-  // FIXME - currently commented out as can't figure out LDAP schema shit
   @Test
-  @Ignore
   public void testLDAP() {
     authService = AuthService.create(vertx, AuthRealmType.LDAP, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
@@ -61,6 +66,37 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     super.setUp();
     ldapServer = new EmbeddedADSVer157(ldapWorkingDirectory.newFolder());
     ldapServer.startServer();
+    // TODO: this is not asynchronous, but for setUp it should be ok
+    insertTestUsers();
+  }
+
+  /*
+   * insert test users (only one currently), if we need more users, it would be
+   * better to use a ldif file
+   */
+  private void insertTestUsers() throws LDAPException {
+    LDAPConnection connection = null;
+    try {
+      connection = new LDAPConnection("localhost", 10389);
+
+      // entry tim/sausages
+      List<Attribute> addRequest = new ArrayList<Attribute>();
+      addRequest.add(new Attribute("objectClass", "top"));
+      addRequest.add(new Attribute("objectClass", "person"));
+      addRequest.add(new Attribute("objectClass", "organizationalPerson"));
+      addRequest.add(new Attribute("objectClass", "inetOrgPerson"));
+      addRequest.add(new Attribute("cn", "Tim Fox"));
+      addRequest.add(new Attribute("sn", "Fox"));
+      addRequest.add(new Attribute("mail", "tim@example.com"));
+      addRequest.add(new Attribute("uid", "tim"));
+      addRequest.add(new Attribute("userPassword", "{ssha}d0M5Z2qjOOCSCQInvZHgVAleCqU5I+ag9ZHXMw=="));
+
+      connection.add("uid=tim,ou=users,dc=foo,dc=com", addRequest);
+    } finally {
+      if (connection != null) {
+        connection.close();
+      }
+    }
   }
 
   @Override
