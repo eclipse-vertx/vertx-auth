@@ -17,6 +17,8 @@
 package io.vertx.ext.auth.impl.realms;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.apache.shiro.realm.ldap.JndiLdapRealm;
@@ -25,6 +27,9 @@ import org.apache.shiro.realm.ldap.JndiLdapRealm;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public class LDAPAuthRealm extends ShiroAuthRealm {
+
+  private static final Logger log = LoggerFactory.getLogger(LDAPAuthRealm.class);
+
 
   public LDAPAuthRealm() {
   }
@@ -71,6 +76,5 @@ public class LDAPAuthRealm extends ShiroAuthRealm {
     this.securityManager = new DefaultSecurityManager(ldapRealm);
     this.realm = ldapRealm;
   }
-
 
 }

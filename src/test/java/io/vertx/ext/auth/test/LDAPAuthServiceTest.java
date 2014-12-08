@@ -16,21 +16,19 @@
 
 package io.vertx.ext.auth.test;
 
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
 import io.vertx.test.core.VertxTestBase;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -40,7 +38,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
   @Rule
   public TemporaryFolder ldapWorkingDirectory = new TemporaryFolder();
 
-  protected EmbeddedADSVer157 ldapServer;
+  protected EmbeddedADS ldapServer;
   protected AuthService authService;
 
   protected JsonObject getConfig() {
@@ -61,12 +59,33 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     await();
   }
 
+  @Test
+  public void testLDAPFailBadpassword() {
+    authService = AuthService.create(vertx, AuthRealmType.LDAP, getConfig());
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongone");
+    authService.login(credentials, onSuccess(res -> {
+      assertFalse(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testLDAPFailUnknownUser() {
+    authService = AuthService.create(vertx, AuthRealmType.LDAP, getConfig());
+    JsonObject credentials = new JsonObject().put("username", "bob").put("password", "blah");
+    authService.login(credentials, onSuccess(res -> {
+      assertFalse(res);
+      testComplete();
+    }));
+    await();
+  }
+
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    ldapServer = new EmbeddedADSVer157(ldapWorkingDirectory.newFolder());
+    ldapServer = new EmbeddedADS(ldapWorkingDirectory.newFolder());
     ldapServer.startServer();
-    // TODO: this is not asynchronous, but for setUp it should be ok
     insertTestUsers();
   }
 

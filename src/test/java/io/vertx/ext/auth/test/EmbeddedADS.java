@@ -55,7 +55,7 @@ import java.util.UUID;
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  * @version $Rev$, $Date$
  */
-public class EmbeddedADSVer157 {
+public class EmbeddedADS {
   /**
    * The directory service
    */
@@ -198,7 +198,7 @@ public class EmbeddedADSVer157 {
    *
    * @throws Exception If something went wrong
    */
-  public EmbeddedADSVer157(File workDir) throws Exception {
+  public EmbeddedADS(File workDir) throws Exception {
     initDirectoryService(workDir);
   }
 
@@ -233,7 +233,7 @@ public class EmbeddedADSVer157 {
       workDir.mkdirs();
 
       // Create the server
-      EmbeddedADSVer157 ads = new EmbeddedADSVer157(workDir);
+      EmbeddedADS ads = new EmbeddedADS(workDir);
 
       // Read an entry
       //Entry result = ads.service.getAdminSession().lookup(new DN("dc=foo,dc=com"));
