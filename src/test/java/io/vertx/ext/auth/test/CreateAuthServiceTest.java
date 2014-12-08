@@ -19,8 +19,15 @@ package io.vertx.ext.auth.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthRealm;
 import io.vertx.ext.auth.AuthService;
+import io.vertx.ext.auth.ShiroAuthRealm;
 import io.vertx.ext.auth.impl.realms.PropertiesAuthRealm;
+import io.vertx.ext.auth.impl.realms.SimplePrincipalCollection;
 import io.vertx.test.core.VertxTestBase;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.realm.Realm;
+import org.apache.shiro.subject.PrincipalCollection;
 import org.junit.Test;
 
 /**
@@ -58,5 +65,46 @@ public class CreateAuthServiceTest extends VertxTestBase {
       testComplete();
     }));
     await();
+  }
+
+  @Test
+  public void testCreateWithShiroRealm() {
+    AuthRealm realm = ShiroAuthRealm.create(new MyShiroRealm());
+    realm.init(new JsonObject());
+    authService = AuthService.createWithRealm(vertx, realm, getConfig());
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.login(credentials, onSuccess(res -> {
+      assertTrue(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  class MyShiroRealm implements Realm {
+
+    @Override
+    public String getName() {
+      return getClass().getName();
+    }
+
+    @Override
+    public boolean supports(AuthenticationToken token) {
+      return true;
+    }
+
+    @Override
+    public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+      return new AuthenticationInfo() {
+        @Override
+        public PrincipalCollection getPrincipals() {
+          return new SimplePrincipalCollection((String)token.getPrincipal());
+        }
+
+        @Override
+        public Object getCredentials() {
+          return token.getCredentials();
+        }
+      };
+    }
   }
 }

@@ -26,7 +26,7 @@ import org.apache.shiro.realm.ldap.JndiLdapRealm;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class LDAPAuthRealm extends ShiroAuthRealm {
+public class LDAPAuthRealm extends ShiroAuthRealmImpl {
 
   private static final Logger log = LoggerFactory.getLogger(LDAPAuthRealm.class);
 
@@ -36,7 +36,6 @@ public class LDAPAuthRealm extends ShiroAuthRealm {
 
   @Override
   public void init(JsonObject config) {
-    JndiLdapContextFactory fact;
     this.config = config;
     JndiLdapRealm ldapRealm = new JndiLdapRealm();
     JndiLdapContextFactory factory = new JndiLdapContextFactory();
@@ -70,7 +69,6 @@ public class LDAPAuthRealm extends ShiroAuthRealm {
     if (systemPassword != null) {
       factory.setSystemPassword(systemPassword);
     }
-
     ldapRealm.setContextFactory(factory);
     ldapRealm.init();
     this.securityManager = new DefaultSecurityManager(ldapRealm);

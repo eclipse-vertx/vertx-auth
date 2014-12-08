@@ -35,29 +35,27 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public abstract class ShiroAuthRealm implements AuthRealm {
+public class ShiroAuthRealmImpl implements AuthRealm {
 
-  private static final Logger log = LoggerFactory.getLogger(ShiroAuthRealm.class);
+  private static final Logger log = LoggerFactory.getLogger(ShiroAuthRealmImpl.class);
 
   protected DefaultSecurityManager securityManager;
   protected Realm realm;
   protected JsonObject config;
 
-  protected ShiroAuthRealm() {
+  protected ShiroAuthRealmImpl() {
   }
 
-  public ShiroAuthRealm(Realm realm) {
+  public ShiroAuthRealmImpl(Realm realm) {
     this.realm = realm;
+  }
+
+  @Override
+  public void init(JsonObject config) {
+    this.securityManager = new DefaultSecurityManager(realm);
   }
 
   @Override
@@ -83,7 +81,7 @@ public abstract class ShiroAuthRealm implements AuthRealm {
   @Override
   public boolean hasRole(String principal, String role) {
     SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new MyPrincipalCollection(principal);
+    PrincipalCollection coll = new SimplePrincipalCollection(principal);
     subjectContext.setPrincipals(coll);
     Subject subject = securityManager.createSubject(subjectContext);
     return subject.hasRole(role);
@@ -92,7 +90,7 @@ public abstract class ShiroAuthRealm implements AuthRealm {
   @Override
   public boolean hasPermission(String principal, String permission) {
     SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new MyPrincipalCollection(principal);
+    PrincipalCollection coll = new SimplePrincipalCollection(principal);
     subjectContext.setPrincipals(coll);
     Subject subject = securityManager.createSubject(subjectContext);
     try {
@@ -103,58 +101,4 @@ public abstract class ShiroAuthRealm implements AuthRealm {
     }
   }
 
-  // Seems kludgy having to do this, but not sure how else to authorise using the Shiro API
-  protected static class MyPrincipalCollection implements PrincipalCollection {
-
-    private final String principal;
-
-    MyPrincipalCollection(String principal) {
-      this.principal = principal;
-    }
-
-    @Override
-    public Object getPrimaryPrincipal() {
-      return principal;
-    }
-
-    @Override
-    public <T> T oneByType(Class<T> type) {
-      return null;
-    }
-
-    @Override
-    public <T> Collection<T> byType(Class<T> type) {
-      return null;
-    }
-
-    @Override
-    public List asList() {
-      return Arrays.asList(principal);
-    }
-
-    @Override
-    public Set asSet() {
-      return new HashSet<>(asList());
-    }
-
-    @Override
-    public Collection fromRealm(String realmName) {
-      return null;
-    }
-
-    @Override
-    public Set<String> getRealmNames() {
-      return null;
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return false;
-    }
-
-    @Override
-    public Iterator iterator() {
-      return null;
-    }
-  }
 }

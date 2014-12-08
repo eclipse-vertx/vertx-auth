@@ -23,7 +23,7 @@ import org.apache.shiro.realm.text.PropertiesRealm;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class PropertiesAuthRealm extends ShiroAuthRealm {
+public class PropertiesAuthRealm extends ShiroAuthRealmImpl {
 
   @Override
   public void init(JsonObject config) {
