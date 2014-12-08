@@ -22,6 +22,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
+import io.vertx.ext.auth.LDAPAuthRealmConstants;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,14 +44,15 @@ public class LDAPAuthServiceTest extends VertxTestBase {
 
   protected JsonObject getConfig() {
     JsonObject config = new JsonObject();
-    config.put("ldap_url", "ldap://localhost:10389");
-    config.put("ldap_user_dn_template", "uid={0},ou=users,dc=foo,dc=com");
+    config.put(LDAPAuthRealmConstants.LDAP_URL, "ldap://localhost:10389");
+    config.put(LDAPAuthRealmConstants.LDAP_USER_DN_TEMPLATE_FIELD, "uid={0},ou=users,dc=foo,dc=com");
+    config.put(AuthService.AUTH_REALM_TYPE_FIELD, AuthRealmType.LDAP.toString());
     return config;
   }
 
   @Test
   public void testLDAP() {
-    authService = AuthService.create(vertx, AuthRealmType.LDAP, getConfig());
+    authService = AuthService.create(vertx, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
       assertTrue(res);
@@ -61,7 +63,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
 
   @Test
   public void testLDAPFailBadpassword() {
-    authService = AuthService.create(vertx, AuthRealmType.LDAP, getConfig());
+    authService = AuthService.create(vertx, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongone");
     authService.login(credentials, onSuccess(res -> {
       assertFalse(res);
@@ -72,7 +74,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
 
   @Test
   public void testLDAPFailUnknownUser() {
-    authService = AuthService.create(vertx, AuthRealmType.LDAP, getConfig());
+    authService = AuthService.create(vertx, getConfig());
     JsonObject credentials = new JsonObject().put("username", "bob").put("password", "blah");
     authService.login(credentials, onSuccess(res -> {
       assertFalse(res);

@@ -45,5 +45,94 @@ in order to authenticate and authorise your users.
 ### Other Shiro realms
 
 You can plug-in any other Shiro `Realm` implementation and use that if you prefer.
- 
 
+## Configuration
+
+### Properties realm
+
+#### Properties file
+
+Create a properties file, e.g. `vertx-users.properties`.
+
+Each line should contain the username, password and roles for a user or permisions in a role.
+
+For a user line it should be of the form:
+
+    user.{username}={password},{roleName1},{roleName2},...,{roleNameN}
+    
+For a role line it should be of the form:
+    
+    role.{roleName}={permissionName1},{permissionName2},...,{permissionNameN}
+
+
+Here's an example:
+
+    user.tim = sausages,administrator,developer
+    user.bob = socks,developer
+    user.joe = manager
+    role.administrator=*
+    role.manager=play_golf,say_buzzwords
+    role.developer=do_actual_work
+    
+#### How the properties file is found
+
+You use the `properties_path` configuration element to define how the properties file is found.
+
+The default value is `classpath:vertx-users.properties`.
+
+If the value is prefixed with `classpath:` then the classpath will be searched for a properties file of that name.
+
+If the value is prefixed with `file:` then it specifies a file on the file system.
+
+If the value is prefixed with `url:` then it specifies a URL from where to load the properties.
+
+### LDAP Realm
+
+#### LDAP configuration
+
+The following configuration properties are used to configure the LDAP realm:
+
+* `ldap-user-dn-template` - this is used to determine the actual lookup to use when looking up a user with a particular
+id. An example is `uid={0},ou=users,dc=foo,dc=com` - the element `{0}` is substituted with the user id to create the
+actual lookup. This setting is mandatory.
+* `ldap_url` - the url to the LDAP server. The url must start with `ldap://` and a port must be specified.
+An example is `ldap:://myldapserver.mycompany.com:10389`
+* `ldap-authentication-mechanism`
+* `ldap-context-factory-class-name`
+* `ldap-pooling-enabled`
+* `ldap-referral`
+* `ldap-system-username`
+* `ldap-system-password`
+
+## Examples
+
+### Authentication
+ 
+    Vertx vertx = Vert.vertx();
+    JsonObject config = new JsonObject().put("classpath:myapp-users.properties");
+    AuthService auth = AuthService.create(vertx, config);
+    
+    auth.login(new JsonObject().put("username", "tim").put("password", "sausages"), res -> {
+      if (res.succeeded()) {
+        if (res.result()) {
+          System.out.println("Logged in ok");          
+        } else {
+          System,out.println("Login attempt failed");
+        }
+      } else {
+        res.cause().printStackTrace();
+    });
+    
+### Authorisation
+  
+    Vertx vertx = Vert.vertx();
+    JsonObject config = new JsonObject().put("classpath:myapp-users.properties");
+    AuthService auth = AuthService.create(vertx, config);
+    
+    auth.hasRole("tim", "developer", res -> {
+      if (res.succeeded()) {
+        System.out.println("Tim " + (res.result() ? "is" : "is not") + " developer");
+      } else {
+        res.cause().printStackTrace();
+    });  
+      

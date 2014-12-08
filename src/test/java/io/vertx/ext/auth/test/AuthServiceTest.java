@@ -17,8 +17,8 @@
 package io.vertx.ext.auth.test;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
+import io.vertx.ext.auth.PropertiesAuthRealmConstants;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -36,13 +36,13 @@ public class AuthServiceTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authService = AuthService.create(vertx, AuthRealmType.PROPERTIES, getConfig());
+    authService = AuthService.create(vertx, getConfig());
     authService.start();
   }
 
   protected JsonObject getConfig() {
     JsonObject config = new JsonObject();
-    config.put("properties_path", "classpath:test-auth.properties");
+    config.put(PropertiesAuthRealmConstants.PROPERTIES_PROPS_PATH_FIELD, "classpath:test-auth.properties");
     return config;
   }
 

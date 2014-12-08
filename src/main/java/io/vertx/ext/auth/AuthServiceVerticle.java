@@ -14,7 +14,7 @@ public class AuthServiceVerticle extends AbstractVerticle {
   public void start() throws Exception {
 
     // Create the service object
-    service = AuthService.create(vertx, AuthRealmType.PROPERTIES, config());
+    service = AuthService.create(vertx, config());
 
     // And register it on the event bus against the configured address
     String address = config().getString("address");

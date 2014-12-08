@@ -163,29 +163,13 @@ var AuthService = function(j_val) {
 
  @memberof module:ext-auth-js/auth_service
  @param vertx {Vertx} 
- @param authRealmType {Object} 
  @param config {Object} 
  @return {AuthService}
  */
-AuthService.create = function(vertx, authRealmType, config) {
+AuthService.create = function(vertx, config) {
   var __args = arguments;
-  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthService(JAuthService.create(vertx._jdel, io.vertx.ext.auth.AuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
-  } else utils.invalidArgs();
-};
-
-/**
-
- @memberof module:ext-auth-js/auth_service
- @param vertx {Vertx} 
- @param authRealmClassName {string} 
- @param config {Object} 
- @return {AuthService}
- */
-AuthService.createWithRealmClassName = function(vertx, authRealmClassName, config) {
-  var __args = arguments;
-  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthService(JAuthService.createWithRealmClassName(vertx._jdel, authRealmClassName, utils.convParamJsonObject(config)));
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
+    return new AuthService(JAuthService.create(vertx._jdel, utils.convParamJsonObject(config)));
   } else utils.invalidArgs();
 };
 

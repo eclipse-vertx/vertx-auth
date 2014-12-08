@@ -20,12 +20,11 @@ import java.util.Set;
 @ProxyGen
 public interface AuthService {
 
-  static AuthService create(Vertx vertx, AuthRealmType authRealmType, JsonObject config) {
-    return new AuthServiceImpl(vertx, authRealmType, config);
-  }
+  public static final String AUTH_REALM_CLASS_NAME_FIELD = "auth_realm_class_name";
+  public static final String AUTH_REALM_TYPE_FIELD = "auth_realm_type";
 
-  static AuthService createWithRealmClassName(Vertx vertx, String authRealmClassName, JsonObject config) {
-    return new AuthServiceImpl(vertx, authRealmClassName, config);
+  static AuthService create(Vertx vertx, JsonObject config) {
+    return new AuthServiceImpl(vertx, config);
   }
 
   @GenIgnore

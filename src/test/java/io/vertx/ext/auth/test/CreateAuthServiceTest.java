@@ -46,7 +46,9 @@ public class CreateAuthServiceTest extends VertxTestBase {
   @Test
   public void testCreateWithClassName() {
     String className = PropertiesAuthRealm.class.getName();
-    authService = AuthService.createWithRealmClassName(vertx, className, getConfig());
+    JsonObject conf = getConfig();
+    conf.put(AuthService.AUTH_REALM_CLASS_NAME_FIELD, className);
+    authService = AuthService.create(vertx, conf);
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
       assertTrue(res);

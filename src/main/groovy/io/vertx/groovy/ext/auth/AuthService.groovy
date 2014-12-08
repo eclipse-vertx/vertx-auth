@@ -20,7 +20,6 @@ import io.vertx.lang.groovy.InternalHelper
 import io.vertx.groovy.core.Vertx
 import java.util.Set
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.AuthRealmType
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
@@ -35,12 +34,8 @@ public class AuthService {
   public Object getDelegate() {
     return delegate;
   }
-  public static AuthService create(Vertx vertx, AuthRealmType authRealmType, Map<String, Object> config) {
-    def ret= AuthService.FACTORY.apply(io.vertx.ext.auth.AuthService.create((io.vertx.core.Vertx)vertx.getDelegate(), authRealmType, config != null ? new io.vertx.core.json.JsonObject(config) : null));
-    return ret;
-  }
-  public static AuthService createWithRealmClassName(Vertx vertx, String authRealmClassName, Map<String, Object> config) {
-    def ret= AuthService.FACTORY.apply(io.vertx.ext.auth.AuthService.createWithRealmClassName((io.vertx.core.Vertx)vertx.getDelegate(), authRealmClassName, config != null ? new io.vertx.core.json.JsonObject(config) : null));
+  public static AuthService create(Vertx vertx, Map<String, Object> config) {
+    def ret= AuthService.FACTORY.apply(io.vertx.ext.auth.AuthService.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null));
     return ret;
   }
   public static AuthService createEventBusProxy(Vertx vertx, String address) {

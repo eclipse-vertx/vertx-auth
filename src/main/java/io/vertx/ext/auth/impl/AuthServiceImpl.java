@@ -23,36 +23,46 @@ public class AuthServiceImpl implements AuthService {
   protected final AuthRealm realm;
   protected final JsonObject config;
 
-  public AuthServiceImpl(Vertx vertx, AuthRealmType type, JsonObject config) {
+  public AuthServiceImpl(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
     this.config = config;
-    switch (type) {
-      case PROPERTIES:
-        this.realm = new PropertiesAuthRealm();
-        break;
-      case JDBC:
-        // TODO
-        throw new UnsupportedOperationException();
-      case LDAP:
-        this.realm = new LDAPAuthRealm();
-        break;
-      default:
-        throw new IllegalArgumentException("type: " + type);
+    String realmClassName = config.getString(AUTH_REALM_CLASS_NAME_FIELD);
+    if (realmClassName != null) {
+      try {
+        Class clazz = getClassLoader().loadClass(realmClassName);
+        this.realm = (AuthRealm)clazz.newInstance();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      String realmType = config.getString(AUTH_REALM_TYPE_FIELD);
+      AuthRealmType type;
+      if (realmType == null) {
+        type = AuthRealmType.PROPERTIES; // Default
+      } else {
+        try {
+          type = AuthRealmType.valueOf(realmType);
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException(AUTH_REALM_TYPE_FIELD + ": " + realmType);
+        }
+      }
+      switch (type) {
+        case PROPERTIES:
+          this.realm = new PropertiesAuthRealm();
+          break;
+        case JDBC:
+          // TODO
+          throw new UnsupportedOperationException();
+        case LDAP:
+          this.realm = new LDAPAuthRealm();
+          break;
+        default:
+          throw new IllegalArgumentException(AUTH_REALM_TYPE_FIELD + ": " + realmType);
+      }
     }
     realm.init(config);
   }
 
-  public AuthServiceImpl(Vertx vertx, String authRealmClassName, JsonObject config) {
-    this.vertx = vertx;
-    this.config = config;
-    try {
-      Class clazz = getClassLoader().loadClass(authRealmClassName);
-      this.realm = (AuthRealm)clazz.newInstance();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    realm.init(config);
-  }
 
   public AuthServiceImpl(Vertx vertx, AuthRealm authRealm, JsonObject config) {
     this.vertx = vertx;
