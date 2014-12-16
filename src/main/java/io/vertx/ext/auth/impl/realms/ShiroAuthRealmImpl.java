@@ -59,7 +59,7 @@ public class ShiroAuthRealmImpl implements AuthRealm {
   }
 
   @Override
-  public boolean login(JsonObject credentials) {
+  public String login(JsonObject credentials) {
     SubjectContext subjectContext = new DefaultSubjectContext();
     Subject subject = securityManager.createSubject(subjectContext);
     String username = credentials.getString("username");
@@ -67,13 +67,13 @@ public class ShiroAuthRealmImpl implements AuthRealm {
     AuthenticationToken token = new UsernamePasswordToken(username, password);
     try {
       subject.login(token);
-      return true;
+      return subject.getPrincipal().toString();
     } catch (UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException e) {
-      return false;
+      return null;
     } catch (AuthenticationException ae) {
       // Unexpected exception - log it
       log.error("Unexpected exception when logging in", ae.getCause());
-      return false;
+      return null;
     }
   }
 

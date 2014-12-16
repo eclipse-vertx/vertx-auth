@@ -55,7 +55,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     authService = AuthService.create(vertx, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
-      assertTrue(res);
+      assertEquals("tim", res);
       testComplete();
     }));
     await();
@@ -66,7 +66,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     authService = AuthService.create(vertx, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongone");
     authService.login(credentials, onSuccess(res -> {
-      assertFalse(res);
+      assertNull(res);
       testComplete();
     }));
     await();
@@ -77,7 +77,7 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     authService = AuthService.create(vertx, getConfig());
     JsonObject credentials = new JsonObject().put("username", "bob").put("password", "blah");
     authService.login(credentials, onSuccess(res -> {
-      assertFalse(res);
+      assertNull(res);
       testComplete();
     }));
     await();

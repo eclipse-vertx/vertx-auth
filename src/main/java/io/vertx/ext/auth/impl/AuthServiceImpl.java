@@ -72,10 +72,10 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public void login(JsonObject credentials, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
-      boolean ok = realm.login(credentials);
-      fut.complete(ok);
+  public void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
+    vertx.executeBlocking((Future<String> fut) -> {
+      String principal = realm.login(credentials);
+      fut.complete(principal);
     }, resultHandler);
   }
 

@@ -51,7 +51,7 @@ public class CreateAuthServiceTest extends VertxTestBase {
     authService = AuthService.create(vertx, conf);
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
-      assertTrue(res);
+      assertEquals("tim", res);
       testComplete();
     }));
     await();
@@ -63,7 +63,7 @@ public class CreateAuthServiceTest extends VertxTestBase {
     authService = AuthService.createWithRealm(vertx, realm, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
-      assertTrue(res);
+      assertEquals("tim", res);
       testComplete();
     }));
     await();
@@ -76,7 +76,7 @@ public class CreateAuthServiceTest extends VertxTestBase {
     authService = AuthService.createWithRealm(vertx, realm, getConfig());
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
-      assertTrue(res);
+      assertEquals("tim", res);
       testComplete();
     }));
     await();

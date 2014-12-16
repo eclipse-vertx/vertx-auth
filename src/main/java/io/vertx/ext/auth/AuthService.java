@@ -36,7 +36,7 @@ public interface AuthService {
     return ProxyHelper.createProxy(AuthService.class, vertx, address);
   }
 
-  void login(JsonObject credentials, Handler<AsyncResult<Boolean>> resultHandler);
+  void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler);
 
   void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
 

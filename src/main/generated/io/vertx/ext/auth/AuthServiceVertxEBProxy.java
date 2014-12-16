@@ -45,13 +45,16 @@ public class AuthServiceVertxEBProxy implements AuthService {
     this._address = address;
   }
 
-  public void login(JsonObject credentials, Handler<AsyncResult<Boolean>> resultHandler) {
-    checkClosed();
+  public void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
     _json.put("credentials", credentials);
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "login");
-    _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -61,7 +64,10 @@ public class AuthServiceVertxEBProxy implements AuthService {
   }
 
   public void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    checkClosed();
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
     _json.put("principal", principal);
     _json.put("role", role);
@@ -77,7 +83,10 @@ public class AuthServiceVertxEBProxy implements AuthService {
   }
 
   public void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    checkClosed();
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
     _json.put("principal", principal);
     _json.put("roles", new JsonArray(new ArrayList<>(roles)));
@@ -93,7 +102,10 @@ public class AuthServiceVertxEBProxy implements AuthService {
   }
 
   public void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    checkClosed();
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
     _json.put("principal", principal);
     _json.put("permission", permission);
@@ -109,7 +121,10 @@ public class AuthServiceVertxEBProxy implements AuthService {
   }
 
   public void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    checkClosed();
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
     _json.put("principal", principal);
     _json.put("permissions", new JsonArray(new ArrayList<>(permissions)));
@@ -149,11 +164,6 @@ public class AuthServiceVertxEBProxy implements AuthService {
     return set;
   }
 
-  private void checkClosed() {
-    if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
-  }
   private <T> Map<String, T> convertMap(Map map) {
     return (Map<String, T>)map;
   }

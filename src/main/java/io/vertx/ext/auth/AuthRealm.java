@@ -25,7 +25,7 @@ public interface AuthRealm {
 
   void init(JsonObject config);
 
-  boolean login(JsonObject credentials);
+  String login(JsonObject credentials);
 
   boolean hasRole(String principal, String role);
 

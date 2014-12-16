@@ -56,7 +56,7 @@ public class AuthServiceTest extends VertxTestBase {
   public void testSimpleLogin() {
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
     authService.login(credentials, onSuccess(res -> {
-      assertTrue(res);
+      assertEquals("tim", res);
       testComplete();
     }));
     await();
@@ -66,7 +66,7 @@ public class AuthServiceTest extends VertxTestBase {
   public void testSimpleLoginFail() {
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongpassword");
     authService.login(credentials, onSuccess(res -> {
-      assertFalse(res);
+      assertNull(res);
       testComplete();
     }));
     await();
