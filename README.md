@@ -114,7 +114,8 @@ An example is `ldap:://myldapserver.mycompany.com:10389`
     
     auth.login(new JsonObject().put("username", "tim").put("password", "sausages"), res -> {
       if (res.succeeded()) {
-        if (res.result()) {
+        String principal = res.result();
+        if (principal != null) {
           System.out.println("Logged in ok");          
         } else {
           System,out.println("Login attempt failed");
