@@ -1,0 +1,9 @@
+{
+  "main": "io.vertx.ext.auth.AuthServiceVerticle",
+  "options": {
+    "worker": false,
+    "config": {
+      "address": "vertx.auth"
+    }
+  }
+}
