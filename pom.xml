@@ -29,7 +29,7 @@
   <artifactId>vertx-auth-service</artifactId>
   <version>3.0.0-SNAPSHOT</version>
 
-  <name>Vert.x Mongo Service</name>
+  <name>Vert.x Authentication and Authorisation Service</name>
 
   <dependencies>
     <dependency>
