@@ -14,7 +14,7 @@
  * under the License.
  */
 
-/** @module ext-auth-js/auth_service */
+/** @module vertx-auth-js/auth_service */
 var utils = require('vertx-js/util/utils');
 
 var io = Packages.io;
@@ -161,7 +161,7 @@ var AuthService = function(j_val) {
 
 /**
 
- @memberof module:ext-auth-js/auth_service
+ @memberof module:vertx-auth-js/auth_service
  @param vertx {Vertx} 
  @param config {Object} 
  @return {AuthService}
@@ -175,7 +175,7 @@ AuthService.create = function(vertx, config) {
 
 /**
 
- @memberof module:ext-auth-js/auth_service
+ @memberof module:vertx-auth-js/auth_service
  @param vertx {Vertx} 
  @param address {string} 
  @return {AuthService}
