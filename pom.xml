@@ -22,7 +22,7 @@
 
   <parent>
     <groupId>io.vertx</groupId>
-    <artifactId>vertx-parent</artifactId>
+    <artifactId>vertx-ext-parent</artifactId>
     <version>1</version>
   </parent>
 
@@ -60,14 +60,20 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-      <version>2.3.6</version>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-js</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-lang-js</artifactId>
+      <artifactId>vertx-docgen</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codetrans</artifactId>
       <version>3.0.0-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
@@ -101,6 +107,7 @@
           <artifactId>shared-ldap-schema</artifactId>
         </exclusion>
       </exclusions>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.unboundid</groupId>
@@ -114,31 +121,6 @@
 
     <pluginManagement>
       <plugins>
-
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.9.1</version>
-        </plugin>
-
-        <!-- Configure the execution of the compiler to execute the codegen processor -->
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>default-compile</id>
-              <configuration>
-                <annotationProcessors>
-                  <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-                </annotationProcessors>
-                <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
-                <compilerArgs>
-                  <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
-                </compilerArgs>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
 
         <!-- Define an assembly execution for packaging the vertx service that can be reused
              by children modules -->
@@ -172,6 +154,7 @@
     </pluginManagement>
 
     <plugins>
+
       <!-- Copy resources after compilation phase as we generate JS in src/main/resources -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -179,38 +162,6 @@
           <execution>
             <id>default-resources</id>
             <phase>process-classes</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Compile Groovy -->
-      <plugin>
-        <groupId>org.codehaus.gmavenplus</groupId>
-        <artifactId>gmavenplus-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Have .groovy files in sources-jar -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-groovy-source</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/src/main/groovy</source>
-              </sources>
-            </configuration>
           </execution>
         </executions>
       </plugin>
