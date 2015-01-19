@@ -27,12 +27,12 @@
   </parent>
 
   <artifactId>vertx-auth-service</artifactId>
-  <version>3.0.0-milestone2</version>
+  <version>3.0.0-SNAPSHOT</version>
 
   <name>Vert.x Mongo Service</name>
 
   <properties>
-    <stack.version>3.0.0-milestone2</stack.version>
+    <stack.version>3.0.0-SNAPSHOT</stack.version>
   </properties>
 
   <dependencyManagement>
