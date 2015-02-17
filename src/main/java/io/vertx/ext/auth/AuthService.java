@@ -21,7 +21,7 @@ import java.util.Set;
 @ProxyGen
 public interface AuthService {
 
-  public static final long DEFAULT_LOGIN_TIMEOUT = 5 * 60 * 1000;
+  public static final long DEFAULT_LOGIN_TIMEOUT = 30 * 60 * 1000;
   public static final long DEFAULT_REAPER_PERIOD = 5 * 1000;
 
   @GenIgnore
