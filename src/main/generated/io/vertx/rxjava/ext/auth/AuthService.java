@@ -43,11 +43,6 @@ public class AuthService {
     return delegate;
   }
 
-  public static AuthService create(Vertx vertx, JsonObject config) {
-    AuthService ret= AuthService.newInstance(io.vertx.ext.auth.AuthService.create((io.vertx.core.Vertx) vertx.getDelegate(), config));
-    return ret;
-  }
-
   public static AuthService createEventBusProxy(Vertx vertx, String address) {
     AuthService ret= AuthService.newInstance(io.vertx.ext.auth.AuthService.createEventBusProxy((io.vertx.core.Vertx) vertx.getDelegate(), address));
     return ret;
@@ -59,47 +54,77 @@ public class AuthService {
 
   public Observable<String> loginObservable(JsonObject credentials) {
     io.vertx.rx.java.ObservableFuture<String> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    login(credentials, resultHandler.asHandler());
+    login(credentials, resultHandler.toHandler());
     return resultHandler;
   }
 
-  public void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasRole(principal, role, resultHandler);
+  public void loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
+    this.delegate.loginWithTimeout(credentials, timeout, resultHandler);
   }
 
-  public Observable<Boolean> hasRoleObservable(String principal, String role) {
-    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasRole(principal, role, resultHandler.asHandler());
+  public Observable<String> loginWithTimeoutObservable(JsonObject credentials, long timeout) {
+    io.vertx.rx.java.ObservableFuture<String> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    loginWithTimeout(credentials, timeout, resultHandler.toHandler());
     return resultHandler;
   }
 
-  public void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasRoles(principal, roles, resultHandler);
+  public void logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+    this.delegate.logout(loginID, resultHandler);
   }
 
-  public Observable<Boolean> hasRolesObservable(String principal, Set<String> roles) {
-    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasRoles(principal, roles, resultHandler.asHandler());
+  public Observable<Void> logoutObservable(String loginID) {
+    io.vertx.rx.java.ObservableFuture<Void> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    logout(loginID, resultHandler.toHandler());
     return resultHandler;
   }
 
-  public void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasPermission(principal, permission, resultHandler);
+  public void refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+    this.delegate.refreshLoginSession(loginID, resultHandler);
   }
 
-  public Observable<Boolean> hasPermissionObservable(String principal, String permission) {
-    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasPermission(principal, permission, resultHandler.asHandler());
+  public Observable<Void> refreshLoginSessionObservable(String loginID) {
+    io.vertx.rx.java.ObservableFuture<Void> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    refreshLoginSession(loginID, resultHandler.toHandler());
     return resultHandler;
   }
 
-  public void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasPermissions(principal, permissions, resultHandler);
+  public void hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasRole(loginID, role, resultHandler);
   }
 
-  public Observable<Boolean> hasPermissionsObservable(String principal, Set<String> permissions) {
+  public Observable<Boolean> hasRoleObservable(String loginID, String role) {
     io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasPermissions(principal, permissions, resultHandler.asHandler());
+    hasRole(loginID, role, resultHandler.toHandler());
+    return resultHandler;
+  }
+
+  public void hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasRoles(loginID, roles, resultHandler);
+  }
+
+  public Observable<Boolean> hasRolesObservable(String loginID, Set<String> roles) {
+    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    hasRoles(loginID, roles, resultHandler.toHandler());
+    return resultHandler;
+  }
+
+  public void hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasPermission(loginID, permission, resultHandler);
+  }
+
+  public Observable<Boolean> hasPermissionObservable(String loginID, String permission) {
+    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    hasPermission(loginID, permission, resultHandler.toHandler());
+    return resultHandler;
+  }
+
+  public void hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
+    this.delegate.hasPermissions(loginID, permissions, resultHandler);
+  }
+
+  public Observable<Boolean> hasPermissionsObservable(String loginID, Set<String> permissions) {
+    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    hasPermissions(loginID, permissions, resultHandler.toHandler());
     return resultHandler;
   }
 
