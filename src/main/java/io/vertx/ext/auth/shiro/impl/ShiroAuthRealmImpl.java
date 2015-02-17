@@ -14,18 +14,15 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.impl.realms;
+package io.vertx.ext.auth.shiro.impl;
 
+import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
-import io.vertx.ext.auth.AuthRealm;
+import io.vertx.ext.auth.shiro.ShiroAuthRealm;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.ExcessiveAttemptsException;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.LockedAccountException;
-import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.mgt.DefaultSecurityManager;
@@ -38,7 +35,7 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ShiroAuthRealmImpl implements AuthRealm {
+public class ShiroAuthRealmImpl implements ShiroAuthRealm {
 
   private static final Logger log = LoggerFactory.getLogger(ShiroAuthRealmImpl.class);
 
@@ -59,7 +56,7 @@ public class ShiroAuthRealmImpl implements AuthRealm {
   }
 
   @Override
-  public String login(JsonObject credentials) {
+  public Object login(JsonObject credentials) {
     SubjectContext subjectContext = new DefaultSubjectContext();
     Subject subject = securityManager.createSubject(subjectContext);
     String username = credentials.getString("username");
@@ -67,19 +64,15 @@ public class ShiroAuthRealmImpl implements AuthRealm {
     AuthenticationToken token = new UsernamePasswordToken(username, password);
     try {
       subject.login(token);
-      return subject.getPrincipal().toString();
-    } catch (UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException e) {
-      return null;
-    } catch (AuthenticationException ae) {
-      // Unexpected exception - log it
-      log.error("Unexpected exception when logging in", ae.getCause());
-      return null;
+      return subject.getPrincipal();
+    } catch (AuthenticationException e) {
+      throw new VertxException(e);
     }
   }
 
 
   @Override
-  public boolean hasRole(String principal, String role) {
+  public boolean hasRole(Object principal, String role) {
     SubjectContext subjectContext = new DefaultSubjectContext();
     PrincipalCollection coll = new SimplePrincipalCollection(principal);
     subjectContext.setPrincipals(coll);
@@ -88,7 +81,7 @@ public class ShiroAuthRealmImpl implements AuthRealm {
   }
 
   @Override
-  public boolean hasPermission(String principal, String permission) {
+  public boolean hasPermission(Object principal, String permission) {
     SubjectContext subjectContext = new DefaultSubjectContext();
     PrincipalCollection coll = new SimplePrincipalCollection(principal);
     subjectContext.setPrincipals(coll);

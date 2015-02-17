@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.shiro;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>

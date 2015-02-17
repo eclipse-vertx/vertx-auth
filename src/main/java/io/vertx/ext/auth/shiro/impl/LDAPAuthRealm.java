@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.impl.realms;
+package io.vertx.ext.auth.shiro.impl;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -22,7 +22,7 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.apache.shiro.realm.ldap.JndiLdapRealm;
-import static io.vertx.ext.auth.LDAPAuthRealmConstants.*;
+import static io.vertx.ext.auth.shiro.LDAPAuthRealmConstants.*;
 
 /**
  *

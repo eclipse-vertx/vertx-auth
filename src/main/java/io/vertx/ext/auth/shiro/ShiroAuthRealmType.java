@@ -14,20 +14,11 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth;
-
-import io.vertx.core.json.JsonObject;
+package io.vertx.ext.auth.shiro;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public interface AuthRealm {
-
-  void init(JsonObject config);
-
-  String login(JsonObject credentials);
-
-  boolean hasRole(String principal, String role);
-
-  boolean hasPermission(String principal, String permission);
+public enum ShiroAuthRealmType {
+  PROPERTIES, JDBC, LDAP
 }

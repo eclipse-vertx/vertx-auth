@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthServiceImpl;
+import io.vertx.ext.auth.spi.AuthProvider;
 import io.vertx.serviceproxy.ProxyHelper;
 
 import java.util.Set;
@@ -20,16 +21,28 @@ import java.util.Set;
 @ProxyGen
 public interface AuthService {
 
-  public static final String AUTH_REALM_CLASS_NAME_FIELD = "auth_realm_class_name";
-  public static final String AUTH_REALM_TYPE_FIELD = "auth_realm_type";
+  public static final long DEFAULT_LOGIN_TIMEOUT = 5 * 60 * 1000;
+  public static final long DEFAULT_REAPER_PERIOD = 5 * 1000;
 
-  static AuthService create(Vertx vertx, JsonObject config) {
-    return new AuthServiceImpl(vertx, config);
+  @GenIgnore
+  static AuthService create(Vertx vertx, AuthProvider provider, JsonObject config) {
+    return new AuthServiceImpl(vertx, config, provider, DEFAULT_REAPER_PERIOD);
   }
 
   @GenIgnore
-  static AuthService createWithRealm(Vertx vertx, AuthRealm authRealm, JsonObject config) {
-    return new AuthServiceImpl(vertx, authRealm, config);
+  static AuthService createFromClassName(Vertx vertx, JsonObject config, String className) {
+    return new AuthServiceImpl(vertx, config, className, DEFAULT_REAPER_PERIOD);
+  }
+
+  // TODO do we really want to mix json config and typed config (i.e. reaperPeriod) ?
+  @GenIgnore
+  static AuthService create(Vertx vertx, AuthProvider provider, JsonObject config, long reaperPeriod) {
+    return new AuthServiceImpl(vertx, config, provider, reaperPeriod);
+  }
+
+  @GenIgnore
+  static AuthService createFromClassName(Vertx vertx, JsonObject config, String className, long reaperPeriod) {
+    return new AuthServiceImpl(vertx, config, className, reaperPeriod);
   }
 
   static AuthService createEventBusProxy(Vertx vertx, String address) {
@@ -38,13 +51,19 @@ public interface AuthService {
 
   void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler);
 
-  void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
+  void loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler);
 
-  void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
+  void logout(String loginID, Handler<AsyncResult<Void>> resultHandler);
 
-  void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler);
+  void refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler);
 
-  void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler);
+  void hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler);
+
+  void hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
+
+  void hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler);
+
+  void hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler);
 
   @ProxyIgnore
   void start();

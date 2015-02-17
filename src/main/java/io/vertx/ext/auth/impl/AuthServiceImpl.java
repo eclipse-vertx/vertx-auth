@@ -1,131 +1,210 @@
 package io.vertx.ext.auth.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthRealm;
-import io.vertx.ext.auth.AuthRealmType;
 import io.vertx.ext.auth.AuthService;
-import io.vertx.ext.auth.impl.realms.LDAPAuthRealm;
-import io.vertx.ext.auth.impl.realms.PropertiesAuthRealm;
+import io.vertx.ext.auth.spi.AuthProvider;
 
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl implements AuthService, Handler<Long> {
 
-  protected final Vertx vertx;
-  protected final AuthRealm realm;
-  protected final JsonObject config;
+  private final Vertx vertx;
+  private final AuthProvider provider;
+  private final Map<String, LoginSession> loginSessions = new ConcurrentHashMap<>();
+  private final long reaperPeriod;
+  private long timerID;
+  private boolean closed;
 
-  public AuthServiceImpl(Vertx vertx, JsonObject config) {
+  public AuthServiceImpl(Vertx vertx, JsonObject config, AuthProvider provider, long reaperPeriod) {
     this.vertx = vertx;
-    this.config = config;
-    String realmClassName = config.getString(AUTH_REALM_CLASS_NAME_FIELD);
-    if (realmClassName != null) {
-      try {
-        Class clazz = getClassLoader().loadClass(realmClassName);
-        this.realm = (AuthRealm)clazz.newInstance();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    } else {
-      String realmType = config.getString(AUTH_REALM_TYPE_FIELD);
-      AuthRealmType type;
-      if (realmType == null) {
-        type = AuthRealmType.PROPERTIES; // Default
-      } else {
-        try {
-          type = AuthRealmType.valueOf(realmType);
-        } catch (IllegalArgumentException e) {
-          throw new IllegalArgumentException(AUTH_REALM_TYPE_FIELD + ": " + realmType);
-        }
-      }
-      switch (type) {
-        case PROPERTIES:
-          this.realm = new PropertiesAuthRealm();
-          break;
-        case JDBC:
-          // TODO
-          throw new UnsupportedOperationException();
-        case LDAP:
-          this.realm = new LDAPAuthRealm();
-          break;
-        default:
-          throw new IllegalArgumentException(AUTH_REALM_TYPE_FIELD + ": " + realmType);
-      }
-    }
-    realm.init(config);
+    this.provider = provider;
+    this.reaperPeriod = reaperPeriod;
+    provider.init(config);
+    setTimer();
   }
 
-
-  public AuthServiceImpl(Vertx vertx, AuthRealm authRealm, JsonObject config) {
+  public AuthServiceImpl(Vertx vertx, JsonObject config, String className, long reaperPeriod) {
     this.vertx = vertx;
-    this.config = config;
-    this.realm = authRealm;
-    realm.init(config);
+    this.reaperPeriod = reaperPeriod;
+    ClassLoader cl = getClassLoader();
+    try {
+      Class<?> clazz = cl.loadClass(className);
+      this.provider = (AuthProvider)clazz.newInstance();
+      provider.init(config);
+    } catch (Exception e) {
+      throw new VertxException(e);
+    }
+    setTimer();
+  }
+
+  private String createLoginSession(long timeout, Object principal) {
+    String id = UUID.randomUUID().toString();
+    loginSessions.put(id, new LoginSession(timeout, principal));
+    return id;
   }
 
   @Override
   public void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
-    vertx.executeBlocking((Future<String> fut) -> {
-      String principal = realm.login(credentials);
-      fut.complete(principal);
-    }, resultHandler);
+    loginWithTimeout(credentials, DEFAULT_LOGIN_TIMEOUT, resultHandler);
   }
 
   @Override
-  public void hasRole(String principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
-      boolean hasRole = realm.hasRole(principal, role);
-      fut.complete(hasRole);
-    }, resultHandler);
+  public void loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
+    provider.login(credentials, res -> {
+      if (res.succeeded()) {
+        Object principal = res.result();
+        if (principal != null) {
+          String loginSessionID = createLoginSession(timeout, principal);
+          resultHandler.handle(Future.succeededFuture(loginSessionID));
+        } else {
+          resultHandler.handle(Future.failedFuture("null principal"));
+        }
+      } else {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      }
+    });
   }
 
   @Override
-  public void hasPermission(String principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
-      boolean hasRole = realm.hasPermission(principal, permission);
-      fut.complete(hasRole);
-    }, resultHandler);
+  public void logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+    LoginSession session = loginSessions.remove(loginID);
+    resultHandler.handle(session == null ? Future.failedFuture("not logged in") : Future.succeededFuture());
   }
 
   @Override
-  public void hasRoles(String principal, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
+  public void refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+    LoginSession session = loginSessions.get(loginID);
+    if (session != null) {
+      session.touch();
+    }
+    resultHandler.handle(session == null ? Future.failedFuture("not logged in") : Future.succeededFuture());
+  }
+
+  @Override
+  public void hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+    LoginSession session = loginSessions.get(loginID);
+    if (session != null) {
+      doHasRole(session, role, resultHandler);
+    } else {
+      resultHandler.handle(Future.failedFuture("not logged in"));
+    }
+  }
+
+  @Override
+  public void hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+    LoginSession session = loginSessions.get(loginID);
+    if (session != null) {
+      doHasPermission(session, permission, resultHandler);
+    } else {
+      resultHandler.handle(Future.failedFuture("not logged in"));
+    }
+  }
+
+  @Override
+  public void hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
+    LoginSession session = loginSessions.get(loginID);
+    if (session != null) {
+      Handler<AsyncResult<Boolean>> wrapped = wrappedHandler(roles.size(), resultHandler);
       for (String role: roles) {
-        if (!realm.hasRole(principal, role)) {
-          fut.complete(false);
-          return;
-        }
+        doHasRole(session, role, wrapped);
       }
-      fut.complete(true);
-    }, resultHandler);
+    } else {
+      resultHandler.handle(Future.failedFuture("not logged in"));
+    }
   }
 
   @Override
-  public void hasPermissions(String principal, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
-      for (String permission : permissions) {
-        if (!realm.hasPermission(principal, permission)) {
-          fut.complete(false);
-          return;
+  public void hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
+    LoginSession session = loginSessions.get(loginID);
+    if (session != null) {
+      Handler<AsyncResult<Boolean>> wrapped = wrappedHandler(permissions.size(), resultHandler);
+      for (String permission: permissions) {
+        doHasPermission(session, permission, wrapped);
+      }
+    } else {
+      resultHandler.handle(Future.failedFuture("not logged in"));
+    }
+  }
+
+  private void doHasRole(LoginSession session, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (session.hasRole(role)) {
+      resultHandler.handle(Future.succeededFuture(true));
+    } else if (session.hasNotRole(role)) {
+      resultHandler.handle(Future.succeededFuture(false));
+    } else {
+      // Don't know - need to check with provider
+      provider.hasRole(session.principal(), role, res -> {
+        if (res.succeeded()) {
+          boolean hasRole = res.result();
+          if (hasRole) {
+            session.addRole(role);
+          } else {
+            session.addNotRole(role);
+          }
+          resultHandler.handle(Future.succeededFuture(hasRole));
+        } else {
+          resultHandler.handle(Future.failedFuture(res.cause()));
+        }
+      });
+    }
+  }
+
+  private void doHasPermission(LoginSession session, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (session.hasPermission(permission)) {
+      resultHandler.handle(Future.succeededFuture(true));
+    } else if (session.hasNotPermission(permission)) {
+      resultHandler.handle(Future.succeededFuture(false));
+    } else {
+      // Don't know - need to check with provider
+      provider.hasPermission(session.principal(), permission, res -> {
+        if (res.succeeded()) {
+          boolean hasPermission = res.result();
+          if (hasPermission) {
+            session.addPermission(permission);
+          } else {
+            session.addNotPermission(permission);
+          }
+          resultHandler.handle(Future.succeededFuture(hasPermission));
+        } else {
+          resultHandler.handle(Future.failedFuture(res.cause()));
+        }
+      });
+    }
+  }
+
+
+  private Handler<AsyncResult<Boolean>> wrappedHandler(int num, Handler<AsyncResult<Boolean>> resultHandler) {
+    AtomicInteger cnt = new AtomicInteger();
+    AtomicBoolean sent = new AtomicBoolean();
+    return res -> {
+      if (res.succeeded()) {
+        boolean hasRole = res.result();
+        int count = cnt.incrementAndGet();
+        if (!hasRole) {
+          if (sent.compareAndSet(false, true)) {
+            resultHandler.handle(Future.succeededFuture(false));
+          }
+        } else {
+          if (count == num) {
+            if (sent.compareAndSet(false, true)) {
+              resultHandler.handle(Future.succeededFuture(true));
+            }
+          }
+        }
+      } else {
+        if (sent.compareAndSet(false, true)) {
+          resultHandler.handle(Future.failedFuture(res.cause()));
         }
       }
-      fut.complete(true);
-    }, resultHandler);
-  }
-
-  public void start() {
-  }
-
-  @Override
-  public void stop() {
+    };
   }
 
   private ClassLoader getClassLoader() {
@@ -133,5 +212,41 @@ public class AuthServiceImpl implements AuthService {
     return tccl == null ? getClass().getClassLoader(): tccl;
   }
 
+  @Override
+  public synchronized void handle(Long tid) {
+    long now = System.currentTimeMillis();
+    Iterator<Map.Entry<String, LoginSession>> iter = loginSessions.entrySet().iterator();
+    while (iter.hasNext()) {
+      Map.Entry<String, LoginSession> entry = iter.next();
+      LoginSession session = entry.getValue();
+      if (now - session.lastAccessed() > session.timeout()) {
+        iter.remove();
+      }
+    }
+    if (!closed) {
+      setTimer();
+    }
+  }
 
+  private void setTimer() {
+    if (reaperPeriod != 0) {
+      timerID = vertx.setTimer(reaperPeriod, this);
+    }
+  }
+
+  @Override
+  public synchronized void start() {
+    closed = false;
+    setTimer();
+  }
+
+  @Override
+  public synchronized void stop() {
+    closed = true;
+    loginSessions.clear();
+    if (timerID != -1) {
+      vertx.cancelTimer(timerID);
+    }
+
+  }
 }

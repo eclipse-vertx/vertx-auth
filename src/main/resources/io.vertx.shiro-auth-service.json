@@ -1,0 +1,9 @@
+{
+  "main": "io.vertx.ext.auth.shiro.ShiroAuthServiceVerticle",
+  "options": {
+    "worker": false,
+    "config": {
+      "address": "vertx.auth"
+    }
+  }
+}

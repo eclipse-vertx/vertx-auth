@@ -14,11 +14,23 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.spi;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public enum AuthRealmType {
-  PROPERTIES, JDBC, LDAP
+public interface AuthProvider {
+
+  void init(JsonObject config);
+
+  void login(JsonObject credentials, Handler<AsyncResult<Object>> resultHandler);
+
+  void hasRole(Object principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
+
+  void hasPermission(Object principal, String permission, Handler<AsyncResult<Boolean>> resultHandler);
+
 }
