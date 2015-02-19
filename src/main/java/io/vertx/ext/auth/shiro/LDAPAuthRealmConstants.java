@@ -17,6 +17,8 @@
 package io.vertx.ext.auth.shiro;
 
 /**
+ * Configuration keys used when configuring a Shiro LDAP auth realm
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public interface LDAPAuthRealmConstants {

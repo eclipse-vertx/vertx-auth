@@ -3,7 +3,8 @@
   "options": {
     "worker": false,
     "config": {
-      "address": "vertx.auth"
+      "address": "vertx.auth",
+      "auth_realm_type": "PROPERTIES"
     }
   }
 }

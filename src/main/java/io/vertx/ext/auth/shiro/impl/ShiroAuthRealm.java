@@ -14,11 +14,13 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.shiro;
+package io.vertx.ext.auth.shiro.impl;
 
 import io.vertx.core.json.JsonObject;
 
 /**
+ * Built-in implementations for Shiro auth Realms should implelken
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public interface ShiroAuthRealm {

@@ -23,6 +23,8 @@ var JsonObject = io.vertx.core.json.JsonObject;
 var JShiroAuthService = io.vertx.ext.auth.shiro.ShiroAuthService;
 
 /**
+ An Auth service implementation that uses Apache Shiro internally.
+ <p>
 
  @class
 */
@@ -39,20 +41,18 @@ var ShiroAuthService = function(j_val) {
 };
 
 /**
+ Create an auth service using the specified auth realm type.
 
  @memberof module:vertx-auth-js/shiro_auth_service
- @param vertx {Vertx} 
- @param authRealmType {Object} 
- @param config {Object} 
- @param reaperPeriod {number} 
- @return {AuthService}
+ @param vertx {Vertx} the Vert.x intance 
+ @param authRealmType {Object} the auth realm type 
+ @param config {Object} the config to pass to the provider 
+ @return {AuthService} the auth service
  */
-ShiroAuthService.create = function() {
+ShiroAuthService.create = function(vertx, authRealmType, config) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthService(JShiroAuthService.create(__args[0]._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(__args[2])));
-  }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object' && typeof __args[3] ==='number') {
-    return new AuthService(JShiroAuthService.create(__args[0]._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(__args[2]), __args[3]));
+    return new AuthService(JShiroAuthService.create(vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
   } else utils.invalidArgs();
 };
 

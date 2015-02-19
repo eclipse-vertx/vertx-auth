@@ -17,10 +17,15 @@
 package io.vertx.ext.auth;
 
 /**
+ * A verticle which starts an Auth service instance
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public class AuthServiceVerticle extends AbstractAuthServiceVerticle {
 
+  /**
+   * The name of the field in the config which contains the class name of the auth provider to use
+   */
   public static final String AUTH_PROVIDER_CLASS_NAME = "provider_class_name";
 
   protected AuthService createService() {
@@ -29,6 +34,6 @@ public class AuthServiceVerticle extends AbstractAuthServiceVerticle {
       throw new IllegalArgumentException(AUTH_PROVIDER_CLASS_NAME + " must be provided");
     }
     // Create the service object
-    return AuthService.createFromClassName(vertx, config(), providerClassName);
+    return AuthService.createFromClassName(vertx, providerClassName, config());
   }
 }

@@ -33,12 +33,12 @@ public class PropertiesAuthServiceTest extends AuthServiceTestBase {
   }
 
   @Override
-  protected void initAuthService(long timeout) throws Exception {
+  protected void initAuthService(long reaperPeriod) throws Exception {
     JsonObject config = getConfig();
-    if (timeout == -1) {
+    if (reaperPeriod == -1) {
       authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config);
     } else {
-      authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config, timeout);
+      authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config).setReaperPeriod(reaperPeriod);
     }
   }
 

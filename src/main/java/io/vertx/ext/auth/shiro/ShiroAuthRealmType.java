@@ -17,8 +17,10 @@
 package io.vertx.ext.auth.shiro;
 
 /**
+ * The type of the Shiro auth realm
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public enum ShiroAuthRealmType {
-  PROPERTIES, JDBC, LDAP
+  PROPERTIES, LDAP
 }

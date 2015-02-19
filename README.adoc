@@ -1,0 +1,11 @@
+# Vert.x Auth Service
+
+This is a Vert.x service that provide authentication and authorisation functionality.
+
+Please see the in source asciidoc documentation or the main documentation on the web-site for a full description
+of Apex:
+
+* Web-site docs
+* link:src/main/asciidoc/java/index.adoc[Java in-source docs]
+* link:src/main/asciidoc/js/index.adoc[JavaScript in-source docs]
+* link:src/main/asciidoc/groovy/index.adoc[Groovy in-source docs]
