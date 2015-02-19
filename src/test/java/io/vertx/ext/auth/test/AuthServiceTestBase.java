@@ -16,6 +16,8 @@
 
 package io.vertx.ext.auth.test;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthService;
 import io.vertx.test.core.VertxTestBase;
@@ -73,23 +75,21 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testHasRole() throws Exception {
     initAuthService();
-    loginThen(sessID -> {
-      authService.hasRole(sessID, "morris_dancer", onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
+    loginThen(sessID ->
+      this.<Boolean>executeTwice(handler -> authService.hasRole(sessID, "morris_dancer", handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
       }));
-    });
     await();
   }
 
   @Test
   public void testHasRoleNotLoggedIn() throws Exception {
     initAuthService();
-    authService.hasRole("uqhwdihuqwd", "morris_dancer", onFailure(thr -> {
-      assertNotNull(thr);
-      assertEquals("not logged in", thr.getMessage());
-      testComplete();
-    }));
+    this.<Boolean>executeTwice(handler -> authService.hasRole("uqhwdihuqwd", "morris_dancer", handler), res -> {
+      assertFalse(res.succeeded());
+      assertEquals("not logged in", res.cause().getMessage());
+    });
     await();
   }
 
@@ -97,10 +97,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   public void testNotHasRole() throws Exception {
     initAuthService();
     loginThen(sessID -> {
-      authService.hasRole(sessID, "manager", onSuccess(res -> {
-        assertFalse(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasRole(sessID, "manager", handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
     });
     await();
   }
@@ -110,10 +110,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
     initAuthService();
     loginThen(sessID -> {
       Set<String> roles = new HashSet<>(Arrays.asList("morris_dancer", "developer"));
-      authService.hasRoles(sessID, roles, onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasRoles(sessID, roles, handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      });
     });
     await();
   }
@@ -135,10 +135,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
     initAuthService();
     loginThen(sessID -> {
       Set<String> roles = new HashSet<>(Arrays.asList("administrator", "developer"));
-      authService.hasRoles(sessID, roles, onSuccess(res -> {
-        assertFalse(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasRoles(sessID, roles, handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
     });
     await();
   }
@@ -147,10 +147,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   public void testHasPermission() throws Exception {
     initAuthService();
     loginThen(sessID -> {
-      authService.hasPermission(sessID, "do_actual_work", onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasPermission(sessID, "do_actual_work", handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      });
     });
     await();
   }
@@ -158,11 +158,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testHasPermissionNotLoggedIn() throws Exception {
     initAuthService();
-    authService.hasPermission("uqhwdihuqwd", "morris_dancer", onFailure(thr -> {
-      assertNotNull(thr);
-      assertEquals("not logged in", thr.getMessage());
-      testComplete();
-    }));
+    this.<Boolean>executeTwice(handler -> authService.hasPermission("uqhwdihuqwd", "morris_dancer", handler), res -> {
+      assertFalse(res.succeeded());
+      assertEquals("not logged in", res.cause().getMessage());
+    });
     await();
   }
 
@@ -170,10 +169,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   public void testNotHasPermission() throws Exception {
     initAuthService();
     loginThen(sessID -> {
-      authService.hasPermission(sessID, "play_golf", onSuccess(res -> {
-        assertFalse(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasPermission(sessID, "play_golf", handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
     });
     await();
   }
@@ -183,10 +182,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
     initAuthService();
     loginThen(sessID -> {
       Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "bang_sticks"));
-      authService.hasPermissions(sessID, permissions, onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasPermissions(sessID, permissions, handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      });
     });
     await();
   }
@@ -208,10 +207,10 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
     initAuthService();
     loginThen(sessID -> {
       Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "eat_cheese"));
-      authService.hasPermissions(sessID, permissions, onSuccess(res -> {
-        assertFalse(res);
-        testComplete();
-      }));
+      this.<Boolean>executeTwice(handler -> authService.hasPermissions(sessID, permissions, handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
     });
     await();
   }
@@ -299,4 +298,15 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
       runner.accept(sessionID);
     }));
   }
+
+  private <T> void executeTwice(Consumer<Handler<AsyncResult<T>>> action, Consumer<AsyncResult<T>> resultConsumer) {
+    action.accept(res -> {
+      resultConsumer.accept(res);
+      action.accept(res2 -> {
+        resultConsumer.accept(res);
+        testComplete();
+      });
+    });
+  }
+
 }

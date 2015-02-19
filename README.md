@@ -1,5 +1,7 @@
 # Authentication and Authorisation Service for Vert.x
 
+# !!TODO README is currently out of date - will be updated shortly when docs are written!!
+
 This Vert.x service provides authentication and authorisation functionality for use in your Vert.x applications.
 
 Internally it currently delegates to [Apache Shiro](http://shiro.apache.org/) to handle the actual authentication and

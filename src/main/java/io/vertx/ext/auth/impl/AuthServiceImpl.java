@@ -112,7 +112,7 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
   public void hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
-      Handler<AsyncResult<Boolean>> wrapped = wrappedHandler(roles.size(), resultHandler);
+      Handler<AsyncResult<Boolean>> wrapped = accumulatingHandler(roles.size(), resultHandler);
       for (String role: roles) {
         doHasRole(session, role, wrapped);
       }
@@ -125,7 +125,7 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
   public void hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
-      Handler<AsyncResult<Boolean>> wrapped = wrappedHandler(permissions.size(), resultHandler);
+      Handler<AsyncResult<Boolean>> wrapped = accumulatingHandler(permissions.size(), resultHandler);
       for (String permission: permissions) {
         doHasPermission(session, permission, wrapped);
       }
@@ -181,7 +181,7 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
   }
 
 
-  private Handler<AsyncResult<Boolean>> wrappedHandler(int num, Handler<AsyncResult<Boolean>> resultHandler) {
+  private Handler<AsyncResult<Boolean>> accumulatingHandler(int num, Handler<AsyncResult<Boolean>> resultHandler) {
     AtomicInteger cnt = new AtomicInteger();
     AtomicBoolean sent = new AtomicBoolean();
     return res -> {
