@@ -14,17 +14,13 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth;
-
-import io.vertx.ext.auth.impl.realms.ShiroAuthRealmImpl;
-import org.apache.shiro.realm.Realm;
+package io.vertx.ext.auth.shiro;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public interface ShiroAuthRealm extends AuthRealm {
+public interface PropertiesAuthRealmConstants {
 
-  static AuthRealm create(Realm realm) {
-    return new ShiroAuthRealmImpl(realm);
-  }
+  static final String PROPERTIES_PROPS_PATH_FIELD = "properties_path";
+
 }

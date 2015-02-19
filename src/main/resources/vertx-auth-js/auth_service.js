@@ -52,14 +52,72 @@ var AuthService = function(j_val) {
   /**
 
    @public
-   @param principal {string} 
+   @param credentials {Object} 
+   @param timeout {number} 
+   @param resultHandler {function} 
+   */
+  this.loginWithTimeout = function(credentials, timeout, resultHandler) {
+    var __args = arguments;
+    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] ==='number' && typeof __args[2] === 'function') {
+      j_authService.loginWithTimeout(utils.convParamJsonObject(credentials), timeout, function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(ar.result(), null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else utils.invalidArgs();
+  };
+
+  /**
+
+   @public
+   @param loginID {string} 
+   @param resultHandler {function} 
+   */
+  this.logout = function(loginID, resultHandler) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_authService.logout(loginID, function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(null, null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else utils.invalidArgs();
+  };
+
+  /**
+
+   @public
+   @param loginID {string} 
+   @param resultHandler {function} 
+   */
+  this.refreshLoginSession = function(loginID, resultHandler) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_authService.refreshLoginSession(loginID, function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(null, null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else utils.invalidArgs();
+  };
+
+  /**
+
+   @public
+   @param loginID {string} 
    @param role {string} 
    @param resultHandler {function} 
    */
-  this.hasRole = function(principal, role, resultHandler) {
+  this.hasRole = function(loginID, role, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-      j_authService.hasRole(principal, role, function(ar) {
+      j_authService.hasRole(loginID, role, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -72,14 +130,14 @@ var AuthService = function(j_val) {
   /**
 
    @public
-   @param principal {string} 
+   @param loginID {string} 
    @param roles {Array.<string>} 
    @param resultHandler {function} 
    */
-  this.hasRoles = function(principal, roles, resultHandler) {
+  this.hasRoles = function(loginID, roles, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && __args[1] instanceof Array && typeof __args[2] === 'function') {
-      j_authService.hasRoles(principal, utils.convParamSetBasicOther(roles), function(ar) {
+      j_authService.hasRoles(loginID, utils.convParamSetBasicOther(roles), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -92,14 +150,14 @@ var AuthService = function(j_val) {
   /**
 
    @public
-   @param principal {string} 
+   @param loginID {string} 
    @param permission {string} 
    @param resultHandler {function} 
    */
-  this.hasPermission = function(principal, permission, resultHandler) {
+  this.hasPermission = function(loginID, permission, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-      j_authService.hasPermission(principal, permission, function(ar) {
+      j_authService.hasPermission(loginID, permission, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -112,14 +170,14 @@ var AuthService = function(j_val) {
   /**
 
    @public
-   @param principal {string} 
+   @param loginID {string} 
    @param permissions {Array.<string>} 
    @param resultHandler {function} 
    */
-  this.hasPermissions = function(principal, permissions, resultHandler) {
+  this.hasPermissions = function(loginID, permissions, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && __args[1] instanceof Array && typeof __args[2] === 'function') {
-      j_authService.hasPermissions(principal, utils.convParamSetBasicOther(permissions), function(ar) {
+      j_authService.hasPermissions(loginID, utils.convParamSetBasicOther(permissions), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -157,20 +215,6 @@ var AuthService = function(j_val) {
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
   this._jdel = j_authService;
-};
-
-/**
-
- @memberof module:vertx-auth-js/auth_service
- @param vertx {Vertx} 
- @param config {Object} 
- @return {AuthService}
- */
-AuthService.create = function(vertx, config) {
-  var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
-    return new AuthService(JAuthService.create(vertx._jdel, utils.convParamJsonObject(config)));
-  } else utils.invalidArgs();
 };
 
 /**

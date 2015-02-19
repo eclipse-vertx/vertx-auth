@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.vertx.ext.auth.test;
+package io.vertx.ext.auth.test.shiro;
 
 
 import org.apache.directory.server.constants.ServerDNConstants;

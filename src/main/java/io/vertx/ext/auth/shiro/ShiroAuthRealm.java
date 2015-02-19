@@ -14,13 +14,20 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.shiro;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public interface PropertiesAuthRealmConstants {
+public interface ShiroAuthRealm {
 
-  static final String PROPERTIES_PROPS_PATH_FIELD = "properties_path";
+  void init(JsonObject config);
 
+  Object login(JsonObject credentials);
+
+  boolean hasRole(Object principal, String role);
+
+  boolean hasPermission(Object principal, String permission);
 }

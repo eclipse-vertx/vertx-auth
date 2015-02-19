@@ -59,25 +59,36 @@ public class AuthServiceVertxProxyHandler extends ProxyHandler {
     }
     switch (action) {
 
-
       case "login": {
         service.login((io.vertx.core.json.JsonObject)json.getValue("credentials"), createHandler(msg));
         break;
       }
+      case "loginWithTimeout": {
+        service.loginWithTimeout((io.vertx.core.json.JsonObject)json.getValue("credentials"), (long)json.getValue("timeout"), createHandler(msg));
+        break;
+      }
+      case "logout": {
+        service.logout((java.lang.String)json.getValue("loginID"), createHandler(msg));
+        break;
+      }
+      case "refreshLoginSession": {
+        service.refreshLoginSession((java.lang.String)json.getValue("loginID"), createHandler(msg));
+        break;
+      }
       case "hasRole": {
-        service.hasRole((java.lang.String)json.getValue("principal"), (java.lang.String)json.getValue("role"), createHandler(msg));
+        service.hasRole((java.lang.String)json.getValue("loginID"), (java.lang.String)json.getValue("role"), createHandler(msg));
         break;
       }
       case "hasRoles": {
-        service.hasRoles((java.lang.String)json.getValue("principal"), convertSet(json.getJsonArray("roles").getList()), createHandler(msg));
+        service.hasRoles((java.lang.String)json.getValue("loginID"), convertSet(json.getJsonArray("roles").getList()), createHandler(msg));
         break;
       }
       case "hasPermission": {
-        service.hasPermission((java.lang.String)json.getValue("principal"), (java.lang.String)json.getValue("permission"), createHandler(msg));
+        service.hasPermission((java.lang.String)json.getValue("loginID"), (java.lang.String)json.getValue("permission"), createHandler(msg));
         break;
       }
       case "hasPermissions": {
-        service.hasPermissions((java.lang.String)json.getValue("principal"), convertSet(json.getJsonArray("permissions").getList()), createHandler(msg));
+        service.hasPermissions((java.lang.String)json.getValue("loginID"), convertSet(json.getJsonArray("permissions").getList()), createHandler(msg));
         break;
       }
       case "start": {

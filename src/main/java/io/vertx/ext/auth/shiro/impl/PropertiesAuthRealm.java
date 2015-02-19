@@ -14,15 +14,14 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.impl.realms;
+package io.vertx.ext.auth.shiro.impl;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.realm.text.PropertiesRealm;
-import static io.vertx.ext.auth.PropertiesAuthRealmConstants.*;
+import static io.vertx.ext.auth.shiro.PropertiesAuthRealmConstants.*;
 
 /**
- * TODO - move the constants out of here
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */

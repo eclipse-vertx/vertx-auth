@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.impl.realms;
+package io.vertx.ext.auth.shiro.impl;
 
 import org.apache.shiro.subject.PrincipalCollection;
 
@@ -32,9 +32,9 @@ import java.util.Set;
  */
 public class SimplePrincipalCollection implements PrincipalCollection {
 
-  private final String principal;
+  private final Object principal;
 
-  public SimplePrincipalCollection(String principal) {
+  public SimplePrincipalCollection(Object principal) {
     this.principal = principal;
   }
 

@@ -132,37 +132,5 @@
     </dependency>
   </dependencies>
 
-  <build>
 
-    <plugins>
-
-      <!-- Copy resources after compilation phase as we generate JS in src/main/resources -->
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-resources</id>
-            <phase>process-classes</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
-          <systemPropertyVariables>
-            <vertx.test.timeout>60</vertx.test.timeout>
-            <io.netty.leakDetectionLevel>PARANOID</io.netty.leakDetectionLevel>
-          </systemPropertyVariables>
-          <argLine>-server -Xms128m -Xmx1024m -XX:NewRatio=2</argLine>
-          <excludes>
-            <exclude>**/ScratchPad.java</exclude>
-            <!-- Exclude Mongo tests until driver API is more stable -->
-            <exclude>**/ext/mongo/**</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
