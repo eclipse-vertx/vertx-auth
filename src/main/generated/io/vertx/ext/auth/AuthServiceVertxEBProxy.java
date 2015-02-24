@@ -45,10 +45,10 @@ public class AuthServiceVertxEBProxy implements AuthService {
     this._address = address;
   }
 
-  public void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
+  public AuthService login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("credentials", credentials);
@@ -61,12 +61,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
+  public AuthService loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("credentials", credentials);
@@ -80,12 +81,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+  public AuthService logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("loginID", loginID);
@@ -98,12 +100,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+  public AuthService refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("loginID", loginID);
@@ -116,12 +119,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("loginID", loginID);
@@ -135,12 +139,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("loginID", loginID);
@@ -154,12 +159,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("loginID", loginID);
@@ -173,12 +179,13 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
   }
 
-  public void hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
-      return;
+      return this;
     }
     JsonObject _json = new JsonObject();
     _json.put("loginID", loginID);
@@ -192,6 +199,19 @@ public class AuthServiceVertxEBProxy implements AuthService {
         resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
+    return this;
+  }
+
+  public AuthService setReaperPeriod(long reaperPeriod) {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
+    JsonObject _json = new JsonObject();
+    _json.put("reaperPeriod", reaperPeriod);
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "setReaperPeriod");
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);
+    return this;
   }
 
   public void start() {

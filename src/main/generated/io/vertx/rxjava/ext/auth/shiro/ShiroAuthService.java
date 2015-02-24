@@ -25,6 +25,9 @@ import io.vertx.rxjava.ext.auth.AuthService;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 
 /**
+ * An Auth service implementation that uses Apache Shiro internally.
+ * <p>
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  *
  * NOTE: This class has been automatically generated from the original non RX-ified interface using Vert.x codegen.
@@ -43,13 +46,16 @@ public class ShiroAuthService extends AuthService {
     return delegate;
   }
 
+  /**
+   * Create an auth service using the specified auth realm type.
+   *
+   * @param vertx  the Vert.x intance
+   * @param authRealmType  the auth realm type
+   * @param config  the config to pass to the provider
+   * @return the auth service
+   */
   public static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config) {
     AuthService ret= AuthService.newInstance(io.vertx.ext.auth.shiro.ShiroAuthService.create((io.vertx.core.Vertx) vertx.getDelegate(), authRealmType, config));
-    return ret;
-  }
-
-  public static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config, long reaperPeriod) {
-    AuthService ret= AuthService.newInstance(io.vertx.ext.auth.shiro.ShiroAuthService.create((io.vertx.core.Vertx) vertx.getDelegate(), authRealmType, config, reaperPeriod));
     return ret;
   }
 

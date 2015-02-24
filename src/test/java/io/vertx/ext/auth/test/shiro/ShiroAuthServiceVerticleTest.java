@@ -29,10 +29,10 @@ import java.util.concurrent.CountDownLatch;
 public class ShiroAuthServiceVerticleTest extends PropertiesAuthServiceTest {
 
   @Override
-  protected void initAuthService(long timeout) throws Exception {
+  protected void initAuthService(long reaperPeriod) throws Exception {
     JsonObject config = getConfig();
-    if (timeout != -1) {
-      config.put(ShiroAuthServiceVerticle.REAPER_PERIOD, timeout);
+    if (reaperPeriod != -1) {
+      config.put(ShiroAuthServiceVerticle.REAPER_PERIOD, reaperPeriod);
     }
     DeploymentOptions options = new DeploymentOptions().setConfig(config);
     CountDownLatch latch = new CountDownLatch(1);

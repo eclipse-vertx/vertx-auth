@@ -17,10 +17,15 @@
 package io.vertx.ext.auth.shiro;
 
 /**
+ * Configuration keys used when configuring a Shiro properties auth realm
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public interface PropertiesAuthRealmConstants {
 
+  /**
+   * The path where to look for the properties file
+   */
   static final String PROPERTIES_PROPS_PATH_FIELD = "properties_path";
 
 }

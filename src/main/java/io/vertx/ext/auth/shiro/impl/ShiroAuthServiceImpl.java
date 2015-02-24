@@ -19,7 +19,6 @@ package io.vertx.ext.auth.shiro.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthServiceImpl;
-import io.vertx.ext.auth.shiro.ShiroAuthRealm;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 
 /**
@@ -34,9 +33,6 @@ public class ShiroAuthServiceImpl extends AuthServiceImpl {
       case PROPERTIES:
         authRealm = new PropertiesAuthRealm();
         break;
-      case JDBC:
-        // TODO
-        throw new UnsupportedOperationException();
       case LDAP:
         authRealm = new LDAPAuthRealm();
         break;
@@ -46,8 +42,8 @@ public class ShiroAuthServiceImpl extends AuthServiceImpl {
     return authRealm;
   }
 
-  public ShiroAuthServiceImpl(Vertx vertx, ShiroAuthRealm authRealm, JsonObject config, long reaperPeriod) {
-    super(vertx, config, new ShiroAuthProvider(vertx, authRealm), reaperPeriod);
+  public ShiroAuthServiceImpl(Vertx vertx, ShiroAuthRealm authRealm, JsonObject config) {
+    super(vertx, config, new ShiroAuthProvider(vertx, authRealm));
     authRealm.init(config);
   }
 }

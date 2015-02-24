@@ -59,6 +59,7 @@ public class AuthServiceVertxProxyHandler extends ProxyHandler {
     }
     switch (action) {
 
+
       case "login": {
         service.login((io.vertx.core.json.JsonObject)json.getValue("credentials"), createHandler(msg));
         break;
@@ -89,6 +90,10 @@ public class AuthServiceVertxProxyHandler extends ProxyHandler {
       }
       case "hasPermissions": {
         service.hasPermissions((java.lang.String)json.getValue("loginID"), convertSet(json.getJsonArray("permissions").getList()), createHandler(msg));
+        break;
+      }
+      case "setReaperPeriod": {
+        service.setReaperPeriod((long)json.getValue("reaperPeriod"));
         break;
       }
       case "start": {

@@ -21,7 +21,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.shiro.ShiroAuthRealm;
 import io.vertx.ext.auth.spi.AuthProvider;
 
 /**

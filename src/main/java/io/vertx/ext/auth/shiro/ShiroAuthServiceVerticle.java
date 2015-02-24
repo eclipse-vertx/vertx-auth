@@ -5,12 +5,18 @@ import io.vertx.ext.auth.AbstractAuthServiceVerticle;
 import io.vertx.ext.auth.AuthService;
 
 /**
+ *
+ * A verticle which starts an Auth service instance
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public class ShiroAuthServiceVerticle extends AbstractAuthServiceVerticle {
 
+  /**
+   * The name of the field in the config which holds the name of the auth realm type to use,
+   * e.g. PROPERTIES or LDAP
+   */
   public static final String SHIRO_AUTH_REALM_TYPE = "auth_realm_type";
-  public static final String REAPER_PERIOD = "reaper_period";
 
   @Override
   protected AuthService createService() {
@@ -26,9 +32,7 @@ public class ShiroAuthServiceVerticle extends AbstractAuthServiceVerticle {
       }
     }
 
-    long reaperPeriod = config().getLong(REAPER_PERIOD, AuthService.DEFAULT_REAPER_PERIOD);
-
     // Create the service object
-    return ShiroAuthService.create(vertx, type, config(), reaperPeriod);
+    return ShiroAuthService.create(vertx, type, config());
   }
 }

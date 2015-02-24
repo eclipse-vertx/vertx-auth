@@ -20,9 +20,16 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.serviceproxy.ProxyHelper;
 
 /**
+ * Base class for auth service verticles
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public abstract class AbstractAuthServiceVerticle extends AbstractVerticle {
+
+  /**
+   * The name of the field in the config which holds the reaper period to use, in ms
+   */
+  public static final String REAPER_PERIOD = "reaper_period";
 
   protected AuthService service;
 
@@ -31,6 +38,11 @@ public abstract class AbstractAuthServiceVerticle extends AbstractVerticle {
 
     // Create the service object
     service = createService();
+
+    Long reaperPeriod = config().getLong(REAPER_PERIOD);
+    if (reaperPeriod != null) {
+      service.setReaperPeriod(reaperPeriod);
+    }
 
     // And register it on the event bus against the configured address
     String address = config().getString("address");

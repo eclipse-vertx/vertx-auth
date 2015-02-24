@@ -26,27 +26,37 @@ import io.vertx.ext.auth.shiro.impl.ShiroAuthServiceImpl;
 import org.apache.shiro.realm.Realm;
 
 /**
+ * An Auth service implementation that uses Apache Shiro internally.
+ * <p>
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
 public interface ShiroAuthService extends AuthService {
 
+  /**
+   * Create an auth service using the specified auth realm type.
+   *
+   * @param vertx  the Vert.x intance
+   * @param authRealmType  the auth realm type
+   * @param config  the config to pass to the provider
+   * @return the auth service
+   */
   static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config) {
-    return new ShiroAuthServiceImpl(vertx, ShiroAuthServiceImpl.createRealm(authRealmType), config, DEFAULT_REAPER_PERIOD);
+    return new ShiroAuthServiceImpl(vertx, ShiroAuthServiceImpl.createRealm(authRealmType), config);
   }
 
+  /**
+   * Create an auth service using the specified Shiro Realm instance
+   *
+   * @param vertx  the Vert.x intance
+   * @param shiroRealm  the Shiro realm instance.
+   * @param config  the config to pass to the provider
+   * @return the auth service
+   */
   @GenIgnore
   static AuthService createFromRealm(Vertx vertx, Realm shiroRealm, JsonObject config) {
-    return new ShiroAuthServiceImpl(vertx, new ShiroAuthRealmImpl(shiroRealm), config, DEFAULT_REAPER_PERIOD);
-  }
-
-  static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config, long reaperPeriod) {
-    return new ShiroAuthServiceImpl(vertx, ShiroAuthServiceImpl.createRealm(authRealmType), config, reaperPeriod);
-  }
-
-  @GenIgnore
-  static AuthService createFromRealm(Vertx vertx, Realm shiroRealm, JsonObject config, long reaperPeriod) {
-    return new ShiroAuthServiceImpl(vertx, new ShiroAuthRealmImpl(shiroRealm), config, reaperPeriod);
+    return new ShiroAuthServiceImpl(vertx, new ShiroAuthRealmImpl(shiroRealm), config);
   }
 
 }

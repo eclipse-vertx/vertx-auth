@@ -19,21 +19,19 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
   private final Vertx vertx;
   private final AuthProvider provider;
   private final Map<String, LoginSession> loginSessions = new ConcurrentHashMap<>();
-  private final long reaperPeriod;
+  private long reaperPeriod = AuthService.DEFAULT_REAPER_PERIOD;
   private long timerID;
   private boolean closed;
 
-  public AuthServiceImpl(Vertx vertx, JsonObject config, AuthProvider provider, long reaperPeriod) {
+  public AuthServiceImpl(Vertx vertx, JsonObject config, AuthProvider provider) {
     this.vertx = vertx;
     this.provider = provider;
-    this.reaperPeriod = reaperPeriod;
     provider.init(config);
     setTimer();
   }
 
-  public AuthServiceImpl(Vertx vertx, JsonObject config, String className, long reaperPeriod) {
+  public AuthServiceImpl(Vertx vertx, JsonObject config, String className) {
     this.vertx = vertx;
-    this.reaperPeriod = reaperPeriod;
     ClassLoader cl = getClassLoader();
     try {
       Class<?> clazz = cl.loadClass(className);
@@ -52,12 +50,13 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
   }
 
   @Override
-  public void login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
+  public AuthService login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
     loginWithTimeout(credentials, DEFAULT_LOGIN_TIMEOUT, resultHandler);
+    return this;
   }
 
   @Override
-  public void loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
+  public AuthService loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
     provider.login(credentials, res -> {
       if (res.succeeded()) {
         Object principal = res.result();
@@ -71,45 +70,50 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
         resultHandler.handle(Future.failedFuture(res.cause()));
       }
     });
+    return this;
   }
 
   @Override
-  public void logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+  public AuthService logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
     LoginSession session = loginSessions.remove(loginID);
     resultHandler.handle(session == null ? Future.failedFuture("not logged in") : Future.succeededFuture());
+    return this;
   }
 
   @Override
-  public void refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+  public AuthService refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
       session.touch();
     }
     resultHandler.handle(session == null ? Future.failedFuture("not logged in") : Future.succeededFuture());
+    return this;
   }
 
   @Override
-  public void hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
       doHasRole(session, role, resultHandler);
     } else {
       resultHandler.handle(Future.failedFuture("not logged in"));
     }
+    return this;
   }
 
   @Override
-  public void hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
       doHasPermission(session, permission, resultHandler);
     } else {
       resultHandler.handle(Future.failedFuture("not logged in"));
     }
+    return this;
   }
 
   @Override
-  public void hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
       Handler<AsyncResult<Boolean>> wrapped = accumulatingHandler(roles.size(), resultHandler);
@@ -119,10 +123,11 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
     } else {
       resultHandler.handle(Future.failedFuture("not logged in"));
     }
+    return this;
   }
 
   @Override
-  public void hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
+  public AuthService hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
     LoginSession session = loginSessions.get(loginID);
     if (session != null) {
       Handler<AsyncResult<Boolean>> wrapped = accumulatingHandler(permissions.size(), resultHandler);
@@ -132,6 +137,13 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
     } else {
       resultHandler.handle(Future.failedFuture("not logged in"));
     }
+    return this;
+  }
+
+  @Override
+  public AuthService setReaperPeriod(long reaperPeriod) {
+    this.reaperPeriod = reaperPeriod;
+    return this;
   }
 
   private void doHasRole(LoginSession session, String role, Handler<AsyncResult<Boolean>> resultHandler) {
