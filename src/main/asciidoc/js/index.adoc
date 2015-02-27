@@ -40,7 +40,9 @@ var options = {
 
 vertx.deployVerticle("io.vertx:shiro-auth-service", options, function (res, res_err) {
   if ((res != null)) {
+    // Deployed ok
   } else {
+    // Failed to deploy
   };
 });
 
@@ -58,6 +60,9 @@ var proxy = AuthService.createEventBusProxy(vertx, "vertx.auth");
 // Now do stuff with it:
 
 proxy.login(credentials, function (res, res_err) {
+
+  // etc
+
 });
 
 ----
@@ -79,6 +84,9 @@ authService.start();
 // Now do stuff with it:
 
 authService.login(credentials, function (res, res_err) {
+
+  // etc
+
 });
 
 
@@ -134,6 +142,9 @@ authService.start();
 // Now do stuff with it:
 
 authService.login(credentials, function (res, res_err) {
+
+  // etc
+
 });
 
 
@@ -300,7 +311,12 @@ the login ID. The login will timeout if it remains unrefreshed for greater than 
 authService.refreshLoginSession(loginID, function (res, res_err) {
 
   if ((res != null)) {
+
+    // Refreshed ok
+
   } else {
+
+    // Not refreshed ok - probably the login has already timed out or doesn't exist.
   };
 });
 
@@ -314,7 +330,13 @@ You can explicitly logout a user with `link:jsdoc/auth_service-AuthService.html#
 authService.logout(loginID, function (res, res_err) {
 
   if ((res != null)) {
+
+    // Logged out ok
+
   } else {
+
+    // Failed to logout - probably the login has already timed out or doesn't exist.
+
   };
 });
 
@@ -344,10 +366,18 @@ authService.hasRole(loginID, "manager", function (res, res_err) {
     var hasRole = res;
 
     if (hasRole) {
+
+      // do something
+
     } else {
+
+      // do something else
+
     };
 
   } else {
+
+    // Something went wrong - maybe the user is not logged in?
   };
 
 });

@@ -40,6 +40,7 @@ public class PropertiesAuthServiceTest extends AuthServiceTestBase {
     } else {
       authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config).setReaperPeriod(reaperPeriod);
     }
+    authService.start();
   }
 
   protected JsonObject getConfig() {
