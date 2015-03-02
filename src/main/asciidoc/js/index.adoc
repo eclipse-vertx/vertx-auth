@@ -39,7 +39,7 @@ var options = {
 };
 
 vertx.deployVerticle("io.vertx:shiro-auth-service", options, function (res, res_err) {
-  if ((res != null)) {
+  if (res_err == null) {
     // Deployed ok
   } else {
     // Failed to deploy
@@ -277,7 +277,7 @@ var credentials = {
 
 authService.login(credentials, function (res, res_err) {
 
-  if ((res != null)) {
+  if (res_err == null) {
 
     // Login successful!
 
@@ -310,7 +310,7 @@ the login ID. The login will timeout if it remains unrefreshed for greater than 
 
 authService.refreshLoginSession(loginID, function (res, res_err) {
 
-  if ((res != null)) {
+  if (res_err == null) {
 
     // Refreshed ok
 
@@ -329,7 +329,7 @@ You can explicitly logout a user with `link:jsdoc/auth_service-AuthService.html#
 
 authService.logout(loginID, function (res, res_err) {
 
-  if ((res != null)) {
+  if (res_err == null) {
 
     // Logged out ok
 
@@ -361,7 +361,7 @@ or false if they don't have the role.
 
 authService.hasRole(loginID, "manager", function (res, res_err) {
 
-  if ((res != null)) {
+  if (res_err == null) {
 
     var hasRole = res;
 
