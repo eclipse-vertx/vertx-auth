@@ -233,12 +233,68 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   }
 
   @Test
-  public void testTouchSession() throws Exception {
+  public void testLoginNoTimeout() throws Exception {
+    initAuthService(100);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 5000, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      vertx.setTimer(1000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(hasRole -> {
+          assertTrue(hasRole);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testRefreshSession() throws Exception {
     initAuthService(500);
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 100, onSuccess(sessionID -> {
+    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.refreshLoginSession(sessionID, res -> {
+        assertTrue(res.succeeded());
+      }));
+      vertx.setTimer(2000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(res -> {
+          assertTrue(res);
+          vertx.cancelTimer(pid);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testRefreshSessionHasRole() throws Exception {
+    initAuthService(500);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      long pid = vertx.setPeriodic(100, tid -> authService.hasRole(sessionID, "morris_dancer", res -> {
+        assertTrue(res.succeeded());
+      }));
+      vertx.setTimer(2000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(res -> {
+          assertTrue(res);
+          vertx.cancelTimer(pid);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testRefreshSessionHasPermission() throws Exception {
+    initAuthService(500);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      long pid = vertx.setPeriodic(100, tid -> authService.hasPermission(sessionID, "bang_sticks", res -> {
         assertTrue(res.succeeded());
       }));
       vertx.setTimer(2000, tid -> {

@@ -35,6 +35,7 @@ class LoginSession {
   LoginSession(long timeout, Object principal) {
     this.timeout = timeout;
     this.principal = principal;
+    touch();
   }
 
   synchronized void touch() {
@@ -42,18 +43,22 @@ class LoginSession {
   }
 
   synchronized boolean hasRole(String role) {
+    touch();
     return roles().contains(role);
   }
 
   synchronized boolean hasNotRole(String role) {
+    touch();
     return notRoles().contains(role);
   }
 
   synchronized boolean hasPermission(String permission) {
+    touch();
     return permissions().contains(permission);
   }
 
   synchronized boolean hasNotPermission(String permission) {
+    touch();
     return notPermissions().contains(permission);
   }
 

@@ -4,7 +4,7 @@ This Vert.x service provides authentication and authorisation functionality for 
 
 The auth service provides a common interface that can be backed by different auth providers. Vert. ships with a
 default implementation that uses http://shiro.apache.org/[Apache Shiro] but you can provide your own implementation
-by implementing the `link:../../apidocs/io/vertx/ext/auth/spi/AuthProvider.html[AuthProvider]` interface. The Vert.x Apache Shiro implementation
+by implementing the `link:apidocs/io/vertx/ext/auth/spi/AuthProvider.html[AuthProvider]` interface. The Vert.x Apache Shiro implementation
 currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
 
 The auth service can either be used directly in your application, but it also integrated with the auth functionality
@@ -79,7 +79,7 @@ authService.login(credentials, res -> {
 });
 ----
 
-If you create an instance this way you should make sure you start it with `link:../../apidocs/io/vertx/ext/auth/AuthService.html#start--[start]`
+If you create an instance this way you should make sure you start it with `link:apidocs/io/vertx/ext/auth/AuthService.html#start--[start]`
 before you use it.
 
 However you do it, once you've got your service you can start using it.
@@ -89,10 +89,10 @@ However you do it, once you've got your service you can start using it.
 As previously mentioned we provide an implementation of the Auth service that uses Apache Shiro to perform the
 actual auth.
 
-To use this, you should use `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuthService.html[ShiroAuthService]`.
+To use this, you should use `link:apidocs/io/vertx/ext/auth/shiro/ShiroAuthService.html[ShiroAuthService]`.
 
 This currently supports properties file based user/role/permission information and using LDAP, and you can also pass
-in a pre-existing Shiro `Realm` instance or implement `link:../../apidocs/io/vertx/ext/auth/shiro/impl/ShiroAuthRealm.html[ShiroAuthRealm]` to implement
+in a pre-existing Shiro `Realm` instance or implement `link:apidocs/io/vertx/ext/auth/shiro/impl/ShiroAuthRealm.html[ShiroAuthRealm]` to implement
 a different method of auth using Shiro.
 
 == Shiro Auth Service Verticle
@@ -187,7 +187,7 @@ An example is `ldap:://myldapserver.mycompany.com:10389`
 
 == Using non Shiro Auth implementations
 
-If you want to use a different auth provider with the Auth service, you should implement `link:../../apidocs/io/vertx/ext/auth/spi/AuthProvider.html[AuthProvider]`.
+If you want to use a different auth provider with the Auth service, you should implement `link:apidocs/io/vertx/ext/auth/spi/AuthProvider.html[AuthProvider]`.
 
 You can then create a local instance of the AuthService with:
 
@@ -216,13 +216,13 @@ vertx.deployVerticle("service:io.vertx:auth-service", options);
 
 == Using the API
 
-The auth service API is described with `link:../../apidocs/io/vertx/ext/auth/AuthService.html[AuthService]`.
+The auth service API is described with `link:apidocs/io/vertx/ext/auth/AuthService.html[AuthService]`.
 
 It contains method to login and check roles and permissions.
 
 === Authentication - login / logout
 
-You use `link:../../apidocs/io/vertx/ext/auth/AuthService.html#login-io.vertx.core.json.JsonObject-io.vertx.core.Handler-[login]` to login a user. The argument to log-in is a `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`
+You use `link:apidocs/io/vertx/ext/auth/AuthService.html#login-io.vertx.core.json.JsonObject-io.vertx.core.Handler-[login]` to login a user. The argument to log-in is a `link:apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`
 representing the _credentials_ of the user.
 
 Often the credentials will just be a `username` string field and a `password` string field - and this is what is
@@ -263,9 +263,9 @@ The login session ID provided at login will be valid as long as the login hasn't
 logged out.
 
 The default time it remains valid is 30 minutes. If you want to use a different value of timeout you can specify that
-by calling `link:../../apidocs/io/vertx/ext/auth/AuthService.html#loginWithTimeout-io.vertx.core.json.JsonObject-long-io.vertx.core.Handler-[loginWithTimeout]`.
+by calling `link:apidocs/io/vertx/ext/auth/AuthService.html#loginWithTimeout-io.vertx.core.json.JsonObject-long-io.vertx.core.Handler-[loginWithTimeout]`.
 
-To prevent a login timing out, you can call `link:../../apidocs/io/vertx/ext/auth/AuthService.html#refreshLoginSession-java.lang.String-io.vertx.core.Handler-[refreshLoginSession]` specifying
+To prevent a login timing out, you can call `link:apidocs/io/vertx/ext/auth/AuthService.html#refreshLoginSession-java.lang.String-io.vertx.core.Handler-[refreshLoginSession]` specifying
 the login ID. The login will timeout if it remains unrefreshed for greater than the timeout period.
 
 [source,java]
@@ -283,7 +283,7 @@ authService.refreshLoginSession(loginID, res -> {
 });
 ----
 
-You can explicitly logout a user with `link:../../apidocs/io/vertx/ext/auth/AuthService.html#logout-java.lang.String-io.vertx.core.Handler-[logout]` specifying the login ID:
+You can explicitly logout a user with `link:apidocs/io/vertx/ext/auth/AuthService.html#logout-java.lang.String-io.vertx.core.Handler-[logout]` specifying the login ID:
 
 [source,java]
 ----
@@ -308,7 +308,7 @@ Authorisation means checking whether the user has the right roles or permissions
 In order to check roles or permissions the user must first be logged-in and you must have a valid login session ID
 as described in the previous section.
 
-To check if a user has a specific role you use `link:../../apidocs/io/vertx/ext/auth/AuthService.html#hasRole-java.lang.String-java.lang.String-io.vertx.core.Handler-[hasRole]` specifying the login ID
+To check if a user has a specific role you use `link:apidocs/io/vertx/ext/auth/AuthService.html#hasRole-java.lang.String-java.lang.String-io.vertx.core.Handler-[hasRole]` specifying the login ID
 and the role.
 
 The result of the check is returned in the handler. If the check didn't occur - e.g. the login ID is not valid, a
@@ -341,12 +341,12 @@ authService.hasRole(loginID, "manager", res -> {
 });
 ----
 
-You can also check multiple roles at the same time with `link:../../apidocs/io/vertx/ext/auth/AuthService.html#hasRoles-java.lang.String-java.util.Set-io.vertx.core.Handler-[hasRoles]`. In this
+You can also check multiple roles at the same time with `link:apidocs/io/vertx/ext/auth/AuthService.html#hasRoles-java.lang.String-java.util.Set-io.vertx.core.Handler-[hasRoles]`. In this
 case you will return a true result only if the user has _all_ the specified roles.
 
 In the same way as checking roles, you can check permissions too. To this you use
-`link:../../apidocs/io/vertx/ext/auth/AuthService.html#hasPermission-java.lang.String-java.lang.String-io.vertx.core.Handler-[hasPermission]` and
-`link:../../apidocs/io/vertx/ext/auth/AuthService.html#hasPermissions-java.lang.String-java.util.Set-io.vertx.core.Handler-[hasPermissions]` in the exact same way as roles.
+`link:apidocs/io/vertx/ext/auth/AuthService.html#hasPermission-java.lang.String-java.lang.String-io.vertx.core.Handler-[hasPermission]` and
+`link:apidocs/io/vertx/ext/auth/AuthService.html#hasPermissions-java.lang.String-java.util.Set-io.vertx.core.Handler-[hasPermissions]` in the exact same way as roles.
 
 Authorisations are cached for the length of the login. This means that the first time you do authorisation for a user
 it will go the auth provider, but the second time you do it with the same roles and permissions it will not call the
