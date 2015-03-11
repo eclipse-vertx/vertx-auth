@@ -250,7 +250,7 @@ It contains method to login and check roles and permissions.
 
 === Authentication - login / logout
 
-You use `link:groovydoc/io/vertx/groovy/ext/auth/AuthService.html#login(io.vertx.core.json.JsonObject,%20io.vertx.core.Handler)[login]` to login a user. The argument to log-in is a `link:groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`
+You use `link:groovydoc/io/vertx/groovy/ext/auth/AuthService.html#login(io.vertx.core.json.JsonObject,%20io.vertx.core.Handler)[login]` to login a user. The argument to log-in is a `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`
 representing the _credentials_ of the user.
 
 Often the credentials will just be a `username` string field and a `password` string field - and this is what is

@@ -254,7 +254,7 @@ It contains method to login and check roles and permissions.
 
 === Authentication - login / logout
 
-You use `link:jsdoc/auth_service-AuthService.html#login[login]` to login a user. The argument to log-in is a `link:jsdoc/json_object-JsonObject.html[JsonObject]`
+You use `link:jsdoc/auth_service-AuthService.html#login[login]` to login a user. The argument to log-in is a `link:../../vertx-core/js/jsdoc/json_object-JsonObject.html[JsonObject]`
 representing the _credentials_ of the user.
 
 Often the credentials will just be a `username` string field and a `password` string field - and this is what is

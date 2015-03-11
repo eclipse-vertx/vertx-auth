@@ -54,7 +54,7 @@ public class ShiroAuthService extends AuthService {
    * @param config  the config to pass to the provider
    * @return the auth service
    */
-  public static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config) {
+  public static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config) { 
     AuthService ret= AuthService.newInstance(io.vertx.ext.auth.shiro.ShiroAuthService.create((io.vertx.core.Vertx) vertx.getDelegate(), authRealmType, config));
     return ret;
   }
