@@ -30,9 +30,8 @@ import io.vertx.core.Handler;
  * <p>
  * Handles authentication and role/permission based authorisation.
  *
- * @author <a href="http://tfox.org">Tim Fox</a>
- *
- * NOTE: This class has been automatically generated from the original non RX-ified interface using Vert.x codegen.
+ * <p/>
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.AuthService original} non RX-ified interface using Vert.x codegen.
  */
 
 public class AuthService {
@@ -49,10 +48,9 @@ public class AuthService {
 
   /**
    * Create an auth service instance using the specified auth provider class name.
-   *
-   * @param vertx  the Vert.x instance
-   * @param className  the fully qualified class name of the auth provider implementation class
-   * @param config  the configuration to pass to the provider
+   * @param vertx the Vert.x instance
+   * @param className the fully qualified class name of the auth provider implementation class
+   * @param config the configuration to pass to the provider
    * @return the auth service
    */
   public static AuthService createFromClassName(Vertx vertx, String className, JsonObject config) { 
@@ -62,10 +60,9 @@ public class AuthService {
 
   /**
    * Create a proxy to an auth service that is deployed somwehere on the event bus.
-   *
-   * @param vertx  the vert.x instance
-   * @param address  the address on the event bus where the auth service is listening
-   * @return  the proxy
+   * @param vertx the vert.x instance
+   * @param address the address on the event bus where the auth service is listening
+   * @return the proxy
    */
   public static AuthService createEventBusProxy(Vertx vertx, String address) { 
     AuthService ret= AuthService.newInstance(io.vertx.ext.auth.AuthService.createEventBusProxy((io.vertx.core.Vertx) vertx.getDelegate(), address));
@@ -75,10 +72,9 @@ public class AuthService {
   /**
    * Authenticate (login) using the specified credentials. The contents of the credentials depend on what the auth
    * provider is expecting. The default login ID timeout will be used.
-   *
-   * @param credentials  the credentials
-   * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing
-   *                      the login ID (a string) if login was successful.
+   * @param credentials the credentials
+   * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing the login ID (a string) if login was successful.
+   * @return 
    */
   public AuthService login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) { 
     this.delegate.login(credentials, resultHandler);
@@ -88,10 +84,8 @@ public class AuthService {
   /**
    * Authenticate (login) using the specified credentials. The contents of the credentials depend on what the auth
    * provider is expecting. The default login ID timeout will be used.
-   *
-   * @param credentials  the credentials
-   * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing
-   *                      the login ID (a string) if login was successful.
+   * @param credentials the credentials
+   * @return 
    */
   public Observable<String> loginObservable(JsonObject credentials) { 
     io.vertx.rx.java.ObservableFuture<String> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -102,11 +96,10 @@ public class AuthService {
   /**
    * Authenticate (login) using the specified credentials. The contents of the credentials depend on what the auth
    * provider is expecting. The specified login ID timeout will be used.
-   *
-   * @param credentials  the credentials
-   * @param timeout  the login timeout to use, in ms
-   * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing
-   *                      the login ID (a string) if login was successful.
+   * @param credentials the credentials
+   * @param timeout the login timeout to use, in ms
+   * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing the login ID (a string) if login was successful.
+   * @return 
    */
   public AuthService loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) { 
     this.delegate.loginWithTimeout(credentials, timeout, resultHandler);
@@ -116,11 +109,9 @@ public class AuthService {
   /**
    * Authenticate (login) using the specified credentials. The contents of the credentials depend on what the auth
    * provider is expecting. The specified login ID timeout will be used.
-   *
-   * @param credentials  the credentials
-   * @param timeout  the login timeout to use, in ms
-   * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing
-   *                      the login ID (a string) if login was successful.
+   * @param credentials the credentials
+   * @param timeout the login timeout to use, in ms
+   * @return 
    */
   public Observable<String> loginWithTimeoutObservable(JsonObject credentials, long timeout) { 
     io.vertx.rx.java.ObservableFuture<String> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -130,9 +121,9 @@ public class AuthService {
 
   /**
    * Logout the user
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param resultHandler  will be called with success or failure
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param resultHandler will be called with success or failure
+   * @return 
    */
   public AuthService logout(String loginID, Handler<AsyncResult<Void>> resultHandler) { 
     this.delegate.logout(loginID, resultHandler);
@@ -141,9 +132,8 @@ public class AuthService {
 
   /**
    * Logout the user
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param resultHandler  will be called with success or failure
+   * @param loginID the login ID as provided by {@link #login}.
+   * @return 
    */
   public Observable<Void> logoutObservable(String loginID) { 
     io.vertx.rx.java.ObservableFuture<Void> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -153,9 +143,9 @@ public class AuthService {
 
   /**
    * Refresh an existing login ID so it doesn't expire
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param resultHandler  will be called with success or failure
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param resultHandler will be called with success or failure
+   * @return 
    */
   public AuthService refreshLoginSession(String loginID, Handler<AsyncResult<Void>> resultHandler) { 
     this.delegate.refreshLoginSession(loginID, resultHandler);
@@ -164,9 +154,8 @@ public class AuthService {
 
   /**
    * Refresh an existing login ID so it doesn't expire
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param resultHandler  will be called with success or failure
+   * @param loginID the login ID as provided by {@link #login}.
+   * @return 
    */
   public Observable<Void> refreshLoginSessionObservable(String loginID) { 
     io.vertx.rx.java.ObservableFuture<Void> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -176,10 +165,10 @@ public class AuthService {
 
   /**
    * Does the user have the specified role?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param role  the role
-   * @param resultHandler  will be called with the result - true if has role, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param role the role
+   * @param resultHandler will be called with the result - true if has role, false if not
+   * @return 
    */
   public AuthService hasRole(String loginID, String role, Handler<AsyncResult<Boolean>> resultHandler) { 
     this.delegate.hasRole(loginID, role, resultHandler);
@@ -188,10 +177,9 @@ public class AuthService {
 
   /**
    * Does the user have the specified role?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param role  the role
-   * @param resultHandler  will be called with the result - true if has role, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param role the role
+   * @return 
    */
   public Observable<Boolean> hasRoleObservable(String loginID, String role) { 
     io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -201,10 +189,10 @@ public class AuthService {
 
   /**
    * Does the user have the specified roles?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param roles  the set of roles
-   * @param resultHandler  will be called with the result - true if has roles, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param roles the set of roles
+   * @param resultHandler will be called with the result - true if has roles, false if not
+   * @return 
    */
   public AuthService hasRoles(String loginID, Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) { 
     this.delegate.hasRoles(loginID, roles, resultHandler);
@@ -213,10 +201,9 @@ public class AuthService {
 
   /**
    * Does the user have the specified roles?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param roles  the set of roles
-   * @param resultHandler  will be called with the result - true if has roles, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param roles the set of roles
+   * @return 
    */
   public Observable<Boolean> hasRolesObservable(String loginID, Set<String> roles) { 
     io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -226,10 +213,10 @@ public class AuthService {
 
   /**
    * Does the user have the specified permission?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param permission  the permission
-   * @param resultHandler  will be called with the result - true if has permission, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param permission the permission
+   * @param resultHandler will be called with the result - true if has permission, false if not
+   * @return 
    */
   public AuthService hasPermission(String loginID, String permission, Handler<AsyncResult<Boolean>> resultHandler) { 
     this.delegate.hasPermission(loginID, permission, resultHandler);
@@ -238,10 +225,9 @@ public class AuthService {
 
   /**
    * Does the user have the specified permission?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param permission  the permission
-   * @param resultHandler  will be called with the result - true if has permission, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param permission the permission
+   * @return 
    */
   public Observable<Boolean> hasPermissionObservable(String loginID, String permission) { 
     io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -251,10 +237,10 @@ public class AuthService {
 
   /**
    * Does the user have the specified permissions?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param permissions  the set of permissions
-   * @param resultHandler  will be called with the result - true if has permissions, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param permissions the set of permissions
+   * @param resultHandler will be called with the result - true if has permissions, false if not
+   * @return 
    */
   public AuthService hasPermissions(String loginID, Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) { 
     this.delegate.hasPermissions(loginID, permissions, resultHandler);
@@ -263,10 +249,9 @@ public class AuthService {
 
   /**
    * Does the user have the specified permissions?
-   *
-   * @param loginID  the login ID as provided by {@link #login}.
-   * @param permissions  the set of permissions
-   * @param resultHandler  will be called with the result - true if has permissions, false if not
+   * @param loginID the login ID as provided by {@link #login}.
+   * @param permissions the set of permissions
+   * @return 
    */
   public Observable<Boolean> hasPermissionsObservable(String loginID, Set<String> permissions) { 
     io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
@@ -276,8 +261,8 @@ public class AuthService {
 
   /**
    * Set the reaper period - how often to check for expired logins, in ms.
-   *
-   * @param reaperPeriod  the reaper period, in ms
+   * @param reaperPeriod the reaper period, in ms
+   * @return 
    */
   public AuthService setReaperPeriod(long reaperPeriod) { 
     this.delegate.setReaperPeriod(reaperPeriod);
