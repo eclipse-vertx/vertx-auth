@@ -11,8 +11,7 @@ import io.vertx.ext.mongo.MongoService;
 import java.util.List;
 
 /**
- * This implementation of {@link AuthProvider} handles authorization and authentication based 
- * on MongoDb
+ * This implementation of {@link AuthProvider} handles authorization and authentication based on MongoDb
  * 
  * @author mremme
  */
@@ -447,6 +446,13 @@ public class MongoAuthProvider implements AuthProvider {
       this.username = username;
       this.password = password;
     }
+  }
+
+  /**
+   * @return the collectionName
+   */
+  public String getCollectionName() {
+    return collectionName;
   }
 
 }

@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.test.mongo;
+package io.vertx.ext.auth.test.mongo.bak;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoService;

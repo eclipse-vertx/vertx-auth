@@ -98,7 +98,11 @@
 	  <groupId>io.vertx</groupId>
 	  <artifactId>vertx-mongo-service</artifactId>
 	</dependency>	
-
+	<dependency>
+	  <groupId>io.vertx</groupId>
+	  <artifactId>vertx-unit</artifactId>
+	</dependency>
+	
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
