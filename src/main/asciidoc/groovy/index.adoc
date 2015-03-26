@@ -38,7 +38,7 @@ def options = [
   config:config
 ]
 
-vertx.deployVerticle("io.vertx:shiro-auth-service", options, { res ->
+vertx.deployVerticle("service:io.vertx.shiro-auth-service", options, { res ->
   if (res.succeeded()) {
     // Deployed ok
   } else {
@@ -72,11 +72,12 @@ Alternatively you can create an instance of the service directly and just use th
 [source,java]
 ----
 import io.vertx.groovy.ext.auth.shiro.ShiroAuthService
+import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 
 def config = [:]
 config."properties_path" = "classpath:test-auth.properties"
 
-def authService = ShiroAuthService.create(vertx, 'PROPERTIES', config)
+def authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config)
 
 authService.start()
 
@@ -129,11 +130,12 @@ Here's an example that uses the out of the box properties auth realm:
 [source,java]
 ----
 import io.vertx.groovy.ext.auth.shiro.ShiroAuthService
+import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 
 def config = [:]
 config."properties_path" = "classpath:test-auth.properties"
 
-def authService = ShiroAuthService.create(vertx, 'PROPERTIES', config)
+def authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config)
 
 authService.start()
 

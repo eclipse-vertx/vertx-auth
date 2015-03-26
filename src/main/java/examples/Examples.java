@@ -34,7 +34,7 @@ public class Examples {
     // Deploy service - can be anywhere on your network
     DeploymentOptions options = new DeploymentOptions().setConfig(config);
 
-    vertx.deployVerticle("io.vertx:shiro-auth-service", options, res -> {
+    vertx.deployVerticle("service:io.vertx.shiro-auth-service", options, res -> {
       if (res.succeeded()) {
         // Deployed ok
       } else {

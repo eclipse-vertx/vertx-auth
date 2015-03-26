@@ -36,7 +36,7 @@ public class ShiroAuthServiceVerticleTest extends PropertiesAuthServiceTest {
     }
     DeploymentOptions options = new DeploymentOptions().setConfig(config);
     CountDownLatch latch = new CountDownLatch(1);
-    vertx.deployVerticle("service:io.vertx:shiro-auth-service", options, onSuccess(id -> {
+    vertx.deployVerticle("service:io.vertx.shiro-auth-service", options, onSuccess(id -> {
       authService = AuthService.createEventBusProxy(vertx, "vertx.auth");
       latch.countDown();
     }));

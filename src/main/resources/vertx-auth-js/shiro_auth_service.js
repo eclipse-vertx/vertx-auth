@@ -52,7 +52,7 @@ var ShiroAuthService = function(j_val) {
 ShiroAuthService.create = function(vertx, authRealmType, config) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthService(JShiroAuthService.create(vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
+    return new AuthService(JShiroAuthService["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
   } else utils.invalidArgs();
 };
 

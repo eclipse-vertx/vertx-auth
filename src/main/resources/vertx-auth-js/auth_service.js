@@ -45,7 +45,7 @@ var AuthService = function(j_val) {
   this.login = function(credentials, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'function') {
-      j_authService.login(utils.convParamJsonObject(credentials), function(ar) {
+      j_authService["login(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(credentials), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -69,7 +69,7 @@ var AuthService = function(j_val) {
   this.loginWithTimeout = function(credentials, timeout, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] ==='number' && typeof __args[2] === 'function') {
-      j_authService.loginWithTimeout(utils.convParamJsonObject(credentials), timeout, function(ar) {
+      j_authService["loginWithTimeout(io.vertx.core.json.JsonObject,long,io.vertx.core.Handler)"](utils.convParamJsonObject(credentials), timeout, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -91,7 +91,7 @@ var AuthService = function(j_val) {
   this.logout = function(loginID, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_authService.logout(loginID, function(ar) {
+      j_authService["logout(java.lang.String,io.vertx.core.Handler)"](loginID, function(ar) {
       if (ar.succeeded()) {
         resultHandler(null, null);
       } else {
@@ -113,7 +113,7 @@ var AuthService = function(j_val) {
   this.refreshLoginSession = function(loginID, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_authService.refreshLoginSession(loginID, function(ar) {
+      j_authService["refreshLoginSession(java.lang.String,io.vertx.core.Handler)"](loginID, function(ar) {
       if (ar.succeeded()) {
         resultHandler(null, null);
       } else {
@@ -136,7 +136,7 @@ var AuthService = function(j_val) {
   this.hasRole = function(loginID, role, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-      j_authService.hasRole(loginID, role, function(ar) {
+      j_authService["hasRole(java.lang.String,java.lang.String,io.vertx.core.Handler)"](loginID, role, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -159,7 +159,7 @@ var AuthService = function(j_val) {
   this.hasRoles = function(loginID, roles, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && __args[1] instanceof Array && typeof __args[2] === 'function') {
-      j_authService.hasRoles(loginID, utils.convParamSetBasicOther(roles), function(ar) {
+      j_authService["hasRoles(java.lang.String,java.util.Set,io.vertx.core.Handler)"](loginID, utils.convParamSetBasicOther(roles), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -182,7 +182,7 @@ var AuthService = function(j_val) {
   this.hasPermission = function(loginID, permission, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-      j_authService.hasPermission(loginID, permission, function(ar) {
+      j_authService["hasPermission(java.lang.String,java.lang.String,io.vertx.core.Handler)"](loginID, permission, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -205,7 +205,7 @@ var AuthService = function(j_val) {
   this.hasPermissions = function(loginID, permissions, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && __args[1] instanceof Array && typeof __args[2] === 'function') {
-      j_authService.hasPermissions(loginID, utils.convParamSetBasicOther(permissions), function(ar) {
+      j_authService["hasPermissions(java.lang.String,java.util.Set,io.vertx.core.Handler)"](loginID, utils.convParamSetBasicOther(permissions), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -226,7 +226,7 @@ var AuthService = function(j_val) {
   this.setReaperPeriod = function(reaperPeriod) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] ==='number') {
-      j_authService.setReaperPeriod(reaperPeriod);
+      j_authService["setReaperPeriod(long)"](reaperPeriod);
       return that;
     } else utils.invalidArgs();
   };
@@ -240,7 +240,7 @@ var AuthService = function(j_val) {
   this.start = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      j_authService.start();
+      j_authService["start()"]();
     } else utils.invalidArgs();
   };
 
@@ -253,7 +253,7 @@ var AuthService = function(j_val) {
   this.stop = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      j_authService.stop();
+      j_authService["stop()"]();
     } else utils.invalidArgs();
   };
 
@@ -275,7 +275,7 @@ var AuthService = function(j_val) {
 AuthService.createFromClassName = function(vertx, className, config) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthService(JAuthService.createFromClassName(vertx._jdel, className, utils.convParamJsonObject(config)));
+    return new AuthService(JAuthService["createFromClassName(io.vertx.core.Vertx,java.lang.String,io.vertx.core.json.JsonObject)"](vertx._jdel, className, utils.convParamJsonObject(config)));
   } else utils.invalidArgs();
 };
 
@@ -290,7 +290,7 @@ AuthService.createFromClassName = function(vertx, className, config) {
 AuthService.createEventBusProxy = function(vertx, address) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
-    return new AuthService(JAuthService.createEventBusProxy(vertx._jdel, address));
+    return new AuthService(JAuthService["createEventBusProxy(io.vertx.core.Vertx,java.lang.String)"](vertx._jdel, address));
   } else utils.invalidArgs();
 };
 
