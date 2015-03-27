@@ -3,13 +3,16 @@ package io.vertx.ext.auth.test.mongo;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.mongo.MongoAuthProvider;
 import io.vertx.ext.mongo.MongoService;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.test.core.VertxTestBase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -25,7 +28,9 @@ import de.flapdoodle.embed.process.runtime.Network;
  * @author mremme
  */
 
-public class MongoTestBase {
+public class MongoTestBase extends VertxTestBase {
+  private static final Logger     log           = LoggerFactory.getLogger(MongoTestBase.class);
+
   protected Vertx                 vertx         = Vertx.vertx();
   private static MongodExecutable exe;
   private MongoService            mongoService;
@@ -81,54 +86,108 @@ public class MongoTestBase {
     dropCollections(context);
   }
 
-  protected void initDemoData(TestContext context) {
+  protected void initDemoData(TestContext context) throws Exception {
     initTestUsers(context);
   }
 
-  protected void initTestUsers(TestContext context) {
-    initOneUser(context, "Michael", "ps1");
+  protected void initTestUsers(TestContext context) throws Exception {
 
-    initOneUser(context, "Doublette", "ps1");
-    initOneUser(context, "Doublette", "ps2");
-    initOneUser(context, "Doublette", "ps2");
+    List<JsonObject> users = createUserList();
+    CountDownLatch latch = new CountDownLatch(users.size());
 
-    Async async = context.async();
+    for (JsonObject user : users) {
+      initOneUser(context, user, latch);
+    }
+    latch.await();
+
+    CountDownLatch latch2 = new CountDownLatch(1);
     mongoService.count(MongoAuthProvider.DEFAULT_COLLECTION_NAME, new JsonObject(), result -> {
+      log.info("count users: " + result.result());
       Long count = result.result();
-      context.assertTrue(count > 0);
-      async.complete();
+      context.assertTrue(count > 0, "No users added");
+      latch2.countDown();
     });
+    latch2.await();
   }
 
-  private void initOneUser(TestContext context, String username, String password) {
+  protected List<JsonObject> createUserList() {
+    List<JsonObject> users = new ArrayList<JsonObject>();
+    users.add(createUser("Michael", "ps1"));
+    users.add(createUser("Doublette", "ps1"));
+    users.add(createUser("Doublette", "ps2"));
+    users.add(createUser("Doublette", "ps2"));
+    return users;
+  }
+
+  /**
+   * Creates a user as {@link JsonObject}
+   * 
+   * @param username
+   * @param password
+   * @return
+   */
+  protected JsonObject createUser(String username, String password) {
     JsonObject user = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, username).put(
         MongoAuthProvider.DEFAULT_PASSWORD_FIELD, password);
-    Async async = context.async();
+    return user;
+  }
+
+  private void initOneUser(TestContext context, JsonObject user, CountDownLatch latch) {
     mongoService.save(MongoAuthProvider.DEFAULT_COLLECTION_NAME, user, res -> {
       if (res.succeeded()) {
+        log.info("user added: " + user.getString(MongoAuthProvider.DEFAULT_USERNAME_FIELD));
+        latch.countDown();
       } else {
         context.fail(res.cause());
       }
-      async.complete();
     });
   }
 
+  /**
+   * drops the userdefined collections to restart the database
+   * 
+   * @param context
+   */
   protected void dropCollections(TestContext context) {
-    // Drop all the collections in the db
-    Async async = context.async();
+
     mongoService.getCollections(result -> {
-      List<String> toDrop = getOurCollections(result.result());
-      if (!toDrop.isEmpty()) {
-        context.fail(new UnsupportedOperationException("implement dropping of existing data from previous run"));
+      if (result.succeeded()) {
+        List<String> toDrop = getOurCollections(result.result());
+        if (!toDrop.isEmpty()) {
+          CountDownLatch latch = new CountDownLatch(toDrop.size());
+
+          for (String collection : toDrop) {
+            dropCollection(context, collection, latch);
+          }
+          try {
+            latch.await();
+          } catch (Exception e) {
+            context.fail(e);
+          }
+        }
+      } else {
+        context.fail(result.cause());
       }
-      async.complete();
+
     });
+  }
+
+  protected void dropCollection(TestContext context, String collection, CountDownLatch latch) {
+    mongoService.dropCollection(collection, result -> {
+      if (result.succeeded()) {
+        log.info("drop collection done: " + collection);
+        latch.countDown();
+      } else {
+        context.fail(result.cause());
+      }
+    });
+
   }
 
   protected List<String> getOurCollections(List<String> colls) {
     List<String> ours = new ArrayList<>();
     for (String coll : colls) {
-      System.out.println(coll);
+      log.info("found collection: " + coll);
       if (isOurCollection(coll)) {
         ours.add(coll);
       }
@@ -139,27 +198,6 @@ public class MongoTestBase {
   protected boolean isOurCollection(String collectionName) {
     return collectionName.startsWith("ext-mongo") || collectionName.equals(MongoAuthProvider.DEFAULT_COLLECTION_NAME);
   }
-
-  //  protected void dropCollections(TestContext context) {
-  //    // Drop all the collections in the db
-  //    Async async = context.async();
-  //    mongoService.getCollections(onSuccess(list -> {
-  //      AtomicInteger collCount = new AtomicInteger();
-  //      List<String> toDrop = getOurCollections(list);
-  //      int count = toDrop.size();
-  //      if (!toDrop.isEmpty()) {
-  //        for (String collection : toDrop) {
-  //          mongoService.dropCollection(collection, onSuccess(v -> {
-  //            if (collCount.incrementAndGet() == count) {
-  //              latch.countDown();
-  //            }
-  //          }));
-  //        }
-  //      } else {
-  //        latch.countDown();
-  //      }
-  //    }));
-  //  }
 
   private void startMongo() throws Exception {
     if (getConnectionString() == null) {

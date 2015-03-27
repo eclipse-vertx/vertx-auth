@@ -25,7 +25,7 @@ public class MongoAuthTest {
     suite.after(mongoTestBase.getAfterHandler());
 
     TestOptions options = new TestOptions().addReporter(new ReportOptions().setTo("console").setFormat("simple"))
-        .setTimeout(5000);
+        .setTimeout(50000);
 
     TestCompletion completion = suite.run(mongoTestBase.vertx, options);
 
@@ -43,6 +43,9 @@ public class MongoAuthTest {
   }
 
   public static void main(String[] args) {
+    System.setProperty("connection_string", "mongodb://localhost:27017");
+    System.setProperty("db_name", "TestDatabase");
+
     MongoAuthTest authTest = new MongoAuthTest();
     authTest.test();
   }
