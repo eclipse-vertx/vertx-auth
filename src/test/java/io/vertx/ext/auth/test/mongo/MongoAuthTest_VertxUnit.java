@@ -9,13 +9,13 @@ import io.vertx.ext.unit.report.ReportOptions;
  * @author mremme
  */
 
-public class MongoAuthTest {
+public class MongoAuthTest_VertxUnit {
   MongoTestBase mongoTestBase = new MongoTestBase();
 
   /**
    * 
    */
-  public MongoAuthTest() {
+  public MongoAuthTest_VertxUnit() {
   }
 
   private void test() {
@@ -46,7 +46,7 @@ public class MongoAuthTest {
     System.setProperty("connection_string", "mongodb://localhost:27017");
     System.setProperty("db_name", "TestDatabase");
 
-    MongoAuthTest authTest = new MongoAuthTest();
+    MongoAuthTest_VertxUnit authTest = new MongoAuthTest_VertxUnit();
     authTest.test();
   }
 

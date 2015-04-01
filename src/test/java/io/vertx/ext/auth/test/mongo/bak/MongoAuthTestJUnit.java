@@ -13,7 +13,7 @@ import org.junit.Test;
  * @author mremme
  */
 
-public class MongoAuthTest extends MongoBaseTest {
+public class MongoAuthTestJUnit extends MongoBaseTest {
   protected MongoAuthService authService;
 
   @Override
