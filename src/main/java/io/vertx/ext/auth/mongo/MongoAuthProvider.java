@@ -297,7 +297,7 @@ public class MongoAuthProvider implements AuthProvider {
     boolean permissionsLookupEnabled = config.getBoolean(PROPERTY_PERMISSIONLOOKUP_ENABLED, false);
     setPermissionsLookupEnabled(permissionsLookupEnabled);
 
-    boolean usernameMustUnique = config.getBoolean(PROPERTY_USERNAME_UNIQUE, true);
+    boolean usernameMustUnique = config.getBoolean(PROPERTY_USERNAME_UNIQUE, false);
     setUsernameMustUnique(usernameMustUnique);
 
   }
@@ -318,12 +318,21 @@ public class MongoAuthProvider implements AuthProvider {
     AuthToken token = new AuthToken(username, password);
 
     JsonObject query = createQuery(username);
-    InternalHandler handler = new InternalHandler(token);
-    mongoService.find(this.collectionName, query, handler);
-    if (handler.result != null)
-      resultHandler.handle(Future.succeededFuture(handler.result));
-    else
-      resultHandler.handle(Future.failedFuture(handler.exception));
+    mongoService.find(this.collectionName, query, res -> {
+
+      try {
+        if (res.succeeded()) {
+          JsonObject result = handleSelection(res, token);
+          resultHandler.handle(Future.succeededFuture(result));
+        } else {
+          resultHandler.handle(Future.failedFuture(res.cause()));
+        }
+      } catch (Throwable e) {
+        resultHandler.handle(Future.failedFuture(e));
+      }
+
+    });
+
   }
 
   /*
@@ -403,34 +412,6 @@ public class MongoAuthProvider implements AuthProvider {
 
   protected String getSaltForUser(String username) {
     return username;
-  }
-
-  /**
-   * Handler for executing the query on Mongo.
-   */
-  class InternalHandler implements Handler<AsyncResult<List<JsonObject>>> {
-    JsonObject result = null;
-    Throwable  exception;
-
-    AuthToken  authToken;
-
-    InternalHandler(AuthToken authToken) {
-      this.authToken = authToken;
-    }
-
-    @Override
-    public void handle(AsyncResult<List<JsonObject>> res) {
-      try {
-        if (res.succeeded()) {
-          result = handleSelection(res, authToken);
-        } else {
-          exception = res.cause();
-        }
-      } catch (Throwable e) {
-        exception = e;
-      }
-    }
-
   }
 
   /**

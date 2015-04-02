@@ -1,6 +1,8 @@
-package io.vertx.ext.auth.test.mongo.bak;
+package io.vertx.ext.auth.test.mongo;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.mongo.MongoService;
 import io.vertx.test.core.TestUtils;
 import io.vertx.test.core.VertxTestBase;
@@ -26,8 +28,12 @@ import de.flapdoodle.embed.process.runtime.Network;
  */
 
 public abstract class MongoBaseTest extends VertxTestBase {
+  private static final Logger     log          = LoggerFactory.getLogger(MongoBaseTest.class);
+
+  public static final String      TABLE_PREFIX = "TestMongo_";
 
   private static MongodExecutable exe;
+  private MongoService            mongoService;
 
   protected static String getConnectionString() {
     return getProperty("connection_string");
@@ -45,7 +51,6 @@ public abstract class MongoBaseTest extends VertxTestBase {
         return s;
       }
     }
-
     return null;
   }
 
@@ -66,13 +71,58 @@ public abstract class MongoBaseTest extends VertxTestBase {
     }
   }
 
-  protected MongoService mongoService;
-
-  private String randomCollection() {
-    return "ext-mongo" + TestUtils.randomAlphaString(20);
+  /**
+   * If instance of MongoService is null, initialization is performed
+   * 
+   * @return
+   * @throws Exception
+   */
+  public MongoService getMongoService() throws Exception {
+    if (mongoService == null) {
+      initMongoService();
+      initDemoData();
+    }
+    return mongoService;
   }
 
-  protected JsonObject getConfig() {
+  private void initMongoService() throws Exception {
+    JsonObject config = getConfig();
+    mongoService = MongoService.create(vertx, config);
+    mongoService.start();
+    CountDownLatch latch = new CountDownLatch(1);
+    dropCollections(latch);
+    awaitLatch(latch);
+
+  }
+
+  /**
+   * Initialize the demo data needed for the tests
+   * 
+   * @throws Exception
+   */
+  public abstract void initDemoData() throws Exception;
+
+  /**
+   * Create a random Name of a collection
+   * 
+   * @return
+   */
+  public String randomCollection() {
+    return createCollectionName(TestUtils.randomAlphaString(20));
+  }
+
+  /**
+   * Create a name of a collection by adding a certain suffix. All Collections with this suffix will be cleared by start
+   * of the test class
+   * 
+   * @param name
+   * @return
+   */
+  public String createCollectionName(String name) {
+    return TABLE_PREFIX + name;
+  }
+
+  protected static JsonObject getConfig() {
     JsonObject config = new JsonObject();
     String connectionString = getConnectionString();
     if (connectionString != null) {
@@ -87,10 +137,10 @@ public abstract class MongoBaseTest extends VertxTestBase {
     return config;
   }
 
-  protected List<String> getOurCollections(List<String> colls) {
+  protected static List<String> getOurCollections(List<String> colls) {
     List<String> ours = new ArrayList<>();
     for (String coll : colls) {
-      if (coll.startsWith("ext-mongo")) {
+      if (coll.startsWith(TABLE_PREFIX)) {
         ours.add(coll);
       }
     }
