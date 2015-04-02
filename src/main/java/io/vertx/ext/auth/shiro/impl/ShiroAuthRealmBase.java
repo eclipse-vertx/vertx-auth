@@ -20,6 +20,7 @@ import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.ext.auth.shiro.ShiroAuthRealm;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -34,36 +35,30 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ShiroAuthRealmImpl implements ShiroAuthRealm {
+public class ShiroAuthRealmBase implements ShiroAuthRealm {
 
-  private static final Logger log = LoggerFactory.getLogger(ShiroAuthRealmImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(ShiroAuthRealmBase.class);
 
   protected DefaultSecurityManager securityManager;
   protected Realm realm;
-  protected JsonObject config;
 
-  protected ShiroAuthRealmImpl() {
+  protected ShiroAuthRealmBase() {
   }
 
-  public ShiroAuthRealmImpl(Realm realm) {
+  public ShiroAuthRealmBase(Realm realm) {
     this.realm = realm;
-  }
-
-  @Override
-  public void init(JsonObject config) {
     this.securityManager = new DefaultSecurityManager(realm);
   }
 
   @Override
-  public Object login(JsonObject credentials) {
+  public void login(JsonObject principal, JsonObject credentials) {
     SubjectContext subjectContext = new DefaultSubjectContext();
     Subject subject = securityManager.createSubject(subjectContext);
-    String username = credentials.getString("username");
+    String username = principal.getString("username");
     String password = credentials.getString("password");
     AuthenticationToken token = new UsernamePasswordToken(username, password);
     try {
       subject.login(token);
-      return subject.getPrincipal();
     } catch (AuthenticationException e) {
       throw new VertxException(e);
     }
@@ -71,18 +66,20 @@ public class ShiroAuthRealmImpl implements ShiroAuthRealm {
 
 
   @Override
-  public boolean hasRole(Object principal, String role) {
+  public boolean hasRole(JsonObject principal, String role) {
     SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new SimplePrincipalCollection(principal);
+    String username = principal.getString("username");
+    PrincipalCollection coll = new SimplePrincipalCollection(username);
     subjectContext.setPrincipals(coll);
     Subject subject = securityManager.createSubject(subjectContext);
     return subject.hasRole(role);
   }
 
   @Override
-  public boolean hasPermission(Object principal, String permission) {
+  public boolean hasPermission(JsonObject principal, String permission) {
     SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new SimplePrincipalCollection(principal);
+    String username = principal.getString("username");
+    PrincipalCollection coll = new SimplePrincipalCollection(username);
     subjectContext.setPrincipals(coll);
     Subject subject = securityManager.createSubject(subjectContext);
     try {

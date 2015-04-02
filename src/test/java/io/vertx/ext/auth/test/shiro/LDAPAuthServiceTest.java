@@ -64,8 +64,9 @@ public class LDAPAuthServiceTest extends VertxTestBase {
 
   @Test
   public void testLDAP() {
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.login(credentials, onSuccess(res -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.login(principal, credentials, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -74,8 +75,9 @@ public class LDAPAuthServiceTest extends VertxTestBase {
 
   @Test
   public void testLDAPFailBadpassword() {
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongone");
-    authService.login(credentials, onFailure(thr -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "wrongone");
+    authService.login(principal, credentials, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -84,8 +86,9 @@ public class LDAPAuthServiceTest extends VertxTestBase {
 
   @Test
   public void testLDAPFailUnknownUser() {
-    JsonObject credentials = new JsonObject().put("username", "bob").put("password", "blah");
-    authService.login(credentials, onFailure(thr -> {
+    JsonObject principal = new JsonObject().put("username", "bob");
+    JsonObject credentials = new JsonObject().put("password", "blah");
+    authService.login(principal, credentials, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));

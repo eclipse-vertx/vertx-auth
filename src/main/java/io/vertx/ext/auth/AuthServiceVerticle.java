@@ -34,6 +34,6 @@ public class AuthServiceVerticle extends AbstractAuthServiceVerticle {
       throw new IllegalArgumentException(AUTH_PROVIDER_CLASS_NAME + " must be provided");
     }
     // Create the service object
-    return AuthService.createFromClassName(vertx, providerClassName, config());
+    return AuthService.createFromClassName(vertx, providerClassName);
   }
 }

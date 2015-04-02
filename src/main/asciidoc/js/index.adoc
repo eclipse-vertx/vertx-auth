@@ -1,14 +1,19 @@
 = Vert.x Auth Service
 
-This Vert.x service provides authentication and authorisation functionality for use in your Vert.x applications.
+This Vert.x service provides authentication and authorisation functionality and the concept of a login session
+for use in your Vert.x applications
 
-The auth service provides a common interface that can be backed by different auth providers. Vert. ships with a
+The auth service provides a common interface that can be backed by different auth providers.
+
+Vert.x ships with a
 default implementation that uses http://shiro.apache.org/[Apache Shiro] but you can provide your own implementation
-by implementing the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface. The Vert.x Apache Shiro implementation
-currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
+by implementing the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
 
-The auth service can either be used directly in your application, but it also integrated with the auth functionality
-in Vert.x Apex.
+The `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface can also be used directory in your applications if you just want
+raw authentication and authorisation functionality without the concept of a login session.
+
+The Vert.x Apache Shiro implementation
+currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
 
 == Basic concepts
 
@@ -59,7 +64,14 @@ var proxy = AuthService.createEventBusProxy(vertx, "vertx.auth");
 
 // Now do stuff with it:
 
-proxy.login(credentials, function (res, res_err) {
+var principal = {
+  "username" : "tim"
+};
+var credentials = {
+  "password" : "sausages"
+};
+
+proxy.login(principal, credentials, function (res, res_err) {
 
   // etc
 
@@ -83,7 +95,14 @@ authService.start();
 
 // Now do stuff with it:
 
-authService.login(credentials, function (res, res_err) {
+var principal = {
+  "username" : "tim"
+};
+var credentials = {
+  "password" : "sausages"
+};
+
+authService.login(principal, credentials, function (res, res_err) {
 
   // etc
 
@@ -96,6 +115,8 @@ If you create an instance this way you should make sure you start it with `link:
 before you use it.
 
 However you do it, once you've got your service you can start using it.
+
+== TODO these docs need to be refactored to talk about AuthProvider and AuthService as different ways of using it
 
 == Shiro Auth Service
 
@@ -116,7 +137,7 @@ an example of deploying a Shiro auth service verticle:
 [source,java]
 ----
 
-vertx.deployVerticle("service:io.vertx:shiro-auth-service");
+vertx.deployVerticle("service:io.vertx.shiro-auth-service");
 
 
 ----
@@ -141,7 +162,14 @@ authService.start();
 
 // Now do stuff with it:
 
-authService.login(credentials, function (res, res_err) {
+var principal = {
+  "username" : "tim"
+};
+var credentials = {
+  "password" : "sausages"
+};
+
+authService.login(principal, credentials, function (res, res_err) {
 
   // etc
 
@@ -216,11 +244,7 @@ You can then create a local instance of the AuthService with:
 ----
 var AuthService = require("vertx-auth-js/auth_service");
 
-var config = {
-};
-config."your_config_property" = "blah";
-
-var authService = AuthService.create(vertx, myAuthProvider, config);
+var authService = AuthService.create(vertx, myAuthProvider);
 
 authService.start();
 
@@ -241,7 +265,7 @@ var options = {
   "config" : config
 };
 
-vertx.deployVerticle("service:io.vertx:auth-service", options);
+vertx.deployVerticle("service:io.vertx.auth-service", options);
 
 
 ----
@@ -254,12 +278,15 @@ It contains method to login and check roles and permissions.
 
 === Authentication - login / logout
 
-You use `link:jsdoc/auth_service-AuthService.html#login[login]` to login a user. The argument to log-in is a `link:../../vertx-core/js/jsdoc/json_object-JsonObject.html[JsonObject]`
-representing the _credentials_ of the user.
+You use `link:jsdoc/auth_service-AuthService.html#login[login]` to login a user. The arguments to log-in are a `link:../../vertx-core/js/jsdoc/json_object-JsonObject.html[JsonObject]`
+representing the principal (principal is a fancy name for a unique id, e.g. username representing the user), and
+another `link:../../vertx-core/js/jsdoc/json_object-JsonObject.html[JsonObject]` representing the credentials (e.g. password) of the user.
 
-Often the credentials will just be a `username` string field and a `password` string field - and this is what is
-expected by the out of the box Apache Shiro provider, but other providers might use other data for credentials that's
-why we keep it as a general JSON object.
+Often the principal will just contain a `username` string field - the value containing the username and this is what is
+expected by the out of the box Apache Shiro provider, but other providers might represent principals in other ways.
+
+Similarly, the credentials will often just be a `password` string field -  the value containing a password but other
+providers might use other data for credentials that's why we keep it as a general JSON object.
 
 The result of the login is returned in the result handler. If the login is successful a string login-ID will be returned
 as the result. This is a unique secure UUID that identifies the login session. The login ID should be used if you
@@ -270,12 +297,14 @@ Here's an example of a login:
 [source,js]
 ----
 
+var principal = {
+  "username" : "tim"
+};
 var credentials = {
-  "username" : "tim",
-  "password" : "wibble"
+  "password" : "sausages"
 };
 
-authService.login(credentials, function (res, res_err) {
+authService.login(principal, credentials, function (res, res_err) {
 
   if (res_err == null) {
 

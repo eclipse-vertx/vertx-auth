@@ -28,17 +28,11 @@ import static io.vertx.ext.auth.shiro.LDAPAuthRealmConstants.*;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class LDAPAuthRealm extends ShiroAuthRealmImpl {
+public class LDAPAuthRealm extends ShiroAuthRealmBase {
 
   private static final Logger log = LoggerFactory.getLogger(LDAPAuthRealm.class);
 
-
-  public LDAPAuthRealm() {
-  }
-
-  @Override
-  public void init(JsonObject config) {
-    this.config = config;
+  public LDAPAuthRealm(JsonObject config) {
     JndiLdapRealm ldapRealm = new JndiLdapRealm();
     JndiLdapContextFactory factory = new JndiLdapContextFactory();
     String userDNTemplate = config.getString(LDAP_USER_DN_TEMPLATE_FIELD);

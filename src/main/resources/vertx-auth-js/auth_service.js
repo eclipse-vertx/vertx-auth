@@ -38,14 +38,15 @@ var AuthService = function(j_val) {
    provider is expecting. The default login ID timeout will be used.
 
    @public
-   @param credentials {Object} the credentials 
+   @param principal {Object} represents the unique id (e.g. username) of the user being logged in 
+   @param credentials {Object} the credentials - e.g. password 
    @param resultHandler {function} will be passed a failed result if login failed or will be passed a succeeded result containing the login ID (a string) if login was successful. 
    @return {AuthService}
    */
-  this.login = function(credentials, resultHandler) {
+  this.login = function(principal, credentials, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'function') {
-      j_authService["login(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(credentials), function(ar) {
+    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && typeof __args[2] === 'function') {
+      j_authService["login(io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(principal), utils.convParamJsonObject(credentials), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -61,15 +62,16 @@ var AuthService = function(j_val) {
    provider is expecting. The specified login ID timeout will be used.
 
    @public
+   @param principal {Object} represents the unique id (e.g. username) of the user being logged in 
    @param credentials {Object} the credentials 
    @param timeout {number} the login timeout to use, in ms 
    @param resultHandler {function} will be passed a failed result if login failed or will be passed a succeeded result containing the login ID (a string) if login was successful. 
    @return {AuthService}
    */
-  this.loginWithTimeout = function(credentials, timeout, resultHandler) {
+  this.loginWithTimeout = function(principal, credentials, timeout, resultHandler) {
     var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] ==='number' && typeof __args[2] === 'function') {
-      j_authService["loginWithTimeout(io.vertx.core.json.JsonObject,long,io.vertx.core.Handler)"](utils.convParamJsonObject(credentials), timeout, function(ar) {
+    if (__args.length === 4 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && typeof __args[2] ==='number' && typeof __args[3] === 'function') {
+      j_authService["loginWithTimeout(io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,long,io.vertx.core.Handler)"](utils.convParamJsonObject(principal), utils.convParamJsonObject(credentials), timeout, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -269,13 +271,12 @@ var AuthService = function(j_val) {
  @memberof module:vertx-auth-js/auth_service
  @param vertx {Vertx} the Vert.x instance 
  @param className {string} the fully qualified class name of the auth provider implementation class 
- @param config {Object} the configuration to pass to the provider 
  @return {AuthService} the auth service
  */
-AuthService.createFromClassName = function(vertx, className, config) {
+AuthService.createFromClassName = function(vertx, className) {
   var __args = arguments;
-  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthService(JAuthService["createFromClassName(io.vertx.core.Vertx,java.lang.String,io.vertx.core.json.JsonObject)"](vertx._jdel, className, utils.convParamJsonObject(config)));
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
+    return new AuthService(JAuthService["createFromClassName(io.vertx.core.Vertx,java.lang.String)"](vertx._jdel, className));
   } else utils.invalidArgs();
 };
 

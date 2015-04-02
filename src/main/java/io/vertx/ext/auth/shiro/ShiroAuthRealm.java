@@ -14,22 +14,20 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.shiro.impl;
+package io.vertx.ext.auth.shiro;
 
 import io.vertx.core.json.JsonObject;
 
 /**
- * Built-in implementations for Shiro auth Realms should implelken
+ * Built-in implementations for Shiro auth Realms should implement this
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public interface ShiroAuthRealm {
 
-  void init(JsonObject config);
+  void login(JsonObject principal, JsonObject credentials);
 
-  Object login(JsonObject credentials);
+  boolean hasRole(JsonObject principal, String role);
 
-  boolean hasRole(Object principal, String role);
-
-  boolean hasPermission(Object principal, String permission);
+  boolean hasPermission(JsonObject principal, String permission);
 }

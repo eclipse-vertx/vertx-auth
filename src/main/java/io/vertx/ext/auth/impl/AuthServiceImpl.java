@@ -3,7 +3,7 @@ package io.vertx.ext.auth.impl;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthService;
-import io.vertx.ext.auth.spi.AuthProvider;
+import io.vertx.ext.auth.AuthProvider;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,49 +23,42 @@ public class AuthServiceImpl implements AuthService, Handler<Long> {
   private long timerID;
   private boolean closed;
 
-  public AuthServiceImpl(Vertx vertx, JsonObject config, AuthProvider provider) {
+  public AuthServiceImpl(Vertx vertx, AuthProvider provider) {
     this.vertx = vertx;
     this.provider = provider;
-    provider.init(config);
     setTimer();
   }
 
-  public AuthServiceImpl(Vertx vertx, JsonObject config, String className) {
+  public AuthServiceImpl(Vertx vertx, String className) {
     this.vertx = vertx;
     ClassLoader cl = getClassLoader();
     try {
       Class<?> clazz = cl.loadClass(className);
       this.provider = (AuthProvider)clazz.newInstance();
-      provider.init(config);
     } catch (Exception e) {
       throw new VertxException(e);
     }
     setTimer();
   }
 
-  private String createLoginSession(long timeout, Object principal) {
+  private String createLoginSession(long timeout, JsonObject principal) {
     String id = UUID.randomUUID().toString();
     loginSessions.put(id, new LoginSession(timeout, principal));
     return id;
   }
 
   @Override
-  public AuthService login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
-    loginWithTimeout(credentials, DEFAULT_LOGIN_TIMEOUT, resultHandler);
+  public AuthService login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<String>> resultHandler) {
+    loginWithTimeout(principal, credentials, DEFAULT_LOGIN_TIMEOUT, resultHandler);
     return this;
   }
 
   @Override
-  public AuthService loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
-    provider.login(credentials, res -> {
+  public AuthService loginWithTimeout(JsonObject principal, JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler) {
+    provider.login(principal, credentials, res -> {
       if (res.succeeded()) {
-        Object principal = res.result();
-        if (principal != null) {
-          String loginSessionID = createLoginSession(timeout, principal);
-          resultHandler.handle(Future.succeededFuture(loginSessionID));
-        } else {
-          resultHandler.handle(Future.failedFuture("null principal"));
-        }
+        String loginSessionID = createLoginSession(timeout, principal);
+        resultHandler.handle(Future.succeededFuture(loginSessionID));
       } else {
         resultHandler.handle(Future.failedFuture(res.cause()));
       }

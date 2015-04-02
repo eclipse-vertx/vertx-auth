@@ -53,8 +53,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testSimpleLogin() throws Exception {
     initAuthService();
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.login(credentials, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.login(principal, credentials, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       testComplete();
     }));
@@ -64,8 +65,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testSimpleLoginFail() throws Exception {
     initAuthService();
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wrongpassword");
-    authService.login(credentials, onFailure(thr -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "wrongpassword");
+    authService.login(principal, credentials, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -218,8 +220,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testLoginTimeout() throws Exception {
     initAuthService(100);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 100, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.loginWithTimeout(principal, credentials, 100, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       vertx.setTimer(1000, tid -> {
         authService.hasRole(sessionID, "morris_dancer", onFailure(thr -> {
@@ -235,8 +238,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testLoginNoTimeout() throws Exception {
     initAuthService(100);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 5000, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.loginWithTimeout(principal, credentials, 5000, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       vertx.setTimer(1000, tid -> {
         authService.hasRole(sessionID, "morris_dancer", onSuccess(hasRole -> {
@@ -251,8 +255,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testRefreshSession() throws Exception {
     initAuthService(500);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.loginWithTimeout(principal, credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.refreshLoginSession(sessionID, res -> {
         assertTrue(res.succeeded());
@@ -271,8 +276,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testRefreshSessionHasRole() throws Exception {
     initAuthService(500);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.loginWithTimeout(principal, credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.hasRole(sessionID, "morris_dancer", res -> {
         assertTrue(res.succeeded());
@@ -291,8 +297,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testRefreshSessionHasPermission() throws Exception {
     initAuthService(500);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.loginWithTimeout(principal, credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.hasPermission(sessionID, "bang_sticks", res -> {
         assertTrue(res.succeeded());
@@ -322,8 +329,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   @Test
   public void testLogout() throws Exception {
     initAuthService();
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.login(credentials, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.login(principal, credentials, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       authService.logout(sessionID, onSuccess(v -> {
         authService.hasRole(sessionID, "morris_dancer", onFailure(thr -> {
@@ -348,8 +356,9 @@ public abstract class AuthServiceTestBase extends VertxTestBase {
   }
 
   private void loginThen(Consumer<String> runner) throws Exception {
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.login(credentials, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.login(principal, credentials, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       runner.accept(sessionID);
     }));

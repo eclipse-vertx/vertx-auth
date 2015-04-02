@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthServiceImpl;
-import io.vertx.ext.auth.spi.AuthProvider;
 import io.vertx.serviceproxy.ProxyHelper;
 
 import java.util.Set;
@@ -37,12 +36,11 @@ public interface AuthService {
    *
    * @param vertx  the Vert.x instance
    * @param provider  the auth provider
-   * @param config  the configuration to pass to the provider
    * @return the auth service
    */
   @GenIgnore
-  static AuthService create(Vertx vertx, AuthProvider provider, JsonObject config) {
-    return new AuthServiceImpl(vertx, config, provider);
+  static AuthService create(Vertx vertx, AuthProvider provider) {
+    return new AuthServiceImpl(vertx, provider);
   }
 
   /**
@@ -50,11 +48,10 @@ public interface AuthService {
    *
    * @param vertx  the Vert.x instance
    * @param className  the fully qualified class name of the auth provider implementation class
-   * @param config  the configuration to pass to the provider
    * @return the auth service
    */
-  static AuthService createFromClassName(Vertx vertx, String className, JsonObject config) {
-    return new AuthServiceImpl(vertx, config, className);
+  static AuthService createFromClassName(Vertx vertx, String className) {
+    return new AuthServiceImpl(vertx, className);
   }
 
   /**
@@ -72,24 +69,26 @@ public interface AuthService {
    * Authenticate (login) using the specified credentials. The contents of the credentials depend on what the auth
    * provider is expecting. The default login ID timeout will be used.
    *
-   * @param credentials  the credentials
+   * @param principal  represents the unique id (e.g. username) of the user being logged in
+   * @param credentials  the credentials - e.g. password
    * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing
    *                      the login ID (a string) if login was successful.
    */
   @Fluent
-  AuthService login(JsonObject credentials, Handler<AsyncResult<String>> resultHandler);
+  AuthService login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<String>> resultHandler);
 
   /**
    * Authenticate (login) using the specified credentials. The contents of the credentials depend on what the auth
    * provider is expecting. The specified login ID timeout will be used.
    *
+   * @param principal  represents the unique id (e.g. username) of the user being logged in
    * @param credentials  the credentials
    * @param timeout  the login timeout to use, in ms
    * @param resultHandler will be passed a failed result if login failed or will be passed a succeeded result containing
    *                      the login ID (a string) if login was successful.
    */
   @Fluent
-  AuthService loginWithTimeout(JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler);
+  AuthService loginWithTimeout(JsonObject principal, JsonObject credentials, long timeout, Handler<AsyncResult<String>> resultHandler);
 
   /**
    * Logout the user

@@ -2,15 +2,18 @@
  *
  * = Vert.x Auth Service
  *
- * This Vert.x service provides authentication and authorisation functionality for use in your Vert.x applications.
+ * This Vert.x service provides authentication and authorisation functionality and the concept of a login session
+ * for use in your Vert.x applications
  *
- * The auth service provides a common interface that can be backed by different auth providers. Vert. ships with a
+ * The auth service provides a common interface that can be backed by different auth providers. Vert.x ships with a
  * default implementation that uses http://shiro.apache.org/[Apache Shiro] but you can provide your own implementation
- * by implementing the {@link io.vertx.ext.auth.spi.AuthProvider} interface. The Vert.x Apache Shiro implementation
- * currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
+ * by implementing the {@link io.vertx.ext.auth.AuthProvider} interface.
  *
- * The auth service can either be used directly in your application, but it also integrated with the auth functionality
- * in Vert.x Apex.
+ * The {@link io.vertx.ext.auth.AuthProvider} interface can also be used directory in your applications if you just want
+ * raw authentication and authorisation functionality without the concept of a login session.
+ *
+ * The Vert.x Apache Shiro implementation
+ * currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
  *
  * == Basic concepts
  *
@@ -57,6 +60,8 @@
  *
  * However you do it, once you've got your service you can start using it.
  *
+ * == TODO these docs need to be refactored to talk about AuthProvider and AuthService as different ways of using it
+ *
  * == Shiro Auth Service
  *
  * As previously mentioned we provide an implementation of the Auth service that uses Apache Shiro to perform the
@@ -65,7 +70,7 @@
  * To use this, you should use {@link io.vertx.ext.auth.shiro.ShiroAuthService}.
  *
  * This currently supports properties file based user/role/permission information and using LDAP, and you can also pass
- * in a pre-existing Shiro `Realm` instance or implement {@link io.vertx.ext.auth.shiro.impl.ShiroAuthRealm} to implement
+ * in a pre-existing Shiro `Realm` instance or implement {@link io.vertx.ext.auth.shiro.ShiroAuthRealm} to implement
  * a different method of auth using Shiro.
  *
  * == Shiro Auth Service Verticle
@@ -147,7 +152,7 @@
  *
  * == Using non Shiro Auth implementations
  *
- * If you want to use a different auth provider with the Auth service, you should implement {@link io.vertx.ext.auth.spi.AuthProvider}.
+ * If you want to use a different auth provider with the Auth service, you should implement {@link io.vertx.ext.auth.AuthProvider}.
  *
  * You can then create a local instance of the AuthService with:
  *
@@ -171,12 +176,15 @@
  *
  * === Authentication - login / logout
  *
- * You use {@link io.vertx.ext.auth.AuthService#login} to login a user. The argument to log-in is a {@link io.vertx.core.json.JsonObject}
- * representing the _credentials_ of the user.
+ * You use {@link io.vertx.ext.auth.AuthService#login} to login a user. The arguments to log-in are a {@link io.vertx.core.json.JsonObject}
+ * representing the principal (principal is a fancy name for a unique id, e.g. username representing the user), and
+ * another {@link io.vertx.core.json.JsonObject} representing the credentials (e.g. password) of the user.
  *
- * Often the credentials will just be a `username` string field and a `password` string field - and this is what is
- * expected by the out of the box Apache Shiro provider, but other providers might use other data for credentials that's
- * why we keep it as a general JSON object.
+ * Often the principal will just contain a `username` string field - the value containing the username and this is what is
+ * expected by the out of the box Apache Shiro provider, but other providers might represent principals in other ways.
+ *
+ * Similarly, the credentials will often just be a `password` string field -  the value containing a password but other
+ * providers might use other data for credentials that's why we keep it as a general JSON object.
  *
  * The result of the login is returned in the result handler. If the login is successful a string login-ID will be returned
  * as the result. This is a unique secure UUID that identifies the login session. The login ID should be used if you
@@ -193,7 +201,7 @@
  * logged out.
  *
  * The default time it remains valid is 30 minutes. If you want to use a different value of timeout you can specify that
- * by calling {@link io.vertx.ext.auth.AuthService#loginWithTimeout(io.vertx.core.json.JsonObject, long, io.vertx.core.Handler)}.
+ * by calling {@link io.vertx.ext.auth.AuthService#loginWithTimeout}.
  *
  * To prevent a login timing out, you can call {@link io.vertx.ext.auth.AuthService#refreshLoginSession} specifying
  * the login ID. The login will timeout if it remains unrefreshed for greater than the timeout period.
