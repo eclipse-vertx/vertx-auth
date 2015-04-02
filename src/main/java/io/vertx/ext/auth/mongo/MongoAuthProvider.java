@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.spi.AuthProvider;
 import io.vertx.ext.mongo.MongoService;
@@ -27,6 +28,11 @@ public class MongoAuthProvider implements AuthProvider {
    * The property name to be used to set the name of the field, where the username is stored inside
    */
   public static final String PROPERTY_USERNAME_FIELD            = "usernameField";
+
+  /**
+   * The property name to be used to set the name of the field, where the roles are stored inside
+   */
+  public static final String PROPERTY_ROLE_FIELD                = "roleField";
 
   /**
    * The property name to be used to set the name of the field, where the password is stored inside
@@ -81,6 +87,12 @@ public class MongoAuthProvider implements AuthProvider {
   public static final String DEFAULT_PASSWORD_FIELD             = "password";
 
   /**
+   * The default name of the property for the roles, like it is stored in mongodb. Roles are expected to be saved as
+   * JsonArray
+   */
+  public static final String DEFAULT_ROLE_FIELD                 = "roles";
+
+  /**
    * The default name of the property for the username, like it is transported in credentials by method
    * {@link #init(JsonObject)}
    */
@@ -112,16 +124,16 @@ public class MongoAuthProvider implements AuthProvider {
 
   private final Vertx  vertx;
   private MongoService mongoService;
-  private String       usernameField            = DEFAULT_USERNAME_FIELD;
-  private String       passwordField            = DEFAULT_PASSWORD_FIELD;
-  private String       usernameCredentialField  = DEFAULT_CREDENTIAL_USERNAME_FIELD;
-  private String       passwordCredentialField  = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
-  private String       saltField                = DEFAULT_SALT_FIELD;
-  private String       collectionName           = DEFAULT_COLLECTION_NAME;
-  private boolean      usernameMustUnique       = false;
-  private boolean      permissionsLookupEnabled = false;
+  private String       usernameField           = DEFAULT_USERNAME_FIELD;
+  private String       passwordField           = DEFAULT_PASSWORD_FIELD;
+  private String       roleField               = DEFAULT_ROLE_FIELD;
+  private String       usernameCredentialField = DEFAULT_CREDENTIAL_USERNAME_FIELD;
+  private String       passwordCredentialField = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
+  private String       saltField               = DEFAULT_SALT_FIELD;
+  private String       collectionName          = DEFAULT_COLLECTION_NAME;
+  private boolean      usernameMustUnique      = false;
 
-  private SaltStyle    saltStyle                = SaltStyle.NO_SALT;
+  private SaltStyle    saltStyle               = SaltStyle.NO_SALT;
   @SuppressWarnings("unused")
   private JsonObject   config;
 
@@ -196,6 +208,18 @@ public class MongoAuthProvider implements AuthProvider {
   }
 
   /**
+   * Set the name of the field to be used for the roles. Defaults to DEFAULT_ROLE_FIELD. Roles are expected to be saved
+   * as JsonArray
+   * 
+   * @param fieldName
+   * @return
+   */
+  public MongoAuthProvider setRoleField(String fieldName) {
+    this.roleField = fieldName;
+    return this;
+  }
+
+  /**
    * Set the name of the field to be used for the username. Defaults to DEFAULT_CREDENTIAL_USERNAME_FIELD
    * 
    * @param fieldName
@@ -240,17 +264,6 @@ public class MongoAuthProvider implements AuthProvider {
     return this;
   }
 
-  /**
-   * Activate / deactivate permission lookup
-   * 
-   * @param permissionsLookupEnabled
-   *          the permissionsLookupEnabled to set
-   */
-  public MongoAuthProvider setPermissionsLookupEnabled(boolean permissionsLookupEnabled) {
-    this.permissionsLookupEnabled = permissionsLookupEnabled;
-    return this;
-  }
-
   /*
    * (non-Javadoc)
    * @see io.vertx.ext.auth.spi.AuthProvider#init(io.vertx.core.json.JsonObject)
@@ -274,6 +287,11 @@ public class MongoAuthProvider implements AuthProvider {
       setPasswordField(passwordField);
     }
 
+    String roleField = config.getString(PROPERTY_ROLE_FIELD);
+    if (roleField != null) {
+      setRoleField(roleField);
+    }
+
     String usernameCredField = config.getString(PROPERTY_CREDENTIAL_USERNAME_FIELD);
     if (usernameCredField != null) {
       setUsernameCredentialField(usernameCredField);
@@ -293,9 +311,6 @@ public class MongoAuthProvider implements AuthProvider {
     if (saltstyle != null) {
       setSaltStyle(SaltStyle.valueOf(saltstyle));
     }
-
-    boolean permissionsLookupEnabled = config.getBoolean(PROPERTY_PERMISSIONLOOKUP_ENABLED, false);
-    setPermissionsLookupEnabled(permissionsLookupEnabled);
 
     boolean usernameMustUnique = config.getBoolean(PROPERTY_USERNAME_UNIQUE, false);
     setUsernameMustUnique(usernameMustUnique);
@@ -341,17 +356,22 @@ public class MongoAuthProvider implements AuthProvider {
    */
   @Override
   public void hasRole(Object principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (!(principal instanceof JsonObject))
+      resultHandler.handle(Future.failedFuture(new IllegalArgumentException("JsonObject expected")));
+    JsonArray roles = readRoles((JsonObject) principal);
+    resultHandler.handle(Future.succeededFuture(roles != null && roles.contains(role)));
   }
 
-  /*
-   * (non-Javadoc)
-   * @see io.vertx.ext.auth.spi.AuthProvider#hasPermission(java.lang.Object, java.lang.String, io.vertx.core.Handler)
+  protected JsonArray readRoles(JsonObject principal) {
+    return principal.getJsonArray(this.roleField);
+  }
+
+  /**
+   * Currently this is a call to {@link #hasRole(Object, String, Handler)}
    */
   @Override
   public void hasPermission(Object principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (permissionsLookupEnabled) {
-      throw new UnsupportedOperationException();
-    }
+    hasRole(principal, permission, resultHandler);
   }
 
   /**

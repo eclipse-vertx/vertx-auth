@@ -1,14 +1,22 @@
 package io.vertx.ext.auth.test.mongo;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.ext.auth.AuthService;
 import io.vertx.ext.auth.mongo.MongoAuthProvider;
 import io.vertx.ext.auth.mongo.MongoAuthService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,7 +30,7 @@ import org.junit.runners.model.InitializationError;
 public class MongoAuthTestJUnit extends MongoBaseTest {
   private static final Logger log = LoggerFactory.getLogger(MongoAuthTestJUnit.class);
 
-  protected MongoAuthService  authService;
+  protected AuthService       authService;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -41,11 +49,11 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   public void setUp() throws Exception {
     super.setUp();
     getMongoService();
-    initAuthService();
   }
 
   @Override
-  public void tearDown() throws Exception {
+  protected void tearDown() throws Exception {
+    authService.stop();
     super.tearDown();
   }
 
@@ -53,7 +61,8 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
    * Test a user with unique username and password
    */
   @Test
-  public void testLoginUniqueUser() {
+  public void testLoginUniqueUser() throws Exception {
+    initAuthService();
     log.info("testLoginUniqueUser");
     JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Michael").put(
         MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps1");
@@ -69,7 +78,8 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
    * Test a user with duplicate username and unique password. This should be accepted by the default implementation
    */
   @Test
-  public void testLoginDoublette1() {
+  public void testLoginDoublette1() throws Exception {
+    initAuthService();
     JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Doublette").put(
         MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps1");
     authService.login(credentials, onSuccess(res -> {
@@ -81,9 +91,12 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
 
   /**
    * Test a user with duplicate username AND duplicate password. This should NOT be accepted
+   * 
+   * @throws Exception
    */
   @Test
-  public void testLoginDoublette2() {
+  public void testLoginDoublette2() throws Exception {
+    initAuthService();
     JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Doublette").put(
         MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps2");
     authService.login(credentials, onFailure(thr -> {
@@ -94,12 +107,211 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
 
   }
 
-  // testen von Null Passwort in User, Null-Passwort in Request, Null Username dito
+  @Test
+  public void testHasRole() throws Exception {
+    initAuthService();
+    loginThen(sessID -> this.<Boolean> executeTwice(handler -> authService.hasRole(sessID, "morris_dancer", handler),
+        res -> {
+          assertTrue(res.succeeded());
+          assertTrue(res.result());
+        }));
+
+    await();
+  }
+
+  @Test
+  public void testHasRoleNotLoggedIn() throws Exception {
+    initAuthService();
+    this.<Boolean> executeTwice(handler -> authService.hasRole("uqhwdihuqwd", "morris_dancer", handler), res -> {
+      assertFalse(res.succeeded());
+      assertEquals("not logged in", res.cause().getMessage());
+    });
+    await();
+  }
+
+  @Test
+  public void testNotHasRole() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      this.<Boolean> executeTwice(handler -> authService.hasRole(sessID, "manager", handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testHasRoles() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      Set<String> roles = new HashSet<>(Arrays.asList("morris_dancer", "developer"));
+      this.<Boolean> executeTwice(handler -> authService.hasRoles(sessID, roles, handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testHasRolesNotLoggedIn() throws Exception {
+    initAuthService();
+    Set<String> roles = new HashSet<>(Arrays.asList("morris_dancer", "developer"));
+    authService.hasRoles("uhqwdihu", roles, onFailure(thr -> {
+      assertNotNull(thr);
+      assertEquals("not logged in", thr.getMessage());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testNotHasRoles() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      Set<String> roles = new HashSet<>(Arrays.asList("administrator", "developer"));
+      this.<Boolean> executeTwice(handler -> authService.hasRoles(sessID, roles, handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testHasPermission() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      this.<Boolean> executeTwice(handler -> authService.hasPermission(sessID, "do_actual_work", handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testHasPermissionNotLoggedIn() throws Exception {
+    initAuthService();
+    this.<Boolean> executeTwice(handler -> authService.hasPermission("uqhwdihuqwd", "morris_dancer", handler), res -> {
+      assertFalse(res.succeeded());
+      assertEquals("not logged in", res.cause().getMessage());
+    });
+    await();
+  }
+
+  @Test
+  public void testNotHasPermission() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      this.<Boolean> executeTwice(handler -> authService.hasPermission(sessID, "play_golf", handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testHasPermissions() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "bang_sticks"));
+      this.<Boolean> executeTwice(handler -> authService.hasPermissions(sessID, permissions, handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testHasPermissionsNotLoggedIn() throws Exception {
+    initAuthService();
+    Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "bang_sticks"));
+    authService.hasPermissions("uhqwdihu", permissions, onFailure(thr -> {
+      assertNotNull(thr);
+      assertEquals("not logged in", thr.getMessage());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testNotHasPermissions() throws Exception {
+    initAuthService();
+    loginThen(sessID -> {
+      Set<String> permissions = new HashSet<>(Arrays.asList("do_actual_work", "eat_cheese"));
+      this.<Boolean> executeTwice(handler -> authService.hasPermissions(sessID, permissions, handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
+  public void testLoginTimeout() throws Exception {
+    initAuthService(100);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 100, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      vertx.setTimer(1000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onFailure(thr -> {
+          assertNotNull(thr);
+          assertEquals("not logged in", thr.getMessage());
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testLoginNoTimeout() throws Exception {
+    initAuthService(100);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 5000, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      vertx.setTimer(1000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(hasRole -> {
+          assertTrue(hasRole);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  /*
+   * preparation methods
+   */
+
+  protected List<JsonObject> createUserList() {
+    List<JsonObject> users = new ArrayList<JsonObject>();
+    users.add(createUser("Michael", "ps1"));
+    users.add(createUser("Doublette", "ps1"));
+    users.add(createUser("Doublette", "ps2"));
+    users.add(createUser("Doublette", "ps2"));
+
+    users.add(createUser("tim", "sausages", Arrays.asList("morris_dancer", "superadmin", "developer"),
+        Arrays.asList("do_actual_work", "bang_sticks")));
+    return users;
+  }
 
   private void initAuthService() throws Exception {
     if (authService == null) {
       log.info("initAuthService");
       authService = new MongoAuthService(vertx, getMongoService(), createAuthServiceConfig());
+    }
+  }
+
+  private void initAuthService(long reaperPeriod) throws Exception {
+    if (authService == null) {
+      log.info("initAuthService");
+      authService = new MongoAuthService(vertx, getMongoService(), createAuthServiceConfig())
+          .setReaperPeriod(reaperPeriod);
     }
   }
 
@@ -146,13 +358,15 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
     return buffer.length() == 0;
   }
 
-  protected List<JsonObject> createUserList() {
-    List<JsonObject> users = new ArrayList<JsonObject>();
-    users.add(createUser("Michael", "ps1"));
-    users.add(createUser("Doublette", "ps1"));
-    users.add(createUser("Doublette", "ps2"));
-    users.add(createUser("Doublette", "ps2"));
-    return users;
+  /**
+   * Creates a user as {@link JsonObject}
+   * 
+   * @param username
+   * @param password
+   * @return
+   */
+  protected JsonObject createUser(String username, String password) {
+    return createUser(username, password, null, null);
   }
 
   /**
@@ -162,9 +376,20 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
    * @param password
    * @return
    */
-  protected JsonObject createUser(String username, String password) {
+  protected JsonObject createUser(String username, String password, List<String> roles, List<String> permissions) {
     JsonObject user = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, username).put(
         MongoAuthProvider.DEFAULT_PASSWORD_FIELD, password);
+
+    List<String> completeList = new ArrayList();
+    if (roles != null) {
+      completeList.addAll(roles);
+    }
+    if (permissions != null) {
+      completeList.addAll(permissions);
+    }
+    if (!completeList.isEmpty()) {
+      user.put(MongoAuthProvider.DEFAULT_ROLE_FIELD, new JsonArray(completeList));
+    }
     return user;
   }
 
@@ -192,6 +417,24 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
     });
     awaitLatch(intLatch);
     return buffer.length() == 0;
+  }
+
+  private void loginThen(Consumer<String> runner) throws Exception {
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.login(credentials, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      runner.accept(sessionID);
+    }));
+  }
+
+  private <T> void executeTwice(Consumer<Handler<AsyncResult<T>>> action, Consumer<AsyncResult<T>> resultConsumer) {
+    action.accept(res -> {
+      resultConsumer.accept(res);
+      action.accept(res2 -> {
+        resultConsumer.accept(res);
+        testComplete();
+      });
+    });
   }
 
 }
