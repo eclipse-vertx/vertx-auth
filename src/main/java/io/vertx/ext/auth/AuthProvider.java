@@ -14,8 +14,9 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.spi;
+package io.vertx.ext.auth;
 
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -28,44 +29,39 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@VertxGen
 public interface AuthProvider {
-
-  /**
-   * The auth service will call this when the service is created
-   *
-   * @param config - the config to pass to your implementation
-   */
-  void init(JsonObject config);
 
   /**
    * Handle the actual login
    *
-   * @param credentials  the credentials - this can contain anything your provider expects
-   * @param resultHandler - this must return a failed result if login fails and it must return a succeeded result which
-   *                      contains the `principal` object representing the logged in entity.
+   * @param principal  represents the unique id (e.g. username) of the user being logged in
+   * @param credentials  the credentials - this can contain anything your provider expects, e.g. password
+   * @param resultHandler - this must return a failed result if login fails and it must return a succeeded result if the
+   *                      login succeeds
    */
-  void login(JsonObject credentials, Handler<AsyncResult<Object>> resultHandler);
+  void login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<Void>> resultHandler);
 
   /**
    * Handle whether a principal has a role
    *
-   * @param principal  the principal object that you returned from {@link #login}.
+   * @param principal  represents the unique id (e.g. username) of the user being logged in
    * @param role  the role
    * @param resultHandler  this must return a failure if the check could not be performed - e.g. the principal is not
    *                       known. Otherwise it must return a succeeded result which contains a boolean `true` if the
    *                       principal has the role, or `false` if they do not have the role.
    */
-  void hasRole(Object principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
+  void hasRole(JsonObject principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
    * Handle whether a principal has a permission
    *
-   * @param principal  the principal object that you returned from {@link #login}.
+   * @param principal   represents the unique id (e.g. username) of the user being logged in
    * @param permission  the permission
    * @param resultHandler  this must return a failure if the check could not be performed - e.g. the principal is not
    *                       known. Otherwise it must return a succeeded result which contains a boolean `true` if the
    *                       principal has the permission, or `false` if they do not have the permission.
    */
-  void hasPermission(Object principal, String permission, Handler<AsyncResult<Boolean>> resultHandler);
+  void hasPermission(JsonObject principal, String permission, Handler<AsyncResult<Boolean>> resultHandler);
 
 }

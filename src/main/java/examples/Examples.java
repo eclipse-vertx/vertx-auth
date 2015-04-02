@@ -22,7 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthService;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.ext.auth.shiro.ShiroAuthService;
-import io.vertx.ext.auth.spi.AuthProvider;
+import io.vertx.ext.auth.AuthProvider;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -43,20 +43,23 @@ public class Examples {
     });
   }
 
-  public void example0_2(Vertx vertx, JsonObject credentials) {
+  public void example0_2(Vertx vertx) {
 
     AuthService proxy = AuthService.createEventBusProxy(vertx, "vertx.auth");
 
     // Now do stuff with it:
 
-    proxy.login(credentials, res -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+
+    proxy.login(principal, credentials, res -> {
 
       // etc
 
     });
   }
 
-  public void example0_3(Vertx vertx, JsonObject credentials) {
+  public void example0_3(Vertx vertx) {
 
     JsonObject config = new JsonObject();
     config.put("properties_path", "classpath:test-auth.properties");
@@ -67,7 +70,10 @@ public class Examples {
 
     // Now do stuff with it:
 
-    authService.login(credentials, res -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+
+    authService.login(principal, credentials, res -> {
 
       // etc
 
@@ -75,13 +81,13 @@ public class Examples {
 
   }
 
-  public void example0_3_1(Vertx vertx, JsonObject credentials) {
+  public void example0_3_1(Vertx vertx) {
 
-    vertx.deployVerticle("service:io.vertx:shiro-auth-service");
+    vertx.deployVerticle("service:io.vertx.shiro-auth-service");
 
   }
 
-  public void example0_4(Vertx vertx, JsonObject credentials) {
+  public void example0_4(Vertx vertx) {
 
     JsonObject config = new JsonObject();
     config.put("properties_path", "classpath:test-auth.properties");
@@ -92,7 +98,10 @@ public class Examples {
 
     // Now do stuff with it:
 
-    authService.login(credentials, res -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+
+    authService.login(principal, credentials, res -> {
 
       // etc
 
@@ -102,10 +111,7 @@ public class Examples {
 
   public void example0_5(Vertx vertx, AuthProvider myAuthProvider) {
 
-    JsonObject config = new JsonObject();
-    config.put("your_config_property", "blah");
-
-    AuthService authService = AuthService.create(vertx, myAuthProvider, config);
+    AuthService authService = AuthService.create(vertx, myAuthProvider);
 
     authService.start();
 
@@ -119,15 +125,16 @@ public class Examples {
 
     DeploymentOptions options = new DeploymentOptions().setConfig(config);
 
-    vertx.deployVerticle("service:io.vertx:auth-service", options);
+    vertx.deployVerticle("service:io.vertx.auth-service", options);
 
   }
 
   public void example1(AuthService authService) {
 
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "wibble");
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
 
-    authService.login(credentials, res -> {
+    authService.login(principal, credentials, res -> {
 
       if (res.succeeded()) {
 

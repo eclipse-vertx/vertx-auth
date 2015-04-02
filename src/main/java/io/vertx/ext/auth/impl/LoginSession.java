@@ -16,6 +16,8 @@
 
 package io.vertx.ext.auth.impl;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,14 +27,14 @@ import java.util.Set;
 class LoginSession {
 
   private final long timeout;
-  private final Object principal;
+  private final JsonObject principal;
   private Set<String> roles;
   private Set<String> permissions;
   private Set<String> notRoles;
   private Set<String> notPermissions;
   private long lastAccessed;
 
-  LoginSession(long timeout, Object principal) {
+  LoginSession(long timeout, JsonObject principal) {
     this.timeout = timeout;
     this.principal = principal;
     touch();
@@ -62,7 +64,7 @@ class LoginSession {
     return notPermissions().contains(permission);
   }
 
-  synchronized Object principal() {
+  synchronized JsonObject principal() {
     return principal;
   }
 

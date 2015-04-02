@@ -21,7 +21,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthService;
-import io.vertx.ext.auth.shiro.impl.ShiroAuthRealmImpl;
+import io.vertx.ext.auth.shiro.impl.ShiroAuthRealmBase;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthServiceImpl;
 import org.apache.shiro.realm.Realm;
 
@@ -43,7 +43,7 @@ public interface ShiroAuthService extends AuthService {
    * @return the auth service
    */
   static AuthService create(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config) {
-    return new ShiroAuthServiceImpl(vertx, ShiroAuthServiceImpl.createRealm(authRealmType), config);
+    return new ShiroAuthServiceImpl(vertx, authRealmType, config);
   }
 
   /**
@@ -51,12 +51,11 @@ public interface ShiroAuthService extends AuthService {
    *
    * @param vertx  the Vert.x intance
    * @param shiroRealm  the Shiro realm instance.
-   * @param config  the config to pass to the provider
    * @return the auth service
    */
   @GenIgnore
-  static AuthService createFromRealm(Vertx vertx, Realm shiroRealm, JsonObject config) {
-    return new ShiroAuthServiceImpl(vertx, new ShiroAuthRealmImpl(shiroRealm), config);
+  static AuthService createFromRealm(Vertx vertx, Realm shiroRealm) {
+    return new ShiroAuthServiceImpl(vertx, new ShiroAuthRealmBase(shiroRealm));
   }
 
 }

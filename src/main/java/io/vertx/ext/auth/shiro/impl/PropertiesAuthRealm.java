@@ -25,11 +25,9 @@ import static io.vertx.ext.auth.shiro.PropertiesAuthRealmConstants.*;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class PropertiesAuthRealm extends ShiroAuthRealmImpl {
+public class PropertiesAuthRealm extends ShiroAuthRealmBase {
 
-  @Override
-  public void init(JsonObject config) {
-    this.config = config;
+  public PropertiesAuthRealm(JsonObject config) {
     PropertiesRealm propsRealm = new PropertiesRealm();
     String resourcePath = config.getString(PROPERTIES_PROPS_PATH_FIELD);
     if (resourcePath != null) {

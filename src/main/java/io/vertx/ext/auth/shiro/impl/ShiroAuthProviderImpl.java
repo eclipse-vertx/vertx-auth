@@ -21,7 +21,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.spi.AuthProvider;
+import io.vertx.ext.auth.shiro.ShiroAuthProvider;
+import io.vertx.ext.auth.shiro.ShiroAuthRealm;
+import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 
 /**
  *
@@ -29,31 +31,40 @@ import io.vertx.ext.auth.spi.AuthProvider;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ShiroAuthProvider implements AuthProvider {
+public class ShiroAuthProviderImpl implements ShiroAuthProvider {
 
   private final Vertx vertx;
   private final ShiroAuthRealm realm;
 
-  public ShiroAuthProvider(Vertx vertx, ShiroAuthRealm realm) {
+  public ShiroAuthProviderImpl(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
+    this.vertx = vertx;
+    switch (realmType) {
+      case PROPERTIES:
+        realm = new PropertiesAuthRealm(config);
+        break;
+      case LDAP:
+        realm = new LDAPAuthRealm(config);
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid shiro auth realm type: " + realmType);
+    }
+  }
+
+  public ShiroAuthProviderImpl(Vertx vertx, ShiroAuthRealm realm) {
     this.vertx = vertx;
     this.realm = realm;
   }
 
   @Override
-  public void init(JsonObject config) {
-    realm.init(config);
-  }
-
-  @Override
-  public void login(JsonObject credentials, Handler<AsyncResult<Object>> resultHandler) {
-    vertx.executeBlocking((Future<Object> fut) -> {
-      Object principal = realm.login(credentials);
-      fut.complete(principal);
+  public void login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<Void>> resultHandler) {
+    vertx.executeBlocking((Future<Void> fut) -> {
+      realm.login(principal, credentials);
+      fut.complete();
     }, resultHandler);
   }
 
   @Override
-  public void hasRole(Object principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void hasRole(JsonObject principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
     vertx.executeBlocking((Future<Boolean> fut) -> {
       boolean hasRole = realm.hasRole(principal, role);
       fut.complete(hasRole);
@@ -61,7 +72,7 @@ public class ShiroAuthProvider implements AuthProvider {
   }
 
   @Override
-  public void hasPermission(Object principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void hasPermission(JsonObject principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     vertx.executeBlocking((Future<Boolean> fut) -> {
       boolean hasPermission = realm.hasPermission(principal, permission);
       fut.complete(hasPermission);

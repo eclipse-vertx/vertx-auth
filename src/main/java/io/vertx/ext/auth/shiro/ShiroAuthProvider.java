@@ -14,24 +14,27 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.shiro.impl;
+package io.vertx.ext.auth.shiro;
 
+import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.AuthServiceImpl;
-import io.vertx.ext.auth.shiro.ShiroAuthRealm;
-import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
+import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.shiro.impl.ShiroAuthProviderImpl;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ShiroAuthServiceImpl extends AuthServiceImpl {
+@VertxGen
+public interface ShiroAuthProvider extends AuthProvider {
 
-  public ShiroAuthServiceImpl(Vertx vertx, ShiroAuthRealm authRealm) {
-    super(vertx, new ShiroAuthProviderImpl(vertx, authRealm));
+  static ShiroAuthProvider create(Vertx vertx, ShiroAuthRealmType shiroAuthRealmType, JsonObject config) {
+    return new ShiroAuthProviderImpl(vertx, shiroAuthRealmType, config);
   }
 
-  public ShiroAuthServiceImpl(Vertx vertx, ShiroAuthRealmType authRealmType, JsonObject config) {
-    super(vertx, new ShiroAuthProviderImpl(vertx, authRealmType, config));
+  @GenIgnore
+  static ShiroAuthProvider create(Vertx vertx, ShiroAuthRealm shiroAuthRealm) {
+    return new ShiroAuthProviderImpl(vertx, shiroAuthRealm);
   }
 }
