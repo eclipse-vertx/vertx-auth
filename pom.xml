@@ -27,12 +27,12 @@
   </parent>
 
   <artifactId>vertx-auth-service</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0-milestone4</version>
 
   <name>Vert.x Auth Service</name>
 
   <properties>
-    <stack.version>3.0.0-SNAPSHOT</stack.version>
+    <stack.version>3.0.0-milestone4</stack.version>
     <!-- until we have it in vertx-ext-parent -->
     <sourcepath>${basedir}/src/main/java;${basedir}/src/main/generated</sourcepath>
   </properties>
