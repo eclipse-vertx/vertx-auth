@@ -252,23 +252,6 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   }
 
   @Test
-  public void testLoginTimeout() throws Exception {
-    initAuthService(100);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 100, onSuccess(sessionID -> {
-      assertNotNull(sessionID);
-      vertx.setTimer(1000, tid -> {
-        authService.hasRole(sessionID, "morris_dancer", onFailure(thr -> {
-          assertNotNull(thr);
-          assertEquals("not logged in", thr.getMessage());
-          testComplete();
-        }));
-      });
-    }));
-    await();
-  }
-
-  @Test
   public void testLoginNoTimeout() throws Exception {
     initAuthService(100);
     JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
@@ -280,6 +263,105 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
           testComplete();
         }));
       });
+    }));
+    await();
+  }
+
+  @Test
+  public void testRefreshSession() throws Exception {
+    initAuthService(500);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      long pid = vertx.setPeriodic(100, tid -> authService.refreshLoginSession(sessionID, res -> {
+        assertTrue(res.succeeded());
+      }));
+      vertx.setTimer(2000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(res -> {
+          assertTrue(res);
+          vertx.cancelTimer(pid);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testRefreshSessionHasRole() throws Exception {
+    initAuthService(500);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      long pid = vertx.setPeriodic(100, tid -> authService.hasRole(sessionID, "morris_dancer", res -> {
+        assertTrue(res.succeeded());
+      }));
+      vertx.setTimer(2000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(res -> {
+          assertTrue(res);
+          vertx.cancelTimer(pid);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testRefreshSessionHasPermission() throws Exception {
+    initAuthService(500);
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      long pid = vertx.setPeriodic(100, tid -> authService.hasPermission(sessionID, "bang_sticks", res -> {
+        assertTrue(res.succeeded());
+      }));
+      vertx.setTimer(2000, tid -> {
+        authService.hasRole(sessionID, "morris_dancer", onSuccess(res -> {
+          assertTrue(res);
+          vertx.cancelTimer(pid);
+          testComplete();
+        }));
+      });
+    }));
+    await();
+  }
+
+  @Test
+  public void testTouchSessionNotLoggedIn() throws Exception {
+    initAuthService();
+    authService.refreshLoginSession("qijsoiqsj", onFailure(thr -> {
+      assertNotNull(thr);
+      assertEquals("not logged in", thr.getMessage());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testLogout() throws Exception {
+    initAuthService();
+    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
+    authService.login(credentials, onSuccess(sessionID -> {
+      assertNotNull(sessionID);
+      authService.logout(sessionID, onSuccess(v -> {
+        authService.hasRole(sessionID, "morris_dancer", onFailure(thr -> {
+          assertNotNull(thr);
+          assertEquals("not logged in", thr.getMessage());
+          testComplete();
+        }));
+      }));
+    }));
+    await();
+  }
+
+  @Test
+  public void testLogoutNotLoggedIn() throws Exception {
+    initAuthService();
+    authService.logout("qijsoiqsj", onFailure(thr -> {
+      assertNotNull(thr);
+      assertEquals("not logged in", thr.getMessage());
+      testComplete();
     }));
     await();
   }
