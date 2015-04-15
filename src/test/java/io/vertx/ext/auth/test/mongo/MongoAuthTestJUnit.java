@@ -64,9 +64,9 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   public void testLoginUniqueUser() throws Exception {
     initAuthService();
     log.info("testLoginUniqueUser");
-    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Michael").put(
-        MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps1");
-    authService.login(credentials, onSuccess(res -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Michael");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps1");
+    authService.login(principal, credentials, onSuccess(res -> {
       log.info(res);
       assertNotNull(res);
       testComplete();
@@ -75,19 +75,21 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   }
 
   /**
-   * Test a user with duplicate username and unique password. This should be accepted by the default implementation
+   * Test a user with duplicate username and unique password. Since last changes this can't work any more. Username must
+   * always be unique
    */
-  @Test
-  public void testLoginDoublette1() throws Exception {
-    initAuthService();
-    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Doublette").put(
-        MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps1");
-    authService.login(credentials, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
-  }
+  //  @Test
+  //  public void testLoginDoublette1() throws Exception {
+  //    initAuthService();
+  //
+  //    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Doublette");
+  //    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps1");
+  //    authService.login(principal, credentials, onSuccess(res -> {
+  //      assertNotNull(res);
+  //      testComplete();
+  //    }));
+  //    await();
+  //  }
 
   /**
    * Test a user with duplicate username AND duplicate password. This should NOT be accepted
@@ -97,9 +99,10 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   @Test
   public void testLoginDoublette2() throws Exception {
     initAuthService();
-    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Doublette").put(
-        MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps2");
-    authService.login(credentials, onFailure(thr -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "Doublette");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "ps2");
+
+    authService.login(principal, credentials, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -254,8 +257,10 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   @Test
   public void testLoginNoTimeout() throws Exception {
     initAuthService(100);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 5000, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "tim");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "sausages");
+
+    authService.loginWithTimeout(principal, credentials, 5000, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       vertx.setTimer(1000, tid -> {
         authService.hasRole(sessionID, "morris_dancer", onSuccess(hasRole -> {
@@ -270,8 +275,9 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   @Test
   public void testRefreshSession() throws Exception {
     initAuthService(500);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "tim");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "sausages");
+    authService.loginWithTimeout(principal, credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.refreshLoginSession(sessionID, res -> {
         assertTrue(res.succeeded());
@@ -290,8 +296,10 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   @Test
   public void testRefreshSessionHasRole() throws Exception {
     initAuthService(500);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "tim");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "sausages");
+
+    authService.loginWithTimeout(principal, credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.hasRole(sessionID, "morris_dancer", res -> {
         assertTrue(res.succeeded());
@@ -310,8 +318,10 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   @Test
   public void testRefreshSessionHasPermission() throws Exception {
     initAuthService(500);
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.loginWithTimeout(credentials, 200, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "tim");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "sausages");
+
+    authService.loginWithTimeout(principal, credentials, 200, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       long pid = vertx.setPeriodic(100, tid -> authService.hasPermission(sessionID, "bang_sticks", res -> {
         assertTrue(res.succeeded());
@@ -341,8 +351,10 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   @Test
   public void testLogout() throws Exception {
     initAuthService();
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.login(credentials, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put(MongoAuthProvider.DEFAULT_USERNAME_FIELD, "tim");
+    JsonObject credentials = new JsonObject().put(MongoAuthProvider.DEFAULT_PASSWORD_FIELD, "sausages");
+
+    authService.login(principal, credentials, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       authService.logout(sessionID, onSuccess(v -> {
         authService.hasRole(sessionID, "morris_dancer", onFailure(thr -> {
@@ -502,8 +514,9 @@ public class MongoAuthTestJUnit extends MongoBaseTest {
   }
 
   private void loginThen(Consumer<String> runner) throws Exception {
-    JsonObject credentials = new JsonObject().put("username", "tim").put("password", "sausages");
-    authService.login(credentials, onSuccess(sessionID -> {
+    JsonObject principal = new JsonObject().put("username", "tim");
+    JsonObject credentials = new JsonObject().put("password", "sausages");
+    authService.login(principal, credentials, onSuccess(sessionID -> {
       assertNotNull(sessionID);
       runner.accept(sessionID);
     }));

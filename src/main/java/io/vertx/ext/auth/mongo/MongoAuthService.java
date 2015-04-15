@@ -1,7 +1,10 @@
 package io.vertx.ext.auth.mongo;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthService;
 import io.vertx.ext.auth.impl.AuthServiceImpl;
 import io.vertx.ext.mongo.MongoService;
 
@@ -12,6 +15,7 @@ import io.vertx.ext.mongo.MongoService;
  */
 
 public class MongoAuthService extends AuthServiceImpl {
+  private Vertx vertx;
 
   /**
    * @param vertx
@@ -19,7 +23,8 @@ public class MongoAuthService extends AuthServiceImpl {
    * @param provider
    */
   public MongoAuthService(Vertx vertx, String serviceName, JsonObject config) {
-    super(vertx, config, new MongoAuthProvider(vertx, serviceName));
+    super(vertx, new MongoAuthProvider(vertx, serviceName, config));
+    this.vertx = vertx;
   }
 
   /**
@@ -28,7 +33,18 @@ public class MongoAuthService extends AuthServiceImpl {
    * @param provider
    */
   public MongoAuthService(Vertx vertx, MongoService service, JsonObject config) {
-    super(vertx, config, new MongoAuthProvider(vertx, service));
+    super(vertx, new MongoAuthProvider(vertx, service, config));
+    this.vertx = vertx;
+  }
+
+  /*
+   * (non-Javadoc)
+   * @see io.vertx.ext.auth.impl.AuthServiceImpl#logout(java.lang.String, io.vertx.core.Handler)
+   */
+  @Override
+  public AuthService logout(String loginID, Handler<AsyncResult<Void>> resultHandler) {
+    vertx.getOrCreateContext().remove(MongoAuthProvider.CURRENT_PRINCIPAL_PROPERTY);
+    return super.logout(loginID, resultHandler);
   }
 
 }

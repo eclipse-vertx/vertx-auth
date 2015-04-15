@@ -6,7 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.spi.AuthProvider;
+import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.mongo.MongoService;
 
 import java.util.List;
@@ -18,6 +18,11 @@ import java.util.List;
  */
 
 public class MongoAuthProvider implements AuthProvider {
+
+  /**
+   * This propertyname is used to set the logged in principal into the context
+   */
+  public static final String CURRENT_PRINCIPAL_PROPERTY         = "current.principal";
 
   /**
    * The property name to be used to set the name of the collection inside the config
@@ -65,11 +70,6 @@ public class MongoAuthProvider implements AuthProvider {
    * The property name to be used to set the name of the field, where the permissionsLookupEnabled is stored inside
    */
   public static final String PROPERTY_PERMISSIONLOOKUP_ENABLED  = "permissionsLookupEnabled";
-
-  /**
-   * The property name to be used to set the name of the field, where the usernameMustUnique is stored inside
-   */
-  public static final String PROPERTY_USERNAME_UNIQUE           = "usernameMustUnique";
 
   /**
    * The default name of the collection to be used
@@ -131,7 +131,6 @@ public class MongoAuthProvider implements AuthProvider {
   private String       passwordCredentialField = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
   private String       saltField               = DEFAULT_SALT_FIELD;
   private String       collectionName          = DEFAULT_COLLECTION_NAME;
-  private boolean      usernameMustUnique      = false;
 
   private SaltStyle    saltStyle               = SaltStyle.NO_SALT;
   @SuppressWarnings("unused")
@@ -140,16 +139,18 @@ public class MongoAuthProvider implements AuthProvider {
   /**
    * 
    */
-  public MongoAuthProvider(Vertx vertx, String serviceName) {
-    this(vertx, MongoService.createEventBusProxy(vertx, serviceName));
+  public MongoAuthProvider(Vertx vertx, String serviceName, JsonObject config) {
+    this(vertx, MongoService.createEventBusProxy(vertx, serviceName), config);
   }
 
   /**
    * 
    */
-  public MongoAuthProvider(Vertx vertx, MongoService service) {
+  public MongoAuthProvider(Vertx vertx, MongoService service, JsonObject config) {
     this.vertx = vertx;
     this.mongoService = service;
+    this.config = config;
+    init();
   }
 
   /**
@@ -242,18 +243,6 @@ public class MongoAuthProvider implements AuthProvider {
   }
 
   /**
-   * Defines wether a username in the store must be unique or not. If not, then the combination of username and password
-   * will define a fitting user
-   * 
-   * @param unique
-   * @return
-   */
-  public MongoAuthProvider setUsernameMustUnique(boolean unique) {
-    this.usernameMustUnique = unique;
-    return this;
-  }
-
-  /**
    * Set the name of the field to be used for the salt ( if needed )
    * 
    * @param fieldName
@@ -264,13 +253,12 @@ public class MongoAuthProvider implements AuthProvider {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * @see io.vertx.ext.auth.spi.AuthProvider#init(io.vertx.core.json.JsonObject)
+  /**
+   * Initializes the current provider by using the defined config object
+   * 
+   * @param config
    */
-  @Override
-  public void init(JsonObject config) {
-    this.config = config;
+  private void init() {
 
     String collectionName = config.getString(PROPERTY_COLLECTION_NAME);
     if (collectionName != null) {
@@ -312,18 +300,16 @@ public class MongoAuthProvider implements AuthProvider {
       setSaltStyle(SaltStyle.valueOf(saltstyle));
     }
 
-    boolean usernameMustUnique = config.getBoolean(PROPERTY_USERNAME_UNIQUE, false);
-    setUsernameMustUnique(usernameMustUnique);
-
   }
 
   /*
    * (non-Javadoc)
-   * @see io.vertx.ext.auth.spi.AuthProvider#login(io.vertx.core.json.JsonObject, io.vertx.core.Handler)
+   * @see io.vertx.ext.auth.AuthProvider#login(io.vertx.core.json.JsonObject, io.vertx.core.json.JsonObject,
+   * io.vertx.core.Handler)
    */
   @Override
-  public void login(JsonObject credentials, Handler<AsyncResult<Object>> resultHandler) {
-    String username = credentials.getString(this.usernameCredentialField);
+  public void login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<Void>> resultHandler) {
+    String username = principal.getString(this.usernameCredentialField);
     String password = credentials.getString(this.passwordCredentialField);
 
     // Null username is invalid
@@ -338,7 +324,8 @@ public class MongoAuthProvider implements AuthProvider {
       try {
         if (res.succeeded()) {
           JsonObject result = handleSelection(res, token);
-          resultHandler.handle(Future.succeededFuture(result));
+          vertx.getOrCreateContext().put(CURRENT_PRINCIPAL_PROPERTY, result);
+          resultHandler.handle(Future.succeededFuture());
         } else {
           resultHandler.handle(Future.failedFuture(res.cause()));
         }
@@ -352,14 +339,38 @@ public class MongoAuthProvider implements AuthProvider {
 
   /*
    * (non-Javadoc)
-   * @see io.vertx.ext.auth.spi.AuthProvider#hasRole(java.lang.Object, java.lang.String, io.vertx.core.Handler)
+   * @see io.vertx.ext.auth.AuthProvider#hasRole(io.vertx.core.json.JsonObject, java.lang.String, io.vertx.core.Handler)
    */
   @Override
-  public void hasRole(Object principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (!(principal instanceof JsonObject))
+  public void hasRole(JsonObject principalRequest, String role, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (!(principalRequest instanceof JsonObject))
       resultHandler.handle(Future.failedFuture(new IllegalArgumentException("JsonObject expected")));
-    JsonArray roles = readRoles((JsonObject) principal);
-    resultHandler.handle(Future.succeededFuture(roles != null && roles.contains(role)));
+
+    String username = principalRequest.getString(this.usernameCredentialField, null);
+
+    // Null username is invalid
+    if (username == null || username.isEmpty()) {
+      resultHandler.handle((Future.failedFuture(new AuthenticationException("Username must be set."))));
+    }
+
+    JsonObject query = createQuery(username);
+    mongoService.find(this.collectionName, query, res -> {
+
+      try {
+        if (res.succeeded()) {
+          JsonObject principal = handleSelection(res, username);
+          vertx.getOrCreateContext().put(CURRENT_PRINCIPAL_PROPERTY, principal);
+          JsonArray roles = readRoles(principal);
+          resultHandler.handle(Future.succeededFuture(roles != null && roles.contains(role)));
+        } else {
+          resultHandler.handle(Future.failedFuture(res.cause()));
+        }
+      } catch (Throwable e) {
+        resultHandler.handle(Future.failedFuture(e));
+      }
+
+    });
+
   }
 
   protected JsonArray readRoles(JsonObject principal) {
@@ -370,7 +381,7 @@ public class MongoAuthProvider implements AuthProvider {
    * Currently this is a call to {@link #hasRole(Object, String, Handler)}
    */
   @Override
-  public void hasPermission(Object principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void hasPermission(JsonObject principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     hasRole(principal, permission, resultHandler);
   }
 
@@ -393,7 +404,7 @@ public class MongoAuthProvider implements AuthProvider {
    */
   private JsonObject handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
       throws AuthenticationException {
-    if (usernameMustUnique && resultList.result().size() > 1)
+    if (resultList.result().size() > 1)
       throw new AuthenticationException("More than one user row found for user [" + authToken.username
           + "]. Usernames must be unique.");
     JsonObject principal = null;
@@ -405,6 +416,23 @@ public class MongoAuthProvider implements AuthProvider {
     if (principal == null)
       throw new AuthenticationException("No account found for user [" + authToken.username + "]");
     return principal;
+  }
+
+  /**
+   * Examine the selection of found users and return first fitting one,
+   * 
+   * @param resultList
+   * @param username
+   * @return
+   */
+  private JsonObject handleSelection(AsyncResult<List<JsonObject>> resultList, String username)
+      throws AuthenticationException {
+    if (resultList.result().size() > 1)
+      throw new AuthenticationException("More than one user row found for user [" + username
+          + "]. Usernames must be unique.");
+    if (resultList.result().isEmpty())
+      throw new AuthenticationException("No account found for user [" + username + "]");
+    return resultList.result().get(0);
   }
 
   /**
