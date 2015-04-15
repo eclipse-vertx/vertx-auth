@@ -93,7 +93,16 @@
       <artifactId>vertx-rx-java</artifactId>
       <optional>true</optional>
     </dependency>
-
+    
+	<dependency>
+	  <groupId>io.vertx</groupId>
+	  <artifactId>vertx-mongo-service</artifactId>
+	</dependency>	
+	<dependency>
+	  <groupId>io.vertx</groupId>
+	  <artifactId>vertx-unit</artifactId>
+	</dependency>
+	
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
@@ -130,6 +139,18 @@
       <version>2.3.7</version>
       <scope>test</scope>
     </dependency>
+	<dependency>
+	  <groupId>io.vertx</groupId>
+      <artifactId>vertx-mongo-embedded-db</artifactId>
+      <scope>test</scope>
+	</dependency>
+	<dependency>
+	  <groupId>io.vertx</groupId>
+	  <artifactId>vertx-mongo-service</artifactId>
+      <scope>test</scope>
+      <classifier>tests</classifier>
+      <version>${stack.version}</version>
+	</dependency>	    
   </dependencies>
 
 
