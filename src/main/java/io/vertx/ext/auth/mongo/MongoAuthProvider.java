@@ -484,4 +484,53 @@ public class MongoAuthProvider implements AuthProvider {
     return collectionName;
   }
 
+  /**
+   * @return the usernameField
+   */
+  public final String getUsernameField() {
+    return usernameField;
+  }
+
+  /**
+   * @return the passwordField
+   */
+  public final String getPasswordField() {
+    return passwordField;
+  }
+
+  /**
+   * @return the roleField
+   */
+  public final String getRoleField() {
+    return roleField;
+  }
+
+  /**
+   * @return the usernameCredentialField
+   */
+  public final String getUsernameCredentialField() {
+    return usernameCredentialField;
+  }
+
+  /**
+   * @return the passwordCredentialField
+   */
+  public final String getPasswordCredentialField() {
+    return passwordCredentialField;
+  }
+
+  /**
+   * @return the saltField
+   */
+  public final String getSaltField() {
+    return saltField;
+  }
+
+  /**
+   * @return the saltStyle
+   */
+  public final SaltStyle getSaltStyle() {
+    return saltStyle;
+  }
+
 }
