@@ -7,9 +7,9 @@ The auth service provides a common interface that can be backed by different aut
 
 Vert.x ships with a
 default implementation that uses http://shiro.apache.org/[Apache Shiro] but you can provide your own implementation
-by implementing the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
+by implementing the `link:yardoc/VertxAuth/AuthProvider.html[AuthProvider]` interface.
 
-The `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface can also be used directory in your applications if you just want
+The `link:yardoc/VertxAuth/AuthProvider.html[AuthProvider]` interface can also be used directory in your applications if you just want
 raw authentication and authorisation functionality without the concept of a login session.
 
 The Vert.x Apache Shiro implementation
@@ -38,18 +38,18 @@ Somewhere you deploy it:
 [source,java]
 ----
 
-// Deploy service - can be anywhere on your network
-var options = {
-  "config" : config
-};
+# Deploy service - can be anywhere on your network
+options = {
+  'config' => config
+}
 
-vertx.deployVerticle("service:io.vertx.shiro-auth-service", options, function (res, res_err) {
-  if (res_err == null) {
-    // Deployed ok
-  } else {
-    // Failed to deploy
-  };
-});
+vertx.deploy_verticle("service:io.vertx.shiro-auth-service", options) { |res,res_err|
+  if (res_err == nil)
+    # Deployed ok
+  else
+    # Failed to deploy
+  end
+}
 
 ----
 
@@ -58,24 +58,24 @@ from wherever you are and just use that:
 
 [source,java]
 ----
-var AuthService = require("vertx-auth-js/auth_service");
+require 'vertx-auth/auth_service'
 
-var proxy = AuthService.createEventBusProxy(vertx, "vertx.auth");
+proxy = VertxAuth::AuthService.create_event_bus_proxy(vertx, "vertx.auth")
 
-// Now do stuff with it:
+# Now do stuff with it:
 
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
+principal = {
+  'username' => "tim"
+}
+credentials = {
+  'password' => "sausages"
+}
 
-proxy.login(principal, credentials, function (res, res_err) {
+proxy.login(principal, credentials) { |res,res_err|
 
-  // etc
+  # etc
 
-});
+}
 
 ----
 
@@ -83,35 +83,35 @@ Alternatively you can create an instance of the service directly and just use th
 
 [source,java]
 ----
-var ShiroAuthService = require("vertx-auth-js/shiro_auth_service");
+require 'vertx-auth/shiro_auth_service'
 
-var config = {
-};
-config."properties_path" = "classpath:test-auth.properties";
+config = {
+}
+config["properties_path"] = "classpath:test-auth.properties"
 
-var authService = ShiroAuthService.create(vertx, 'PROPERTIES', config);
+authService = VertxAuth::ShiroAuthService.create(vertx, :PROPERTIES, config)
 
-authService.start();
+authService.start()
 
-// Now do stuff with it:
+# Now do stuff with it:
 
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
+principal = {
+  'username' => "tim"
+}
+credentials = {
+  'password' => "sausages"
+}
 
-authService.login(principal, credentials, function (res, res_err) {
+authService.login(principal, credentials) { |res,res_err|
 
-  // etc
+  # etc
 
-});
+}
 
 
 ----
 
-If you create an instance this way you should make sure you start it with `link:jsdoc/auth_service-AuthService.html#start[start]`
+If you create an instance this way you should make sure you start it with `link:yardoc/VertxAuth/AuthService.html#start-instance_method[start]`
 before you use it.
 
 However you do it, once you've got your service you can start using it.
@@ -123,10 +123,10 @@ However you do it, once you've got your service you can start using it.
 As previously mentioned we provide an implementation of the Auth service that uses Apache Shiro to perform the
 actual auth.
 
-To use this, you should use `link:jsdoc/shiro_auth_service-ShiroAuthService.html[ShiroAuthService]`.
+To use this, you should use `link:yardoc/VertxAuth/ShiroAuthService.html[ShiroAuthService]`.
 
 This currently supports properties file based user/role/permission information and using LDAP, and you can also pass
-in a pre-existing Shiro `Realm` instance or implement `ShiroAuthRealm` to implement
+in a pre-existing Shiro `Realm` instance or implement `link:unavailable[ShiroAuthRealm]` to implement
 a different method of auth using Shiro.
 
 == Shiro Auth Service Verticle
@@ -137,7 +137,7 @@ an example of deploying a Shiro auth service verticle:
 [source,java]
 ----
 
-vertx.deployVerticle("service:io.vertx.shiro-auth-service");
+vertx.deploy_verticle("service:io.vertx.shiro-auth-service")
 
 
 ----
@@ -150,30 +150,30 @@ Here's an example that uses the out of the box properties auth realm:
 
 [source,java]
 ----
-var ShiroAuthService = require("vertx-auth-js/shiro_auth_service");
+require 'vertx-auth/shiro_auth_service'
 
-var config = {
-};
-config."properties_path" = "classpath:test-auth.properties";
+config = {
+}
+config["properties_path"] = "classpath:test-auth.properties"
 
-var authService = ShiroAuthService.create(vertx, 'PROPERTIES', config);
+authService = VertxAuth::ShiroAuthService.create(vertx, :PROPERTIES, config)
 
-authService.start();
+authService.start()
 
-// Now do stuff with it:
+# Now do stuff with it:
 
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
+principal = {
+  'username' => "tim"
+}
+credentials = {
+  'password' => "sausages"
+}
 
-authService.login(principal, credentials, function (res, res_err) {
+authService.login(principal, credentials) { |res,res_err|
 
-  // etc
+  # etc
 
-});
+}
 
 
 ----
@@ -236,51 +236,51 @@ An example is `ldap:://myldapserver.mycompany.com:10389`
 
 == Using non Shiro Auth implementations
 
-If you want to use a different auth provider with the Auth service, you should implement `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
+If you want to use a different auth provider with the Auth service, you should implement `link:yardoc/VertxAuth/AuthProvider.html[AuthProvider]`.
 
 You can then create a local instance of the AuthService with:
 
-[source,js]
+[source,ruby]
 ----
-var AuthService = require("vertx-auth-js/auth_service");
+require 'vertx-auth/auth_service'
 
-var authService = AuthService.create(vertx, myAuthProvider);
+authService = VertxAuth::AuthService.create(vertx, myAuthProvider)
 
-authService.start();
+authService.start()
 
 
 ----
 
 Or to to deploy an verticle instance:
 
-[source,js]
+[source,ruby]
 ----
 
-var config = {
-};
-config."provider_class_name" = "com.mycompany.myproject.MyAuthProviderClass";
-config."your_config_property" = "blah";
+config = {
+}
+config["provider_class_name"] = "com.mycompany.myproject.MyAuthProviderClass"
+config["your_config_property"] = "blah"
 
-var options = {
-  "config" : config
-};
+options = {
+  'config' => config
+}
 
-vertx.deployVerticle("service:io.vertx.auth-service", options);
+vertx.deploy_verticle("service:io.vertx.auth-service", options)
 
 
 ----
 
 == Using the API
 
-The auth service API is described with `link:jsdoc/auth_service-AuthService.html[AuthService]`.
+The auth service API is described with `link:yardoc/VertxAuth/AuthService.html[AuthService]`.
 
 It contains method to login and check roles and permissions.
 
 === Authentication - login / logout
 
-You use `link:jsdoc/auth_service-AuthService.html#login[login]` to login a user. The arguments to log-in are a `JsonObject`
+You use `link:yardoc/VertxAuth/AuthService.html#login-instance_method[login]` to login a user. The arguments to log-in are a `link:unavailable[JsonObject]`
 representing the principal (principal is a fancy name for a unique id, e.g. username representing the user), and
-another `JsonObject` representing the credentials (e.g. password) of the user.
+another `link:unavailable[JsonObject]` representing the credentials (e.g. password) of the user.
 
 Often the principal will just contain a `username` string field - the value containing the username and this is what is
 expected by the out of the box Apache Shiro provider, but other providers might represent principals in other ways.
@@ -294,34 +294,34 @@ later want to authorise the user, i.e. check whether they have permissions or ro
 
 Here's an example of a login:
 
-[source,js]
+[source,ruby]
 ----
 
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
+principal = {
+  'username' => "tim"
+}
+credentials = {
+  'password' => "sausages"
+}
 
-authService.login(principal, credentials, function (res, res_err) {
+authService.login(principal, credentials) { |res,res_err|
 
-  if (res_err == null) {
+  if (res_err == nil)
 
-    // Login successful!
+    # Login successful!
 
-    // The login ID is needed if you later want to authorise a user
+    # The login ID is needed if you later want to authorise a user
 
-    var loginID = res;
+    loginID = res
 
-  } else {
+  else
 
-    // Login failed.
+    # Login failed.
 
-    var reason = res_err.getMessage();
+    reason = res_err.get_message()
 
-  };
-});
+  end
+}
 
 ----
 
@@ -329,45 +329,45 @@ The login session ID provided at login will be valid as long as the login hasn't
 logged out.
 
 The default time it remains valid is 30 minutes. If you want to use a different value of timeout you can specify that
-by calling `link:jsdoc/auth_service-AuthService.html#loginWithTimeout[loginWithTimeout]`.
+by calling `link:yardoc/VertxAuth/AuthService.html#login_with_timeout-instance_method[loginWithTimeout]`.
 
-To prevent a login timing out, you can call `link:jsdoc/auth_service-AuthService.html#refreshLoginSession[refreshLoginSession]` specifying
+To prevent a login timing out, you can call `link:yardoc/VertxAuth/AuthService.html#refresh_login_session-instance_method[refreshLoginSession]` specifying
 the login ID. The login will timeout if it remains unrefreshed for greater than the timeout period.
 
-[source,js]
+[source,ruby]
 ----
 
-authService.refreshLoginSession(loginID, function (res, res_err) {
+authService.refresh_login_session(loginID) { |res,res_err|
 
-  if (res_err == null) {
+  if (res_err == nil)
 
-    // Refreshed ok
+    # Refreshed ok
 
-  } else {
+  else
 
-    // Not refreshed ok - probably the login has already timed out or doesn't exist.
-  };
-});
+    # Not refreshed ok - probably the login has already timed out or doesn't exist.
+  end
+}
 
 ----
 
-You can explicitly logout a user with `link:jsdoc/auth_service-AuthService.html#logout[logout]` specifying the login ID:
+You can explicitly logout a user with `link:yardoc/VertxAuth/AuthService.html#logout-instance_method[logout]` specifying the login ID:
 
-[source,js]
+[source,ruby]
 ----
 
-authService.logout(loginID, function (res, res_err) {
+authService.logout(loginID) { |res,res_err|
 
-  if (res_err == null) {
+  if (res_err == nil)
 
-    // Logged out ok
+    # Logged out ok
 
-  } else {
+  else
 
-    // Failed to logout - probably the login has already timed out or doesn't exist.
+    # Failed to logout - probably the login has already timed out or doesn't exist.
 
-  };
-});
+  end
+}
 
 ----
 
@@ -378,47 +378,47 @@ Authorisation means checking whether the user has the right roles or permissions
 In order to check roles or permissions the user must first be logged-in and you must have a valid login session ID
 as described in the previous section.
 
-To check if a user has a specific role you use `link:jsdoc/auth_service-AuthService.html#hasRole[hasRole]` specifying the login ID
+To check if a user has a specific role you use `link:yardoc/VertxAuth/AuthService.html#has_role-instance_method[hasRole]` specifying the login ID
 and the role.
 
 The result of the check is returned in the handler. If the check didn't occur - e.g. the login ID is not valid, a
 failure will be returned in the handler, otherwise it will return a boolean - true if the user has the role
 or false if they don't have the role.
 
-[source,js]
+[source,ruby]
 ----
 
-authService.hasRole(loginID, "manager", function (res, res_err) {
+authService.has_role(loginID, "manager") { |res,res_err|
 
-  if (res_err == null) {
+  if (res_err == nil)
 
-    var hasRole = res;
+    hasRole = res
 
-    if (hasRole) {
+    if (hasRole)
 
-      // do something
+      # do something
 
-    } else {
+    else
 
-      // do something else
+      # do something else
 
-    };
+    end
 
-  } else {
+  else
 
-    // Something went wrong - maybe the user is not logged in?
-  };
+    # Something went wrong - maybe the user is not logged in?
+  end
 
-});
+}
 
 ----
 
-You can also check multiple roles at the same time with `link:jsdoc/auth_service-AuthService.html#hasRoles[hasRoles]`. In this
+You can also check multiple roles at the same time with `link:yardoc/VertxAuth/AuthService.html#has_roles-instance_method[hasRoles]`. In this
 case you will return a true result only if the user has _all_ the specified roles.
 
 In the same way as checking roles, you can check permissions too. To this you use
-`link:jsdoc/auth_service-AuthService.html#hasPermission[hasPermission]` and
-`link:jsdoc/auth_service-AuthService.html#hasPermissions[hasPermissions]` in the exact same way as roles.
+`link:yardoc/VertxAuth/AuthService.html#has_permission-instance_method[hasPermission]` and
+`link:yardoc/VertxAuth/AuthService.html#has_permissions-instance_method[hasPermissions]` in the exact same way as roles.
 
 Authorisations are cached for the length of the login. This means that the first time you do authorisation for a user
 it will go the auth provider, but the second time you do it with the same roles and permissions it will not call the

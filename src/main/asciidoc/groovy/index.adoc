@@ -126,7 +126,7 @@ actual auth.
 To use this, you should use `link:groovydoc/io/vertx/groovy/ext/auth/shiro/ShiroAuthService.html[ShiroAuthService]`.
 
 This currently supports properties file based user/role/permission information and using LDAP, and you can also pass
-in a pre-existing Shiro `Realm` instance or implement `link:groovydoc/io/vertx/groovy/ext/auth/shiro/ShiroAuthRealm.html[ShiroAuthRealm]` to implement
+in a pre-existing Shiro `Realm` instance or implement `ShiroAuthRealm` to implement
 a different method of auth using Shiro.
 
 == Shiro Auth Service Verticle
@@ -277,9 +277,9 @@ It contains method to login and check roles and permissions.
 
 === Authentication - login / logout
 
-You use `link:groovydoc/io/vertx/groovy/ext/auth/AuthService.html#login(io.vertx.core.json.JsonObject,%20io.vertx.core.json.JsonObject,%20io.vertx.core.Handler)[login]` to login a user. The arguments to log-in are a `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`
+You use `link:groovydoc/io/vertx/groovy/ext/auth/AuthService.html#login(io.vertx.core.json.JsonObject,%20io.vertx.core.json.JsonObject,%20io.vertx.core.Handler)[login]` to login a user. The arguments to log-in are a `JsonObject`
 representing the principal (principal is a fancy name for a unique id, e.g. username representing the user), and
-another `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]` representing the credentials (e.g. password) of the user.
+another `JsonObject` representing the credentials (e.g. password) of the user.
 
 Often the principal will just contain a `username` string field - the value containing the username and this is what is
 expected by the out of the box Apache Shiro provider, but other providers might represent principals in other ways.
