@@ -23,7 +23,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>9</version>
+    <version>11</version>
   </parent>
 
   <artifactId>vertx-auth-service</artifactId>
@@ -118,15 +118,38 @@
     </dependency>
     <dependency>
       <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-all</artifactId>
+      <artifactId>apacheds-core-api</artifactId>
       <version>1.5.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-protocol-ldap</artifactId>
+      <version>1.5.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-jdbm-store</artifactId>
+      <version>1.5.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-jdbm-partition</artifactId>
+      <version>1.5.7</version>
+      <scope>test</scope>
       <exclusions>
-        <!-- shared-ldap-schema module needs to be excluded to avoid multiple schema resources on the classpath -->
         <exclusion>
-          <groupId>org.apache.directory.shared</groupId>
-          <artifactId>shared-ldap-schema</artifactId>
+          <groupId>bouncycastle</groupId>
+          <artifactId>bcprov-jdk15</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-ldif-partition</artifactId>
+      <version>1.5.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -136,6 +159,49 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>default-test</id>
+              <configuration>
+                <additionalClasspathElements>
+                  <additionalClasspathElement>${project.build.directory}/bouncy-classes</additionalClasspathElement>
+                </additionalClasspathElements>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <phase>process-test-classes</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>bouncycastle</groupId>
+                  <artifactId>bcprov-jdk15</artifactId>
+                  <version>140</version>
+                  <outputDirectory>${project.build.directory}/bouncy-classes</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 
 </project>
