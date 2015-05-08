@@ -6,6 +6,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.mongo.MongoService;
 
@@ -18,96 +20,97 @@ import java.util.List;
  */
 
 public class MongoAuthProvider implements AuthProvider {
+  private static final Logger log                                = LoggerFactory.getLogger(MongoAuthProvider.class);
 
   /**
    * This propertyname is used to set the logged in principal into the context
    */
-  public static final String CURRENT_PRINCIPAL_PROPERTY         = "current.principal";
+  public static final String  CURRENT_PRINCIPAL_PROPERTY         = "current.principal";
 
   /**
    * The property name to be used to set the name of the collection inside the config
    */
-  public static final String PROPERTY_COLLECTION_NAME           = "collectionName";
+  public static final String  PROPERTY_COLLECTION_NAME           = "collectionName";
 
   /**
    * The property name to be used to set the name of the field, where the username is stored inside
    */
-  public static final String PROPERTY_USERNAME_FIELD            = "usernameField";
+  public static final String  PROPERTY_USERNAME_FIELD            = "usernameField";
 
   /**
    * The property name to be used to set the name of the field, where the roles are stored inside
    */
-  public static final String PROPERTY_ROLE_FIELD                = "roleField";
+  public static final String  PROPERTY_ROLE_FIELD                = "roleField";
 
   /**
    * The property name to be used to set the name of the field, where the password is stored inside
    */
-  public static final String PROPERTY_PASSWORD_FIELD            = "passwordField";
+  public static final String  PROPERTY_PASSWORD_FIELD            = "passwordField";
 
   /**
    * The property name to be used to set the name of the field, where the username for the credentials is stored inside
    */
-  public static final String PROPERTY_CREDENTIAL_USERNAME_FIELD = "usernameCredentialField";
+  public static final String  PROPERTY_CREDENTIAL_USERNAME_FIELD = "usernameCredentialField";
 
   /**
    * The property name to be used to set the name of the field, where the password for the credentials is stored inside
    */
-  public static final String PROPERTY_CREDENTIAL_PASSWORD_FIELD = "passwordCredentialField";
+  public static final String  PROPERTY_CREDENTIAL_PASSWORD_FIELD = "passwordCredentialField";
 
   /**
    * The property name to be used to set the name of the field, where the SALT is stored inside
    */
-  public static final String PROPERTY_SALT_FIELD                = "saltField";
+  public static final String  PROPERTY_SALT_FIELD                = "saltField";
 
   /**
    * The property name to be used to set the name of the field, where the salt style is stored inside
    * 
    * @see SaltStyle
    */
-  public static final String PROPERTY_SALT_STYLE                = "saltStyle";
+  public static final String  PROPERTY_SALT_STYLE                = "saltStyle";
 
   /**
    * The property name to be used to set the name of the field, where the permissionsLookupEnabled is stored inside
    */
-  public static final String PROPERTY_PERMISSIONLOOKUP_ENABLED  = "permissionsLookupEnabled";
+  public static final String  PROPERTY_PERMISSIONLOOKUP_ENABLED  = "permissionsLookupEnabled";
 
   /**
    * The default name of the collection to be used
    */
-  public static final String DEFAULT_COLLECTION_NAME            = "user";
+  public static final String  DEFAULT_COLLECTION_NAME            = "user";
 
   /**
    * The default name of the property for the username, like it is stored in mongodb
    */
-  public static final String DEFAULT_USERNAME_FIELD             = "username";
+  public static final String  DEFAULT_USERNAME_FIELD             = "username";
 
   /**
    * The default name of the property for the password, like it is stored in mongodb
    */
-  public static final String DEFAULT_PASSWORD_FIELD             = "password";
+  public static final String  DEFAULT_PASSWORD_FIELD             = "password";
 
   /**
    * The default name of the property for the roles, like it is stored in mongodb. Roles are expected to be saved as
    * JsonArray
    */
-  public static final String DEFAULT_ROLE_FIELD                 = "roles";
+  public static final String  DEFAULT_ROLE_FIELD                 = "roles";
 
   /**
    * The default name of the property for the username, like it is transported in credentials by method
    * {@link #init(JsonObject)}
    */
-  public static final String DEFAULT_CREDENTIAL_USERNAME_FIELD  = DEFAULT_USERNAME_FIELD;
+  public static final String  DEFAULT_CREDENTIAL_USERNAME_FIELD  = DEFAULT_USERNAME_FIELD;
 
   /**
    * The default name of the property for the password, like it is transported in credentials by method
    * {@link #init(JsonObject)}
    */
-  public static final String DEFAULT_CREDENTIAL_PASSWORD_FIELD  = DEFAULT_PASSWORD_FIELD;
+  public static final String  DEFAULT_CREDENTIAL_PASSWORD_FIELD  = DEFAULT_PASSWORD_FIELD;
 
   /**
    * The default name of the property for the salt field
    */
-  public static final String DEFAULT_SALT_FIELD                 = "salt";
+  public static final String  DEFAULT_SALT_FIELD                 = "salt";
 
   /**
    * Password hash salt configuration.
@@ -330,6 +333,7 @@ public class MongoAuthProvider implements AuthProvider {
           resultHandler.handle(Future.failedFuture(res.cause()));
         }
       } catch (Throwable e) {
+        log.warn(e);
         resultHandler.handle(Future.failedFuture(e));
       }
 
@@ -343,14 +347,18 @@ public class MongoAuthProvider implements AuthProvider {
    */
   @Override
   public void hasRole(JsonObject principalRequest, String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (!(principalRequest instanceof JsonObject))
-      resultHandler.handle(Future.failedFuture(new IllegalArgumentException("JsonObject expected")));
+    if (!(principalRequest instanceof JsonObject)) {
+      String message = "JsonObject expected";
+      resultHandler.handle(Future.failedFuture(new IllegalArgumentException(message)));
+
+    }
 
     String username = principalRequest.getString(this.usernameCredentialField, null);
 
     // Null username is invalid
     if (username == null || username.isEmpty()) {
-      resultHandler.handle((Future.failedFuture(new AuthenticationException("Username must be set."))));
+      String message = "Username must be set.";
+      resultHandler.handle((Future.failedFuture(new AuthenticationException(message))));
     }
 
     JsonObject query = createQuery(username);
@@ -404,17 +412,26 @@ public class MongoAuthProvider implements AuthProvider {
    */
   private JsonObject handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
       throws AuthenticationException {
-    if (resultList.result().size() > 1)
-      throw new AuthenticationException("More than one user row found for user [" + authToken.username
-          + "]. Usernames must be unique.");
+    if (resultList.result().size() > 1) {
+      String message = "More than one user row found for user [" + authToken.username + "( "
+          + resultList.result().size() + " )]. Usernames must be unique.";
+      //log.warn(message);
+      throw new AuthenticationException(message);
+    }
     JsonObject principal = null;
     for (JsonObject json : resultList.result()) {
-      if (handleObject(json, authToken) && principal != null)
-        throw new AuthenticationException("Duplicate account [" + authToken.username + "]");
+      if (handleObject(json, authToken) && principal != null) {
+        String message = "Duplicate account [" + authToken.username + "]";
+        //log.warn(message);
+        throw new AuthenticationException(message);
+      }
       principal = json;
     }
-    if (principal == null)
-      throw new AuthenticationException("No account found for user [" + authToken.username + "]");
+    if (principal == null) {
+      String message = "No account found for user [" + authToken.username + "]";
+      //log.warn(message);
+      throw new AuthenticationException(message);
+    }
     return principal;
   }
 
@@ -427,11 +444,16 @@ public class MongoAuthProvider implements AuthProvider {
    */
   private JsonObject handleSelection(AsyncResult<List<JsonObject>> resultList, String username)
       throws AuthenticationException {
-    if (resultList.result().size() > 1)
-      throw new AuthenticationException("More than one user row found for user [" + username
-          + "]. Usernames must be unique.");
-    if (resultList.result().isEmpty())
-      throw new AuthenticationException("No account found for user [" + username + "]");
+    if (resultList.result().size() > 1) {
+      String message = "More than one user row found for user [" + username + "]. Usernames must be unique.";
+      //log.warn(message);
+      throw new AuthenticationException(message);
+    }
+    if (resultList.result().isEmpty()) {
+      String message = "No account found for user [" + username + "]";
+      //log.warn(message);
+      throw new AuthenticationException(message);
+    }
     return resultList.result().get(0);
   }
 
