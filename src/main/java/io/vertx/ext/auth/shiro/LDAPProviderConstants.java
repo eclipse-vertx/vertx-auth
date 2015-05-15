@@ -21,7 +21,7 @@ package io.vertx.ext.auth.shiro;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public interface LDAPAuthRealmConstants {
+public interface LDAPProviderConstants {
 
   static final String LDAP_USER_DN_TEMPLATE_FIELD = "ldap_user_dn_template";
   static final String LDAP_URL = "ldap_url";

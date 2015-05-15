@@ -14,44 +14,57 @@
  * under the License.
  */
 
-/** @module vertx-auth-js/shiro_auth_provider */
+/** @module vertx-auth-js/clusterable_auth_provider */
 var utils = require('vertx-js/util/utils');
+var User = require('vertx-auth-js/user');
+var Buffer = require('vertx-js/buffer');
 var AuthProvider = require('vertx-auth-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JShiroAuthProvider = io.vertx.ext.auth.shiro.ShiroAuthProvider;
+var JClusterableAuthProvider = io.vertx.ext.auth.ClusterableAuthProvider;
 
 /**
 
  @class
 */
-var ShiroAuthProvider = function(j_val) {
+var ClusterableAuthProvider = function(j_val) {
 
-  var j_shiroAuthProvider = j_val;
+  var j_clusterableAuthProvider = j_val;
   var that = this;
   AuthProvider.call(this, j_val);
+
+  /**
+
+   @public
+   @param user {User} 
+   @return {Buffer}
+   */
+  this.toBuffer = function(user) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return new Buffer(j_clusterableAuthProvider["toBuffer(io.vertx.ext.auth.User)"](user._jdel));
+    } else utils.invalidArgs();
+  };
+
+  /**
+
+   @public
+   @param buffer {Buffer} 
+   @return {User}
+   */
+  this.fromBuffer = function(buffer) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return new User(j_clusterableAuthProvider["fromBuffer(io.vertx.core.buffer.Buffer)"](buffer._jdel));
+    } else utils.invalidArgs();
+  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
-  this._jdel = j_shiroAuthProvider;
-};
-
-/**
-
- @memberof module:vertx-auth-js/shiro_auth_provider
- @param vertx {Vertx} 
- @param realmType {Object} 
- @param config {Object} 
- @return {ShiroAuthProvider}
- */
-ShiroAuthProvider.create = function(vertx, realmType, config) {
-  var __args = arguments;
-  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new ShiroAuthProvider(JShiroAuthProvider["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
-  } else utils.invalidArgs();
+  this._jdel = j_clusterableAuthProvider;
 };
 
 // We export the Constructor function
-module.exports = ShiroAuthProvider;
+module.exports = ClusterableAuthProvider;

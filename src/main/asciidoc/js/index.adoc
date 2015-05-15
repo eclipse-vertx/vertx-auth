@@ -1,25 +1,21 @@
-= Vert.x Auth Service
+= Vert.x Auth - Authentication and Authorisation
 
-This Vert.x service provides authentication and authorisation functionality and the concept of a login session
-for use in your Vert.x applications
+This Vert.x component provides interfaces for authentication and authorisation that can be used from your Vert.x
+applications and can be backed by different providers.
 
-The auth service provides a common interface that can be backed by different auth providers.
-
-Vert.x ships with a
-default implementation that uses http://shiro.apache.org/[Apache Shiro] but you can provide your own implementation
-by implementing the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
-
-The `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface can also be used directory in your applications if you just want
-raw authentication and authorisation functionality without the concept of a login session.
+It also provides an implementation that uses http://shiro.apache.org/[Apache Shiro] out-of-the-box but you can provide
+your own implementation by implementing the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
 
 The Vert.x Apache Shiro implementation
 currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
+
+Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
 
 == Basic concepts
 
 _Authentication_ (aka _log in_) means verifying the identity of a user.
 
-_Authorisation_ means verifying a user has the correct access rights for some resource.
+_Authorisation_ means verifying a user is allowed to access some resource.
 
 The service uses a familiar user/role/permission model that you will probably know already:
 
@@ -28,158 +24,138 @@ Users can have zero or more roles, e.g. "manager", "developer".
 Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
 and a developer might have a permission "commit_code".
 
-== Setting up the service
+== Authentication - the `AuthProvider`
 
-As with other services you can use the service either by deploying it as a verticle somewhere on your network and
-interacting with it over the event bus, either directly by sending messages, or using a service proxy, e.g.
+To authenticate a user you use `link:jsdoc/auth_provider-AuthProvider.html#authenticate[authenticate]`.
 
-Somewhere you deploy it:
+The first argument is a JSON object which contains authentication information. What this actually contains depends
+on the specific implementation; for a simple username/password based authentication it might contain something like:
+
+----
+{
+  "username": "tim"
+  "password": "mypassword"
+}
+----
+
+For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
+
+Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
+the call. The async result contains an instance of `link:jsdoc/user-User.html[User]` which represents the authenticated
+user and contains operations which allow the user to be authorised.
+
+Here's an example of authenticating a user using a simple username/password implementation:
 
 [source,java]
 ----
 
-// Deploy service - can be anywhere on your network
-var options = {
-  "config" : config
+var authInfo = {
+  "username" : "tim",
+  "password" : "mypassword"
 };
 
-vertx.deployVerticle("service:io.vertx.shiro-auth-service", options, function (res, res_err) {
+authProvider.authenticate(authInfo, function (res, res_err) {
   if (res_err == null) {
-    // Deployed ok
+
+    var user = res;
+
+    console.log("User " + user.principal() + " is now authenticated");
+
   } else {
-    // Failed to deploy
+    res_err.printStackTrace();
   };
 });
 
 ----
 
-Now you can either send messages to it directly over the event bus, or you can create a proxy to the service
-from wherever you are and just use that:
+=== Re-creating users from Buffers
+
+The operation `link:jsdoc/auth_provider-AuthProvider.html#fromBuffer[fromBuffer]` allows a User object
+to be reconstructed from a `link:../../vertx-core/js/jsdoc/buffer-Buffer.html[Buffer]`. This is primarily used in vertx-web session clustering
+to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
+
+== Authorisation - the `User`
+
+Once you have an `link:jsdoc/user-User.html[User]` instance you can call methods on it to authorise it.
+
+To check if a user has a specific role you use `link:jsdoc/user-User.html#hasRole[hasRole]`,
+to check if a user has all the specified roles you use `link:jsdoc/user-User.html#hasRoles[hasRoles]`,
+to check if a user has a specific permission you use `link:jsdoc/user-User.html#hasPermission[hasPermission]`,
+to check if a user has all the specified permissions you use `link:jsdoc/user-User.html#hasPermissions[hasPermissions]`.
+
+The results of all the above are provided asynchronously in the handler.
+
+Here's an example of authorising a user:
 
 [source,java]
 ----
-var AuthService = require("vertx-auth-js/auth_service");
 
-var proxy = AuthService.createEventBusProxy(vertx, "vertx.auth");
+user.hasPermission("admin", function (res, res_err) {
+  if (res_err == null) {
 
-// Now do stuff with it:
+    var hasPermission = res;
 
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
+    if (hasPermission) {
+      console.log("User has the permision");
+    } else {
+      console.log("User does not have the permision");
+    };
 
-proxy.login(principal, credentials, function (res, res_err) {
-
-  // etc
-
+  } else {
+    res_err.printStackTrace();
+  };
 });
 
 ----
 
-Alternatively you can create an instance of the service directly and just use that locally:
+=== Caching roles and permissions
+
+The user object will cache any roles and permissions so subsequently calls to check if it has the same roles or
+permissions will result in the underlying provider being called.
+
+In order to clear the internal cache you can use `link:jsdoc/user-User.html#clearCache[clearCache]`.
+
+=== The User Principal
+
+You can get the Principal corresponding to the authenticated user with `link:jsdoc/user-User.html#principal[principal]`.
+
+What this returns depends on the underlying implementation.
+
+=== Clusterable users
+
+Sometimes users might be put into sessions and clustered to other nodes. For implementations that do not want to
+be clustered in this way, they should return `false` from this method.
+
+== The Apache Shiro implementation
+
+This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
+
+We provide out of the box support for properties and LDAP based auth using Shiro.
+
+To create an instance of the provider you use `link:jsdoc/shiro_auth-ShiroAuth.html[ShiroAuth]`. You specify the type of
+Shiro auth provider that you want with `ShiroAuthRealmType`, and you specify the
+configuration in a JSON object.
+
+Here's an example of creating a Shiro auth provider:
 
 [source,java]
 ----
-var ShiroAuthService = require("vertx-auth-js/shiro_auth_service");
+var ShiroAuth = require("vertx-auth-js/shiro_auth");
 
 var config = {
-};
-config."properties_path" = "classpath:test-auth.properties";
-
-var authService = ShiroAuthService.create(vertx, 'PROPERTIES', config);
-
-authService.start();
-
-// Now do stuff with it:
-
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
+  "properties_path" : "classpath:test-auth.properties"
 };
 
-authService.login(principal, credentials, function (res, res_err) {
-
-  // etc
-
-});
+var provider = ShiroAuth.create(vertx, 'PROPERTIES', config);
 
 
 ----
 
-If you create an instance this way you should make sure you start it with `link:jsdoc/auth_service-AuthService.html#start[start]`
-before you use it.
+=== The Shiro properties auth provider
 
-However you do it, once you've got your service you can start using it.
+This auth provider implementation uses Apache Shiro to get user/role/permission information from a properties file.
 
-== TODO these docs need to be refactored to talk about AuthProvider and AuthService as different ways of using it
-
-== Shiro Auth Service
-
-As previously mentioned we provide an implementation of the Auth service that uses Apache Shiro to perform the
-actual auth.
-
-To use this, you should use `link:jsdoc/shiro_auth_service-ShiroAuthService.html[ShiroAuthService]`.
-
-This currently supports properties file based user/role/permission information and using LDAP, and you can also pass
-in a pre-existing Shiro `Realm` instance or implement `ShiroAuthRealm` to implement
-a different method of auth using Shiro.
-
-== Shiro Auth Service Verticle
-
-As with most services you can deploy the service somewhere on your network and interact with it via a proxy, here's
-an example of deploying a Shiro auth service verticle:
-
-[source,java]
-----
-
-vertx.deployVerticle("service:io.vertx.shiro-auth-service");
-
-
-----
-
-=== Properties auth realm
-
-The properties auth realm gets user/role/permission information from a properties file.
-
-Here's an example that uses the out of the box properties auth realm:
-
-[source,java]
-----
-var ShiroAuthService = require("vertx-auth-js/shiro_auth_service");
-
-var config = {
-};
-config."properties_path" = "classpath:test-auth.properties";
-
-var authService = ShiroAuthService.create(vertx, 'PROPERTIES', config);
-
-authService.start();
-
-// Now do stuff with it:
-
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
-
-authService.login(principal, credentials, function (res, res_err) {
-
-  // etc
-
-});
-
-
-----
-
-The properties auth realm will, by default, look for a file called `vertx-users.properties`
-on the classpath.
+The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
 
 If you want to change this, you can use the `properties_path` configuration element to define how the properties
 file is found.
@@ -216,7 +192,7 @@ role.developer=do_actual_work
 
 When describing roles a wildcard `*` can be used to indicate that the role has all permissions
 
-=== LDAP auth realm
+=== The Shiro LDAP auth provider
 
 The LDAP auth realm gets user/role/permission information from an LDAP server.
 
@@ -234,197 +210,28 @@ An example is `ldap:://myldapserver.mycompany.com:10389`
 `ldap-system-username`:: TODO
 `ldap-system-password`:: TODO
 
-== Using non Shiro Auth implementations
+== Creating your own auth implementation
 
-If you want to use a different auth provider with the Auth service, you should implement `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
+If you wish to create your own auth provider you should implement the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
 
-You can then create a local instance of the AuthService with:
+We provide an abstract implementation of user called `AbstractUser` which you can subclass
+to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
 
-[source,js]
+If you wish your user objects to be clusterable you should make sure they implement `ClusterSerializable`.
+
+=== Using another Shiro Realm
+
+It's also possible to create an auth provider instance using a pre-created Apache Shiro Realm object.
+
+This is done as follows:
+
+[source,java]
 ----
-var AuthService = require("vertx-auth-js/auth_service");
+var ShiroAuth = require("vertx-auth-js/shiro_auth");
 
-var authService = AuthService.create(vertx, myAuthProvider);
-
-authService.start();
-
-
-----
-
-Or to to deploy an verticle instance:
-
-[source,js]
-----
-
-var config = {
-};
-config."provider_class_name" = "com.mycompany.myproject.MyAuthProviderClass";
-config."your_config_property" = "blah";
-
-var options = {
-  "config" : config
-};
-
-vertx.deployVerticle("service:io.vertx.auth-service", options);
+var provider = ShiroAuth.create(vertx, realm);
 
 
 ----
 
-== Using the API
-
-The auth service API is described with `link:jsdoc/auth_service-AuthService.html[AuthService]`.
-
-It contains method to login and check roles and permissions.
-
-=== Authentication - login / logout
-
-You use `link:jsdoc/auth_service-AuthService.html#login[login]` to login a user. The arguments to log-in are a `JsonObject`
-representing the principal (principal is a fancy name for a unique id, e.g. username representing the user), and
-another `JsonObject` representing the credentials (e.g. password) of the user.
-
-Often the principal will just contain a `username` string field - the value containing the username and this is what is
-expected by the out of the box Apache Shiro provider, but other providers might represent principals in other ways.
-
-Similarly, the credentials will often just be a `password` string field -  the value containing a password but other
-providers might use other data for credentials that's why we keep it as a general JSON object.
-
-The result of the login is returned in the result handler. If the login is successful a string login-ID will be returned
-as the result. This is a unique secure UUID that identifies the login session. The login ID should be used if you
-later want to authorise the user, i.e. check whether they have permissions or roles.
-
-Here's an example of a login:
-
-[source,js]
-----
-
-var principal = {
-  "username" : "tim"
-};
-var credentials = {
-  "password" : "sausages"
-};
-
-authService.login(principal, credentials, function (res, res_err) {
-
-  if (res_err == null) {
-
-    // Login successful!
-
-    // The login ID is needed if you later want to authorise a user
-
-    var loginID = res;
-
-  } else {
-
-    // Login failed.
-
-    var reason = res_err.getMessage();
-
-  };
-});
-
-----
-
-The login session ID provided at login will be valid as long as the login hasn't timed out or been explicitly
-logged out.
-
-The default time it remains valid is 30 minutes. If you want to use a different value of timeout you can specify that
-by calling `link:jsdoc/auth_service-AuthService.html#loginWithTimeout[loginWithTimeout]`.
-
-To prevent a login timing out, you can call `link:jsdoc/auth_service-AuthService.html#refreshLoginSession[refreshLoginSession]` specifying
-the login ID. The login will timeout if it remains unrefreshed for greater than the timeout period.
-
-[source,js]
-----
-
-authService.refreshLoginSession(loginID, function (res, res_err) {
-
-  if (res_err == null) {
-
-    // Refreshed ok
-
-  } else {
-
-    // Not refreshed ok - probably the login has already timed out or doesn't exist.
-  };
-});
-
-----
-
-You can explicitly logout a user with `link:jsdoc/auth_service-AuthService.html#logout[logout]` specifying the login ID:
-
-[source,js]
-----
-
-authService.logout(loginID, function (res, res_err) {
-
-  if (res_err == null) {
-
-    // Logged out ok
-
-  } else {
-
-    // Failed to logout - probably the login has already timed out or doesn't exist.
-
-  };
-});
-
-----
-
-=== Authorisation
-
-Authorisation means checking whether the user has the right roles or permissions.
-
-In order to check roles or permissions the user must first be logged-in and you must have a valid login session ID
-as described in the previous section.
-
-To check if a user has a specific role you use `link:jsdoc/auth_service-AuthService.html#hasRole[hasRole]` specifying the login ID
-and the role.
-
-The result of the check is returned in the handler. If the check didn't occur - e.g. the login ID is not valid, a
-failure will be returned in the handler, otherwise it will return a boolean - true if the user has the role
-or false if they don't have the role.
-
-[source,js]
-----
-
-authService.hasRole(loginID, "manager", function (res, res_err) {
-
-  if (res_err == null) {
-
-    var hasRole = res;
-
-    if (hasRole) {
-
-      // do something
-
-    } else {
-
-      // do something else
-
-    };
-
-  } else {
-
-    // Something went wrong - maybe the user is not logged in?
-  };
-
-});
-
-----
-
-You can also check multiple roles at the same time with `link:jsdoc/auth_service-AuthService.html#hasRoles[hasRoles]`. In this
-case you will return a true result only if the user has _all_ the specified roles.
-
-In the same way as checking roles, you can check permissions too. To this you use
-`link:jsdoc/auth_service-AuthService.html#hasPermission[hasPermission]` and
-`link:jsdoc/auth_service-AuthService.html#hasPermissions[hasPermissions]` in the exact same way as roles.
-
-Authorisations are cached for the length of the login. This means that the first time you do authorisation for a user
-it will go the auth provider, but the second time you do it with the same roles and permissions it will not call the
-auth provider but will return the cached value.
-
-This allows better performance but bear in mind that if the roles
-or permissions for a user change in the provider while the login session is valid and when they have already been
-cached in the auth service, then the auth service won't see the changes in the provider until a new login session
-is started.
+The implementation currently assumes that user/password based authentication is used.

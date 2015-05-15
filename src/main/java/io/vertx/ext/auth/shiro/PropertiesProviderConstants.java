@@ -16,18 +16,16 @@
 
 package io.vertx.ext.auth.shiro;
 
-import io.vertx.core.json.JsonObject;
-
 /**
- * Built-in implementations for Shiro auth Realms should implement this
+ * Configuration keys used when configuring a Shiro properties auth realm
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public interface ShiroAuthRealm {
+public interface PropertiesProviderConstants {
 
-  void login(JsonObject principal, JsonObject credentials);
+  /**
+   * The path where to look for the properties file
+   */
+  static final String PROPERTIES_PROPS_PATH_FIELD = "properties_path";
 
-  boolean hasRole(JsonObject principal, String role);
-
-  boolean hasPermission(JsonObject principal, String permission);
 }

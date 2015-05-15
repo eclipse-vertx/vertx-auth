@@ -19,15 +19,14 @@ package io.vertx.rxjava.ext.auth;
 import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
+import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 /**
- * This interface is implemented by auth providers which provide the actual auth functionality -
- * e.g. we have a implementation which uses Apache Shiro.
- * <p>
- * If you wish to use the auth service with other providers, implement this interface for your provider.
+ *
+ * User-facing interface for authenticating users.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.AuthProvider original} non RX-ified interface using Vert.x codegen.
@@ -46,69 +45,72 @@ public class AuthProvider {
   }
 
   /**
-   * Handle the actual login
-   * @param principal represents the unique id (e.g. username) of the user being logged in
-   * @param credentials the credentials - this can contain anything your provider expects, e.g. password
-   * @param resultHandler - this must return a failed result if login fails and it must return a succeeded result if the login succeeds
+   * Authenticate a user.
+   * <p>
+   * The first argument is a JSON object containing information for authenticating the user. What this actually contains
+   * depends on the specific implementation. In the case of a simple username/password based
+   * authentication it is likely to contain a JSON object with the following structure:
+   * <pre>
+   *   {
+   *     "username": "tim",
+   *     "password": "mypassword"
+   *   }
+   * </pre>
+   * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
+   * <p>
+   * If the user is successfully authenticated a {@link  User} object is passed to the handler in an .
+   * The user object can then be used for authorisation.
+   * @param authInfo The auth information
+   * @param resultHandler The result handler
    */
-  public void login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<Void>> resultHandler) { 
-    this.delegate.login(principal, credentials, resultHandler);
+  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) { 
+    this.delegate.authenticate(authInfo, new Handler<AsyncResult<io.vertx.ext.auth.User>>() {
+      public void handle(AsyncResult<io.vertx.ext.auth.User> event) {
+        AsyncResult<User> f;
+        if (event.succeeded()) {
+          f = InternalHelper.<User>result(new User(event.result()));
+        } else {
+          f = InternalHelper.<User>failure(event.cause());
+        }
+        resultHandler.handle(f);
+      }
+    });
   }
 
   /**
-   * Handle the actual login
-   * @param principal represents the unique id (e.g. username) of the user being logged in
-   * @param credentials the credentials - this can contain anything your provider expects, e.g. password
+   * Authenticate a user.
+   * <p>
+   * The first argument is a JSON object containing information for authenticating the user. What this actually contains
+   * depends on the specific implementation. In the case of a simple username/password based
+   * authentication it is likely to contain a JSON object with the following structure:
+   * <pre>
+   *   {
+   *     "username": "tim",
+   *     "password": "mypassword"
+   *   }
+   * </pre>
+   * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
+   * <p>
+   * If the user is successfully authenticated a {@link  User} object is passed to the handler in an .
+   * The user object can then be used for authorisation.
+   * @param authInfo The auth information
    * @return 
    */
-  public Observable<Void> loginObservable(JsonObject principal, JsonObject credentials) { 
-    io.vertx.rx.java.ObservableFuture<Void> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    login(principal, credentials, resultHandler.toHandler());
+  public Observable<User> authenticateObservable(JsonObject authInfo) { 
+    io.vertx.rx.java.ObservableFuture<User> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    authenticate(authInfo, resultHandler.toHandler());
     return resultHandler;
   }
 
   /**
-   * Handle whether a principal has a role
-   * @param principal represents the unique id (e.g. username) of the user being logged in
-   * @param role the role
-   * @param resultHandler this must return a failure if the check could not be performed - e.g. the principal is not known. Otherwise it must return a succeeded result which contains a boolean `true` if the principal has the role, or `false` if they do not have the role.
+   * Reconstruct a user object from a buffer. This is typically used to recreate a user after it has been deserialized
+   * from a buffer, e.g. after being stored in a clustered session.
+   * @param buffer the buffer
+   * @return the user
    */
-  public void hasRole(JsonObject principal, String role, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.hasRole(principal, role, resultHandler);
-  }
-
-  /**
-   * Handle whether a principal has a role
-   * @param principal represents the unique id (e.g. username) of the user being logged in
-   * @param role the role
-   * @return 
-   */
-  public Observable<Boolean> hasRoleObservable(JsonObject principal, String role) { 
-    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasRole(principal, role, resultHandler.toHandler());
-    return resultHandler;
-  }
-
-  /**
-   * Handle whether a principal has a permission
-   * @param principal represents the unique id (e.g. username) of the user being logged in
-   * @param permission the permission
-   * @param resultHandler this must return a failure if the check could not be performed - e.g. the principal is not known. Otherwise it must return a succeeded result which contains a boolean `true` if the principal has the permission, or `false` if they do not have the permission.
-   */
-  public void hasPermission(JsonObject principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.hasPermission(principal, permission, resultHandler);
-  }
-
-  /**
-   * Handle whether a principal has a permission
-   * @param principal represents the unique id (e.g. username) of the user being logged in
-   * @param permission the permission
-   * @return 
-   */
-  public Observable<Boolean> hasPermissionObservable(JsonObject principal, String permission) { 
-    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasPermission(principal, permission, resultHandler.toHandler());
-    return resultHandler;
+  public User fromBuffer(Buffer buffer) { 
+    User ret= User.newInstance(this.delegate.fromBuffer((io.vertx.core.buffer.Buffer) buffer.getDelegate()));
+    return ret;
   }
 
 

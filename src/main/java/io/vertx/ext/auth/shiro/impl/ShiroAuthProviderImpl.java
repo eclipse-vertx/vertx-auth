@@ -17,66 +17,74 @@
 package io.vertx.ext.auth.shiro.impl;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxException;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.shiro.ShiroAuthProvider;
-import io.vertx.ext.auth.shiro.ShiroAuthRealm;
+import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.realm.Realm;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.SubjectContext;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
 
 /**
  *
- * Shiro API is unfortunately inherently synchronous, so we need to execute everything on the worker pool
- *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ShiroAuthProviderImpl implements ShiroAuthProvider {
+public class ShiroAuthProviderImpl implements AuthProvider {
 
-  private final Vertx vertx;
-  private final ShiroAuthRealm realm;
+  private Vertx vertx;
+  private org.apache.shiro.mgt.SecurityManager securityManager;
 
-  public ShiroAuthProviderImpl(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
-    this.vertx = vertx;
+  public static AuthProvider create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
+    Realm realm;
     switch (realmType) {
       case PROPERTIES:
-        realm = new PropertiesAuthRealm(config);
+        realm = PropertiesAuthProvider.createRealm(config);
         break;
       case LDAP:
-        realm = new LDAPAuthRealm(config);
+        realm = LDAPAuthProvider.createRealm(config);
         break;
       default:
         throw new IllegalArgumentException("Invalid shiro auth realm type: " + realmType);
     }
+    return new ShiroAuthProviderImpl(vertx, realm);
   }
 
-  public ShiroAuthProviderImpl(Vertx vertx, ShiroAuthRealm realm) {
+  public ShiroAuthProviderImpl(Vertx vertx, Realm realm) {
     this.vertx = vertx;
-    this.realm = realm;
+    this.securityManager = new DefaultSecurityManager(realm);
   }
 
   @Override
-  public void login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<Void>> resultHandler) {
-    vertx.executeBlocking((Future<Void> fut) -> {
-      realm.login(principal, credentials);
-      fut.complete();
+  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
+    vertx.executeBlocking(fut -> {
+      SubjectContext subjectContext = new DefaultSubjectContext();
+      Subject subject = securityManager.createSubject(subjectContext);
+      String username = authInfo.getString("username");
+      String password = authInfo.getString("password");
+      AuthenticationToken token = new UsernamePasswordToken(username, password);
+      try {
+        subject.login(token);
+      } catch (AuthenticationException e) {
+        throw new VertxException(e);
+      }
+      fut.complete(new ShiroUser(vertx, securityManager, username));
     }, resultHandler);
   }
 
   @Override
-  public void hasRole(JsonObject principal, String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
-      boolean hasRole = realm.hasRole(principal, role);
-      fut.complete(hasRole);
-    }, resultHandler);
-  }
-
-  @Override
-  public void hasPermission(JsonObject principal, String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking((Future<Boolean> fut) -> {
-      boolean hasPermission = realm.hasPermission(principal, permission);
-      fut.complete(hasPermission);
-    }, resultHandler);
+  public User fromBuffer(Buffer buffer) {
+    ShiroUser user = new ShiroUser(vertx, securityManager);
+    user.readFromBuffer(0, buffer);
+    return user;
   }
 
 }

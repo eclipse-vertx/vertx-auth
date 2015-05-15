@@ -19,13 +19,12 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 /**
- * This interface is implemented by auth providers which provide the actual auth functionality -
- * e.g. we have a implementation which uses Apache Shiro.
- * <p>
- * If you wish to use the auth service with other providers, implement this interface for your provider.
+ *
+ * User-facing interface for authenticating users.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -33,35 +32,34 @@ import io.vertx.core.json.JsonObject;
 public interface AuthProvider {
 
   /**
-   * Handle the actual login
+   * Authenticate a user.
+   * <p>
+   * The first argument is a JSON object containing information for authenticating the user. What this actually contains
+   * depends on the specific implementation. In the case of a simple username/password based
+   * authentication it is likely to contain a JSON object with the following structure:
+   * <pre>
+   *   {
+   *     "username": "tim",
+   *     "password": "mypassword"
+   *   }
+   * </pre>
+   * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
+   * <p>
+   * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
+   * The user object can then be used for authorisation.
    *
-   * @param principal  represents the unique id (e.g. username) of the user being logged in
-   * @param credentials  the credentials - this can contain anything your provider expects, e.g. password
-   * @param resultHandler - this must return a failed result if login fails and it must return a succeeded result if the
-   *                      login succeeds
+   * @param authInfo  The auth information
+   * @param resultHandler  The result handler
    */
-  void login(JsonObject principal, JsonObject credentials, Handler<AsyncResult<Void>> resultHandler);
+  void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler);
 
   /**
-   * Handle whether a principal has a role
+   * Reconstruct a user object from a buffer. This is typically used to recreate a user after it has been deserialized
+   * from a buffer, e.g. after being stored in a clustered session.
    *
-   * @param principal  represents the unique id (e.g. username) of the user being logged in
-   * @param role  the role
-   * @param resultHandler  this must return a failure if the check could not be performed - e.g. the principal is not
-   *                       known. Otherwise it must return a succeeded result which contains a boolean `true` if the
-   *                       principal has the role, or `false` if they do not have the role.
+   * @param buffer  the buffer
+   * @return  the user
    */
-  void hasRole(JsonObject principal, String role, Handler<AsyncResult<Boolean>> resultHandler);
-
-  /**
-   * Handle whether a principal has a permission
-   *
-   * @param principal   represents the unique id (e.g. username) of the user being logged in
-   * @param permission  the permission
-   * @param resultHandler  this must return a failure if the check could not be performed - e.g. the principal is not
-   *                       known. Otherwise it must return a succeeded result which contains a boolean `true` if the
-   *                       principal has the permission, or `false` if they do not have the permission.
-   */
-  void hasPermission(JsonObject principal, String permission, Handler<AsyncResult<Boolean>> resultHandler);
+  User fromBuffer(Buffer buffer);
 
 }
