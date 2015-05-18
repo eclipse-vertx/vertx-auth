@@ -20,7 +20,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.Utils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -28,6 +27,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 /**
@@ -91,7 +91,7 @@ public class ShiroUser extends AbstractUser {
   @Override
   public void writeToBuffer(Buffer buff) {
     super.writeToBuffer(buff);
-    byte[] bytes = username.getBytes(Utils.UTF8);
+    byte[] bytes = username.getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length).appendBytes(bytes);
   }
 
@@ -102,7 +102,7 @@ public class ShiroUser extends AbstractUser {
     pos += 4;
     byte[] bytes = buffer.getBytes(pos, pos + len);
     pos += len;
-    username = new String(bytes, Utils.UTF8);
+    username = new String(bytes, StandardCharsets.UTF_8);
     setSubject();
     return pos;
   }

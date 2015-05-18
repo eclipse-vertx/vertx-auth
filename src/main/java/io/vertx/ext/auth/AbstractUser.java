@@ -20,9 +20,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.Utils;
 import io.vertx.core.shareddata.impl.ClusterSerializable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -141,7 +141,7 @@ public abstract class AbstractUser implements User, ClusterSerializable {
     buff.appendInt(set == null ? 0 : set.size());
     if (set != null) {
       for (String entry : set) {
-        byte[] bytes = entry.getBytes(Utils.UTF8);
+        byte[] bytes = entry.getBytes(StandardCharsets.UTF_8);
         buff.appendInt(bytes.length).appendBytes(bytes);
       }
     }
@@ -155,7 +155,7 @@ public abstract class AbstractUser implements User, ClusterSerializable {
       pos += 4;
       byte[] bytes = buffer.getBytes(pos, pos + len);
       pos += len;
-      set.add(new String(bytes, Utils.UTF8));
+      set.add(new String(bytes, StandardCharsets.UTF_8));
     }
     return pos;
   }

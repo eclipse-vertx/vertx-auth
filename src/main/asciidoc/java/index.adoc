@@ -24,7 +24,7 @@ Users can have zero or more roles, e.g. "manager", "developer".
 Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
 and a developer might have a permission "commit_code".
 
-== Authentication - the `AuthProvider`
+== Authentication
 
 To authenticate a user you use `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html#authenticate-io.vertx.core.json.JsonObject-io.vertx.core.Handler-[authenticate]`.
 
@@ -69,7 +69,7 @@ The operation `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html#fromBuffer
 to be reconstructed from a `link:../../apidocs/io/vertx/core/buffer/Buffer.html[Buffer]`. This is primarily used in vertx-web session clustering
 to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
 
-== Authorisation - the `User`
+== Authorisation
 
 Once you have an `link:../../apidocs/io/vertx/ext/auth/User.html[User]` instance you can call methods on it to authorise it.
 
