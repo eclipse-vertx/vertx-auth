@@ -20,6 +20,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.apache.shiro.realm.Realm;
@@ -79,6 +80,15 @@ public class Examples {
 
   }
 
+  public void example5(Vertx vertx) {
+
+    JsonObject config = new JsonObject()
+        .put("keyStoreURI", "classpath:///keystore.jceks")
+        .put("keyStoreType", "jceks")
+        .put("keyStorePassword", "secret");
+
+    AuthProvider provider = JWTAuth.create(vertx, config);
+  }
 //
 //  public void example0_1(Vertx vertx, JsonObject config) {
 //
