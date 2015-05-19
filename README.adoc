@@ -1,9 +1,10 @@
-# Vert.x Auth Service
+# Vert.x Auth
 
-This is a Vert.x service that provide authentication and authorisation functionality.
+This component provides interfaces for authentication and authorisation in Vert.x.
 
-Please see the in source asciidoc documentation or the main documentation on the web-site for a full description
-of Apex:
+It also provides an implementation that uses Apache Shiro.
+
+Please see the in source asciidoc documentation or the main documentation on the web-site for a full description:
 
 * Web-site docs
 * link:src/main/asciidoc/java/index.adoc[Java in-source docs]

@@ -16,23 +16,21 @@
 
 package io.vertx.ext.auth.shiro.impl;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
-import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.realm.Realm;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.apache.shiro.realm.ldap.JndiLdapRealm;
-import static io.vertx.ext.auth.shiro.LDAPAuthRealmConstants.*;
+
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.*;
 
 /**
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class LDAPAuthRealm extends ShiroAuthRealmBase {
+public class LDAPAuthProvider extends ShiroAuthProviderImpl {
 
-  private static final Logger log = LoggerFactory.getLogger(LDAPAuthRealm.class);
-
-  public LDAPAuthRealm(JsonObject config) {
+  public static Realm createRealm(JsonObject config) {
     JndiLdapRealm ldapRealm = new JndiLdapRealm();
     JndiLdapContextFactory factory = new JndiLdapContextFactory();
     String userDNTemplate = config.getString(LDAP_USER_DN_TEMPLATE_FIELD);
@@ -67,8 +65,10 @@ public class LDAPAuthRealm extends ShiroAuthRealmBase {
     }
     ldapRealm.setContextFactory(factory);
     ldapRealm.init();
-    this.securityManager = new DefaultSecurityManager(ldapRealm);
-    this.realm = ldapRealm;
+    return ldapRealm;
   }
 
+  public LDAPAuthProvider(Vertx vertx, Realm realm) {
+    super(vertx, realm);
+  }
 }

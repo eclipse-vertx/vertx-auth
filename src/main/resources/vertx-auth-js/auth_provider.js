@@ -16,16 +16,16 @@
 
 /** @module vertx-auth-js/auth_provider */
 var utils = require('vertx-js/util/utils');
+var User = require('vertx-auth-js/user');
+var Buffer = require('vertx-js/buffer');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
 var JAuthProvider = io.vertx.ext.auth.AuthProvider;
 
 /**
- This interface is implemented by auth providers which provide the actual auth functionality -
- e.g. we have a implementation which uses Apache Shiro.
- <p>
- If you wish to use the auth service with other providers, implement this interface for your provider.
+
+ User-facing interface for authenticating users.
 
  @class
 */
@@ -35,19 +35,32 @@ var AuthProvider = function(j_val) {
   var that = this;
 
   /**
-   Handle the actual login
+   Authenticate a user.
+   <p>
+   The first argument is a JSON object containing information for authenticating the user. What this actually contains
+   depends on the specific implementation. In the case of a simple username/password based
+   authentication it is likely to contain a JSON object with the following structure:
+   <pre>
+     {
+       "username": "tim",
+       "password": "mypassword"
+     }
+   </pre>
+   For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
+   <p>
+   If the user is successfully authenticated a {@link User} object is passed to the handler in an .
+   The user object can then be used for authorisation.
 
    @public
-   @param principal {Object} represents the unique id (e.g. username) of the user being logged in 
-   @param credentials {Object} the credentials - this can contain anything your provider expects, e.g. password 
-   @param resultHandler {function} - this must return a failed result if login fails and it must return a succeeded result if the login succeeds 
+   @param authInfo {Object} The auth information 
+   @param resultHandler {function} The result handler 
    */
-  this.login = function(principal, credentials, resultHandler) {
+  this.authenticate = function(authInfo, resultHandler) {
     var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && typeof __args[2] === 'function') {
-      j_authProvider["login(io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(principal), utils.convParamJsonObject(credentials), function(ar) {
+    if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'function') {
+      j_authProvider["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(authInfo), function(ar) {
       if (ar.succeeded()) {
-        resultHandler(null, null);
+        resultHandler(new User(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -56,44 +69,17 @@ var AuthProvider = function(j_val) {
   };
 
   /**
-   Handle whether a principal has a role
+   Reconstruct a user object from a buffer. This is typically used to recreate a user after it has been deserialized
+   from a buffer, e.g. after being stored in a clustered session.
 
    @public
-   @param principal {Object} represents the unique id (e.g. username) of the user being logged in 
-   @param role {string} the role 
-   @param resultHandler {function} this must return a failure if the check could not be performed - e.g. the principal is not known. Otherwise it must return a succeeded result which contains a boolean `true` if the principal has the role, or `false` if they do not have the role. 
+   @param buffer {Buffer} the buffer 
+   @return {User} the user
    */
-  this.hasRole = function(principal, role, resultHandler) {
+  this.fromBuffer = function(buffer) {
     var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-      j_authProvider["hasRole(io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](utils.convParamJsonObject(principal), role, function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-    } else utils.invalidArgs();
-  };
-
-  /**
-   Handle whether a principal has a permission
-
-   @public
-   @param principal {Object} represents the unique id (e.g. username) of the user being logged in 
-   @param permission {string} the permission 
-   @param resultHandler {function} this must return a failure if the check could not be performed - e.g. the principal is not known. Otherwise it must return a succeeded result which contains a boolean `true` if the principal has the permission, or `false` if they do not have the permission. 
-   */
-  this.hasPermission = function(principal, permission, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-      j_authProvider["hasPermission(io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](utils.convParamJsonObject(principal), permission, function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return new User(j_authProvider["fromBuffer(io.vertx.core.buffer.Buffer)"](buffer._jdel));
     } else utils.invalidArgs();
   };
 

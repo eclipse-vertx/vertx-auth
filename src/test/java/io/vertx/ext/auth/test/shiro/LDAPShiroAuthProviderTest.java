@@ -20,13 +20,11 @@ import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthService;
-import io.vertx.ext.auth.shiro.LDAPAuthRealmConstants;
+import io.vertx.ext.auth.shiro.LDAPProviderConstants;
+import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
-import io.vertx.ext.auth.shiro.ShiroAuthService;
-import io.vertx.test.core.VertxTestBase;
+import org.junit.Ignore;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.ArrayList;
@@ -37,13 +35,13 @@ import java.util.List;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class LDAPAuthServiceTest extends VertxTestBase {
+@Ignore
+public class LDAPShiroAuthProviderTest extends ShiroAuthProviderTestBase {
 
   @Rule
   public TemporaryFolder ldapWorkingDirectory = new TemporaryFolder();
 
   protected EmbeddedADS ldapServer;
-  protected AuthService authService;
 
   @Override
   public void setUp() throws Exception {
@@ -51,48 +49,14 @@ public class LDAPAuthServiceTest extends VertxTestBase {
     ldapServer = new EmbeddedADS(ldapWorkingDirectory.newFolder());
     ldapServer.startServer();
     insertTestUsers();
-    authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.LDAP, getConfig());
+    authProvider = ShiroAuth.create(vertx, ShiroAuthRealmType.LDAP, getConfig());
   }
-
 
   protected JsonObject getConfig() {
     JsonObject config = new JsonObject();
-    config.put(LDAPAuthRealmConstants.LDAP_URL, "ldap://localhost:10389");
-    config.put(LDAPAuthRealmConstants.LDAP_USER_DN_TEMPLATE_FIELD, "uid={0},ou=users,dc=foo,dc=com");
+    config.put(LDAPProviderConstants.LDAP_URL, "ldap://localhost:10389");
+    config.put(LDAPProviderConstants.LDAP_USER_DN_TEMPLATE_FIELD, "uid={0},ou=users,dc=foo,dc=com");
     return config;
-  }
-
-  @Test
-  public void testLDAP() {
-    JsonObject principal = new JsonObject().put("username", "tim");
-    JsonObject credentials = new JsonObject().put("password", "sausages");
-    authService.login(principal, credentials, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testLDAPFailBadpassword() {
-    JsonObject principal = new JsonObject().put("username", "tim");
-    JsonObject credentials = new JsonObject().put("password", "wrongone");
-    authService.login(principal, credentials, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testLDAPFailUnknownUser() {
-    JsonObject principal = new JsonObject().put("username", "bob");
-    JsonObject credentials = new JsonObject().put("password", "blah");
-    authService.login(principal, credentials, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
   }
 
   /*

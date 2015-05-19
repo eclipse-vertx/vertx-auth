@@ -17,35 +17,24 @@
 package io.vertx.ext.auth.test.shiro;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.shiro.PropertiesAuthRealmConstants;
+import io.vertx.ext.auth.shiro.PropertiesProviderConstants;
+import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
-import io.vertx.ext.auth.shiro.ShiroAuthService;
-import io.vertx.ext.auth.test.AuthServiceTestBase;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class PropertiesAuthServiceTest extends AuthServiceTestBase {
+public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
 
   @Override
-  protected void initAuthService() throws Exception {
-    initAuthService(-1);
-  }
-
-  @Override
-  protected void initAuthService(long reaperPeriod) throws Exception {
-    JsonObject config = getConfig();
-    if (reaperPeriod == -1) {
-      authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config);
-    } else {
-      authService = ShiroAuthService.create(vertx, ShiroAuthRealmType.PROPERTIES, config).setReaperPeriod(reaperPeriod);
-    }
-    authService.start();
+  public void setUp() throws Exception {
+    super.setUp();
+    authProvider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, getConfig());
   }
 
   protected JsonObject getConfig() {
     JsonObject config = new JsonObject();
-    config.put(PropertiesAuthRealmConstants.PROPERTIES_PROPS_PATH_FIELD, "classpath:test-auth.properties");
+    config.put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, "classpath:test-auth.properties");
     return config;
   }
 

@@ -1,25 +1,38 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
+
 /**
+ * = Vert.x Auth - Authentication and Authorisation
  *
- * = Vert.x Auth Service
+ * This Vert.x component provides interfaces for authentication and authorisation that can be used from your Vert.x
+ * applications and can be backed by different providers.
  *
- * This Vert.x service provides authentication and authorisation functionality and the concept of a login session
- * for use in your Vert.x applications
- *
- * The auth service provides a common interface that can be backed by different auth providers. Vert.x ships with a
- * default implementation that uses http://shiro.apache.org/[Apache Shiro] but you can provide your own implementation
- * by implementing the {@link io.vertx.ext.auth.AuthProvider} interface.
- *
- * The {@link io.vertx.ext.auth.AuthProvider} interface can also be used directory in your applications if you just want
- * raw authentication and authorisation functionality without the concept of a login session.
+ * It also provides an implementation that uses http://shiro.apache.org/[Apache Shiro] out-of-the-box but you can provide
+ * your own implementation by implementing the {@link io.vertx.ext.auth.AuthProvider} interface.
  *
  * The Vert.x Apache Shiro implementation
  * currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
+ *
+ * Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
  *
  * == Basic concepts
  *
  * _Authentication_ (aka _log in_) means verifying the identity of a user.
  *
- * _Authorisation_ means verifying a user has the correct access rights for some resource.
+ * _Authorisation_ means verifying a user is allowed to access some resource.
  *
  * The service uses a familiar user/role/permission model that you will probably know already:
  *
@@ -28,74 +41,97 @@
  * Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
  * and a developer might have a permission "commit_code".
  *
- * == Setting up the service
+ * == Authentication
  *
- * As with other services you can use the service either by deploying it as a verticle somewhere on your network and
- * interacting with it over the event bus, either directly by sending messages, or using a service proxy, e.g.
+ * To authenticate a user you use {@link io.vertx.ext.auth.AuthProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
  *
- * Somewhere you deploy it:
+ * The first argument is a JSON object which contains authentication information. What this actually contains depends
+ * on the specific implementation; for a simple username/password based authentication it might contain something like:
+ *
+ * ----
+ * {
+ *   "username": "tim"
+ *   "password": "mypassword"
+ * }
+ * ----
+ *
+ * For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
+ *
+ * Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
+ * the call. The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated
+ * user and contains operations which allow the user to be authorised.
+ *
+ * Here's an example of authenticating a user using a simple username/password implementation:
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example0_1}
+ * {@link examples.Examples#example1}
  * ----
  *
- * Now you can either send messages to it directly over the event bus, or you can create a proxy to the service
- * from wherever you are and just use that:
+ * === Re-creating users from Buffers
+ *
+ * The operation {@link io.vertx.ext.auth.AuthProvider#fromBuffer(io.vertx.core.buffer.Buffer)} allows a User object
+ * to be reconstructed from a {@link io.vertx.core.buffer.Buffer}. This is primarily used in vertx-web session clustering
+ * to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
+ *
+ * == Authorisation
+ *
+ * Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
+ *
+ * To check if a user has a specific role you use {@link io.vertx.ext.auth.User#hasRole},
+ * to check if a user has all the specified roles you use {@link io.vertx.ext.auth.User#hasRoles},
+ * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#hasPermission},
+ * to check if a user has all the specified permissions you use {@link io.vertx.ext.auth.User#hasPermissions}.
+ *
+ * The results of all the above are provided asynchronously in the handler.
+ *
+ * Here's an example of authorising a user:
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example0_2}
+ * {@link examples.Examples#example2}
  * ----
  *
- * Alternatively you can create an instance of the service directly and just use that locally:
+ * === Caching roles and permissions
+ *
+ * The user object will cache any roles and permissions so subsequently calls to check if it has the same roles or
+ * permissions will result in the underlying provider being called.
+ *
+ * In order to clear the internal cache you can use {@link io.vertx.ext.auth.User#clearCache()}.
+ *
+ * === The User Principal
+ *
+ * You can get the Principal corresponding to the authenticated user with {@link io.vertx.ext.auth.User#principal()}.
+ *
+ * What this returns depends on the underlying implementation.
+ *
+ * === Clusterable users
+ *
+ * Sometimes users might be put into sessions and clustered to other nodes. For implementations that do not want to
+ * be clustered in this way, they should return `false` from this method.
+ *
+ * == The Apache Shiro implementation
+ *
+ * This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
+ *
+ * We provide out of the box support for properties and LDAP based auth using Shiro.
+ *
+ * To create an instance of the provider you use {@link io.vertx.ext.auth.shiro.ShiroAuth}. You specify the type of
+ * Shiro auth provider that you want with {@link io.vertx.ext.auth.shiro.ShiroAuthRealmType}, and you specify the
+ * configuration in a JSON object.
+ *
+ * Here's an example of creating a Shiro auth provider:
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example0_3}
+ * {@link examples.Examples#example3}
  * ----
  *
- * If you create an instance this way you should make sure you start it with {@link io.vertx.ext.auth.AuthService#start}
- * before you use it.
+ * === The Shiro properties auth provider
  *
- * However you do it, once you've got your service you can start using it.
+ * This auth provider implementation uses Apache Shiro to get user/role/permission information from a properties file.
  *
- * == TODO these docs need to be refactored to talk about AuthProvider and AuthService as different ways of using it
- *
- * == Shiro Auth Service
- *
- * As previously mentioned we provide an implementation of the Auth service that uses Apache Shiro to perform the
- * actual auth.
- *
- * To use this, you should use {@link io.vertx.ext.auth.shiro.ShiroAuthService}.
- *
- * This currently supports properties file based user/role/permission information and using LDAP, and you can also pass
- * in a pre-existing Shiro `Realm` instance or implement {@link io.vertx.ext.auth.shiro.ShiroAuthRealm} to implement
- * a different method of auth using Shiro.
- *
- * == Shiro Auth Service Verticle
- *
- * As with most services you can deploy the service somewhere on your network and interact with it via a proxy, here's
- * an example of deploying a Shiro auth service verticle:
- *
- * [source,java]
- * ----
- * {@link examples.Examples#example0_3_1}
- * ----
- *
- * === Properties auth realm
- *
- * The properties auth realm gets user/role/permission information from a properties file.
- *
- * Here's an example that uses the out of the box properties auth realm:
- *
- * [source,java]
- * ----
- * {@link examples.Examples#example0_4}
- * ----
- *
- * The properties auth realm will, by default, look for a file called `vertx-users.properties`
- * on the classpath.
+ * The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
  *
  * If you want to change this, you can use the `properties_path` configuration element to define how the properties
  * file is found.
@@ -132,7 +168,7 @@
  *
  * When describing roles a wildcard `*` can be used to indicate that the role has all permissions
  *
- * === LDAP auth realm
+ * === The Shiro LDAP auth provider
  *
  * The LDAP auth realm gets user/role/permission information from an LDAP server.
  *
@@ -150,108 +186,30 @@
  * `ldap-system-username`:: TODO
  * `ldap-system-password`:: TODO
  *
- * == Using non Shiro Auth implementations
+ * == Creating your own auth implementation
  *
- * If you want to use a different auth provider with the Auth service, you should implement {@link io.vertx.ext.auth.AuthProvider}.
+ * If you wish to create your own auth provider you should implement the {@link io.vertx.ext.auth.AuthProvider} interface.
  *
- * You can then create a local instance of the AuthService with:
+ * We provide an abstract implementation of user called {@link io.vertx.ext.auth.AbstractUser} which you can subclass
+ * to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
  *
- * [source,$lang]
- * ----
- * {@link examples.Examples#example0_5}
- * ----
+ * If you wish your user objects to be clusterable you should make sure they implement {@link io.vertx.core.shareddata.impl.ClusterSerializable}.
  *
- * Or to to deploy an verticle instance:
+ * === Using another Shiro Realm
  *
- * [source,$lang]
- * ----
- * {@link examples.Examples#example0_6}
- * ----
+ * It's also possible to create an auth provider instance using a pre-created Apache Shiro Realm object.
  *
- * == Using the API
+ * This is done as follows:
  *
- * The auth service API is described with {@link io.vertx.ext.auth.AuthService}.
- *
- * It contains method to login and check roles and permissions.
- *
- * === Authentication - login / logout
- *
- * You use {@link io.vertx.ext.auth.AuthService#login} to login a user. The arguments to log-in are a {@link io.vertx.core.json.JsonObject}
- * representing the principal (principal is a fancy name for a unique id, e.g. username representing the user), and
- * another {@link io.vertx.core.json.JsonObject} representing the credentials (e.g. password) of the user.
- *
- * Often the principal will just contain a `username` string field - the value containing the username and this is what is
- * expected by the out of the box Apache Shiro provider, but other providers might represent principals in other ways.
- *
- * Similarly, the credentials will often just be a `password` string field -  the value containing a password but other
- * providers might use other data for credentials that's why we keep it as a general JSON object.
- *
- * The result of the login is returned in the result handler. If the login is successful a string login-ID will be returned
- * as the result. This is a unique secure UUID that identifies the login session. The login ID should be used if you
- * later want to authorise the user, i.e. check whether they have permissions or roles.
- *
- * Here's an example of a login:
- *
- * [source,$lang]
- * ----
- * {@link examples.Examples#example1}
- * ----
- *
- * The login session ID provided at login will be valid as long as the login hasn't timed out or been explicitly
- * logged out.
- *
- * The default time it remains valid is 30 minutes. If you want to use a different value of timeout you can specify that
- * by calling {@link io.vertx.ext.auth.AuthService#loginWithTimeout}.
- *
- * To prevent a login timing out, you can call {@link io.vertx.ext.auth.AuthService#refreshLoginSession} specifying
- * the login ID. The login will timeout if it remains unrefreshed for greater than the timeout period.
- *
- * [source,$lang]
- * ----
- * {@link examples.Examples#example2}
- * ----
- *
- * You can explicitly logout a user with {@link io.vertx.ext.auth.AuthService#logout} specifying the login ID:
- *
- * [source,$lang]
- * ----
- * {@link examples.Examples#example3}
- * ----
- *
- * === Authorisation
- *
- * Authorisation means checking whether the user has the right roles or permissions.
- *
- * In order to check roles or permissions the user must first be logged-in and you must have a valid login session ID
- * as described in the previous section.
- *
- * To check if a user has a specific role you use {@link io.vertx.ext.auth.AuthService#hasRole} specifying the login ID
- * and the role.
- *
- * The result of the check is returned in the handler. If the check didn't occur - e.g. the login ID is not valid, a
- * failure will be returned in the handler, otherwise it will return a boolean - true if the user has the role
- * or false if they don't have the role.
- *
- * [source,$lang]
+ * [source,java]
  * ----
  * {@link examples.Examples#example4}
  * ----
  *
- * You can also check multiple roles at the same time with {@link io.vertx.ext.auth.AuthService#hasRoles}. In this
- * case you will return a true result only if the user has _all_ the specified roles.
+ * The implementation currently assumes that user/password based authentication is used.
  *
- * In the same way as checking roles, you can check permissions too. To this you use
- * {@link io.vertx.ext.auth.AuthService#hasPermission} and
- * {@link io.vertx.ext.auth.AuthService#hasPermissions} in the exact same way as roles.
  *
- * Authorisations are cached for the length of the login. This means that the first time you do authorisation for a user
- * it will go the auth provider, but the second time you do it with the same roles and permissions it will not call the
- * auth provider but will return the cached value.
  *
- * This allows better performance but bear in mind that if the roles
- * or permissions for a user change in the provider while the login session is valid and when they have already been
- * cached in the auth service, then the auth service won't see the changes in the provider until a new login session
- * is started.
  *
  *
  *

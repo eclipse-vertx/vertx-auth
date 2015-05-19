@@ -16,18 +16,20 @@
 
 package io.vertx.ext.auth.shiro.impl;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.realm.Realm;
 import org.apache.shiro.realm.text.PropertiesRealm;
-import static io.vertx.ext.auth.shiro.PropertiesAuthRealmConstants.*;
+
+import static io.vertx.ext.auth.shiro.PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD;
 
 /**
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class PropertiesAuthRealm extends ShiroAuthRealmBase {
+public class PropertiesAuthProvider extends ShiroAuthProviderImpl {
 
-  public PropertiesAuthRealm(JsonObject config) {
+  public static Realm createRealm(JsonObject config) {
     PropertiesRealm propsRealm = new PropertiesRealm();
     String resourcePath = config.getString(PROPERTIES_PROPS_PATH_FIELD);
     if (resourcePath != null) {
@@ -36,9 +38,10 @@ public class PropertiesAuthRealm extends ShiroAuthRealmBase {
       propsRealm.setResourcePath("classpath:vertx-users.properties");
     }
     propsRealm.init();
-    this.securityManager = new DefaultSecurityManager(propsRealm);
-    this.realm = propsRealm;
+    return propsRealm;
   }
 
-
+  public PropertiesAuthProvider(Vertx vertx, Realm realm) {
+    super(vertx, realm);
+  }
 }

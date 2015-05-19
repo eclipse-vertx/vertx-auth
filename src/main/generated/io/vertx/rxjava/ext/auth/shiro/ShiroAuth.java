@@ -25,18 +25,17 @@ import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
- * @author <a href="http://tfox.org">Tim Fox</a>
+ * Factory interface for creating Apache Shiro based {@link  io.vertx.rxjava.ext.auth.AuthProvider} instances.
  *
  * <p/>
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuthProvider original} non RX-ified interface using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuth original} non RX-ified interface using Vert.x codegen.
  */
 
-public class ShiroAuthProvider extends AuthProvider {
+public class ShiroAuth {
 
-  final io.vertx.ext.auth.shiro.ShiroAuthProvider delegate;
+  final io.vertx.ext.auth.shiro.ShiroAuth delegate;
 
-  public ShiroAuthProvider(io.vertx.ext.auth.shiro.ShiroAuthProvider delegate) {
-    super(delegate);
+  public ShiroAuth(io.vertx.ext.auth.shiro.ShiroAuth delegate) {
     this.delegate = delegate;
   }
 
@@ -44,13 +43,13 @@ public class ShiroAuthProvider extends AuthProvider {
     return delegate;
   }
 
-  public static ShiroAuthProvider create(Vertx vertx, ShiroAuthRealmType shiroAuthRealmType, JsonObject config) { 
-    ShiroAuthProvider ret= ShiroAuthProvider.newInstance(io.vertx.ext.auth.shiro.ShiroAuthProvider.create((io.vertx.core.Vertx) vertx.getDelegate(), shiroAuthRealmType, config));
+  public static AuthProvider create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) { 
+    AuthProvider ret= AuthProvider.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), realmType, config));
     return ret;
   }
 
 
-  public static ShiroAuthProvider newInstance(io.vertx.ext.auth.shiro.ShiroAuthProvider arg) {
-    return new ShiroAuthProvider(arg);
+  public static ShiroAuth newInstance(io.vertx.ext.auth.shiro.ShiroAuth arg) {
+    return new ShiroAuth(arg);
   }
 }

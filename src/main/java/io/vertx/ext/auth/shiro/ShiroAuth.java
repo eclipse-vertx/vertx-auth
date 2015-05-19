@@ -22,19 +22,22 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthProviderImpl;
+import org.apache.shiro.realm.Realm;
 
 /**
+ * Factory interface for creating Apache Shiro based {@link io.vertx.ext.auth.AuthProvider} instances.
+ *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
-public interface ShiroAuthProvider extends AuthProvider {
+public interface ShiroAuth {
 
-  static ShiroAuthProvider create(Vertx vertx, ShiroAuthRealmType shiroAuthRealmType, JsonObject config) {
-    return new ShiroAuthProviderImpl(vertx, shiroAuthRealmType, config);
+  static AuthProvider create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
+    return ShiroAuthProviderImpl.create(vertx, realmType, config);
   }
 
   @GenIgnore
-  static ShiroAuthProvider create(Vertx vertx, ShiroAuthRealm shiroAuthRealm) {
-    return new ShiroAuthProviderImpl(vertx, shiroAuthRealm);
+  static AuthProvider create(Vertx vertx, Realm realm) {
+    return new ShiroAuthProviderImpl(vertx, realm);
   }
 }
