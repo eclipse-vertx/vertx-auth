@@ -41,9 +41,9 @@ public interface JDBCAuth extends AuthProvider {
   static final String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
 
   /**
-   * The default query to retrieve all permissions for the user
+   * The default query to retrieve all permissions for the role
    */
-  static final String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM USER_PERMS WHERE USERNAME = ?";
+  static final String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
 
   /**
    * Create a JDBC auth provider implementation
