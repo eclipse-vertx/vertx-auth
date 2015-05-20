@@ -126,7 +126,7 @@ What this returns depends on the underlying implementation.
 Sometimes users might be put into sessions and clustered to other nodes. For implementations that do not want to
 be clustered in this way, they should return `false` from this method.
 
-== The Apache Shiro implementation
+== The Apache Shiro Auth provider implementation
 
 This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
 
@@ -210,15 +210,6 @@ An example is `ldap:://myldapserver.mycompany.com:10389`
 `ldap-system-username`:: TODO
 `ldap-system-password`:: TODO
 
-== Creating your own auth implementation
-
-If you wish to create your own auth provider you should implement the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
-
-We provide an abstract implementation of user called `AbstractUser` which you can subclass
-to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
-
-If you wish your user objects to be clusterable you should make sure they implement `ClusterSerializable`.
-
 === Using another Shiro Realm
 
 It's also possible to create an auth provider instance using a pre-created Apache Shiro Realm object.
@@ -235,3 +226,51 @@ var provider = ShiroAuth.create(vertx, realm);
 ----
 
 The implementation currently assumes that user/password based authentication is used.
+
+== Creating your own auth implementation
+
+If you wish to create your own auth provider you should implement the `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` interface.
+
+We provide an abstract implementation of user called `AbstractUser` which you can subclass
+to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
+
+If you wish your user objects to be clusterable you should make sure they implement `ClusterSerializable`.
+
+== JDBC Auth Provider implementation
+
+We provide an implementation of `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/js/jsdoc/jdbc_client-JDBCClient.html[JDBCClient]`
+to perform authentication and authorisation against any JDBC compliant database.
+
+To create an instance you first need an instance of `link:../../vertx-jdbc-client/js/jsdoc/jdbc_client-JDBCClient.html[JDBCClient]`. To learn how to create one
+of those please consult the documentation for the JDBC client.
+
+Once you've got one of those you can create a `link:jsdoc/jdbc_auth-JDBCAuth.html[JDBCAuth]` instance as follows:
+
+[source,java]
+----
+var JDBCClient = require("vertx-jdbc-js/jdbc_client");
+var JDBCAuth = require("vertx-auth-js/jdbc_auth");
+
+var jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
+
+var authProvider = JDBCAuth.create(jdbcClient);
+
+----
+
+Once you've got your instance you can authenticate and authorise with it just like any `link:jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
+
+The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
+with the operations `link:jsdoc/jdbc_auth-JDBCAuth.html#setAuthenticationQuery[setAuthenticationQuery]`,
+`link:jsdoc/jdbc_auth-JDBCAuth.html#setPermissionsQuery[setPermissionsQuery]` and
+`link:jsdoc/jdbc_auth-JDBCAuth.html#setRolesQuery[setRolesQuery]`, if you want to use them with a different
+database schema.
+
+The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
+concatenated with a salt. It also assumes the salt is stored in the table too.
+
+If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
+`link:jsdoc/jdbc_auth-JDBCAuth.html#setHashStrategy[setHashStrategy]`.
+
+WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
+with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
+never to store your passwords as plain text.
