@@ -21,6 +21,7 @@ import io.vertx.core.logging.impl.LoggerFactory;
 
 import javax.crypto.Mac;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -32,7 +33,7 @@ import java.util.*;
  */
 public final class JWT {
 
-  private static final Charset UTF8 = Charset.forName("UTF-8");
+  private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
   private static final JsonObject EMPTY = new JsonObject();
 

@@ -16,11 +16,7 @@
 
 package io.vertx.ext.auth.jwt;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
@@ -32,10 +28,18 @@ import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
  */
 @VertxGen
 public interface JWTAuth extends AuthProvider {
-  static JWTAuth create(Vertx vertx, JsonObject config) {
-    return new JWTAuthProviderImpl(vertx, config);
+  static JWTAuth create(JsonObject config) {
+    return new JWTAuthProviderImpl(config);
   }
 
-  @Fluent
-  JWTAuth generateToken(JsonObject payload, JWTOptions options, Handler<AsyncResult<String>> resultHandler);
+  /**
+   * Generate a new JWT token.
+   *
+   * @param claims Json with user defined claims for a list of official claims
+   *               @see <a href="http://www.iana.org/assignments/jwt/jwt.xhtml">www.iana.org/assignments/jwt/jwt.xhtml</a>
+   * @param options extra options for the generation
+   *
+   * @return JWT encoded token
+   */
+  String generateToken(JsonObject claims, JWTOptions options);
 }

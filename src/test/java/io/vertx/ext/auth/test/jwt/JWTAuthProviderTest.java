@@ -38,7 +38,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = JWTAuth.create(vertx, getConfig());
+    authProvider = JWTAuth.create(getConfig());
   }
 
   protected JsonObject getConfig() {
@@ -178,13 +178,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
                 .add("write")
                 .add("execute"));
 
-    authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"), onSuccess(token -> {
-      assertNotNull(token);
-      assertEquals(JWT_VALID, token);
-
-      testComplete();
-    }));
-    await();
+    String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
+    assertNotNull(token);
+    assertEquals(JWT_VALID, token);
   }
 
   @Test
@@ -192,17 +188,20 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject payload = new JsonObject()
         .put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions().setExpiresInMinutes(5).setNoTimestamp(true), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload,
+        new JWTOptions().setExpiresInMinutes(5).setNoTimestamp(true));
 
-      JsonObject authInfo = new JsonObject().put("jwt", token);
-      authProvider.authenticate(authInfo, onSuccess(res -> {
-        assertNotNull(res);
-        assertTrue(res.principal().containsKey("exp"));
-        assertFalse(res.principal().containsKey("iat"));
-        testComplete();
-      }));
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      assertTrue(res.principal().containsKey("exp"));
+      assertFalse(res.principal().containsKey("iat"));
+      testComplete();
     }));
+
     await();
   }
 
@@ -211,15 +210,14 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject payload = new JsonObject()
         .put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions(), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload, new JWTOptions());
+    assertNotNull(token);
 
-      JsonObject authInfo = new JsonObject().put("jwt", token);
-      authProvider.authenticate(authInfo, onSuccess(res -> {
-        assertNotNull(res);
-        assertTrue(res.principal().containsKey("iat"));
-        testComplete();
-      }));
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      assertTrue(res.principal().containsKey("iat"));
+      testComplete();
     }));
     await();
   }
@@ -229,14 +227,15 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject payload = new JsonObject()
             .put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions().setExpiresInMinutes(-5).setNoTimestamp(true), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload,
+        new JWTOptions().setExpiresInMinutes(-5).setNoTimestamp(true));
 
-      JsonObject authInfo = new JsonObject().put("jwt", token);
-      authProvider.authenticate(authInfo, onFailure(thr -> {
-        assertNotNull(thr);
-        testComplete();
-      }));
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    authProvider.authenticate(authInfo, onFailure(thr -> {
+      assertNotNull(thr);
+      testComplete();
     }));
     await();
   }
@@ -246,39 +245,36 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject payload = new JsonObject()
             .put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions().setIssuer("https://vertx.io"), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://vertx.io"));
+    assertNotNull(token);
 
-      JsonObject authInfo = new JsonObject()
-              .put("jwt", token)
-              .put("options", new JsonObject()
-                      .put("issuer", "https://vertx.io"));
+    JsonObject authInfo = new JsonObject()
+        .put("jwt", token)
+        .put("options", new JsonObject()
+             .put("issuer", "https://vertx.io"));
 
-      authProvider.authenticate(authInfo, onSuccess(res -> {
-        assertNotNull(res);
-        testComplete();
-      }));
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
     }));
     await();
   }
 
   @Test
   public void testBadIssuer() {
-    JsonObject payload = new JsonObject()
-            .put("sub", "Paulo");
+    JsonObject payload = new JsonObject().put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions().setIssuer("https://auth0.io"), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://auth0.io"));
+    assertNotNull(token);
 
-      JsonObject authInfo = new JsonObject()
-              .put("jwt", token)
-              .put("options", new JsonObject()
-                      .put("issuer", "https://vertx.io"));
+    JsonObject authInfo = new JsonObject()
+        .put("jwt", token)
+        .put("options", new JsonObject()
+             .put("issuer", "https://vertx.io"));
 
-      authProvider.authenticate(authInfo, onFailure(thr -> {
-        assertNotNull(thr);
-        testComplete();
-      }));
+    authProvider.authenticate(authInfo, onFailure(thr -> {
+      assertNotNull(thr);
+      testComplete();
     }));
     await();
   }
@@ -288,18 +284,19 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject payload = new JsonObject()
             .put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions().addAudience("a").addAudience("b").addAudience("c"), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload,
+        new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
 
-      JsonObject authInfo = new JsonObject()
-              .put("jwt", token)
-              .put("options", new JsonObject()
-                      .put("audience", new JsonArray().add("b").add("d")));
+    assertNotNull(token);
 
-      authProvider.authenticate(authInfo, onSuccess(res -> {
-        assertNotNull(res);
-        testComplete();
-      }));
+    JsonObject authInfo = new JsonObject()
+        .put("jwt", token)
+        .put("options", new JsonObject()
+             .put("audience", new JsonArray().add("b").add("d")));
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
     }));
     await();
   }
@@ -309,18 +306,19 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject payload = new JsonObject()
             .put("sub", "Paulo");
 
-    authProvider.generateToken(payload, new JWTOptions().addAudience("a").addAudience("b").addAudience("c"), onSuccess(token -> {
-      assertNotNull(token);
+    final String token = authProvider.generateToken(payload,
+        new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
 
-      JsonObject authInfo = new JsonObject()
-              .put("jwt", token)
-              .put("options", new JsonObject()
-                      .put("audience", new JsonArray().add("e").add("d")));
+    assertNotNull(token);
 
-      authProvider.authenticate(authInfo, onFailure(thr -> {
-        assertNotNull(thr);
-        testComplete();
-      }));
+    JsonObject authInfo = new JsonObject()
+        .put("jwt", token)
+        .put("options", new JsonObject()
+             .put("audience", new JsonArray().add("e").add("d")));
+
+    authProvider.authenticate(authInfo, onFailure(thr -> {
+      assertNotNull(thr);
+      testComplete();
     }));
     await();
   }

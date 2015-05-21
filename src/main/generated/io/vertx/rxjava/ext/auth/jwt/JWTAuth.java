@@ -19,11 +19,8 @@ package io.vertx.rxjava.ext.auth.jwt;
 import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
-import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.AsyncResult;
 import io.vertx.ext.auth.jwt.JWTOptions;
-import io.vertx.core.Handler;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
@@ -46,20 +43,20 @@ public class JWTAuth extends AuthProvider {
     return delegate;
   }
 
-  public static JWTAuth create(Vertx vertx, JsonObject config) { 
-    JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), config));
+  public static JWTAuth create(JsonObject config) { 
+    JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create(config));
     return ret;
   }
 
-  public JWTAuth generateToken(JsonObject payload, JWTOptions options, Handler<AsyncResult<String>> resultHandler) { 
-    this.delegate.generateToken(payload, options, resultHandler);
-    return this;
-  }
-
-  public Observable<String> generateTokenObservable(JsonObject payload, JWTOptions options) { 
-    io.vertx.rx.java.ObservableFuture<String> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    generateToken(payload, options, resultHandler.toHandler());
-    return resultHandler;
+  /**
+   * Generate a new JWT token.
+   * @param claims Json with user defined claims for a list of official claims
+   * @param options extra options for the generation
+   * @return JWT encoded token
+   */
+  public String generateToken(JsonObject claims, JWTOptions options) { 
+    String ret = this.delegate.generateToken(claims, options);
+    return ret;
   }
 
 

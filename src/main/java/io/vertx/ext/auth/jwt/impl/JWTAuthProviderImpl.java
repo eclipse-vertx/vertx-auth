@@ -18,7 +18,6 @@ package io.vertx.ext.auth.jwt.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -50,7 +49,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
   private final String rolesClaimKey;
   private final String permissionsClaimKey;
 
-  public JWTAuthProviderImpl(Vertx vertx, JsonObject config) {
+  public JWTAuthProviderImpl(JsonObject config) {
     this.rolesClaimKey = config.getString("rolesClaimKey", "roles");
     this.permissionsClaimKey = config.getString("permissionsClaimKey", "permissions");
 
@@ -160,14 +159,18 @@ public class JWTAuthProviderImpl implements JWTAuth {
   }
 
   @Override
-  public JWTAuth generateToken(JsonObject payload, JWTOptions options, Handler<AsyncResult<String>> resultHandler) {
-    try {
-      final String token = jwt.sign(payload, options.toJSON());
-      resultHandler.handle(Future.succeededFuture(token));
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+  public String generateToken(JsonObject claims, final JWTOptions options) {
+    final JsonObject jsonOptions = options.toJSON();
+
+    // we do some "enhancement" of the claims to support roles and permissions
+    if (jsonOptions.containsKey("roles") && !claims.containsKey(rolesClaimKey)) {
+      claims.put(rolesClaimKey, jsonOptions.getJsonArray("roles"));
     }
 
-    return this;
+    if (jsonOptions.containsKey("permissions") && !claims.containsKey(permissionsClaimKey)) {
+      claims.put(permissionsClaimKey, jsonOptions.getJsonArray("permissions"));
+    }
+
+    return jwt.sign(claims, options.toJSON());
   }
 }

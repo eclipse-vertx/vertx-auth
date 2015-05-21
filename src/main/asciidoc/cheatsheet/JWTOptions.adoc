@@ -54,4 +54,14 @@ The issuer of this token+++
 |`Boolean`
 |+++
 Disable the generation of issued at claim+++
+
+|[[roles]]`roles`
+|`Array of String`
+|+++
+Add a role to this token.+++
+
+|[[permissions]]`permissions`
+|`Array of String`
+|+++
+Add a permission to this token.+++
 |===

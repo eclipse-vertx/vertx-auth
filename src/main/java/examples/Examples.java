@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.apache.shiro.realm.Realm;
@@ -80,15 +81,33 @@ public class Examples {
 
   }
 
-  public void example5(Vertx vertx) {
+  public void example5() {
 
     JsonObject config = new JsonObject()
         .put("keyStoreURI", "classpath:///keystore.jceks")
         .put("keyStoreType", "jceks")
         .put("keyStorePassword", "secret");
 
-    AuthProvider provider = JWTAuth.create(vertx, config);
+    AuthProvider provider = JWTAuth.create(config);
   }
+
+  public void example6(String username, String password) {
+
+    JsonObject config = new JsonObject()
+            .put("keyStoreURI", "classpath:///keystore.jceks")
+            .put("keyStoreType", "jceks")
+            .put("keyStorePassword", "secret");
+
+    JWTAuth provider = JWTAuth.create(config);
+
+    // on the verify endpoint once you verify the identity of the user by its username/password
+    if ("paulo".equals(username) && "super_secret".equals(password)) {
+      String token = provider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions());
+      // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
+      // Authorization: Bearer <token>
+    }
+  }
+
 //
 //  public void example0_1(Vertx vertx, JsonObject config) {
 //

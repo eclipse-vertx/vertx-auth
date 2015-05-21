@@ -15,25 +15,23 @@ module VertxAuth
     def j_del
       @j_del
     end
-    # @param [::Vertx::Vertx] vertx
     # @param [Hash{String => Object}] config
     # @return [::VertxAuth::JWTAuth]
-    def self.create(vertx=nil,config=nil)
-      if vertx.class.method_defined?(:j_del) && config.class == Hash && !block_given?
-        return ::VertxAuth::JWTAuth.new(Java::IoVertxExtAuthJwt::JWTAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,::Vertx::Util::Utils.to_json_object(config)))
+    def self.create(config=nil)
+      if config.class == Hash && !block_given?
+        return ::VertxAuth::JWTAuth.new(Java::IoVertxExtAuthJwt::JWTAuth.java_method(:create, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(config)))
       end
-      raise ArgumentError, "Invalid arguments when calling create(vertx,config)"
+      raise ArgumentError, "Invalid arguments when calling create(config)"
     end
-    # @param [Hash{String => Object}] payload
-    # @param [Hash] options
-    # @yield 
-    # @return [self]
-    def generate_token(payload=nil,options=nil)
-      if payload.class == Hash && options.class == Hash && block_given?
-        @j_del.java_method(:generateToken, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxExtAuthJwt::JWTOptions.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(payload),Java::IoVertxExtAuthJwt::JWTOptions.new(::Vertx::Util::Utils.to_json_object(options)),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
-        return self
+    #  Generate a new JWT token.
+    # @param [Hash{String => Object}] claims Json with user defined claims for a list of official claims
+    # @param [Hash] options extra options for the generation
+    # @return [String] JWT encoded token
+    def generate_token(claims=nil,options=nil)
+      if claims.class == Hash && options.class == Hash && !block_given?
+        return @j_del.java_method(:generateToken, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxExtAuthJwt::JWTOptions.java_class]).call(::Vertx::Util::Utils.to_json_object(claims),Java::IoVertxExtAuthJwt::JWTOptions.new(::Vertx::Util::Utils.to_json_object(options)))
       end
-      raise ArgumentError, "Invalid arguments when calling generate_token(payload,options)"
+      raise ArgumentError, "Invalid arguments when calling generate_token(claims,options)"
     end
   end
 end

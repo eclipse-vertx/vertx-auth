@@ -190,6 +190,25 @@
  *
  * This component contains an out of the box a JWT implementation.
  *
+ * JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be verified to
+ * be trusted. JWT are well suited for scenarios as:
+ *
+ * * In a Single Sign-On scenario where you want a separate authentication server that can then send user information in
+ *   a trusted way.
+ * * Stateless API servers, very well suited for sinple page applications.
+ * * etc...
+ *
+ * Before deciding on using JWT, it's important to note that JWT does not encrypt the payload, it only signs it. You
+ * should not send any secret information using JWT, rather you should send information that is not secret but needs to
+ * be verified. For instance, sending a signed user id to indicate the user that should be logged in would work great!
+ * Sending a user's password would be very, very bad.
+ *
+ * Its main advantages are:
+ *
+ * * It allows you to verify token authenticity.
+ * * It has a json body to contain any variable amount of data you want.
+ * * It's completely stateless.
+ *
  * To create an instance of the provider you use {@link io.vertx.ext.auth.jwt.JWTAuth}. You specify the configuration
  * in a JSON object.
  *
@@ -198,6 +217,15 @@
  * [source,java]
  * ----
  * {@link examples.Examples#example5}
+ * ----
+ *
+ * A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point
+ * should be running in SSL mode, there after you verify the request user, say by its username and password you would
+ * do:
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example6}
  * ----
  *
  * === The JWT keystore file

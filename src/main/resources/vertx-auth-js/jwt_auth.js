@@ -34,24 +34,17 @@ var JWTAuth = function(j_val) {
   AuthProvider.call(this, j_val);
 
   /**
+   Generate a new JWT token.
 
    @public
-   @param payload {Object} 
-   @param options {Object} 
-   @param resultHandler {function} 
-   @return {JWTAuth}
+   @param claims {Object} Json with user defined claims for a list of official claims 
+   @param options {Object} extra options for the generation 
+   @return {string} JWT encoded token
    */
-  this.generateToken = function(payload, options, resultHandler) {
+  this.generateToken = function(claims, options) {
     var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && typeof __args[2] === 'function') {
-      j_jWTAuth["generateToken(io.vertx.core.json.JsonObject,io.vertx.ext.auth.jwt.JWTOptions,io.vertx.core.Handler)"](utils.convParamJsonObject(payload), options != null ? new JWTOptions(new JsonObject(JSON.stringify(options))) : null, function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-      return that;
+    if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'object') {
+      return j_jWTAuth["generateToken(io.vertx.core.json.JsonObject,io.vertx.ext.auth.jwt.JWTOptions)"](utils.convParamJsonObject(claims), options != null ? new JWTOptions(new JsonObject(JSON.stringify(options))) : null);
     } else utils.invalidArgs();
   };
 
@@ -64,14 +57,13 @@ var JWTAuth = function(j_val) {
 /**
 
  @memberof module:vertx-auth-js/jwt_auth
- @param vertx {Vertx} 
  @param config {Object} 
  @return {JWTAuth}
  */
-JWTAuth.create = function(vertx, config) {
+JWTAuth.create = function(config) {
   var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
-    return new JWTAuth(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)));
+  if (__args.length === 1 && typeof __args[0] === 'object') {
+    return new JWTAuth(JJWTAuth["create(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(config)));
   } else utils.invalidArgs();
 };
 
