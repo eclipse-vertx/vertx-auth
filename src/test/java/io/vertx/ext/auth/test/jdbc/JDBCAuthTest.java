@@ -55,7 +55,7 @@ public class JDBCAuthTest extends VertxTestBase {
 
     SQL.add("drop table if exists user2;");
     SQL.add("drop table if exists user_roles2;");
-    SQL.add("drop table if exists user_perms2;");
+    SQL.add("drop table if exists roles_perms2;");
     SQL.add("create table user2 (user_name varchar(255), pwd varchar(255), pwd_salt varchar(255) );");
     SQL.add("create table user_roles2 (user_name varchar(255), role varchar(255));");
     SQL.add("create table roles_perms2 (role varchar(255), perm varchar(255));");

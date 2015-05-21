@@ -21,12 +21,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.VertxException;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
-import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
@@ -38,8 +36,6 @@ import io.vertx.ext.sql.SQLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -88,7 +84,7 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
           String salt = strategy.getSalt(row);
           String hashedPassword = strategy.computeHash(password, salt);
           if (hashedStoredPwd.equals(hashedPassword)) {
-            resultHandler.handle(Future.succeededFuture(new JDBCUser(username)));
+            resultHandler.handle(Future.succeededFuture(new JDBCUser(username, this)));
           } else {
             resultHandler.handle(Future.failedFuture("Invalid username/password"));
           }
@@ -103,12 +99,12 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     });
   }
 
-  @Override
-  public User fromBuffer(Buffer buffer) {
-    JDBCUser user = new JDBCUser();
-    user.readFromBuffer(0, buffer);
-    return user;
-  }
+//  @Override
+//  public User fromBuffer(Buffer buffer) {
+//    JDBCUser user = new JDBCUser();
+//    user.readFromBuffer(0, buffer);
+//    return user;
+//  }
 
   @Override
   public JDBCAuth setAuthenticationQuery(String authenticationQuery) {
@@ -132,107 +128,6 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   public JDBCAuth setHashStrategy(JDBCHashStrategy strategy) {
     this.strategy = strategy;
     return this;
-  }
-
-  private class JDBCUser extends AbstractUser {
-
-    String username;
-    JsonObject principal;
-
-    JDBCUser() {
-    }
-
-    JDBCUser(String username) {
-      this.username = username;
-    }
-
-    @Override
-    public void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-      hasRoleOrPermission(role, rolesQuery, resultHandler);
-    }
-
-    @Override
-    public void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-      hasRoleOrPermission(permission, permissionsQuery, resultHandler);
-    }
-
-    @Override
-    public void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-      hasAllRolesOrPermissions(roles, rolesQuery, resultHandler);
-    }
-
-    @Override
-    public void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-      hasAllRolesOrPermissions(permissions, permissionsQuery, resultHandler);
-    }
-
-    @Override
-    public JsonObject principal() {
-      if (principal == null) {
-        principal = new JsonObject().put("username", username);
-      }
-      return principal;
-    }
-
-    @Override
-    public boolean isClusterable() {
-      return true;
-    }
-
-    @Override
-    public void writeToBuffer(Buffer buff) {
-      super.writeToBuffer(buff);
-      byte[] bytes = username.getBytes(StandardCharsets.UTF_8);
-      buff.appendInt(bytes.length);
-      buff.appendBytes(bytes);
-    }
-
-    @Override
-    public int readFromBuffer(int pos, Buffer buffer) {
-      pos = super.readFromBuffer(pos, buffer);
-      int len = buffer.getInt(pos);
-      pos += 4;
-      byte[] bytes = buffer.getBytes(pos, pos + len);
-      username = new String(bytes, StandardCharsets.UTF_8);
-      pos += len;
-      return pos;
-    }
-
-    private void hasRoleOrPermission(String roleOrPermission, String query, Handler<AsyncResult<Boolean>> resultHandler) {
-      executeQuery(query, new JsonArray().add(username), resultHandler, rs -> {
-        boolean has = false;
-        for (JsonArray result: rs.getResults()) {
-          String theRoleOrPermission = result.getString(0);
-          if (roleOrPermission.equals(theRoleOrPermission)) {
-            resultHandler.handle(Future.succeededFuture(true));
-            has = true;
-            break;
-          }
-        }
-        if (!has) {
-          resultHandler.handle(Future.succeededFuture(false));
-        }
-      });
-    }
-
-    private void hasAllRolesOrPermissions(Set<String> rolesOrPermissions, String query, Handler<AsyncResult<Boolean>> resultHandler) {
-      Set<String> copy = new HashSet<>(rolesOrPermissions);
-      executeQuery(query, new JsonArray().add(username), resultHandler, rs -> {
-        boolean hasAll = false;
-        for (JsonArray result: rs.getResults()) {
-          String theRoleOrPermission = result.getString(0);
-          copy.remove(theRoleOrPermission);
-          if (copy.isEmpty()) {
-            hasAll = true;
-            resultHandler.handle(Future.succeededFuture(true));
-            break;
-          }
-        }
-        if (!hasAll) {
-          resultHandler.handle(Future.succeededFuture(false));
-        }
-      });
-    }
   }
 
   protected <T> void executeQuery(String query, JsonArray params, Handler<AsyncResult<T>> resultHandler,
@@ -276,6 +171,14 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     } catch (NoSuchAlgorithmException e) {
       throw new VertxException(e);
     }
+  }
+
+  String getRolesQuery() {
+    return rolesQuery;
+  }
+
+  String getPermissionsQuery() {
+    return permissionsQuery;
   }
 
   private class DefaultHashStrategy implements JDBCHashStrategy {

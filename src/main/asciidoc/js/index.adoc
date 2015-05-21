@@ -68,12 +68,6 @@ authProvider.authenticate(authInfo, function (res, res_err) {
 
 ----
 
-=== Re-creating users from Buffers
-
-The operation `link:jsdoc/auth_provider-AuthProvider.html#fromBuffer[fromBuffer]` allows a User object
-to be reconstructed from a `link:../../vertx-core/js/jsdoc/buffer-Buffer.html[Buffer]`. This is primarily used in vertx-web session clustering
-to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
-
 == Authorisation
 
 Once you have an `link:jsdoc/user-User.html[User]` instance you can call methods on it to authorise it.

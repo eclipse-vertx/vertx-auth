@@ -19,7 +19,6 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -52,14 +51,5 @@ public interface AuthProvider {
    * @param resultHandler  The result handler
    */
   void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler);
-
-  /**
-   * Reconstruct a user object from a buffer. This is typically used to recreate a user after it has been deserialized
-   * from a buffer, e.g. after being stored in a clustered session.
-   *
-   * @param buffer  the buffer
-   * @return  the user
-   */
-  User fromBuffer(Buffer buffer);
 
 }

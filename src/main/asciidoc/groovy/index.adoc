@@ -68,12 +68,6 @@ authProvider.authenticate(authInfo, { res ->
 
 ----
 
-=== Re-creating users from Buffers
-
-The operation `link:groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html#fromBuffer(io.vertx.core.buffer.Buffer)[fromBuffer]` allows a User object
-to be reconstructed from a `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/buffer/Buffer.html[Buffer]`. This is primarily used in vertx-web session clustering
-to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
-
 == Authorisation
 
 Once you have an `link:groovydoc/io/vertx/groovy/ext/auth/User.html[User]` instance you can call methods on it to authorise it.

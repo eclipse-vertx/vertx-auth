@@ -17,7 +17,6 @@
 /** @module vertx-auth-js/auth_provider */
 var utils = require('vertx-js/util/utils');
 var User = require('vertx-auth-js/user');
-var Buffer = require('vertx-js/buffer');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -65,21 +64,6 @@ var AuthProvider = function(j_val) {
         resultHandler(null, ar.cause());
       }
     });
-    } else utils.invalidArgs();
-  };
-
-  /**
-   Reconstruct a user object from a buffer. This is typically used to recreate a user after it has been deserialized
-   from a buffer, e.g. after being stored in a clustered session.
-
-   @public
-   @param buffer {Buffer} the buffer 
-   @return {User} the user
-   */
-  this.fromBuffer = function(buffer) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return new User(j_authProvider["fromBuffer(io.vertx.core.buffer.Buffer)"](buffer._jdel));
     } else utils.invalidArgs();
   };
 

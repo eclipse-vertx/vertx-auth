@@ -19,7 +19,6 @@ package io.vertx.rxjava.ext.auth;
 import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
-import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -100,17 +99,6 @@ public class AuthProvider {
     io.vertx.rx.java.ObservableFuture<User> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
     authenticate(authInfo, resultHandler.toHandler());
     return resultHandler;
-  }
-
-  /**
-   * Reconstruct a user object from a buffer. This is typically used to recreate a user after it has been deserialized
-   * from a buffer, e.g. after being stored in a clustered session.
-   * @param buffer the buffer
-   * @return the user
-   */
-  public User fromBuffer(Buffer buffer) { 
-    User ret= User.newInstance(this.delegate.fromBuffer((io.vertx.core.buffer.Buffer) buffer.getDelegate()));
-    return ret;
   }
 
 

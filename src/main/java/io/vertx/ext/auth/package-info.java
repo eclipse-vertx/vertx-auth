@@ -68,12 +68,6 @@
  * {@link examples.Examples#example1}
  * ----
  *
- * === Re-creating users from Buffers
- *
- * The operation {@link io.vertx.ext.auth.AuthProvider#fromBuffer(io.vertx.core.buffer.Buffer)} allows a User object
- * to be reconstructed from a {@link io.vertx.core.buffer.Buffer}. This is primarily used in vertx-web session clustering
- * to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
- *
  * == Authorisation
  *
  * Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
