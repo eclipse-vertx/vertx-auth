@@ -99,13 +99,6 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     });
   }
 
-//  @Override
-//  public User fromBuffer(Buffer buffer) {
-//    JDBCUser user = new JDBCUser();
-//    user.readFromBuffer(0, buffer);
-//    return user;
-//  }
-
   @Override
   public JDBCAuth setAuthenticationQuery(String authenticationQuery) {
     this.authenticateQuery = authenticationQuery;

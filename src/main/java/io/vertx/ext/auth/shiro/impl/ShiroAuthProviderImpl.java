@@ -79,13 +79,6 @@ public class ShiroAuthProviderImpl implements AuthProvider {
     }, resultHandler);
   }
 
-//  @Override
-//  public User fromBuffer(Buffer buffer) {
-//    ShiroUser user = new ShiroUser(vertx, securityManager);
-//    user.readFromBuffer(0, buffer);
-//    return user;
-//  }
-
   Vertx getVertx() {
     return vertx;
   }
