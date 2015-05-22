@@ -20,7 +20,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
@@ -80,11 +79,11 @@ public class ShiroAuthProviderImpl implements AuthProvider {
     }, resultHandler);
   }
 
-  @Override
-  public User fromBuffer(Buffer buffer) {
-    ShiroUser user = new ShiroUser(vertx, securityManager);
-    user.readFromBuffer(0, buffer);
-    return user;
+  Vertx getVertx() {
+    return vertx;
   }
 
+  org.apache.shiro.mgt.SecurityManager getSecurityManager() {
+    return securityManager;
+  }
 }

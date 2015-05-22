@@ -107,11 +107,10 @@ public interface User {
   JsonObject principal();
 
   /**
-   * Is the User clusterable? Some Apex handlers store the User in the Apex session so it is available between
-   * requests and even on different servers in the case of clustered sessions.
-   * If a User implementation should not be serialized and clustered then this should return `false`.
+   * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
+   * after it has been deserialized.
    *
-   * @return true if the implementation is clusterable, `false` otherwise.
+   * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
-  boolean isClusterable();
+  void setAuthProvider(AuthProvider authProvider);
 }

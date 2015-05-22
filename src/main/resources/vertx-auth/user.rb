@@ -1,3 +1,4 @@
+require 'vertx-auth/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.User
 module VertxAuth
@@ -84,15 +85,15 @@ module VertxAuth
       end
       raise ArgumentError, "Invalid arguments when calling principal()"
     end
-    #  Is the User clusterable? Some Apex handlers store the User in the Apex session so it is available between
-    #  requests and even on different servers in the case of clustered sessions.
-    #  If a User implementation should not be serialized and clustered then this should return `false`.
-    # @return [true,false] true if the implementation is clusterable, `false` otherwise.
-    def clusterable?
-      if !block_given?
-        return @j_del.java_method(:isClusterable, []).call()
+    #  Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
+    #  after it has been deserialized.
+    # @param [::VertxAuth::AuthProvider] authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
+    # @return [void]
+    def set_auth_provider(authProvider=nil)
+      if authProvider.class.method_defined?(:j_del) && !block_given?
+        return @j_del.java_method(:setAuthProvider, [Java::IoVertxExtAuth::AuthProvider.java_class]).call(authProvider.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling clusterable?()"
+      raise ArgumentError, "Invalid arguments when calling set_auth_provider(authProvider)"
     end
   end
 end

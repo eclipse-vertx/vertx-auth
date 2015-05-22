@@ -68,12 +68,6 @@
  * {@link examples.Examples#example1}
  * ----
  *
- * === Re-creating users from Buffers
- *
- * The operation {@link io.vertx.ext.auth.AuthProvider#fromBuffer(io.vertx.core.buffer.Buffer)} allows a User object
- * to be reconstructed from a {@link io.vertx.core.buffer.Buffer}. This is primarily used in vertx-web session clustering
- * to allow the instance to be serialized in the session and passed over the wire to other nodes of the cluster.
- *
  * == Authorisation
  *
  * Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
@@ -110,7 +104,7 @@
  * Sometimes users might be put into sessions and clustered to other nodes. For implementations that do not want to
  * be clustered in this way, they should return `false` from this method.
  *
- * == The Apache Shiro implementation
+ * == The Apache Shiro Auth provider implementation
  *
  * This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
  *
@@ -186,7 +180,20 @@
  * `ldap-system-username`:: TODO
  * `ldap-system-password`:: TODO
  *
- * == The JWT implementation
+ * === Using another Shiro Realm
+ *
+ * It's also possible to create an auth provider instance using a pre-created Apache Shiro Realm object.
+ *
+ * This is done as follows:
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example4}
+ * ----
+ *
+ * The implementation currently assumes that user/password based authentication is used.
+ *
+ * == The JWT auth provider
  *
  * This component contains an out of the box a JWT implementation.
  *
@@ -216,7 +223,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example5}
+ * {@link examples.Examples#example6}
  * ----
  *
  * A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point
@@ -225,7 +232,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example6}
+ * {@link examples.Examples#example7}
  * ----
  *
  * === The JWT keystore file
@@ -259,23 +266,38 @@
  *
  * If you wish your user objects to be clusterable you should make sure they implement {@link io.vertx.core.shareddata.impl.ClusterSerializable}.
  *
- * === Using another Shiro Realm
+ * == JDBC Auth Provider implementation
  *
- * It's also possible to create an auth provider instance using a pre-created Apache Shiro Realm object.
+ * We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}
+ * to perform authentication and authorisation against any JDBC compliant database.
  *
- * This is done as follows:
+ * To create an instance you first need an instance of {@link io.vertx.ext.jdbc.JDBCClient}. To learn how to create one
+ * of those please consult the documentation for the JDBC client.
+ *
+ * Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuth} instance as follows:
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example4}
+ * {@link examples.Examples#example5}
  * ----
  *
- * The implementation currently assumes that user/password based authentication is used.
+ * Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
  *
+ * The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
+ * with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuth#setAuthenticationQuery(java.lang.String)},
+ * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setPermissionsQuery(java.lang.String)} and
+ * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolesQuery(java.lang.String)}, if you want to use them with a different
+ * database schema.
  *
+ * The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
+ * concatenated with a salt. It also assumes the salt is stored in the table too.
  *
+ * If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
+ * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setHashStrategy(io.vertx.ext.auth.jdbc.JDBCHashStrategy)}.
  *
- *
+ * WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
+ * with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
+ * never to store your passwords as plain text.
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  * @author <a href="http://tfox.org">Tim Fox</a>

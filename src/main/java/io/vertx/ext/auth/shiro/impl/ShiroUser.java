@@ -22,6 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
+import io.vertx.ext.auth.AuthProvider;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
@@ -49,9 +50,7 @@ public class ShiroUser extends AbstractUser {
     setSubject();
   }
 
-  ShiroUser(Vertx vertx, org.apache.shiro.mgt.SecurityManager securityManager) {
-    this.vertx = vertx;
-    this.securityManager = securityManager;
+  public ShiroUser() {
   }
 
   @Override
@@ -84,11 +83,6 @@ public class ShiroUser extends AbstractUser {
   }
 
   @Override
-  public boolean isClusterable() {
-    return true;
-  }
-
-  @Override
   public void writeToBuffer(Buffer buff) {
     super.writeToBuffer(buff);
     byte[] bytes = username.getBytes(StandardCharsets.UTF_8);
@@ -103,8 +97,19 @@ public class ShiroUser extends AbstractUser {
     byte[] bytes = buffer.getBytes(pos, pos + len);
     pos += len;
     username = new String(bytes, StandardCharsets.UTF_8);
-    setSubject();
     return pos;
+  }
+
+  @Override
+  public void setAuthProvider(AuthProvider authProvider) {
+    if (authProvider instanceof ShiroAuthProviderImpl) {
+      ShiroAuthProviderImpl shiroAuthProvider = (ShiroAuthProviderImpl)authProvider;
+      this.vertx = shiroAuthProvider.getVertx();
+      this.securityManager = shiroAuthProvider.getSecurityManager();
+      setSubject();
+    } else {
+      throw new IllegalArgumentException("Not a ShiroAuthProviderImpl");
+    }
   }
 
   private void setSubject() {

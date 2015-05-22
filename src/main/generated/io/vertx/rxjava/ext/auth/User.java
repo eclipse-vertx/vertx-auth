@@ -160,14 +160,12 @@ public class User {
   }
 
   /**
-   * Is the User clusterable? Some Apex handlers store the User in the Apex session so it is available between
-   * requests and even on different servers in the case of clustered sessions.
-   * If a User implementation should not be serialized and clustered then this should return `false`.
-   * @return true if the implementation is clusterable, `false` otherwise.
+   * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
+   * after it has been deserialized.
+   * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
-  public boolean isClusterable() { 
-    boolean ret = this.delegate.isClusterable();
-    return ret;
+  public void setAuthProvider(AuthProvider authProvider) { 
+    this.delegate.setAuthProvider((io.vertx.ext.auth.AuthProvider) authProvider.getDelegate());
   }
 
 

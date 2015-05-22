@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
+import io.vertx.ext.auth.AuthProvider;
 
 import java.util.Set;
 
@@ -51,8 +52,8 @@ public final class JWTUser extends AbstractUser {
   }
 
   @Override
-  public boolean isClusterable() {
-    return false;
+  public void setAuthProvider(AuthProvider authProvider) {
+    // NOOP - JWT tokens are self contained :)
   }
 
   @Override

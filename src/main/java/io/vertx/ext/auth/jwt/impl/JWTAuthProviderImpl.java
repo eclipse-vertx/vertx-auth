@@ -18,7 +18,6 @@ package io.vertx.ext.auth.jwt.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -151,11 +150,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
-  }
-
-  @Override
-  public User fromBuffer(Buffer buffer) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
