@@ -1,0 +1,99 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ * Red Hat licenses this file to you under the Apache License, version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at:
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+/** @module vertx-auth-jdbc-js/jdbc_auth */
+var utils = require('vertx-js/util/utils');
+var JDBCClient = require('vertx-jdbc-js/jdbc_client');
+var AuthProvider = require('vertx-auth-common-js/auth_provider');
+
+var io = Packages.io;
+var JsonObject = io.vertx.core.json.JsonObject;
+var JJDBCAuth = io.vertx.ext.auth.jdbc.JDBCAuth;
+
+/**
+
+ @class
+*/
+var JDBCAuth = function(j_val) {
+
+  var j_jDBCAuth = j_val;
+  var that = this;
+  AuthProvider.call(this, j_val);
+
+  /**
+   Set the authentication query to use. Use this if you want to override the default authentication query.
+
+   @public
+   @param authenticationQuery {string} the authentication query 
+   @return {JDBCAuth} a reference to this for fluency
+   */
+  this.setAuthenticationQuery = function(authenticationQuery) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      return new JDBCAuth(j_jDBCAuth["setAuthenticationQuery(java.lang.String)"](authenticationQuery));
+    } else utils.invalidArgs();
+  };
+
+  /**
+   Set the roles query to use. Use this if you want to override the default roles query.
+
+   @public
+   @param rolesQuery {string} the roles query 
+   @return {JDBCAuth} a reference to this for fluency
+   */
+  this.setRolesQuery = function(rolesQuery) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      return new JDBCAuth(j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery));
+    } else utils.invalidArgs();
+  };
+
+  /**
+   Set the permissions query to use. Use this if you want to override the default permissions query.
+
+   @public
+   @param permissionsQuery {string} the permissions query 
+   @return {JDBCAuth} a reference to this for fluency
+   */
+  this.setPermissionsQuery = function(permissionsQuery) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      return new JDBCAuth(j_jDBCAuth["setPermissionsQuery(java.lang.String)"](permissionsQuery));
+    } else utils.invalidArgs();
+  };
+
+  // A reference to the underlying Java delegate
+  // NOTE! This is an internal API and must not be used in user code.
+  // If you rely on this property your code is likely to break if we change it / remove it without warning.
+  this._jdel = j_jDBCAuth;
+};
+
+/**
+ Create a JDBC auth provider implementation
+
+ @memberof module:vertx-auth-jdbc-js/jdbc_auth
+ @param client {JDBCClient} the JDBC client instance 
+ @return {JDBCAuth} the auth provider
+ */
+JDBCAuth.create = function(client) {
+  var __args = arguments;
+  if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+    return new JDBCAuth(JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel));
+  } else utils.invalidArgs();
+};
+
+// We export the Constructor function
+module.exports = JDBCAuth;

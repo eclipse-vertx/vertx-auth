@@ -20,6 +20,15 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>vertx-auth-common</module>
+    <module>vertx-auth-shiro</module>
+    <module>vertx-auth-jdbc</module>
+    <module>vertx-auth-jwt</module>
+  </modules>
+
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
@@ -53,15 +62,6 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.shiro</groupId>
-      <artifactId>shiro-core</artifactId>
-      <version>1.2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-jdbc-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -111,93 +111,26 @@
       <scope>test</scope>
       <version>4.11</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-core-api</artifactId>
-      <version>1.5.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-protocol-ldap</artifactId>
-      <version>1.5.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-jdbm-store</artifactId>
-      <version>1.5.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-jdbm-partition</artifactId>
-      <version>1.5.7</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>bouncycastle</groupId>
-          <artifactId>bcprov-jdk15</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-ldif-partition</artifactId>
-      <version>1.5.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.unboundid</groupId>
-      <artifactId>unboundid-ldapsdk</artifactId>
-      <version>2.3.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>2.3.2</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>default-test</id>
-              <configuration>
-                <additionalClasspathElements>
-                  <additionalClasspathElement>${project.build.directory}/bouncy-classes</additionalClasspathElement>
-                </additionalClasspathElements>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
+      <!-- Work around because the vertx-ext-parent does not support well aggregators -->
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
         <executions>
           <execution>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <phase>process-test-classes</phase>
             <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>bouncycastle</groupId>
-                  <artifactId>bcprov-jdk15</artifactId>
-                  <version>140</version>
-                  <outputDirectory>${project.build.directory}/bouncy-classes</outputDirectory>
-                </artifactItem>
-              </artifactItems>
+              <target>
+                <mkdir dir="${project.basedir}/src/main/asciidoc"/>
+                <mkdir dir="${project.basedir}/src/main/resources"/>
+              </target>
             </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>generate-sources</phase>
           </execution>
         </executions>
       </plugin>
