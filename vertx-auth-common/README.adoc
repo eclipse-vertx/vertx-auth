@@ -1,0 +1,5 @@
+# Vert.x Auth Common
+
+This module contains common auth interfaces.
+
+Please see the documentation for full information

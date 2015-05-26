@@ -1,0 +1,5 @@
+# Vert.x JWT Auth
+
+This module contains contains a Vert.x auth implementation which uses JSON Web Tokens (JWT)
+
+Please see the documentation for more information.

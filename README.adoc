@@ -1,12 +1,5 @@
 # Vert.x Auth
 
-This component provides interfaces for authentication and authorisation in Vert.x.
+This module contains auth implementations for Vert.x and common auth interfaces
 
-It also provides an implementation that uses Apache Shiro.
-
-Please see the in source asciidoc documentation or the main documentation on the web-site for a full description:
-
-* Web-site docs
-* link:src/main/asciidoc/java/index.adoc[Java in-source docs]
-* link:src/main/asciidoc/js/index.adoc[JavaScript in-source docs]
-* link:src/main/asciidoc/groovy/index.adoc[Groovy in-source docs]
+Particular implementations are stored in sub modules.
