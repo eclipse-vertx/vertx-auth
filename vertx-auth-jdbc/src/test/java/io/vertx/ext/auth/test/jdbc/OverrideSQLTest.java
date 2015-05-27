@@ -26,6 +26,7 @@ public class OverrideSQLTest extends JDBCAuthTest {
     super.setUp();
 
     authProvider.setAuthenticationQuery("select pwd, pwd_salt from user2 where user_name = ?")
-      .setPermissionsQuery("select perm from perms2 where username = ?");
+      .setPermissionsQuery("select perm from roles_perms2 rp, user_roles2 ur where ur.user_name = ? and ur.role = rp.role")
+      .setRolesQuery("select role from user_roles2 where user_name = ?");
   }
 }

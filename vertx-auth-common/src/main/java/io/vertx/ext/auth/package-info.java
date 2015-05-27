@@ -74,8 +74,7 @@
  *
  * Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
  *
- * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#isPermitted},
- * to check if a user has all the specified permissions you use {@link io.vertx.ext.auth.User#isPermitted}.
+ * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#isPermitted}.
  *
  * The results of all the above are provided asynchronously in the handler.
  *
@@ -86,8 +85,8 @@
  * {@link examples.Examples#example2}
  * ----
  *
- * Matching of Permissions is expected to be done using String equality unless otherwise stated by the underlying
- * implementation.
+ * Matching of Permissions has no hard constraints by this module, it is the responsibility of the provider to document
+ * the underlying implementation.
  *
  * === Caching permissions
  *

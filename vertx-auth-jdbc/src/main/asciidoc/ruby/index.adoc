@@ -23,7 +23,8 @@ Once you've got your instance you can authenticate and authorise with it just li
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
 with the operations `link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_authentication_query-instance_method[setAuthenticationQuery]`,
-`link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_permissions_query-instance_method[setPermissionsQuery]`, if you want to use them with a different
+`link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_permissions_query-instance_method[setPermissionsQuery]` and
+`link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_roles_query-instance_method[setRolesQuery]`, if you want to use them with a different
 database schema.
 
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being

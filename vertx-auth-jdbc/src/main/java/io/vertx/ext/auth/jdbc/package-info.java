@@ -34,7 +34,8 @@
  *
  * The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
  * with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuth#setAuthenticationQuery(String)},
- * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setPermissionsQuery(String)}, if you want to use them with a different
+ * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setPermissionsQuery(String)} and
+ * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolesQuery(String)}, if you want to use them with a different
  * database schema.
  *
  * The default implementation assumes that the password is stored in the database as a SHA-512 hash after being

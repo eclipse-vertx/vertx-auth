@@ -36,9 +36,14 @@ public interface JDBCAuth extends AuthProvider {
   String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD, PASSWORD_SALT FROM USER WHERE USERNAME = ?";
 
   /**
-   * The default query to retrieve all permissions for the user
+   * The default query to retrieve all roles for the user
    */
-  String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM PERMS WHERE USERNAME = ?";
+  String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
+
+  /**
+   * The default query to retrieve all permissions for the role
+   */
+  String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
 
   /**
    * Create a JDBC auth provider implementation
@@ -56,6 +61,13 @@ public interface JDBCAuth extends AuthProvider {
    * @return  a reference to this for fluency
    */
   JDBCAuth setAuthenticationQuery(String authenticationQuery);
+
+  /**
+   * Set the roles query to use. Use this if you want to override the default roles query.
+   * @param rolesQuery  the roles query
+   * @return  a reference to this for fluency
+   */
+  JDBCAuth setRolesQuery(String rolesQuery);
 
   /**
    * Set the permissions query to use. Use this if you want to override the default permissions query.

@@ -37,6 +37,8 @@ public class JDBCUser extends AbstractUser {
   private String username;
   private JsonObject principal;
 
+  private static final String ROLE_PREFIX = "role:";
+
   public JDBCUser() {
   }
 
@@ -46,8 +48,12 @@ public class JDBCUser extends AbstractUser {
   }
 
   @Override
-  public void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    isPermitted(permission, authProvider.getPermissionsQuery(), resultHandler);
+  public void doIsPermitted(String permissionOrRole, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (permissionOrRole != null && permissionOrRole.startsWith(ROLE_PREFIX)) {
+      hasRoleOrPermission(permissionOrRole.substring(ROLE_PREFIX.length()), authProvider.getRolesQuery(), resultHandler);
+    } else {
+      hasRoleOrPermission(permissionOrRole, authProvider.getPermissionsQuery(), resultHandler);
+    }
   }
 
   @Override
@@ -86,12 +92,12 @@ public class JDBCUser extends AbstractUser {
     return pos;
   }
 
-  private void isPermitted(String permission, String query, Handler<AsyncResult<Boolean>> resultHandler) {
+  private void hasRoleOrPermission(String roleOrPermission, String query, Handler<AsyncResult<Boolean>> resultHandler) {
     authProvider.executeQuery(query, new JsonArray().add(username), resultHandler, rs -> {
       boolean has = false;
       for (JsonArray result : rs.getResults()) {
-        String thePermission = result.getString(0);
-        if (permission.equals(thePermission)) {
+        String theRoleOrPermission = result.getString(0);
+        if (roleOrPermission.equals(theRoleOrPermission)) {
           resultHandler.handle(Future.succeededFuture(true));
           has = true;
           break;

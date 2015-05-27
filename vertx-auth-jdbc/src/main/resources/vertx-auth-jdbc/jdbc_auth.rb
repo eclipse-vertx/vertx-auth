@@ -34,6 +34,15 @@ module VertxAuthJdbc
       end
       raise ArgumentError, "Invalid arguments when calling set_authentication_query(authenticationQuery)"
     end
+    #  Set the roles query to use. Use this if you want to override the default roles query.
+    # @param [String] rolesQuery the roles query
+    # @return [::VertxAuthJdbc::JDBCAuth] a reference to this for fluency
+    def set_roles_query(rolesQuery=nil)
+      if rolesQuery.class == String && !block_given?
+        return ::VertxAuthJdbc::JDBCAuth.new(@j_del.java_method(:setRolesQuery, [Java::java.lang.String.java_class]).call(rolesQuery))
+      end
+      raise ArgumentError, "Invalid arguments when calling set_roles_query(rolesQuery)"
+    end
     #  Set the permissions query to use. Use this if you want to override the default permissions query.
     # @param [String] permissionsQuery the permissions query
     # @return [::VertxAuthJdbc::JDBCAuth] a reference to this for fluency

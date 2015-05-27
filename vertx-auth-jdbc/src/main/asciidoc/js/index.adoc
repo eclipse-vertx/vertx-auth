@@ -23,7 +23,8 @@ Once you've got your instance you can authenticate and authorise with it just li
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
 with the operations `link:jsdoc/jdbc_auth-JDBCAuth.html#setAuthenticationQuery[setAuthenticationQuery]`,
-`link:jsdoc/jdbc_auth-JDBCAuth.html#setPermissionsQuery[setPermissionsQuery]`, if you want to use them with a different
+`link:jsdoc/jdbc_auth-JDBCAuth.html#setPermissionsQuery[setPermissionsQuery]` and
+`link:jsdoc/jdbc_auth-JDBCAuth.html#setRolesQuery[setRolesQuery]`, if you want to use them with a different
 database schema.
 
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being

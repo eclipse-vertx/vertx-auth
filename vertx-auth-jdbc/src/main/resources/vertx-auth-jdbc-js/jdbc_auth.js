@@ -48,6 +48,20 @@ var JDBCAuth = function(j_val) {
   };
 
   /**
+   Set the roles query to use. Use this if you want to override the default roles query.
+
+   @public
+   @param rolesQuery {string} the roles query 
+   @return {JDBCAuth} a reference to this for fluency
+   */
+  this.setRolesQuery = function(rolesQuery) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      return new JDBCAuth(j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery));
+    } else utils.invalidArgs();
+  };
+
+  /**
    Set the permissions query to use. Use this if you want to override the default permissions query.
 
    @public
