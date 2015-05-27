@@ -24,9 +24,6 @@ import io.vertx.ext.auth.User;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -63,51 +60,6 @@ public abstract class ShiroAuthProviderTestBase extends VertxTestBase {
       assertNotNull(thr);
       testComplete();
     }));
-    await();
-  }
-
-  @Test
-  public void testHasRole() throws Exception {
-    loginThen(user ->
-      this.<Boolean>executeTwice(handler -> user.hasRole("morris_dancer", handler), res -> {
-        assertTrue(res.succeeded());
-        assertTrue(res.result());
-      }));
-    await();
-  }
-
-  @Test
-  public void testNotHasRole() throws Exception {
-    loginThen(user -> {
-      this.<Boolean>executeTwice(handler -> user.hasRole("manager", handler), res -> {
-        assertTrue(res.succeeded());
-        assertFalse(res.result());
-      });
-    });
-    await();
-  }
-
-  @Test
-  public void testHasRoles() throws Exception {
-    loginThen(user -> {
-      Set<String> roles = new HashSet<>(Arrays.asList("morris_dancer", "developer"));
-      this.<Boolean>executeTwice(handler -> user.hasRoles(roles, handler), res -> {
-        assertTrue(res.succeeded());
-        assertTrue(res.result());
-      });
-    });
-    await();
-  }
-
-  @Test
-  public void testNotHasRoles() throws Exception {
-    loginThen(user -> {
-      Set<String> roles = new HashSet<>(Arrays.asList("administrator", "developer"));
-      this.<Boolean>executeTwice(handler -> user.hasRoles(roles, handler), res -> {
-        assertTrue(res.succeeded());
-        assertFalse(res.result());
-      });
-    });
     await();
   }
 

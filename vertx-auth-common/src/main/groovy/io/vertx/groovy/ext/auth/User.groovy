@@ -17,12 +17,11 @@
 package io.vertx.groovy.ext.auth;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
-import java.util.Set
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
- * Represents an authenticate User and contains operations to authorise the user, using a role/permission
+ * Represents an authenticate User and contains operations to authorise the user, using a permission
  * based model.
  * <p>
  * Please consult the documentation for a detailed explanation.
@@ -37,16 +36,6 @@ public class User {
     return delegate;
   }
   /**
-   * Does the user have the specified role?
-   * @param role the role
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the role or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  public User hasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasRole(role, resultHandler);
-    return this;
-  }
-  /**
    * Does the user have the specified permission?
    * @param permission the permission
    * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the permission or `false` otherwise.
@@ -54,16 +43,6 @@ public class User {
    */
   public User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     this.delegate.isPermitted(permission, resultHandler);
-    return this;
-  }
-  /**
-   * Does the user have all the specified roles?
-   * @param roles the set of roles
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have all the roles or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  public User hasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasRoles(roles, resultHandler);
     return this;
   }
   /**

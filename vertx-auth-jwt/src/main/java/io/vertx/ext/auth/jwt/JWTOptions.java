@@ -174,32 +174,6 @@ public class JWTOptions {
   }
 
   /**
-   * The roles of this token.
-   *
-   * @param roles the roles for this token that will be used for AuthZ
-   * @return fluent API
-   */
-  public JWTOptions setRoles(List<String> roles) {
-    json.put("roles", new JsonArray(roles));
-    return this;
-  }
-
-  /**
-   * Add a role to this token.
-   *
-   * @param role role for this token that will be used for AuthZ
-   * @return fluent API
-   */
-  public JWTOptions addRole(String role) {
-    if (!json.containsKey("roles")) {
-      json.put("roles", new JsonArray());
-    }
-
-    json.getJsonArray("roles").add(role);
-    return this;
-  }
-
-  /**
    * The permissions of this token.
    *
    * @param permissions the permissions for this token that will be used for AuthZ

@@ -69,34 +69,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   @Test
-  public void testJWTValidRole() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-
-      user.hasRole("developer", onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testJWTInvalidRole() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-
-      user.hasRole("root", onSuccess(hasRole -> {
-        assertFalse(hasRole);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
   public void testJWTValidPermission() {
     JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(user -> {
@@ -118,25 +90,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
       user.isPermitted("drop", onSuccess(hasPermission -> {
         assertFalse(hasPermission);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testJWTValidRoles() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-
-      Set<String> roles = new HashSet<>();
-
-      roles.add("developer");
-      roles.add("user");
-
-      user.hasRoles(roles, onSuccess(res -> {
-        assertNotNull(res);
         testComplete();
       }));
     }));

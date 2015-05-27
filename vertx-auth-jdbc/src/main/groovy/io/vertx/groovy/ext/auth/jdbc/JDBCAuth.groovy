@@ -51,15 +51,6 @@ public class JDBCAuth extends AuthProvider {
     return ret;
   }
   /**
-   * Set the roles query to use. Use this if you want to override the default roles query.
-   * @param rolesQuery the roles query
-   * @return a reference to this for fluency
-   */
-  public JDBCAuth setRolesQuery(String rolesQuery) {
-    def ret= new io.vertx.groovy.ext.auth.jdbc.JDBCAuth(this.delegate.setRolesQuery(rolesQuery));
-    return ret;
-  }
-  /**
    * Set the permissions query to use. Use this if you want to override the default permissions query.
    * @param permissionsQuery the permissions query
    * @return a reference to this for fluency

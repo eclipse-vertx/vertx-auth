@@ -45,11 +45,9 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   private final JWT jwt;
 
-  private final String rolesClaimKey;
   private final String permissionsClaimKey;
 
   public JWTAuthProviderImpl(JsonObject config) {
-    this.rolesClaimKey = config.getString("rolesClaimKey", "roles");
     this.permissionsClaimKey = config.getString("permissionsClaimKey", "permissions");
 
     final String keyStoreURI = config.getString("keyStoreURI");
@@ -145,7 +143,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
 
-      resultHandler.handle(Future.succeededFuture(new JWTUser(payload, rolesClaimKey, permissionsClaimKey)));
+      resultHandler.handle(Future.succeededFuture(new JWTUser(payload, permissionsClaimKey)));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
@@ -157,10 +155,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
     final JsonObject jsonOptions = options.toJSON();
 
     // we do some "enhancement" of the claims to support roles and permissions
-    if (jsonOptions.containsKey("roles") && !claims.containsKey(rolesClaimKey)) {
-      claims.put(rolesClaimKey, jsonOptions.getJsonArray("roles"));
-    }
-
     if (jsonOptions.containsKey("permissions") && !claims.containsKey(permissionsClaimKey)) {
       claims.put(permissionsClaimKey, jsonOptions.getJsonArray("permissions"));
     }

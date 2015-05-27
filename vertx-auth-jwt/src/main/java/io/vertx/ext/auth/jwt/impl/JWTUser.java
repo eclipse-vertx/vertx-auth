@@ -25,8 +25,6 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 
-import java.util.Set;
-
 /**
  * @author Paulo Lopes
  */
@@ -36,13 +34,11 @@ public final class JWTUser extends AbstractUser {
 
   private final JsonObject jwtToken;
 
-  private final JsonArray roles;
   private final JsonArray permissions;
 
-  public JWTUser(JsonObject jwtToken, String rolesClaimKey, String permissionsClaimKey) {
+  public JWTUser(JsonObject jwtToken, String permissionsClaimKey) {
     this.jwtToken = jwtToken;
 
-    this.roles = jwtToken.getJsonArray(rolesClaimKey, null);
     this.permissions = jwtToken.getJsonArray(permissionsClaimKey, null);
   }
 
@@ -57,46 +53,7 @@ public final class JWTUser extends AbstractUser {
   }
 
   @Override
-  protected void doHasRole(String role, Handler<AsyncResult<Boolean>> handler) {
-    if (roles != null) {
-      for (Object jwtRole : roles) {
-        if (role.equals(jwtRole)) {
-          handler.handle(Future.succeededFuture(true));
-          return;
-        }
-      }
-    }
-
-    log.debug("User has no role [" + role + "]");
-    handler.handle(Future.succeededFuture(false));
-  }
-
-  @Override
-  public void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> handler) {
-    if (this.roles != null) {
-      for (String role : roles) {
-        boolean found = false;
-
-        for (Object jwtRole : this.roles) {
-          if (role.equals(jwtRole)) {
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          log.debug("User has no role [" + role + "]");
-          handler.handle(Future.succeededFuture(false));
-          return;
-        }
-      }
-    }
-
-    handler.handle(Future.succeededFuture(true));
-  }
-
-  @Override
-  public void doHasPermission(String permission, Handler<AsyncResult<Boolean>> handler) {
+  public void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> handler) {
     if (permissions != null) {
       for (Object jwtPermission : permissions) {
         if (permission.equals(jwtPermission)) {

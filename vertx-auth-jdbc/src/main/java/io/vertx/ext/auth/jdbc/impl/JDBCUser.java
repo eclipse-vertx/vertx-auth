@@ -26,8 +26,6 @@ import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
@@ -48,18 +46,8 @@ public class JDBCUser extends AbstractUser {
   }
 
   @Override
-  public void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasRoleOrPermission(role, authProvider.getRolesQuery(), resultHandler);
-  }
-
-  @Override
-  public void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasRoleOrPermission(permission, authProvider.getPermissionsQuery(), resultHandler);
-  }
-
-  @Override
-  public void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasAllRolesOrPermissions(roles, authProvider.getRolesQuery(), resultHandler);
+  public void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+    isPermitted(permission, authProvider.getPermissionsQuery(), resultHandler);
   }
 
   @Override
@@ -98,37 +86,18 @@ public class JDBCUser extends AbstractUser {
     return pos;
   }
 
-  private void hasRoleOrPermission(String roleOrPermission, String query, Handler<AsyncResult<Boolean>> resultHandler) {
+  private void isPermitted(String permission, String query, Handler<AsyncResult<Boolean>> resultHandler) {
     authProvider.executeQuery(query, new JsonArray().add(username), resultHandler, rs -> {
       boolean has = false;
       for (JsonArray result : rs.getResults()) {
-        String theRoleOrPermission = result.getString(0);
-        if (roleOrPermission.equals(theRoleOrPermission)) {
+        String thePermission = result.getString(0);
+        if (permission.equals(thePermission)) {
           resultHandler.handle(Future.succeededFuture(true));
           has = true;
           break;
         }
       }
       if (!has) {
-        resultHandler.handle(Future.succeededFuture(false));
-      }
-    });
-  }
-
-  private void hasAllRolesOrPermissions(Set<String> rolesOrPermissions, String query, Handler<AsyncResult<Boolean>> resultHandler) {
-    Set<String> copy = new HashSet<>(rolesOrPermissions);
-    authProvider.executeQuery(query, new JsonArray().add(username), resultHandler, rs -> {
-      boolean hasAll = false;
-      for (JsonArray result : rs.getResults()) {
-        String theRoleOrPermission = result.getString(0);
-        copy.remove(theRoleOrPermission);
-        if (copy.isEmpty()) {
-          hasAll = true;
-          resultHandler.handle(Future.succeededFuture(true));
-          break;
-        }
-      }
-      if (!hasAll) {
         resultHandler.handle(Future.succeededFuture(false));
       }
     });

@@ -49,7 +49,6 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   private JDBCClient client;
   private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
-  private String rolesQuery = DEFAULT_ROLES_QUERY;
   private String permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
   private JDBCHashStrategy strategy = new DefaultHashStrategy();
 
@@ -106,12 +105,6 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   }
 
   @Override
-  public JDBCAuth setRolesQuery(String rolesQuery) {
-    this.rolesQuery = rolesQuery;
-    return this;
-  }
-
-  @Override
   public JDBCAuth setPermissionsQuery(String permissionsQuery) {
     this.permissionsQuery = permissionsQuery;
     return this;
@@ -164,10 +157,6 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     } catch (NoSuchAlgorithmException e) {
       throw new VertxException(e);
     }
-  }
-
-  String getRolesQuery() {
-    return rolesQuery;
   }
 
   String getPermissionsQuery() {

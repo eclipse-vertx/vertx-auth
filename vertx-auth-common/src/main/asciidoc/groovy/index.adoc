@@ -7,7 +7,7 @@ It also provides an implementation that uses http://shiro.apache.org/[Apache Shi
 your own implementation by implementing the `link:groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]` interface.
 
 The Vert.x Apache Shiro implementation
-currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
+currently allows user/permission information to be accessed from simple properties files or LDAP servers.
 
 Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
 
@@ -17,12 +17,7 @@ _Authentication_ (aka _log in_) means verifying the identity of a user.
 
 _Authorisation_ means verifying a user is allowed to access some resource.
 
-The service uses a familiar user/role/permission model that you will probably know already:
-
-Users can have zero or more roles, e.g. "manager", "developer".
-
-Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
-and a developer might have a permission "commit_code".
+The service uses a familiar user/permission model that you will probably know already:
 
 Permission is a statement that describes raw functionality in the application and nothing more. Permissions are
 described as a _opaque_ `String`, meaning that vert.x makes no assumption on the format of the
@@ -30,10 +25,6 @@ String.
 
 A Permission can be e.g.: "code:push", "code_push", "printers:print:lab1-printer". A common pattern to define these
 Strings is "domain[:action[:instance]], however the choice is up to the developer.
-
-Having these concepts in mind, a Role is simply a named collection of Permissions. Permissions _might_ overlap over
-roles however since there is no context related to Permissions (as described before), they are expected to have
-always the same security meaning.
 
 == Authentication
 
@@ -83,8 +74,6 @@ authProvider.authenticate(authInfo, { res ->
 
 Once you have an `link:groovydoc/io/vertx/groovy/ext/auth/User.html[User]` instance you can call methods on it to authorise it.
 
-To check if a user has a specific role you use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#hasRole(java.lang.String,%20io.vertx.core.Handler)[hasRole]`,
-to check if a user has all the specified roles you use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#hasRoles(java.util.Set,%20io.vertx.core.Handler)[hasRoles]`,
 to check if a user has a specific permission you use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#isPermitted(java.lang.String,%20io.vertx.core.Handler)[isPermitted]`,
 to check if a user has all the specified permissions you use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#isPermitted(java.lang.String,%20io.vertx.core.Handler)[isPermitted]`.
 
@@ -113,13 +102,13 @@ user.isPermitted("admin", { res ->
 
 ----
 
-Matching of Permissions and Roles is expected to be done using String equality unless otherwise stated by the
-underlying implementation.
+Matching of Permissions is expected to be done using String equality unless otherwise stated by the underlying
+implementation.
 
-=== Caching roles and permissions
+=== Caching permissions
 
-The user object will cache any roles and permissions so subsequently calls to check if it has the same roles or
-permissions will result in the underlying provider being called.
+The user object will cache any permissions so subsequently calls to check if it has the same permissions will result
+in the underlying provider being called.
 
 In order to clear the internal cache you can use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#clearCache()[clearCache]`.
 

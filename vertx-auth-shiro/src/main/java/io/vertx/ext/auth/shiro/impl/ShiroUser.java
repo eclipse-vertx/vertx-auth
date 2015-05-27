@@ -29,7 +29,6 @@ import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 /**
  *
@@ -54,18 +53,8 @@ public class ShiroUser extends AbstractUser {
   }
 
   @Override
-  protected void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.hasRole(role)), resultHandler);
-  }
-
-  @Override
-  protected void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  protected void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     vertx.executeBlocking(fut -> fut.complete(subject.isPermitted(permission)), resultHandler);
-  }
-
-  @Override
-  protected void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.hasAllRoles(roles)), resultHandler);
   }
 
   @Override

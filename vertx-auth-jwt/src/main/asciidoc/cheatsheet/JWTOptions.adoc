@@ -55,11 +55,6 @@ The issuer of this token+++
 |+++
 Disable the generation of issued at claim+++
 
-|[[roles]]`roles`
-|`Array of String`
-|+++
-Add a role to this token.+++
-
 |[[permissions]]`permissions`
 |`Array of String`
 |+++

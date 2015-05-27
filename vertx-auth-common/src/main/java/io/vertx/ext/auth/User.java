@@ -26,7 +26,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.Set;
 
 /**
- * Represents an authenticate User and contains operations to authorise the user, using a role/permission
+ * Represents an authenticate User and contains operations to authorise the user, using a permission
  * based model.
  * <p>
  * Please consult the documentation for a detailed explanation.
@@ -35,18 +35,6 @@ import java.util.Set;
  */
 @VertxGen
 public interface User {
-
-  /**
-   * Does the user have the specified role?
-   *
-   * @param role  the role
-   * @param resultHandler  handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                       `true` if the they have the role or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  @Fluent
-  @CacheReturn
-  User hasRole(String role, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
    * Does the user have the specified permission?
@@ -59,18 +47,6 @@ public interface User {
   @Fluent
   @CacheReturn
   User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler);
-
-  /**
-   * Does the user have all the specified roles?
-   *
-   * @param roles  the set of roles
-   * @param resultHandler  handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                       `true` if the they have all the roles or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  @Fluent
-  @CacheReturn
-  User hasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
    * The User object will cache any roles or permissions that it knows it has to avoid hitting the
