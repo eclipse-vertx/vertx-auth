@@ -72,7 +72,18 @@
  * role.developer=do_actual_work
  * ----
  *
- * When describing roles a wildcard `*` can be used to indicate that the role has all permissions
+ * When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
+ *
+ * The implementation verifies Permissions using String matching so you can define wildcard permissions like:
+ * ----
+ * user.editor = mypassword,editor
+ * role.editor=newsletter:edit:*
+ * ----
+ *
+ * And match like:
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example5}
  *
  * === The Shiro LDAP auth provider
  *

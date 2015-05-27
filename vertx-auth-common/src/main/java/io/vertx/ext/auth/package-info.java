@@ -41,6 +41,17 @@
  * Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
  * and a developer might have a permission "commit_code".
  *
+ * Permission is a statement that describes raw functionality in the application and nothing more. Permissions are
+ * described as a _opaque_ {@link java.lang.String}, meaning that vert.x makes no assumption on the format of the
+ * String.
+ *
+ * A Permission can be e.g.: "code:push", "code_push", "printers:print:lab1-printer". A common pattern to define these
+ * Strings is "&lt;domain&gt;[:&lt;action&gt;[:&lt;instance&gt;]], however the choice is up to the developer.
+ *
+ * Having these concepts in mind, a Role is simply a named collection of Permissions. Permissions _might_ overlap over
+ * roles however since there is no context related to Permissions (as described before), they are expected to have
+ * always the same security meaning.
+ *
  * == Authentication
  *
  * To authenticate a user you use {@link io.vertx.ext.auth.AuthProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
@@ -85,6 +96,9 @@
  * ----
  * {@link examples.Examples#example2}
  * ----
+ *
+ * Matching of Permissions and Roles is expected to be done using String equality unless otherwise stated by the
+ * underlying implementation.
  *
  * === Caching roles and permissions
  *

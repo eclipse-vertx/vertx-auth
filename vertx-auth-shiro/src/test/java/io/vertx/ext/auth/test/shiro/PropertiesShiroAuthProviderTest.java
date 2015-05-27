@@ -20,6 +20,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.shiro.PropertiesProviderConstants;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
+import org.junit.Test;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -38,4 +39,31 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     return config;
   }
 
+  @Test
+  public void testHasWildcardPermission() throws Exception {
+    JsonObject authInfo = new JsonObject().put("username", "paulo").put("password", "secret");
+    authProvider.authenticate(authInfo, onSuccess(user -> {
+      assertNotNull(user);
+      // paulo can do anything...
+      user.hasPermission("do_actual_work", onSuccess(res -> {
+        assertTrue(res);
+        testComplete();
+      }));
+    }));
+    await();
+  }
+
+  @Test
+  public void testHasWildcardMatchPermission() throws Exception {
+    JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "secret");
+    authProvider.authenticate(authInfo, onSuccess(user -> {
+      assertNotNull(user);
+      // editor can edit any newsletter item...
+      user.hasPermission("newsletter:edit:13", onSuccess(res -> {
+        assertTrue(res);
+        testComplete();
+      }));
+    }));
+    await();
+  }
 }

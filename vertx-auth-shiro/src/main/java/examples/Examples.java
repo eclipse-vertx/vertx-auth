@@ -43,4 +43,19 @@ public class Examples {
 
   }
 
+  public void example5(Vertx vertx, Realm realm) {
+
+    AuthProvider provider = ShiroAuth.create(vertx, realm);
+
+    JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "password");
+    provider.authenticate(authInfo, authenticate -> {
+      if (authenticate.succeeded()) {
+        authenticate.result().hasPermission("newsletter:edit:13", hasPermission -> {
+          if (hasPermission.succeeded()) {
+            // carry on, user has this permission...
+          }
+        });
+      }
+    });
+  }
 }
