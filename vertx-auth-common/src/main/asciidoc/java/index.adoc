@@ -24,6 +24,17 @@ Users can have zero or more roles, e.g. "manager", "developer".
 Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
 and a developer might have a permission "commit_code".
 
+Permission is a statement that describes raw functionality in the application and nothing more. Permissions are
+described as a _opaque_ `link:../../apidocs/java/lang/String.html[String]`, meaning that vert.x makes no assumption on the format of the
+String.
+
+A Permission can be e.g.: "code:push", "code_push", "printers:print:lab1-printer". A common pattern to define these
+Strings is "domain[:action[:instance]], however the choice is up to the developer.
+
+Having these concepts in mind, a Role is simply a named collection of Permissions. Permissions _might_ overlap over
+roles however since there is no context related to Permissions (as described before), they are expected to have
+always the same security meaning.
+
 == Authentication
 
 To authenticate a user you use `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html#authenticate-io.vertx.core.json.JsonObject-io.vertx.core.Handler-[authenticate]`.
@@ -69,8 +80,8 @@ Once you have an `link:../../apidocs/io/vertx/ext/auth/User.html[User]` instance
 
 To check if a user has a specific role you use `link:../../apidocs/io/vertx/ext/auth/User.html#hasRole-java.lang.String-io.vertx.core.Handler-[hasRole]`,
 to check if a user has all the specified roles you use `link:../../apidocs/io/vertx/ext/auth/User.html#hasRoles-java.util.Set-io.vertx.core.Handler-[hasRoles]`,
-to check if a user has a specific permission you use `link:../../apidocs/io/vertx/ext/auth/User.html#hasPermission-java.lang.String-io.vertx.core.Handler-[hasPermission]`,
-to check if a user has all the specified permissions you use `link:../../apidocs/io/vertx/ext/auth/User.html#hasPermissions-java.util.Set-io.vertx.core.Handler-[hasPermissions]`.
+to check if a user has a specific permission you use `link:../../apidocs/io/vertx/ext/auth/User.html#isPermitted-java.lang.String-io.vertx.core.Handler-[isPermitted]`,
+to check if a user has all the specified permissions you use `link:../../apidocs/io/vertx/ext/auth/User.html#isPermitted-java.lang.String-io.vertx.core.Handler-[isPermitted]`.
 
 The results of all the above are provided asynchronously in the handler.
 
@@ -78,7 +89,7 @@ Here's an example of authorising a user:
 
 [source,java]
 ----
-user.hasPermission("admin", res -> {
+user.isPermitted("admin", res -> {
   if (res.succeeded()) {
 
     boolean hasPermission = res.result();
@@ -94,6 +105,9 @@ user.hasPermission("admin", res -> {
   }
 });
 ----
+
+Matching of Permissions and Roles is expected to be done using String equality unless otherwise stated by the
+underlying implementation.
 
 === Caching roles and permissions
 

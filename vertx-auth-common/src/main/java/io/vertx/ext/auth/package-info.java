@@ -85,8 +85,8 @@
  *
  * To check if a user has a specific role you use {@link io.vertx.ext.auth.User#hasRole},
  * to check if a user has all the specified roles you use {@link io.vertx.ext.auth.User#hasRoles},
- * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#hasPermission},
- * to check if a user has all the specified permissions you use {@link io.vertx.ext.auth.User#hasPermissions}.
+ * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#isPermitted},
+ * to check if a user has all the specified permissions you use {@link io.vertx.ext.auth.User#isPermitted}.
  *
  * The results of all the above are provided asynchronously in the handler.
  *

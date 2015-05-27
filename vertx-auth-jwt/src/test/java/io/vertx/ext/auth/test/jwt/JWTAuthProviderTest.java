@@ -102,7 +102,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
 
-      user.hasPermission("write", onSuccess(res -> {
+      user.isPermitted("write", onSuccess(res -> {
         assertNotNull(res);
         testComplete();
       }));
@@ -116,7 +116,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
 
-      user.hasPermission("drop", onSuccess(hasPermission -> {
+      user.isPermitted("drop", onSuccess(hasPermission -> {
         assertFalse(hasPermission);
         testComplete();
       }));
@@ -136,25 +136,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
       roles.add("user");
 
       user.hasRoles(roles, onSuccess(res -> {
-        assertNotNull(res);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testJWTValidPermissions() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-
-      Set<String> permissions = new HashSet<>();
-
-      permissions.add("read");
-      permissions.add("write");
-
-      user.hasPermissions(permissions, onSuccess(res -> {
         assertNotNull(res);
         testComplete();
       }));

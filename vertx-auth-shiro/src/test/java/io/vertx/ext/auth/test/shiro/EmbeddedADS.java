@@ -95,7 +95,7 @@ public class EmbeddedADS {
    */
   private void addIndex(Partition partition, String... attrs) {
     // Index some attributes on the apache partition
-    HashSet<Index<?, ServerEntry, Long>> indexedAttributes = new HashSet<Index<?, ServerEntry, Long>>();
+    HashSet<Index<?, ServerEntry, Long>> indexedAttributes = new HashSet<>();
 
     for (String attribute : attrs) {
       indexedAttributes.add(new JdbmIndex<String, ServerEntry>(attribute));

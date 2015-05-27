@@ -74,8 +74,8 @@ public class User {
    * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the permission or `false` otherwise.
    * @return the User to enable fluent use
    */
-  public User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.hasPermission(permission, resultHandler);
+  public User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) { 
+    this.delegate.isPermitted(permission, resultHandler);
     return this;
   }
 
@@ -84,9 +84,9 @@ public class User {
    * @param permission the permission
    * @return 
    */
-  public Observable<Boolean> hasPermissionObservable(String permission) { 
+  public Observable<Boolean> isPermittedObservable(String permission) { 
     io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasPermission(permission, resultHandler.toHandler());
+    isPermitted(permission, resultHandler.toHandler());
     return resultHandler;
   }
 
@@ -113,28 +113,6 @@ public class User {
   }
 
   /**
-   * Does the user have all the specified permissions?
-   * @param permissions the set of permissions
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have all the permissions or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  public User hasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.hasPermissions(permissions, resultHandler);
-    return this;
-  }
-
-  /**
-   * Does the user have all the specified permissions?
-   * @param permissions the set of permissions
-   * @return 
-   */
-  public Observable<Boolean> hasPermissionsObservable(Set<String> permissions) { 
-    io.vertx.rx.java.ObservableFuture<Boolean> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
-    hasPermissions(permissions, resultHandler.toHandler());
-    return resultHandler;
-  }
-
-  /**
    * The User object will cache any roles or permissions that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.
    * @return the User to enable fluent use
@@ -152,7 +130,7 @@ public class User {
    *     "username", "tim"
    *   }
    * </pre>
-   * @return 
+   * @return JSON representation of the Principal
    */
   public JsonObject principal() { 
     JsonObject ret = this.delegate.principal();

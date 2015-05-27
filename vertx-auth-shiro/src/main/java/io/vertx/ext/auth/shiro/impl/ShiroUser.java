@@ -69,12 +69,6 @@ public class ShiroUser extends AbstractUser {
   }
 
   @Override
-  protected void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.isPermittedAll(permissions.toArray(new String[permissions.size()]))),
-                          resultHandler);
-  }
-
-  @Override
   public JsonObject principal() {
     if (principal == null) {
       principal = new JsonObject().put("username", username);

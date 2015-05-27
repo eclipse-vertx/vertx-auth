@@ -50,7 +50,7 @@ public class Examples {
     JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "password");
     provider.authenticate(authInfo, authenticate -> {
       if (authenticate.succeeded()) {
-        authenticate.result().hasPermission("newsletter:edit:13", hasPermission -> {
+        authenticate.result().isPermitted("newsletter:edit:13", hasPermission -> {
           if (hasPermission.succeeded()) {
             // carry on, user has this permission...
           }

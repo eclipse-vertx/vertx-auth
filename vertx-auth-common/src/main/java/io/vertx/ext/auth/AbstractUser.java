@@ -58,7 +58,7 @@ public abstract class AbstractUser implements User, ClusterSerializable {
   }
 
   @Override
-  public User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     if (cachedPermissions.contains(permission)) {
       resultHandler.handle(Future.succeededFuture(true));
     } else {
@@ -92,23 +92,6 @@ public abstract class AbstractUser implements User, ClusterSerializable {
   }
 
   @Override
-  public User hasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (this.cachedPermissions.containsAll(permissions)) {
-      resultHandler.handle(Future.succeededFuture(true));
-    } else {
-      doHasPermissions(permissions, res -> {
-        if (res.succeeded()) {
-          if (res.result()) {
-            permissions.addAll(permissions);
-          }
-        }
-        resultHandler.handle(res);
-      });
-    }
-    return this;
-  }
-
-  @Override
   public User clearCache() {
     cachedRoles.clear();
     cachedPermissions.clear();
@@ -133,9 +116,6 @@ public abstract class AbstractUser implements User, ClusterSerializable {
   protected abstract void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler);
 
   protected abstract void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
-
-  protected abstract void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler);
-
 
   private void writeStringSet(Buffer buff, Set<String> set) {
     buff.appendInt(set == null ? 0 : set.size());

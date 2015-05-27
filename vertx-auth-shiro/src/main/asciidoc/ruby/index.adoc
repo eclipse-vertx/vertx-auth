@@ -62,7 +62,35 @@ role.manager=play_golf,say_buzzwords
 role.developer=do_actual_work
 ----
 
-When describing roles a wildcard `*` can be used to indicate that the role has all permissions
+When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
+
+The implementation verifies Permissions using String matching so you can define wildcard permissions like:
+----
+user.editor = mypassword,editor
+role.editor=newsletter:edit:*
+----
+
+And match like:
+[source,java]
+----
+require 'vertx-auth-shiro/shiro_auth'
+
+provider = VertxAuthShiro::ShiroAuth.create(vertx, realm)
+
+authInfo = {
+  'username' => "editor",
+  'password' => "password"
+}
+provider.authenticate(authInfo) { |authenticate,authenticate_err|
+  if (authenticate_err == nil)
+    authenticate.is_permitted("newsletter:edit:13") { |hasPermission,hasPermission_err|
+      if (hasPermission_err == nil)
+        # carry on, user has this permission...
+      end
+    }
+  end
+}
+
 
 === The Shiro LDAP auth provider
 

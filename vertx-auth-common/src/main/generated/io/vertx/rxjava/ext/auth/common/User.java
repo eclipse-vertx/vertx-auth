@@ -74,7 +74,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.hasPermission(permission, resultHandler);
+    this.delegate.isPermitted(permission, resultHandler);
     return this;
   }
 
@@ -118,7 +118,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User hasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.hasPermissions(permissions, resultHandler);
+    this.delegate.isPermitted(permissions, resultHandler);
     return this;
   }
 

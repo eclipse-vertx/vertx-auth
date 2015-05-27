@@ -63,11 +63,6 @@ public class JDBCUser extends AbstractUser {
   }
 
   @Override
-  public void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasAllRolesOrPermissions(permissions, authProvider.getPermissionsQuery(), resultHandler);
-  }
-
-  @Override
   public JsonObject principal() {
     if (principal == null) {
       principal = new JsonObject().put("username", username);

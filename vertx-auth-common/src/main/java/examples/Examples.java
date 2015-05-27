@@ -44,7 +44,7 @@ public class Examples {
 
   public void example2(User user) {
 
-    user.hasPermission("admin", res -> {
+    user.isPermitted("admin", res -> {
       if (res.succeeded()) {
 
         boolean hasPermission = res.result();

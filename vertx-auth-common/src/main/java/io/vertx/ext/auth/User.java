@@ -58,7 +58,7 @@ public interface User {
    */
   @Fluent
   @CacheReturn
-  User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler);
+  User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
    * Does the user have all the specified roles?
@@ -71,18 +71,6 @@ public interface User {
   @Fluent
   @CacheReturn
   User hasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
-
-  /**
-   * Does the user have all the specified permissions?
-   *
-   * @param permissions  the set of permissions
-   * @param resultHandler  handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                       `true` if the they have all the permissions or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  @Fluent
-  @CacheReturn
-  User hasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
    * The User object will cache any roles or permissions that it knows it has to avoid hitting the
@@ -102,7 +90,7 @@ public interface User {
    *     "username", "tim"
    *   }
    * </pre>
-   * @return
+   * @return JSON representation of the Principal
    */
   JsonObject principal();
 

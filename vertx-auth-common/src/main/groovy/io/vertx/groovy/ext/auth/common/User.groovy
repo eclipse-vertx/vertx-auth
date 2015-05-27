@@ -50,7 +50,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasPermission(permission, resultHandler);
+    this.delegate.isPermitted(permission, resultHandler);
     return this;
   }
   /**
@@ -61,16 +61,6 @@ public class User {
    */
   public User hasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
     this.delegate.hasRoles(roles, resultHandler);
-    return this;
-  }
-  /**
-   * Does the user have all the specified permissions?
-   * @param permissions the set of permissions
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have all the permissions or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  public User hasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.hasPermissions(permissions, resultHandler);
     return this;
   }
   /**

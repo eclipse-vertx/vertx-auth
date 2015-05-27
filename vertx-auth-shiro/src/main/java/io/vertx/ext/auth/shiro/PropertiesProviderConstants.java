@@ -26,6 +26,6 @@ public interface PropertiesProviderConstants {
   /**
    * The path where to look for the properties file
    */
-  static final String PROPERTIES_PROPS_PATH_FIELD = "properties_path";
+  String PROPERTIES_PROPS_PATH_FIELD = "properties_path";
 
 }

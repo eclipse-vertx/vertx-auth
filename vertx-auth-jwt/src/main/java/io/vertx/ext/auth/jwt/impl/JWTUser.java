@@ -109,28 +109,4 @@ public final class JWTUser extends AbstractUser {
     log.debug("User has no permission [" + permission + "]");
     handler.handle(Future.succeededFuture(false));
   }
-
-  @Override
-  public void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> handler) {
-    if (this.permissions != null) {
-      for (String permission : permissions) {
-        boolean found = false;
-
-        for (Object jwtPermission : this.permissions) {
-          if (permission.equals(jwtPermission)) {
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          log.debug("User has no permission [" + permission + "]");
-          handler.handle(Future.succeededFuture(false));
-          return;
-        }
-      }
-    }
-
-    handler.handle(Future.succeededFuture(true));
-  }
 }

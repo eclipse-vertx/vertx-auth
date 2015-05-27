@@ -32,12 +32,12 @@ module VertxAuthCommon
     # @param [String] permission the permission
     # @yield handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the permission or `false` otherwise.
     # @return [self]
-    def has_permission(permission=nil)
+    def is_permitted(permission=nil)
       if permission.class == String && block_given?
-        @j_del.java_method(:hasPermission, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(permission,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
+        @j_del.java_method(:isPermitted, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(permission,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling has_permission(permission)"
+      raise ArgumentError, "Invalid arguments when calling is_permitted(permission)"
     end
     #  Does the user have all the specified roles?
     # @param [Set<String>] roles the set of roles
@@ -49,17 +49,6 @@ module VertxAuthCommon
         return self
       end
       raise ArgumentError, "Invalid arguments when calling has_roles(roles)"
-    end
-    #  Does the user have all the specified permissions?
-    # @param [Set<String>] permissions the set of permissions
-    # @yield handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have all the permissions or `false` otherwise.
-    # @return [self]
-    def has_permissions(permissions=nil)
-      if permissions.class == Set && block_given?
-        @j_del.java_method(:hasPermissions, [Java::JavaUtil::Set.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::JavaUtil::LinkedHashSet.new(permissions.map { |element| element }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
-        return self
-      end
-      raise ArgumentError, "Invalid arguments when calling has_permissions(permissions)"
     end
     #  The User object will cache any roles or permissions that it knows it has to avoid hitting the
     #  underlying auth provider each time.  Use this method if you want to clear this cache.
@@ -78,7 +67,7 @@ module VertxAuthCommon
     #      "username", "tim"
     #    }
     #  </pre>
-    # @return [Hash{String => Object}] 
+    # @return [Hash{String => Object}] JSON representation of the Principal
     def principal
       if !block_given?
         return @j_del.java_method(:principal, []).call() != nil ? JSON.parse(@j_del.java_method(:principal, []).call().encode) : nil
