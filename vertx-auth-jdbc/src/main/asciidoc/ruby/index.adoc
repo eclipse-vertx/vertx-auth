@@ -1,6 +1,6 @@
 == JDBC Auth Provider implementation
 
-We provide an implementation of `link:../../null/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/ruby/yardoc/VertxJdbc/JDBCClient.html[JDBCClient]`
+We provide an implementation of `link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/ruby/yardoc/VertxJdbc/JDBCClient.html[JDBCClient]`
 to perform authentication and authorisation against any JDBC compliant database.
 
 To create an instance you first need an instance of `link:../../vertx-jdbc-client/ruby/yardoc/VertxJdbc/JDBCClient.html[JDBCClient]`. To learn how to create one
@@ -19,7 +19,7 @@ authProvider = VertxAuthJdbc::JDBCAuth.create(jdbcClient)
 
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any `link:../../null/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
 with the operations `link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_authentication_query-instance_method[setAuthenticationQuery]`,
@@ -67,7 +67,7 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../null/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
+`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
 
 [source,java]
 ----

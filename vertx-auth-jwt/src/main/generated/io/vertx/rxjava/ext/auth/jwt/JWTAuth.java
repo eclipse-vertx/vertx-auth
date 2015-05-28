@@ -43,6 +43,11 @@ public class JWTAuth extends AuthProvider {
     return delegate;
   }
 
+  /**
+   * Create a JWT auth provider
+   * @param config the config
+   * @return the auth provider
+   */
   public static JWTAuth create(JsonObject config) { 
     JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create(config));
     return ret;

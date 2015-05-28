@@ -54,7 +54,7 @@ implementation uses a familiar user/role/permission model, where a user can have
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../null/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
+`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
 
 [source,java]
 ----

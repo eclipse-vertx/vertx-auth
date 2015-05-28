@@ -33,6 +33,11 @@ public class JWTAuth extends AuthProvider {
   public Object getDelegate() {
     return delegate;
   }
+  /**
+   * Create a JWT auth provider
+   * @param config the config
+   * @return the auth provider
+   */
   public static JWTAuth create(Map<String, Object> config) {
     def ret= new io.vertx.groovy.ext.auth.jwt.JWTAuth(io.vertx.ext.auth.jwt.JWTAuth.create(config != null ? new io.vertx.core.json.JsonObject(config) : null));
     return ret;

@@ -55,7 +55,7 @@ implementation uses a familiar user/role/permission model, where a user can have
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../null/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]` as follows:
+`link:../../vertx-auth-common/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]` as follows:
 
 [source,java]
 ----

@@ -15,8 +15,9 @@ module VertxAuthJwt
     def j_del
       @j_del
     end
-    # @param [Hash{String => Object}] config
-    # @return [::VertxAuthJwt::JWTAuth]
+    #  Create a JWT auth provider
+    # @param [Hash{String => Object}] config the config
+    # @return [::VertxAuthJwt::JWTAuth] the auth provider
     def self.create(config=nil)
       if config.class == Hash && !block_given?
         return ::VertxAuthJwt::JWTAuth.new(Java::IoVertxExtAuthJwt::JWTAuth.java_method(:create, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(config)))

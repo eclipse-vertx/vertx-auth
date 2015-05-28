@@ -1,6 +1,6 @@
 == JDBC Auth Provider implementation
 
-We provide an implementation of `link:../../null/js/jsdoc/auth_provider-AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/js/jsdoc/jdbc_client-JDBCClient.html[JDBCClient]`
+We provide an implementation of `link:../../vertx-auth-common/js/jsdoc/auth_provider-AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/js/jsdoc/jdbc_client-JDBCClient.html[JDBCClient]`
 to perform authentication and authorisation against any JDBC compliant database.
 
 To create an instance you first need an instance of `link:../../vertx-jdbc-client/js/jsdoc/jdbc_client-JDBCClient.html[JDBCClient]`. To learn how to create one
@@ -19,7 +19,7 @@ var authProvider = JDBCAuth.create(jdbcClient);
 
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any `link:../../null/js/jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../vertx-auth-common/js/jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
 with the operations `link:jsdoc/jdbc_auth-JDBCAuth.html#setAuthenticationQuery[setAuthenticationQuery]`,
@@ -67,7 +67,7 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../null/js/jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
+`link:../../vertx-auth-common/js/jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
 
 [source,java]
 ----
