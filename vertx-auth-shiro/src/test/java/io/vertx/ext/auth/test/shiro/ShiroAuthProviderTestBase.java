@@ -64,6 +64,27 @@ public abstract class ShiroAuthProviderTestBase extends VertxTestBase {
   }
 
   @Test
+  public void testHasRole() throws Exception {
+    loginThen(user ->
+      this.<Boolean>executeTwice(handler -> user.isPermitted("role:morris_dancer", handler), res -> {
+        assertTrue(res.succeeded());
+        assertTrue(res.result());
+      }));
+    await();
+  }
+
+  @Test
+  public void testNotHasRole() throws Exception {
+    loginThen(user -> {
+      this.<Boolean>executeTwice(handler -> user.isPermitted("role:manager", handler), res -> {
+        assertTrue(res.succeeded());
+        assertFalse(res.result());
+      });
+    });
+    await();
+  }
+
+  @Test
   public void testHasPermission() throws Exception {
     loginThen(user -> {
       this.<Boolean>executeTwice(handler -> user.isPermitted("do_actual_work", handler), res -> {

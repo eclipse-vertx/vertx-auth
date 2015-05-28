@@ -23,6 +23,7 @@ import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -37,12 +38,13 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ShiroAuthProviderImpl implements AuthProvider {
+public class ShiroAuthProviderImpl implements ShiroAuth {
 
   private Vertx vertx;
   private org.apache.shiro.mgt.SecurityManager securityManager;
+  private String rolePrefix = DEFAULT_ROLE_PREFIX;
 
-  public static AuthProvider create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
+  public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
     Realm realm;
     switch (realmType) {
       case PROPERTIES:
@@ -75,9 +77,16 @@ public class ShiroAuthProviderImpl implements AuthProvider {
       } catch (AuthenticationException e) {
         throw new VertxException(e);
       }
-      fut.complete(new ShiroUser(vertx, securityManager, username));
+      fut.complete(new ShiroUser(vertx, securityManager, username, rolePrefix));
     }, resultHandler);
   }
+
+  @Override
+  public ShiroAuth setRolePrefix(String rolePrefix) {
+    this.rolePrefix = rolePrefix;
+    return this;
+  }
+
 
   Vertx getVertx() {
     return vertx;

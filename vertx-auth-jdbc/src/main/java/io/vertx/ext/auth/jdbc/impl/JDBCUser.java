@@ -37,20 +37,21 @@ public class JDBCUser extends AbstractUser {
   private String username;
   private JsonObject principal;
 
-  private static final String ROLE_PREFIX = "role:";
+  private String rolePrefix;
 
   public JDBCUser() {
   }
 
-  JDBCUser(String username, JDBCAuthImpl authProvider) {
+  JDBCUser(String username, JDBCAuthImpl authProvider, String rolePrefix) {
     this.username = username;
     this.authProvider = authProvider;
+    this.rolePrefix = rolePrefix;
   }
 
   @Override
   public void doIsPermitted(String permissionOrRole, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (permissionOrRole != null && permissionOrRole.startsWith(ROLE_PREFIX)) {
-      hasRoleOrPermission(permissionOrRole.substring(ROLE_PREFIX.length()), authProvider.getRolesQuery(), resultHandler);
+    if (permissionOrRole != null && permissionOrRole.startsWith(rolePrefix)) {
+      hasRoleOrPermission(permissionOrRole.substring(rolePrefix.length()), authProvider.getRolesQuery(), resultHandler);
     } else {
       hasRoleOrPermission(permissionOrRole, authProvider.getPermissionsQuery(), resultHandler);
     }
@@ -79,6 +80,10 @@ public class JDBCUser extends AbstractUser {
     byte[] bytes = username.getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length);
     buff.appendBytes(bytes);
+
+    bytes = rolePrefix.getBytes(StandardCharsets.UTF_8);
+    buff.appendInt(bytes.length);
+    buff.appendBytes(bytes);
   }
 
   @Override
@@ -89,6 +94,13 @@ public class JDBCUser extends AbstractUser {
     byte[] bytes = buffer.getBytes(pos, pos + len);
     username = new String(bytes, StandardCharsets.UTF_8);
     pos += len;
+
+    len = buffer.getInt(pos);
+    pos += 4;
+    bytes = buffer.getBytes(pos, pos + len);
+    rolePrefix = new String(bytes, StandardCharsets.UTF_8);
+    pos += len;
+
     return pos;
   }
 

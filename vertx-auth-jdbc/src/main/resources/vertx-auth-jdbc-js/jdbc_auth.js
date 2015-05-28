@@ -75,6 +75,20 @@ var JDBCAuth = function(j_val) {
     } else utils.invalidArgs();
   };
 
+  /**
+   Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+
+   @public
+   @param rolePrefix {string} a Prefix e.g.: "role:" 
+   @return {JDBCAuth} a reference to this for fluency
+   */
+  this.setRolePrefix = function(rolePrefix) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      return new JDBCAuth(j_jDBCAuth["setRolePrefix(java.lang.String)"](rolePrefix));
+    } else utils.invalidArgs();
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.

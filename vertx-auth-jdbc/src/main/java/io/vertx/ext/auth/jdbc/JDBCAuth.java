@@ -46,6 +46,11 @@ public interface JDBCAuth extends AuthProvider {
   String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
 
   /**
+   * The default role prefix
+   */
+  String DEFAULT_ROLE_PREFIX = "role:";
+
+  /**
    * Create a JDBC auth provider implementation
    *
    * @param client  the JDBC client instance
@@ -75,6 +80,13 @@ public interface JDBCAuth extends AuthProvider {
    * @return  a reference to this for fluency
    */
   JDBCAuth setPermissionsQuery(String permissionsQuery);
+
+  /**
+   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+   * @param rolePrefix a Prefix e.g.: "role:"
+   * @return a reference to this for fluency
+   */
+  JDBCAuth setRolePrefix(String rolePrefix);
 
   /**
    * Set the hash strategy to use. Use this if you want override the default hash strategy

@@ -35,10 +35,11 @@
  *
  * === The Shiro properties auth provider
  *
- * This auth provider implementation uses Apache Shiro to get user/permission information from a properties file.
+ * This auth provider implementation uses Apache Shiro to get user/role/permission information from a properties file.
  *
  * Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
- * possible.
+ * possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
+ * with {@link io.vertx.ext.auth.shiro.ShiroAuth#setRolePrefix(java.lang.String)}.
  *
  * The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
  *

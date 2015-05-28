@@ -30,6 +30,21 @@ var ShiroAuth = function(j_val) {
 
   var j_shiroAuth = j_val;
   var that = this;
+  AuthProvider.call(this, j_val);
+
+  /**
+   Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+
+   @public
+   @param rolePrefix {string} a Prefix e.g.: "role:" 
+   @return {ShiroAuth} a reference to this for fluency
+   */
+  this.setRolePrefix = function(rolePrefix) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      return new ShiroAuth(j_shiroAuth["setRolePrefix(java.lang.String)"](rolePrefix));
+    } else utils.invalidArgs();
+  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -43,12 +58,12 @@ var ShiroAuth = function(j_val) {
  @param vertx {Vertx} 
  @param realmType {Object} 
  @param config {Object} 
- @return {AuthProvider}
+ @return {ShiroAuth}
  */
 ShiroAuth.create = function(vertx, realmType, config) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return new AuthProvider(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
+    return new ShiroAuth(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)));
   } else utils.invalidArgs();
 };
 

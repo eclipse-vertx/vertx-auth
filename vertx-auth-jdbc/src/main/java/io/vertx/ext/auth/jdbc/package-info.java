@@ -48,6 +48,9 @@
  * with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
  * never to store your passwords as plain text.
  *
+ * The role concept is opaque to vertx-auth however assertions can be checked using the prefix `role:`. The prefix is
+ * configurable also with the JDBC provider using: {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolePrefix(java.lang.String)}.
+ *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  * @author <a href="http://tfox.org">Tim Fox</a>
  */

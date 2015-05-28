@@ -51,6 +51,7 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
   private String rolesQuery = DEFAULT_ROLES_QUERY;
   private String permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
+  private String rolePrefix = DEFAULT_ROLE_PREFIX;
   private JDBCHashStrategy strategy = new DefaultHashStrategy();
 
   public JDBCAuthImpl(JDBCClient client) {
@@ -84,7 +85,7 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
           String salt = strategy.getSalt(row);
           String hashedPassword = strategy.computeHash(password, salt);
           if (hashedStoredPwd.equals(hashedPassword)) {
-            resultHandler.handle(Future.succeededFuture(new JDBCUser(username, this)));
+            resultHandler.handle(Future.succeededFuture(new JDBCUser(username, this, rolePrefix)));
           } else {
             resultHandler.handle(Future.failedFuture("Invalid username/password"));
           }
@@ -114,6 +115,12 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   @Override
   public JDBCAuth setPermissionsQuery(String permissionsQuery) {
     this.permissionsQuery = permissionsQuery;
+    return this;
+  }
+
+  @Override
+  public JDBCAuth setRolePrefix(String rolePrefix) {
+    this.rolePrefix = rolePrefix;
     return this;
   }
 

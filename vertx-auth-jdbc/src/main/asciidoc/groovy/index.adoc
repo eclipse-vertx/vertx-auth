@@ -36,3 +36,6 @@ If you want to override this behaviour you can do so by providing an alternative
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
+
+The role concept is opaque to vertx-auth however assertions can be checked using the prefix `role:`. The prefix is
+configurable also with the JDBC provider using: `link:groovydoc/io/vertx/groovy/ext/auth/jdbc/JDBCAuth.html#setRolePrefix(java.lang.String)[setRolePrefix]`.
