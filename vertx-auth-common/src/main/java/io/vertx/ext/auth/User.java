@@ -24,8 +24,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Represents an authenticates User and contains operations to authorise the user, using a flexible permission
- * based model.
+ * Represents an authenticates User and contains operations to authorise the user.
  * <p>
  * Please consult the documentation for a detailed explanation.
  *
@@ -35,19 +34,21 @@ import io.vertx.core.json.JsonObject;
 public interface User {
 
   /**
-   * Does the user have the specified permission?
+   * Is the user authorised to
    *
-   * @param permission  the permission
+   * @param authority  the authority - what this really means is determined by the specific implementation. It might
+   *                   represent a permission to access a resource e.g. `printers:printer34` or it might represent
+   *                   authority to a role in a roles based model, e.g. `role:admin`.
    * @param resultHandler  handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                       `true` if the they have the permission or `false` otherwise.
+   *                       `true` if the they has the authority or `false` otherwise.
    * @return the User to enable fluent use
    */
   @Fluent
   @CacheReturn
-  User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler);
+  User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
-   * The User object will cache any roles or permissions that it knows it has to avoid hitting the
+   * The User object will cache any authorities that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.
    *
    * @return the User to enable fluent use

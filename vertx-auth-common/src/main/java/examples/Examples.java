@@ -44,15 +44,34 @@ public class Examples {
 
   public void example2(User user) {
 
-    user.isPermitted("admin", res -> {
+    user.isAuthorised("printers:printer1234", res -> {
       if (res.succeeded()) {
 
-        boolean hasPermission = res.result();
+        boolean hasAuthority = res.result();
 
-        if (hasPermission) {
-          System.out.println("User has the permision");
+        if (hasAuthority) {
+          System.out.println("User has the authority");
         } else {
-          System.out.println("User does not have the permision");
+          System.out.println("User does not have the authority");
+        }
+
+      } else {
+        res.cause().printStackTrace();
+      }
+    });
+  }
+
+  public void example3(User user) {
+
+    user.isAuthorised("role:admin", res -> {
+      if (res.succeeded()) {
+
+        boolean hasAuthority = res.result();
+
+        if (hasAuthority) {
+          System.out.println("User has the authority to the role of admin");
+        } else {
+          System.out.println("User does not have the authority");
         }
 
       } else {

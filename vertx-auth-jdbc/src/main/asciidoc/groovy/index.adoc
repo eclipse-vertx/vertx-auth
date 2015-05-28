@@ -1,6 +1,6 @@
 == JDBC Auth Provider implementation
 
-We provide an implementation of `link:../../vertx-auth-common/groovy/groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/groovy/groovydoc/io/vertx/groovy/ext/jdbc/JDBCClient.html[JDBCClient]`
+We provide an implementation of `link:../../null/groovy/groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-jdbc-client/groovy/groovydoc/io/vertx/groovy/ext/jdbc/JDBCClient.html[JDBCClient]`
 to perform authentication and authorisation against any JDBC compliant database.
 
 To create an instance you first need an instance of `link:../../vertx-jdbc-client/groovy/groovydoc/io/vertx/groovy/ext/jdbc/JDBCClient.html[JDBCClient]`. To learn how to create one
@@ -19,7 +19,7 @@ def authProvider = JDBCAuth.create(jdbcClient)
 
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any `link:../../vertx-auth-common/groovy/groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../null/groovy/groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
 with the operations `link:groovydoc/io/vertx/groovy/ext/auth/jdbc/JDBCAuth.html#setAuthenticationQuery(java.lang.String)[setAuthenticationQuery]`,
@@ -67,12 +67,12 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../vertx-auth-common/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isPermitted(java.lang.String,%20io.vertx.core.Handler)[isPermitted]` as follows:
+`link:../../null/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]` as follows:
 
 [source,java]
 ----
 
-user.isPermitted("commit_code", { res ->
+user.isAuthorised("commit_code", { res ->
   if (res.succeeded()) {
     def hasPermission = res.result()
   } else {
@@ -88,7 +88,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 [source,java]
 ----
 
-user.isPermitted("role:manager", { res ->
+user.isAuthorised("role:manager", { res ->
   if (res.succeeded()) {
     def hasRole = res.result()
   } else {

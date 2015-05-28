@@ -47,11 +47,11 @@
  * == Authorisation - Permission-Role Model
  *
  * Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
- * implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+ * implementation uses a familiar user/role/permission model, where a user can have zero or more roles and a role
  * can have zero or more permissions.
  *
  * If validating if a user has a particular permission simply pass the permission into.
- * {@link io.vertx.ext.auth.User#isPermitted(java.lang.String, io.vertx.core.Handler)} as follows:
+ * {@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
  *
  * [source,java]
  * ----

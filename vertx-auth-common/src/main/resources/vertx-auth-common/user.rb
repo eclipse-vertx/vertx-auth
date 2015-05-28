@@ -2,8 +2,7 @@ require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.User
 module VertxAuthCommon
-  #  Represents an authenticates User and contains operations to authorise the user, using a flexible permission
-  #  based model.
+  #  Represents an authenticates User and contains operations to authorise the user.
   #  <p>
   #  Please consult the documentation for a detailed explanation.
   class User
@@ -17,18 +16,18 @@ module VertxAuthCommon
     def j_del
       @j_del
     end
-    #  Does the user have the specified permission?
-    # @param [String] permission the permission
-    # @yield handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the permission or `false` otherwise.
+    #  Is the user authorised to
+    # @param [String] authority the authority - what this really means is determined by the specific implementation. It might represent a permission to access a resource e.g. `printers:printer34` or it might represent authority to a role in a roles based model, e.g. `role:admin`.
+    # @yield handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they has the authority or `false` otherwise.
     # @return [self]
-    def is_permitted(permission=nil)
-      if permission.class == String && block_given?
-        @j_del.java_method(:isPermitted, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(permission,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
+    def is_authorised(authority=nil)
+      if authority.class == String && block_given?
+        @j_del.java_method(:isAuthorised, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(authority,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling is_permitted(permission)"
+      raise ArgumentError, "Invalid arguments when calling is_authorised(authority)"
     end
-    #  The User object will cache any roles or permissions that it knows it has to avoid hitting the
+    #  The User object will cache any authorities that it knows it has to avoid hitting the
     #  underlying auth provider each time.  Use this method if you want to clear this cache.
     # @return [self]
     def clear_cache

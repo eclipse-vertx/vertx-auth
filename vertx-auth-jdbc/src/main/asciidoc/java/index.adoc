@@ -58,11 +58,11 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../apidocs/io/vertx/ext/auth/User.html#isPermitted-java.lang.String-io.vertx.core.Handler-[isPermitted]` as follows:
+`link:../../apidocs/io/vertx/ext/auth/User.html#isAuthorised-java.lang.String-io.vertx.core.Handler-[isAuthorised]` as follows:
 
 [source,java]
 ----
-user.isPermitted("commit_code", res -> {
+user.isAuthorised("commit_code", res -> {
   if (res.succeeded()) {
     boolean hasPermission = res.result();
   } else {
@@ -75,7 +75,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 
 [source,java]
 ----
-user.isPermitted("role:manager", res -> {
+user.isAuthorised("role:manager", res -> {
   if (res.succeeded()) {
     boolean hasRole = res.result();
   } else {

@@ -51,16 +51,16 @@ authProvider.authenticate(authInfo, { res ->
 == Authorisation - Permission-Role Model
 
 Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
-implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+implementation uses a familiar user/role/permission model, where a user can have zero or more roles and a role
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../vertx-auth-common/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isPermitted(java.lang.String,%20io.vertx.core.Handler)[isPermitted]` as follows:
+`link:../../null/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]` as follows:
 
 [source,java]
 ----
 
-user.isPermitted("newsletter:edit:13", { res ->
+user.isAuthorised("newsletter:edit:13", { res ->
   if (res.succeeded()) {
     def hasPermission = res.result()
   } else {
@@ -75,7 +75,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 [source,java]
 ----
 
-user.isPermitted("role:manager", { res ->
+user.isAuthorised("role:manager", { res ->
   if (res.succeeded()) {
     def hasRole = res.result()
   } else {

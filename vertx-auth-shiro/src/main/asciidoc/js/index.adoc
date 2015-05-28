@@ -50,16 +50,16 @@ authProvider.authenticate(authInfo, function (res, res_err) {
 == Authorisation - Permission-Role Model
 
 Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
-implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+implementation uses a familiar user/role/permission model, where a user can have zero or more roles and a role
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../vertx-auth-common/js/jsdoc/user-User.html#isPermitted[isPermitted]` as follows:
+`link:../../null/js/jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
 
 [source,java]
 ----
 
-user.isPermitted("newsletter:edit:13", function (res, res_err) {
+user.isAuthorised("newsletter:edit:13", function (res, res_err) {
   if (res_err == null) {
     var hasPermission = res;
   } else {
@@ -74,7 +74,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 [source,java]
 ----
 
-user.isPermitted("role:manager", function (res, res_err) {
+user.isAuthorised("role:manager", function (res, res_err) {
   if (res_err == null) {
     var hasRole = res;
   } else {

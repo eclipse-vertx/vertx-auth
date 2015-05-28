@@ -23,8 +23,7 @@ var JsonObject = io.vertx.core.json.JsonObject;
 var JUser = io.vertx.ext.auth.User;
 
 /**
- Represents an authenticates User and contains operations to authorise the user, using a flexible permission
- based model.
+ Represents an authenticates User and contains operations to authorise the user.
  <p>
  Please consult the documentation for a detailed explanation.
 
@@ -36,17 +35,17 @@ var User = function(j_val) {
   var that = this;
 
   /**
-   Does the user have the specified permission?
+   Is the user authorised to
 
    @public
-   @param permission {string} the permission 
-   @param resultHandler {function} handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the permission or `false` otherwise. 
+   @param authority {string} the authority - what this really means is determined by the specific implementation. It might represent a permission to access a resource e.g. `printers:printer34` or it might represent authority to a role in a roles based model, e.g. `role:admin`. 
+   @param resultHandler {function} handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they has the authority or `false` otherwise. 
    @return {User} the User to enable fluent use
    */
-  this.isPermitted = function(permission, resultHandler) {
+  this.isAuthorised = function(authority, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_user["isPermitted(java.lang.String,io.vertx.core.Handler)"](permission, function(ar) {
+      j_user["isAuthorised(java.lang.String,io.vertx.core.Handler)"](authority, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -58,7 +57,7 @@ var User = function(j_val) {
   };
 
   /**
-   The User object will cache any roles or permissions that it knows it has to avoid hitting the
+   The User object will cache any authorities that it knows it has to avoid hitting the
    underlying auth provider each time.  Use this method if you want to clear this cache.
 
    @public

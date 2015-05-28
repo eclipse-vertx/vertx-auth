@@ -61,7 +61,7 @@ public final class JWT {
         try {
           tmp.put(alg, new CryptoSignature(getSignature(keyStore, keyStorePassword, alg)));
         } catch (RuntimeException e) {
-          log.warn(alg + " not supported", e);
+          log.warn(alg + " not supported");
         }
       }
     }

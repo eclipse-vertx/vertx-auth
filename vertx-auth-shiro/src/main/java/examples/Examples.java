@@ -55,7 +55,7 @@ public class Examples {
 
   public void example5(User user) {
 
-    user.isPermitted("newsletter:edit:13", res -> {
+    user.isAuthorised("newsletter:edit:13", res -> {
       if (res.succeeded()) {
         boolean hasPermission = res.result();
       } else {
@@ -67,7 +67,7 @@ public class Examples {
 
   public void example6(User user) {
 
-    user.isPermitted("role:manager", res -> {
+    user.isAuthorised("role:manager", res -> {
       if (res.succeeded()) {
         boolean hasRole = res.result();
       } else {

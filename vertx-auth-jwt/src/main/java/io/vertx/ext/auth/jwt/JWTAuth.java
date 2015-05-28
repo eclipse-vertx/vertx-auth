@@ -28,6 +28,13 @@ import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
  */
 @VertxGen
 public interface JWTAuth extends AuthProvider {
+
+  /**
+   * Create a JWT auth provider
+   *
+   * @param config  the config
+   * @return the auth provider
+   */
   static JWTAuth create(JsonObject config) {
     return new JWTAuthProviderImpl(config);
   }

@@ -40,7 +40,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.isPermitted(permission, resultHandler);
+    this.delegate.isAuthorised(permission, resultHandler);
     return this;
   }
   /**

@@ -153,7 +153,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isPermitted("role:dev", onSuccess(has -> {
+      user.isAuthorised("role:dev", onSuccess(has -> {
         assertTrue(has);
         testComplete();
       }));
@@ -167,7 +167,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isPermitted("role:manager", onSuccess(has -> {
+      user.isAuthorised("role:manager", onSuccess(has -> {
         assertFalse(has);
         testComplete();
       }));
@@ -181,7 +181,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isPermitted("commit_code", onSuccess(has -> {
+      user.isAuthorised("commit_code", onSuccess(has -> {
         assertTrue(has);
         testComplete();
       }));
@@ -195,7 +195,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isPermitted("eat_sandwich", onSuccess(has -> {
+      user.isAuthorised("eat_sandwich", onSuccess(has -> {
         assertFalse(has);
         testComplete();
       }));

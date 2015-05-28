@@ -50,16 +50,16 @@ authProvider.authenticate(authInfo) { |res,res_err|
 == Authorisation - Permission-Role Model
 
 Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
-implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+implementation uses a familiar user/role/permission model, where a user can have zero or more roles and a role
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_permitted-instance_method[isPermitted]` as follows:
+`link:../../null/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
 
 [source,java]
 ----
 
-user.is_permitted("newsletter:edit:13") { |res,res_err|
+user.is_authorised("newsletter:edit:13") { |res,res_err|
   if (res_err == nil)
     hasPermission = res
   else
@@ -74,7 +74,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 [source,java]
 ----
 
-user.is_permitted("role:manager") { |res,res_err|
+user.is_authorised("role:manager") { |res,res_err|
   if (res_err == nil)
     hasRole = res
   else

@@ -20,29 +20,21 @@
  * This Vert.x component provides interfaces for authentication and authorisation that can be used from your Vert.x
  * applications and can be backed by different providers.
  *
- * It also provides an implementation that uses http://shiro.apache.org/[Apache Shiro] out-of-the-box but you can provide
- * your own implementation by implementing the {@link io.vertx.ext.auth.AuthProvider} interface.
- *
- * The Vert.x Apache Shiro implementation
- * currently allows user/permission information to be accessed from simple properties files or LDAP servers.
- *
  * Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
  *
  * == Basic concepts
  *
- * _Authentication_ (aka _log in_) means verifying the identity of a user.
+ * _Authentication_ means verifying the identity of a user.
  *
- * _Authorisation_ means verifying a user is allowed to access some resource.
+ * _Authorisation_ means verifying a user has an authority.
  *
- * The service uses a familiar user/permission model that you will probably know already:
+ * What the authority means is determined by the particular implementation and we don't mandate any particular model,
+ * e.g. a permissions/roles model, to keep things very flexible.
  *
- * Permission is a statement that describes raw functionality in the application and nothing more. Permissions are
- * described as a _opaque_ {@link java.lang.String}, meaning that vert.x makes no assumption on the format of the
- * String.
- *
- * A Permission can be e.g.: "code:push", "code_push", "printers:print:lab1-printer". A common pattern to define these
- * Strings is "&lt;domain&gt;[:&lt;action&gt;[:&lt;instance&gt;]], however the choice is up to the implementation of
- * the particular auth provider.
+ * For some implementations an authority might represent a permission, for example the authority to access all printers,
+ * or a specific printer. Other implementations must support roles too, and will often represent this by prefixing
+ * the authority with something like `role:`, e.g. `role:admin`. Another implementation might have a completely
+ * different model of representing authorities.
  *
  * To find out what a particular auth provider expects, consult the documentation for that auth provider..
  *
@@ -77,7 +69,7 @@
  *
  * Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
  *
- * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#isPermitted}.
+ * to check if a user has a specific authority you use {@link io.vertx.ext.auth.User#isAuthorised}.
  *
  * The results of all the above are provided asynchronously in the handler.
  *
@@ -88,12 +80,14 @@
  * {@link examples.Examples#example2}
  * ----
  *
- * Matching of Permissions has no hard constraints by this module, it is the responsibility of the provider to document
- * the underlying implementation.
+ * And another example of authorising in a roles based model which uses `role:` as a prefix.
  *
- * === Caching permissions
+ * Please note, as discussed above how the authority string is interpreted is completely determined by the underlying
+ * implementation and Vert.x makes no assumptions here.
  *
- * The user object will cache any permissions so subsequently calls to check if it has the same permissions will result
+ * === Caching authorities
+ *
+ * The user object will cache any authorities so subsequently calls to check if it has the same authorities will result
  * in the underlying provider being called.
  *
  * In order to clear the internal cache you can use {@link io.vertx.ext.auth.User#clearCache()}.

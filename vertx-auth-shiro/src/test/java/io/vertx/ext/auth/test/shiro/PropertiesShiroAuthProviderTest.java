@@ -45,7 +45,7 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       // paulo can do anything...
-      user.isPermitted("do_actual_work", onSuccess(res -> {
+      user.isAuthorised("do_actual_work", onSuccess(res -> {
         assertTrue(res);
         testComplete();
       }));
@@ -59,7 +59,7 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       // editor can edit any newsletter item...
-      user.isPermitted("newsletter:edit:13", onSuccess(res -> {
+      user.isAuthorised("newsletter:edit:13", onSuccess(res -> {
         assertTrue(res);
         testComplete();
       }));

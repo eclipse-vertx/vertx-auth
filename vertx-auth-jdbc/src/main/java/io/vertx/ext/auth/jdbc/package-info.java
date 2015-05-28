@@ -65,7 +65,7 @@
  * can have zero or more permissions.
  *
  * If validating if a user has a particular permission simply pass the permission into.
- * {@link io.vertx.ext.auth.User#isPermitted(java.lang.String, io.vertx.core.Handler)} as follows:
+ * {@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
  *
  * [source,java]
  * ----

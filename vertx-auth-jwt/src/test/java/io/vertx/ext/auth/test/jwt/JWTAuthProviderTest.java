@@ -22,9 +22,6 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class JWTAuthProviderTest extends VertxTestBase {
 
   protected JWTAuth authProvider;
@@ -74,7 +71,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
 
-      user.isPermitted("write", onSuccess(res -> {
+      user.isAuthorised("write", onSuccess(res -> {
         assertNotNull(res);
         testComplete();
       }));
@@ -88,7 +85,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
 
-      user.isPermitted("drop", onSuccess(hasPermission -> {
+      user.isAuthorised("drop", onSuccess(hasPermission -> {
         assertFalse(hasPermission);
         testComplete();
       }));

@@ -66,7 +66,7 @@ public abstract class ShiroAuthProviderTestBase extends VertxTestBase {
   @Test
   public void testHasRole() throws Exception {
     loginThen(user ->
-      this.<Boolean>executeTwice(handler -> user.isPermitted("role:morris_dancer", handler), res -> {
+      this.<Boolean>executeTwice(handler -> user.isAuthorised("role:morris_dancer", handler), res -> {
         assertTrue(res.succeeded());
         assertTrue(res.result());
       }));
@@ -76,7 +76,7 @@ public abstract class ShiroAuthProviderTestBase extends VertxTestBase {
   @Test
   public void testNotHasRole() throws Exception {
     loginThen(user -> {
-      this.<Boolean>executeTwice(handler -> user.isPermitted("role:manager", handler), res -> {
+      this.<Boolean>executeTwice(handler -> user.isAuthorised("role:manager", handler), res -> {
         assertTrue(res.succeeded());
         assertFalse(res.result());
       });
@@ -87,7 +87,7 @@ public abstract class ShiroAuthProviderTestBase extends VertxTestBase {
   @Test
   public void testHasPermission() throws Exception {
     loginThen(user -> {
-      this.<Boolean>executeTwice(handler -> user.isPermitted("do_actual_work", handler), res -> {
+      this.<Boolean>executeTwice(handler -> user.isAuthorised("do_actual_work", handler), res -> {
         assertTrue(res.succeeded());
         assertTrue(res.result());
       });
@@ -98,7 +98,7 @@ public abstract class ShiroAuthProviderTestBase extends VertxTestBase {
   @Test
   public void testNotHasPermission() throws Exception {
     loginThen(user -> {
-      this.<Boolean>executeTwice(handler -> user.isPermitted("play_golf", handler), res -> {
+      this.<Boolean>executeTwice(handler -> user.isAuthorised("play_golf", handler), res -> {
         assertTrue(res.succeeded());
         assertFalse(res.result());
       });
