@@ -34,6 +34,13 @@ public class ShiroAuth extends AuthProvider {
   public Object getDelegate() {
     return delegate;
   }
+  /**
+   * Create a Shiro auth provider
+   * @param vertx the Vert.x instance
+   * @param realmType the Shiro realm type
+   * @param config the config
+   * @return the auth provider
+   */
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, Map<String, Object> config) {
     def ret= new io.vertx.groovy.ext.auth.shiro.ShiroAuth(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), realmType, config != null ? new io.vertx.core.json.JsonObject(config) : null));
     return ret;

@@ -19,6 +19,7 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.apache.shiro.realm.Realm;
@@ -37,25 +38,50 @@ public class Examples {
 
   }
 
-  public void example4(Vertx vertx, Realm realm) {
 
-    AuthProvider provider = ShiroAuth.create(vertx, realm);
+
+  public void example4(AuthProvider authProvider) {
+
+    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+
+    authProvider.authenticate(authInfo, res -> {
+      if (res.succeeded()) {
+        User user = res.result();
+      } else {
+        // Failed!
+      }
+    });
+  }
+
+  public void example5(User user) {
+
+    user.isPermitted("newsletter:edit:13", res -> {
+      if (res.succeeded()) {
+        boolean hasPermission = res.result();
+      } else {
+        // Failed to
+      }
+    });
 
   }
 
-  public void example5(Vertx vertx, Realm realm) {
+  public void example6(User user) {
+
+    user.isPermitted("role:manager", res -> {
+      if (res.succeeded()) {
+        boolean hasRole = res.result();
+      } else {
+        // Failed to
+      }
+    });
+
+  }
+
+
+
+  public void example8(Vertx vertx, Realm realm) {
 
     AuthProvider provider = ShiroAuth.create(vertx, realm);
 
-    JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "password");
-    provider.authenticate(authInfo, authenticate -> {
-      if (authenticate.succeeded()) {
-        authenticate.result().isPermitted("newsletter:edit:13", hasPermission -> {
-          if (hasPermission.succeeded()) {
-            // carry on, user has this permission...
-          }
-        });
-      }
-    });
   }
 }

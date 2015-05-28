@@ -37,5 +37,66 @@ WARNING: It is advised to always store your passwords as hashes in your database
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
 
-The role concept is opaque to vertx-auth however assertions can be checked using the prefix `role:`. The prefix is
-configurable also with the JDBC provider using: `link:groovydoc/io/vertx/groovy/ext/auth/jdbc/JDBCAuth.html#setRolePrefix(java.lang.String)[setRolePrefix]`.
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+
+def authInfo = [
+  username:"tim",
+  password:"sausages"
+]
+
+authProvider.authenticate(authInfo, { res ->
+  if (res.succeeded()) {
+    def user = res.result()
+  } else {
+    // Failed!
+  }
+})
+
+----
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../vertx-auth-common/groovy/groovydoc/io/vertx/groovy/ext/auth/User.html#isPermitted(java.lang.String,%20io.vertx.core.Handler)[isPermitted]` as follows:
+
+[source,java]
+----
+
+user.isPermitted("commit_code", { res ->
+  if (res.succeeded()) {
+    def hasPermission = res.result()
+  } else {
+    // Failed to
+  }
+})
+
+
+----
+
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+
+user.isPermitted("role:manager", { res ->
+  if (res.succeeded()) {
+    def hasRole = res.result()
+  } else {
+    // Failed to
+  }
+})
+
+
+----
+
+The default role prefix is `role:`. You can change this with `link:groovydoc/io/vertx/groovy/ext/auth/jdbc/JDBCAuth.html#setRolePrefix(java.lang.String)[setRolePrefix]`.

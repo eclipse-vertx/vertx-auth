@@ -18,6 +18,8 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.jdbc.JDBCClient;
 
@@ -32,6 +34,43 @@ public class Examples {
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
     JDBCAuth authProvider = JDBCAuth.create(jdbcClient);
+  }
+
+  public void example6(AuthProvider authProvider) {
+
+    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+
+    authProvider.authenticate(authInfo, res -> {
+      if (res.succeeded()) {
+        User user = res.result();
+      } else {
+        // Failed!
+      }
+    });
+  }
+
+  public void example7(User user) {
+
+    user.isPermitted("commit_code", res -> {
+      if (res.succeeded()) {
+        boolean hasPermission = res.result();
+      } else {
+        // Failed to
+      }
+    });
+
+  }
+
+  public void example8(User user) {
+
+    user.isPermitted("role:manager", res -> {
+      if (res.succeeded()) {
+        boolean hasRole = res.result();
+      } else {
+        // Failed to
+      }
+    });
+
   }
 
 }

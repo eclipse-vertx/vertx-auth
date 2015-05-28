@@ -37,5 +37,66 @@ WARNING: It is advised to always store your passwords as hashes in your database
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
 
-The role concept is opaque to vertx-auth however assertions can be checked using the prefix `role:`. The prefix is
-configurable also with the JDBC provider using: `link:jsdoc/jdbc_auth-JDBCAuth.html#setRolePrefix[setRolePrefix]`.
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+
+var authInfo = {
+  "username" : "tim",
+  "password" : "sausages"
+};
+
+authProvider.authenticate(authInfo, function (res, res_err) {
+  if (res_err == null) {
+    var user = res;
+  } else {
+    // Failed!
+  };
+});
+
+----
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../vertx-auth-common/js/jsdoc/user-User.html#isPermitted[isPermitted]` as follows:
+
+[source,java]
+----
+
+user.isPermitted("commit_code", function (res, res_err) {
+  if (res_err == null) {
+    var hasPermission = res;
+  } else {
+    // Failed to
+  };
+});
+
+
+----
+
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+
+user.isPermitted("role:manager", function (res, res_err) {
+  if (res_err == null) {
+    var hasRole = res;
+  } else {
+    // Failed to
+  };
+});
+
+
+----
+
+The default role prefix is `role:`. You can change this with `link:jsdoc/jdbc_auth-JDBCAuth.html#setRolePrefix[setRolePrefix]`.

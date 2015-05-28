@@ -37,15 +37,27 @@ public interface ShiroAuth extends AuthProvider {
    */
   String DEFAULT_ROLE_PREFIX = "role:";
 
+  /**
+   * Create a Shiro auth provider
+   * @param vertx  the Vert.x instance
+   * @param realmType  the Shiro realm type
+   * @param config  the config
+   * @return  the auth provider
+   */
   static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
     return ShiroAuthProviderImpl.create(vertx, realmType, config);
   }
 
+  /**
+   * Create a Shiro auth provider
+   * @param vertx  the Vert.x instance
+   * @param realm  the Shiro realm
+   * @return  the auth provider
+   */
   @GenIgnore
   static ShiroAuth create(Vertx vertx, Realm realm) {
     return new ShiroAuthProviderImpl(vertx, realm);
   }
-
 
   /**
    * Set the role prefix to distinguish from permissions when checking for isPermitted requests.

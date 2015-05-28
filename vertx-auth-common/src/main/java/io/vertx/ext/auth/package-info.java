@@ -41,7 +41,10 @@
  * String.
  *
  * A Permission can be e.g.: "code:push", "code_push", "printers:print:lab1-printer". A common pattern to define these
- * Strings is "&lt;domain&gt;[:&lt;action&gt;[:&lt;instance&gt;]], however the choice is up to the developer.
+ * Strings is "&lt;domain&gt;[:&lt;action&gt;[:&lt;instance&gt;]], however the choice is up to the implementation of
+ * the particular auth provider.
+ *
+ * To find out what a particular auth provider expects, consult the documentation for that auth provider..
  *
  * == Authentication
  *

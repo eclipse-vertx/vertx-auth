@@ -2,7 +2,7 @@ require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.User
 module VertxAuthCommon
-  #  Represents an authenticate User and contains operations to authorise the user, using a permission
+  #  Represents an authenticates User and contains operations to authorise the user, using a flexible permission
   #  based model.
   #  <p>
   #  Please consult the documentation for a detailed explanation.

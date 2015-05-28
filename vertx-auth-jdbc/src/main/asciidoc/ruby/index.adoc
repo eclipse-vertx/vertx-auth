@@ -37,5 +37,66 @@ WARNING: It is advised to always store your passwords as hashes in your database
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
 
-The role concept is opaque to vertx-auth however assertions can be checked using the prefix `role:`. The prefix is
-configurable also with the JDBC provider using: `link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+
+authInfo = {
+  'username' => "tim",
+  'password' => "sausages"
+}
+
+authProvider.authenticate(authInfo) { |res,res_err|
+  if (res_err == nil)
+    user = res
+  else
+    # Failed!
+  end
+}
+
+----
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_permitted-instance_method[isPermitted]` as follows:
+
+[source,java]
+----
+
+user.is_permitted("commit_code") { |res,res_err|
+  if (res_err == nil)
+    hasPermission = res
+  else
+    # Failed to
+  end
+}
+
+
+----
+
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+
+user.is_permitted("role:manager") { |res,res_err|
+  if (res_err == nil)
+    hasRole = res
+  else
+    # Failed to
+  end
+}
+
+
+----
+
+The default role prefix is `role:`. You can change this with `link:yardoc/VertxAuthJdbc/JDBCAuth.html#set_role_prefix-instance_method[setRolePrefix]`.

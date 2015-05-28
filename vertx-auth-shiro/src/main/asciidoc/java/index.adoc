@@ -1,14 +1,15 @@
 == The Apache Shiro Auth provider implementation
 
-This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
+This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].
 
-We provide out of the box support for properties and LDAP based auth using Shiro.
+We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
+other Shiro Realm which expects username and password for credentials.
 
 To create an instance of the provider you use `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html[ShiroAuth]`. You specify the type of
 Shiro auth provider that you want with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuthRealmType.html[ShiroAuthRealmType]`, and you specify the
 configuration in a JSON object.
 
-Here's an example of creating a Shiro auth provider:
+Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
@@ -16,6 +17,58 @@ JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth
 
 AuthProvider provider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, config);
 ----
+
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+
+authProvider.authenticate(authInfo, res -> {
+  if (res.succeeded()) {
+    User user = res.result();
+  } else {
+    // Failed!
+  }
+});
+----
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../apidocs/io/vertx/ext/auth/User.html#isPermitted-java.lang.String-io.vertx.core.Handler-[isPermitted]` as follows:
+
+[source,java]
+----
+user.isPermitted("newsletter:edit:13", res -> {
+  if (res.succeeded()) {
+    boolean hasPermission = res.result();
+  } else {
+    // Failed to
+  }
+});
+----
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+user.isPermitted("role:manager", res -> {
+  if (res.succeeded()) {
+    boolean hasRole = res.result();
+  } else {
+    // Failed to
+  }
+});
+----
+
+The default role prefix is `role:`. You can change this with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
 
 === The Shiro properties auth provider
 
@@ -61,28 +114,6 @@ role.developer=do_actual_work
 ----
 
 When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
-
-The implementation verifies Permissions using String matching so you can define wildcard permissions like:
-----
-user.editor = mypassword,editor
-role.editor=newsletter:edit:*
-----
-
-And match like:
-[source,java]
-----
-AuthProvider provider = ShiroAuth.create(vertx, realm);
-
-JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "password");
-provider.authenticate(authInfo, authenticate -> {
-  if (authenticate.succeeded()) {
-    authenticate.result().isPermitted("newsletter:edit:13", hasPermission -> {
-      if (hasPermission.succeeded()) {
-        // carry on, user has this permission...
-      }
-    });
-  }
-});
 
 === The Shiro LDAP auth provider
 

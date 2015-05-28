@@ -23,7 +23,7 @@ var JsonObject = io.vertx.core.json.JsonObject;
 var JUser = io.vertx.ext.auth.User;
 
 /**
- Represents an authenticate User and contains operations to authorise the user, using a permission
+ Represents an authenticates User and contains operations to authorise the user, using a flexible permission
  based model.
  <p>
  Please consult the documentation for a detailed explanation.

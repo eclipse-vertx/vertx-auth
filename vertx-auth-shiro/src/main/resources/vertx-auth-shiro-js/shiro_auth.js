@@ -53,12 +53,13 @@ var ShiroAuth = function(j_val) {
 };
 
 /**
+ Create a Shiro auth provider
 
  @memberof module:vertx-auth-shiro-js/shiro_auth
- @param vertx {Vertx} 
- @param realmType {Object} 
- @param config {Object} 
- @return {ShiroAuth}
+ @param vertx {Vertx} the Vert.x instance 
+ @param realmType {Object} the Shiro realm type 
+ @param config {Object} the config 
+ @return {ShiroAuth} the auth provider
  */
 ShiroAuth.create = function(vertx, realmType, config) {
   var __args = arguments;

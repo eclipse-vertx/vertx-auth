@@ -48,8 +48,38 @@
  * with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
  * never to store your passwords as plain text.
  *
- * The role concept is opaque to vertx-auth however assertions can be checked using the prefix `role:`. The prefix is
- * configurable also with the JDBC provider using: {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolePrefix(java.lang.String)}.
+ * == Authentication
+ *
+ * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+ * authentication info:
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example6}
+ * ----
+ *
+ * == Authorisation - Permission-Role Model
+ *
+ * Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+ * implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+ * can have zero or more permissions.
+ *
+ * If validating if a user has a particular permission simply pass the permission into.
+ * {@link io.vertx.ext.auth.User#isPermitted(java.lang.String, io.vertx.core.Handler)} as follows:
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example7}
+ * ----
+ *
+ * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example8}
+ * ----
+ *
+ * The default role prefix is `role:`. You can change this with {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolePrefix(java.lang.String)}.
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  * @author <a href="http://tfox.org">Tim Fox</a>

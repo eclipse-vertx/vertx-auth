@@ -1,14 +1,15 @@
 == The Apache Shiro Auth provider implementation
 
-This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
+This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].
 
-We provide out of the box support for properties and LDAP based auth using Shiro.
+We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
+other Shiro Realm which expects username and password for credentials.
 
 To create an instance of the provider you use `link:yardoc/VertxAuthShiro/ShiroAuth.html[ShiroAuth]`. You specify the type of
 Shiro auth provider that you want with `link:unavailable[ShiroAuthRealmType]`, and you specify the
 configuration in a JSON object.
 
-Here's an example of creating a Shiro auth provider:
+Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
@@ -22,6 +23,69 @@ provider = VertxAuthShiro::ShiroAuth.create(vertx, :PROPERTIES, config)
 
 
 ----
+
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+
+authInfo = {
+  'username' => "tim",
+  'password' => "sausages"
+}
+
+authProvider.authenticate(authInfo) { |res,res_err|
+  if (res_err == nil)
+    user = res
+  else
+    # Failed!
+  end
+}
+
+----
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_permitted-instance_method[isPermitted]` as follows:
+
+[source,java]
+----
+
+user.is_permitted("newsletter:edit:13") { |res,res_err|
+  if (res_err == nil)
+    hasPermission = res
+  else
+    # Failed to
+  end
+}
+
+
+----
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+
+user.is_permitted("role:manager") { |res,res_err|
+  if (res_err == nil)
+    hasRole = res
+  else
+    # Failed to
+  end
+}
+
+
+----
+
+The default role prefix is `role:`. You can change this with `link:yardoc/VertxAuthShiro/ShiroAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
 
 === The Shiro properties auth provider
 
@@ -67,34 +131,6 @@ role.developer=do_actual_work
 ----
 
 When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
-
-The implementation verifies Permissions using String matching so you can define wildcard permissions like:
-----
-user.editor = mypassword,editor
-role.editor=newsletter:edit:*
-----
-
-And match like:
-[source,java]
-----
-require 'vertx-auth-shiro/shiro_auth'
-
-provider = VertxAuthShiro::ShiroAuth.create(vertx, realm)
-
-authInfo = {
-  'username' => "editor",
-  'password' => "password"
-}
-provider.authenticate(authInfo) { |authenticate,authenticate_err|
-  if (authenticate_err == nil)
-    authenticate.is_permitted("newsletter:edit:13") { |hasPermission,hasPermission_err|
-      if (hasPermission_err == nil)
-        # carry on, user has this permission...
-      end
-    }
-  end
-}
-
 
 === The Shiro LDAP auth provider
 

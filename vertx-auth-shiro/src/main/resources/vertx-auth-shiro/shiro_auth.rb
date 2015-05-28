@@ -15,10 +15,11 @@ module VertxAuthShiro
     def j_del
       @j_del
     end
-    # @param [::Vertx::Vertx] vertx
-    # @param [:PROPERTIES,:LDAP] realmType
-    # @param [Hash{String => Object}] config
-    # @return [::VertxAuthShiro::ShiroAuth]
+    #  Create a Shiro auth provider
+    # @param [::Vertx::Vertx] vertx the Vert.x instance
+    # @param [:PROPERTIES,:LDAP] realmType the Shiro realm type
+    # @param [Hash{String => Object}] config the config
+    # @return [::VertxAuthShiro::ShiroAuth] the auth provider
     def self.create(vertx=nil,realmType=nil,config=nil)
       if vertx.class.method_defined?(:j_del) && realmType.class == Symbol && config.class == Hash && !block_given?
         return ::VertxAuthShiro::ShiroAuth.new(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(realmType),::Vertx::Util::Utils.to_json_object(config)))

@@ -18,20 +18,53 @@
  *
  * == The Apache Shiro Auth provider implementation
  *
- * This component contains an out of the box implementation that uses http://shiro.apache.org/[Apache Shiro].
+ * This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].
  *
- * We provide out of the box support for properties and LDAP based auth using Shiro.
+ * We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
+ * other Shiro Realm which expects username and password for credentials.
  *
  * To create an instance of the provider you use {@link io.vertx.ext.auth.shiro.ShiroAuth}. You specify the type of
  * Shiro auth provider that you want with {@link io.vertx.ext.auth.shiro.ShiroAuthRealmType}, and you specify the
  * configuration in a JSON object.
  *
- * Here's an example of creating a Shiro auth provider:
+ * Here's an example of creating a Shiro auth provider by specifying the type:
  *
  * [source,java]
  * ----
  * {@link examples.Examples#example3}
  * ----
+ *
+ * == Authentication
+ *
+ * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+ * authentication info:
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example4}
+ * ----
+ *
+ * == Authorisation - Permission-Role Model
+ *
+ * Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+ * implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+ * can have zero or more permissions.
+ *
+ * If validating if a user has a particular permission simply pass the permission into.
+ * {@link io.vertx.ext.auth.User#isPermitted(java.lang.String, io.vertx.core.Handler)} as follows:
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example5}
+ * ----
+ * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+ *
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example6}
+ * ----
+ *
+ * The default role prefix is `role:`. You can change this with {@link io.vertx.ext.auth.shiro.ShiroAuth#setRolePrefix(java.lang.String)}.
  *
  * === The Shiro properties auth provider
  *
@@ -78,17 +111,6 @@
  *
  * When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
  *
- * The implementation verifies Permissions using String matching so you can define wildcard permissions like:
- * ----
- * user.editor = mypassword,editor
- * role.editor=newsletter:edit:*
- * ----
- *
- * And match like:
- * [source,java]
- * ----
- * {@link examples.Examples#example5}
- *
  * === The Shiro LDAP auth provider
  *
  * The LDAP auth realm gets user/role/permission information from an LDAP server.
@@ -115,7 +137,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example4}
+ * {@link examples.Examples#example8}
  * ----
  *
  * The implementation currently assumes that user/password based authentication is used.
