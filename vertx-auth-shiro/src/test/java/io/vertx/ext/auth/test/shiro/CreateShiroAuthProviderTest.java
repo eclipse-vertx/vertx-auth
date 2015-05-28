@@ -64,7 +64,7 @@ public class CreateShiroAuthProviderTest extends VertxTestBase {
       return new AuthenticationInfo() {
         @Override
         public PrincipalCollection getPrincipals() {
-          return new SimplePrincipalCollection((String)token.getPrincipal());
+          return new SimplePrincipalCollection(token.getPrincipal());
         }
 
         @Override

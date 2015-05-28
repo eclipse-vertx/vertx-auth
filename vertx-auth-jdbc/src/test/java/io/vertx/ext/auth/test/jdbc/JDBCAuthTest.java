@@ -153,21 +153,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.hasRole("dev", onSuccess(has -> {
-        assertTrue(has);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testAuthoriseHasRoles() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      user.hasRoles(new HashSet<>(Arrays.asList("dev", "admin")), onSuccess(has -> {
+      user.isPermitted("role:dev", onSuccess(has -> {
         assertTrue(has);
         testComplete();
       }));
@@ -181,21 +167,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.hasRole("manager", onSuccess(has -> {
-        assertFalse(has);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testAuthoriseNotHasRoles() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      user.hasRoles(new HashSet<>(Arrays.asList("dev", "manager")), onSuccess(has -> {
+      user.isPermitted("role:manager", onSuccess(has -> {
         assertFalse(has);
         testComplete();
       }));
@@ -209,21 +181,7 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.hasPermission("commit_code", onSuccess(has -> {
-        assertTrue(has);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testAuthoriseHasPermissions() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      user.hasPermissions(new HashSet<>(Arrays.asList("commit_code", "merge_pr")), onSuccess(has -> {
+      user.isPermitted("commit_code", onSuccess(has -> {
         assertTrue(has);
         testComplete();
       }));
@@ -237,27 +195,11 @@ public class JDBCAuthTest extends VertxTestBase {
     authInfo.put("username", "tim").put("password", "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.hasPermission("eat_sandwich", onSuccess(has -> {
+      user.isPermitted("eat_sandwich", onSuccess(has -> {
         assertFalse(has);
         testComplete();
       }));
     }));
     await();
   }
-
-  @Test
-  public void testAuthoriseNotHasPermissions() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      user.hasPermissions(new HashSet<>(Arrays.asList("commit_code", "play_golf")), onSuccess(has -> {
-        assertFalse(has);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-
 }

@@ -24,7 +24,7 @@
  * your own implementation by implementing the {@link io.vertx.ext.auth.AuthProvider} interface.
  *
  * The Vert.x Apache Shiro implementation
- * currently allows user/role/permission information to be accessed from simple properties files or LDAP servers.
+ * currently allows user/permission information to be accessed from simple properties files or LDAP servers.
  *
  * Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
  *
@@ -34,12 +34,14 @@
  *
  * _Authorisation_ means verifying a user is allowed to access some resource.
  *
- * The service uses a familiar user/role/permission model that you will probably know already:
+ * The service uses a familiar user/permission model that you will probably know already:
  *
- * Users can have zero or more roles, e.g. "manager", "developer".
+ * Permission is a statement that describes raw functionality in the application and nothing more. Permissions are
+ * described as a _opaque_ {@link java.lang.String}, meaning that vert.x makes no assumption on the format of the
+ * String.
  *
- * Roles can have zero or more permissions, e.g. a manager might have permission "approve expenses", "conduct_reviews",
- * and a developer might have a permission "commit_code".
+ * A Permission can be e.g.: "code:push", "code_push", "printers:print:lab1-printer". A common pattern to define these
+ * Strings is "&lt;domain&gt;[:&lt;action&gt;[:&lt;instance&gt;]], however the choice is up to the developer.
  *
  * == Authentication
  *
@@ -72,10 +74,7 @@
  *
  * Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
  *
- * To check if a user has a specific role you use {@link io.vertx.ext.auth.User#hasRole},
- * to check if a user has all the specified roles you use {@link io.vertx.ext.auth.User#hasRoles},
- * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#hasPermission},
- * to check if a user has all the specified permissions you use {@link io.vertx.ext.auth.User#hasPermissions}.
+ * to check if a user has a specific permission you use {@link io.vertx.ext.auth.User#isPermitted}.
  *
  * The results of all the above are provided asynchronously in the handler.
  *
@@ -86,10 +85,13 @@
  * {@link examples.Examples#example2}
  * ----
  *
- * === Caching roles and permissions
+ * Matching of Permissions has no hard constraints by this module, it is the responsibility of the provider to document
+ * the underlying implementation.
  *
- * The user object will cache any roles and permissions so subsequently calls to check if it has the same roles or
- * permissions will result in the underlying provider being called.
+ * === Caching permissions
+ *
+ * The user object will cache any permissions so subsequently calls to check if it has the same permissions will result
+ * in the underlying provider being called.
  *
  * In order to clear the internal cache you can use {@link io.vertx.ext.auth.User#clearCache()}.
  *

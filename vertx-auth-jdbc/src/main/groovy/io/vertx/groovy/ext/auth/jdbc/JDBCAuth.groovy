@@ -68,4 +68,13 @@ public class JDBCAuth extends AuthProvider {
     def ret= new io.vertx.groovy.ext.auth.jdbc.JDBCAuth(this.delegate.setPermissionsQuery(permissionsQuery));
     return ret;
   }
+  /**
+   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+   * @param rolePrefix a Prefix e.g.: "role:"
+   * @return a reference to this for fluency
+   */
+  public JDBCAuth setRolePrefix(String rolePrefix) {
+    def ret= new io.vertx.groovy.ext.auth.jdbc.JDBCAuth(this.delegate.setRolePrefix(rolePrefix));
+    return ret;
+  }
 }

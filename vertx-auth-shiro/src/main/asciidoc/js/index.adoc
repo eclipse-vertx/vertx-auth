@@ -27,6 +27,10 @@ var provider = ShiroAuth.create(vertx, 'PROPERTIES', config);
 
 This auth provider implementation uses Apache Shiro to get user/role/permission information from a properties file.
 
+Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
+possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
+with `link:jsdoc/shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
+
 The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
 
 If you want to change this, you can use the `properties_path` configuration element to define how the properties
@@ -62,7 +66,35 @@ role.manager=play_golf,say_buzzwords
 role.developer=do_actual_work
 ----
 
-When describing roles a wildcard `*` can be used to indicate that the role has all permissions
+When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
+
+The implementation verifies Permissions using String matching so you can define wildcard permissions like:
+----
+user.editor = mypassword,editor
+role.editor=newsletter:edit:*
+----
+
+And match like:
+[source,java]
+----
+var ShiroAuth = require("vertx-auth-shiro-js/shiro_auth");
+
+var provider = ShiroAuth.create(vertx, realm);
+
+var authInfo = {
+  "username" : "editor",
+  "password" : "password"
+};
+provider.authenticate(authInfo, function (authenticate, authenticate_err) {
+  if (authenticate_err == null) {
+    authenticate.isPermitted("newsletter:edit:13", function (hasPermission, hasPermission_err) {
+      if (hasPermission_err == null) {
+        // carry on, user has this permission...
+      };
+    });
+  };
+});
+
 
 === The Shiro LDAP auth provider
 

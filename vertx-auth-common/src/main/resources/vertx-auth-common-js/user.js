@@ -23,7 +23,7 @@ var JsonObject = io.vertx.core.json.JsonObject;
 var JUser = io.vertx.ext.auth.User;
 
 /**
- Represents an authenticate User and contains operations to authorise the user, using a role/permission
+ Represents an authenticate User and contains operations to authorise the user, using a permission
  based model.
  <p>
  Please consult the documentation for a detailed explanation.
@@ -36,28 +36,6 @@ var User = function(j_val) {
   var that = this;
 
   /**
-   Does the user have the specified role?
-
-   @public
-   @param role {string} the role 
-   @param resultHandler {function} handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the role or `false` otherwise. 
-   @return {User} the User to enable fluent use
-   */
-  this.hasRole = function(role, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_user["hasRole(java.lang.String,io.vertx.core.Handler)"](role, function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-      return that;
-    } else utils.invalidArgs();
-  };
-
-  /**
    Does the user have the specified permission?
 
    @public
@@ -65,54 +43,10 @@ var User = function(j_val) {
    @param resultHandler {function} handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have the permission or `false` otherwise. 
    @return {User} the User to enable fluent use
    */
-  this.hasPermission = function(permission, resultHandler) {
+  this.isPermitted = function(permission, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_user["hasPermission(java.lang.String,io.vertx.core.Handler)"](permission, function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-      return that;
-    } else utils.invalidArgs();
-  };
-
-  /**
-   Does the user have all the specified roles?
-
-   @public
-   @param roles {Array.<string>} the set of roles 
-   @param resultHandler {function} handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have all the roles or `false` otherwise. 
-   @return {User} the User to enable fluent use
-   */
-  this.hasRoles = function(roles, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
-      j_user["hasRoles(java.util.Set,io.vertx.core.Handler)"](utils.convParamSetBasicOther(roles), function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-      return that;
-    } else utils.invalidArgs();
-  };
-
-  /**
-   Does the user have all the specified permissions?
-
-   @public
-   @param permissions {Array.<string>} the set of permissions 
-   @param resultHandler {function} handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they have all the permissions or `false` otherwise. 
-   @return {User} the User to enable fluent use
-   */
-  this.hasPermissions = function(permissions, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
-      j_user["hasPermissions(java.util.Set,io.vertx.core.Handler)"](utils.convParamSetBasicOther(permissions), function(ar) {
+      j_user["isPermitted(java.lang.String,io.vertx.core.Handler)"](permission, function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -150,7 +84,7 @@ var User = function(j_val) {
 
    @public
 
-   @return {Object} 
+   @return {Object} JSON representation of the Principal
    */
   this.principal = function() {
     var __args = arguments;

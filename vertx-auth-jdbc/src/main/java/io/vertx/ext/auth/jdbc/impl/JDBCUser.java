@@ -26,8 +26,6 @@ import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
@@ -39,32 +37,24 @@ public class JDBCUser extends AbstractUser {
   private String username;
   private JsonObject principal;
 
+  private String rolePrefix;
+
   public JDBCUser() {
   }
 
-  JDBCUser(String username, JDBCAuthImpl authProvider) {
+  JDBCUser(String username, JDBCAuthImpl authProvider, String rolePrefix) {
     this.username = username;
     this.authProvider = authProvider;
+    this.rolePrefix = rolePrefix;
   }
 
   @Override
-  public void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasRoleOrPermission(role, authProvider.getRolesQuery(), resultHandler);
-  }
-
-  @Override
-  public void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasRoleOrPermission(permission, authProvider.getPermissionsQuery(), resultHandler);
-  }
-
-  @Override
-  public void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasAllRolesOrPermissions(roles, authProvider.getRolesQuery(), resultHandler);
-  }
-
-  @Override
-  public void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    hasAllRolesOrPermissions(permissions, authProvider.getPermissionsQuery(), resultHandler);
+  public void doIsPermitted(String permissionOrRole, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (permissionOrRole != null && permissionOrRole.startsWith(rolePrefix)) {
+      hasRoleOrPermission(permissionOrRole.substring(rolePrefix.length()), authProvider.getRolesQuery(), resultHandler);
+    } else {
+      hasRoleOrPermission(permissionOrRole, authProvider.getPermissionsQuery(), resultHandler);
+    }
   }
 
   @Override
@@ -90,6 +80,10 @@ public class JDBCUser extends AbstractUser {
     byte[] bytes = username.getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length);
     buff.appendBytes(bytes);
+
+    bytes = rolePrefix.getBytes(StandardCharsets.UTF_8);
+    buff.appendInt(bytes.length);
+    buff.appendBytes(bytes);
   }
 
   @Override
@@ -100,6 +94,13 @@ public class JDBCUser extends AbstractUser {
     byte[] bytes = buffer.getBytes(pos, pos + len);
     username = new String(bytes, StandardCharsets.UTF_8);
     pos += len;
+
+    len = buffer.getInt(pos);
+    pos += 4;
+    bytes = buffer.getBytes(pos, pos + len);
+    rolePrefix = new String(bytes, StandardCharsets.UTF_8);
+    pos += len;
+
     return pos;
   }
 
@@ -115,25 +116,6 @@ public class JDBCUser extends AbstractUser {
         }
       }
       if (!has) {
-        resultHandler.handle(Future.succeededFuture(false));
-      }
-    });
-  }
-
-  private void hasAllRolesOrPermissions(Set<String> rolesOrPermissions, String query, Handler<AsyncResult<Boolean>> resultHandler) {
-    Set<String> copy = new HashSet<>(rolesOrPermissions);
-    authProvider.executeQuery(query, new JsonArray().add(username), resultHandler, rs -> {
-      boolean hasAll = false;
-      for (JsonArray result : rs.getResults()) {
-        String theRoleOrPermission = result.getString(0);
-        copy.remove(theRoleOrPermission);
-        if (copy.isEmpty()) {
-          hasAll = true;
-          resultHandler.handle(Future.succeededFuture(true));
-          break;
-        }
-      }
-      if (!hasAll) {
         resultHandler.handle(Future.succeededFuture(false));
       }
     });

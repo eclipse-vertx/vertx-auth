@@ -82,6 +82,16 @@ public class JDBCAuth extends AuthProvider {
     return ret;
   }
 
+  /**
+   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+   * @param rolePrefix a Prefix e.g.: "role:"
+   * @return a reference to this for fluency
+   */
+  public JDBCAuth setRolePrefix(String rolePrefix) { 
+    JDBCAuth ret= JDBCAuth.newInstance(this.delegate.setRolePrefix(rolePrefix));
+    return ret;
+  }
+
 
   public static JDBCAuth newInstance(io.vertx.ext.auth.jdbc.JDBCAuth arg) {
     return new JDBCAuth(arg);

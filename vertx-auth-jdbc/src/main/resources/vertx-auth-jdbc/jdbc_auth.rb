@@ -52,5 +52,14 @@ module VertxAuthJdbc
       end
       raise ArgumentError, "Invalid arguments when calling set_permissions_query(permissionsQuery)"
     end
+    #  Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+    # @param [String] rolePrefix a Prefix e.g.: "role:"
+    # @return [::VertxAuthJdbc::JDBCAuth] a reference to this for fluency
+    def set_role_prefix(rolePrefix=nil)
+      if rolePrefix.class == String && !block_given?
+        return ::VertxAuthJdbc::JDBCAuth.new(@j_del.java_method(:setRolePrefix, [Java::java.lang.String.java_class]).call(rolePrefix))
+      end
+      raise ArgumentError, "Invalid arguments when calling set_role_prefix(rolePrefix)"
+    end
   end
 end

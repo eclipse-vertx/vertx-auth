@@ -31,11 +31,12 @@ import io.vertx.rxjava.ext.auth.AuthProvider;
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuth original} non RX-ified interface using Vert.x codegen.
  */
 
-public class ShiroAuth {
+public class ShiroAuth extends AuthProvider {
 
   final io.vertx.ext.auth.shiro.ShiroAuth delegate;
 
   public ShiroAuth(io.vertx.ext.auth.shiro.ShiroAuth delegate) {
+    super(delegate);
     this.delegate = delegate;
   }
 
@@ -43,8 +44,18 @@ public class ShiroAuth {
     return delegate;
   }
 
-  public static AuthProvider create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) { 
-    AuthProvider ret= AuthProvider.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), realmType, config));
+  public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) { 
+    ShiroAuth ret= ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), realmType, config));
+    return ret;
+  }
+
+  /**
+   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+   * @param rolePrefix a Prefix e.g.: "role:"
+   * @return a reference to this for fluency
+   */
+  public ShiroAuth setRolePrefix(String rolePrefix) { 
+    ShiroAuth ret= ShiroAuth.newInstance(this.delegate.setRolePrefix(rolePrefix));
     return ret;
   }
 

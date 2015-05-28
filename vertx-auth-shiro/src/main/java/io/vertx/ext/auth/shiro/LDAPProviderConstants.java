@@ -23,13 +23,13 @@ package io.vertx.ext.auth.shiro;
  */
 public interface LDAPProviderConstants {
 
-  static final String LDAP_USER_DN_TEMPLATE_FIELD = "ldap_user_dn_template";
-  static final String LDAP_URL = "ldap_url";
-  static final String LDAP_AUTHENTICATION_MECHANISM = "ldap_authentication_mechanism";
-  static final String LDAP_CONTEXT_FACTORY_CLASS_NAME = "ldap_context_factory_class_name";
-  static final String LDAP_POOLING_ENABLED = "ldap_pooling_enabled";
-  static final String LDAP_REFERRAL = "ldap_referral";
-  static final String LDAP_SYSTEM_USERNAME = "ldap_system_username";
-  static final String LDAP_SYSTEM_PASSWORD = "ldap_system_password";
+  String LDAP_USER_DN_TEMPLATE_FIELD = "ldap_user_dn_template";
+  String LDAP_URL = "ldap_url";
+  String LDAP_AUTHENTICATION_MECHANISM = "ldap_authentication_mechanism";
+  String LDAP_CONTEXT_FACTORY_CLASS_NAME = "ldap_context_factory_class_name";
+  String LDAP_POOLING_ENABLED = "ldap_pooling_enabled";
+  String LDAP_REFERRAL = "ldap_referral";
+  String LDAP_SYSTEM_USERNAME = "ldap_system_username";
+  String LDAP_SYSTEM_PASSWORD = "ldap_system_password";
 
 }

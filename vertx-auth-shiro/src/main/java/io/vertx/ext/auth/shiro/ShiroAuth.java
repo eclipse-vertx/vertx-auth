@@ -30,14 +30,28 @@ import org.apache.shiro.realm.Realm;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
-public interface ShiroAuth {
+public interface ShiroAuth extends AuthProvider {
 
-  static AuthProvider create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
+  /**
+   * The default role prefix
+   */
+  String DEFAULT_ROLE_PREFIX = "role:";
+
+  static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
     return ShiroAuthProviderImpl.create(vertx, realmType, config);
   }
 
   @GenIgnore
-  static AuthProvider create(Vertx vertx, Realm realm) {
+  static ShiroAuth create(Vertx vertx, Realm realm) {
     return new ShiroAuthProviderImpl(vertx, realm);
   }
+
+
+  /**
+   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+   * @param rolePrefix a Prefix e.g.: "role:"
+   * @return a reference to this for fluency
+   */
+  ShiroAuth setRolePrefix(String rolePrefix);
+
 }

@@ -37,6 +37,10 @@
  *
  * This auth provider implementation uses Apache Shiro to get user/role/permission information from a properties file.
  *
+ * Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
+ * possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
+ * with {@link io.vertx.ext.auth.shiro.ShiroAuth#setRolePrefix(java.lang.String)}.
+ *
  * The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
  *
  * If you want to change this, you can use the `properties_path` configuration element to define how the properties
@@ -72,7 +76,18 @@
  * role.developer=do_actual_work
  * ----
  *
- * When describing roles a wildcard `*` can be used to indicate that the role has all permissions
+ * When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
+ *
+ * The implementation verifies Permissions using String matching so you can define wildcard permissions like:
+ * ----
+ * user.editor = mypassword,editor
+ * role.editor=newsletter:edit:*
+ * ----
+ *
+ * And match like:
+ * [source,java]
+ * ----
+ * {@link examples.Examples#example5}
  *
  * === The Shiro LDAP auth provider
  *

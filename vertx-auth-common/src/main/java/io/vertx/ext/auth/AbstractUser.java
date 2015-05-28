@@ -37,32 +37,14 @@ import java.util.Set;
  */
 public abstract class AbstractUser implements User, ClusterSerializable {
 
-  final Set<String> cachedRoles = new HashSet<>();
   final Set<String> cachedPermissions = new HashSet<>();
 
   @Override
-  public User hasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (cachedRoles.contains(role)) {
-      resultHandler.handle(Future.succeededFuture(true));
-    } else {
-      doHasRole(role, res -> {
-        if (res.succeeded()) {
-          if (res.result()) {
-            cachedRoles.add(role);
-          }
-        }
-        resultHandler.handle(res);
-      });
-    }
-    return this;
-  }
-
-  @Override
-  public User hasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  public User isPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     if (cachedPermissions.contains(permission)) {
       resultHandler.handle(Future.succeededFuture(true));
     } else {
-      doHasPermission(permission, res -> {
+      doIsPermitted(permission, res -> {
         if (res.succeeded()) {
           if (res.result()) {
             cachedPermissions.add(permission);
@@ -75,67 +57,23 @@ public abstract class AbstractUser implements User, ClusterSerializable {
   }
 
   @Override
-  public User hasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (this.cachedRoles.containsAll(roles)) {
-      resultHandler.handle(Future.succeededFuture(true));
-    } else {
-      doHasRoles(roles, res -> {
-        if (res.succeeded()) {
-          if (res.result()) {
-            roles.addAll(roles);
-          }
-        }
-        resultHandler.handle(res);
-      });
-    }
-    return this;
-  }
-
-  @Override
-  public User hasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (this.cachedPermissions.containsAll(permissions)) {
-      resultHandler.handle(Future.succeededFuture(true));
-    } else {
-      doHasPermissions(permissions, res -> {
-        if (res.succeeded()) {
-          if (res.result()) {
-            permissions.addAll(permissions);
-          }
-        }
-        resultHandler.handle(res);
-      });
-    }
-    return this;
-  }
-
-  @Override
   public User clearCache() {
-    cachedRoles.clear();
     cachedPermissions.clear();
     return this;
   }
 
   @Override
   public void writeToBuffer(Buffer buff) {
-    writeStringSet(buff, cachedRoles);
     writeStringSet(buff, cachedPermissions);
   }
 
   @Override
   public int readFromBuffer(int pos, Buffer buffer) {
-    pos = readStringSet(buffer, cachedRoles, pos);
     pos = readStringSet(buffer, cachedPermissions, pos);
     return pos;
   }
 
-  protected abstract void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler);
-
-  protected abstract void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler);
-
-  protected abstract void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler);
-
-  protected abstract void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler);
-
+  protected abstract void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler);
 
   private void writeStringSet(Buffer buff, Set<String> set) {
     buff.appendInt(set == null ? 0 : set.size());

@@ -29,7 +29,6 @@ import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 /**
  *
@@ -42,11 +41,13 @@ public class ShiroUser extends AbstractUser {
   private String username;
   private Subject subject;
   private JsonObject principal;
+  private String rolePrefix;
 
-  public ShiroUser(Vertx vertx, org.apache.shiro.mgt.SecurityManager securityManager, String username) {
+  public ShiroUser(Vertx vertx, org.apache.shiro.mgt.SecurityManager securityManager, String username, String rolePrefix) {
     this.vertx = vertx;
     this.securityManager = securityManager;
     this.username = username;
+    this.rolePrefix = rolePrefix;
     setSubject();
   }
 
@@ -54,24 +55,12 @@ public class ShiroUser extends AbstractUser {
   }
 
   @Override
-  protected void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.hasRole(role)), resultHandler);
-  }
-
-  @Override
-  protected void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.isPermitted(permission)), resultHandler);
-  }
-
-  @Override
-  protected void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.hasAllRoles(roles)), resultHandler);
-  }
-
-  @Override
-  protected void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(fut -> fut.complete(subject.isPermittedAll(permissions.toArray(new String[permissions.size()]))),
-                          resultHandler);
+  protected void doIsPermitted(String permissionOrRole, Handler<AsyncResult<Boolean>> resultHandler) {
+    if (permissionOrRole.startsWith(rolePrefix)) {
+      vertx.executeBlocking(fut -> fut.complete(subject.hasRole(permissionOrRole.substring(rolePrefix.length()))), resultHandler);
+    } else {
+      vertx.executeBlocking(fut -> fut.complete(subject.isPermitted(permissionOrRole)), resultHandler);
+    }
   }
 
   @Override
@@ -87,6 +76,10 @@ public class ShiroUser extends AbstractUser {
     super.writeToBuffer(buff);
     byte[] bytes = username.getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length).appendBytes(bytes);
+
+    bytes = rolePrefix.getBytes(StandardCharsets.UTF_8);
+    buff.appendInt(bytes.length);
+    buff.appendBytes(bytes);
   }
 
   @Override
@@ -95,8 +88,15 @@ public class ShiroUser extends AbstractUser {
     int len = buffer.getInt(pos);
     pos += 4;
     byte[] bytes = buffer.getBytes(pos, pos + len);
-    pos += len;
     username = new String(bytes, StandardCharsets.UTF_8);
+    pos += len;
+
+    len = buffer.getInt(pos);
+    pos += 4;
+    bytes = buffer.getBytes(pos, pos + len);
+    rolePrefix = new String(bytes, StandardCharsets.UTF_8);
+    pos += len;
+
     return pos;
   }
 

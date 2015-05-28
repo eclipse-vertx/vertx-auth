@@ -69,7 +69,7 @@ public class LDAPShiroAuthProviderTest extends ShiroAuthProviderTestBase {
       connection = new LDAPConnection("localhost", 10389);
 
       // entry tim/sausages
-      List<Attribute> addRequest = new ArrayList<Attribute>();
+      List<Attribute> addRequest = new ArrayList<>();
       addRequest.add(new Attribute("objectClass", "top"));
       addRequest.add(new Attribute("objectClass", "person"));
       addRequest.add(new Attribute("objectClass", "organizationalPerson"));
