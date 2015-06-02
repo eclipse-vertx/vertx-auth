@@ -56,7 +56,7 @@ public interface HashStrategy {
    * 
    * @param user
    *          the user to get the stored password for
-   * @return the password or as hashed version or as cleartext, depending on the preferences
+   * @return the password, either as hashed version or as cleartext, depending on the preferences
    */
   String getStoredPwd(User user);
 
