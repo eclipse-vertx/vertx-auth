@@ -1,6 +1,8 @@
-# Vert.x Mongo Auth
+# Vert.x Auth
 
-This module contains contains a Vert.x auth implementation which uses a Vert.x mongo client to query 
-user/role/permission information.
 
-Please see the documentation for more information.
+image:https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-auth["Build Status",link="https://vertx.ci.cloudbees.com/view/vert.x-3/job/vert.x3-auth/"]
+
+This module contains auth implementations for Vert.x and common auth interfaces
+
+Particular implementations are stored in sub modules.
