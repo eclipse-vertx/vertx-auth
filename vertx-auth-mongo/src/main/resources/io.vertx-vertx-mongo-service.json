@@ -1,0 +1,11 @@
+{
+  "main": "io.vertx.ext.mongo.MongoServiceVerticle",
+  "options": {
+    "worker": false,
+    "config": {
+      "address": "vertx.mongo",
+      "connection_string": "mongodb://localhost:27017",
+      "db_name": "RemisMongoDatabase"
+    }
+  }
+}
