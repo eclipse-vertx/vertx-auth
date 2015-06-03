@@ -22,7 +22,7 @@ import io.vertx.ext.auth.User;
  * Determines how the hashing is computed in the implementation
  * You can implement this to provide a different hashing strategy to the default.
  *
- * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author mremme
  */
 public interface HashStrategy {
 
@@ -40,7 +40,7 @@ public interface HashStrategy {
   };
 
   /**
-   * Compute the hashed password given the unhashed password and the salt
+   * Compute the hashed password given the unhashed password and the user
    * 
    * @param password
    *          the unhashed password
@@ -79,13 +79,15 @@ public interface HashStrategy {
   void setExternalSalt(String salt);
 
   /**
-   * Set the saltstyle as defined by enumeration {@link SaltStyle}. Defaults to DEFAULT_SALT_FIELD
+   * Set the saltstyle as defined by {@link SaltStyle}.
    * 
    * @param saltStyle
    */
   public void setSaltStyle(SaltStyle saltStyle);
 
   /**
+   * Get the defined {@link SaltStyle} of the current instance
+   * 
    * @return the saltStyle
    */
   public SaltStyle getSaltStyle();
