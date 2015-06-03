@@ -23,18 +23,15 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.impl.MongoAuthImpl;
 import io.vertx.ext.auth.mongo.impl.MongoUserFactory;
-import io.vertx.ext.mongo.MongoService;
+import io.vertx.ext.mongo.MongoClient;
 
 /**
+ * An extension of AuthProvider which is using {@link MongoClient} as store
+ * 
  * @author mremme
  */
 
 public interface MongoAuth extends AuthProvider {
-
-  /**
-   * This propertyname is used to set the logged in principal into the context
-   */
-  public static final String CURRENT_PRINCIPAL_PROPERTY         = "current.principal";
 
   /**
    * The property name to be used to set the name of the collection inside the config
@@ -136,7 +133,7 @@ public interface MongoAuth extends AuthProvider {
   public static final String ROLE_PREFIX                        = "role:";
 
   /**
-   * Creates an instance of MongoAuth by using the {@link MongoUserFactory}
+   * Creates an instance of MongoAuth by using a {@link MongoUserFactory}
    * 
    * @param vertx
    * @param serviceName
@@ -148,19 +145,19 @@ public interface MongoAuth extends AuthProvider {
   }
 
   /**
-   * Creates an instance of MongoAuth by using the {@link MongoUserFactory}
+   * Creates an instance of MongoAuth by using a {@link MongoUserFactory}
    * 
    * @param vertx
-   * @param service
+   * @param mongoClient
    * @param config
    * @return
    */
-  public static MongoAuth create(Vertx vertx, MongoService service, JsonObject config) {
-    return new MongoAuthImpl(vertx, service, config, null);
+  public static MongoAuth create(Vertx vertx, MongoClient mongoClient, JsonObject config) {
+    return new MongoAuthImpl(vertx, mongoClient, config, null);
   }
 
   /**
-   * Creates an instance of MongoAuth with the defined userfactory
+   * Creates an instance of MongoAuth with the defined {@link UserFactory}
    * 
    * @param vertx
    * @param serviceName
@@ -173,16 +170,16 @@ public interface MongoAuth extends AuthProvider {
   }
 
   /**
-   * Creates an instance of MongoAuth with the defined userfactory
+   * Creates an instance of MongoAuth with the defined {@link UserFactory}
    * 
    * @param vertx
-   * @param service
+   * @param mongoClient
    * @param config
    * @userFactory the instance of {@link UserFactory} to be used
    * @return
    */
-  public static MongoAuth create(Vertx vertx, MongoService service, JsonObject config, UserFactory userFactory) {
-    return new MongoAuthImpl(vertx, service, config, userFactory);
+  public static MongoAuth create(Vertx vertx, MongoClient mongoClient, JsonObject config, UserFactory userFactory) {
+    return new MongoAuthImpl(vertx, mongoClient, config, userFactory);
   }
 
   /**

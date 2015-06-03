@@ -29,6 +29,7 @@ import io.vertx.ext.auth.mongo.HashStrategy;
 import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.auth.mongo.UserFactory;
+import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.MongoService;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class MongoAuthImpl implements MongoAuth {
   private static final Logger log                     = LoggerFactory.getLogger(MongoAuthImpl.class);
 
   private final Vertx         vertx;
-  private MongoService        mongoService;
+  private MongoClient         mongoClient;
   private String              usernameField           = DEFAULT_USERNAME_FIELD;
   private String              passwordField           = DEFAULT_PASSWORD_FIELD;
   private String              roleField               = DEFAULT_ROLE_FIELD;
@@ -67,9 +68,9 @@ public class MongoAuthImpl implements MongoAuth {
   /**
    * 
    */
-  public MongoAuthImpl(Vertx vertx, MongoService service, JsonObject config, UserFactory userFactory) {
+  public MongoAuthImpl(Vertx vertx, MongoClient mongoClient, JsonObject config, UserFactory userFactory) {
     this.vertx = vertx;
-    this.mongoService = service;
+    this.mongoClient = mongoClient;
     this.config = config;
     this.userFactory = userFactory;
     init();
@@ -82,22 +83,21 @@ public class MongoAuthImpl implements MongoAuth {
 
     // Null username is invalid
     if (username == null) {
-      resultHandler.handle((Future.failedFuture(new AuthenticationException("Username must be set."))));
+      resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
       return;
     }
     if (password == null) {
-      resultHandler.handle((Future.failedFuture(new AuthenticationException("Password must be set."))));
+      resultHandler.handle((Future.failedFuture("Password must be set for authentication.")));
       return;
     }
     AuthToken token = new AuthToken(username, password);
 
     JsonObject query = createQuery(username);
-    mongoService.find(this.collectionName, query, res -> {
+    mongoClient.find(this.collectionName, query, res -> {
 
       try {
         if (res.succeeded()) {
           User user = handleSelection(res, token);
-          vertx.getOrCreateContext().put(CURRENT_PRINCIPAL_PROPERTY, user);
           resultHandler.handle(Future.succeededFuture(user));
         } else {
           resultHandler.handle(Future.failedFuture(res.cause()));
@@ -163,9 +163,8 @@ public class MongoAuthImpl implements MongoAuth {
    * @param userObject
    * @param authToken
    * @return
-   * @throws AuthenticationException
    */
-  private boolean examinePassword(User user, AuthToken authToken) throws AuthenticationException {
+  private boolean examinePassword(User user, AuthToken authToken) {
     String storedPassword = getHashStrategy().getStoredPwd(user);
     String givenPassword = getHashStrategy().computeHash(authToken.password, user);
     return storedPassword != null && storedPassword.equals(givenPassword);
