@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Apache License v2.0 which accompanies this distribution.
+ * 
+ * The Eclipse Public License is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * The Apache License v2.0 is available at
+ * http://www.opensource.org/licenses/apache2.0.php
+ * 
+ * You may elect to redistribute this code under either of these licenses.
+ */
+
 package io.vertx.ext.auth.mongo.impl;
 
 import io.vertx.core.VertxException;
@@ -11,10 +27,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * <br>
- * <br>
- * Copyright: Copyright (c) 29.05.2015 <br>
- * Company: Braintags GmbH <br>
+ * Implementation of HashStrategy which is using SHA-512 as crypt
  * 
  * @author mremme
  */
@@ -30,7 +43,7 @@ public class DefaultHashStrategy implements HashStrategy {
    * 
    */
   public DefaultHashStrategy() {
-    saltStyle = SaltStyle.NO_SALT;
+    saltStyle = SaltStyle.COLUMN;
   }
 
   /**
