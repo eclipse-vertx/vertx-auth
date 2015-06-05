@@ -16,6 +16,8 @@
 
 package io.vertx.ext.auth.mongo;
 
+import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
@@ -30,119 +32,107 @@ import io.vertx.ext.mongo.MongoClient;
  * 
  * @author mremme
  */
-
+@VertxGen
 public interface MongoAuth extends AuthProvider {
 
   /**
    * The property name to be used to set the name of the collection inside the config
    */
-  public static final String PROPERTY_COLLECTION_NAME           = "collectionName";
+  String PROPERTY_COLLECTION_NAME = "collectionName";
 
   /**
    * The property name to be used to set the name of the field, where the username is stored inside
    */
-  public static final String PROPERTY_USERNAME_FIELD            = "usernameField";
+  String PROPERTY_USERNAME_FIELD = "usernameField";
 
   /**
    * The property name to be used to set the name of the field, where the roles are stored inside
    */
-  public static final String PROPERTY_ROLE_FIELD                = "roleField";
+  String PROPERTY_ROLE_FIELD = "roleField";
 
   /**
    * The property name to be used to set the name of the field, where the permissions are stored inside
    */
-  public static final String PROPERTY_PERMISSION_FIELD          = "permissionField";
+  String PROPERTY_PERMISSION_FIELD = "permissionField";
 
   /**
    * The property name to be used to set the name of the field, where the password is stored inside
    */
-  public static final String PROPERTY_PASSWORD_FIELD            = "passwordField";
+  String PROPERTY_PASSWORD_FIELD = "passwordField";
 
   /**
    * The property name to be used to set the name of the field, where the username for the credentials is stored inside
    */
-  public static final String PROPERTY_CREDENTIAL_USERNAME_FIELD = "usernameCredentialField";
+  String PROPERTY_CREDENTIAL_USERNAME_FIELD = "usernameCredentialField";
 
   /**
    * The property name to be used to set the name of the field, where the password for the credentials is stored inside
    */
-  public static final String PROPERTY_CREDENTIAL_PASSWORD_FIELD = "passwordCredentialField";
+  String PROPERTY_CREDENTIAL_PASSWORD_FIELD = "passwordCredentialField";
 
   /**
    * The property name to be used to set the name of the field, where the SALT is stored inside
    */
-  public static final String PROPERTY_SALT_FIELD                = "saltField";
+  String PROPERTY_SALT_FIELD = "saltField";
 
   /**
    * The property name to be used to set the name of the field, where the salt style is stored inside
    * 
    * @see SaltStyle
    */
-  public static final String PROPERTY_SALT_STYLE                = "saltStyle";
+  String PROPERTY_SALT_STYLE = "saltStyle";
 
   /**
    * The property name to be used to set the name of the field, where the permissionsLookupEnabled is stored inside
    */
-  public static final String PROPERTY_PERMISSIONLOOKUP_ENABLED  = "permissionsLookupEnabled";
+  String PROPERTY_PERMISSIONLOOKUP_ENABLED = "permissionsLookupEnabled";
 
   /**
    * The default name of the collection to be used
    */
-  public static final String DEFAULT_COLLECTION_NAME            = "user";
+  String DEFAULT_COLLECTION_NAME = "user";
 
   /**
    * The default name of the property for the username, like it is stored in mongodb
    */
-  public static final String DEFAULT_USERNAME_FIELD             = "username";
+  String DEFAULT_USERNAME_FIELD = "username";
 
   /**
    * The default name of the property for the password, like it is stored in mongodb
    */
-  public static final String DEFAULT_PASSWORD_FIELD             = "password";
+  String DEFAULT_PASSWORD_FIELD = "password";
 
   /**
    * The default name of the property for the roles, like it is stored in mongodb. Roles are expected to be saved as
    * JsonArray
    */
-  public static final String DEFAULT_ROLE_FIELD                 = "roles";
+  String DEFAULT_ROLE_FIELD = "roles";
 
   /**
    * The default name of the property for the permissions, like it is stored in mongodb. Permissions are expected to be
    * saved as
    * JsonArray
    */
-  public static final String DEFAULT_PERMISSION_FIELD           = "permissions";
+  String DEFAULT_PERMISSION_FIELD = "permissions";
 
   /**
    * The default name of the property for the username, like it is transported in credentials by method
    * {@link #init(JsonObject)}
    */
-  public static final String DEFAULT_CREDENTIAL_USERNAME_FIELD  = DEFAULT_USERNAME_FIELD;
+  String DEFAULT_CREDENTIAL_USERNAME_FIELD = DEFAULT_USERNAME_FIELD;
 
   /**
    * The default name of the property for the password, like it is transported in credentials by method
    * {@link #init(JsonObject)}
    */
-  public static final String DEFAULT_CREDENTIAL_PASSWORD_FIELD  = DEFAULT_PASSWORD_FIELD;
+  String DEFAULT_CREDENTIAL_PASSWORD_FIELD = DEFAULT_PASSWORD_FIELD;
 
   /**
    * The default name of the property for the salt field
    */
-  public static final String DEFAULT_SALT_FIELD                 = "salt";
+  String DEFAULT_SALT_FIELD = "salt";
 
-  public static final String ROLE_PREFIX                        = "role:";
-
-  /**
-   * Creates an instance of MongoAuth by using a {@link MongoUserFactory}
-   * 
-   * @param vertx
-   * @param serviceName
-   * @param config
-   * @return
-   */
-  public static MongoAuth create(Vertx vertx, String serviceName, JsonObject config) {
-    return new MongoAuthImpl(vertx, serviceName, config, null);
-  }
+  String ROLE_PREFIX = "role:";
 
   /**
    * Creates an instance of MongoAuth by using a {@link MongoUserFactory}
@@ -154,19 +144,6 @@ public interface MongoAuth extends AuthProvider {
    */
   public static MongoAuth create(Vertx vertx, MongoClient mongoClient, JsonObject config) {
     return new MongoAuthImpl(vertx, mongoClient, config, null);
-  }
-
-  /**
-   * Creates an instance of MongoAuth with the defined {@link UserFactory}
-   * 
-   * @param vertx
-   * @param serviceName
-   * @param config
-   * @userFactory the instance of {@link UserFactory} to be used
-   * @return
-   */
-  public static MongoAuth create(Vertx vertx, String serviceName, JsonObject config, UserFactory userFactory) {
-    return new MongoAuthImpl(vertx, serviceName, config, userFactory);
   }
 
   /**
@@ -188,6 +165,7 @@ public interface MongoAuth extends AuthProvider {
    * @param collectionName
    * @return
    */
+  @Fluent
   public MongoAuth setCollectionName(String collectionName);
 
   /**
@@ -196,6 +174,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setUsernameField(String fieldName);
 
   /**
@@ -204,6 +183,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setPasswordField(String fieldName);
 
   /**
@@ -213,6 +193,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setRoleField(String fieldName);
 
   /**
@@ -223,6 +204,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setPermissionField(String fieldName);
 
   /**
@@ -233,6 +215,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setUsernameCredentialField(String fieldName);
 
   /**
@@ -243,6 +226,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setPasswordCredentialField(String fieldName);
 
   /**
@@ -251,6 +235,7 @@ public interface MongoAuth extends AuthProvider {
    * @param fieldName
    * @return
    */
+  @Fluent
   public MongoAuth setSaltField(String fieldName);
 
   /**
@@ -305,14 +290,16 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @param userFactory
    */
-  public void setUserFactory(UserFactory userFactory);
+  @Fluent
+  public MongoAuth setUserFactory(UserFactory userFactory);
 
   /**
    * The HashStrategy which is used by the current instance
    * 
    * @param hashStrategy
    */
-  public void setHashStrategy(HashStrategy hashStrategy);
+  @Fluent
+  public MongoAuth setHashStrategy(HashStrategy hashStrategy);
 
   /**
    * The HashStrategy which is used by the current instance
