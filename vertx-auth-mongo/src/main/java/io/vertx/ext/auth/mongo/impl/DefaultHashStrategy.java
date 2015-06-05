@@ -35,9 +35,9 @@ import java.util.Random;
 public class DefaultHashStrategy implements HashStrategy {
   private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
-  private SaltStyle           saltStyle;
+  private SaltStyle saltStyle;
   // Used only if SaltStyle#External is used
-  private String              externalSalt;
+  private String externalSalt;
 
   /**
    * 

@@ -64,8 +64,8 @@ public interface UserFactory {
 
   /**
    * Create an instance of {@link User}.
-   * This method is NOT performing automatisms like password encryption, cause it can be used for already existing, from
-   * database loaded users
+   * This method is NOT performing automatisms like password encryption, cause it can be used for already existing
+   * users loaded from database
    * 
    * @param principal
    * @param authProvider
