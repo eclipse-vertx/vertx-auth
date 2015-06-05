@@ -27,8 +27,6 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
-import java.util.Set;
-
 /**
  * An implementation of {@link User} for use with {@link MongoAuth} is using the {@link JsonObject} which was loaded
  * from a MongoDb
@@ -37,7 +35,7 @@ import java.util.Set;
  */
 public class MongoUser extends AbstractUser {
   private JsonObject principal;
-  private MongoAuth  mongoAuth;
+  private MongoAuth mongoAuth;
 
   public MongoUser() {
   }
@@ -137,56 +135,6 @@ public class MongoUser extends AbstractUser {
     try {
       JsonArray userPermissions = readPermissions();
       resultHandler.handle(Future.succeededFuture(userPermissions != null && userPermissions.contains(permission)));
-    } catch (Throwable e) {
-      resultHandler.handle(Future.failedFuture(e));
-    }
-  }
-
-  /**
-   * Check a series of roles
-   * 
-   * @param roles
-   * @param resultHandler
-   */
-  protected void doHasRoles(Set<String> roles, Handler<AsyncResult<Boolean>> resultHandler) {
-    try {
-      JsonArray userRoles = readPermissions();
-      if (userRoles == null || userRoles.isEmpty()) {
-        resultHandler.handle(Future.succeededFuture(false));
-        return;
-      }
-      for (String role : roles) {
-        if (!userRoles.contains(role)) {
-          resultHandler.handle(Future.succeededFuture(false));
-          return;
-        }
-      }
-      resultHandler.handle(Future.succeededFuture(true));
-    } catch (Throwable e) {
-      resultHandler.handle(Future.failedFuture(e));
-    }
-  }
-
-  /**
-   * Check a series of permissions
-   * 
-   * @param permissions
-   * @param resultHandler
-   */
-  protected void doHasPermissions(Set<String> permissions, Handler<AsyncResult<Boolean>> resultHandler) {
-    try {
-      JsonArray userPermissions = readPermissions();
-      if (userPermissions == null || userPermissions.isEmpty()) {
-        resultHandler.handle(Future.succeededFuture(false));
-        return;
-      }
-      for (String permission : permissions) {
-        if (!userPermissions.contains(permission)) {
-          resultHandler.handle(Future.succeededFuture(false));
-          return;
-        }
-      }
-      resultHandler.handle(Future.succeededFuture(true));
     } catch (Throwable e) {
       resultHandler.handle(Future.failedFuture(e));
     }
