@@ -40,23 +40,23 @@ import java.util.List;
  * @author mremme
  */
 public class MongoAuthImpl implements MongoAuth {
-  private static final Logger log                     = LoggerFactory.getLogger(MongoAuthImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
 
-  private final Vertx         vertx;
-  private MongoClient         mongoClient;
-  private String              usernameField           = DEFAULT_USERNAME_FIELD;
-  private String              passwordField           = DEFAULT_PASSWORD_FIELD;
-  private String              roleField               = DEFAULT_ROLE_FIELD;
-  private String              permissionField         = DEFAULT_PERMISSION_FIELD;
-  private String              usernameCredentialField = DEFAULT_CREDENTIAL_USERNAME_FIELD;
-  private String              passwordCredentialField = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
-  private String              saltField               = DEFAULT_SALT_FIELD;
-  private String              collectionName          = DEFAULT_COLLECTION_NAME;
+  private final Vertx vertx;
+  private MongoClient mongoClient;
+  private String usernameField = DEFAULT_USERNAME_FIELD;
+  private String passwordField = DEFAULT_PASSWORD_FIELD;
+  private String roleField = DEFAULT_ROLE_FIELD;
+  private String permissionField = DEFAULT_PERMISSION_FIELD;
+  private String usernameCredentialField = DEFAULT_CREDENTIAL_USERNAME_FIELD;
+  private String passwordCredentialField = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
+  private String saltField = DEFAULT_SALT_FIELD;
+  private String collectionName = DEFAULT_COLLECTION_NAME;
 
-  private JsonObject          config;
-  private UserFactory         userFactory;
+  private JsonObject config;
+  private UserFactory userFactory;
 
-  private HashStrategy        hashStrategy;
+  private HashStrategy hashStrategy;
 
   /**
    * 
@@ -357,8 +357,9 @@ public class MongoAuthImpl implements MongoAuth {
    * @see io.vertx.ext.auth.mongo.MongoAuth#setUserFactory(io.vertx.ext.auth.mongo.UserFactory)
    */
   @Override
-  public void setUserFactory(UserFactory userFactory) {
+  public MongoAuth setUserFactory(UserFactory userFactory) {
     this.userFactory = userFactory;
+    return this;
   }
 
   @Override
@@ -373,8 +374,9 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   @Override
-  public void setHashStrategy(HashStrategy hashStrategy) {
+  public MongoAuth setHashStrategy(HashStrategy hashStrategy) {
     this.hashStrategy = hashStrategy;
+    return this;
   }
 
   @Override
