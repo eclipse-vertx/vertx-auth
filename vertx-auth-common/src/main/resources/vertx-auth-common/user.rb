@@ -18,7 +18,7 @@ module VertxAuthCommon
     end
     #  Is the user authorised to
     # @param [String] authority the authority - what this really means is determined by the specific implementation. It might represent a permission to access a resource e.g. `printers:printer34` or it might represent authority to a role in a roles based model, e.g. `role:admin`.
-    # @yield handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they has the authority or `false` otherwise.
+    # @yield handler that will be called with an {AsyncResult} containing the value `true` if the they has the authority or `false` otherwise.
     # @return [self]
     def is_authorised(authority=nil)
       if authority.class == String && block_given?

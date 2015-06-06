@@ -42,7 +42,7 @@ authProvider.authenticate(authInfo, function (res, res_err) {
     var user = res;
   } else {
     // Failed!
-  };
+  }
 });
 
 ----
@@ -64,7 +64,7 @@ user.isAuthorised("newsletter:edit:13", function (res, res_err) {
     var hasPermission = res;
   } else {
     // Failed to
-  };
+  }
 });
 
 
@@ -79,7 +79,7 @@ user.isAuthorised("role:manager", function (res, res_err) {
     var hasRole = res;
   } else {
     // Failed to
-  };
+  }
 });
 
 

@@ -24,7 +24,7 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
- * Factory interface for creating JWT based {@link  io.vertx.rxjava.ext.auth.AuthProvider} instances.
+ * Factory interface for creating JWT based {@link io.vertx.rxjava.ext.auth.AuthProvider} instances.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTAuth original} non RX-ified interface using Vert.x codegen.

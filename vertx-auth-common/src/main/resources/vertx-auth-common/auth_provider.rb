@@ -28,7 +28,7 @@ module VertxAuthCommon
     #  </pre>
     #  For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
     #  <p>
-    #  If the user is successfully authenticated a {::VertxAuthCommon::User} object is passed to the handler in an {::Vertx::AsyncResult}.
+    #  If the user is successfully authenticated a {::VertxAuthCommon::User} object is passed to the handler in an {AsyncResult}.
     #  The user object can then be used for authorisation.
     # @param [Hash{String => Object}] authInfo The auth information
     # @yield The result handler

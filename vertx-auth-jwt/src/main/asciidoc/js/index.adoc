@@ -64,7 +64,7 @@ if ("paulo" == username && "super_secret" == password) {
   });
   // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
   // Authorization: Bearer <token>
-};
+}
 
 ----
 

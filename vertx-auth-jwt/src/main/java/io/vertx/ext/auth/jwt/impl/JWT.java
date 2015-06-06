@@ -17,7 +17,7 @@ package io.vertx.ext.auth.jwt.impl;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 
 import javax.crypto.Mac;
 import java.nio.charset.Charset;
