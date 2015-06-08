@@ -22,7 +22,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.AuthenticationException;
 import io.vertx.ext.auth.mongo.HashStrategy;
@@ -30,7 +30,6 @@ import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.auth.mongo.UserFactory;
 import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.mongo.MongoService;
 
 import java.util.List;
 
@@ -40,7 +39,8 @@ import java.util.List;
  * @author mremme
  */
 public class MongoAuthImpl implements MongoAuth {
-  private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(MongoAuthImpl.class);
 
   private final Vertx vertx;
   private MongoClient mongoClient;
@@ -61,14 +61,8 @@ public class MongoAuthImpl implements MongoAuth {
   /**
    * 
    */
-  public MongoAuthImpl(Vertx vertx, String serviceName, JsonObject config, UserFactory userFactory) {
-    this(vertx, MongoService.createEventBusProxy(vertx, serviceName), config, userFactory);
-  }
-
-  /**
-   * 
-   */
-  public MongoAuthImpl(Vertx vertx, MongoClient mongoClient, JsonObject config, UserFactory userFactory) {
+  public MongoAuthImpl(Vertx vertx, MongoClient mongoClient, JsonObject config,
+      UserFactory userFactory) {
     this.vertx = vertx;
     this.mongoClient = mongoClient;
     this.config = config;
@@ -77,17 +71,20 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(JsonObject authInfo,
+      Handler<AsyncResult<User>> resultHandler) {
     String username = authInfo.getString(this.usernameCredentialField);
     String password = authInfo.getString(this.passwordCredentialField);
 
     // Null username is invalid
     if (username == null) {
-      resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
+      resultHandler.handle((Future
+          .failedFuture("Username must be set for authentication.")));
       return;
     }
     if (password == null) {
-      resultHandler.handle((Future.failedFuture("Password must be set for authentication.")));
+      resultHandler.handle((Future
+          .failedFuture("Password must be set for authentication.")));
       return;
     }
     AuthToken token = new AuthToken(username, password);
@@ -122,18 +119,19 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   /**
-   * Examine the selection of found users and return one, if password is fitting,
+   * Examine the selection of found users and return one, if password is
+   * fitting,
    * 
    * @param resultList
    * @param username
    * @return
    */
-  private User handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
-      throws AuthenticationException {
+  private User handleSelection(AsyncResult<List<JsonObject>> resultList,
+      AuthToken authToken) throws AuthenticationException {
     switch (resultList.result().size()) {
     case 0: {
       String message = "No account found for user [" + authToken.username + "]";
-      //log.warn(message);
+      // log.warn(message);
       throw new AuthenticationException(message);
     }
     case 1: {
@@ -142,23 +140,26 @@ public class MongoAuthImpl implements MongoAuth {
       if (examinePassword(user, authToken))
         return user;
       else {
-        String message = "Invalid username/password [" + authToken.username + "]";
-        //log.warn(message);
+        String message = "Invalid username/password [" + authToken.username
+            + "]";
+        // log.warn(message);
         throw new AuthenticationException(message);
       }
     }
     default: {
       // More than one row returned!
-      String message = "More than one user row found for user [" + authToken.username + "( "
-          + resultList.result().size() + " )]. Usernames must be unique.";
-      //log.warn(message);
+      String message = "More than one user row found for user ["
+          + authToken.username + "( " + resultList.result().size()
+          + " )]. Usernames must be unique.";
+      // log.warn(message);
       throw new AuthenticationException(message);
     }
     }
   }
 
   /**
-   * Examine the given user object. Returns true, if object fits the given authentication
+   * Examine the given user object. Returns true, if object fits the given
+   * authentication
    * 
    * @param userObject
    * @param authToken
@@ -166,7 +167,8 @@ public class MongoAuthImpl implements MongoAuth {
    */
   private boolean examinePassword(User user, AuthToken authToken) {
     String storedPassword = getHashStrategy().getStoredPwd(user);
-    String givenPassword = getHashStrategy().computeHash(authToken.password, user);
+    String givenPassword = getHashStrategy().computeHash(authToken.password,
+        user);
     return storedPassword != null && storedPassword.equals(givenPassword);
   }
 
@@ -202,12 +204,14 @@ public class MongoAuthImpl implements MongoAuth {
       setPermissionField(permissionField);
     }
 
-    String usernameCredField = config.getString(PROPERTY_CREDENTIAL_USERNAME_FIELD);
+    String usernameCredField = config
+        .getString(PROPERTY_CREDENTIAL_USERNAME_FIELD);
     if (usernameCredField != null) {
       setUsernameCredentialField(usernameCredField);
     }
 
-    String passwordCredField = config.getString(PROPERTY_CREDENTIAL_PASSWORD_FIELD);
+    String passwordCredField = config
+        .getString(PROPERTY_CREDENTIAL_PASSWORD_FIELD);
     if (passwordCredField != null) {
       setPasswordCredentialField(passwordCredField);
     }
@@ -224,7 +228,9 @@ public class MongoAuthImpl implements MongoAuth {
 
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#setCollectionName(java.lang.String)
    */
   @Override
@@ -233,7 +239,9 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#setUsernameField(java.lang.String)
    */
   @Override
@@ -242,7 +250,9 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#setPasswordField(java.lang.String)
    */
   @Override
@@ -251,7 +261,9 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#setRoleField(java.lang.String)
    */
   @Override
@@ -260,8 +272,12 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
-   * @see io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(java.lang.String)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(java.lang.
+   * String)
    */
   @Override
   public MongoAuth setUsernameCredentialField(String fieldName) {
@@ -269,8 +285,12 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
-   * @see io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(java.lang.String)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(java.lang.
+   * String)
    */
   @Override
   public MongoAuth setPasswordCredentialField(String fieldName) {
@@ -278,7 +298,9 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#setSaltField(java.lang.String)
    */
   @Override
@@ -287,7 +309,9 @@ public class MongoAuthImpl implements MongoAuth {
     return this;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getCollectionName()
    */
   @Override
@@ -295,7 +319,9 @@ public class MongoAuthImpl implements MongoAuth {
     return collectionName;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getUsernameField()
    */
   @Override
@@ -303,7 +329,9 @@ public class MongoAuthImpl implements MongoAuth {
     return usernameField;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getPasswordField()
    */
   @Override
@@ -311,7 +339,9 @@ public class MongoAuthImpl implements MongoAuth {
     return passwordField;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getRoleField()
    */
   @Override
@@ -319,7 +349,9 @@ public class MongoAuthImpl implements MongoAuth {
     return roleField;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getUsernameCredentialField()
    */
   @Override
@@ -327,7 +359,9 @@ public class MongoAuthImpl implements MongoAuth {
     return usernameCredentialField;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getPasswordCredentialField()
    */
   @Override
@@ -335,7 +369,9 @@ public class MongoAuthImpl implements MongoAuth {
     return passwordCredentialField;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getSaltField()
    */
   @Override
@@ -343,7 +379,9 @@ public class MongoAuthImpl implements MongoAuth {
     return saltField;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.MongoAuth#getUserFactory()
    */
   @Override
@@ -353,8 +391,12 @@ public class MongoAuthImpl implements MongoAuth {
     return userFactory;
   }
 
-  /* (non-Javadoc)
-   * @see io.vertx.ext.auth.mongo.MongoAuth#setUserFactory(io.vertx.ext.auth.mongo.UserFactory)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * io.vertx.ext.auth.mongo.MongoAuth#setUserFactory(io.vertx.ext.auth.mongo
+   * .UserFactory)
    */
   @Override
   public MongoAuth setUserFactory(UserFactory userFactory) {

@@ -3,7 +3,7 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoService;
 import io.vertx.test.core.TestUtils;
 import io.vertx.test.core.VertxTestBase;
@@ -29,12 +29,13 @@ import de.flapdoodle.embed.process.runtime.Network;
  */
 
 public abstract class MongoBaseTest extends VertxTestBase {
-  private static final Logger     log          = LoggerFactory.getLogger(MongoBaseTest.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(MongoBaseTest.class);
 
-  public static final String      TABLE_PREFIX = "TestMongo_";
+  public static final String TABLE_PREFIX = "TestMongo_";
 
   private static MongodExecutable exe;
-  private MongoService            mongoService;
+  private MongoService mongoService;
 
   protected static String getConnectionString() {
     return getProperty("connection_string");
@@ -58,7 +59,8 @@ public abstract class MongoBaseTest extends VertxTestBase {
   @BeforeClass
   public static void startMongo() throws Exception {
     if (getConnectionString() == null) {
-      IMongodConfig config = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
+      IMongodConfig config = new MongodConfigBuilder()
+          .version(Version.Main.PRODUCTION)
           .net(new Net(27018, Network.localhostIsIPv6())).build();
       exe = MongodStarter.getDefaultInstance().prepare(config);
       exe.start();
@@ -90,17 +92,22 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
     DeploymentOptions options = new DeploymentOptions().setConfig(config);
     CountDownLatch latch = new CountDownLatch(1);
-    vertx.deployVerticle("service:io.vertx.mongo-service", options, onSuccess(id -> {
-      mongoService = MongoService.createEventBusProxy(vertx, "vertx.mongo");
-      dropCollections(latch);
-    }));
+    vertx
+        .deployVerticle(
+            "service:io.vertx.mongo-service",
+            options,
+            onSuccess(id -> {
+              mongoService = MongoService.createEventBusProxy(vertx,
+                  "vertx.mongo");
+              dropCollections(latch);
+            }));
     awaitLatch(latch);
 
-    //    mongoService = MongoService.create(vertx, config);
-    //    mongoService.start();
-    //    CountDownLatch latch = new CountDownLatch(1);
-    //    dropCollections(latch);
-    //    awaitLatch(latch);
+    // mongoService = MongoService.create(vertx, config);
+    // mongoService.start();
+    // CountDownLatch latch = new CountDownLatch(1);
+    // dropCollections(latch);
+    // awaitLatch(latch);
 
   }
 
@@ -121,8 +128,8 @@ public abstract class MongoBaseTest extends VertxTestBase {
   }
 
   /**
-   * Create a name of a collection by adding a certain suffix. All Collections with this suffix will be cleared by start
-   * of the test class
+   * Create a name of a collection by adding a certain suffix. All Collections
+   * with this suffix will be cleared by start of the test class
    * 
    * @param name
    * @return
