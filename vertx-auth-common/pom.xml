@@ -27,5 +27,8 @@
 
   <artifactId>vertx-auth-common</artifactId>
 
+  <properties>
+    <doc.skip>false</doc.skip>
+  </properties>
 
 </project>
