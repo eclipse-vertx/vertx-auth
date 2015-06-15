@@ -28,10 +28,10 @@ Here's an example of creating a JWT auth provider:
 
 [source,java]
 ----
-JsonObject config = new JsonObject()
-    .put("keyStore", "keystore.jceks")
-    .put("keyStoreType", "jceks")
-    .put("keyStorePassword", "secret");
+JsonObject config = new JsonObject().put("keyStore", new JsonObject()
+    .put("path", "keystore.jceks")
+    .put("type", "jceks")
+    .put("password", "secret"));
 
 AuthProvider provider = JWTAuth.create(vertx, config);
 ----
@@ -42,10 +42,10 @@ do:
 
 [source,java]
 ----
-JsonObject config = new JsonObject()
-        .put("keyStore", "keystore.jceks")
-        .put("keyStoreType", "jceks")
-        .put("keyStorePassword", "secret");
+JsonObject config = new JsonObject().put("keyStore", new JsonObject()
+    .put("path", "keystore.jceks")
+    .put("type", "jceks")
+    .put("password", "secret"));
 
 JWTAuth provider = JWTAuth.create(vertx, config);
 

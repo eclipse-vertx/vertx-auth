@@ -50,19 +50,19 @@ public class JWTAuthProviderImpl implements JWTAuth {
   public JWTAuthProviderImpl(Vertx vertx, JsonObject config) {
     this.permissionsClaimKey = config.getString("permissionsClaimKey", "permissions");
 
-    final String keyStore = config.getString("keyStore");
+    final JsonObject keyStore = config.getJsonObject("keyStore");
 
     try {
       if (keyStore != null) {
-        KeyStore ks = KeyStore.getInstance(config.getString("keyStoreType", "jceks"));
+        KeyStore ks = KeyStore.getInstance(keyStore.getString("type", "jceks"));
 
         VertxInternal vertxInternal = (VertxInternal) vertx;
 
-        try (InputStream in = new FileInputStream(vertxInternal.resolveFile(keyStore))) {
-          ks.load(in, config.getString("keyStorePassword").toCharArray());
+        try (InputStream in = new FileInputStream(vertxInternal.resolveFile(keyStore.getString("path")))) {
+          ks.load(in, keyStore.getString("password").toCharArray());
         }
 
-        this.jwt = new JWT(ks, config.getString("keyStorePassword").toCharArray());
+        this.jwt = new JWT(ks, keyStore.getString("password").toCharArray());
       } else {
         this.jwt = new JWT(null, null);
       }

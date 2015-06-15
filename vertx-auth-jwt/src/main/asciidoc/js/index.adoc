@@ -31,9 +31,11 @@ Here's an example of creating a JWT auth provider:
 var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
 
 var config = {
-  "keyStore" : "keystore.jceks",
-  "keyStoreType" : "jceks",
-  "keyStorePassword" : "secret"
+  "keyStore" : {
+    "path" : "keystore.jceks",
+    "type" : "jceks",
+    "password" : "secret"
+  }
 };
 
 var provider = JWTAuth.create(vertx, config);
@@ -49,9 +51,11 @@ do:
 var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
 
 var config = {
-  "keyStore" : "keystore.jceks",
-  "keyStoreType" : "jceks",
-  "keyStorePassword" : "secret"
+  "keyStore" : {
+    "path" : "keystore.jceks",
+    "type" : "jceks",
+    "password" : "secret"
+  }
 };
 
 var provider = JWTAuth.create(vertx, config);

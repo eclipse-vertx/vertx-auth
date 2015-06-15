@@ -39,10 +39,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   protected JsonObject getConfig() {
-    return new JsonObject()
-        .put("keyStoreType", "jceks")
-        .put("keyStore", "keystore.jceks")
-        .put("keyStorePassword", "secret");
+    return new JsonObject().put("keyStore", new JsonObject()
+        .put("path", "keystore.jceks")
+        .put("type", "jceks")
+        .put("password", "secret"));
   }
 
   @Test

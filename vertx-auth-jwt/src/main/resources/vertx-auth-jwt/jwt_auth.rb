@@ -16,7 +16,7 @@ module VertxAuthJwt
       @j_del
     end
     #  Create a JWT auth provider
-    # @param [::Vertx::Vertx] vertx 
+    # @param [::Vertx::Vertx] vertx the Vertx instance
     # @param [Hash{String => Object}] config the config
     # @return [::VertxAuthJwt::JWTAuth] the auth provider
     def self.create(vertx=nil,config=nil)

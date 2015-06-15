@@ -29,20 +29,20 @@ public class Examples {
 
   public void example6(Vertx vertx) {
 
-    JsonObject config = new JsonObject()
-        .put("keyStore", "keystore.jceks")
-        .put("keyStoreType", "jceks")
-        .put("keyStorePassword", "secret");
+    JsonObject config = new JsonObject().put("keyStore", new JsonObject()
+        .put("path", "keystore.jceks")
+        .put("type", "jceks")
+        .put("password", "secret"));
 
     AuthProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example7(Vertx vertx, String username, String password) {
 
-    JsonObject config = new JsonObject()
-            .put("keyStore", "keystore.jceks")
-            .put("keyStoreType", "jceks")
-            .put("keyStorePassword", "secret");
+    JsonObject config = new JsonObject().put("keyStore", new JsonObject()
+        .put("path", "keystore.jceks")
+        .put("type", "jceks")
+        .put("password", "secret"));
 
     JWTAuth provider = JWTAuth.create(vertx, config);
 

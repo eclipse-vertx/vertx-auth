@@ -31,9 +31,11 @@ Here's an example of creating a JWT auth provider:
 require 'vertx-auth-jwt/jwt_auth'
 
 config = {
-  'keyStore' => "keystore.jceks",
-  'keyStoreType' => "jceks",
-  'keyStorePassword' => "secret"
+  'keyStore' => {
+    'path' => "keystore.jceks",
+    'type' => "jceks",
+    'password' => "secret"
+  }
 }
 
 provider = VertxAuthJwt::JWTAuth.create(vertx, config)
@@ -49,9 +51,11 @@ do:
 require 'vertx-auth-jwt/jwt_auth'
 
 config = {
-  'keyStore' => "keystore.jceks",
-  'keyStoreType' => "jceks",
-  'keyStorePassword' => "secret"
+  'keyStore' => {
+    'path' => "keystore.jceks",
+    'type' => "jceks",
+    'password' => "secret"
+  }
 }
 
 provider = VertxAuthJwt::JWTAuth.create(vertx, config)

@@ -58,7 +58,7 @@ var JWTAuth = function(j_val) {
  Create a JWT auth provider
 
  @memberof module:vertx-auth-jwt-js/jwt_auth
- @param vertx {Vertx} 
+ @param vertx {Vertx} the Vertx instance 
  @param config {Object} the config 
  @return {JWTAuth} the auth provider
  */

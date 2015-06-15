@@ -46,7 +46,7 @@ public class JWTAuth extends AuthProvider {
 
   /**
    * Create a JWT auth provider
-   * @param vertx 
+   * @param vertx the Vertx instance
    * @param config the config
    * @return the auth provider
    */
