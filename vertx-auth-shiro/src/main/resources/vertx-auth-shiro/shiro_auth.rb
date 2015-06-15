@@ -22,7 +22,7 @@ module VertxAuthShiro
     # @return [::VertxAuthShiro::ShiroAuth] the auth provider
     def self.create(vertx=nil,realmType=nil,config=nil)
       if vertx.class.method_defined?(:j_del) && realmType.class == Symbol && config.class == Hash && !block_given?
-        return ::VertxAuthShiro::ShiroAuth.new(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(realmType),::Vertx::Util::Utils.to_json_object(config)))
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(realmType),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthShiro::ShiroAuth)
       end
       raise ArgumentError, "Invalid arguments when calling create(vertx,realmType,config)"
     end
@@ -31,7 +31,7 @@ module VertxAuthShiro
     # @return [::VertxAuthShiro::ShiroAuth] a reference to this for fluency
     def set_role_prefix(rolePrefix=nil)
       if rolePrefix.class == String && !block_given?
-        return ::VertxAuthShiro::ShiroAuth.new(@j_del.java_method(:setRolePrefix, [Java::java.lang.String.java_class]).call(rolePrefix))
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setRolePrefix, [Java::java.lang.String.java_class]).call(rolePrefix),::VertxAuthShiro::ShiroAuth)
       end
       raise ArgumentError, "Invalid arguments when calling set_role_prefix(rolePrefix)"
     end

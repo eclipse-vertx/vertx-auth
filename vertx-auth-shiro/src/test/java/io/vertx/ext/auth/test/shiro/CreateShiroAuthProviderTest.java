@@ -19,13 +19,13 @@ package io.vertx.ext.auth.test.shiro;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuth;
-import io.vertx.ext.auth.shiro.impl.SimplePrincipalCollection;
 import io.vertx.test.core.VertxTestBase;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.junit.Test;
 
 /**
@@ -64,7 +64,7 @@ public class CreateShiroAuthProviderTest extends VertxTestBase {
       return new AuthenticationInfo() {
         @Override
         public PrincipalCollection getPrincipals() {
-          return new SimplePrincipalCollection(token.getPrincipal());
+          return new SimplePrincipalCollection(token.getPrincipal(), "vertx-auth-shiro");
         }
 
         @Override

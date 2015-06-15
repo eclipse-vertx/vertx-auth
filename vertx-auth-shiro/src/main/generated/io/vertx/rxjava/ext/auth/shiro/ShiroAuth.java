@@ -68,6 +68,6 @@ public class ShiroAuth extends AuthProvider {
 
 
   public static ShiroAuth newInstance(io.vertx.ext.auth.shiro.ShiroAuth arg) {
-    return new ShiroAuth(arg);
+    return arg != null ? new ShiroAuth(arg) : null;
   }
 }

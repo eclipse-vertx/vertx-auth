@@ -42,7 +42,7 @@ public class ShiroAuth extends AuthProvider {
    * @return the auth provider
    */
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, Map<String, Object> config) {
-    def ret= new io.vertx.groovy.ext.auth.shiro.ShiroAuth(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), realmType, config != null ? new io.vertx.core.json.JsonObject(config) : null));
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), realmType, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.ext.auth.shiro.ShiroAuth.class, io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
   /**
@@ -51,7 +51,7 @@ public class ShiroAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public ShiroAuth setRolePrefix(String rolePrefix) {
-    def ret= new io.vertx.groovy.ext.auth.shiro.ShiroAuth(this.delegate.setRolePrefix(rolePrefix));
+    def ret= InternalHelper.safeCreate(this.delegate.setRolePrefix(rolePrefix), io.vertx.ext.auth.shiro.ShiroAuth.class, io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
 }
