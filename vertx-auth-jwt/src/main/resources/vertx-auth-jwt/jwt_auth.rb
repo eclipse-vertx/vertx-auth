@@ -16,13 +16,14 @@ module VertxAuthJwt
       @j_del
     end
     #  Create a JWT auth provider
+    # @param [::Vertx::Vertx] vertx 
     # @param [Hash{String => Object}] config the config
     # @return [::VertxAuthJwt::JWTAuth] the auth provider
-    def self.create(config=nil)
-      if config.class == Hash && !block_given?
-        return ::VertxAuthJwt::JWTAuth.new(Java::IoVertxExtAuthJwt::JWTAuth.java_method(:create, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(config)))
+    def self.create(vertx=nil,config=nil)
+      if vertx.class.method_defined?(:j_del) && config.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthJwt::JWTAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,::Vertx::Util::Utils.to_json_object(config)),::VertxAuthJwt::JWTAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(config)"
+      raise ArgumentError, "Invalid arguments when calling create(vertx,config)"
     end
     #  Generate a new JWT token.
     # @param [Hash{String => Object}] claims Json with user defined claims for a list of official claims

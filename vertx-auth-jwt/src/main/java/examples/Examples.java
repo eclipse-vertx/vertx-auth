@@ -16,6 +16,7 @@
 
 package examples;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -26,24 +27,24 @@ import io.vertx.ext.auth.jwt.JWTOptions;
  */
 public class Examples {
 
-  public void example6() {
+  public void example6(Vertx vertx) {
 
     JsonObject config = new JsonObject()
-        .put("keyStoreURI", "classpath:///keystore.jceks")
+        .put("keyStore", "keystore.jceks")
         .put("keyStoreType", "jceks")
         .put("keyStorePassword", "secret");
 
-    AuthProvider provider = JWTAuth.create(config);
+    AuthProvider provider = JWTAuth.create(vertx, config);
   }
 
-  public void example7(String username, String password) {
+  public void example7(Vertx vertx, String username, String password) {
 
     JsonObject config = new JsonObject()
-            .put("keyStoreURI", "classpath:///keystore.jceks")
+            .put("keyStore", "keystore.jceks")
             .put("keyStoreType", "jceks")
             .put("keyStorePassword", "secret");
 
-    JWTAuth provider = JWTAuth.create(config);
+    JWTAuth provider = JWTAuth.create(vertx, config);
 
     // on the verify endpoint once you verify the identity of the user by its username/password
     if ("paulo".equals(username) && "super_secret".equals(password)) {

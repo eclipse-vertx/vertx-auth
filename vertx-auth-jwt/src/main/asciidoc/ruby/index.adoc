@@ -31,12 +31,12 @@ Here's an example of creating a JWT auth provider:
 require 'vertx-auth-jwt/jwt_auth'
 
 config = {
-  'keyStoreURI' => "classpath:///keystore.jceks",
+  'keyStore' => "keystore.jceks",
   'keyStoreType' => "jceks",
   'keyStorePassword' => "secret"
 }
 
-provider = VertxAuthJwt::JWTAuth.create(config)
+provider = VertxAuthJwt::JWTAuth.create(vertx, config)
 
 ----
 
@@ -49,12 +49,12 @@ do:
 require 'vertx-auth-jwt/jwt_auth'
 
 config = {
-  'keyStoreURI' => "classpath:///keystore.jceks",
+  'keyStore' => "keystore.jceks",
   'keyStoreType' => "jceks",
   'keyStorePassword' => "secret"
 }
 
-provider = VertxAuthJwt::JWTAuth.create(config)
+provider = VertxAuthJwt::JWTAuth.create(vertx, config)
 
 # on the verify endpoint once you verify the identity of the user by its username/password
 if ("paulo".==(username) && "super_secret".==(password))

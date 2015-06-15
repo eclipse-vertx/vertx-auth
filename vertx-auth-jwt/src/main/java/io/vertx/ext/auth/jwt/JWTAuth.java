@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
@@ -35,8 +36,8 @@ public interface JWTAuth extends AuthProvider {
    * @param config  the config
    * @return the auth provider
    */
-  static JWTAuth create(JsonObject config) {
-    return new JWTAuthProviderImpl(config);
+  static JWTAuth create(Vertx vertx, JsonObject config) {
+    return new JWTAuthProviderImpl(vertx, config);
   }
 
   /**

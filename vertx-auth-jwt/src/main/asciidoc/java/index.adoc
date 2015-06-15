@@ -29,11 +29,11 @@ Here's an example of creating a JWT auth provider:
 [source,java]
 ----
 JsonObject config = new JsonObject()
-    .put("keyStoreURI", "classpath:///keystore.jceks")
+    .put("keyStore", "keystore.jceks")
     .put("keyStoreType", "jceks")
     .put("keyStorePassword", "secret");
 
-AuthProvider provider = JWTAuth.create(config);
+AuthProvider provider = JWTAuth.create(vertx, config);
 ----
 
 A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point
@@ -43,11 +43,11 @@ do:
 [source,java]
 ----
 JsonObject config = new JsonObject()
-        .put("keyStoreURI", "classpath:///keystore.jceks")
+        .put("keyStore", "keystore.jceks")
         .put("keyStoreType", "jceks")
         .put("keyStorePassword", "secret");
 
-JWTAuth provider = JWTAuth.create(config);
+JWTAuth provider = JWTAuth.create(vertx, config);
 
 // on the verify endpoint once you verify the identity of the user by its username/password
 if ("paulo".equals(username) && "super_secret".equals(password)) {

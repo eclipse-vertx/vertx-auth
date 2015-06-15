@@ -18,6 +18,8 @@ package io.vertx.ext.auth.jwt.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -27,8 +29,6 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -47,31 +47,19 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   private final String permissionsClaimKey;
 
-  public JWTAuthProviderImpl(JsonObject config) {
+  public JWTAuthProviderImpl(Vertx vertx, JsonObject config) {
     this.permissionsClaimKey = config.getString("permissionsClaimKey", "permissions");
 
-    final String keyStoreURI = config.getString("keyStoreURI");
+    final String keyStore = config.getString("keyStore");
 
     try {
-      if (keyStoreURI != null) {
+      if (keyStore != null) {
         KeyStore ks = KeyStore.getInstance(config.getString("keyStoreType", "jceks"));
 
-        final URI uri = new URI(keyStoreURI);
+        VertxInternal vertxInternal = (VertxInternal) vertx;
 
-        switch (uri.getScheme()) {
-          case "classpath":
-            // ignore leading slash
-            try (InputStream in = getClassLoader().getResourceAsStream(uri.getPath().substring(1))) {
-              ks.load(in, config.getString("keyStorePassword").toCharArray());
-            }
-            break;
-          case "file":
-            try (InputStream in = new FileInputStream(uri.getPath())) {
-              ks.load(in, config.getString("keyStorePassword").toCharArray());
-            }
-            break;
-          default:
-            throw new IllegalArgumentException("Invalid uri: " + config.getString("keyStoreFilename"));
+        try (InputStream in = new FileInputStream(vertxInternal.resolveFile(keyStore))) {
+          ks.load(in, config.getString("keyStorePassword").toCharArray());
         }
 
         this.jwt = new JWT(ks, config.getString("keyStorePassword").toCharArray());
@@ -79,14 +67,9 @@ public class JWTAuthProviderImpl implements JWTAuth {
         this.jwt = new JWT(null, null);
       }
 
-    } catch (URISyntaxException | KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+    } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private ClassLoader getClassLoader() {
-    ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-    return tccl == null ? getClass().getClassLoader() : tccl;
   }
 
   @Override
