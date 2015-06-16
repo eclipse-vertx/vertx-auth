@@ -43,6 +43,7 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   private Vertx vertx;
   private org.apache.shiro.mgt.SecurityManager securityManager;
   private String rolePrefix = DEFAULT_ROLE_PREFIX;
+  private String realmName;
 
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
     Realm realm;
@@ -62,6 +63,7 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   public ShiroAuthProviderImpl(Vertx vertx, Realm realm) {
     this.vertx = vertx;
     this.securityManager = new DefaultSecurityManager(realm);
+    this.realmName = realm.getName();
   }
 
   @Override
@@ -77,7 +79,7 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
       } catch (AuthenticationException e) {
         throw new VertxException(e);
       }
-      fut.complete(new ShiroUser(vertx, securityManager, username, rolePrefix));
+      fut.complete(new ShiroUser(vertx, realmName, securityManager, username, rolePrefix));
     }, resultHandler);
   }
 
@@ -94,5 +96,9 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
 
   org.apache.shiro.mgt.SecurityManager getSecurityManager() {
     return securityManager;
+  }
+
+  String getRealmName() {
+    return realmName;
   }
 }

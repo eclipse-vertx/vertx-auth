@@ -39,13 +39,15 @@ public class ShiroUser extends AbstractUser {
 
   private Vertx vertx;
   private org.apache.shiro.mgt.SecurityManager securityManager;
+  private String realmName;
   private String username;
   private Subject subject;
   private JsonObject principal;
   private String rolePrefix;
 
-  public ShiroUser(Vertx vertx, org.apache.shiro.mgt.SecurityManager securityManager, String username, String rolePrefix) {
+  public ShiroUser(Vertx vertx, String realmName, org.apache.shiro.mgt.SecurityManager securityManager, String username, String rolePrefix) {
     this.vertx = vertx;
+    this.realmName = realmName;
     this.securityManager = securityManager;
     this.username = username;
     this.rolePrefix = rolePrefix;
@@ -106,6 +108,7 @@ public class ShiroUser extends AbstractUser {
     if (authProvider instanceof ShiroAuthProviderImpl) {
       ShiroAuthProviderImpl shiroAuthProvider = (ShiroAuthProviderImpl)authProvider;
       this.vertx = shiroAuthProvider.getVertx();
+      this.realmName = shiroAuthProvider.getRealmName();
       this.securityManager = shiroAuthProvider.getSecurityManager();
       setSubject();
     } else {
@@ -115,7 +118,7 @@ public class ShiroUser extends AbstractUser {
 
   private void setSubject() {
     SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new SimplePrincipalCollection(username, "vertx-auth-shiro");
+    PrincipalCollection coll = new SimplePrincipalCollection(username, realmName);
     subjectContext.setPrincipals(coll);
     subject = securityManager.createSubject(subjectContext);
   }
