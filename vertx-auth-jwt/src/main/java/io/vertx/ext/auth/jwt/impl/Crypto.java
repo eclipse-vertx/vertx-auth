@@ -88,7 +88,7 @@ final class CryptoSignature implements Crypto {
 }
 
 final class CryptoNone implements Crypto {
-  private final byte[] NOOP = new byte[0];
+  private static final byte[] NOOP = new byte[0];
 
   @Override
   public byte[] sign(byte[] payload) {

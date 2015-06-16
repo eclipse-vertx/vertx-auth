@@ -92,6 +92,12 @@
     </dependency>
     <dependency>
       <groupId>com.stormpath.sdk</groupId>
+      <artifactId>stormpath-sdk-api</artifactId>
+      <version>1.0.RC4.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.stormpath.sdk</groupId>
       <artifactId>stormpath-sdk-httpclient</artifactId>
       <version>1.0.RC4.3</version>
       <scope>test</scope>

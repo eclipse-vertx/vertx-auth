@@ -25,6 +25,7 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -79,7 +80,7 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
       } catch (AuthenticationException e) {
         throw new VertxException(e);
       }
-      fut.complete(new ShiroUser(vertx, realmName, securityManager, username, rolePrefix));
+      fut.complete(new ShiroUser(vertx, securityManager, subject, rolePrefix));
     }, resultHandler);
   }
 
