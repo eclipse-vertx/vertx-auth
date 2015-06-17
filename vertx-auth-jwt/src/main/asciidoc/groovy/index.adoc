@@ -31,12 +31,14 @@ Here's an example of creating a JWT auth provider:
 import io.vertx.groovy.ext.auth.jwt.JWTAuth
 
 def config = [
-  keyStoreURI:"classpath:///keystore.jceks",
-  keyStoreType:"jceks",
-  keyStorePassword:"secret"
+  keyStore:[
+    path:"keystore.jceks",
+    type:"jceks",
+    password:"secret"
+  ]
 ]
 
-def provider = JWTAuth.create(config)
+def provider = JWTAuth.create(vertx, config)
 
 ----
 
@@ -49,12 +51,14 @@ do:
 import io.vertx.groovy.ext.auth.jwt.JWTAuth
 
 def config = [
-  keyStoreURI:"classpath:///keystore.jceks",
-  keyStoreType:"jceks",
-  keyStorePassword:"secret"
+  keyStore:[
+    path:"keystore.jceks",
+    type:"jceks",
+    password:"secret"
+  ]
 ]
 
-def provider = JWTAuth.create(config)
+def provider = JWTAuth.create(vertx, config)
 
 // on the verify endpoint once you verify the identity of the user by its username/password
 if ("paulo" == username && "super_secret" == password) {

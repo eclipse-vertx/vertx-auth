@@ -23,7 +23,7 @@ import io.vertx.rxjava.ext.jdbc.JDBCClient;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
- * Factory interface for creating {@link  io.vertx.rxjava.ext.auth.AuthProvider} instances that use the Vert.x JDBC client
+ * Factory interface for creating {@link io.vertx.rxjava.ext.auth.AuthProvider} instances that use the Vert.x JDBC client
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jdbc.JDBCAuth original} non RX-ified interface using Vert.x codegen.

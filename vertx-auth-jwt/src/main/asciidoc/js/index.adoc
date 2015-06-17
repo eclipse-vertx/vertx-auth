@@ -31,12 +31,14 @@ Here's an example of creating a JWT auth provider:
 var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
 
 var config = {
-  "keyStoreURI" : "classpath:///keystore.jceks",
-  "keyStoreType" : "jceks",
-  "keyStorePassword" : "secret"
+  "keyStore" : {
+    "path" : "keystore.jceks",
+    "type" : "jceks",
+    "password" : "secret"
+  }
 };
 
-var provider = JWTAuth.create(config);
+var provider = JWTAuth.create(vertx, config);
 
 ----
 
@@ -49,12 +51,14 @@ do:
 var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
 
 var config = {
-  "keyStoreURI" : "classpath:///keystore.jceks",
-  "keyStoreType" : "jceks",
-  "keyStorePassword" : "secret"
+  "keyStore" : {
+    "path" : "keystore.jceks",
+    "type" : "jceks",
+    "password" : "secret"
+  }
 };
 
-var provider = JWTAuth.create(config);
+var provider = JWTAuth.create(vertx, config);
 
 // on the verify endpoint once you verify the identity of the user by its username/password
 if ("paulo" == username && "super_secret" == password) {
@@ -64,7 +68,7 @@ if ("paulo" == username && "super_secret" == password) {
   });
   // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
   // Authorization: Bearer <token>
-};
+}
 
 ----
 

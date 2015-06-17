@@ -58,13 +58,14 @@ var JWTAuth = function(j_val) {
  Create a JWT auth provider
 
  @memberof module:vertx-auth-jwt-js/jwt_auth
+ @param vertx {Vertx} the Vertx instance 
  @param config {Object} the config 
  @return {JWTAuth} the auth provider
  */
-JWTAuth.create = function(config) {
+JWTAuth.create = function(vertx, config) {
   var __args = arguments;
-  if (__args.length === 1 && typeof __args[0] === 'object') {
-    return new JWTAuth(JJWTAuth["create(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(config)));
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
+    return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)), JWTAuth);
   } else utils.invalidArgs();
 };
 

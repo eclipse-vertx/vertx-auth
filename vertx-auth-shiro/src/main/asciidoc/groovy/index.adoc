@@ -13,8 +13,8 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-import io.vertx.groovy.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
+import io.vertx.groovy.ext.auth.shiro.ShiroAuth
 
 def config = [
   properties_path:"classpath:test-auth.properties"

@@ -37,7 +37,7 @@ authInfo = {
   'password' => "sausages"
 }
 
-authProvider.authenticate(authInfo) { |res,res_err|
+authProvider.authenticate(authInfo) { |res_err,res|
   if (res_err == nil)
     user = res
   else
@@ -59,7 +59,7 @@ If validating if a user has a particular permission simply pass the permission i
 [source,java]
 ----
 
-user.is_authorised("newsletter:edit:13") { |res,res_err|
+user.is_authorised("newsletter:edit:13") { |res_err,res|
   if (res_err == nil)
     hasPermission = res
   else
@@ -74,7 +74,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 [source,java]
 ----
 
-user.is_authorised("role:manager") { |res,res_err|
+user.is_authorised("role:manager") { |res_err,res|
   if (res_err == nil)
     hasRole = res
   else

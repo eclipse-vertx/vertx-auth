@@ -25,7 +25,7 @@ import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
- * Factory interface for creating Apache Shiro based {@link  io.vertx.rxjava.ext.auth.AuthProvider} instances.
+ * Factory interface for creating Apache Shiro based {@link io.vertx.rxjava.ext.auth.AuthProvider} instances.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuth original} non RX-ified interface using Vert.x codegen.
@@ -68,6 +68,6 @@ public class ShiroAuth extends AuthProvider {
 
 
   public static ShiroAuth newInstance(io.vertx.ext.auth.shiro.ShiroAuth arg) {
-    return new ShiroAuth(arg);
+    return arg != null ? new ShiroAuth(arg) : null;
   }
 }

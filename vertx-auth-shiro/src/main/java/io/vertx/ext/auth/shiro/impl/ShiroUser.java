@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
@@ -114,7 +115,7 @@ public class ShiroUser extends AbstractUser {
 
   private void setSubject() {
     SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new SimplePrincipalCollection(username);
+    PrincipalCollection coll = new SimplePrincipalCollection(username, "vertx-auth-shiro");
     subjectContext.setPrincipals(coll);
     subject = securityManager.createSubject(subjectContext);
   }

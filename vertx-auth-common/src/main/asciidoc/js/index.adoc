@@ -60,7 +60,7 @@ authProvider.authenticate(authInfo, function (res, res_err) {
 
   } else {
     res_err.printStackTrace();
-  };
+  }
 });
 
 ----
@@ -87,11 +87,11 @@ user.isAuthorised("printers:printer1234", function (res, res_err) {
       console.log("User has the authority");
     } else {
       console.log("User does not have the authority");
-    };
+    }
 
   } else {
     res_err.printStackTrace();
-  };
+  }
 });
 
 ----

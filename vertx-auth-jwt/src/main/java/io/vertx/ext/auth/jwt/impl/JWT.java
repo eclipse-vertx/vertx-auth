@@ -17,7 +17,7 @@ package io.vertx.ext.auth.jwt.impl;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 
 import javax.crypto.Mac;
 import java.nio.charset.Charset;
@@ -50,7 +50,12 @@ public final class JWT {
       // load MACs
       for (String alg : Arrays.<String>asList("HS256", "HS384", "HS512")) {
         try {
-          tmp.put(alg, new CryptoMac(getMac(keyStore, keyStorePassword, alg)));
+          Mac mac = getMac(keyStore, keyStorePassword, alg);
+          if (mac != null) {
+            tmp.put(alg, new CryptoMac(mac));
+          } else {
+            log.info(alg + " not available");
+          }
         } catch (RuntimeException e) {
           log.warn(alg + " not supported", e);
         }
@@ -59,7 +64,12 @@ public final class JWT {
       // load SIGNATUREs
       for (String alg : Arrays.<String>asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
         try {
-          tmp.put(alg, new CryptoSignature(getSignature(keyStore, keyStorePassword, alg)));
+          Signature signature = getSignature(keyStore, keyStorePassword, alg);
+          if (signature != null) {
+            tmp.put(alg, new CryptoSignature(signature));
+          } else {
+            log.info(alg + " not available");
+          }
         } catch (RuntimeException e) {
           log.warn(alg + " not supported");
         }
@@ -82,6 +92,11 @@ public final class JWT {
   private Mac getMac(final KeyStore keyStore, final char[] keyStorePassword, final String alias) {
     try {
       final Key secretKey = keyStore.getKey(alias, keyStorePassword);
+      
+      // key store does not have the requested algorithm
+      if (secretKey == null) {
+        return null;
+      }
 
       Mac mac = Mac.getInstance(secretKey.getAlgorithm());
       mac.init(secretKey);
@@ -97,6 +112,11 @@ public final class JWT {
       final PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
 
       final X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
+      
+      // key store does not have the requested algorithm
+      if (privateKey == null || certificate == null) {
+        return null;
+      }
 
       Signature signature = Signature.getInstance(certificate.getSigAlgName());
       signature.initSign(privateKey);

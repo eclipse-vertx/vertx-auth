@@ -17,6 +17,7 @@
 package io.vertx.groovy.ext.auth.jwt;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
+import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTOptions
 import io.vertx.groovy.ext.auth.AuthProvider
@@ -35,11 +36,12 @@ public class JWTAuth extends AuthProvider {
   }
   /**
    * Create a JWT auth provider
+   * @param vertx the Vertx instance
    * @param config the config
    * @return the auth provider
    */
-  public static JWTAuth create(Map<String, Object> config) {
-    def ret= new io.vertx.groovy.ext.auth.jwt.JWTAuth(io.vertx.ext.auth.jwt.JWTAuth.create(config != null ? new io.vertx.core.json.JsonObject(config) : null));
+  public static JWTAuth create(Vertx vertx, Map<String, Object> config) {
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.ext.auth.jwt.JWTAuth.class, io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
     return ret;
   }
   /**

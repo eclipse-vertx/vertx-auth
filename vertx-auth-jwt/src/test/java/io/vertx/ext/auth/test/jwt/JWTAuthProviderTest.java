@@ -35,14 +35,14 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = JWTAuth.create(getConfig());
+    authProvider = JWTAuth.create(vertx, getConfig());
   }
 
   protected JsonObject getConfig() {
-    return new JsonObject()
-        .put("keyStoreType", "jceks")
-        .put("keyStoreURI", "classpath:///keystore.jceks")
-        .put("keyStorePassword", "secret");
+    return new JsonObject().put("keyStore", new JsonObject()
+        .put("path", "keystore.jceks")
+        .put("type", "jceks")
+        .put("password", "secret"));
   }
 
   @Test

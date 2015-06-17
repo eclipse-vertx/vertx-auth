@@ -26,6 +26,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <properties>
+    <doc.skip>false</doc.skip>
+  </properties>
+
   <artifactId>vertx-auth-shiro</artifactId>
 
   <dependencies>

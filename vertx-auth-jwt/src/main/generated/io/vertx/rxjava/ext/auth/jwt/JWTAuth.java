@@ -19,12 +19,13 @@ package io.vertx.rxjava.ext.auth.jwt;
 import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
- * Factory interface for creating JWT based {@link  io.vertx.rxjava.ext.auth.AuthProvider} instances.
+ * Factory interface for creating JWT based {@link io.vertx.rxjava.ext.auth.AuthProvider} instances.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTAuth original} non RX-ified interface using Vert.x codegen.
@@ -45,11 +46,12 @@ public class JWTAuth extends AuthProvider {
 
   /**
    * Create a JWT auth provider
+   * @param vertx the Vertx instance
    * @param config the config
    * @return the auth provider
    */
-  public static JWTAuth create(JsonObject config) { 
-    JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create(config));
+  public static JWTAuth create(Vertx vertx, JsonObject config) { 
+    JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), config));
     return ret;
   }
 
@@ -66,6 +68,6 @@ public class JWTAuth extends AuthProvider {
 
 
   public static JWTAuth newInstance(io.vertx.ext.auth.jwt.JWTAuth arg) {
-    return new JWTAuth(arg);
+    return arg != null ? new JWTAuth(arg) : null;
   }
 }
