@@ -35,7 +35,7 @@ module VertxAuthCommon
     # @return [void]
     def authenticate(authInfo=nil)
       if authInfo.class == Hash && block_given?
-        return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(authInfo),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::VertxAuthCommon::User.new(ar.result) : nil) }))
+        return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(authInfo),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling authenticate(authInfo)"
     end

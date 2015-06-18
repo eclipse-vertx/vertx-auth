@@ -64,7 +64,7 @@ public class User {
    * @return JSON representation of the Principal
    */
   public Map<String, Object> principal() {
-    def ret = this.delegate.principal()?.getMap();
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(this.delegate.principal());
     return ret;
   }
   /**

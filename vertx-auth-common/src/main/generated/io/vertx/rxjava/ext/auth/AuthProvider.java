@@ -103,6 +103,6 @@ public class AuthProvider {
 
 
   public static AuthProvider newInstance(io.vertx.ext.auth.AuthProvider arg) {
-    return new AuthProvider(arg);
+    return arg != null ? new AuthProvider(arg) : null;
   }
 }

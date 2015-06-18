@@ -59,7 +59,7 @@ var AuthProvider = function(j_val) {
     if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'function') {
       j_authProvider["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(authInfo), function(ar) {
       if (ar.succeeded()) {
-        resultHandler(new User(ar.result()), null);
+        resultHandler(utils.convReturnVertxGen(ar.result(), User), null);
       } else {
         resultHandler(null, ar.cause());
       }

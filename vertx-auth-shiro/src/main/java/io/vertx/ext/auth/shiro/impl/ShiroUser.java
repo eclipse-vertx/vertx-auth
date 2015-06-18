@@ -44,12 +44,12 @@ public class ShiroUser extends AbstractUser {
   private JsonObject principal;
   private String rolePrefix;
 
-  public ShiroUser(Vertx vertx, org.apache.shiro.mgt.SecurityManager securityManager, String username, String rolePrefix) {
+  public ShiroUser(Vertx vertx, org.apache.shiro.mgt.SecurityManager securityManager, Subject subject, String rolePrefix) {
     this.vertx = vertx;
     this.securityManager = securityManager;
-    this.username = username;
     this.rolePrefix = rolePrefix;
-    setSubject();
+    this.subject = subject;
+    this.username = subject.getPrincipal().toString();
   }
 
   public ShiroUser() {
@@ -107,16 +107,14 @@ public class ShiroUser extends AbstractUser {
       ShiroAuthProviderImpl shiroAuthProvider = (ShiroAuthProviderImpl)authProvider;
       this.vertx = shiroAuthProvider.getVertx();
       this.securityManager = shiroAuthProvider.getSecurityManager();
-      setSubject();
+
+      // generate the subject back from the provider
+      SubjectContext subjectContext = new DefaultSubjectContext();
+      PrincipalCollection coll = new SimplePrincipalCollection(username, shiroAuthProvider.getRealmName());
+      subjectContext.setPrincipals(coll);
+      subject = securityManager.createSubject(subjectContext);
     } else {
       throw new IllegalArgumentException("Not a ShiroAuthProviderImpl");
     }
-  }
-
-  private void setSubject() {
-    SubjectContext subjectContext = new DefaultSubjectContext();
-    PrincipalCollection coll = new SimplePrincipalCollection(username, "vertx-auth-shiro");
-    subjectContext.setPrincipals(coll);
-    subject = securityManager.createSubject(subjectContext);
   }
 }
