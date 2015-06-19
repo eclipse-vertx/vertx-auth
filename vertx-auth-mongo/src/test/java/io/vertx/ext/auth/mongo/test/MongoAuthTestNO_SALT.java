@@ -24,8 +24,7 @@ import org.junit.runners.model.InitializationError;
  */
 
 public class MongoAuthTestNO_SALT extends MongoBaseTest {
-  private static final Logger log = LoggerFactory
-      .getLogger(MongoAuthTestNO_SALT.class);
+  private static final Logger log = LoggerFactory.getLogger(MongoAuthTestNO_SALT.class);
 
   protected MongoAuth authProvider;
 
@@ -58,8 +57,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthenticate() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(
-        authProvider.getPasswordField(), "sausages");
+    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
@@ -70,8 +68,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthenticateFailBadPwd() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(
-        authProvider.getPasswordField(), "eggs");
+    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "eggs");
     authProvider.authenticate(authInfo, onFailure(v -> {
       assertTrue(v instanceof AuthenticationException);
       testComplete();
@@ -82,8 +79,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthenticateFailBadUser() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "blah").put(
-        authProvider.getPasswordField(), "whatever");
+    authInfo.put(authProvider.getUsernameField(), "blah").put(authProvider.getPasswordField(), "whatever");
     authProvider.authenticate(authInfo, onFailure(v -> {
       assertTrue(v instanceof AuthenticationException);
       testComplete();
@@ -94,8 +90,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthoriseHasRole() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(
-        authProvider.getPasswordField(), "sausages");
+    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorised("role:developer", onSuccess(has -> {
@@ -109,8 +104,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthoriseNotHasRole() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(
-        authProvider.getPasswordField(), "sausages");
+    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorised("role:manager", onSuccess(has -> {
@@ -124,8 +118,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthoriseHasPermission() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(
-        authProvider.getPasswordField(), "sausages");
+    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorised("commit_code", onSuccess(has -> {
@@ -139,8 +132,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Test
   public void testAuthoriseNotHasPermission() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(
-        authProvider.getPasswordField(), "sausages");
+    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorised("eat_sandwich", onSuccess(has -> {
@@ -162,24 +154,21 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
     users.add(createUser("Doublette", "ps2"));
     users.add(createUser("Doublette", "ps2"));
 
-    users.add(createUser("tim", "sausages", Arrays.asList("morris_dancer",
-        "superadmin", "developer"), Arrays.asList("commit_code", "merge_pr",
-        "do_actual_work", "bang_sticks")));
+    users.add(createUser("tim", "sausages", Arrays.asList("morris_dancer", "superadmin", "developer"),
+        Arrays.asList("commit_code", "merge_pr", "do_actual_work", "bang_sticks")));
     return users;
   }
 
   protected void initAuthService() throws Exception {
     if (authProvider == null) {
       log.info("initAuthService");
-      authProvider = MongoAuth.create(vertx, getMongoService(),
-          createAuthServiceConfig());
+      authProvider = MongoAuth.create(vertx, getMongoService(), createAuthServiceConfig());
     }
   }
 
   protected JsonObject createAuthServiceConfig() {
     JsonObject js = new JsonObject();
-    js.put(MongoAuth.PROPERTY_COLLECTION_NAME,
-        createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
+    js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
     return js;
   }
 
@@ -240,12 +229,9 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
    * @param password
    * @return
    */
-  protected User createUser(String username, String password,
-      List<String> roles, List<String> permissions) {
-    User user = authProvider.getUserFactory().createUser(username, password,
-        roles, permissions, authProvider);
-    String userpassword = user.principal().getString(
-        authProvider.getPasswordField());
+  protected User createUser(String username, String password, List<String> roles, List<String> permissions) {
+    User user = authProvider.createUser(username, password, roles, permissions);
+    String userpassword = user.principal().getString(authProvider.getPasswordField());
 
     assertNotNull(userpassword);
 
@@ -272,28 +258,23 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   private boolean initOneUser(User user, CountDownLatch latch) throws Exception {
     CountDownLatch intLatch = new CountDownLatch(1);
     final StringBuffer buffer = new StringBuffer();
-    getMongoService().save(
-        authProvider.getCollectionName(),
-        user.principal(),
-        res -> {
-          if (res.succeeded()) {
-            log.info("user added: "
-                + user.principal().getString(authProvider.getUsernameField()));
-            latch.countDown();
-          } else {
-            log.error("", res.cause());
-            buffer.append("false");
-          }
-          intLatch.countDown();
-        });
+    getMongoService().save(authProvider.getCollectionName(), user.principal(), res -> {
+      if (res.succeeded()) {
+        log.info("user added: " + user.principal().getString(authProvider.getUsernameField()));
+        latch.countDown();
+      } else {
+        log.error("", res.cause());
+        buffer.append("false");
+      }
+      intLatch.countDown();
+    });
     awaitLatch(intLatch);
     return buffer.length() == 0;
   }
 
   public JsonObject createAuthInfo(String username, String password) {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), username).put(
-        authProvider.getPasswordField(), password);
+    authInfo.put(authProvider.getUsernameField(), username).put(authProvider.getPasswordField(), password);
     return authInfo;
   }
 

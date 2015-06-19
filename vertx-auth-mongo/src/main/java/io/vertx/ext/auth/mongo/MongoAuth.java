@@ -24,8 +24,9 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.impl.MongoAuthImpl;
-import io.vertx.ext.auth.mongo.impl.MongoUserFactory;
 import io.vertx.ext.mongo.MongoClient;
+
+import java.util.List;
 
 /**
  * An extension of AuthProvider which is using {@link MongoClient} as store
@@ -110,8 +111,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * The default name of the property for the permissions, like it is stored in mongodb. Permissions are expected to be
-   * saved as
-   * JsonArray
+   * saved as JsonArray
    */
   String DEFAULT_PERMISSION_FIELD = "permissions";
 
@@ -135,7 +135,7 @@ public interface MongoAuth extends AuthProvider {
   String ROLE_PREFIX = "role:";
 
   /**
-   * Creates an instance of MongoAuth by using a {@link MongoUserFactory}
+   * Creates an instance of MongoAuth
    * 
    * @param vertx
    * @param mongoClient
@@ -143,20 +143,7 @@ public interface MongoAuth extends AuthProvider {
    * @return
    */
   public static MongoAuth create(Vertx vertx, MongoClient mongoClient, JsonObject config) {
-    return new MongoAuthImpl(vertx, mongoClient, config, null);
-  }
-
-  /**
-   * Creates an instance of MongoAuth with the defined {@link UserFactory}
-   * 
-   * @param vertx
-   * @param mongoClient
-   * @param config
-   * @userFactory the instance of {@link UserFactory} to be used
-   * @return
-   */
-  public static MongoAuth create(Vertx vertx, MongoClient mongoClient, JsonObject config, UserFactory userFactory) {
-    return new MongoAuthImpl(vertx, mongoClient, config, userFactory);
+    return new MongoAuthImpl(vertx, mongoClient, config);
   }
 
   /**
@@ -198,8 +185,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * Set the name of the field to be used for the permissions. Defaults to DEFAULT_PERMISSION_FIELD. Permissions are
-   * expected to be saved
-   * as JsonArray
+   * expected to be saved as JsonArray
    * 
    * @param fieldName
    * @return
@@ -209,8 +195,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * Set the name of the field to be used as property for the username in the method
-   * {@link #authenticate(JsonObject, io.vertx.core.Handler)}.
-   * Defaults to {@link #DEFAULT_CREDENTIAL_USERNAME_FIELD}
+   * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_USERNAME_FIELD}
    * 
    * @param fieldName
    * @return
@@ -220,8 +205,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * Set the name of the field to be used as property for the password of credentials in the method
-   * {@link #authenticate(JsonObject, io.vertx.core.Handler)}.
-   * Defaults to {@link #DEFAULT_CREDENTIAL_PASSWORD_FIELD}
+   * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_PASSWORD_FIELD}
    * 
    * @param fieldName
    * @return
@@ -279,21 +263,6 @@ public interface MongoAuth extends AuthProvider {
   public String getSaltField();
 
   /**
-   * Get the {@link UserFactory} which is used to create instances of {@link User}
-   * 
-   * @return
-   */
-  public UserFactory getUserFactory();
-
-  /**
-   * The {@link UserFactory} to be used with the current instance.
-   * 
-   * @param userFactory
-   */
-  @Fluent
-  public MongoAuth setUserFactory(UserFactory userFactory);
-
-  /**
    * The HashStrategy which is used by the current instance
    * 
    * @param hashStrategy
@@ -307,5 +276,24 @@ public interface MongoAuth extends AuthProvider {
    * @return
    */
   public HashStrategy getHashStrategy();
+
+  /**
+   * Create a {@link User} with the given parameters
+   * 
+   * @param username
+   * @param password
+   * @param roles
+   * @param permissions
+   * @return
+   */
+  public User createUser(String username, String password, List<String> roles, List<String> permissions);
+
+  /**
+   * Create a {@link User} with the given JsonObject
+   * 
+   * @param principal
+   * @return
+   */
+  public User createUser(JsonObject principal);
 
 }
