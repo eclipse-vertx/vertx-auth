@@ -3,7 +3,6 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.AuthenticationException;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
@@ -147,15 +146,15 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
    * ################################################## preparation methods
    * ##################################################
    */
-  protected List<User> createUserList() {
-    List<User> users = new ArrayList<User>();
-    users.add(createUser("Michael", "ps1"));
-    users.add(createUser("Doublette", "ps1"));
-    users.add(createUser("Doublette", "ps2"));
-    users.add(createUser("Doublette", "ps2"));
+  protected List<InternalUser> createUserList() {
+    List<InternalUser> users = new ArrayList<InternalUser>();
+    users.add(new InternalUser("Michael", "ps1", null, null));
+    users.add(new InternalUser("Doublette", "ps1", null, null));
+    users.add(new InternalUser("Doublette", "ps2", null, null));
+    users.add(new InternalUser("Doublette", "ps2", null, null));
 
-    users.add(createUser("tim", "sausages", Arrays.asList("morris_dancer", "superadmin", "developer"),
-        Arrays.asList("commit_code", "merge_pr", "do_actual_work", "bang_sticks")));
+    users.add(new InternalUser("tim", "sausages", Arrays.asList("morris_dancer", "superadmin", "developer"), Arrays
+        .asList("commit_code", "merge_pr", "do_actual_work", "bang_sticks")));
     return users;
   }
 
@@ -179,10 +178,10 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
 
   private void initTestUsers() throws Exception {
     log.info("initTestUsers");
-    List<User> users = createUserList();
+    List<InternalUser> users = createUserList();
     CountDownLatch latch = new CountDownLatch(users.size());
 
-    for (User user : users) {
+    for (InternalUser user : users) {
       if (!initOneUser(user, latch))
         throw new InitializationError("could not create users");
     }
@@ -212,41 +211,6 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   }
 
   /**
-   * Creates a user as {@link JsonObject}
-   * 
-   * @param username
-   * @param password
-   * @return
-   */
-  protected User createUser(String username, String password) {
-    return createUser(username, password, null, null);
-  }
-
-  /**
-   * Creates a user as {@link JsonObject}
-   * 
-   * @param username
-   * @param password
-   * @return
-   */
-  protected User createUser(String username, String password, List<String> roles, List<String> permissions) {
-    User user = authProvider.createUser(username, password, roles, permissions);
-    String userpassword = user.principal().getString(authProvider.getPasswordField());
-
-    assertNotNull(userpassword);
-
-    switch (authProvider.getHashStrategy().getSaltStyle()) {
-    case NO_SALT:
-      assertSame(password, userpassword);
-      break;
-    default:
-      assertNotSame(password, userpassword);
-
-    }
-    return user;
-  }
-
-  /**
    * Creates a user inside mongo. Returns true, if user was successfully added
    * 
    * @param user
@@ -255,12 +219,13 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
    * @throws Exception
    * @throws Throwable
    */
-  private boolean initOneUser(User user, CountDownLatch latch) throws Exception {
+  private boolean initOneUser(InternalUser user, CountDownLatch latch) throws Exception {
     CountDownLatch intLatch = new CountDownLatch(1);
     final StringBuffer buffer = new StringBuffer();
-    getMongoService().save(authProvider.getCollectionName(), user.principal(), res -> {
+
+    authProvider.insertUser(user.username, user.password, user.roles, user.permissions, res -> {
       if (res.succeeded()) {
-        log.info("user added: " + user.principal().getString(authProvider.getUsernameField()));
+        log.info("user added: " + user.username);
         latch.countDown();
       } else {
         log.error("", res.cause());
@@ -278,4 +243,19 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
     return authInfo;
   }
 
+  class InternalUser {
+    String username;
+    String password;
+    List<String> roles;
+    List<String> permissions;
+
+    InternalUser(String username, String password, List<String> roles, List<String> permissions) {
+      this.username = username;
+      this.password = password;
+      this.roles = roles;
+      this.permissions = permissions;
+
+    }
+
+  }
 }

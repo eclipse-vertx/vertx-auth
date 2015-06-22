@@ -18,10 +18,11 @@ package io.vertx.ext.auth.mongo;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.impl.MongoAuthImpl;
 import io.vertx.ext.mongo.MongoClient;
@@ -266,6 +267,8 @@ public interface MongoAuth extends AuthProvider {
    * The HashStrategy which is used by the current instance
    * 
    * @param hashStrategy
+   *          the {@link HashStrategy} to be set
+   * 
    */
   @Fluent
   public MongoAuth setHashStrategy(HashStrategy hashStrategy);
@@ -273,27 +276,26 @@ public interface MongoAuth extends AuthProvider {
   /**
    * The HashStrategy which is used by the current instance
    * 
-   * @return
+   * @return the defined instance of {@link HashStrategy}
    */
   public HashStrategy getHashStrategy();
 
   /**
-   * Create a {@link User} with the given parameters
+   * Insert a new user into mongo in the convenient way
    * 
    * @param username
+   *          the username to be set
    * @param password
+   *          the passsword in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
    * @param roles
+   *          a list of roles to be set
    * @param permissions
+   *          a list of permissions to be set
+   * @param resultHandler
+   *          the ResultHandler will be provided with the id of the generated record
    * @return
    */
-  public User createUser(String username, String password, List<String> roles, List<String> permissions);
-
-  /**
-   * Create a {@link User} with the given JsonObject
-   * 
-   * @param principal
-   * @return
-   */
-  public User createUser(JsonObject principal);
+  public void insertUser(String username, String password, List<String> roles, List<String> permissions,
+      Handler<AsyncResult<String>> resultHandler);
 
 }

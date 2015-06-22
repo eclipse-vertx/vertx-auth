@@ -128,7 +128,7 @@ public class MongoAuthImpl implements MongoAuth {
     }
     case 1: {
       JsonObject json = resultList.result().get(0);
-      User user = createUser(json);
+      User user = new MongoUser(json, this);
       if (examinePassword(user, authToken))
         return user;
       else {
@@ -147,17 +147,15 @@ public class MongoAuthImpl implements MongoAuth {
     }
   }
 
-  /**
-   * Create a {@link MongoUser} with the given parameters
+  /*
+   * (non-Javadoc)
    * 
-   * @param username
-   * @param password
-   * @param roles
-   * @param permissions
-   * @return
+   * @see io.vertx.ext.auth.mongo.MongoAuth#insertUser(java.lang.String, java.lang.String, java.util.List,
+   * java.util.List, io.vertx.core.Handler)
    */
   @Override
-  public User createUser(String username, String password, List<String> roles, List<String> permissions) {
+  public void insertUser(String username, String password, List<String> roles, List<String> permissions,
+      Handler<AsyncResult<String>> resultHandler) {
     JsonObject principal = new JsonObject();
     principal.put(getUsernameField(), username);
 
@@ -168,7 +166,7 @@ public class MongoAuthImpl implements MongoAuth {
     if (permissions != null) {
       principal.put(MongoAuth.DEFAULT_PERMISSION_FIELD, new JsonArray(permissions));
     }
-    MongoUser user = (MongoUser) createUser(principal);
+    MongoUser user = new MongoUser(principal, this);
 
     if (getHashStrategy().getSaltStyle() == SaltStyle.COLUMN) {
       principal.put(getSaltField(), DefaultHashStrategy.generateSalt());
@@ -176,17 +174,8 @@ public class MongoAuthImpl implements MongoAuth {
 
     String cryptPassword = getHashStrategy().computeHash(password, user);
     principal.put(getPasswordField(), cryptPassword);
-    return user;
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see io.vertx.ext.auth.mongo.MongoAuth#createUser(io.vertx.core.json.JsonObject)
-   */
-  @Override
-  public User createUser(JsonObject principal) {
-    return new MongoUser(principal, this);
+    mongoClient.save(getCollectionName(), user.principal(), resultHandler);
   }
 
   /**
