@@ -43,7 +43,7 @@ var JDBCAuth = function(j_val) {
   this.setAuthenticationQuery = function(authenticationQuery) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return new JDBCAuth(j_jDBCAuth["setAuthenticationQuery(java.lang.String)"](authenticationQuery));
+      return utils.convReturnVertxGen(j_jDBCAuth["setAuthenticationQuery(java.lang.String)"](authenticationQuery), JDBCAuth);
     } else utils.invalidArgs();
   };
 
@@ -57,7 +57,7 @@ var JDBCAuth = function(j_val) {
   this.setRolesQuery = function(rolesQuery) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return new JDBCAuth(j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery));
+      return utils.convReturnVertxGen(j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery), JDBCAuth);
     } else utils.invalidArgs();
   };
 
@@ -71,7 +71,7 @@ var JDBCAuth = function(j_val) {
   this.setPermissionsQuery = function(permissionsQuery) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return new JDBCAuth(j_jDBCAuth["setPermissionsQuery(java.lang.String)"](permissionsQuery));
+      return utils.convReturnVertxGen(j_jDBCAuth["setPermissionsQuery(java.lang.String)"](permissionsQuery), JDBCAuth);
     } else utils.invalidArgs();
   };
 
@@ -85,7 +85,7 @@ var JDBCAuth = function(j_val) {
   this.setRolePrefix = function(rolePrefix) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return new JDBCAuth(j_jDBCAuth["setRolePrefix(java.lang.String)"](rolePrefix));
+      return utils.convReturnVertxGen(j_jDBCAuth["setRolePrefix(java.lang.String)"](rolePrefix), JDBCAuth);
     } else utils.invalidArgs();
   };
 
@@ -105,7 +105,7 @@ var JDBCAuth = function(j_val) {
 JDBCAuth.create = function(client) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return new JDBCAuth(JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel));
+    return utils.convReturnVertxGen(JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel), JDBCAuth);
   } else utils.invalidArgs();
 };
 

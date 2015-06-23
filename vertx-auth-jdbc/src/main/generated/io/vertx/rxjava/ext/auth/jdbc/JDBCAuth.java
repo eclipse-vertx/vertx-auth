@@ -94,6 +94,6 @@ public class JDBCAuth extends AuthProvider {
 
 
   public static JDBCAuth newInstance(io.vertx.ext.auth.jdbc.JDBCAuth arg) {
-    return new JDBCAuth(arg);
+    return arg != null ? new JDBCAuth(arg) : null;
   }
 }

@@ -102,6 +102,6 @@ public class User {
 
 
   public static User newInstance(io.vertx.ext.auth.User arg) {
-    return new User(arg);
+    return arg != null ? new User(arg) : null;
   }
 }

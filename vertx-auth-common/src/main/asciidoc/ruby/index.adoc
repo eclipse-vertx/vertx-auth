@@ -51,7 +51,7 @@ authInfo = {
   'password' => "mypassword"
 }
 
-authProvider.authenticate(authInfo) { |res,res_err|
+authProvider.authenticate(authInfo) { |res_err,res|
   if (res_err == nil)
 
     user = res
@@ -78,7 +78,7 @@ Here's an example of authorising a user:
 [source,java]
 ----
 
-user.is_authorised("printers:printer1234") { |res,res_err|
+user.is_authorised("printers:printer1234") { |res_err,res|
   if (res_err == nil)
 
     hasAuthority = res
