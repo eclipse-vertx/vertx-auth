@@ -74,12 +74,6 @@
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(String) }
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(String) }
  * 
- * === UserFactory
- * 
- * The method authenticate returns an instance of {@link io.vertx.ext.auth.User}. The implementation of {@link io.vertx.ext.auth.User}
- * can be changed by creating an own imeplementation of {@link io.vertx.ext.auth.mongo.UserFactory} and adding this into 
- * {@link io.vertx.ext.auth.mongo.MongoAuth#setUserFactory(UserFactory)}
- *
  * == Authorisation - Permission-Role Model
  *
  * Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this

@@ -57,8 +57,10 @@ public class DefaultHashStrategy implements HashStrategy {
     this.externalSalt = externalSalt;
   }
 
-  /* (non-Javadoc)
-   * @see io.vertx.ext.auth.mongo.HashStrategy#computeHash(java.lang.String, java.lang.String)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.HashStrategy#computeHash(java.lang.String, io.vertx.ext.auth.User)
    */
   @Override
   public String computeHash(String password, User user) {
@@ -74,16 +76,20 @@ public class DefaultHashStrategy implements HashStrategy {
     }
   }
 
-  /* (non-Javadoc)
-   * @see io.vertx.ext.auth.mongo.HashStrategy#getHashedStoredPwd()
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.HashStrategy#getStoredPwd(io.vertx.ext.auth.User)
    */
   @Override
   public String getStoredPwd(User user) {
     return ((MongoUser) user).getPassword();
   }
 
-  /* (non-Javadoc)
-   * @see io.vertx.ext.auth.mongo.HashStrategy#getSalt()
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.HashStrategy#getSalt(io.vertx.ext.auth.User)
    */
   @Override
   public String getSalt(User user) {
@@ -100,7 +106,9 @@ public class DefaultHashStrategy implements HashStrategy {
 
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.HashStrategy#setSaltStyle(io.vertx.ext.auth.mongo.HashStrategy.SaltStyle)
    */
   @Override
@@ -108,7 +116,9 @@ public class DefaultHashStrategy implements HashStrategy {
     this.saltStyle = saltStyle;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.HashStrategy#getSaltStyle()
    */
   @Override
@@ -130,7 +140,7 @@ public class DefaultHashStrategy implements HashStrategy {
   /**
    * Generate a salt
    * 
-   * @return
+   * @return the generated salt
    */
   public static String generateSalt() {
     final Random r = new SecureRandom();
@@ -149,7 +159,9 @@ public class DefaultHashStrategy implements HashStrategy {
     return new String(chars);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see io.vertx.ext.auth.mongo.HashStrategy#setExternalSalt(java.lang.String)
    */
   @Override

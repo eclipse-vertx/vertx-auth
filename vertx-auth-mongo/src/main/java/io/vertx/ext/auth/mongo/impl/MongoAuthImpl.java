@@ -19,7 +19,6 @@ package io.vertx.ext.auth.mongo.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -40,8 +39,6 @@ import java.util.List;
  */
 public class MongoAuthImpl implements MongoAuth {
   private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
-
-  private final Vertx vertx;
   private MongoClient mongoClient;
   private String usernameField = DEFAULT_USERNAME_FIELD;
   private String passwordField = DEFAULT_PASSWORD_FIELD;
@@ -57,10 +54,15 @@ public class MongoAuthImpl implements MongoAuth {
   private HashStrategy hashStrategy;
 
   /**
+   * Creates a new instance
    * 
+   * @param mongoClient
+   *          the {@link MongoClient} to be used
+   * @param config
+   *          the config for configuring the new instance
+   * @see MongoAuth#create(MongoClient, JsonObject)
    */
-  public MongoAuthImpl(Vertx vertx, MongoClient mongoClient, JsonObject config) {
-    this.vertx = vertx;
+  public MongoAuthImpl(MongoClient mongoClient, JsonObject config) {
     this.mongoClient = mongoClient;
     this.config = config;
     init();
@@ -181,7 +183,7 @@ public class MongoAuthImpl implements MongoAuth {
   /**
    * Examine the given user object. Returns true, if object fits the given authentication
    * 
-   * @param userObject
+   * @param user
    * @param authToken
    * @return
    */
@@ -192,9 +194,7 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   /**
-   * Initializes the current provider by using the defined config object
-   * 
-   * @param config
+   * Initializes the current provider by using the current config object
    */
   private void init() {
 
@@ -392,23 +392,43 @@ public class MongoAuthImpl implements MongoAuth {
     return saltField;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.MongoAuth#setPermissionField(java.lang.String)
+   */
   @Override
   public MongoAuth setPermissionField(String fieldName) {
     this.permissionField = fieldName;
     return this;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.MongoAuth#getPermissionField()
+   */
   @Override
   public String getPermissionField() {
     return this.permissionField;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.MongoAuth#setHashStrategy(io.vertx.ext.auth.mongo.HashStrategy)
+   */
   @Override
   public MongoAuth setHashStrategy(HashStrategy hashStrategy) {
     this.hashStrategy = hashStrategy;
     return this;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.auth.mongo.MongoAuth#getHashStrategy()
+   */
   @Override
   public HashStrategy getHashStrategy() {
     if (hashStrategy == null)

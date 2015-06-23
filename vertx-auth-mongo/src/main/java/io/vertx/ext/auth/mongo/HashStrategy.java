@@ -16,14 +16,16 @@
 
 package io.vertx.ext.auth.mongo;
 
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.User;
 
 /**
- * Determines how the hashing is computed in the implementation
- * You can implement this to provide a different hashing strategy to the default.
+ * Determines how the hashing is computed in the implementation You can implement this to provide a different hashing
+ * strategy to the default.
  *
  * @author mremme
  */
+@VertxGen
 public interface HashStrategy {
 
   /**
@@ -61,8 +63,8 @@ public interface HashStrategy {
   String getStoredPwd(User user);
 
   /**
-   * Retrieve the salt. The source of the salt can be the external salt or the propriate column of the
-   * given user, depending on the defined {@link SaltStyle}
+   * Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
+   * depending on the defined {@link SaltStyle}
    * 
    * @param user
    *          the user to get the salt for. This paramter is needed, if the {@link SaltStyle#COLUMN} is declared to be
@@ -75,6 +77,7 @@ public interface HashStrategy {
    * Set an external salt. This method should be used in case of {@link SaltStyle#EXTERNAL}
    * 
    * @param salt
+   *          the salt, which shall be used
    */
   void setExternalSalt(String salt);
 
@@ -82,6 +85,7 @@ public interface HashStrategy {
    * Set the saltstyle as defined by {@link SaltStyle}.
    * 
    * @param saltStyle
+   *          the {@link SaltStyle} to be used
    */
   public void setSaltStyle(SaltStyle saltStyle);
 

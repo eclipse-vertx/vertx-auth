@@ -30,7 +30,7 @@ public class Examples {
   public void example1(Vertx vertx, JsonObject mongoClientConfig) {
     MongoClient client = MongoClient.createShared(vertx, mongoClientConfig);
     JsonObject authProperties = new JsonObject();
-    MongoAuth authProvider = MongoAuth.create(vertx, client, authProperties);
+    MongoAuth authProvider = MongoAuth.create(client, authProperties);
   }
 
   public void example2(MongoAuth authProvider) {

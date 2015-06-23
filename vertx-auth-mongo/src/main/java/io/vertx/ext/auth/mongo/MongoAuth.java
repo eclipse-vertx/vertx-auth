@@ -20,9 +20,9 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.impl.MongoAuthImpl;
 import io.vertx.ext.mongo.MongoClient;
@@ -85,11 +85,6 @@ public interface MongoAuth extends AuthProvider {
   String PROPERTY_SALT_STYLE = "saltStyle";
 
   /**
-   * The property name to be used to set the name of the field, where the permissionsLookupEnabled is stored inside
-   */
-  String PROPERTY_PERMISSIONLOOKUP_ENABLED = "permissionsLookupEnabled";
-
-  /**
    * The default name of the collection to be used
    */
   String DEFAULT_COLLECTION_NAME = "user";
@@ -118,13 +113,13 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * The default name of the property for the username, like it is transported in credentials by method
-   * {@link #init(JsonObject)}
+   * {@link #authenticate(JsonObject, Handler)}
    */
   String DEFAULT_CREDENTIAL_USERNAME_FIELD = DEFAULT_USERNAME_FIELD;
 
   /**
    * The default name of the property for the password, like it is transported in credentials by method
-   * {@link #init(JsonObject)}
+   * {@link #authenticate(JsonObject, Handler)}
    */
   String DEFAULT_CREDENTIAL_PASSWORD_FIELD = DEFAULT_PASSWORD_FIELD;
 
@@ -133,63 +128,78 @@ public interface MongoAuth extends AuthProvider {
    */
   String DEFAULT_SALT_FIELD = "salt";
 
+  /**
+   * The prefix which is used by the method {@link User#isAuthorised(String, Handler)} when checking for role access
+   */
   String ROLE_PREFIX = "role:";
 
   /**
-   * Creates an instance of MongoAuth
+   * Creates an instance of MongoAuth by using the given {@link MongoClient} and configuration object. An example for a
+   * configuration object:
    * 
-   * @param vertx
+   * <pre>
+   * JsonObject js = new JsonObject();
+   * js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
+   * </pre>
+   * 
    * @param mongoClient
+   *          an instance of {@link MongoClient} to be used for data storage and retrival
    * @param config
-   * @return
+   *          the configuration object for the current instance. By this
+   * @return the created instance of {@link MongoAuth}s
    */
-  public static MongoAuth create(Vertx vertx, MongoClient mongoClient, JsonObject config) {
-    return new MongoAuthImpl(vertx, mongoClient, config);
+  public static MongoAuth create(MongoClient mongoClient, JsonObject config) {
+    return new MongoAuthImpl(mongoClient, config);
   }
 
   /**
-   * Set the name of the collection to be used. Defaults to DEFAULT_COLLECTION_NAME
+   * Set the name of the collection to be used. Defaults to {@link #DEFAULT_COLLECTION_NAME}
    * 
    * @param collectionName
-   * @return
+   *          the name of the collection to be used for storing and reading user data
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setCollectionName(String collectionName);
 
   /**
-   * Set the name of the field to be used for the username. Defaults to DEFAULT_USERNAME_FIELD
+   * Set the name of the field to be used for the username. Defaults to {@link #DEFAULT_USERNAME_FIELD}
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setUsernameField(String fieldName);
 
   /**
-   * Set the name of the field to be used for the password Defaults to DEFAULT_PASSWORD_FIELD
+   * Set the name of the field to be used for the password Defaults to {@link #DEFAULT_PASSWORD_FIELD}
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setPasswordField(String fieldName);
 
   /**
-   * Set the name of the field to be used for the roles. Defaults to DEFAULT_ROLE_FIELD. Roles are expected to be saved
-   * as JsonArray
+   * Set the name of the field to be used for the roles. Defaults to {@link #DEFAULT_ROLE_FIELD}. Roles are expected to
+   * be saved as JsonArray
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setRoleField(String fieldName);
 
   /**
-   * Set the name of the field to be used for the permissions. Defaults to DEFAULT_PERMISSION_FIELD. Permissions are
-   * expected to be saved as JsonArray
+   * Set the name of the field to be used for the permissions. Defaults to {@link #DEFAULT_PERMISSION_FIELD}.
+   * Permissions are expected to be saved as JsonArray
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setPermissionField(String fieldName);
@@ -199,7 +209,8 @@ public interface MongoAuth extends AuthProvider {
    * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_USERNAME_FIELD}
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setUsernameCredentialField(String fieldName);
@@ -209,56 +220,80 @@ public interface MongoAuth extends AuthProvider {
    * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_PASSWORD_FIELD}
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setPasswordCredentialField(String fieldName);
 
   /**
-   * Set the name of the field to be used for the salt ( if needed )
+   * Set the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(SaltStyle)} is
+   * set to {@link SaltStyle#COLUMN}
    * 
    * @param fieldName
-   * @return
+   *          the name of the field to be used
+   * @return the current instance itself for fluent calls
    */
   @Fluent
   public MongoAuth setSaltField(String fieldName);
 
   /**
+   * The name of the collection used to store User objects inside. Defaults to {@link #DEFAULT_COLLECTION_NAME}
+   * 
    * @return the collectionName
    */
   public String getCollectionName();
 
   /**
+   * Get the name of the field to be used for the username. Defaults to {@link #DEFAULT_USERNAME_FIELD}
+   * 
    * @return the usernameField
    */
   public String getUsernameField();
 
   /**
+   * Get the name of the field to be used for the password Defaults to {@link #DEFAULT_PASSWORD_FIELD}
+   * 
    * @return the passwordField
    */
   public String getPasswordField();
 
   /**
+   * Get the name of the field to be used for the roles. Defaults to {@link #DEFAULT_ROLE_FIELD}. Roles are expected to
+   * be saved as JsonArray
+   * 
    * @return the roleField
    */
   public String getRoleField();
 
   /**
+   * Get the name of the field to be used for the permissions. Defaults to {@link #DEFAULT_PERMISSION_FIELD}.
+   * Permissions are expected to be saved as JsonArray
+   * 
    * @return the permissionField
    */
   public String getPermissionField();
 
   /**
+   * Get the name of the field to be used as property for the username in the method
+   * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_USERNAME_FIELD}
+   * 
    * @return the usernameCredentialField
    */
   public String getUsernameCredentialField();
 
   /**
+   * Get the name of the field to be used as property for the password of credentials in the method
+   * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_PASSWORD_FIELD}
+   * 
    * @return the passwordCredentialField
    */
   public String getPasswordCredentialField();
 
   /**
+   * Get the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(SaltStyle)} is
+   * set to {@link SaltStyle#COLUMN}
+   * 
    * @return the saltField
    */
   public String getSaltField();
@@ -268,6 +303,7 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @param hashStrategy
    *          the {@link HashStrategy} to be set
+   * @return the current instance itself for fluent calls
    * 
    */
   @Fluent
@@ -293,7 +329,6 @@ public interface MongoAuth extends AuthProvider {
    *          a list of permissions to be set
    * @param resultHandler
    *          the ResultHandler will be provided with the id of the generated record
-   * @return
    */
   public void insertUser(String username, String password, List<String> roles, List<String> permissions,
       Handler<AsyncResult<String>> resultHandler);

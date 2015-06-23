@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
+
 package io.vertx.ext.auth.mongo.test;
 
 import io.vertx.core.json.JsonObject;
@@ -43,7 +59,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    getMongoService();
+    getMongoClient();
     initAuthService();
     initDemoData();
   }
@@ -161,7 +177,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
   protected void initAuthService() throws Exception {
     if (authProvider == null) {
       log.info("initAuthService");
-      authProvider = MongoAuth.create(vertx, getMongoService(), createAuthServiceConfig());
+      authProvider = MongoAuth.create(getMongoClient(), createAuthServiceConfig());
     }
   }
 
@@ -196,7 +212,7 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
     CountDownLatch intLatch = new CountDownLatch(1);
     String collectionName = authProvider.getCollectionName();
     log.info("verifyUserData in " + collectionName);
-    getMongoService().find(collectionName, new JsonObject(), res -> {
+    getMongoClient().find(collectionName, new JsonObject(), res -> {
       if (res.succeeded()) {
         log.info(res.result().size() + " users found: " + res.result());
 
@@ -237,6 +253,15 @@ public class MongoAuthTestNO_SALT extends MongoBaseTest {
     return buffer.length() == 0;
   }
 
+  /**
+   * Creates JsonObject for login in the convenient way
+   * 
+   * @param username
+   *          the username to be used
+   * @param password
+   *          the password to be used
+   * @return a {@link JsonObject} with valid parameters
+   */
   public JsonObject createAuthInfo(String username, String password) {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authProvider.getUsernameField(), username).put(authProvider.getPasswordField(), password);
