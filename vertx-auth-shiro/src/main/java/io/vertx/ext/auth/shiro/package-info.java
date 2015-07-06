@@ -18,7 +18,26 @@
  *
  * == The Apache Shiro Auth provider implementation
  *
- * This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].
+ * This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].  To use this
+ * project, add the following dependency to the _dependencies_ section of your build descriptor:
+ *
+ * * Maven (in your `pom.xml`):
+ *
+ * [source,xml,subs="+attributes"]
+ * ----
+ * <dependency>
+ *   <groupId>{maven-groupId}</groupId>
+ *   <artifactId>{maven-artifactId}</artifactId>
+ *   <version>{maven-version}</version>
+ * </dependency>
+ * ----
+ *
+ * * Gradle (in your `build.gradle` file):
+ *
+ * [source,groovy,subs="+attributes"]
+ * ----
+ * compile {maven-groupId}:{maven-artifactId}:{maven-version}
+ * ----
  *
  * We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
  * other Shiro Realm which expects username and password for credentials.

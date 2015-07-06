@@ -17,10 +17,30 @@
 /**
  * = Vert.x Auth - Authentication and Authorisation
  *
- * This Vert.x component provides interfaces for authentication and authorisation that can be used from your Vert.x
- * applications and can be backed by different providers.
+ * This Vert.x component provides interfaces for authentication and authorisation that can be used from
+ * your Vert.x applications and can be backed by different providers.
  *
  * Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
+ *
+ * To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
+ *
+ * * Maven (in your `pom.xml`):
+ *
+ * [source,xml,subs="+attributes"]
+ * ----
+ * <dependency>
+ *   <groupId>{maven-groupId}</groupId>
+ *   <artifactId>{maven-artifactId}</artifactId>
+ *   <version>{maven-version}</version>
+ * </dependency>
+ * ----
+ *
+ * * Gradle (in your `build.gradle` file):
+ *
+ * [source,groovy,subs="+attributes"]
+ * ----
+ * compile {maven-groupId}:{maven-artifactId}:{maven-version}
+ * ----
  *
  * == Basic concepts
  *

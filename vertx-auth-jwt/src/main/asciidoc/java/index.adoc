@@ -2,11 +2,33 @@
 
 This component contains an out of the box a JWT implementation.
 
-JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be verified to
+To use this project, add the following
+dependency to the _dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>{maven-groupId}</groupId>
+  <artifactId>{maven-artifactId}</artifactId>
+  <version>{maven-version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile {maven-groupId}:{maven-artifactId}:{maven-version}
+----
+
+JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
+verified to
 be trusted. JWT are well suited for scenarios as:
 
-* In a Single Sign-On scenario where you want a separate authentication server that can then send user information in
-  a trusted way.
+* In a Single Sign-On scenario where you want a separate authentication server that can then send user
+information in a trusted way.
 * Stateless API servers, very well suited for sinple page applications.
 * etc...
 
