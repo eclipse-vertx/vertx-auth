@@ -117,7 +117,7 @@ public class MongoAuthImpl implements MongoAuth {
    * Examine the selection of found users and return one, if password is fitting,
    * 
    * @param resultList
-   * @param username
+   * @param authToken
    * @return
    */
   private User handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
@@ -441,7 +441,7 @@ public class MongoAuthImpl implements MongoAuth {
    * 
    * @author mremme
    */
-  class AuthToken {
+  static class AuthToken {
     String username;
     String password;
 

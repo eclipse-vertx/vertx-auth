@@ -24,10 +24,10 @@ import io.vertx.groovy.ext.auth.AuthProvider
 */
 @CompileStatic
 public class JDBCAuth extends AuthProvider {
-  final def io.vertx.ext.auth.jdbc.JDBCAuth delegate;
-  public JDBCAuth(io.vertx.ext.auth.jdbc.JDBCAuth delegate) {
-    super(delegate);
-    this.delegate = delegate;
+  private final def io.vertx.ext.auth.jdbc.JDBCAuth delegate;
+  public JDBCAuth(Object delegate) {
+    super((io.vertx.ext.auth.jdbc.JDBCAuth) delegate);
+    this.delegate = (io.vertx.ext.auth.jdbc.JDBCAuth) delegate;
   }
   public Object getDelegate() {
     return delegate;
@@ -38,7 +38,7 @@ public class JDBCAuth extends AuthProvider {
    * @return the auth provider
    */
   public static JDBCAuth create(JDBCClient client) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jdbc.JDBCAuth.create((io.vertx.ext.jdbc.JDBCClient)client.getDelegate()), io.vertx.ext.auth.jdbc.JDBCAuth.class, io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jdbc.JDBCAuth.create((io.vertx.ext.jdbc.JDBCClient)client.getDelegate()), io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
     return ret;
   }
   /**
@@ -47,7 +47,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setAuthenticationQuery(String authenticationQuery) {
-    def ret= InternalHelper.safeCreate(this.delegate.setAuthenticationQuery(authenticationQuery), io.vertx.ext.auth.jdbc.JDBCAuth.class, io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
+    def ret= InternalHelper.safeCreate(this.delegate.setAuthenticationQuery(authenticationQuery), io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
     return ret;
   }
   /**
@@ -56,7 +56,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setRolesQuery(String rolesQuery) {
-    def ret= InternalHelper.safeCreate(this.delegate.setRolesQuery(rolesQuery), io.vertx.ext.auth.jdbc.JDBCAuth.class, io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
+    def ret= InternalHelper.safeCreate(this.delegate.setRolesQuery(rolesQuery), io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
     return ret;
   }
   /**
@@ -65,7 +65,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setPermissionsQuery(String permissionsQuery) {
-    def ret= InternalHelper.safeCreate(this.delegate.setPermissionsQuery(permissionsQuery), io.vertx.ext.auth.jdbc.JDBCAuth.class, io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
+    def ret= InternalHelper.safeCreate(this.delegate.setPermissionsQuery(permissionsQuery), io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
     return ret;
   }
   /**
@@ -74,7 +74,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setRolePrefix(String rolePrefix) {
-    def ret= InternalHelper.safeCreate(this.delegate.setRolePrefix(rolePrefix), io.vertx.ext.auth.jdbc.JDBCAuth.class, io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
+    def ret= InternalHelper.safeCreate(this.delegate.setRolePrefix(rolePrefix), io.vertx.groovy.ext.auth.jdbc.JDBCAuth.class);
     return ret;
   }
 }

@@ -26,9 +26,9 @@ import io.vertx.core.Handler
 */
 @CompileStatic
 public class AuthProvider {
-  final def io.vertx.ext.auth.AuthProvider delegate;
-  public AuthProvider(io.vertx.ext.auth.AuthProvider delegate) {
-    this.delegate = delegate;
+  private final def io.vertx.ext.auth.AuthProvider delegate;
+  public AuthProvider(Object delegate) {
+    this.delegate = (io.vertx.ext.auth.AuthProvider) delegate;
   }
   public Object getDelegate() {
     return delegate;

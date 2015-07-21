@@ -16,12 +16,8 @@
 
 package io.vertx.ext.auth.mongo.test;
 
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.mongo.MongoService;
 import io.vertx.test.core.VertxTestBase;
 
 import java.util.ArrayList;
@@ -45,7 +41,6 @@ import de.flapdoodle.embed.process.runtime.Network;
  */
 
 public abstract class MongoBaseTest extends VertxTestBase {
-  private static final Logger log = LoggerFactory.getLogger(MongoBaseTest.class);
 
   public static final String TABLE_PREFIX = "TestMongo_";
 
@@ -120,14 +115,10 @@ public abstract class MongoBaseTest extends VertxTestBase {
   }
 
   private void initMongoClient() throws Exception {
-    JsonObject config = getConfig();
-
-    DeploymentOptions options = new DeploymentOptions().setConfig(config);
     CountDownLatch latch = new CountDownLatch(1);
-    vertx.deployVerticle("service:io.vertx.mongo-service", options, onSuccess(id -> {
-      mongoClient = MongoService.createEventBusProxy(vertx, "vertx.mongo");
-      dropCollections(latch);
-    }));
+    System.out.println(getConfig().encode());
+    mongoClient = MongoClient.createShared(vertx, getConfig());
+    dropCollections(latch);
     awaitLatch(latch);
   }
 

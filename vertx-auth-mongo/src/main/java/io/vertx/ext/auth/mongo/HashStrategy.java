@@ -37,9 +37,9 @@ public interface HashStrategy {
    * </li>
    * </ul>
    */
-  public enum SaltStyle {
-    NO_SALT, COLUMN, EXTERNAL;
-  };
+  enum SaltStyle {
+    NO_SALT, COLUMN, EXTERNAL
+  }
 
   /**
    * Compute the hashed password given the unhashed password and the user
@@ -87,13 +87,13 @@ public interface HashStrategy {
    * @param saltStyle
    *          the {@link SaltStyle} to be used
    */
-  public void setSaltStyle(SaltStyle saltStyle);
+  void setSaltStyle(SaltStyle saltStyle);
 
   /**
    * Get the defined {@link SaltStyle} of the current instance
    * 
    * @return the saltStyle
    */
-  public SaltStyle getSaltStyle();
+  SaltStyle getSaltStyle();
 
 }

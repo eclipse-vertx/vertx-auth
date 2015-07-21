@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runners.model.InitializationError;
 
@@ -38,23 +36,10 @@ import org.junit.runners.model.InitializationError;
  * @author mremme
  */
 
-public class MongoAuthTestNO_SALT extends MongoBaseTest {
-  private static final Logger log = LoggerFactory.getLogger(MongoAuthTestNO_SALT.class);
+public class MongoAuthNO_SALTTest extends MongoBaseTest {
+  private static final Logger log = LoggerFactory.getLogger(MongoAuthNO_SALTTest.class);
 
   protected MongoAuth authProvider;
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    System.setProperty("connection_string", "mongodb://localhost:27017");
-    System.setProperty("db_name", "TestDatabase");
-
-    MongoBaseTest.startMongo();
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    MongoBaseTest.stopMongo();
-  }
 
   @Override
   public void setUp() throws Exception {

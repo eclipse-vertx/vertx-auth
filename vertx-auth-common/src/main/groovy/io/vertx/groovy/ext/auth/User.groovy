@@ -27,9 +27,9 @@ import io.vertx.core.Handler
 */
 @CompileStatic
 public class User {
-  final def io.vertx.ext.auth.User delegate;
-  public User(io.vertx.ext.auth.User delegate) {
-    this.delegate = delegate;
+  private final def io.vertx.ext.auth.User delegate;
+  public User(Object delegate) {
+    this.delegate = (io.vertx.ext.auth.User) delegate;
   }
   public Object getDelegate() {
     return delegate;

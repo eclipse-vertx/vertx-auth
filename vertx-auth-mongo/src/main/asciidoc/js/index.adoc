@@ -1,0 +1,104 @@
+== Mongo Auth Provider implementation
+
+We provide an implementation of `link:../../vertx-auth-common/js/jsdoc/auth_provider-AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-mongo-client/js/jsdoc/mongo_client-MongoClient.html[MongoClient]`
+to perform authentication and authorisation against a MongoDb.
+
+To create an instance you first need an instance of `link:../../vertx-mongo-client/js/jsdoc/mongo_client-MongoClient.html[MongoClient]`. To learn how to create one
+of those please consult the documentation for the MongoClient.
+
+Once you've got one of those you can create a `link:jsdoc/mongo_auth-MongoAuth.html[MongoAuth]` instance as follows:
+
+[source,java]
+----
+var MongoClient = require("vertx-mongo-js/mongo_client");
+var MongoAuth = require("vertx-auth-mongo-js/mongo_auth");
+var client = MongoClient.createShared(vertx, mongoClientConfig);
+var authProperties = {
+};
+var authProvider = MongoAuth.create(client, authProperties);
+
+----
+
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../vertx-auth-common/js/jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
+
+The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username" 
+some others. You can easily change those defaults with the operations 
+`link:jsdoc/mongo_auth-MongoAuth.html#setCollectionName[setCollectionName]`
+`link:jsdoc/mongo_auth-MongoAuth.html#setUsernameField[setUsernameField]`
+`link:jsdoc/mongo_auth-MongoAuth.html#setPasswordField[setPasswordField]`
+`link:jsdoc/mongo_auth-MongoAuth.html#setPermissionField[setPermissionField]`
+`link:jsdoc/mongo_auth-MongoAuth.html#setRoleField[setRoleField]`
+if you want to adapt that to your needs.
+
+The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
+concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
+stored can be set by `link:jsdoc/mongo_auth-MongoAuth.html#setSaltField[setSaltField]`, the default is "salt".
+You are able to change this behaviour by using `link:jsdoc/hash_strategy-HashStrategy.html#setSaltStyle[setSaltStyle]`.
+The HashStrategy you can retrieve by  `link:jsdoc/mongo_auth-MongoAuth.html#getHashStrategy[getHashStrategy]`.
+By using this, you are able to set:
+`link:todo[NO_SALT]` by which passwords are not crypted and stored 
+in cleartext. ( see the warning below! )
+`link:todo[COLUMN]`, which will create a salt per user and store this
+inside the defined column of the user. ( see the warning below! )
+`link:todo[EXTERNAL]`, which will store only the crypted password in the 
+database and will use a salt from external, which you will have to set by `link:jsdoc/hash_strategy-HashStrategy.html#setExternalSalt[setExternalSalt]`
+
+If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
+ `link:jsdoc/mongo_auth-MongoAuth.html#setHashStrategy[setHashStrategy]`
+
+WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option. 
+The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
+salt and password are stored inside the same place!
+
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+Code not translatable
+----
+You are able to modify the credential fields by using the methods
+`link:jsdoc/mongo_auth-MongoAuth.html#setUsernameCredentialField[setUsernameCredentialField]`
+`link:jsdoc/mongo_auth-MongoAuth.html#setPasswordCredentialField[setPasswordCredentialField]`
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../vertx-auth-common/js/jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
+
+[source,java]
+----
+
+user.isAuthorised("commit_code", function (res, res_err) {
+  if (res_err == null) {
+    var hasPermission = res;
+  } else {
+    // Failed to
+  }
+});
+
+
+----
+
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+var MongoAuth = require("vertx-auth-mongo-js/mongo_auth");
+
+user.isAuthorised(MongoAuth.ROLE_PREFIX + "manager", function (res, res_err) {
+  if (res_err == null) {
+    var hasRole = res;
+  } else {
+    // Failed to
+  }
+});
+
+
+----

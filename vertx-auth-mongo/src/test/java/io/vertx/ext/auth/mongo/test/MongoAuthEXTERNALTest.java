@@ -27,9 +27,9 @@ import io.vertx.ext.auth.mongo.impl.DefaultHashStrategy;
  * @author mremme
  */
 
-public class MongoAuthTest_EXTERNAL extends MongoAuthTestNO_SALT {
+public class MongoAuthEXTERNALTest extends MongoAuthNO_SALTTest {
 
-  public MongoAuthTest_EXTERNAL() {
+  public MongoAuthEXTERNALTest() {
   }
 
   @Override

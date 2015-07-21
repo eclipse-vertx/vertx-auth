@@ -148,7 +148,7 @@ public interface MongoAuth extends AuthProvider {
    *          the configuration object for the current instance. By this
    * @return the created instance of {@link MongoAuth}s
    */
-  public static MongoAuth create(MongoClient mongoClient, JsonObject config) {
+  static MongoAuth create(MongoClient mongoClient, JsonObject config) {
     return new MongoAuthImpl(mongoClient, config);
   }
 
@@ -160,7 +160,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setCollectionName(String collectionName);
+  MongoAuth setCollectionName(String collectionName);
 
   /**
    * Set the name of the field to be used for the username. Defaults to {@link #DEFAULT_USERNAME_FIELD}
@@ -170,7 +170,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setUsernameField(String fieldName);
+  MongoAuth setUsernameField(String fieldName);
 
   /**
    * Set the name of the field to be used for the password Defaults to {@link #DEFAULT_PASSWORD_FIELD}
@@ -180,7 +180,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setPasswordField(String fieldName);
+  MongoAuth setPasswordField(String fieldName);
 
   /**
    * Set the name of the field to be used for the roles. Defaults to {@link #DEFAULT_ROLE_FIELD}. Roles are expected to
@@ -191,7 +191,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setRoleField(String fieldName);
+  MongoAuth setRoleField(String fieldName);
 
   /**
    * Set the name of the field to be used for the permissions. Defaults to {@link #DEFAULT_PERMISSION_FIELD}.
@@ -202,7 +202,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setPermissionField(String fieldName);
+  MongoAuth setPermissionField(String fieldName);
 
   /**
    * Set the name of the field to be used as property for the username in the method
@@ -213,7 +213,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setUsernameCredentialField(String fieldName);
+  MongoAuth setUsernameCredentialField(String fieldName);
 
   /**
    * Set the name of the field to be used as property for the password of credentials in the method
@@ -224,7 +224,7 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setPasswordCredentialField(String fieldName);
+  MongoAuth setPasswordCredentialField(String fieldName);
 
   /**
    * Set the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(SaltStyle)} is
@@ -235,28 +235,28 @@ public interface MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   @Fluent
-  public MongoAuth setSaltField(String fieldName);
+  MongoAuth setSaltField(String fieldName);
 
   /**
    * The name of the collection used to store User objects inside. Defaults to {@link #DEFAULT_COLLECTION_NAME}
    * 
    * @return the collectionName
    */
-  public String getCollectionName();
+  String getCollectionName();
 
   /**
    * Get the name of the field to be used for the username. Defaults to {@link #DEFAULT_USERNAME_FIELD}
    * 
    * @return the usernameField
    */
-  public String getUsernameField();
+  String getUsernameField();
 
   /**
    * Get the name of the field to be used for the password Defaults to {@link #DEFAULT_PASSWORD_FIELD}
    * 
    * @return the passwordField
    */
-  public String getPasswordField();
+  String getPasswordField();
 
   /**
    * Get the name of the field to be used for the roles. Defaults to {@link #DEFAULT_ROLE_FIELD}. Roles are expected to
@@ -264,7 +264,7 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @return the roleField
    */
-  public String getRoleField();
+  String getRoleField();
 
   /**
    * Get the name of the field to be used for the permissions. Defaults to {@link #DEFAULT_PERMISSION_FIELD}.
@@ -272,7 +272,7 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @return the permissionField
    */
-  public String getPermissionField();
+  String getPermissionField();
 
   /**
    * Get the name of the field to be used as property for the username in the method
@@ -280,7 +280,7 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @return the usernameCredentialField
    */
-  public String getUsernameCredentialField();
+  String getUsernameCredentialField();
 
   /**
    * Get the name of the field to be used as property for the password of credentials in the method
@@ -288,7 +288,7 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @return the passwordCredentialField
    */
-  public String getPasswordCredentialField();
+  String getPasswordCredentialField();
 
   /**
    * Get the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(SaltStyle)} is
@@ -296,7 +296,7 @@ public interface MongoAuth extends AuthProvider {
    * 
    * @return the saltField
    */
-  public String getSaltField();
+  String getSaltField();
 
   /**
    * The HashStrategy which is used by the current instance
@@ -307,14 +307,14 @@ public interface MongoAuth extends AuthProvider {
    * 
    */
   @Fluent
-  public MongoAuth setHashStrategy(HashStrategy hashStrategy);
+  MongoAuth setHashStrategy(HashStrategy hashStrategy);
 
   /**
    * The HashStrategy which is used by the current instance
    * 
    * @return the defined instance of {@link HashStrategy}
    */
-  public HashStrategy getHashStrategy();
+  HashStrategy getHashStrategy();
 
   /**
    * Insert a new user into mongo in the convenient way
@@ -330,7 +330,7 @@ public interface MongoAuth extends AuthProvider {
    * @param resultHandler
    *          the ResultHandler will be provided with the id of the generated record
    */
-  public void insertUser(String username, String password, List<String> roles, List<String> permissions,
+  void insertUser(String username, String password, List<String> roles, List<String> permissions,
       Handler<AsyncResult<String>> resultHandler);
 
 }

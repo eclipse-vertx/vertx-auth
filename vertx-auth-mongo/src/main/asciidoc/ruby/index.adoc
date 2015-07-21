@@ -1,0 +1,104 @@
+== Mongo Auth Provider implementation
+
+We provide an implementation of `link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-mongo-client/ruby/yardoc/VertxMongo/MongoClient.html[MongoClient]`
+to perform authentication and authorisation against a MongoDb.
+
+To create an instance you first need an instance of `link:../../vertx-mongo-client/ruby/yardoc/VertxMongo/MongoClient.html[MongoClient]`. To learn how to create one
+of those please consult the documentation for the MongoClient.
+
+Once you've got one of those you can create a `link:yardoc/VertxAuthMongo/MongoAuth.html[MongoAuth]` instance as follows:
+
+[source,java]
+----
+require 'vertx-mongo/mongo_client'
+require 'vertx-auth-mongo/mongo_auth'
+client = VertxMongo::MongoClient.create_shared(vertx, mongoClientConfig)
+authProperties = {
+}
+authProvider = VertxAuthMongo::MongoAuth.create(client, authProperties)
+
+----
+
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]`.
+
+The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username" 
+some others. You can easily change those defaults with the operations 
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_collection_name-instance_method[setCollectionName]`
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_username_field-instance_method[setUsernameField]`
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_password_field-instance_method[setPasswordField]`
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_permission_field-instance_method[setPermissionField]`
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_role_field-instance_method[setRoleField]`
+if you want to adapt that to your needs.
+
+The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
+concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
+stored can be set by `link:yardoc/VertxAuthMongo/MongoAuth.html#set_salt_field-instance_method[setSaltField]`, the default is "salt".
+You are able to change this behaviour by using `link:yardoc/VertxAuthMongo/HashStrategy.html#set_salt_style-instance_method[setSaltStyle]`.
+The HashStrategy you can retrieve by  `link:yardoc/VertxAuthMongo/MongoAuth.html#get_hash_strategy-instance_method[getHashStrategy]`.
+By using this, you are able to set:
+`link:todo[NO_SALT]` by which passwords are not crypted and stored 
+in cleartext. ( see the warning below! )
+`link:todo[COLUMN]`, which will create a salt per user and store this
+inside the defined column of the user. ( see the warning below! )
+`link:todo[EXTERNAL]`, which will store only the crypted password in the 
+database and will use a salt from external, which you will have to set by `link:yardoc/VertxAuthMongo/HashStrategy.html#set_external_salt-instance_method[setExternalSalt]`
+
+If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
+ `link:yardoc/VertxAuthMongo/MongoAuth.html#set_hash_strategy-instance_method[setHashStrategy]`
+
+WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option. 
+The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
+salt and password are stored inside the same place!
+
+== Authentication
+
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the
+authentication info:
+
+[source,java]
+----
+Code not translatable
+----
+You are able to modify the credential fields by using the methods
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_username_credential_field-instance_method[setUsernameCredentialField]`
+`link:yardoc/VertxAuthMongo/MongoAuth.html#set_password_credential_field-instance_method[setPasswordCredentialField]`
+
+== Authorisation - Permission-Role Model
+
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
+implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
+can have zero or more permissions.
+
+If validating if a user has a particular permission simply pass the permission into.
+`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
+
+[source,java]
+----
+
+user.is_authorised("commit_code") { |res_err,res|
+  if (res_err == nil)
+    hasPermission = res
+  else
+    # Failed to
+  end
+}
+
+
+----
+
+If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+
+[source,java]
+----
+require 'vertx-auth-mongo/mongo_auth'
+
+user.is_authorised("#{VertxAuthMongo::MongoAuth::ROLE_PREFIX}manager") { |res_err,res|
+  if (res_err == nil)
+    hasRole = res
+  else
+    # Failed to
+  end
+}
+
+
+----

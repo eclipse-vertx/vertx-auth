@@ -26,9 +26,9 @@ import io.vertx.ext.auth.mongo.MongoAuth;
  * @author mremme
  */
 
-public class MongoAuthTest_COLUMN extends MongoAuthTestNO_SALT {
+public class MongoAuthCOLUMNTest extends MongoAuthNO_SALTTest {
 
-  public MongoAuthTest_COLUMN() {
+  public MongoAuthCOLUMNTest() {
   }
 
   @Override

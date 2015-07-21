@@ -26,10 +26,10 @@ import io.vertx.groovy.ext.auth.AuthProvider
 */
 @CompileStatic
 public class JWTAuth extends AuthProvider {
-  final def io.vertx.ext.auth.jwt.JWTAuth delegate;
-  public JWTAuth(io.vertx.ext.auth.jwt.JWTAuth delegate) {
-    super(delegate);
-    this.delegate = delegate;
+  private final def io.vertx.ext.auth.jwt.JWTAuth delegate;
+  public JWTAuth(Object delegate) {
+    super((io.vertx.ext.auth.jwt.JWTAuth) delegate);
+    this.delegate = (io.vertx.ext.auth.jwt.JWTAuth) delegate;
   }
   public Object getDelegate() {
     return delegate;
@@ -41,7 +41,7 @@ public class JWTAuth extends AuthProvider {
    * @return the auth provider
    */
   public static JWTAuth create(Vertx vertx, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.ext.auth.jwt.JWTAuth.class, io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
     return ret;
   }
   /**
