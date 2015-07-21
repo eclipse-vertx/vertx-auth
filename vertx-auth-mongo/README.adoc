@@ -1,0 +1,6 @@
+# Vert.x Mongo Auth
+
+This module contains contains a Vert.x auth implementation which uses a Vert.x mongo client to query 
+user/role/permission information.
+
+Please see the documentation for more information.
