@@ -17,7 +17,7 @@
 package io.vertx.ext.auth.mongo.test;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.auth.mongo.impl.DefaultHashStrategy;
 
@@ -36,14 +36,14 @@ public class MongoAuthEXTERNALTest extends MongoAuthNO_SALTTest {
   protected JsonObject createAuthServiceConfig() {
     JsonObject js = new JsonObject();
     js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-    js.put(MongoAuth.PROPERTY_SALT_STYLE, SaltStyle.EXTERNAL);
+    js.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.EXTERNAL);
     return js;
   }
 
   @Override
   protected void initAuthService() throws Exception {
     super.initAuthService();
-    assertEquals(SaltStyle.EXTERNAL, authProvider.getHashStrategy().getSaltStyle());
+    assertEquals(HashSaltStyle.EXTERNAL, authProvider.getHashStrategy().getSaltStyle());
     authProvider.getHashStrategy().setExternalSalt(DefaultHashStrategy.generateSalt());
   }
 

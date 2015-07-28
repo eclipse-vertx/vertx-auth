@@ -26,7 +26,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.AuthenticationException;
 import io.vertx.ext.auth.mongo.HashStrategy;
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.mongo.MongoClient;
 
@@ -170,7 +170,7 @@ public class MongoAuthImpl implements MongoAuth {
     }
     MongoUser user = new MongoUser(principal, this);
 
-    if (getHashStrategy().getSaltStyle() == SaltStyle.COLUMN) {
+    if (getHashStrategy().getSaltStyle() == HashSaltStyle.COLUMN) {
       principal.put(getSaltField(), DefaultHashStrategy.generateSalt());
     }
 
@@ -240,7 +240,7 @@ public class MongoAuthImpl implements MongoAuth {
 
     String saltstyle = config.getString(PROPERTY_SALT_STYLE);
     if (saltstyle != null) {
-      getHashStrategy().setSaltStyle(SaltStyle.valueOf(saltstyle));
+      getHashStrategy().setSaltStyle(HashSaltStyle.valueOf(saltstyle));
     }
 
   }

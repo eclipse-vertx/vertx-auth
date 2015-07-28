@@ -16,11 +16,8 @@
 
 package io.vertx.rxjava.ext.auth.mongo;
 
-import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
-import rx.Observable;
 import io.vertx.rxjava.ext.auth.User;
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
 
 /**
  * Determines how the hashing is computed in the implementation You can implement this to provide a different hashing
@@ -86,7 +83,7 @@ public class HashStrategy {
    * Set the saltstyle as defined by .
    * @param saltStyle the  to be used
    */
-  public void setSaltStyle(SaltStyle saltStyle) { 
+  public void setSaltStyle(HashSaltStyle saltStyle) {
     this.delegate.setSaltStyle(saltStyle);
   }
 
@@ -94,8 +91,8 @@ public class HashStrategy {
    * Get the defined  of the current instance
    * @return the saltStyle
    */
-  public SaltStyle getSaltStyle() { 
-    SaltStyle ret = this.delegate.getSaltStyle();
+  public HashSaltStyle getSaltStyle() {
+    HashSaltStyle ret = this.delegate.getSaltStyle();
     return ret;
   }
 

@@ -17,7 +17,7 @@
 package io.vertx.ext.auth.mongo.test;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
 /**
@@ -35,14 +35,14 @@ public class MongoAuthCOLUMNTest extends MongoAuthNO_SALTTest {
   protected JsonObject createAuthServiceConfig() {
     JsonObject js = new JsonObject();
     js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-    js.put(MongoAuth.PROPERTY_SALT_STYLE, SaltStyle.COLUMN);
+    js.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.COLUMN);
     return js;
   }
 
   @Override
   protected void initAuthService() throws Exception {
     super.initAuthService();
-    assertEquals(SaltStyle.COLUMN, authProvider.getHashStrategy().getSaltStyle());
+    assertEquals(HashSaltStyle.COLUMN, authProvider.getHashStrategy().getSaltStyle());
   }
 
 }

@@ -18,6 +18,7 @@ package io.vertx.ext.auth.mongo.impl;
 
 import io.vertx.core.VertxException;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.HashStrategy;
 
 import java.nio.charset.StandardCharsets;
@@ -35,7 +36,7 @@ import java.util.Random;
 public class DefaultHashStrategy implements HashStrategy {
   private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
-  private SaltStyle saltStyle;
+  private HashSaltStyle saltStyle;
   // Used only if SaltStyle#External is used
   private String externalSalt;
 
@@ -43,17 +44,17 @@ public class DefaultHashStrategy implements HashStrategy {
    * 
    */
   public DefaultHashStrategy() {
-    saltStyle = SaltStyle.COLUMN;
+    saltStyle = HashSaltStyle.COLUMN;
   }
 
   /**
-   * This method is called, if the strategy shall be {@link SaltStyle#EXTERNAL}
+   * This method is called, if the strategy shall be {@link io.vertx.ext.auth.mongo.HashSaltStyle#EXTERNAL}
    * 
    * @param externalSalt
    *          the external salt to be used
    */
   public DefaultHashStrategy(String externalSalt) {
-    saltStyle = SaltStyle.EXTERNAL;
+    saltStyle = HashSaltStyle.EXTERNAL;
     this.externalSalt = externalSalt;
   }
 
@@ -112,7 +113,7 @@ public class DefaultHashStrategy implements HashStrategy {
    * @see io.vertx.ext.auth.mongo.HashStrategy#setSaltStyle(io.vertx.ext.auth.mongo.HashStrategy.SaltStyle)
    */
   @Override
-  public void setSaltStyle(SaltStyle saltStyle) {
+  public void setSaltStyle(HashSaltStyle saltStyle) {
     this.saltStyle = saltStyle;
   }
 
@@ -122,7 +123,7 @@ public class DefaultHashStrategy implements HashStrategy {
    * @see io.vertx.ext.auth.mongo.HashStrategy#getSaltStyle()
    */
   @Override
-  public SaltStyle getSaltStyle() {
+  public HashSaltStyle getSaltStyle() {
     return saltStyle;
   }
 

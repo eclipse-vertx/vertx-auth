@@ -24,7 +24,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
 /**
@@ -104,7 +103,7 @@ public class MongoUser extends AbstractUser {
 
   /**
    * Fetch the salt for the current user. This method is called, if the salt is defined to be stored inside the user
-   * itself by {@link SaltStyle#COLUMN}
+   * itself by {@link io.vertx.ext.auth.mongo.HashSaltStyle#COLUMN}
    * 
    * @return the salt, if it was stored inside a column, or null
    */

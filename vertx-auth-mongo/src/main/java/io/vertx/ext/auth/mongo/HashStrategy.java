@@ -29,25 +29,12 @@ import io.vertx.ext.auth.User;
 public interface HashStrategy {
 
   /**
-   * Password hash salt configuration.
-   * <ul>
-   * <li>NO_SALT - password hashes are not salted.</li>
-   * <li>COLUMN - salt is in a separate column for each user in the database.</li>
-   * <li>EXTERNAL - salt is NOT stored in the database, but defined as external value like application preferences or so
-   * </li>
-   * </ul>
-   */
-  enum SaltStyle {
-    NO_SALT, COLUMN, EXTERNAL
-  }
-
-  /**
    * Compute the hashed password given the unhashed password and the user
    * 
    * @param password
    *          the unhashed password
    * @param user
-   *          the user to get the salt for. This paramter is needed, if the {@link SaltStyle#COLUMN} is declared to be
+   *          the user to get the salt for. This paramter is needed, if the {@link HashSaltStyle#COLUMN} is declared to be
    *          used
    * @return the hashed password
    */
@@ -64,17 +51,17 @@ public interface HashStrategy {
 
   /**
    * Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
-   * depending on the defined {@link SaltStyle}
+   * depending on the defined {@link HashSaltStyle}
    * 
    * @param user
-   *          the user to get the salt for. This paramter is needed, if the {@link SaltStyle#COLUMN} is declared to be
+   *          the user to get the salt for. This paramter is needed, if the {@link HashSaltStyle#COLUMN} is declared to be
    *          used
-   * @return null in case of {@link SaltStyle#NO_SALT} the salt of the user or a defined external salt
+   * @return null in case of {@link HashSaltStyle#NO_SALT} the salt of the user or a defined external salt
    */
   String getSalt(User user);
 
   /**
-   * Set an external salt. This method should be used in case of {@link SaltStyle#EXTERNAL}
+   * Set an external salt. This method should be used in case of {@link HashSaltStyle#EXTERNAL}
    * 
    * @param salt
    *          the salt, which shall be used
@@ -82,18 +69,18 @@ public interface HashStrategy {
   void setExternalSalt(String salt);
 
   /**
-   * Set the saltstyle as defined by {@link SaltStyle}.
+   * Set the saltstyle as defined by {@link HashSaltStyle}.
    * 
    * @param saltStyle
-   *          the {@link SaltStyle} to be used
+   *          the {@link HashSaltStyle} to be used
    */
-  void setSaltStyle(SaltStyle saltStyle);
+  void setSaltStyle(HashSaltStyle saltStyle);
 
   /**
-   * Get the defined {@link SaltStyle} of the current instance
+   * Get the defined {@link HashSaltStyle} of the current instance
    * 
    * @return the saltStyle
    */
-  SaltStyle getSaltStyle();
+  HashSaltStyle getSaltStyle();
 
 }

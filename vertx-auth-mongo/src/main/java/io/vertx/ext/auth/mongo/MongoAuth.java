@@ -23,7 +23,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle;
 import io.vertx.ext.auth.mongo.impl.MongoAuthImpl;
 import io.vertx.ext.mongo.MongoClient;
 
@@ -80,7 +79,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * The property name to be used to set the name of the field, where the salt style is stored inside
    * 
-   * @see SaltStyle
+   * @see HashSaltStyle
    */
   String PROPERTY_SALT_STYLE = "saltStyle";
 
@@ -227,8 +226,8 @@ public interface MongoAuth extends AuthProvider {
   MongoAuth setPasswordCredentialField(String fieldName);
 
   /**
-   * Set the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(SaltStyle)} is
-   * set to {@link SaltStyle#COLUMN}
+   * Set the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(HashSaltStyle)} is
+   * set to {@link HashSaltStyle#COLUMN}
    * 
    * @param fieldName
    *          the name of the field to be used
@@ -291,8 +290,8 @@ public interface MongoAuth extends AuthProvider {
   String getPasswordCredentialField();
 
   /**
-   * Get the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(SaltStyle)} is
-   * set to {@link SaltStyle#COLUMN}
+   * Get the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(HashSaltStyle)} is
+   * set to {@link HashSaltStyle#COLUMN}
    * 
    * @return the saltField
    */

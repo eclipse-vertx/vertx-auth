@@ -18,7 +18,7 @@ package io.vertx.groovy.ext.auth.mongo;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.groovy.ext.auth.User
-import io.vertx.ext.auth.mongo.HashStrategy.SaltStyle
+import io.vertx.ext.auth.mongo.HashSaltStyle
 /**
  * Determines how the hashing is computed in the implementation You can implement this to provide a different hashing
  * strategy to the default.
@@ -72,14 +72,14 @@ public class HashStrategy {
    * Set the saltstyle as defined by .
    * @param saltStyle the  to be used
    */
-  public void setSaltStyle(SaltStyle saltStyle) {
+  public void setSaltStyle(HashSaltStyle saltStyle) {
     this.delegate.setSaltStyle(saltStyle);
   }
   /**
    * Get the defined  of the current instance
    * @return the saltStyle
    */
-  public SaltStyle getSaltStyle() {
+  public HashSaltStyle getSaltStyle() {
     def ret = this.delegate.getSaltStyle();
     return ret;
   }

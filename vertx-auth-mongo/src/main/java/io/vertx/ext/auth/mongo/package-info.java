@@ -44,20 +44,20 @@
  * The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
  * concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
  * stored can be set by {@link io.vertx.ext.auth.mongo.MongoAuth#setSaltField(String) }, the default is "salt".
- * You are able to change this behaviour by using {@link io.vertx.ext.auth.mongo.HashStrategy#setSaltStyle(io.vertx.ext.auth.mongo.HashStrategy.SaltStyle)}.
+ * You are able to change this behaviour by using {@link io.vertx.ext.auth.mongo.HashStrategy#setSaltStyle(HashSaltStyle)}.
  * The HashStrategy you can retrieve by  {@link io.vertx.ext.auth.mongo.MongoAuth#getHashStrategy() }.
  * By using this, you are able to set:
- * {@link io.vertx.ext.auth.mongo.HashStrategy.SaltStyle#NO_SALT} by which passwords are not crypted and stored 
+ * {@link io.vertx.ext.auth.mongo.HashSaltStyle#NO_SALT} by which passwords are not crypted and stored
  * in cleartext. ( see the warning below! )
- * {@link io.vertx.ext.auth.mongo.HashStrategy.SaltStyle#COLUMN}, which will create a salt per user and store this
+ * {@link io.vertx.ext.auth.mongo.HashSaltStyle#COLUMN}, which will create a salt per user and store this
  * inside the defined column of the user. ( see the warning below! )
- * {@link io.vertx.ext.auth.mongo.HashStrategy.SaltStyle#EXTERNAL}, which will store only the crypted password in the 
+ * {@link io.vertx.ext.auth.mongo.HashSaltStyle#EXTERNAL}, which will store only the crypted password in the
  * database and will use a salt from external, which you will have to set by {@link io.vertx.ext.auth.mongo.HashStrategy#setExternalSalt(String)}
  *
  * If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
  *  {@link io.vertx.ext.auth.mongo.MongoAuth#setHashStrategy(HashStrategy) }
  *
- * WARNING: It is strongly advised to use the {@link io.vertx.ext.auth.mongo.HashStrategy.SaltStyle#EXTERNAL} option. 
+ * WARNING: It is strongly advised to use the {@link io.vertx.ext.auth.mongo.HashSaltStyle#EXTERNAL} option.
  * The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
  * salt and password are stored inside the same place!
  * 
