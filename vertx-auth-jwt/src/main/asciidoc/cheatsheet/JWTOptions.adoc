@@ -20,16 +20,6 @@
 |+++
 The algorithm to use, it should be one of the alias [HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512]+++
 
-|[[expiresInMinutes]]`expiresInMinutes`
-|`Number`
-|+++
-The expiration time for the token in minutes+++
-
-|[[expiresInSeconds]]`expiresInSeconds`
-|`Number`
-|+++
-The expiration time for the token in seconds+++
-
 |[[audience]]`audience`
 |`Array of String`
 |+++
@@ -40,10 +30,15 @@ The target audience of this token+++
 |+++
 The target audience of this token+++
 
-|[[subject]]`subject`
-|`String`
+|[[expiresInMinutes]]`expiresInMinutes`
+|`Number (long)`
 |+++
-The subject of this token+++
+The expiration time for the token in minutes+++
+
+|[[expiresInSeconds]]`expiresInSeconds`
+|`Number (long)`
+|+++
+The expiration time for the token in seconds+++
 
 |[[issuer]]`issuer`
 |`String`
@@ -59,4 +54,9 @@ Disable the generation of issued at claim+++
 |`Array of String`
 |+++
 Add a permission to this token.+++
+
+|[[subject]]`subject`
+|`String`
+|+++
+The subject of this token+++
 |===

@@ -16,11 +16,13 @@
 
 /** @module vertx-auth-jwt-js/jwt_auth */
 var utils = require('vertx-js/util/utils');
+var Vertx = require('vertx-js/vertx');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
 var JJWTAuth = io.vertx.ext.auth.jwt.JWTAuth;
+var JksOptions = io.vertx.core.net.JksOptions;
 var JWTOptions = io.vertx.ext.auth.jwt.JWTOptions;
 
 /**
@@ -32,6 +34,21 @@ var JWTAuth = function(j_val) {
   var j_jWTAuth = j_val;
   var that = this;
   AuthProvider.call(this, j_val);
+
+  /**
+   Sets the key name in the json token where permission claims will be listed.
+
+   @public
+   @param name {string} the key name 
+   @return {JWTAuth} self
+   */
+  this.setPermissionsClaimKey = function(name) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      j_jWTAuth["setPermissionsClaimKey(java.lang.String)"](name);
+      return that;
+    } else utils.invalidArgs();
+  };
 
   /**
    Generate a new JWT token.
@@ -62,10 +79,12 @@ var JWTAuth = function(j_val) {
  @param config {Object} the config 
  @return {JWTAuth} the auth provider
  */
-JWTAuth.create = function(vertx, config) {
+JWTAuth.create = function() {
   var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
-    return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)), JWTAuth);
+  if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+    return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx)"](__args[0]._jdel), JWTAuth);
+  }else if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
+    return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.net.JksOptions)"](__args[0]._jdel, __args[1] != null ? new JksOptions(new JsonObject(JSON.stringify(__args[1]))) : null), JWTAuth);
   } else utils.invalidArgs();
 };
 

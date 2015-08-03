@@ -16,9 +16,11 @@
 
 package io.vertx.ext.auth.jwt;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 
@@ -37,9 +39,28 @@ public interface JWTAuth extends AuthProvider {
    * @param config  the config
    * @return the auth provider
    */
-  static JWTAuth create(Vertx vertx, JsonObject config) {
+  static JWTAuth create(Vertx vertx, JksOptions config) {
     return new JWTAuthProviderImpl(vertx, config);
   }
+
+  /**
+   * Create a Unsafe JWT auth provider. In this mode tokens will not be signed.
+   *
+   * @param vertx the Vertx instance
+   * @return the auth provider
+   */
+  static JWTAuth create(Vertx vertx) {
+    return new JWTAuthProviderImpl(vertx, null);
+  }
+
+  /**
+   * Sets the key name in the json token where permission claims will be listed.
+   *
+   * @param name the key name
+   * @return self
+   */
+  @Fluent
+  JWTAuth setPermissionsClaimKey(String name);
 
   /**
    * Generate a new JWT token.
