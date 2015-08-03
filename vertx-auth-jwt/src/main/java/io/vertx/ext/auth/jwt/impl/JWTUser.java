@@ -18,6 +18,7 @@ package io.vertx.ext.auth.jwt.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -25,20 +26,26 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author Paulo Lopes
  */
-public final class JWTUser extends AbstractUser {
+public class JWTUser extends AbstractUser {
 
   private static final Logger log = LoggerFactory.getLogger(JWTUser.class);
 
-  private final JsonObject jwtToken;
+  private JsonObject jwtToken;
+  private JsonArray permissions;
 
-  private final JsonArray permissions;
+  public JWTUser() {
+    // required if the object is serialized, however this is not a good idea
+    // because JWT are supposed to be used in stateless environments
+    log.info("You are probably serializing the JWT User, JWT are supposed to be used in stateless servers!");
+  }
 
   public JWTUser(JsonObject jwtToken, String permissionsClaimKey) {
     this.jwtToken = jwtToken;
-
     this.permissions = jwtToken.getJsonArray(permissionsClaimKey, null);
   }
 
@@ -65,5 +72,35 @@ public final class JWTUser extends AbstractUser {
 
     log.debug("User has no permission [" + permission + "]");
     handler.handle(Future.succeededFuture(false));
+  }
+
+  @Override
+  public void writeToBuffer(Buffer buff) {
+    super.writeToBuffer(buff);
+    byte[] bytes = jwtToken.encode().getBytes(StandardCharsets.UTF_8);
+    buff.appendInt(bytes.length);
+    buff.appendBytes(bytes);
+
+    bytes = permissions.encode().getBytes(StandardCharsets.UTF_8);
+    buff.appendInt(bytes.length);
+    buff.appendBytes(bytes);
+  }
+
+  @Override
+  public int readFromBuffer(int pos, Buffer buffer) {
+    pos = super.readFromBuffer(pos, buffer);
+    int len = buffer.getInt(pos);
+    pos += 4;
+    byte[] bytes = buffer.getBytes(pos, pos + len);
+    jwtToken = new JsonObject(new String(bytes, StandardCharsets.UTF_8));
+    pos += len;
+
+    len = buffer.getInt(pos);
+    pos += 4;
+    bytes = buffer.getBytes(pos, pos + len);
+    permissions = new JsonArray(new String(bytes, StandardCharsets.UTF_8));
+    pos += len;
+
+    return pos;
   }
 }
