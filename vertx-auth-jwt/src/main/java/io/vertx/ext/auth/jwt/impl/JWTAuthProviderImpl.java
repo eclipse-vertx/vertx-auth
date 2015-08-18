@@ -19,14 +19,16 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -45,24 +47,29 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   private final JWT jwt;
 
-  private final String permissionsClaimKey;
+  private String permissionsClaimKey = "permissions";
 
-  public JWTAuthProviderImpl(Vertx vertx, JsonObject config) {
-    this.permissionsClaimKey = config.getString("permissionsClaimKey", "permissions");
-
-    final JsonObject keyStore = config.getJsonObject("keyStore");
-
+  public JWTAuthProviderImpl(Vertx vertx, JksOptions keyStore) {
     try {
       if (keyStore != null) {
-        KeyStore ks = KeyStore.getInstance(keyStore.getString("type", "jceks"));
+        final VertxInternal vertxInternal = (VertxInternal) vertx;
+        final Buffer buffer;
+        final String password = keyStore.getPassword();
 
-        VertxInternal vertxInternal = (VertxInternal) vertx;
-
-        try (InputStream in = new FileInputStream(vertxInternal.resolveFile(keyStore.getString("path")))) {
-          ks.load(in, keyStore.getString("password").toCharArray());
+        if (keyStore.getPath() != null && keyStore.getValue() == null) {
+          keyStore.setValue(
+              vertx.fileSystem().readFileBlocking(vertxInternal.resolveFile(keyStore.getPath()).getAbsolutePath()));
         }
 
-        this.jwt = new JWT(ks, keyStore.getString("password").toCharArray());
+        buffer = keyStore.getValue();
+
+        KeyStore ks = KeyStore.getInstance("jceks");
+
+        try (InputStream in = new ByteArrayInputStream(buffer.getBytes())) {
+          ks.load(in, password != null ? password.toCharArray(): null);
+        }
+
+        this.jwt = new JWT(ks, password != null ? password.toCharArray(): null);
       } else {
         this.jwt = new JWT(null, null);
       }
@@ -70,6 +77,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
     } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public JWTAuth setPermissionsClaimKey(String name) {
+    this.permissionsClaimKey = name;
+    return this;
   }
 
   @Override

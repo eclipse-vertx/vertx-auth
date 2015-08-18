@@ -17,6 +17,7 @@
 package io.vertx.groovy.ext.auth.jwt;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
+import io.vertx.core.net.JksOptions
 import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTOptions
@@ -37,12 +38,30 @@ public class JWTAuth extends AuthProvider {
   /**
    * Create a JWT auth provider
    * @param vertx the Vertx instance
-   * @param config the config
+   * @param config the config (see <a href="../../../../../../../../cheatsheet/JksOptions.html">JksOptions</a>)
    * @return the auth provider
    */
   public static JWTAuth create(Vertx vertx, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.net.JksOptions(new io.vertx.core.json.JsonObject(config)) : null), io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
     return ret;
+  }
+  /**
+   * Create a Unsafe JWT auth provider. In this mode tokens will not be signed.
+   * @param vertx the Vertx instance
+   * @return the auth provider
+   */
+  public static JWTAuth create(Vertx vertx) {
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate()), io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
+    return ret;
+  }
+  /**
+   * Sets the key name in the json token where permission claims will be listed.
+   * @param name the key name
+   * @return self
+   */
+  public JWTAuth setPermissionsClaimKey(String name) {
+    this.delegate.setPermissionsClaimKey(name);
+    return this;
   }
   /**
    * Generate a new JWT token.

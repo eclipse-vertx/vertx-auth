@@ -18,6 +18,7 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
@@ -29,20 +30,18 @@ public class Examples {
 
   public void example6(Vertx vertx) {
 
-    JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret"));
+    JksOptions config = new JksOptions()
+        .setPath("keystore.jceks")
+        .setPassword("secret");
 
     AuthProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example7(Vertx vertx, String username, String password) {
 
-    JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret"));
+    JksOptions config = new JksOptions()
+        .setPath("keystore.jceks")
+        .setPassword("secret");
 
     JWTAuth provider = JWTAuth.create(vertx, config);
 

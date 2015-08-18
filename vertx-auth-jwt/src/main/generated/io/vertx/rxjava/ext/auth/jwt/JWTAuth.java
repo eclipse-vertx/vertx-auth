@@ -19,6 +19,7 @@ package io.vertx.rxjava.ext.auth.jwt;
 import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
+import io.vertx.core.net.JksOptions;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTOptions;
@@ -50,9 +51,29 @@ public class JWTAuth extends AuthProvider {
    * @param config the config
    * @return the auth provider
    */
-  public static JWTAuth create(Vertx vertx, JsonObject config) { 
+  public static JWTAuth create(Vertx vertx, JksOptions config) { 
     JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), config));
     return ret;
+  }
+
+  /**
+   * Create a Unsafe JWT auth provider. In this mode tokens will not be signed.
+   * @param vertx the Vertx instance
+   * @return the auth provider
+   */
+  public static JWTAuth create(Vertx vertx) { 
+    JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx) vertx.getDelegate()));
+    return ret;
+  }
+
+  /**
+   * Sets the key name in the json token where permission claims will be listed.
+   * @param name the key name
+   * @return self
+   */
+  public JWTAuth setPermissionsClaimKey(String name) { 
+    this.delegate.setPermissionsClaimKey(name);
+    return this;
   }
 
   /**

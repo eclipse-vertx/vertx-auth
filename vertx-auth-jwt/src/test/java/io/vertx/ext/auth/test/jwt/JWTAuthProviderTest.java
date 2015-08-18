@@ -17,6 +17,7 @@ package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
@@ -38,11 +39,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider = JWTAuth.create(vertx, getConfig());
   }
 
-  protected JsonObject getConfig() {
-    return new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret"));
+  protected JksOptions getConfig() {
+    return new JksOptions()
+        .setPath("keystore.jceks")
+        .setPassword("secret");
   }
 
   @Test
