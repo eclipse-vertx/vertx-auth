@@ -1,3 +1,4 @@
+require 'vertx/vertx'
 require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.jwt.JWTAuth

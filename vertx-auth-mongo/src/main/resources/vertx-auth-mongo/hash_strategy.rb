@@ -35,7 +35,7 @@ module VertxAuthMongo
       raise ArgumentError, "Invalid arguments when calling get_stored_pwd(user)"
     end
     #  Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
-    #  depending on the defined 
+    #  depending on the defined HashSaltStyle
     # @param [::VertxAuthCommon::User] user the user to get the salt for. This paramter is needed, if the  is declared to be used
     # @return [String] null in case of  the salt of the user or a defined external salt
     def get_salt(user=nil)
@@ -53,16 +53,16 @@ module VertxAuthMongo
       end
       raise ArgumentError, "Invalid arguments when calling set_external_salt(salt)"
     end
-    #  Set the saltstyle as defined by .
-    # @param [:NO_SALT,:COLUMN,:EXTERNAL] saltStyle the  to be used
+    #  Set the saltstyle as defined by HashSaltStyle.
+    # @param [:NO_SALT,:COLUMN,:EXTERNAL] saltStyle the HashSaltStyle to be used
     # @return [void]
     def set_salt_style(saltStyle=nil)
       if saltStyle.class == Symbol && !block_given?
-        return @j_del.java_method(:setSaltStyle, [Java::IoVertxExtAuthMongoHashStrategy::SaltStyle.java_class]).call(Java::IoVertxExtAuthMongoHashStrategy::SaltStyle.valueOf(saltStyle))
+        return @j_del.java_method(:setSaltStyle, [Java::IoVertxExtAuthMongo::HashSaltStyle.java_class]).call(Java::IoVertxExtAuthMongo::HashSaltStyle.valueOf(saltStyle))
       end
       raise ArgumentError, "Invalid arguments when calling set_salt_style(saltStyle)"
     end
-    #  Get the defined  of the current instance
+    #  Get the defined HashSaltStyle of the current instance
     # @return [:NO_SALT,:COLUMN,:EXTERNAL] the saltStyle
     def get_salt_style
       if !block_given?

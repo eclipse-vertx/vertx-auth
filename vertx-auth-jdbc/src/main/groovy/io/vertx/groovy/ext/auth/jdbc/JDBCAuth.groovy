@@ -17,6 +17,7 @@
 package io.vertx.groovy.ext.auth.jdbc;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
+import io.vertx.core.json.JsonObject
 import io.vertx.groovy.ext.jdbc.JDBCClient
 import io.vertx.groovy.ext.auth.AuthProvider
 /**

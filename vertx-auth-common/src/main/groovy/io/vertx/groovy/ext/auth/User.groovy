@@ -18,6 +18,7 @@ package io.vertx.groovy.ext.auth;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
@@ -37,7 +38,7 @@ public class User {
   /**
    * Is the user authorised to
    * @param authority the authority - what this really means is determined by the specific implementation. It might represent a permission to access a resource e.g. `printers:printer34` or it might represent authority to a role in a roles based model, e.g. `role:admin`.
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value `true` if the they has the authority or `false` otherwise.
+   * @param resultHandler handler that will be called with an {@link io.vertx.groovy.core.AsyncResult} containing the value `true` if the they has the authority or `false` otherwise.
    * @return the User to enable fluent use
    */
   public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {

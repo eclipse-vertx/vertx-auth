@@ -32,20 +32,20 @@ if you want to adapt that to your needs.
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
 concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
 stored can be set by `link:groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setSaltField(java.lang.String)[setSaltField]`, the default is "salt".
-You are able to change this behaviour by using `link:groovydoc/io/vertx/groovy/ext/auth/mongo/HashStrategy.html#setSaltStyle(io.vertx.ext.auth.mongo.HashStrategy.SaltStyle)[setSaltStyle]`.
+You are able to change this behaviour by using `link:groovydoc/io/vertx/groovy/ext/auth/mongo/HashStrategy.html#setSaltStyle(io.vertx.ext.auth.mongo.HashSaltStyle)[setSaltStyle]`.
 The HashStrategy you can retrieve by  `link:groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#getHashStrategy()[getHashStrategy]`.
 By using this, you are able to set:
-`link:todo[NO_SALT]` by which passwords are not crypted and stored 
+`link:todo[NO_SALT]` by which passwords are not crypted and stored
 in cleartext. ( see the warning below! )
 `link:todo[COLUMN]`, which will create a salt per user and store this
 inside the defined column of the user. ( see the warning below! )
-`link:todo[EXTERNAL]`, which will store only the crypted password in the 
+`link:todo[EXTERNAL]`, which will store only the crypted password in the
 database and will use a salt from external, which you will have to set by `link:groovydoc/io/vertx/groovy/ext/auth/mongo/HashStrategy.html#setExternalSalt(java.lang.String)[setExternalSalt]`
 
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
  `link:groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setHashStrategy(io.vertx.ext.auth.mongo.HashStrategy)[setHashStrategy]`
 
-WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option. 
+WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option.
 The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
 salt and password are stored inside the same place!
 

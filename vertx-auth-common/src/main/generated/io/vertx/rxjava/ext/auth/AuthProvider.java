@@ -57,7 +57,7 @@ public class AuthProvider {
    * </pre>
    * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
    * <p>
-   * If the user is successfully authenticated a {@link io.vertx.rxjava.ext.auth.User} object is passed to the handler in an {@link io.vertx.core.AsyncResult}.
+   * If the user is successfully authenticated a {@link io.vertx.rxjava.ext.auth.User} object is passed to the handler in an {@link io.vertx.rxjava.core.AsyncResult}.
    * The user object can then be used for authorisation.
    * @param authInfo The auth information
    * @param resultHandler The result handler

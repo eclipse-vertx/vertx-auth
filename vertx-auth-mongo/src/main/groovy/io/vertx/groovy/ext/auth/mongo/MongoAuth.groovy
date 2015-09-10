@@ -17,6 +17,7 @@
 package io.vertx.groovy.ext.auth.mongo;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
+import io.vertx.core.json.JsonObject
 import java.util.List
 import io.vertx.groovy.ext.mongo.MongoClient
 import io.vertx.core.json.JsonObject
@@ -28,10 +29,10 @@ import io.vertx.groovy.ext.auth.AuthProvider
 */
 @CompileStatic
 public class MongoAuth extends AuthProvider {
-  final def io.vertx.ext.auth.mongo.MongoAuth delegate;
-  public MongoAuth(io.vertx.ext.auth.mongo.MongoAuth delegate) {
-    super(delegate);
-    this.delegate = delegate;
+  private final def io.vertx.ext.auth.mongo.MongoAuth delegate;
+  public MongoAuth(Object delegate) {
+    super((io.vertx.ext.auth.mongo.MongoAuth) delegate);
+    this.delegate = (io.vertx.ext.auth.mongo.MongoAuth) delegate;
   }
   public Object getDelegate() {
     return delegate;
@@ -49,7 +50,7 @@ public class MongoAuth extends AuthProvider {
    * @return the created instance of {@link io.vertx.groovy.ext.auth.mongo.MongoAuth}s
    */
   public static MongoAuth create(MongoClient mongoClient, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.mongo.MongoAuth.create((io.vertx.ext.mongo.MongoClient)mongoClient.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.ext.auth.mongo.MongoAuth.class, io.vertx.groovy.ext.auth.mongo.MongoAuth.class);
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.mongo.MongoAuth.create((io.vertx.ext.mongo.MongoClient)mongoClient.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.mongo.MongoAuth.class);
     return ret;
   }
   /**
@@ -212,7 +213,7 @@ public class MongoAuth extends AuthProvider {
    * @return the defined instance of {@link io.vertx.groovy.ext.auth.mongo.HashStrategy}
    */
   public HashStrategy getHashStrategy() {
-    def ret= InternalHelper.safeCreate(this.delegate.getHashStrategy(), io.vertx.ext.auth.mongo.HashStrategy.class, io.vertx.groovy.ext.auth.mongo.HashStrategy.class);
+    def ret= InternalHelper.safeCreate(this.delegate.getHashStrategy(), io.vertx.groovy.ext.auth.mongo.HashStrategy.class);
     return ret;
   }
   /**

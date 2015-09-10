@@ -64,7 +64,7 @@ var HashStrategy = function(j_val) {
 
   /**
    Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
-   depending on the defined 
+   depending on the defined HashSaltStyle
 
    @public
    @param user {User} the user to get the salt for. This paramter is needed, if the  is declared to be used 
@@ -91,20 +91,20 @@ var HashStrategy = function(j_val) {
   };
 
   /**
-   Set the saltstyle as defined by .
+   Set the saltstyle as defined by HashSaltStyle.
 
    @public
-   @param saltStyle {Object} the  to be used 
+   @param saltStyle {Object} the HashSaltStyle to be used 
    */
   this.setSaltStyle = function(saltStyle) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      j_hashStrategy["setSaltStyle(io.vertx.ext.auth.mongo.HashStrategy.SaltStyle)"](io.vertx.ext.auth.mongo.HashStrategy.SaltStyle.valueOf(__args[0]));
+      j_hashStrategy["setSaltStyle(io.vertx.ext.auth.mongo.HashSaltStyle)"](io.vertx.ext.auth.mongo.HashSaltStyle.valueOf(__args[0]));
     } else utils.invalidArgs();
   };
 
   /**
-   Get the defined  of the current instance
+   Get the defined HashSaltStyle of the current instance
 
    @public
 

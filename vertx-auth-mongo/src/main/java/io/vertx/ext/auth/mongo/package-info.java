@@ -99,9 +99,9 @@
  * @author mremme
  */
 @Document(fileName = "index.adoc")
-@GenModule(name = "vertx-auth-mongo")
+@ModuleGen(name = "vertx-auth-mongo", groupPackage = "io.vertx")
 package io.vertx.ext.auth.mongo;
 
-import io.vertx.codegen.annotations.GenModule;
+import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;
 

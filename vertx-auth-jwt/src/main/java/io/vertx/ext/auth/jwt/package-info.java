@@ -124,8 +124,8 @@
  * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
 @Document(fileName = "index.adoc")
-@GenModule(name = "vertx-auth-jwt")
+@ModuleGen(name = "vertx-auth-jwt", groupPackage = "io.vertx")
 package io.vertx.ext.auth.jwt;
 
-import io.vertx.codegen.annotations.GenModule;
+import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;

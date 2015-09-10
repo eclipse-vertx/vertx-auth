@@ -17,17 +17,18 @@
 package io.vertx.groovy.ext.auth.mongo;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
-import io.vertx.groovy.ext.auth.User
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.mongo.HashSaltStyle
+import io.vertx.groovy.ext.auth.User
 /**
  * Determines how the hashing is computed in the implementation You can implement this to provide a different hashing
  * strategy to the default.
 */
 @CompileStatic
 public class HashStrategy {
-  final def io.vertx.ext.auth.mongo.HashStrategy delegate;
-  public HashStrategy(io.vertx.ext.auth.mongo.HashStrategy delegate) {
-    this.delegate = delegate;
+  private final def io.vertx.ext.auth.mongo.HashStrategy delegate;
+  public HashStrategy(Object delegate) {
+    this.delegate = (io.vertx.ext.auth.mongo.HashStrategy) delegate;
   }
   public Object getDelegate() {
     return delegate;
@@ -53,7 +54,7 @@ public class HashStrategy {
   }
   /**
    * Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
-   * depending on the defined 
+   * depending on the defined {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle}
    * @param user the user to get the salt for. This paramter is needed, if the  is declared to be used
    * @return null in case of  the salt of the user or a defined external salt
    */
@@ -69,14 +70,14 @@ public class HashStrategy {
     this.delegate.setExternalSalt(salt);
   }
   /**
-   * Set the saltstyle as defined by .
-   * @param saltStyle the  to be used
+   * Set the saltstyle as defined by {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle}.
+   * @param saltStyle the {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle} to be used
    */
   public void setSaltStyle(HashSaltStyle saltStyle) {
     this.delegate.setSaltStyle(saltStyle);
   }
   /**
-   * Get the defined  of the current instance
+   * Get the defined {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle} of the current instance
    * @return the saltStyle
    */
   public HashSaltStyle getSaltStyle() {

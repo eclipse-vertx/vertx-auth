@@ -104,8 +104,8 @@
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @Document(fileName = "index.adoc")
-@GenModule(name = "vertx-auth-jdbc")
+@ModuleGen(name = "vertx-auth-jdbc", groupPackage = "io.vertx")
 package io.vertx.ext.auth.jdbc;
 
-import io.vertx.codegen.annotations.GenModule;
+import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;

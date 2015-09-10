@@ -16,6 +16,7 @@
 
 /** @module vertx-auth-jwt-js/jwt_auth */
 var utils = require('vertx-js/util/utils');
+var Vertx = require('vertx-js/vertx');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;

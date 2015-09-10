@@ -36,17 +36,17 @@ stored can be set by `link:jsdoc/mongo_auth-MongoAuth.html#setSaltField[setSaltF
 You are able to change this behaviour by using `link:jsdoc/hash_strategy-HashStrategy.html#setSaltStyle[setSaltStyle]`.
 The HashStrategy you can retrieve by  `link:jsdoc/mongo_auth-MongoAuth.html#getHashStrategy[getHashStrategy]`.
 By using this, you are able to set:
-`link:todo[NO_SALT]` by which passwords are not crypted and stored 
+`link:todo[NO_SALT]` by which passwords are not crypted and stored
 in cleartext. ( see the warning below! )
 `link:todo[COLUMN]`, which will create a salt per user and store this
 inside the defined column of the user. ( see the warning below! )
-`link:todo[EXTERNAL]`, which will store only the crypted password in the 
+`link:todo[EXTERNAL]`, which will store only the crypted password in the
 database and will use a salt from external, which you will have to set by `link:jsdoc/hash_strategy-HashStrategy.html#setExternalSalt[setExternalSalt]`
 
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
  `link:jsdoc/mongo_auth-MongoAuth.html#setHashStrategy[setHashStrategy]`
 
-WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option. 
+WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option.
 The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
 salt and password are stored inside the same place!
 

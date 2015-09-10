@@ -18,6 +18,7 @@ package io.vertx.groovy.ext.auth;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
@@ -47,7 +48,7 @@ public class AuthProvider {
    * </pre>
    * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
    * <p>
-   * If the user is successfully authenticated a {@link io.vertx.groovy.ext.auth.User} object is passed to the handler in an {@link io.vertx.core.AsyncResult}.
+   * If the user is successfully authenticated a {@link io.vertx.groovy.ext.auth.User} object is passed to the handler in an {@link io.vertx.groovy.core.AsyncResult}.
    * The user object can then be used for authorisation.
    * @param authInfo The auth information
    * @param resultHandler The result handler

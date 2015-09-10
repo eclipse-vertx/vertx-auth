@@ -165,8 +165,8 @@
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @Document(fileName = "index.adoc")
-@GenModule(name = "vertx-auth-shiro")
+@ModuleGen(name = "vertx-auth-shiro", groupPackage = "io.vertx")
 package io.vertx.ext.auth.shiro;
 
-import io.vertx.codegen.annotations.GenModule;
+import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;

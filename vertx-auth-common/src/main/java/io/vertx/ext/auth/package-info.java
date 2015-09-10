@@ -131,8 +131,8 @@
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @Document(fileName = "index.adoc")
-@GenModule(name = "vertx-auth-common")
+@ModuleGen(name = "vertx-auth-common", groupPackage = "io.vertx")
 package io.vertx.ext.auth;
 
-import io.vertx.codegen.annotations.GenModule;
+import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;
