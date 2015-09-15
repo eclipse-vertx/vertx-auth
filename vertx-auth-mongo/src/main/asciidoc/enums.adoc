@@ -1,0 +1,28 @@
+= Enums
+
+[[HashSaltStyle]]
+== HashSaltStyle
+
+++++
+ Password hash salt configuration.
+++++
+'''
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[NO_SALT]]`NO_SALT`|
++++
+Password hashes are not salted
++++
+|[[COLUMN]]`COLUMN`|
++++
+Salt is in a separate column for each user in the database
++++
+|[[EXTERNAL]]`EXTERNAL`|
++++
+Salt is NOT stored in the database, but defined as external value like application preferences or so
++++
+|===
+

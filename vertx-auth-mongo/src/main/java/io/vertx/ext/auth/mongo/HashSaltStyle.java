@@ -16,15 +16,26 @@
 
 package io.vertx.ext.auth.mongo;
 
+import io.vertx.codegen.annotations.VertxGen;
+
 /**
  * Password hash salt configuration.
- * <ul>
- * <li>NO_SALT - password hashes are not salted.</li>
- * <li>COLUMN - salt is in a separate column for each user in the database.</li>
- * <li>EXTERNAL - salt is NOT stored in the database, but defined as external value like application preferences or so
- * </li>
- * </ul>
  */
+@VertxGen
 public enum HashSaltStyle {
-  NO_SALT, COLUMN, EXTERNAL
+
+  /**
+   * Password hashes are not salted
+   */
+  NO_SALT,
+
+  /**
+   * Salt is in a separate column for each user in the database
+   */
+  COLUMN,
+
+  /**
+   * Salt is NOT stored in the database, but defined as external value like application preferences or so
+   */
+  EXTERNAL
 }

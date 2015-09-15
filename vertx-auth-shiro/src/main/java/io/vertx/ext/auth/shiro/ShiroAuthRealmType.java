@@ -16,11 +16,23 @@
 
 package io.vertx.ext.auth.shiro;
 
+import io.vertx.codegen.annotations.VertxGen;
+
 /**
  * The type of the Shiro auth realm
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@VertxGen
 public enum ShiroAuthRealmType {
-  PROPERTIES, LDAP
+
+  /**
+   * The realm is a Shiro properties auth provider
+   */
+  PROPERTIES,
+
+  /**
+   * The realm is a Shiro LDAP auth provider
+   */
+  LDAP
 }
