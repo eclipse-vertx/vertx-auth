@@ -15,8 +15,10 @@
  */
 package io.vertx.ext.auth.test.jwt;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
@@ -182,7 +184,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject()
         .put("jwt", token)
         .put("options", new JsonObject()
-             .put("issuer", "https://vertx.io"));
+            .put("issuer", "https://vertx.io"));
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -251,6 +253,30 @@ public class JWTAuthProviderTest extends VertxTestBase {
       assertNotNull(thr);
       testComplete();
     }));
+    await();
+  }
+
+  @Test
+  public void testGenerateNewTokenES256() {
+    authProvider = JWTAuth.create(vertx, new JsonObject().put("keyStore", new JsonObject()
+        .put("path", "es256-keystore.jceks")
+        .put("type", "jceks")
+        .put("password", "secret")));
+
+    String token = authProvider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions().setAlgorithm("ES256"));
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject()
+        .put("jwt", token);
+
+    authProvider.authenticate(authInfo, res -> {
+        if (res.failed()) {
+          res.cause().printStackTrace();
+          fail();
+        }
+        System.out.println(res.result());
+      testComplete();
+    });
     await();
   }
 }
