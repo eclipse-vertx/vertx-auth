@@ -16,8 +16,8 @@
 package io.vertx.ext.auth.jwt.impl;
 
 import javax.crypto.Mac;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 /**
@@ -61,17 +61,26 @@ final class CryptoMac implements Crypto {
  */
 final class CryptoSignature implements Crypto {
   private final Signature sig;
+  private final PrivateKey privateKey;
+  private final X509Certificate certificate;
 
-  CryptoSignature(final Signature signature) {
-    this.sig = signature;
+  CryptoSignature(final X509Certificate certificate, final PrivateKey privateKey) {
+    this.certificate = certificate;
+    this.privateKey = privateKey;
+    try {
+      this.sig = Signature.getInstance(certificate.getSigAlgName());
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public byte[] sign(byte[] payload) {
     try {
+      sig.initSign(privateKey);
       sig.update(payload);
       return sig.sign();
-    } catch (SignatureException e) {
+    } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
   }
@@ -79,9 +88,10 @@ final class CryptoSignature implements Crypto {
   @Override
   public boolean verify(byte[] signature, byte[] payload) {
     try {
+      sig.initVerify(certificate);
       sig.update(payload);
       return sig.verify(signature);
-    } catch (SignatureException e) {
+    } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
   }

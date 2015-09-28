@@ -64,9 +64,10 @@ public final class JWT {
       // load SIGNATUREs
       for (String alg : Arrays.<String>asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
         try {
-          Signature signature = getSignature(keyStore, keyStorePassword, alg);
-          if (signature != null) {
-            tmp.put(alg, new CryptoSignature(signature));
+          X509Certificate certificate = getCertificate(keyStore, alg);
+          PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
+          if (certificate != null && privateKey != null) {
+            tmp.put(alg, new CryptoSignature(certificate, privateKey));
           } else {
             log.info(alg + " not available");
           }
@@ -107,22 +108,20 @@ public final class JWT {
     }
   }
 
-  private Signature getSignature(final KeyStore keyStore, final char[] keyStorePassword, final String alias) {
+  private X509Certificate getCertificate(final KeyStore keyStore, final String alias) {
     try {
-      final PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
+      return (X509Certificate) keyStore.getCertificate(alias);
 
-      final X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
-      
-      // key store does not have the requested algorithm
-      if (privateKey == null || certificate == null) {
-        return null;
-      }
+    } catch (KeyStoreException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-      Signature signature = Signature.getInstance(certificate.getSigAlgName());
-      signature.initSign(privateKey);
+  private PrivateKey getPrivateKey(final KeyStore keyStore, final char[] keyStorePassword, final String alias) {
+    try {
+      return (PrivateKey) keyStore.getKey(alias, keyStorePassword);
 
-      return signature;
-    } catch (NoSuchAlgorithmException | InvalidKeyException | UnrecoverableKeyException | KeyStoreException e) {
+    } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
       throw new RuntimeException(e);
     }
   }
