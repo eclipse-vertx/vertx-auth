@@ -27,7 +27,7 @@ We provide out of the box support for properties and LDAP based auth using Shiro
 other Shiro Realm which expects username and password for credentials.
 
 To create an instance of the provider you use `link:jsdoc/shiro_auth-ShiroAuth.html[ShiroAuth]`. You specify the type of
-Shiro auth provider that you want with `ShiroAuthRealmType`, and you specify the
+Shiro auth provider that you want with `link:../enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`, and you specify the
 configuration in a JSON object.
 
 Here's an example of creating a Shiro auth provider by specifying the type:
