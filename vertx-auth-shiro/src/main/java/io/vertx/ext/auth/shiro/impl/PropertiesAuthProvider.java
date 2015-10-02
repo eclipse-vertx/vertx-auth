@@ -21,6 +21,9 @@ import io.vertx.core.json.JsonObject;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.realm.text.PropertiesRealm;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import static io.vertx.ext.auth.shiro.PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD;
 
 /**
@@ -29,11 +32,30 @@ import static io.vertx.ext.auth.shiro.PropertiesProviderConstants.PROPERTIES_PRO
  */
 public class PropertiesAuthProvider extends ShiroAuthProviderImpl {
 
+  private static String resolve(String resource) {
+    if (resource.startsWith("classpath:") || resource.startsWith("url:")) {
+      return resource;
+    }
+    String s = resource;
+    if (s.startsWith("file:")) {
+      s = s.substring(5);
+    }
+    String cwd = System.getProperty("vertx.cwd");
+    if (cwd != null) {
+      Path root = new File(cwd).getAbsoluteFile().toPath().normalize();
+      Path path = root.resolve(s);
+      if (path.toFile().exists()) {
+        resource = path.normalize().toString();
+      }
+    }
+    return resource;
+  }
+
   public static Realm createRealm(JsonObject config) {
     PropertiesRealm propsRealm = new PropertiesRealm();
     String resourcePath = config.getString(PROPERTIES_PROPS_PATH_FIELD);
     if (resourcePath != null) {
-      propsRealm.setResourcePath(resourcePath);
+      propsRealm.setResourcePath(resolve(resourcePath));
     } else {
       propsRealm.setResourcePath("classpath:vertx-users.properties");
     }
