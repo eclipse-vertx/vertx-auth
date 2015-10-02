@@ -33,18 +33,19 @@ import static io.vertx.ext.auth.shiro.PropertiesProviderConstants.PROPERTIES_PRO
 public class PropertiesAuthProvider extends ShiroAuthProviderImpl {
 
   private static String resolve(String resource) {
+    if (resource.startsWith("classpath:") || resource.startsWith("url:")) {
+      return resource;
+    }
     String s = resource;
     if (s.startsWith("file:")) {
       s = s.substring(5);
     }
-    if (!s.contains(":")) {
-      String cwd = System.getProperty("vertx.cwd");
-      if (cwd != null) {
-        Path root = new File(cwd).getAbsoluteFile().toPath().normalize();
-        Path path = root.resolve(s);
-        if (path.toFile().exists()) {
-          resource = path.normalize().toString();
-        }
+    String cwd = System.getProperty("vertx.cwd");
+    if (cwd != null) {
+      Path root = new File(cwd).getAbsoluteFile().toPath().normalize();
+      Path path = root.resolve(s);
+      if (path.toFile().exists()) {
+        resource = path.normalize().toString();
       }
     }
     return resource;

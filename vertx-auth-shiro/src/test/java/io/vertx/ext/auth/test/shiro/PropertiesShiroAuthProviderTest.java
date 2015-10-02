@@ -83,6 +83,8 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     assertResolve(res.getParentFile(), res.getName());
     assertResolve(res.getParentFile(), "file:" + res.getName());
     assertResolve(res.getParentFile().getParentFile(), "file:" + res.getParentFile().getName() + File.separatorChar + res.getName());
+    assertResolve(res.getParentFile().getParentFile(), "classpath:" + res.getName());
+    assertResolve(res.getParentFile().getParentFile(), "url:" + res.toURI().toURL());
   }
 
   private void assertResolve(File cwd, String path) {
