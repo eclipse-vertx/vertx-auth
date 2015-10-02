@@ -3,6 +3,27 @@
 We provide an implementation of `link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../vertx-mongo-client/ruby/yardoc/VertxMongo/MongoClient.html[MongoClient]`
 to perform authentication and authorisation against a MongoDb.
 
+To use this project, add the following
+dependency to the _dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-mongo</artifactId>
+  <version>3.1.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile io.vertx:vertx-auth-mongo:3.1.0-SNAPSHOT
+----
+
 To create an instance you first need an instance of `link:../../vertx-mongo-client/ruby/yardoc/VertxMongo/MongoClient.html[MongoClient]`. To learn how to create one
 of those please consult the documentation for the MongoClient.
 
@@ -21,8 +42,8 @@ authProvider = VertxAuthMongo::MongoAuth.create(client, authProperties)
 
 Once you've got your instance you can authenticate and authorise with it just like any `link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/AuthProvider.html[AuthProvider]`.
 
-The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username" 
-some others. You can easily change those defaults with the operations 
+The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
+some others. You can easily change those defaults with the operations
 `link:yardoc/VertxAuthMongo/MongoAuth.html#set_collection_name-instance_method[setCollectionName]`
 `link:yardoc/VertxAuthMongo/MongoAuth.html#set_username_field-instance_method[setUsernameField]`
 `link:yardoc/VertxAuthMongo/MongoAuth.html#set_password_field-instance_method[setPasswordField]`

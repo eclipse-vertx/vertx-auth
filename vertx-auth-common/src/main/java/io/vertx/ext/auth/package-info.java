@@ -29,9 +29,9 @@
  * [source,xml,subs="+attributes"]
  * ----
  * <dependency>
- *   <groupId>{maven-groupId}</groupId>
- *   <artifactId>{maven-artifactId}</artifactId>
- *   <version>{maven-version}</version>
+ *   <groupId>${maven.groupId}</groupId>
+ *   <artifactId>${maven.artifactId}</artifactId>
+ *   <version>${maven.version}</version>
  * </dependency>
  * ----
  *
@@ -39,7 +39,7 @@
  *
  * [source,groovy,subs="+attributes"]
  * ----
- * compile {maven-groupId}:{maven-artifactId}:{maven-version}
+ * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
  * ----
  *
  * == Basic concepts

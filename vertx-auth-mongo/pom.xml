@@ -26,6 +26,10 @@
 
   <artifactId>vertx-auth-mongo</artifactId>
 
+  <properties>
+    <doc.skip>false</doc.skip>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

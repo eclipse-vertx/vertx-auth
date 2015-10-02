@@ -20,6 +20,27 @@
  * We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the Vert.x {@link io.vertx.ext.mongo.MongoClient}
  * to perform authentication and authorisation against a MongoDb.
  *
+ * To use this project, add the following
+ * dependency to the _dependencies_ section of your build descriptor:
+ *
+ * * Maven (in your `pom.xml`):
+ *
+ * [source,xml,subs="+attributes"]
+ * ----
+ * <dependency>
+ *   <groupId>${maven.groupId}</groupId>
+ *   <artifactId>${maven.artifactId}</artifactId>
+ *   <version>${maven.version}</version>
+ * </dependency>
+ * ----
+ *
+ * * Gradle (in your `build.gradle` file):
+ *
+ * [source,groovy,subs="+attributes"]
+ * ----
+ * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
+ * ----
+ *
  * To create an instance you first need an instance of {@link io.vertx.ext.mongo.MongoClient}. To learn how to create one
  * of those please consult the documentation for the MongoClient.
  *
@@ -29,11 +50,11 @@
  * ----
  * {@link examples.Examples#example1(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
  * ----
- * 
+ *
  * Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
  *
- * The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username" 
- * some others. You can easily change those defaults with the operations 
+ * The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
+ * some others. You can easily change those defaults with the operations
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setCollectionName(String)}
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameField(String)}
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordField(String)}
@@ -60,7 +81,7 @@
  * WARNING: It is strongly advised to use the {@link io.vertx.ext.auth.mongo.HashSaltStyle#EXTERNAL} option.
  * The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
  * salt and password are stored inside the same place!
- * 
+ *
  * == Authentication
  *
  * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
@@ -73,7 +94,7 @@
  * You are able to modify the credential fields by using the methods
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(String) }
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(String) }
- * 
+ *
  * == Authorisation - Permission-Role Model
  *
  * Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
@@ -104,4 +125,3 @@ package io.vertx.ext.auth.mongo;
 
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;
-
