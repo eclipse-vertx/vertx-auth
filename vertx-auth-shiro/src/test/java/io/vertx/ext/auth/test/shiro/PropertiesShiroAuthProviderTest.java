@@ -22,6 +22,8 @@ import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.junit.Test;
 
+import java.io.File;
+
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -65,5 +67,32 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
       }));
     }));
     await();
+  }
+
+  @Test
+  public void testResolve() throws Exception {
+    ClassLoader loader = PropertiesShiroAuthProviderTest.class.getClassLoader();
+    File res = new File(loader.getResource("test-auth.properties").toURI());
+    try {
+      ShiroAuth.create(vertx,
+          ShiroAuthRealmType.PROPERTIES,
+          new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, res.getName()));
+      fail();
+    } catch (Exception ignore) {
+    }
+    assertResolve(res.getParentFile(), res.getName());
+    assertResolve(res.getParentFile(), "file:" + res.getName());
+    assertResolve(res.getParentFile().getParentFile(), "file:" + res.getParentFile().getName() + File.separatorChar + res.getName());
+  }
+
+  private void assertResolve(File cwd, String path) {
+    try {
+      System.setProperty("vertx.cwd", cwd.getAbsolutePath());
+      ShiroAuth.create(vertx,
+          ShiroAuthRealmType.PROPERTIES,
+          new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, path));
+    } finally {
+      System.clearProperty("vertx.cwd");
+    }
   }
 }
