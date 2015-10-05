@@ -46,7 +46,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setCollectionName(java.lang.String)"](collectionName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -61,7 +61,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setUsernameField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -76,7 +76,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setPasswordField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -92,7 +92,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setRoleField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -108,7 +108,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setPermissionField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -124,7 +124,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setUsernameCredentialField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -140,7 +140,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setPasswordCredentialField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -156,7 +156,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_mongoAuth["setSaltField(java.lang.String)"](fieldName);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -170,7 +170,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getCollectionName()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -184,7 +184,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getUsernameField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -198,7 +198,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getPasswordField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -213,7 +213,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getRoleField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -228,7 +228,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getPermissionField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -243,7 +243,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getUsernameCredentialField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -258,7 +258,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getPasswordCredentialField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -273,7 +273,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_mongoAuth["getSaltField()"]();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -288,7 +288,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       j_mongoAuth["setHashStrategy(io.vertx.ext.auth.mongo.HashStrategy)"](hashStrategy._jdel);
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -302,7 +302,7 @@ var MongoAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return utils.convReturnVertxGen(j_mongoAuth["getHashStrategy()"](), HashStrategy);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -325,7 +325,7 @@ var MongoAuth = function(j_val) {
         resultHandler(null, ar.cause());
       }
     });
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate
@@ -352,7 +352,7 @@ MongoAuth.create = function(mongoClient, config) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
     return utils.convReturnVertxGen(JMongoAuth["create(io.vertx.ext.mongo.MongoClient,io.vertx.core.json.JsonObject)"](mongoClient._jdel, utils.convParamJsonObject(config)), MongoAuth);
-  } else utils.invalidArgs();
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 // We export the Constructor function

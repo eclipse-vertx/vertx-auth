@@ -45,7 +45,7 @@ var HashStrategy = function(j_val) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && __args[1]._jdel) {
       return j_hashStrategy["computeHash(java.lang.String,io.vertx.ext.auth.User)"](password, user._jdel);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -59,7 +59,7 @@ var HashStrategy = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       return j_hashStrategy["getStoredPwd(io.vertx.ext.auth.User)"](user._jdel);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -74,7 +74,7 @@ var HashStrategy = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       return j_hashStrategy["getSalt(io.vertx.ext.auth.User)"](user._jdel);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -87,7 +87,7 @@ var HashStrategy = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_hashStrategy["setExternalSalt(java.lang.String)"](salt);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -100,7 +100,7 @@ var HashStrategy = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
       j_hashStrategy["setSaltStyle(io.vertx.ext.auth.mongo.HashSaltStyle)"](io.vertx.ext.auth.mongo.HashSaltStyle.valueOf(__args[0]));
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -114,7 +114,7 @@ var HashStrategy = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return (j_hashStrategy["getSaltStyle()"]()).toString();
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate

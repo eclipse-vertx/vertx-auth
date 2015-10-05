@@ -44,7 +44,7 @@ var JDBCAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
       return utils.convReturnVertxGen(j_jDBCAuth["setAuthenticationQuery(java.lang.String)"](authenticationQuery), JDBCAuth);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -58,7 +58,7 @@ var JDBCAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
       return utils.convReturnVertxGen(j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery), JDBCAuth);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -72,7 +72,7 @@ var JDBCAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
       return utils.convReturnVertxGen(j_jDBCAuth["setPermissionsQuery(java.lang.String)"](permissionsQuery), JDBCAuth);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -86,7 +86,7 @@ var JDBCAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
       return utils.convReturnVertxGen(j_jDBCAuth["setRolePrefix(java.lang.String)"](rolePrefix), JDBCAuth);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate
@@ -106,7 +106,7 @@ JDBCAuth.create = function(client) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
     return utils.convReturnVertxGen(JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel), JDBCAuth);
-  } else utils.invalidArgs();
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 // We export the Constructor function

@@ -46,7 +46,7 @@ var JWTAuth = function(j_val) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'object') {
       return j_jWTAuth["generateToken(io.vertx.core.json.JsonObject,io.vertx.ext.auth.jwt.JWTOptions)"](utils.convParamJsonObject(claims), options != null ? new JWTOptions(new JsonObject(JSON.stringify(options))) : null);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate
@@ -67,7 +67,7 @@ JWTAuth.create = function(vertx, config) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
     return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)), JWTAuth);
-  } else utils.invalidArgs();
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 // We export the Constructor function

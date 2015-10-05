@@ -53,7 +53,7 @@ var User = function(j_val) {
       }
     });
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -69,7 +69,7 @@ var User = function(j_val) {
     if (__args.length === 0) {
       j_user["clearCache()"]();
       return that;
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -89,7 +89,7 @@ var User = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return utils.convReturnJson(j_user["principal()"]());
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -103,7 +103,7 @@ var User = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       j_user["setAuthProvider(io.vertx.ext.auth.AuthProvider)"](authProvider._jdel);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate

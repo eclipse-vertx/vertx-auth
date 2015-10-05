@@ -64,7 +64,7 @@ var AuthProvider = function(j_val) {
         resultHandler(null, ar.cause());
       }
     });
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate
