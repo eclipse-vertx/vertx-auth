@@ -64,7 +64,7 @@ var ShiroAuth = function(j_val) {
  */
 ShiroAuth.create = function(vertx, realmType, config) {
   var __args = arguments;
-  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
+  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
     return utils.convReturnVertxGen(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)), ShiroAuth);
   } else throw new TypeError('function invoked with invalid arguments');
 };

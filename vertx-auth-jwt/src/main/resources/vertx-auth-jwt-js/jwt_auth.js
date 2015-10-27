@@ -44,7 +44,7 @@ var JWTAuth = function(j_val) {
    */
   this.generateToken = function(claims, options) {
     var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'object') {
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && (typeof __args[1] === 'object' && __args[1] != null)) {
       return j_jWTAuth["generateToken(io.vertx.core.json.JsonObject,io.vertx.ext.auth.jwt.JWTOptions)"](utils.convParamJsonObject(claims), options != null ? new JWTOptions(new JsonObject(JSON.stringify(options))) : null);
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -65,7 +65,7 @@ var JWTAuth = function(j_val) {
  */
 JWTAuth.create = function(vertx, config) {
   var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
     return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)), JWTAuth);
   } else throw new TypeError('function invoked with invalid arguments');
 };

@@ -113,7 +113,7 @@ var HashStrategy = function(j_val) {
   this.getSaltStyle = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return (j_hashStrategy["getSaltStyle()"]()).toString();
+      return utils.convReturnEnum(j_hashStrategy["getSaltStyle()"]());
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

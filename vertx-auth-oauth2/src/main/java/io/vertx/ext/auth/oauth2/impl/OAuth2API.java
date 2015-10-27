@@ -1,0 +1,237 @@
+/*
+ * Copyright 2015 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
+package io.vertx.ext.auth.oauth2.impl;
+
+import io.vertx.core.*;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Base64;
+import java.util.Map;
+
+/**
+ * @author Paulo Lopes
+ */
+public class OAuth2API {
+
+  public static void api(Vertx vertx, JsonObject config, HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+    final String url;
+
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      url = path ;
+    } else {
+      url = config.getString("site") + path ;
+    }
+
+    call(vertx, config, method, url, params, callback);
+  }
+
+  private static void call(Vertx vertx, JsonObject config, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+
+    if (!config.containsKey("clientID") || !config.containsKey("clientSecret") || !config.containsKey("site")) {
+      callback.handle(Future.failedFuture("Configuration missing. You need to specify the client id, the client secret and the oauth2 server"));
+      return;
+    }
+
+    final JsonObject headers = new JsonObject();
+
+    if (params.containsKey("access_token") && !params.containsKey("client_id")) {
+      headers.put("Authorization", "Bearer " + params.getString("access_token"));
+      params.remove("access_token");
+    } else if (config.containsKey("useBasicAuthorizationHeader") && config.containsKey("clientID") && !params.containsKey("client_id")) {
+      String basic = config.getString("clientID") + ":" + config.getString("clientSecret");
+      headers.put("Authorization", "Basic " + Base64.getUrlEncoder().encodeToString(basic.getBytes()));
+    }
+
+    JsonObject tmp = config.getJsonObject("headers");
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    JsonObject form = null;
+
+    if (method != HttpMethod.GET) {
+      form = params.copy();
+    }
+
+    if (method == HttpMethod.GET) {
+      if (uri.indexOf('?') != -1) {
+        uri += "&" + stringify(params);
+      }
+    }
+
+    // Enable the system to send authorization params in the body (for example github does not require to be in the header)
+    if (method != HttpMethod.GET && form != null) {
+      form.put("client_id", config.getString("clientID"));
+      if (config.containsKey("clientSecretParameterName")) {
+        form.put(config.getString("clientSecretParameterName"), config.getString("clientSecret"));
+      }
+    }
+
+    HttpClient client;
+
+    try {
+      URL url = new URL(uri);
+      boolean isSecure = "https".equalsIgnoreCase(url.getProtocol());
+      String host = url.getHost();
+      int port = url.getPort();
+
+      if (port == -1) {
+        if (isSecure) {
+          port = 443;
+        } else {
+          port = 80;
+        }
+      }
+
+      client = vertx.createHttpClient(new HttpClientOptions()
+          .setSsl(isSecure)
+          .setDefaultHost(host)
+          .setDefaultPort(port));
+
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
+
+    HttpClientRequest request = client.request(method, uri, resp -> {
+      if (resp.statusCode() >= 400) {
+        callback.handle(Future.failedFuture(resp.statusMessage()));
+        return;
+      }
+
+      resp.bodyHandler(body -> {
+        if (body == null) {
+          callback.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        String contentType = resp.getHeader("Content-Type");
+        int sep = contentType.indexOf(';');
+        // exclude charset
+        if (sep != -1) {
+          contentType = contentType.substring(0, sep);
+        }
+
+        switch (contentType) {
+          case "application/json":
+            try {
+              callback.handle(Future.succeededFuture(new JsonObject(body.toString())));
+            } catch (RuntimeException e) {
+              callback.handle(Future.failedFuture(e));
+            }
+            break;
+          case "application/x-www-form-urlencoded":
+            try {
+              callback.handle(Future.succeededFuture(queryToJSON(body.toString())));
+            } catch (UnsupportedEncodingException | RuntimeException e) {
+              callback.handle(Future.failedFuture(e));
+            }
+            break;
+          default:
+            callback.handle(Future.failedFuture("Cannot handle content type: " + contentType));
+            break;
+        }
+      });
+    });
+
+    // write the headers
+    for (Map.Entry<String, ?> kv : headers) {
+      request.putHeader(kv.getKey(), kv.getValue().toString());
+    }
+
+    // specific UA
+    if (config.containsKey("agent")) {
+      request.putHeader("User-Agent", config.getString("agent"));
+    }
+
+    // specify preferred content type
+    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    if (form != null) {
+      request.putHeader("Content-Type", "application/x-www-form-urlencoded");
+      final String payload = stringify(form);
+
+      request.putHeader("Content-Length", Integer.toString(payload.length()));
+      request.write(payload);
+    }
+
+    // Make sure the request is ended when you're done with it
+    request.end();
+  }
+
+  public static String stringify(JsonObject json) {
+    StringBuilder sb = new StringBuilder();
+    try {
+      for (Map.Entry<String, ?> kv : json) {
+        sb.append(URLEncoder.encode(kv.getKey(), "UTF-8"));
+        sb.append('=');
+        Object v = kv.getValue();
+        if (v != null) {
+          sb.append(URLEncoder.encode(v.toString(), "UTF-8"));
+        }
+        sb.append('&');
+      }
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
+
+    // exclude the last amp
+    if (sb.length() > 0) {
+      sb.setLength(sb.length() - 1);
+    }
+
+    return sb.toString();
+  }
+
+  public static JsonObject queryToJSON(String query) throws UnsupportedEncodingException {
+    final JsonObject json = new JsonObject();
+    final String[] pairs = query.split("&");
+    for (String pair : pairs) {
+      final int idx = pair.indexOf("=");
+      final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
+      final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
+      if (!json.containsKey(key)) {
+        json.put(key, value);
+      } else {
+        Object oldValue = json.getValue(key);
+        JsonArray array;
+        if (oldValue instanceof JsonArray) {
+          array = (JsonArray) oldValue;
+        } else {
+          array = new JsonArray();
+          array.add(oldValue);
+          json.put(key, array);
+        }
+        if (value == null) {
+          array.addNull();
+        } else {
+          array.add(value);
+        }
+      }
+    }
+
+    return json;
+  }
+}

@@ -13,7 +13,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jdbc</artifactId>
-  <version>3.1.0</version>
+  <version>3.2.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -21,7 +21,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-jdbc:3.1.0
+compile io.vertx:vertx-auth-jdbc:3.2.0-SNAPSHOT
 ----
 
 To create an instance you first need an instance of `link:../../vertx-jdbc-client/groovy/groovydoc/io/vertx/groovy/ext/jdbc/JDBCClient.html[JDBCClient]`. To learn how to create one
@@ -121,3 +121,4 @@ user.isAuthorised("role:manager", { res ->
 ----
 
 The default role prefix is `role:`. You can change this with `link:groovydoc/io/vertx/groovy/ext/auth/jdbc/JDBCAuth.html#setRolePrefix(java.lang.String)[setRolePrefix]`.
+<a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a>

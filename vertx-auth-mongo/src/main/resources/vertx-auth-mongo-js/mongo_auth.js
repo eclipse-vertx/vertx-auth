@@ -350,7 +350,7 @@ var MongoAuth = function(j_val) {
  */
 MongoAuth.create = function(mongoClient, config) {
   var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object') {
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
     return utils.convReturnVertxGen(JMongoAuth["create(io.vertx.ext.mongo.MongoClient,io.vertx.core.json.JsonObject)"](mongoClient._jdel, utils.convParamJsonObject(config)), MongoAuth);
   } else throw new TypeError('function invoked with invalid arguments');
 };
