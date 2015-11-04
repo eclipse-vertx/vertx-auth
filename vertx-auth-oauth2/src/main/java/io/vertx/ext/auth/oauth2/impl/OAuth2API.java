@@ -127,6 +127,12 @@ public class OAuth2API {
           return;
         }
 
+        if (body.length() == 0) {
+          // no body
+          callback.handle(Future.succeededFuture());
+          return;
+        }
+
         String contentType = resp.getHeader("Content-Type");
         int sep = contentType.indexOf(';');
         // exclude charset
