@@ -1,0 +1,18 @@
+= Cheatsheets
+
+[[AuthOptions]]
+== AuthOptions
+
+++++
+ A common base object for authentication options.
+ <p>
+ note: this will be moved to vertx-auth project after 3.1
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|===
+

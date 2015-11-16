@@ -17,15 +17,21 @@ module VertxAuthShiro
       @j_del
     end
     #  Create a Shiro auth provider
-    # @param [::Vertx::Vertx] vertx the Vert.x instance
-    # @param [:PROPERTIES,:LDAP] realmType the Shiro realm type
-    # @param [Hash{String => Object}] config the config
+    # @overload create(vertx,options)
+    #   @param [::Vertx::Vertx] vertx the Vert.x instance
+    #   @param [Hash] options the Shiro configuration options
+    # @overload create(vertx,realmType,config)
+    #   @param [::Vertx::Vertx] vertx the Vert.x instance
+    #   @param [:PROPERTIES,:LDAP] realmType the Shiro realm type
+    #   @param [Hash{String => Object}] config the config
     # @return [::VertxAuthShiro::ShiroAuth] the auth provider
-    def self.create(vertx=nil,realmType=nil,config=nil)
-      if vertx.class.method_defined?(:j_del) && realmType.class == Symbol && config.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(realmType),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthShiro::ShiroAuth)
+    def self.create(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && !block_given? && param_3 == nil
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthOptions.java_class]).call(param_1.j_del,Java::IoVertxExtAuthShiro::ShiroAuthOptions.new(::Vertx::Util::Utils.to_json_object(param_2))),::VertxAuthShiro::ShiroAuth)
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Symbol && param_3.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(param_2),::Vertx::Util::Utils.to_json_object(param_3)),::VertxAuthShiro::ShiroAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(vertx,realmType,config)"
+      raise ArgumentError, "Invalid arguments when calling create(param_1,param_2,param_3)"
     end
     #  Set the role prefix to distinguish from permissions when checking for isPermitted requests.
     # @param [String] rolePrefix a Prefix e.g.: "role:"

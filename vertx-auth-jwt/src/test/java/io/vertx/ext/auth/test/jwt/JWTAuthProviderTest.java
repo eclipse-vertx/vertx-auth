@@ -122,7 +122,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
         .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().setExpiresInMinutes(5).setNoTimestamp(true));
+        new JWTOptions().setExpiresInMinutes(5L).setNoTimestamp(true));
 
     assertNotNull(token);
 
@@ -161,7 +161,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
             .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().setExpiresInMinutes(-5).setNoTimestamp(true));
+        new JWTOptions().setExpiresInMinutes(-5L).setNoTimestamp(true));
 
     assertNotNull(token);
 
