@@ -71,7 +71,7 @@ public class JWTOptions {
    * @param expiresInMinutes time in minutes
    * @return fluent API
    */
-  public JWTOptions setExpiresInMinutes(long expiresInMinutes) {
+  public JWTOptions setExpiresInMinutes(Long expiresInMinutes) {
     json.put("expiresInMinutes", expiresInMinutes);
     return this;
   }
@@ -85,13 +85,13 @@ public class JWTOptions {
    * @param expiresInSeconds time in seconds
    * @return fluent API
    */
-  public JWTOptions setExpiresInSeconds(long expiresInSeconds) {
+  public JWTOptions setExpiresInSeconds(Long expiresInSeconds) {
     json.put("expiresInSeconds", expiresInSeconds);
     return this;
   }
 
-  public JsonArray getAudience() {
-    return json.getJsonArray("audience");
+  public List<String> getAudience() {
+    return json.getJsonArray("audience").getList();
   }
 
   /**

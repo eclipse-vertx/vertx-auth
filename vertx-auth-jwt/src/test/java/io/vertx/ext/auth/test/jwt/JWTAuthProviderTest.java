@@ -107,9 +107,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
             .add("developer")
             .add("user"))
         .put("permissions", new JsonArray()
-                .add("read")
-                .add("write")
-                .add("execute"));
+            .add("read")
+            .add("write")
+            .add("execute"));
 
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
     assertNotNull(token);
@@ -122,7 +122,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
         .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().setExpiresInMinutes(5).setNoTimestamp(true));
+        new JWTOptions().setExpiresInMinutes(5L).setNoTimestamp(true));
 
     assertNotNull(token);
 
@@ -158,10 +158,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testExpiration() {
     JsonObject payload = new JsonObject()
-            .put("sub", "Paulo");
+        .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().setExpiresInMinutes(-5).setNoTimestamp(true));
+        new JWTOptions().setExpiresInMinutes(-5L).setNoTimestamp(true));
 
     assertNotNull(token);
 
@@ -176,7 +176,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGoodIssuer() {
     JsonObject payload = new JsonObject()
-            .put("sub", "Paulo");
+        .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://vertx.io"));
     assertNotNull(token);
@@ -203,7 +203,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject()
         .put("jwt", token)
         .put("options", new JsonObject()
-             .put("issuer", "https://vertx.io"));
+            .put("issuer", "https://vertx.io"));
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -215,7 +215,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGoodAudience() {
     JsonObject payload = new JsonObject()
-            .put("sub", "Paulo");
+        .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
         new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
@@ -225,7 +225,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject()
         .put("jwt", token)
         .put("options", new JsonObject()
-             .put("audience", new JsonArray().add("b").add("d")));
+            .put("audience", new JsonArray().add("b").add("d")));
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -237,7 +237,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testBadAudience() {
     JsonObject payload = new JsonObject()
-            .put("sub", "Paulo");
+        .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
         new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
@@ -247,7 +247,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject()
         .put("jwt", token)
         .put("options", new JsonObject()
-             .put("audience", new JsonArray().add("e").add("d")));
+            .put("audience", new JsonArray().add("e").add("d")));
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -270,13 +270,33 @@ public class JWTAuthProviderTest extends VertxTestBase {
         .put("jwt", token);
 
     authProvider.authenticate(authInfo, res -> {
-        if (res.failed()) {
-          res.cause().printStackTrace();
-          fail();
-        }
-        System.out.println(res.result());
+      if (res.failed()) {
+        res.cause().printStackTrace();
+        fail();
+      }
+
+      assertNotNull(res.result());
       testComplete();
     });
+    await();
+  }
+
+  @Test
+  public void testGenerateNewTokenForceAlgorithm() {
+    authProvider = JWTAuth.create(vertx, new JsonObject().put("keyStore", new JsonObject()
+        .put("path", "gce.jks")
+        .put("type", "jks")
+        .put("password", "notasecret")));
+
+    String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("RS256"));
+    assertNotNull(token);
+
+    // reverse
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
     await();
   }
 }

@@ -29,14 +29,15 @@ The target audience of this token
 +++
 The target audience of this token
 +++
-|[[expiresInMinutes]]`expiresInMinutes`|`Number (long)`|
+|[[expiresInMinutes]]`expiresInMinutes`|`Number (Long)`|
 +++
 The expiration time for the token in minutes
 +++
-|[[expiresInSeconds]]`expiresInSeconds`|`Number (long)`|
+|[[expiresInSeconds]]`expiresInSeconds`|`Number (Long)`|
 +++
 The expiration time for the token in seconds
 +++
+|[[header]]`header`|`Json object`|-
 |[[issuer]]`issuer`|`String`|
 +++
 The issuer of this token
@@ -47,7 +48,7 @@ Disable the generation of issued at claim
 +++
 |[[permissions]]`permissions`|`Array of String`|
 +++
-Add a permission to this token.
+The permissions of this token.
 +++
 |[[subject]]`subject`|`String`|
 +++

@@ -64,14 +64,25 @@ final class CryptoSignature implements Crypto {
   private final PrivateKey privateKey;
   private final X509Certificate certificate;
 
-  CryptoSignature(final X509Certificate certificate, final PrivateKey privateKey) {
+  CryptoSignature(final String algorithm, final X509Certificate certificate, final PrivateKey privateKey) {
     this.certificate = certificate;
     this.privateKey = privateKey;
+
+    Signature signature;
     try {
-      this.sig = Signature.getInstance(certificate.getSigAlgName());
+      // use default
+      signature = Signature.getInstance(algorithm);
     } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
+      // fallback
+      try {
+        signature = Signature.getInstance(certificate.getSigAlgName());
+      } catch (NoSuchAlgorithmException e1) {
+        // error
+        throw new RuntimeException(e);
+      }
     }
+
+    this.sig = signature;
   }
 
   @Override
