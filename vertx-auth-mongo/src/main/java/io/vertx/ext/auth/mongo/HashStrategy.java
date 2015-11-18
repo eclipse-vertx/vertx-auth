@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.mongo;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.User;
 
@@ -58,6 +59,7 @@ public interface HashStrategy {
    *          used
    * @return null in case of {@link HashSaltStyle#NO_SALT} the salt of the user or a defined external salt
    */
+  @Nullable
   String getSalt(User user);
 
   /**

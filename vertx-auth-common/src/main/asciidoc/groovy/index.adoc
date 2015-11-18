@@ -14,7 +14,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-common</artifactId>
-  <version>3.1.0</version>
+  <version>3.2.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -22,7 +22,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-common:3.1.0
+compile io.vertx:vertx-auth-common:3.2.0-SNAPSHOT
 ----
 
 == Basic concepts
@@ -142,3 +142,4 @@ We provide an abstract implementation of user called `AbstractUser` which you ca
 to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
 
 If you wish your user objects to be clusterable you should make sure they implement `ClusterSerializable`.
+<a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a>

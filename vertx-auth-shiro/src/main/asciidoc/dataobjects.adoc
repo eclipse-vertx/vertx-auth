@@ -1,0 +1,24 @@
+= Cheatsheets
+
+[[ShiroAuthOptions]]
+== ShiroAuthOptions
+
+++++
+ Shiro auth configuration options, see Vert.x Auth Shiro component and/or Apache Shiro project.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[config]]`config`|`Json object`|
++++
+@return the Shiro auth config
++++
+|[[type]]`type`|`link:enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`|
++++
+@return the Shiro realm type
++++
+|===
+

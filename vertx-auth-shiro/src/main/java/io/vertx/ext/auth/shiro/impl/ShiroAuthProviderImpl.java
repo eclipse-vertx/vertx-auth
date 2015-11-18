@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -46,17 +47,17 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   private String rolePrefix = DEFAULT_ROLE_PREFIX;
   private String realmName;
 
-  public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
+  public static ShiroAuth create(Vertx vertx, ShiroAuthOptions options) {
     Realm realm;
-    switch (realmType) {
+    switch (options.getType()) {
       case PROPERTIES:
-        realm = PropertiesAuthProvider.createRealm(config);
+        realm = PropertiesAuthProvider.createRealm(options.getConfig());
         break;
       case LDAP:
-        realm = LDAPAuthProvider.createRealm(config);
+        realm = LDAPAuthProvider.createRealm(options.getConfig());
         break;
       default:
-        throw new IllegalArgumentException("Invalid shiro auth realm type: " + realmType);
+        throw new IllegalArgumentException("Invalid shiro auth realm type: " + options.getType());
     }
     return new ShiroAuthProviderImpl(vertx, realm);
   }

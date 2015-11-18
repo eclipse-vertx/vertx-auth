@@ -22,6 +22,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
 var JShiroAuth = io.vertx.ext.auth.shiro.ShiroAuth;
+var ShiroAuthOptions = io.vertx.ext.auth.shiro.ShiroAuthOptions;
 
 /**
 
@@ -62,10 +63,12 @@ var ShiroAuth = function(j_val) {
  @param config {Object} the config 
  @return {ShiroAuth} the auth provider
  */
-ShiroAuth.create = function(vertx, realmType, config) {
+ShiroAuth.create = function() {
   var __args = arguments;
-  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'object') {
-    return utils.convReturnVertxGen(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(config)), ShiroAuth);
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
+    return utils.convReturnVertxGen(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthOptions)"](__args[0]._jdel, __args[1] != null ? new ShiroAuthOptions(new JsonObject(JSON.stringify(__args[1]))) : null), ShiroAuth);
+  }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
+    return utils.convReturnVertxGen(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](__args[0]._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(__args[2])), ShiroAuth);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
