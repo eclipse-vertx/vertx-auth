@@ -45,7 +45,7 @@ public class JWTOptions {
   }
 
   public JWTOptions(JWTOptions options) {
-    this(options.toJSON());
+    this(options.toJson());
   }
 
   public String getAlgorithm() {
@@ -71,8 +71,12 @@ public class JWTOptions {
    * @param expiresInMinutes time in minutes
    * @return fluent API
    */
-  public JWTOptions setExpiresInMinutes(long expiresInMinutes) {
-    json.put("expiresInMinutes", expiresInMinutes);
+  public JWTOptions setExpiresInMinutes(Long expiresInMinutes) {
+    if (expiresInMinutes != null) {
+      json.put("expiresInMinutes", expiresInMinutes);
+    } else {
+      json.remove("expiresInMinutes");
+    }
     return this;
   }
 
@@ -85,13 +89,17 @@ public class JWTOptions {
    * @param expiresInSeconds time in seconds
    * @return fluent API
    */
-  public JWTOptions setExpiresInSeconds(long expiresInSeconds) {
-    json.put("expiresInSeconds", expiresInSeconds);
+  public JWTOptions setExpiresInSeconds(Long expiresInSeconds) {
+    if (expiresInSeconds != null) {
+      json.put("expiresInSeconds", expiresInSeconds);
+    } else {
+      json.remove("expiresInSeconds");
+    }
     return this;
   }
 
-  public JsonArray getAudience() {
-    return json.getJsonArray("audience");
+  public List<String> getAudience() {
+    return json.getJsonArray("audience") != null ? json.getJsonArray("audience").getList() : null;
   }
 
   /**
@@ -199,7 +207,7 @@ public class JWTOptions {
     return this;
   }
 
-  public JsonObject toJSON() {
+  public JsonObject toJson() {
     return json;
   }
 }

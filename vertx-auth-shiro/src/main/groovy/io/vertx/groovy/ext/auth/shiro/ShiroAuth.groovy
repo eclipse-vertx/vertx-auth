@@ -20,6 +20,7 @@ import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 import io.vertx.groovy.ext.auth.AuthProvider
 /**
@@ -44,6 +45,16 @@ public class ShiroAuth extends AuthProvider {
    */
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, Map<String, Object> config) {
     def ret= InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), realmType, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
+    return ret;
+  }
+  /**
+   * Create a Shiro auth provider
+   * @param vertx the Vert.x instance
+   * @param options the Shiro configuration options (see <a href="../../../../../../../../cheatsheet/ShiroAuthOptions.html">ShiroAuthOptions</a>)
+   * @return the auth provider
+   */
+  public static ShiroAuth create(Vertx vertx, Map<String, Object> options) {
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), options != null ? new io.vertx.ext.auth.shiro.ShiroAuthOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
   /**

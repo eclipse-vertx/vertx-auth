@@ -62,16 +62,26 @@ public final class JWT {
       }
 
       // load SIGNATUREs
+      final Map<String, String> alias = new HashMap<String, String>() {{
+        put("RS256", "SHA256withRSA");
+        put("RS384", "SHA384withRSA");
+        put("RS512", "SHA512withRSA");
+        put("ES256", "SHA256withECDSA");
+        put("ES384", "SHA384withECDSA");
+        put("ES512", "SHA512withECDSA");
+      }};
+
       for (String alg : Arrays.<String>asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
         try {
           X509Certificate certificate = getCertificate(keyStore, alg);
           PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
           if (certificate != null && privateKey != null) {
-            tmp.put(alg, new CryptoSignature(certificate, privateKey));
+            tmp.put(alg, new CryptoSignature(alias.get(alg), certificate, privateKey));
           } else {
             log.info(alg + " not available");
           }
         } catch (RuntimeException e) {
+          e.printStackTrace();
           log.warn(alg + " not supported");
         }
       }

@@ -21,6 +21,7 @@ import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
@@ -53,6 +54,17 @@ public class ShiroAuth extends AuthProvider {
    */
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) { 
     ShiroAuth ret= ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), realmType, config));
+    return ret;
+  }
+
+  /**
+   * Create a Shiro auth provider
+   * @param vertx the Vert.x instance
+   * @param options the Shiro configuration options
+   * @return the auth provider
+   */
+  public static ShiroAuth create(Vertx vertx, ShiroAuthOptions options) { 
+    ShiroAuth ret= ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), options));
     return ret;
   }
 
