@@ -16,14 +16,6 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
 
 public class OAuth2FailureTest extends VertxTestBase {
 
-  private static final JsonObject fixture = new JsonObject(
-      "{" +
-          "  \"access_token\": \"4adc339e0\"," +
-          "  \"refresh_token\": \"ec1a59d298\"," +
-          "  \"token_type\": \"bearer\"," +
-          "  \"expires_in\": 7200" +
-          "}");
-
   private static final JsonObject tokenConfig = new JsonObject()
       .put("code", "code")
       .put("redirect_uri", "http://callback.com");
@@ -34,12 +26,6 @@ public class OAuth2FailureTest extends VertxTestBase {
       .put("client_secret", "client-secret")
       .put("grant_type", "authorization_code")
       .put("client_id", "client-id");
-
-  private static final JsonObject authorizeConfig = new JsonObject()
-      .put("redirect_uri", "http://localhost:3000/callback")
-      .put("scope", "user")
-      .put("state", "02afe928b");
-
 
   protected OAuth2Auth oauth2;
   private HttpServer server;
