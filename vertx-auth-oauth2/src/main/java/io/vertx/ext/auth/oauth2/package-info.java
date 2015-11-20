@@ -175,6 +175,13 @@
  * {@link examples.Examples#example11}
  * ----
  *
+ * ==== JBoss Keycloak
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example12}
+ * ----
+ *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @Document(fileName = "index.adoc")

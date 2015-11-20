@@ -250,4 +250,18 @@ public class Examples {
     // Initialize the OAuth2 Library
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
   }
+
+  public void example12(Vertx vertx, String realm) {
+    // Set the client credentials and the OAuth2 server
+    JsonObject credentials = new JsonObject()
+        .put("clientID", "CLIENT_ID")
+        .put("clientSecret", "CLIENT_SECRET")
+        .put("site", "https://www.your-keycloak-server.com")
+        .put("authorizationPath", "/realms/" + realm + "/protocol/openid-connect/auth")
+        .put("tokenPath", "/realms/" + realm + "/protocol/openid-connect/token");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
 }

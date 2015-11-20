@@ -370,4 +370,24 @@ credentials = {
 oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
+
+==== JBoss Keycloak
+
+[source,ruby]
+----
+require 'vertx-auth-jwt/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://www.your-keycloak-server.com",
+  'authorizationPath' => "/realms/#{realm}/protocol/openid-connect/auth",
+  'tokenPath' => "/realms/#{realm}/protocol/openid-connect/token"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
 <a href="mailto:plopes@redhat.com">Paulo Lopes</a>

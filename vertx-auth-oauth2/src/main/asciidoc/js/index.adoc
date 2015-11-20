@@ -370,4 +370,24 @@ var credentials = {
 var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
 
 ----
+
+==== JBoss Keycloak
+
+[source,js]
+----
+var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+// Set the client credentials and the OAuth2 server
+var credentials = {
+  "clientID" : "CLIENT_ID",
+  "clientSecret" : "CLIENT_SECRET",
+  "site" : "https://www.your-keycloak-server.com",
+  "authorizationPath" : "/realms/" + realm + "/protocol/openid-connect/auth",
+  "tokenPath" : "/realms/" + realm + "/protocol/openid-connect/token"
+};
+
+
+// Initialize the OAuth2 Library
+var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
+
+----
 <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
