@@ -114,8 +114,8 @@ oauth2.get_token({
 
 The Authorization Code flow is made up from two parts. At first your application asks to the user the permission to
 access their data. If the user approves the OAuth2 server sends to the client an authorization code. In the second
-part, the client POST the authorization code along with its client secret to the Lelylan in order to get the access
-token.
+part, the client POST the authorization code along with its client secret to the authority server in order to get the
+access token.
 
 [source,ruby]
 ----
@@ -266,6 +266,108 @@ token.revoke("access_token") { |res_err,res|
     puts "token revoked."
   }
 }
+
+----
+
+=== Example configuration for common OAuth2 providers
+
+==== Google
+
+[source,ruby]
+----
+require 'vertx-auth-jwt/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://accounts.google.com",
+  'tokenPath' => "https://www.googleapis.com/oauth2/v3/token",
+  'authorizationPath' => "/o/oauth2/auth"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
+
+==== GitHub
+
+[source,ruby]
+----
+require 'vertx-auth-jwt/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://github.com/login",
+  'tokenPath' => "/oauth/access_token",
+  'authorizationPath' => "/oauth/authorize"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
+
+==== Linkedin
+
+[source,ruby]
+----
+require 'vertx-auth-jwt/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://www.linkedin.com",
+  'authorizationPath' => "/uas/oauth2/authorization",
+  'tokenPath' => "/uas/oauth2/accessToken"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
+
+==== Twitter
+
+[source,ruby]
+----
+require 'vertx-auth-jwt/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://api.twitter.com",
+  'authorizationPath' => "/oauth/authorize",
+  'tokenPath' => "/oauth/access_token"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
+
+==== Facebook
+
+[source,ruby]
+----
+require 'vertx-auth-jwt/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://www.facebook.com",
+  'authorizationPath' => "/dialog/oauth",
+  'tokenPath' => "https://graph.facebook.com/oauth/access_token"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 <a href="mailto:plopes@redhat.com">Paulo Lopes</a>

@@ -138,6 +138,43 @@
  * {@link examples.Examples#example6}
  * ----
  *
+ * === Example configuration for common OAuth2 providers
+ *
+ * ==== Google
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example7}
+ * ----
+ *
+ * ==== GitHub
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example8}
+ * ----
+ *
+ * ==== Linkedin
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example9}
+ * ----
+ *
+ * ==== Twitter
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example10}
+ * ----
+ *
+ * ==== Facebook
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example11}
+ * ----
+ *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @Document(fileName = "index.adoc")

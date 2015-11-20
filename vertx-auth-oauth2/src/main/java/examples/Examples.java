@@ -180,4 +180,74 @@ public class Examples {
       });
     });
   }
+
+  public void example7(Vertx vertx) {
+    // Set the client credentials and the OAuth2 server
+    JsonObject credentials = new JsonObject()
+        .put("clientID", "CLIENT_ID")
+        .put("clientSecret", "CLIENT_SECRET")
+        .put("site", "https://accounts.google.com")
+        .put("tokenPath", "https://www.googleapis.com/oauth2/v3/token")
+        .put("authorizationPath", "/o/oauth2/auth");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
+
+  public void example8(Vertx vertx) {
+    // Set the client credentials and the OAuth2 server
+    JsonObject credentials = new JsonObject()
+        .put("clientID", "CLIENT_ID")
+        .put("clientSecret", "CLIENT_SECRET")
+        .put("site", "https://github.com/login")
+        .put("tokenPath", "/oauth/access_token")
+        .put("authorizationPath", "/oauth/authorize");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
+
+  public void example9(Vertx vertx) {
+    // Set the client credentials and the OAuth2 server
+    JsonObject credentials = new JsonObject()
+        .put("clientID", "CLIENT_ID")
+        .put("clientSecret", "CLIENT_SECRET")
+        .put("site", "https://www.linkedin.com")
+        .put("authorizationPath", "/uas/oauth2/authorization")
+        .put("tokenPath", "/uas/oauth2/accessToken");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
+
+  public void example10(Vertx vertx) {
+    // Set the client credentials and the OAuth2 server
+    JsonObject credentials = new JsonObject()
+        .put("clientID", "CLIENT_ID")
+        .put("clientSecret", "CLIENT_SECRET")
+        .put("site", "https://api.twitter.com")
+        .put("authorizationPath", "/oauth/authorize")
+        .put("tokenPath", "/oauth/access_token");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
+
+  public void example11(Vertx vertx) {
+    // Set the client credentials and the OAuth2 server
+    JsonObject credentials = new JsonObject()
+        .put("clientID", "CLIENT_ID")
+        .put("clientSecret", "CLIENT_SECRET")
+        .put("site", "https://www.facebook.com")
+        .put("authorizationPath", "/dialog/oauth")
+        .put("tokenPath", "https://graph.facebook.com/oauth/access_token");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
 }
