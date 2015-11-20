@@ -1,0 +1,382 @@
+== The OAuth2 auth provider
+
+This component contains an out of the box OAuth2 implementation.
+
+To use this project, add the following
+dependency to the _dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-oauth2</artifactId>
+  <version>3.2.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile io.vertx:vertx-auth-oauth2:3.2.0-SNAPSHOT
+----
+
+OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
+to enable and disable those accesses whenever they want.
+
+Vert.x OAuth2 supports the following flows.
+
+* Authorization Code Flow (for apps with servers that can store persistent information).
+* Password Credentials Flow (when previous flow can't be used or during development).
+* Client Credentials Flow (the client can request an access token using only its client credentials)
+
+=== Authorization Code Flow
+
+The authorization code grant type is used to obtain both access tokens and refresh tokens and is optimized for
+confidential clients. As a redirection-based flow, the client must be capable of interacting with the resource
+owner's user-agent (typically a web browser) and capable of receiving incoming requests (via redirection) from the
+authorization server.
+
+For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1">Oauth2 spec#section-4.1</a>.
+
+=== Password Credentials Flow
+
+The resource owner password credentials grant type is suitable in cases where the resource owner has a trust
+relationship with the client, such as the device operating system or a highly privileged application. The
+authorization server should take special care when enabling this grant type, and only allow it when other flows are
+not viable.
+
+The grant type is suitable for clients capable of obtaining the resource owner's credentials (username and password,
+typically using an interactive form).  It is also used to migrate existing clients using direct authentication
+schemes such as HTTP Basic or Digest authentication to OAuth by converting the stored credentials to an access token.
+
+For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.3">Oauth2 spec#section-4.3</a>.
+
+=== Client Credentials Flow
+
+The client can request an access token using only its client credentials (or other supported means of authentication)
+when the client is requesting access to the protected resources under its control, or those of another resource owner
+that have been previously arranged with the authorization server (the method of which is beyond the scope of this
+specification).
+
+The client credentials grant type MUST only be used by confidential clients.
+
+For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4">Oauth2 spec#section-4.4</a>.
+
+=== Getting Started
+
+An example on how to use this provider and authenticate with GitHub can be implemented as:
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, [
+  clientID:"YOUR_CLIENT_ID",
+  clientSecret:"YOUR_CLIENT_SECRET",
+  site:"https://github.com/login",
+  tokenPath:"/oauth/access_token",
+  authorizationPath:"/oauth/authorize"
+])
+
+// when there is a need to access a protected resource or call a protected method,
+// call the authZ url for a challenge
+
+def authorization_uri = oauth2.authorizeURL([
+  redirect_uri:"http://localhost:8080/callback",
+  scope:"notifications",
+  state:"3(#0/!~"
+])
+
+// when working with web application use the above string as a redirect url
+
+// in this case GitHub will call you back in the callback uri one should now complete the handshake as:
+
+
+def code = "xxxxxxxxxxxxxxxxxxxxxxxx"
+
+oauth2.getToken([
+  code:code,
+  redirect_uri:"http://localhost:8080/callback"
+], { res ->
+  if (res.failed()) {
+    // error, the code provided is not valid
+  } else {
+    // save the token and continue...
+  }
+})
+
+----
+
+==== Authorization Code flow
+
+The Authorization Code flow is made up from two parts. At first your application asks to the user the permission to
+access their data. If the user approves the OAuth2 server sends to the client an authorization code. In the second
+part, the client POST the authorization code along with its client secret to the authority server in order to get the
+access token.
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"<client-id>",
+  clientSecret:"<client-secret>",
+  site:"https://api.oauth.com"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials)
+
+// Authorization oauth2 URI
+def authorization_uri = oauth2.authorizeURL([
+  redirect_uri:"http://localhost:8080/callback",
+  scope:"<scope>",
+  state:"<state>"
+])
+
+// Redirect example using Vert.x
+response.putHeader("Location", authorization_uri).setStatusCode(302).end()
+
+def tokenConfig = [
+  code:"<code>",
+  redirect_uri:"http://localhost:3000/callback"
+]
+
+// Callbacks
+// Save the access token
+oauth2.getToken(tokenConfig, { res ->
+  if (res.failed()) {
+    System.err.println("Access Token Error: ${res.cause().getMessage()}")
+  } else {
+    // Get the access token object (the authorization code is given from the previous step).
+    def token = res.result()
+  }
+})
+
+----
+
+==== Password Credentials Flow
+
+This flow is suitable when the resource owner has a trust relationship with the client, such as its computer
+operating system or a highly privileged application. Use this flow only when other flows are not viable or when you
+need a fast way to test your application.
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+import io.vertx.core.http.HttpMethod
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD)
+
+def tokenConfig = [
+  username:"username",
+  password:"password"
+]
+
+// Callbacks
+// Save the access token
+oauth2.getToken(tokenConfig, { res ->
+  if (res.failed()) {
+    System.err.println("Access Token Error: ${res.cause().getMessage()}")
+  } else {
+    // Get the access token object (the authorization code is given from the previous step).
+    def token = res.result()
+
+    oauth2.api(HttpMethod.GET, "/users", [
+      access_token:token.principal().access_token
+    ], { res2 ->
+      // the user object should be returned here...
+    })
+  }
+})
+
+----
+
+==== Client Credentials Flow
+
+This flow is suitable when client is requesting access to the protected resources under its control.
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"<client-id>",
+  clientSecret:"<client-secret>",
+  site:"https://api.oauth.com"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+def tokenConfig = [:]
+
+// Callbacks
+// Save the access token
+oauth2.getToken(tokenConfig, { res ->
+  if (res.failed()) {
+    System.err.println("Access Token Error: ${res.cause().getMessage()}")
+  } else {
+    // Get the access token object (the authorization code is given from the previous step).
+    def token = res.result()
+  }
+})
+
+----
+
+=== AccessToken object
+
+When a token expires we need to refresh it. OAuth2 offers the AccessToken class that add a couple of useful methods
+to refresh the access token when it is expired.
+
+[source,groovy]
+----
+// Check if the token is expired. If expired it is refreshed.
+if (token.expired()) {
+  // Callbacks
+  token.refresh({ res ->
+    if (res.succeeded()) {
+      // success
+    } else {
+      // error handling...
+    }
+  })
+}
+
+----
+
+When you've done with the token or you want to log out, you can revoke the access token and refresh token.
+
+[source,groovy]
+----
+// Revoke only the access token
+token.revoke("access_token", { res ->
+  // Session ended. But the refresh_token is still valid.
+
+  // Revoke the refresh_token
+  token.revoke("refresh_token", { res1 ->
+    println("token revoked.")
+  })
+})
+
+----
+
+=== Example configuration for common OAuth2 providers
+
+==== Google
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"CLIENT_ID",
+  clientSecret:"CLIENT_SECRET",
+  site:"https://accounts.google.com",
+  tokenPath:"https://www.googleapis.com/oauth2/v3/token",
+  authorizationPath:"/o/oauth2/auth"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+----
+
+==== GitHub
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"CLIENT_ID",
+  clientSecret:"CLIENT_SECRET",
+  site:"https://github.com/login",
+  tokenPath:"/oauth/access_token",
+  authorizationPath:"/oauth/authorize"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+----
+
+==== Linkedin
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"CLIENT_ID",
+  clientSecret:"CLIENT_SECRET",
+  site:"https://www.linkedin.com",
+  authorizationPath:"/uas/oauth2/authorization",
+  tokenPath:"/uas/oauth2/accessToken"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+----
+
+==== Twitter
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"CLIENT_ID",
+  clientSecret:"CLIENT_SECRET",
+  site:"https://api.twitter.com",
+  authorizationPath:"/oauth/authorize",
+  tokenPath:"/oauth/access_token"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+----
+
+==== Facebook
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"CLIENT_ID",
+  clientSecret:"CLIENT_SECRET",
+  site:"https://www.facebook.com",
+  authorizationPath:"/dialog/oauth",
+  tokenPath:"https://graph.facebook.com/oauth/access_token"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+----
+<a href="mailto:plopes@redhat.com">Paulo Lopes</a>

@@ -1,0 +1,3 @@
+# Vert.x OAuth2 Auth
+
+Please see the documentation for more information.
