@@ -140,7 +140,7 @@
  * id. An example is `uid={0},ou=users,dc=foo,dc=com` - the element `{0}` is substituted with the user id to create the
  * actual lookup. This setting is mandatory.
  * `ldap_url`:: the url to the LDAP server. The url must start with `ldap://` and a port must be specified.
- * An example is `ldap:://myldapserver.mycompany.com:10389`
+ * An example is `ldap://myldapserver.mycompany.com:10389`
  * `ldap-authentication-mechanism`:: TODO
  * `ldap-context-factory-class-name`:: TODO
  * `ldap-pooling-enabled`:: TODO
