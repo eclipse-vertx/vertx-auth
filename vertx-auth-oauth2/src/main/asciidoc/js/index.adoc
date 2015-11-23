@@ -71,7 +71,7 @@ An example on how to use this provider and authenticate with GitHub can be imple
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 
 var oauth2 = OAuth2Auth.create(vertx, 'AUTH_CODE', {
   "clientID" : "YOUR_CLIENT_ID",
@@ -119,7 +119,7 @@ access token.
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 
 // Set the client credentials and the OAuth2 server
 var credentials = {
@@ -168,7 +168,7 @@ need a fast way to test your application.
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 
 // Initialize the OAuth2 Library
 var oauth2 = OAuth2Auth.create(vertx, 'PASSWORD');
@@ -203,7 +203,7 @@ This flow is suitable when client is requesting access to the protected resource
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 
 // Set the client credentials and the OAuth2 server
 var credentials = {
@@ -275,7 +275,7 @@ token.revoke("access_token", function (res, res_err) {
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 // Set the client credentials and the OAuth2 server
 var credentials = {
   "clientID" : "CLIENT_ID",
@@ -295,7 +295,7 @@ var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 // Set the client credentials and the OAuth2 server
 var credentials = {
   "clientID" : "CLIENT_ID",
@@ -315,7 +315,7 @@ var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 // Set the client credentials and the OAuth2 server
 var credentials = {
   "clientID" : "CLIENT_ID",
@@ -335,7 +335,7 @@ var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 // Set the client credentials and the OAuth2 server
 var credentials = {
   "clientID" : "CLIENT_ID",
@@ -355,7 +355,7 @@ var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 // Set the client credentials and the OAuth2 server
 var credentials = {
   "clientID" : "CLIENT_ID",
@@ -375,7 +375,7 @@ var oauth2 = OAuth2Auth.create(vertx, 'CLIENT', credentials);
 
 [source,js]
 ----
-var OAuth2Auth = require("vertx-auth-jwt-js/o_auth2_auth");
+var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
 // Set the client credentials and the OAuth2 server
 var credentials = {
   "clientID" : "CLIENT_ID",

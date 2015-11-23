@@ -14,7 +14,7 @@
  * under the License.
  */
 
-/** @module vertx-auth-jwt-js/access_token */
+/** @module vertx-auth-oauth2-js/access_token */
 var utils = require('vertx-js/util/utils');
 var User = require('vertx-auth-common-js/user');
 

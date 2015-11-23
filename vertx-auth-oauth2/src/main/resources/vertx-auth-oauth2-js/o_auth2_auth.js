@@ -14,10 +14,10 @@
  * under the License.
  */
 
-/** @module vertx-auth-jwt-js/o_auth2_auth */
+/** @module vertx-auth-oauth2-js/o_auth2_auth */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
-var AccessToken = require('vertx-auth-jwt-js/access_token');
+var AccessToken = require('vertx-auth-oauth2-js/access_token');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
@@ -101,7 +101,7 @@ var OAuth2Auth = function(j_val) {
 /**
  Create a OAuth2 auth provider
 
- @memberof module:vertx-auth-jwt-js/o_auth2_auth
+ @memberof module:vertx-auth-oauth2-js/o_auth2_auth
  @param vertx {Vertx} the Vertx instance 
  @param flow {Object} 
  @param config {Object} the config 

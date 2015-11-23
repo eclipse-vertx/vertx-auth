@@ -71,9 +71,9 @@ An example on how to use this provider and authenticate with GitHub can be imple
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :AUTH_CODE, {
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :AUTH_CODE, {
   'clientID' => "YOUR_CLIENT_ID",
   'clientSecret' => "YOUR_CLIENT_SECRET",
   'site' => "https://github.com/login",
@@ -119,7 +119,7 @@ access token.
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 
 # Set the client credentials and the OAuth2 server
 credentials = {
@@ -130,7 +130,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :AUTH_CODE, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :AUTH_CODE, credentials)
 
 # Authorization oauth2 URI
 authorization_uri = oauth2.authorize_url({
@@ -168,10 +168,10 @@ need a fast way to test your application.
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :PASSWORD)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :PASSWORD)
 
 tokenConfig = {
   'username' => "username",
@@ -203,7 +203,7 @@ This flow is suitable when client is requesting access to the protected resource
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 
 # Set the client credentials and the OAuth2 server
 credentials = {
@@ -214,7 +214,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 tokenConfig = {
 }
@@ -275,7 +275,7 @@ token.revoke("access_token") { |res_err,res|
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 # Set the client credentials and the OAuth2 server
 credentials = {
   'clientID' => "CLIENT_ID",
@@ -287,7 +287,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 
@@ -295,7 +295,7 @@ oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 # Set the client credentials and the OAuth2 server
 credentials = {
   'clientID' => "CLIENT_ID",
@@ -307,7 +307,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 
@@ -315,7 +315,7 @@ oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 # Set the client credentials and the OAuth2 server
 credentials = {
   'clientID' => "CLIENT_ID",
@@ -327,7 +327,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 
@@ -335,7 +335,7 @@ oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 # Set the client credentials and the OAuth2 server
 credentials = {
   'clientID' => "CLIENT_ID",
@@ -347,7 +347,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 
@@ -355,7 +355,7 @@ oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 # Set the client credentials and the OAuth2 server
 credentials = {
   'clientID' => "CLIENT_ID",
@@ -367,7 +367,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 
@@ -375,7 +375,7 @@ oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 [source,ruby]
 ----
-require 'vertx-auth-jwt/o_auth2_auth'
+require 'vertx-auth-oauth2/o_auth2_auth'
 # Set the client credentials and the OAuth2 server
 credentials = {
   'clientID' => "CLIENT_ID",
@@ -387,7 +387,7 @@ credentials = {
 
 
 # Initialize the OAuth2 Library
-oauth2 = VertxAuthJwt::OAuth2Auth.create(vertx, :CLIENT, credentials)
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 <a href="mailto:plopes@redhat.com">Paulo Lopes</a>

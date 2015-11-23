@@ -1,17 +1,17 @@
 require 'vertx-auth-common/user'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.oauth2.AccessToken
-module VertxAuthJwt
+module VertxAuthOauth2
   #  AccessToken extension to the User interface
   class AccessToken < ::VertxAuthCommon::User
     # @private
-    # @param j_del [::VertxAuthJwt::AccessToken] the java delegate
+    # @param j_del [::VertxAuthOauth2::AccessToken] the java delegate
     def initialize(j_del)
       super(j_del)
       @j_del = j_del
     end
     # @private
-    # @return [::VertxAuthJwt::AccessToken] the underlying java delegate
+    # @return [::VertxAuthOauth2::AccessToken] the underlying java delegate
     def j_del
       @j_del
     end

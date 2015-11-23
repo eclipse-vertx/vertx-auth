@@ -185,7 +185,7 @@
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @Document(fileName = "index.adoc")
-@ModuleGen(name = "vertx-auth-jwt", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-auth-oauth2", groupPackage = "io.vertx")
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.ModuleGen;
