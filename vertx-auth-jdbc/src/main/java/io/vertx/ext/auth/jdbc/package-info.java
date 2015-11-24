@@ -46,7 +46,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example5}
+ * {@link examples.AuthJDBCExamples#example5}
  * ----
  *
  * Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
@@ -74,7 +74,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example6}
+ * {@link examples.AuthJDBCExamples#example6}
  * ----
  *
  * == Authorisation - Permission-Role Model
@@ -88,14 +88,14 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example7}
+ * {@link examples.AuthJDBCExamples#example7}
  * ----
  *
  * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example8}
+ * {@link examples.AuthJDBCExamples#example8}
  * ----
  *
  * The default role prefix is `role:`. You can change this with {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolePrefix(java.lang.String)}.

@@ -25,7 +25,7 @@ import io.vertx.ext.mongo.MongoClient;
 /**
  * @author mremme
  */
-public class Examples {
+public class AuthMongoExamples {
 
   public void example1(Vertx vertx, JsonObject mongoClientConfig) {
     MongoClient client = MongoClient.createShared(vertx, mongoClientConfig);

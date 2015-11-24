@@ -29,7 +29,7 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-public class Examples {
+public class AuthOAuth2Examples {
 
   public void example1(Vertx vertx) {
 

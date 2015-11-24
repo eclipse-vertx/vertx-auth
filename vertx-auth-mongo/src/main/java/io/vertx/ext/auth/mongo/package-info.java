@@ -48,7 +48,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example1(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
+ * {@link examples.AuthMongoExamples#example1(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
  * ----
  *
  * Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
@@ -89,7 +89,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example2(MongoAuth)}
+ * {@link examples.AuthMongoExamples#example2(MongoAuth)}
  * ----
  * You are able to modify the credential fields by using the methods
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(String) }
@@ -106,14 +106,14 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example3(io.vertx.ext.auth.User)}
+ * {@link examples.AuthMongoExamples#example3(io.vertx.ext.auth.User)}
  * ----
  *
  * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example4}
+ * {@link examples.AuthMongoExamples#example4}
  * ----
  *
  *

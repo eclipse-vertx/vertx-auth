@@ -23,7 +23,7 @@ import io.vertx.ext.auth.User;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class Examples {
+public class AuthCommonExamples {
 
   public void example1(AuthProvider authProvider) {
 

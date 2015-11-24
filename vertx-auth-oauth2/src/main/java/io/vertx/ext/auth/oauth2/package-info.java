@@ -86,7 +86,7 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example1}
+ * {@link examples.AuthOAuth2Examples#example1}
  * ----
  *
  * ==== Authorization Code flow
@@ -98,7 +98,7 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example2}
+ * {@link examples.AuthOAuth2Examples#example2}
  * ----
  *
  * ==== Password Credentials Flow
@@ -109,7 +109,7 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example3}
+ * {@link examples.AuthOAuth2Examples#example3}
  * ----
  *
  * ==== Client Credentials Flow
@@ -118,7 +118,7 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example4}
+ * {@link examples.AuthOAuth2Examples#example4}
  * ----
  *
  * === AccessToken object
@@ -128,14 +128,14 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example5}
+ * {@link examples.AuthOAuth2Examples#example5}
  * ----
  *
  * When you've done with the token or you want to log out, you can revoke the access token and refresh token.
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example6}
+ * {@link examples.AuthOAuth2Examples#example6}
  * ----
  *
  * === Example configuration for common OAuth2 providers
@@ -144,42 +144,42 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example7}
+ * {@link examples.AuthOAuth2Examples#example7}
  * ----
  *
  * ==== GitHub
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example8}
+ * {@link examples.AuthOAuth2Examples#example8}
  * ----
  *
  * ==== Linkedin
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example9}
+ * {@link examples.AuthOAuth2Examples#example9}
  * ----
  *
  * ==== Twitter
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example10}
+ * {@link examples.AuthOAuth2Examples#example10}
  * ----
  *
  * ==== Facebook
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example11}
+ * {@link examples.AuthOAuth2Examples#example11}
  * ----
  *
  * ==== JBoss Keycloak
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example12}
+ * {@link examples.AuthOAuth2Examples#example12}
  * ----
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>

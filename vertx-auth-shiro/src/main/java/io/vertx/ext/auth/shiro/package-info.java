@@ -50,7 +50,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example3}
+ * {@link examples.AuthShiroExamples#example3}
  * ----
  *
  * == Authentication
@@ -60,7 +60,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example4}
+ * {@link examples.AuthShiroExamples#example4}
  * ----
  *
  * == Authorisation - Permission-Role Model
@@ -74,13 +74,13 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example5}
+ * {@link examples.AuthShiroExamples#example5}
  * ----
  * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example6}
+ * {@link examples.AuthShiroExamples#example6}
  * ----
  *
  * The default role prefix is `role:`. You can change this with {@link io.vertx.ext.auth.shiro.ShiroAuth#setRolePrefix(java.lang.String)}.
@@ -156,7 +156,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example8}
+ * {@link examples.AuthShiroExamples#example8}
  * ----
  *
  * The implementation currently assumes that user/password based authentication is used.

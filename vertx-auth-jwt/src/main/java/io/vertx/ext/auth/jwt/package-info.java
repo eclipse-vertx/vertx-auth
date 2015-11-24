@@ -65,7 +65,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example6}
+ * {@link examples.AuthJWTExamples#example6}
  * ----
  *
  * A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point
@@ -74,7 +74,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example7}
+ * {@link examples.AuthJWTExamples#example7}
  * ----
  *
  * TODO show example of authentication and authorisation with JWT and explain how the permission string passed

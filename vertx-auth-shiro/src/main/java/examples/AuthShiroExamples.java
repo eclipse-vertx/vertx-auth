@@ -27,7 +27,7 @@ import org.apache.shiro.realm.Realm;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class Examples {
+public class AuthShiroExamples {
 
 
   public void example3(Vertx vertx) {

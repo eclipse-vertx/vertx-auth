@@ -26,7 +26,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class Examples {
+public class AuthJDBCExamples {
 
 
   public void example5(Vertx vertx, JsonObject jdbcClientConfig) {

@@ -25,7 +25,7 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class Examples {
+public class AuthJWTExamples {
 
   public void example6(Vertx vertx) {
 

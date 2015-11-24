@@ -14,11 +14,11 @@
 ^|Name | Type ^| Description
 |[[config]]`config`|`Json object`|
 +++
-@return the Shiro auth config
+Set the Shiro auth config.
 +++
 |[[type]]`type`|`link:enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`|
 +++
-@return the Shiro realm type
+Set the Shiro auth options type.
 +++
 |===
 

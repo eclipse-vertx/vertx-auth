@@ -82,7 +82,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example1}
+ * {@link examples.AuthCommonExamples#example1}
  * ----
  *
  * == Authorisation
@@ -97,7 +97,7 @@
  *
  * [source,java]
  * ----
- * {@link examples.Examples#example2}
+ * {@link examples.AuthCommonExamples#example2}
  * ----
  *
  * And another example of authorising in a roles based model which uses `role:` as a prefix.
