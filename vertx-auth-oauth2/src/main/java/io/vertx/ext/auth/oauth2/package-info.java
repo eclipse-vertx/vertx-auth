@@ -35,7 +35,7 @@
  *
  * [source,groovy,subs="+attributes"]
  * ----
- * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
+ * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
  * OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
@@ -181,8 +181,6 @@
  * ----
  * {@link examples.AuthOAuth2Examples#example12}
  * ----
- *
- * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-auth-oauth2", groupPackage = "io.vertx")
