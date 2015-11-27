@@ -39,7 +39,21 @@ MongoAuth authProvider = MongoAuth.create(client, authProperties);
 Once you've got your instance you can authenticate and authorise with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
-some others. You can easily change those defaults with the operations
+some others.
+
+In order to avoid duplicates of user names your "user" collection should have a unique index on "username". In order
+to do this you should run the following snippet on your mongo server:
+
+----
+db.user.createIndex( { username: 1 }, { unique: true } )
+----
+
+The reason you should add the index is that due to the nature of mongo doing a query first to verify if a username is
+already taken and then insert a document cannot be run as an atomic action. Using the index the code will try to
+insert the row and fail if duplicate.
+
+You can also change all the defaults for the mongo collection and column names using any of the methods:
+
 `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setCollectionName-java.lang.String-[setCollectionName]`
 `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameField-java.lang.String-[setUsernameField]`
 `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setPasswordField-java.lang.String-[setPasswordField]`

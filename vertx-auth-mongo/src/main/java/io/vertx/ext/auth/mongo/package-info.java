@@ -46,7 +46,7 @@
  *
  * Once you've got one of those you can create a {@link io.vertx.ext.auth.mongo.MongoAuth} instance as follows:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthMongoExamples#example1(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
  * ----
@@ -54,7 +54,21 @@
  * Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
  *
  * The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
- * some others. You can easily change those defaults with the operations
+ * some others.
+ *
+ * In order to avoid duplicates of user names your "user" collection should have a unique index on "username". In order
+ * to do this you should run the following snippet on your mongo server:
+ *
+ * ----
+ * db.user.createIndex( { username: 1 }, { unique: true } )
+ * ----
+ *
+ * The reason you should add the index is that due to the nature of mongo doing a query first to verify if a username is
+ * already taken and then insert a document cannot be run as an atomic action. Using the index the code will try to
+ * insert the row and fail if duplicate.
+ *
+ * You can also change all the defaults for the mongo collection and column names using any of the methods:
+ *
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setCollectionName(String)}
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameField(String)}
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordField(String)}
@@ -87,7 +101,7 @@
  * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
  * authentication info:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthMongoExamples#example2(MongoAuth)}
  * ----
@@ -104,14 +118,14 @@
  * If validating if a user has a particular permission simply pass the permission into.
  * {@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthMongoExamples#example3(io.vertx.ext.auth.User)}
  * ----
  *
  * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthMongoExamples#example4}
  * ----
