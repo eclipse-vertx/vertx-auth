@@ -36,7 +36,7 @@
  *
  * [source,groovy,subs="+attributes"]
  * ----
- * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
+ * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
  * We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any

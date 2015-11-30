@@ -91,8 +91,8 @@ authProvider.authenticate(authInfo) { |res_err,res|
 }
 
 ----
-Instead of the `username` and `password` fields used in the previous snippet, you should use:
-`link:../../yardoc/VertxAuthMongo/MongoAuth.html#set_username_credential_field-instance_method[setUsernameCredentialField]`
+Instead of the `username` and `password` field names used in the previous snippet, you should use:
+`link:../../yardoc/VertxAuthMongo/MongoAuth.html#set_username_credential_field-instance_method[setUsernameCredentialField]` and
 `link:../../yardoc/VertxAuthMongo/MongoAuth.html#set_password_credential_field-instance_method[setPasswordCredentialField]`
 
 == Authorisation - Permission-Role Model

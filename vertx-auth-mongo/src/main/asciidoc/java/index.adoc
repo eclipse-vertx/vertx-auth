@@ -85,8 +85,8 @@ authProvider.authenticate(authInfo, res -> {
   }
 });
 ----
-Instead of the `username` and `password` fields used in the previous snippet, you should use:
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField-java.lang.String-[setUsernameCredentialField]`
+Instead of the `username` and `password` field names used in the previous snippet, you should use:
+`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField-java.lang.String-[setUsernameCredentialField]` and
 `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setPasswordCredentialField-java.lang.String-[setPasswordCredentialField]`
 
 == Authorisation - Permission-Role Model

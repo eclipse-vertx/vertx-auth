@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-oauth2:3.2.0-SNAPSHOT
+compile 'io.vertx:vertx-auth-oauth2:3.2.0-SNAPSHOT'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
@@ -390,4 +390,3 @@ credentials = {
 oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
-<a href="mailto:plopes@redhat.com">Paulo Lopes</a>
