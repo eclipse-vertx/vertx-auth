@@ -19,6 +19,7 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.mongo.AuthenticationException;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
@@ -162,14 +163,14 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
   protected void initAuthService() throws Exception {
     if (authProvider == null) {
       log.info("initAuthService");
-      authProvider = MongoAuth.create(getMongoClient(), createAuthServiceConfig());
+      authProvider = createProvider();
     }
   }
 
-  protected JsonObject createAuthServiceConfig() {
-    JsonObject js = new JsonObject();
-    js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-    return js;
+  protected MongoAuth createProvider() throws Exception {
+    JsonObject config = new JsonObject();
+    config.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
+    return MongoAuth.create(getMongoClient(), config);
   }
 
   @Override

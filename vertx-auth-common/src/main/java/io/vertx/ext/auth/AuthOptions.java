@@ -16,26 +16,66 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonObject;
 
+import java.lang.reflect.Constructor;
+
 /**
- * A common base object for authentication options.
- * <p>
- * note: this will be moved to vertx-auth project after 3.1
+ * A common base object for authentication options.<p>
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject
-public abstract class AuthOptions {
+public interface AuthOptions {
 
-  public AuthOptions() {
+  /**
+   * Create the auth options from a json value, the implementation makes a lookup on the {@literal provider}
+   * property of the json object and returns the corresponding class.
+   *
+   * @param json the json value
+   * @return the auth provider
+   */
+  static AuthOptions create(JsonObject json) {
+
+    String provider = json.getString("provider", "");
+    String impl;
+    switch (provider) {
+      case "shiro":
+        impl = "io.vertx.ext.auth.shiro.ShiroAuthOptions";
+        break;
+      case "jdbc":
+        impl = "io.vertx.ext.auth.jdbc.JDBCAuthOptions";
+        break;
+      case "mongo":
+        impl = "io.vertx.ext.auth.mongo.MongoAuthOptions";
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid auth provider: " + provider);
+    }
+
+    try {
+      ClassLoader cl = Thread.currentThread().getContextClassLoader();
+      Class<?> optionsClass = cl.loadClass(impl);
+      Constructor<?> ctor = optionsClass.getConstructor(JsonObject.class);
+      return (AuthOptions) ctor.newInstance(json);
+    } catch (ClassNotFoundException e) {
+      throw new VertxException("Provider class not found " + impl + " / check your classpath");
+    } catch(InstantiationException e) {
+      throw new VertxException("Cannot create " + provider +" options", e.getCause());
+    } catch (Exception e) {
+      throw new VertxException("Cannot create " + provider + " options" + provider, e);
+    }
   }
 
-  public AuthOptions(AuthOptions that) {
-  }
+  AuthOptions clone();
 
-  public AuthOptions(JsonObject json) {
-  }
-
-  public abstract AuthOptions clone();
+  /**
+   * Create the suitable provider for this option.
+   *
+   * @param vertx the vertx instance
+   * @return the auth provider
+   */
+  AuthProvider createProvider(Vertx vertx);
 }

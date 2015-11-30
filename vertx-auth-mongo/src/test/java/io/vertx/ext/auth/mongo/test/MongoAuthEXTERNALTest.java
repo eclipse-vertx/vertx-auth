@@ -33,11 +33,11 @@ public class MongoAuthEXTERNALTest extends MongoAuthNO_SALTTest {
   }
 
   @Override
-  protected JsonObject createAuthServiceConfig() {
-    JsonObject js = new JsonObject();
-    js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-    js.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.EXTERNAL);
-    return js;
+  protected MongoAuth createProvider() throws Exception {
+    JsonObject config = new JsonObject();
+    config.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.EXTERNAL);
+    config.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
+    return MongoAuth.create(getMongoClient(), config);
   }
 
   @Override

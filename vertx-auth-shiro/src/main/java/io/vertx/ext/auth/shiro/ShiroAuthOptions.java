@@ -17,8 +17,9 @@ package io.vertx.ext.auth.shiro;
 
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthOptions;
+import io.vertx.ext.auth.AuthProvider;
 
 /**
  * Shiro auth configuration options, see Vert.x Auth Shiro component and/or Apache Shiro project.
@@ -26,7 +27,7 @@ import io.vertx.ext.auth.AuthOptions;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
-public class ShiroAuthOptions extends AuthOptions {
+public class ShiroAuthOptions implements io.vertx.ext.auth.AuthOptions {
 
   public static final ShiroAuthRealmType DEFAULT_TYPE = ShiroAuthRealmType.PROPERTIES;
 
@@ -84,7 +85,12 @@ public class ShiroAuthOptions extends AuthOptions {
   }
 
   @Override
-  public AuthOptions clone() {
+  public ShiroAuthOptions clone() {
     return new ShiroAuthOptions(this);
+  }
+
+  @Override
+  public AuthProvider createProvider(Vertx vertx) {
+    return ShiroAuth.create(vertx, this);
   }
 }
