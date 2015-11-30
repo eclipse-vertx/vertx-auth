@@ -43,7 +43,7 @@ Its main advantages are:
 * It has a json body to contain any variable amount of data you want.
 * It's completely stateless.
 
-To create an instance of the provider you use `link:yardoc/VertxAuthJwt/JWTAuth.html[JWTAuth]`. You specify the configuration
+To create an instance of the provider you use `link:../../yardoc/VertxAuthJwt/JWTAuth.html[JWTAuth]`. You specify the configuration
 in a JSON object.
 
 Here's an example of creating a JWT auth provider:

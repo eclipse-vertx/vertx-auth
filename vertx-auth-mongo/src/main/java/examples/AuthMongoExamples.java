@@ -34,8 +34,9 @@ public class AuthMongoExamples {
   }
 
   public void example2(MongoAuth authProvider) {
-    JsonObject authInfo = new JsonObject().put(authProvider.getUsernameCredentialField(), "tim").put(
-        authProvider.getPasswordCredentialField(), "sausages");
+    JsonObject authInfo = new JsonObject()
+        .put("username", "tim")
+        .put("password", "sausages");
     authProvider.authenticate(authInfo, res -> {
       if (res.succeeded()) {
         User user = res.result();

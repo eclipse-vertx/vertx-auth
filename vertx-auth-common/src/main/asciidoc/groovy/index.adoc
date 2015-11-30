@@ -43,7 +43,7 @@ To find out what a particular auth provider expects, consult the documentation f
 
 == Authentication
 
-To authenticate a user you use `link:groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html#authenticate(io.vertx.core.json.JsonObject,%20io.vertx.core.Handler)[authenticate]`.
+To authenticate a user you use `link:../../groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html#authenticate(io.vertx.core.json.JsonObject,%20io.vertx.core.Handler)[authenticate]`.
 
 The first argument is a JSON object which contains authentication information. What this actually contains depends
 on the specific implementation; for a simple username/password based authentication it might contain something like:
@@ -58,7 +58,7 @@ on the specific implementation; for a simple username/password based authenticat
 For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
 
 Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
-the call. The async result contains an instance of `link:groovydoc/io/vertx/groovy/ext/auth/User.html[User]` which represents the authenticated
+the call. The async result contains an instance of `link:../../groovydoc/io/vertx/groovy/ext/auth/User.html[User]` which represents the authenticated
 user and contains operations which allow the user to be authorised.
 
 Here's an example of authenticating a user using a simple username/password implementation:
@@ -87,9 +87,9 @@ authProvider.authenticate(authInfo, { res ->
 
 == Authorisation
 
-Once you have an `link:groovydoc/io/vertx/groovy/ext/auth/User.html[User]` instance you can call methods on it to authorise it.
+Once you have an `link:../../groovydoc/io/vertx/groovy/ext/auth/User.html[User]` instance you can call methods on it to authorise it.
 
-to check if a user has a specific authority you use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]`.
+to check if a user has a specific authority you use `link:../../groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]`.
 
 The results of all the above are provided asynchronously in the handler.
 
@@ -126,17 +126,17 @@ implementation and Vert.x makes no assumptions here.
 The user object will cache any authorities so subsequently calls to check if it has the same authorities will result
 in the underlying provider being called.
 
-In order to clear the internal cache you can use `link:groovydoc/io/vertx/groovy/ext/auth/User.html#clearCache()[clearCache]`.
+In order to clear the internal cache you can use `link:../../groovydoc/io/vertx/groovy/ext/auth/User.html#clearCache()[clearCache]`.
 
 === The User Principal
 
-You can get the Principal corresponding to the authenticated user with `link:groovydoc/io/vertx/groovy/ext/auth/User.html#principal()[principal]`.
+You can get the Principal corresponding to the authenticated user with `link:../../groovydoc/io/vertx/groovy/ext/auth/User.html#principal()[principal]`.
 
 What this returns depends on the underlying implementation.
 
 == Creating your own auth implementation
 
-If you wish to create your own auth provider you should implement the `link:groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]` interface.
+If you wish to create your own auth provider you should implement the `link:../../groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]` interface.
 
 We provide an abstract implementation of user called `AbstractUser` which you can subclass
 to make your user implementation. This contains the caching logic so you don't have to implement that yourself.

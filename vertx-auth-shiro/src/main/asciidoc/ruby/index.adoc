@@ -26,7 +26,7 @@ compile io.vertx:vertx-auth-shiro:3.2.0-SNAPSHOT
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
 other Shiro Realm which expects username and password for credentials.
 
-To create an instance of the provider you use `link:yardoc/VertxAuthShiro/ShiroAuth.html[ShiroAuth]`. You specify the type of
+To create an instance of the provider you use `link:../../yardoc/VertxAuthShiro/ShiroAuth.html[ShiroAuth]`. You specify the type of
 Shiro auth provider that you want with `link:../enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`, and you specify the
 configuration in a JSON object.
 
@@ -75,7 +75,7 @@ implementation uses a familiar user/role/permission model, where a user can have
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../vertx-auth-common/ruby/yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
+`link:../../yardoc/VertxAuthCommon/User.html#is_authorised-instance_method[isAuthorised]` as follows:
 
 [source,java]
 ----
@@ -106,7 +106,7 @@ user.is_authorised("role:manager") { |res_err,res|
 
 ----
 
-The default role prefix is `role:`. You can change this with `link:yardoc/VertxAuthShiro/ShiroAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
+The default role prefix is `role:`. You can change this with `link:../../yardoc/VertxAuthShiro/ShiroAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
 
 === The Shiro properties auth provider
 
@@ -114,7 +114,7 @@ This auth provider implementation uses Apache Shiro to get user/role/permission 
 
 Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
 possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
-with `link:yardoc/VertxAuthShiro/ShiroAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
+with `link:../../yardoc/VertxAuthShiro/ShiroAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
 
 The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
 
