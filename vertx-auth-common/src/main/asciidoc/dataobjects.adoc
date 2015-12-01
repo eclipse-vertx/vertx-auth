@@ -4,9 +4,7 @@
 == AuthOptions
 
 ++++
- A common base object for authentication options.
- <p>
- note: this will be moved to vertx-auth project after 3.1
+ A common base object for authentication options.<p>
 ++++
 '''
 

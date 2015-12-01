@@ -38,7 +38,7 @@
  *
  * [source,groovy,subs="+attributes"]
  * ----
- * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
+ * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
  * To create an instance you first need an instance of {@link io.vertx.ext.mongo.MongoClient}. To learn how to create one
@@ -105,8 +105,8 @@
  * ----
  * {@link examples.AuthMongoExamples#example2(MongoAuth)}
  * ----
- * You are able to modify the credential fields by using the methods
- * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(String) }
+ * Instead of the `username` and `password` field names used in the previous snippet, you should use:
+ * {@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(String) } and
  * {@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(String) }
  *
  * == Authorisation - Permission-Role Model
@@ -129,9 +129,6 @@
  * ----
  * {@link examples.AuthMongoExamples#example4}
  * ----
- *
- *
- * @author mremme
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-auth-mongo", groupPackage = "io.vertx")

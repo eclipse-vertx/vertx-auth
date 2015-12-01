@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-jwt:3.2.0-SNAPSHOT
+compile 'io.vertx:vertx-auth-jwt:3.2.0-SNAPSHOT'
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be

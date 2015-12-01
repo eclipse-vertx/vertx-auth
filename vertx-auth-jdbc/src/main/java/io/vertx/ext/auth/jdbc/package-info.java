@@ -36,7 +36,7 @@
  *
  * [source,groovy,subs="+attributes"]
  * ----
- * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
+ * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
  * To create an instance you first need an instance of {@link io.vertx.ext.jdbc.JDBCClient}. To learn how to create one

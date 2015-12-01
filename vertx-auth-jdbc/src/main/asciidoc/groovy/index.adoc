@@ -21,7 +21,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-jdbc:3.2.0-SNAPSHOT
+compile 'io.vertx:vertx-auth-jdbc:3.2.0-SNAPSHOT'
 ----
 
 To create an instance you first need an instance of `link:../../groovydoc/io/vertx/groovy/ext/jdbc/JDBCClient.html[JDBCClient]`. To learn how to create one

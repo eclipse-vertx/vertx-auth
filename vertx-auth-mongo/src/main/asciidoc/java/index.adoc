@@ -21,7 +21,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-mongo:3.2.0-SNAPSHOT
+compile 'io.vertx:vertx-auth-mongo:3.2.0-SNAPSHOT'
 ----
 
 To create an instance you first need an instance of `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`. To learn how to create one
@@ -88,8 +88,9 @@ authentication info:
 
 [source,java]
 ----
-JsonObject authInfo = new JsonObject().put(authProvider.getUsernameCredentialField(), "tim").put(
-    authProvider.getPasswordCredentialField(), "sausages");
+JsonObject authInfo = new JsonObject()
+    .put("username", "tim")
+    .put("password", "sausages");
 authProvider.authenticate(authInfo, res -> {
   if (res.succeeded()) {
     User user = res.result();
@@ -98,8 +99,8 @@ authProvider.authenticate(authInfo, res -> {
   }
 });
 ----
-You are able to modify the credential fields by using the methods
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField-java.lang.String-[setUsernameCredentialField]`
+Instead of the `username` and `password` field names used in the previous snippet, you should use:
+`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField-java.lang.String-[setUsernameCredentialField]` and
 `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setPasswordCredentialField-java.lang.String-[setPasswordCredentialField]`
 
 == Authorisation - Permission-Role Model
@@ -134,4 +135,3 @@ user.isAuthorised(MongoAuth.ROLE_PREFIX + "manager", res -> {
   }
 });
 ----
-mremme

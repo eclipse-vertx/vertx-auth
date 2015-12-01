@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.test.jdbc;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -104,9 +105,13 @@ public class JDBCAuthTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+    authProvider = createProvider();
 
+  }
+
+  protected JDBCAuth createProvider() {
     JDBCClient client = JDBCClient.createNonShared(vertx, config());
-    authProvider = JDBCAuth.create(client);
+    return JDBCAuth.create(client);
   }
 
   @Override

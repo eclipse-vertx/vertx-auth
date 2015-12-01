@@ -21,7 +21,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-auth-mongo:3.2.0-SNAPSHOT
+compile 'io.vertx:vertx-auth-mongo:3.2.0-SNAPSHOT'
 ----
 
 To create an instance you first need an instance of `link:../../jsdoc/mongo_client-MongoClient.html[MongoClient]`. To learn how to create one
@@ -29,7 +29,7 @@ of those please consult the documentation for the MongoClient.
 
 Once you've got one of those you can create a `link:../../jsdoc/mongo_auth-MongoAuth.html[MongoAuth]` instance as follows:
 
-[source,js]
+[source,java]
 ----
 var MongoClient = require("vertx-mongo-js/mongo_client");
 var MongoAuth = require("vertx-auth-mongo-js/mongo_auth");
@@ -43,21 +43,7 @@ var authProvider = MongoAuth.create(client, authProperties);
 Once you've got your instance you can authenticate and authorise with it just like any `link:../../jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
-some others.
-
-In order to avoid duplicates of user names your "user" collection should have a unique index on "username". In order
-to do this you should run the following snippet on your mongo server:
-
-----
-db.user.createIndex( { username: 1 }, { unique: true } )
-----
-
-The reason you should add the index is that due to the nature of mongo doing a query first to verify if a username is
-already taken and then insert a document cannot be run as an atomic action. Using the index the code will try to
-insert the row and fail if duplicate.
-
-You can also change all the defaults for the mongo collection and column names using any of the methods:
-
+some others. You can easily change those defaults with the operations
 `link:../../jsdoc/mongo_auth-MongoAuth.html#setCollectionName[setCollectionName]`
 `link:../../jsdoc/mongo_auth-MongoAuth.html#setUsernameField[setUsernameField]`
 `link:../../jsdoc/mongo_auth-MongoAuth.html#setPasswordField[setPasswordField]`
@@ -90,12 +76,23 @@ salt and password are stored inside the same place!
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
 authentication info:
 
-[source,js]
+[source,java]
 ----
-Code not translatable
+var authInfo = {
+  "username" : "tim",
+  "password" : "sausages"
+};
+authProvider.authenticate(authInfo, function (res, res_err) {
+  if (res_err == null) {
+    var user = res;
+  } else {
+    // Failed!
+  }
+});
+
 ----
-You are able to modify the credential fields by using the methods
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setUsernameCredentialField[setUsernameCredentialField]`
+Instead of the `username` and `password` field names used in the previous snippet, you should use:
+`link:../../jsdoc/mongo_auth-MongoAuth.html#setUsernameCredentialField[setUsernameCredentialField]` and
 `link:../../jsdoc/mongo_auth-MongoAuth.html#setPasswordCredentialField[setPasswordCredentialField]`
 
 == Authorisation - Permission-Role Model
@@ -107,7 +104,7 @@ can have zero or more permissions.
 If validating if a user has a particular permission simply pass the permission into.
 `link:../../jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
 
-[source,js]
+[source,java]
 ----
 
 user.isAuthorised("commit_code", function (res, res_err) {
@@ -123,7 +120,7 @@ user.isAuthorised("commit_code", function (res, res_err) {
 
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
-[source,js]
+[source,java]
 ----
 var MongoAuth = require("vertx-auth-mongo-js/mongo_auth");
 
@@ -137,4 +134,3 @@ user.isAuthorised(MongoAuth.ROLE_PREFIX + "manager", function (res, res_err) {
 
 
 ----
-mremme

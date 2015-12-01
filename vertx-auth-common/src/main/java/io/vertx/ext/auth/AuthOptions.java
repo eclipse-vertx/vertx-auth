@@ -16,26 +16,23 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.Vertx;
 
 /**
- * A common base object for authentication options.
- * <p>
- * note: this will be moved to vertx-auth project after 3.1
+ * A common base object for authentication options.<p>
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject
-public abstract class AuthOptions {
+public interface AuthOptions {
 
-  public AuthOptions() {
-  }
+  AuthOptions clone();
 
-  public AuthOptions(AuthOptions that) {
-  }
-
-  public AuthOptions(JsonObject json) {
-  }
-
-  public abstract AuthOptions clone();
+  /**
+   * Create the suitable provider for this option.
+   *
+   * @param vertx the vertx instance
+   * @return the auth provider
+   */
+  AuthProvider createProvider(Vertx vertx);
 }

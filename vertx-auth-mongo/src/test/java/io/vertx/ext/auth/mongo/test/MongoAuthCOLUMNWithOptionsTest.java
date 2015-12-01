@@ -19,6 +19,7 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
+import io.vertx.ext.auth.mongo.MongoAuthOptions;
 
 /**
  * Testing MongoAuth setting the salt to a column in the user
@@ -26,17 +27,19 @@ import io.vertx.ext.auth.mongo.MongoAuth;
  * @author mremme
  */
 
-public class MongoAuthCOLUMNTest extends MongoAuthNO_SALTTest {
+public class MongoAuthCOLUMNWithOptionsTest extends MongoAuthNO_SALTTest {
 
-  public MongoAuthCOLUMNTest() {
+  public MongoAuthCOLUMNWithOptionsTest() {
   }
 
   @Override
   protected MongoAuth createProvider() throws Exception {
-    JsonObject config = new JsonObject();
-    config.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-    config.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.COLUMN);
-    return MongoAuth.create(getMongoClient(), config);
+    MongoAuthOptions options = new MongoAuthOptions();
+    options.setCollectionName(createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
+    options.setSaltStyle(HashSaltStyle.COLUMN);
+    options.setConfig(getConfig());
+    options.setShared(true);
+    return options.createProvider(vertx);
   }
 
   @Override
