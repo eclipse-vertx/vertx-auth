@@ -15,7 +15,7 @@ public class AuthOptionsTest {
 
   @Test
   public void testSomething() {
-    ShiroAuthOptions options = (ShiroAuthOptions) AuthOptions.create(
+    ShiroAuthOptions options = new ShiroAuthOptions(
         new JsonObject().put("provider", "shiro").
             put("type", "PROPERTIES").
             put("config", new JsonObject().put("foo", "bar")));
