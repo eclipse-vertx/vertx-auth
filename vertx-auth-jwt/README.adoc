@@ -2,4 +2,4 @@
 
 This module contains contains a Vert.x auth implementation which uses JSON Web Tokens (JWT)
 
-Please see the documentation for more information.
+Please see the http://vertx.io/docs/#authentication_and_authorisation(documentation) for more information.
