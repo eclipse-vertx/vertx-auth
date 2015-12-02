@@ -2,4 +2,4 @@
 
 This module contains common auth interfaces.
 
-Please see the documentation for full information
+Please see the http://vertx.io/docs/#authentication_and_authorisation[documentation] for more information.
