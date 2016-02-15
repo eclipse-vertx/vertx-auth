@@ -117,6 +117,18 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   @Test
+  public void testGenerateNewTokenImmutableClaims() {
+
+    JsonObject payload = new JsonObject()
+        .put("sub", "Paulo");
+
+    String token0 = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
+    String token1 = authProvider.generateToken(payload, new JWTOptions().addPermission("admin"));
+
+    assertNotSame(token0, token1);
+  }
+
+  @Test
   public void testTokenWithoutTimestamp() {
     JsonObject payload = new JsonObject()
         .put("sub", "Paulo");
