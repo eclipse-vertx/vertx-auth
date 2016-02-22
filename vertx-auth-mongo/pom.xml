@@ -48,7 +48,7 @@
       <!-- dependency requried by flapdoodle -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.12</version>
+      <version>1.7.16</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
