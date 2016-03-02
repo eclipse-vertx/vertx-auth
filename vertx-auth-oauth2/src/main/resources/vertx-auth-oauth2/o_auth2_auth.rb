@@ -20,13 +20,13 @@ module VertxAuthOauth2
     #  Create a OAuth2 auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance
     # @param [:AUTH_CODE,:CLIENT,:PASSWORD] flow 
-    # @param [Hash{String => Object}] config the config
+    # @param [Hash] config the config
     # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
     def self.create(vertx=nil,flow=nil,config=nil)
       if vertx.class.method_defined?(:j_del) && flow.class == Symbol && !block_given? && config == nil
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow)),::VertxAuthOauth2::OAuth2Auth)
       elsif vertx.class.method_defined?(:j_del) && flow.class == Symbol && config.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthOauth2::OAuth2Auth)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.new(::Vertx::Util::Utils.to_json_object(config))),::VertxAuthOauth2::OAuth2Auth)
       end
       raise ArgumentError, "Invalid arguments when calling create(vertx,flow,config)"
     end

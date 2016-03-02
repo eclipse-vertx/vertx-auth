@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.flow.OAuth2Flow;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.impl.flow.AuthCodeImpl;
@@ -35,18 +36,13 @@ import io.vertx.ext.auth.oauth2.impl.flow.PasswordImpl;
 public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private final Vertx vertx;
-  private final JsonObject config;
+  private final OAuth2ClientOptions config;
 
   private final OAuth2Flow flow;
 
-  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2FlowType flow, JsonObject config) {
+  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
     this.vertx = vertx;
-    this.config = new JsonObject()
-        .put("authorizationPath", "/oauth/authorize")
-        .put("tokenPath", "/oauth/token")
-        .put("revocationPath", "/oauth/revoke")
-        .put("useBasicAuthorizationHeader", true)
-        .put("clientSecretParameterName", "client_secret").mergeIn(config);
+    this.config = config;
 
     switch (flow) {
       case AUTH_CODE:
@@ -63,7 +59,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
   }
 
-  public JsonObject getConfig() {
+  public OAuth2ClientOptions getConfig() {
     return config;
   }
 

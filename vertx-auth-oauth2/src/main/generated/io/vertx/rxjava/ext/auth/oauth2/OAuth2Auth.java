@@ -25,6 +25,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.core.Handler;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
@@ -54,7 +55,7 @@ public class OAuth2Auth extends AuthProvider {
    * @param config the config
    * @return the auth provider
    */
-  public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, JsonObject config) { 
+  public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) { 
     OAuth2Auth ret= OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx) vertx.getDelegate(), flow, config));
     return ret;
   }

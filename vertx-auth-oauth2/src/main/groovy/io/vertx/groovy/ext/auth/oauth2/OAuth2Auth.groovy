@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
 import io.vertx.core.Handler
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions
 import io.vertx.groovy.ext.auth.AuthProvider
 /**
  * Factory interface for creating OAuth2 based {@link io.vertx.groovy.ext.auth.AuthProvider} instances.
@@ -42,11 +43,11 @@ public class OAuth2Auth extends AuthProvider {
    * Create a OAuth2 auth provider
    * @param vertx the Vertx instance
    * @param flow 
-   * @param config the config
+   * @param config the config (see <a href="../../../../../../../../cheatsheet/OAuth2ClientOptions.html">OAuth2ClientOptions</a>)
    * @return the auth provider
    */
   public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx)vertx.getDelegate(), flow, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx)vertx.getDelegate(), flow, config != null ? new io.vertx.ext.auth.oauth2.OAuth2ClientOptions(new io.vertx.core.json.JsonObject(config)) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
     return ret;
   }
   /**

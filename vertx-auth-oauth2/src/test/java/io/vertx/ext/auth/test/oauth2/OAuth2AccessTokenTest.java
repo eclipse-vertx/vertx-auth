@@ -5,6 +5,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -54,10 +55,10 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new JsonObject()
-        .put("clientID", "client-id")
-        .put("clientSecret", "client-secret")
-        .put("site", "http://localhost:8080"));
+    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
+        .setClientID("client-id")
+        .setClientSecret("client-secret")
+        .setSite("http://localhost:8080"));
 
     final CountDownLatch latch = new CountDownLatch(1);
 
