@@ -20,11 +20,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -33,12 +32,12 @@ public class AuthOAuth2Examples {
 
   public void example1(Vertx vertx) {
 
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new JsonObject()
-            .put("clientID", "YOUR_CLIENT_ID")
-            .put("clientSecret", "YOUR_CLIENT_SECRET")
-            .put("site", "https://github.com/login")
-            .put("tokenPath", "/oauth/access_token")
-            .put("authorizationPath", "/oauth/authorize")
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
+            .setClientID("YOUR_CLIENT_ID")
+            .setClientSecret("YOUR_CLIENT_SECRET")
+            .setSite("https://github.com/login")
+            .setTokenPath("/oauth/access_token")
+            .setAuthorizationPath("/oauth/authorize")
     );
 
     // when there is a need to access a protected resource or call a protected method,
@@ -68,10 +67,10 @@ public class AuthOAuth2Examples {
   public void example2(Vertx vertx, HttpServerResponse response) {
 
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "<client-id>")
-        .put("clientSecret", "<client-secret>")
-        .put("site", "https://api.oauth.com");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("<client-id>")
+        .setClientSecret("<client-secret>")
+        .setSite("https://api.oauth.com");
 
 
     // Initialize the OAuth2 Library
@@ -132,10 +131,10 @@ public class AuthOAuth2Examples {
   public void example4(Vertx vertx) {
 
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "<client-id>")
-        .put("clientSecret", "<client-secret>")
-        .put("site", "https://api.oauth.com");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("<client-id>")
+        .setClientSecret("<client-secret>")
+        .setSite("https://api.oauth.com");
 
 
     // Initialize the OAuth2 Library
@@ -183,12 +182,12 @@ public class AuthOAuth2Examples {
 
   public void example7(Vertx vertx) {
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "CLIENT_ID")
-        .put("clientSecret", "CLIENT_SECRET")
-        .put("site", "https://accounts.google.com")
-        .put("tokenPath", "https://www.googleapis.com/oauth2/v3/token")
-        .put("authorizationPath", "/o/oauth2/auth");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID")
+        .setClientSecret("CLIENT_SECRET")
+        .setSite("https://accounts.google.com")
+        .setTokenPath("https://www.googleapis.com/oauth2/v3/token")
+        .setAuthorizationPath("/o/oauth2/auth");
 
 
     // Initialize the OAuth2 Library
@@ -197,12 +196,12 @@ public class AuthOAuth2Examples {
 
   public void example8(Vertx vertx) {
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "CLIENT_ID")
-        .put("clientSecret", "CLIENT_SECRET")
-        .put("site", "https://github.com/login")
-        .put("tokenPath", "/oauth/access_token")
-        .put("authorizationPath", "/oauth/authorize");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID")
+        .setClientSecret("CLIENT_SECRET")
+        .setSite("https://github.com/login")
+        .setTokenPath("/oauth/access_token")
+        .setAuthorizationPath("/oauth/authorize");
 
 
     // Initialize the OAuth2 Library
@@ -211,12 +210,12 @@ public class AuthOAuth2Examples {
 
   public void example9(Vertx vertx) {
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "CLIENT_ID")
-        .put("clientSecret", "CLIENT_SECRET")
-        .put("site", "https://www.linkedin.com")
-        .put("authorizationPath", "/uas/oauth2/authorization")
-        .put("tokenPath", "/uas/oauth2/accessToken");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID")
+        .setClientSecret("CLIENT_SECRET")
+        .setSite("https://www.linkedin.com")
+        .setAuthorizationPath("/uas/oauth2/authorization")
+        .setTokenPath("/uas/oauth2/accessToken");
 
 
     // Initialize the OAuth2 Library
@@ -225,12 +224,12 @@ public class AuthOAuth2Examples {
 
   public void example10(Vertx vertx) {
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "CLIENT_ID")
-        .put("clientSecret", "CLIENT_SECRET")
-        .put("site", "https://api.twitter.com")
-        .put("authorizationPath", "/oauth/authorize")
-        .put("tokenPath", "/oauth/access_token");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID")
+        .setClientSecret("CLIENT_SECRET")
+        .setSite("https://api.twitter.com")
+        .setAuthorizationPath("/oauth/authorize")
+        .setTokenPath("/oauth/access_token");
 
 
     // Initialize the OAuth2 Library
@@ -239,12 +238,12 @@ public class AuthOAuth2Examples {
 
   public void example11(Vertx vertx) {
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "CLIENT_ID")
-        .put("clientSecret", "CLIENT_SECRET")
-        .put("site", "https://www.facebook.com")
-        .put("authorizationPath", "/dialog/oauth")
-        .put("tokenPath", "https://graph.facebook.com/oauth/access_token");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID")
+        .setClientSecret("CLIENT_SECRET")
+        .setSite("https://www.facebook.com")
+        .setAuthorizationPath("/dialog/oauth")
+        .setTokenPath("https://graph.facebook.com/oauth/access_token");
 
 
     // Initialize the OAuth2 Library
@@ -253,12 +252,12 @@ public class AuthOAuth2Examples {
 
   public void example12(Vertx vertx, String realm) {
     // Set the client credentials and the OAuth2 server
-    JsonObject credentials = new JsonObject()
-        .put("clientID", "CLIENT_ID")
-        .put("clientSecret", "CLIENT_SECRET")
-        .put("site", "https://www.your-keycloak-server.com")
-        .put("authorizationPath", "/realms/" + realm + "/protocol/openid-connect/auth")
-        .put("tokenPath", "/realms/" + realm + "/protocol/openid-connect/token");
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID")
+        .setClientSecret("CLIENT_SECRET")
+        .setSite("https://www.your-keycloak-server.com")
+        .setAuthorizationPath("/realms/" + realm + "/protocol/openid-connect/auth")
+        .setTokenPath("/realms/" + realm + "/protocol/openid-connect/token");
 
 
     // Initialize the OAuth2 Library

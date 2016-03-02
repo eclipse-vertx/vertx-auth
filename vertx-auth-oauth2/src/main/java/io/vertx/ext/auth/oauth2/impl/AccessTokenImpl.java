@@ -27,6 +27,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 
 import java.nio.charset.StandardCharsets;
 
@@ -38,7 +39,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   private static final Logger log = LoggerFactory.getLogger(AccessTokenImpl.class);
 
   private Vertx vertx;
-  private JsonObject config;
+  private OAuth2ClientOptions config;
 
   private JsonObject token;
 
@@ -55,7 +56,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * Creates an AccessToken instance.
    * @param token - An object containing the token object returned from the OAuth2 server.
    */
-  public AccessTokenImpl(Vertx vertx, JsonObject config, JsonObject token) {
+  public AccessTokenImpl(Vertx vertx, OAuth2ClientOptions config, JsonObject token) {
     this.vertx = vertx;
     this.config = config;
 
@@ -90,7 +91,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
         .put("grant_type", "refresh_token")
         .put("refresh_token", token.getString("refresh_token"));
 
-    OAuth2API.api(vertx, config, HttpMethod.POST, config.getString("tokenPath"), params, res -> {
+    OAuth2API.api(vertx, config, HttpMethod.POST, config.getTokenPath(), params, res -> {
       if (res.succeeded()) {
         init(res.result());
         callback.handle(Future.succeededFuture());
@@ -117,7 +118,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
         .put("token", token)
         .put("token_type_hint", token_type);
 
-    OAuth2API.api(vertx, config, HttpMethod.POST, config.getString("revocationPath"), params, res -> {
+    OAuth2API.api(vertx, config, HttpMethod.POST, config.getRevocationPath(), params, res -> {
       if (res.succeeded()) {
         // TODO: what to do with the result from this call?
         callback.handle(Future.succeededFuture());

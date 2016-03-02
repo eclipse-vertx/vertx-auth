@@ -22,6 +22,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -36,21 +37,21 @@ import java.util.Map;
  */
 public class OAuth2API {
 
-  public static void api(Vertx vertx, JsonObject config, HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+  public static void api(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
     final String url;
 
     if (path.startsWith("http://") || path.startsWith("https://")) {
       url = path ;
     } else {
-      url = config.getString("site") + path ;
+      url = config.getSite() + path ;
     }
 
     call(vertx, config, method, url, params, callback);
   }
 
-  private static void call(Vertx vertx, JsonObject config, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+  private static void call(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
 
-    if (!config.containsKey("clientID") || !config.containsKey("clientSecret") || !config.containsKey("site")) {
+    if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
       callback.handle(Future.failedFuture("Configuration missing. You need to specify the client id, the client secret and the oauth2 server"));
       return;
     }
@@ -60,12 +61,12 @@ public class OAuth2API {
     if (params.containsKey("access_token") && !params.containsKey("client_id")) {
       headers.put("Authorization", "Bearer " + params.getString("access_token"));
       params.remove("access_token");
-    } else if (config.containsKey("useBasicAuthorizationHeader") && config.containsKey("clientID") && !params.containsKey("client_id")) {
-      String basic = config.getString("clientID") + ":" + config.getString("clientSecret");
+    } else if (config.isUseBasicAuthorizationHeader() && config.getClientID() != null && !params.containsKey("client_id")) {
+      String basic = config.getClientID() + ":" + config.getClientSecret();
       headers.put("Authorization", "Basic " + Base64.getUrlEncoder().encodeToString(basic.getBytes()));
     }
 
-    JsonObject tmp = config.getJsonObject("headers");
+    JsonObject tmp = config.getHeaders();
     if (tmp != null) {
       headers.mergeIn(tmp);
     }
@@ -84,9 +85,9 @@ public class OAuth2API {
 
     // Enable the system to send authorization params in the body (for example github does not require to be in the header)
     if (method != HttpMethod.GET && form != null) {
-      form.put("client_id", config.getString("clientID"));
-      if (config.containsKey("clientSecretParameterName")) {
-        form.put(config.getString("clientSecretParameterName"), config.getString("clientSecret"));
+      form.put("client_id", config.getClientID());
+      if (config.getClientSecretParameterName() != null) {
+        form.put(config.getClientSecretParameterName(), config.getClientSecret());
       }
     }
 
@@ -118,18 +119,21 @@ public class OAuth2API {
     HttpClientRequest request = client.request(method, uri, resp -> {
       if (resp.statusCode() >= 400) {
         callback.handle(Future.failedFuture(resp.statusMessage()));
+        client.close();
         return;
       }
 
       resp.bodyHandler(body -> {
         if (body == null) {
           callback.handle(Future.failedFuture("No Body"));
+          client.close();
           return;
         }
 
         if (body.length() == 0) {
           // no body
           callback.handle(Future.succeededFuture());
+          client.close();
           return;
         }
 
@@ -159,6 +163,7 @@ public class OAuth2API {
             callback.handle(Future.failedFuture("Cannot handle content type: " + contentType));
             break;
         }
+        client.close();
       });
     });
 
@@ -168,8 +173,8 @@ public class OAuth2API {
     }
 
     // specific UA
-    if (config.containsKey("agent")) {
-      request.putHeader("User-Agent", config.getString("agent"));
+    if (config.getUserAgent() != null) {
+      request.putHeader("User-Agent", config.getUserAgent());
     }
 
     // specify preferred content type

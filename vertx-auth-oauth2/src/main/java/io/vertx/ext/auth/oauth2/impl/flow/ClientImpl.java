@@ -21,8 +21,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
@@ -33,9 +33,9 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 public class ClientImpl implements OAuth2Flow {
 
   private final Vertx vertx;
-  private final JsonObject config;
+  private final OAuth2ClientOptions config;
 
-  public ClientImpl(Vertx vertx, JsonObject config) {
+  public ClientImpl(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
   }
@@ -54,7 +54,7 @@ public class ClientImpl implements OAuth2Flow {
   @Override
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
     params.put("grant_type", "client_credentials");
-    api(vertx, config, HttpMethod.POST, config.getString("tokenPath"), params, res -> {
+    api(vertx, config, HttpMethod.POST, config.getTokenPath(), params, res -> {
       if (res.succeeded()) {
         handler.handle(Future.succeededFuture(new AccessTokenImpl(vertx, config, res.result())));
       } else {

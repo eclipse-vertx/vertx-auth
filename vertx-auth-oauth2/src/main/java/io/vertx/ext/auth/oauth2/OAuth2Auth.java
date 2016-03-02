@@ -24,7 +24,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -42,7 +41,7 @@ public interface OAuth2Auth extends AuthProvider {
    * @param config  the config
    * @return the auth provider
    */
-  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, JsonObject config) {
+  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
     return new OAuth2AuthProviderImpl(vertx, flow, config);
   }
 
@@ -53,7 +52,7 @@ public interface OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow) {
-    return new OAuth2AuthProviderImpl(vertx, flow, new JsonObject());
+    return new OAuth2AuthProviderImpl(vertx, flow, new OAuth2ClientOptions());
   }
 
   /**

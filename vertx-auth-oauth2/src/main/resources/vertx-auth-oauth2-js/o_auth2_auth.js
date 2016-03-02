@@ -23,6 +23,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
 var JOAuth2Auth = io.vertx.ext.auth.oauth2.OAuth2Auth;
+var OAuth2ClientOptions = io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 
 /**
 
@@ -112,7 +113,7 @@ OAuth2Auth.create = function() {
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
     return utils.convReturnVertxGen(JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1])), OAuth2Auth);
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(__args[2])), OAuth2Auth);
+    return utils.convReturnVertxGen(JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.ext.auth.oauth2.OAuth2ClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), __args[2] != null ? new OAuth2ClientOptions(new JsonObject(JSON.stringify(__args[2]))) : null), OAuth2Auth);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
