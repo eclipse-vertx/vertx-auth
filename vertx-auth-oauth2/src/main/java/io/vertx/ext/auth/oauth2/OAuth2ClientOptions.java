@@ -35,6 +35,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String REVOKATION_PATH = "/oauth/revoke";
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
+  private static final boolean JWT_TOKEN = false;
 
   private String authorizationPath;
   private String tokenPath;
@@ -47,6 +48,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String clientSecret;
   private String userAgent;
   private JsonObject headers;
+  private String publicKey;
+  private boolean jwtToken;
 
   public String getSite() {
     return site;
@@ -77,6 +80,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     site = other.getSite();
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
+    publicKey = other.getPublicKey();
   }
 
   private void init() {
@@ -85,6 +89,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     revocationPath = REVOKATION_PATH;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
+    jwtToken = JWT_TOKEN;
   }
 
   /**
@@ -181,6 +186,24 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setHeaders(JsonObject headers) {
     this.headers = headers;
+    return this;
+  }
+
+  public String getPublicKey() {
+    return publicKey;
+  }
+
+  public OAuth2ClientOptions setPublicKey(String publicKey) {
+    this.publicKey = publicKey;
+    return this;
+  }
+
+  public boolean isJwtToken() {
+    return jwtToken;
+  }
+
+  public OAuth2ClientOptions setJwtToken(boolean jwtToken) {
+    this.jwtToken = jwtToken;
     return this;
   }
 }

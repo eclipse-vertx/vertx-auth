@@ -29,7 +29,9 @@ public interface OAuth2Flow {
   /**
    * See implementations for specific documentation
    */
-  String authorizeURL(JsonObject params);
+  default String authorizeURL(JsonObject params) {
+    return null;
+  }
 
   /**
    * See implementations for specific documentation

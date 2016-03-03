@@ -37,19 +37,21 @@ import java.util.Map;
  */
 public class OAuth2API {
 
-  public static void api(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+  public static void api(OAuth2AuthProviderImpl provider, HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
     final String url;
 
     if (path.startsWith("http://") || path.startsWith("https://")) {
       url = path ;
     } else {
-      url = config.getSite() + path ;
+      url = provider.getConfig().getSite() + path ;
     }
 
-    call(vertx, config, method, url, params, callback);
+    call(provider, method, url, params, callback);
   }
 
-  private static void call(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+  private static void call(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+
+    final OAuth2ClientOptions config = provider.getConfig();
 
     if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
       callback.handle(Future.failedFuture("Configuration missing. You need to specify the client id, the client secret and the oauth2 server"));
@@ -107,7 +109,7 @@ public class OAuth2API {
         }
       }
 
-      client = vertx.createHttpClient(new HttpClientOptions()
+      client = provider.getVertx().createHttpClient(new HttpClientOptions()
           .setSsl(isSecure)
           .setDefaultHost(host)
           .setDefaultPort(port));

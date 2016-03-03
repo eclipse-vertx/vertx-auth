@@ -373,20 +373,18 @@ oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ==== JBoss Keycloak
 
+When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
+web UI and use it as the OAuth2 config with the helper class `link:../dataobjects.html#KeycloakClientOptions[KeycloakClientOptions]`.
+
 [source,ruby]
 ----
-require 'vertx-auth-oauth2/o_auth2_auth'
-# Set the client credentials and the OAuth2 server
-credentials = {
-  'clientID' => "CLIENT_ID",
-  'clientSecret' => "CLIENT_SECRET",
-  'site' => "https://www.your-keycloak-server.com",
-  'authorizationPath' => "/realms/#{realm}/protocol/openid-connect/auth",
-  'tokenPath' => "/realms/#{realm}/protocol/openid-connect/token"
-}
+Code not translatable
+----
 
+When using this approach the provider has knowledge on how to parse access tokens and extract grants from inside.
+This information is quite valuable since it allows to do authorization at the API level, for example:
 
-# Initialize the OAuth2 Library
-oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
-
+[source,ruby]
+----
+Code not translatable
 ----

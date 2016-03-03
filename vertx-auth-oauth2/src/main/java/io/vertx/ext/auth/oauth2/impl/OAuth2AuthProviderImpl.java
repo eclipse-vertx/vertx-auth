@@ -21,11 +21,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.oauth2.impl.crypto.TokenVerifier;
 import io.vertx.ext.auth.oauth2.impl.flow.OAuth2Flow;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.impl.flow.AuthCodeImpl;
 import io.vertx.ext.auth.oauth2.impl.flow.ClientImpl;
 import io.vertx.ext.auth.oauth2.impl.flow.PasswordImpl;
@@ -37,22 +35,24 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private final Vertx vertx;
   private final OAuth2ClientOptions config;
+  private final TokenVerifier verifier;
 
   private final OAuth2Flow flow;
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
+    verifier = new TokenVerifier(config.getPublicKey());
 
     switch (flow) {
       case AUTH_CODE:
-        this.flow = new AuthCodeImpl(this.vertx, this.config);
+        this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
-        this.flow = new ClientImpl(this.vertx, this.config);
+        this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
-        this.flow = new PasswordImpl(this.vertx, this.config);
+        this.flow = new PasswordImpl(this);
         break;
       default:
         throw new IllegalArgumentException("Invalid oauth2 flow type: " + flow);
@@ -65,6 +65,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   public Vertx getVertx() {
     return vertx;
+  }
+
+  public TokenVerifier getVerifier() {
+    return verifier;
   }
 
   @Override
@@ -84,7 +88,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth api(HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> handler) {
-    OAuth2API.api(vertx, config, method, path, params, handler);
+    OAuth2API.api(this, method, path, params, handler);
     return this;
   }
 }

@@ -177,10 +177,22 @@
  *
  * ==== JBoss Keycloak
  *
+ * When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
+ * web UI and use it as the OAuth2 config with the helper class {@link io.vertx.ext.auth.oauth2.KeycloakClientOptions}.
+ *
  * [source,$lang]
  * ----
  * {@link examples.AuthOAuth2Examples#example12}
  * ----
+ *
+ * When using this approach the provider has knowledge on how to parse access tokens and extract grants from inside.
+ * This information is quite valuable since it allows to do authorization at the API level, for example:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example13}
+ * ----
+ *
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-auth-oauth2", groupPackage = "io.vertx")

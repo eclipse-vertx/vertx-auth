@@ -324,16 +324,58 @@ OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 
 ==== JBoss Keycloak
 
+When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
+web UI and use it as the OAuth2 config with the helper class `link:../../apidocs/io/vertx/ext/auth/oauth2/KeycloakClientOptions.html[KeycloakClientOptions]`.
+
 [source,java]
 ----
-OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-    .setClientID("CLIENT_ID")
-    .setClientSecret("CLIENT_SECRET")
-    .setSite("https://www.your-keycloak-server.com")
-    .setAuthorizationPath("/realms/" + realm + "/protocol/openid-connect/auth")
-    .setTokenPath("/realms/" + realm + "/protocol/openid-connect/token");
+JsonObject keycloakJson = new JsonObject(
+    "{\n" +
+    "  \"realm\": \"master\",\n" +
+    "  \"realm-public-key\": " +
+        "\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1" +
+        "czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5B" +
+        "lPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3" +
+        "ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIc" +
+        "H8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB\",\n" +
+    "  \"auth-server-url\": \"http://localhost:9000/auth\",\n" +
+    "  \"ssl-required\": \"external\",\n" +
+    "  \"resource\": \"frontend\",\n" +
+    "  \"credentials\": {\n" +
+    "    \"secret\": \"2fbf5e18-b923-4a83-9657-b4ebd5317f60\"\n" +
+    "  }\n" +
+    "}");
 
+// you can now use this config with the OAuth2 provider like this:
+KeycloakClientOptions keycloakConfig = new KeycloakClientOptions(keycloakJson);
 
 // Initialize the OAuth2 Library
-OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, keycloakConfig);
+----
+
+When using this approach the provider has knowledge on how to parse access tokens and extract grants from inside.
+This information is quite valuable since it allows to do authorization at the API level, for example:
+
+[source,java]
+----
+KeycloakClientOptions keycloakConfig = new KeycloakClientOptions(new JsonObject("{...}"));
+
+// Initialize the OAuth2 Library
+OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD, keycloakConfig);
+
+// first get a token (authenticate)
+oauth2.getToken(new JsonObject().put("username", "user").put("password", "secret"), res -> {
+  if (res.failed()) {
+    // error handling...
+  } else {
+    AccessToken token = res.result();
+
+    // now check for permissions
+    token.isAuthorised("account:manage-account", r -> {
+      if (r.result()) {
+        // this user is authorized to manage its account
+      }
+    });
+  }
+});
 ----
