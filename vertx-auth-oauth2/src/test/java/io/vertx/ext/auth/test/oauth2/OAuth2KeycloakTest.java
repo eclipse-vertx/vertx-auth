@@ -68,4 +68,34 @@ public class OAuth2KeycloakTest extends VertxTestBase {
     });
     await();
   }
+
+  @Test
+  @Ignore
+  public void testLogout() {
+    oauth2.getToken(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
+      if (res.failed()) {
+        fail(res.cause().getMessage());
+      } else {
+        AccessToken token = res.result();
+        assertNotNull(token);
+        assertNotNull(token.principal());
+
+        // go to keycloak web interface, there should be 1 session
+
+        vertx.setTimer(10000, v -> {
+          // logout
+          token.logout(res3 -> {
+            if(res3.failed()) {
+              fail(res3.cause().getMessage());
+            } else {
+
+              // go to keycloak web interface, there should be no session
+              testComplete();
+            }
+          });
+        });
+      }
+    });
+    await();
+  }
 }

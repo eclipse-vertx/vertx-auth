@@ -40,6 +40,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
+  // this is an openid-connect extension
+  private String logoutPath;
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
 
@@ -81,6 +83,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
     publicKey = other.getPublicKey();
+    logoutPath = other.getLogoutPath();
   }
 
   private void init() {
@@ -204,6 +207,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setJwtToken(boolean jwtToken) {
     this.jwtToken = jwtToken;
+    return this;
+  }
+
+  public String getLogoutPath() {
+    return logoutPath;
+  }
+
+  public OAuth2ClientOptions setLogoutPath(String logoutPath) {
+    this.logoutPath = logoutPath;
     return this;
   }
 }

@@ -155,6 +155,34 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   }
 
   /**
+   * Revoke refresh token and calls the logout endpoint
+   *
+   * @param callback - The callback function returning the results.
+   */
+  @Override
+  public AccessTokenImpl logout(Handler<AsyncResult<Void>> callback) {
+
+    JsonObject params = new JsonObject()
+        .put("access_token", token.getString("access_token"))
+        .put("refresh_token", token.getString("refresh_token"));
+
+    OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getLogoutPath(), params, res -> {
+      if (res.succeeded()) {
+
+        // invalidate ourselves
+        token = null;
+        content = null;
+
+        callback.handle(Future.succeededFuture());
+      } else {
+        callback.handle(Future.failedFuture(res.cause()));
+      }
+    });
+
+    return this;
+  }
+
+  /**
    * Determine if this token has an associated role.
    * <p>
    * This method is only functional if the token is constructed

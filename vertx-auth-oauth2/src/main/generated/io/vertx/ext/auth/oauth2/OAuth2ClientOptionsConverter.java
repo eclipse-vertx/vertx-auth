@@ -45,6 +45,9 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("jwtToken") instanceof Boolean) {
       obj.setJwtToken((Boolean)json.getValue("jwtToken"));
     }
+    if (json.getValue("logoutPath") instanceof String) {
+      obj.setLogoutPath((String)json.getValue("logoutPath"));
+    }
     if (json.getValue("publicKey") instanceof String) {
       obj.setPublicKey((String)json.getValue("publicKey"));
     }
@@ -82,6 +85,9 @@ public class OAuth2ClientOptionsConverter {
       json.put("headers", obj.getHeaders());
     }
     json.put("jwtToken", obj.isJwtToken());
+    if (obj.getLogoutPath() != null) {
+      json.put("logoutPath", obj.getLogoutPath());
+    }
     if (obj.getPublicKey() != null) {
       json.put("publicKey", obj.getPublicKey());
     }

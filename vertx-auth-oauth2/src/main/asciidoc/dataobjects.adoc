@@ -87,6 +87,7 @@
 |[[jwtToken]]`jwtToken`|`Boolean`|-
 |[[keepAlive]]`keepAlive`|`Boolean`|-
 |[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
+|[[logoutPath]]`logoutPath`|`String`|-
 |[[maxChunkSize]]`maxChunkSize`|`Number (int)`|-
 |[[maxPoolSize]]`maxPoolSize`|`Number (int)`|-
 |[[maxWaitQueueSize]]`maxWaitQueueSize`|`Number (int)`|-

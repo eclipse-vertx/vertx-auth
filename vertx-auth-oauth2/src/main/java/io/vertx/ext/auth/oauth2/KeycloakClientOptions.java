@@ -27,7 +27,6 @@ import io.vertx.core.json.JsonObject;
 @DataObject
 public class KeycloakClientOptions extends OAuth2ClientOptions {
 
-  private String logoutPath;
   private String userInfoPath;
 
   /**
@@ -44,7 +43,6 @@ public class KeycloakClientOptions extends OAuth2ClientOptions {
    */
   public KeycloakClientOptions(KeycloakClientOptions other) {
     super(other);
-    logoutPath = other.getLogoutPath();
     userInfoPath = other.getUserInfoPath();
   }
 
@@ -87,14 +85,6 @@ public class KeycloakClientOptions extends OAuth2ClientOptions {
       setPublicKey(json.getString("realm-public-key"));
       setJwtToken(true);
     }
-  }
-
-  public String getLogoutPath() {
-    return logoutPath;
-  }
-
-  public void setLogoutPath(String logoutPath) {
-    this.logoutPath = logoutPath;
   }
 
   public String getUserInfoPath() {
