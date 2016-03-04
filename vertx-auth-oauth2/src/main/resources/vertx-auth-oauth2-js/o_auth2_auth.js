@@ -93,6 +93,27 @@ var OAuth2Auth = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+   implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+   by default.
+  
+   This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+   token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+   a token and all grants will be encoded on the token itself so the requester does not need to list the required
+   grants.
+
+   @public
+
+   @return {boolean} true if openid-connect is used.
+   */
+  this.hasJWTToken = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_oAuth2Auth["hasJWTToken()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.

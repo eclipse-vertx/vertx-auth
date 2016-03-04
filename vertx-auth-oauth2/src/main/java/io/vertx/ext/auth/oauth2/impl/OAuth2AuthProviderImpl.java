@@ -91,4 +91,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     OAuth2API.api(this, method, path, params, handler);
     return this;
   }
+
+  @Override
+  public boolean hasJWTToken() {
+    return config.isJwtToken();
+  }
 }
