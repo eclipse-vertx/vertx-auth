@@ -1,0 +1,62 @@
+= Cheatsheets
+
+[[OAuth2ClientOptions]]
+== OAuth2ClientOptions
+
+++++
+ Options describing how an OAuth2  will make connections.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[authorizationPath]]`authorizationPath`|`String`|-
+|[[clientID]]`clientID`|`String`|-
+|[[clientSecret]]`clientSecret`|`String`|-
+|[[clientSecretParameterName]]`clientSecretParameterName`|`String`|-
+|[[connectTimeout]]`connectTimeout`|`Number (int)`|-
+|[[crlPaths]]`crlPaths`|`Array of String`|-
+|[[crlValues]]`crlValues`|`Array of Buffer`|-
+|[[defaultHost]]`defaultHost`|`String`|-
+|[[defaultPort]]`defaultPort`|`Number (int)`|-
+|[[enabledCipherSuites]]`enabledCipherSuites`|`Array of String`|-
+|[[headers]]`headers`|`Json object`|-
+|[[idleTimeout]]`idleTimeout`|`Number (int)`|-
+|[[jwtToken]]`jwtToken`|`Boolean`|-
+|[[keepAlive]]`keepAlive`|`Boolean`|-
+|[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
+|[[logoutPath]]`logoutPath`|`String`|-
+|[[maxChunkSize]]`maxChunkSize`|`Number (int)`|-
+|[[maxPoolSize]]`maxPoolSize`|`Number (int)`|-
+|[[maxWaitQueueSize]]`maxWaitQueueSize`|`Number (int)`|-
+|[[maxWebsocketFrameSize]]`maxWebsocketFrameSize`|`Number (int)`|-
+|[[pemKeyCertOptions]]`pemKeyCertOptions`|`link:dataobjects.html#PemKeyCertOptions[PemKeyCertOptions]`|-
+|[[pemTrustOptions]]`pemTrustOptions`|`link:dataobjects.html#PemTrustOptions[PemTrustOptions]`|-
+|[[pfxKeyCertOptions]]`pfxKeyCertOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
+|[[pfxTrustOptions]]`pfxTrustOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
+|[[pipelining]]`pipelining`|`Boolean`|-
+|[[protocolVersion]]`protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
+|[[publicKey]]`publicKey`|`String`|-
+|[[receiveBufferSize]]`receiveBufferSize`|`Number (int)`|-
+|[[reuseAddress]]`reuseAddress`|`Boolean`|-
+|[[revocationPath]]`revocationPath`|`String`|-
+|[[sendBufferSize]]`sendBufferSize`|`Number (int)`|-
+|[[site]]`site`|`String`|-
+|[[soLinger]]`soLinger`|`Number (int)`|-
+|[[ssl]]`ssl`|`Boolean`|-
+|[[tcpKeepAlive]]`tcpKeepAlive`|`Boolean`|-
+|[[tcpNoDelay]]`tcpNoDelay`|`Boolean`|-
+|[[tokenPath]]`tokenPath`|`String`|-
+|[[trafficClass]]`trafficClass`|`Number (int)`|-
+|[[trustAll]]`trustAll`|`Boolean`|-
+|[[trustStoreOptions]]`trustStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
+|[[tryUseCompression]]`tryUseCompression`|`Boolean`|-
+|[[useBasicAuthorizationHeader]]`useBasicAuthorizationHeader`|`Boolean`|-
+|[[usePooledBuffers]]`usePooledBuffers`|`Boolean`|-
+|[[userAgent]]`userAgent`|`String`|-
+|[[userInfoPath]]`userInfoPath`|`String`|-
+|[[verifyHost]]`verifyHost`|`Boolean`|-
+|===
+

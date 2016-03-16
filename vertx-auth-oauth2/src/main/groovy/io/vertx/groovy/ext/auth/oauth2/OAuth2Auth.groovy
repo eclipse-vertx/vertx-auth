@@ -43,6 +43,17 @@ public class OAuth2Auth extends AuthProvider {
    * Create a OAuth2 auth provider
    * @param vertx the Vertx instance
    * @param flow 
+   * @param config the config as exported from the admin console
+   * @return the auth provider
+   */
+  public static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, Map<String, Object> config) {
+    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak((io.vertx.core.Vertx)vertx.getDelegate(), flow, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
+    return ret;
+  }
+  /**
+   * Create a OAuth2 auth provider
+   * @param vertx the Vertx instance
+   * @param flow 
    * @param config the config (see <a href="../../../../../../../../cheatsheet/OAuth2ClientOptions.html">OAuth2ClientOptions</a>)
    * @return the auth provider
    */
@@ -108,5 +119,20 @@ public class OAuth2Auth extends AuthProvider {
       }
     });
     return this;
+  }
+  /**
+   * Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+   * implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+   * by default.
+   *
+   * This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+   * token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+   * a token and all grants will be encoded on the token itself so the requester does not need to list the required
+   * grants.
+   * @return true if openid-connect is used.
+   */
+  public boolean hasJWTToken() {
+    def ret = this.delegate.hasJWTToken();
+    return ret;
   }
 }

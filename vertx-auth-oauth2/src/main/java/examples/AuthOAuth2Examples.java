@@ -20,10 +20,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.*;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -250,17 +247,51 @@ public class AuthOAuth2Examples {
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
   }
 
-  public void example12(Vertx vertx, String realm) {
-    // Set the client credentials and the OAuth2 server
-    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-        .setClientID("CLIENT_ID")
-        .setClientSecret("CLIENT_SECRET")
-        .setSite("https://www.your-keycloak-server.com")
-        .setAuthorizationPath("/realms/" + realm + "/protocol/openid-connect/auth")
-        .setTokenPath("/realms/" + realm + "/protocol/openid-connect/token");
+  public void example12(Vertx vertx) {
+    // After setting up the application and users in keycloak export
+    // the configuration json file from the web interface and load it in your application e.g.:
 
+    JsonObject keycloakJson = new JsonObject()
+        .put("realm", "master")
+        .put("realm-public-key", "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB")
+        .put("auth-server-url", "http://localhost:9000/auth")
+        .put("ssl-required", "external")
+        .put("resource", "frontend")
+        .put("credentials", new JsonObject()
+            .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+    OAuth2Auth oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.CLIENT, keycloakJson);
+  }
+
+  public void example13(Vertx vertx) {
+    // you can now use this config with the OAuth2 provider like this:
+    JsonObject keycloakJson = new JsonObject()
+        .put("realm", "master")
+        .put("realm-public-key", "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB")
+        .put("auth-server-url", "http://localhost:9000/auth")
+        .put("ssl-required", "external")
+        .put("resource", "frontend")
+        .put("credentials", new JsonObject()
+            .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.PASSWORD, keycloakJson);
+
+    // first get a token (authenticate)
+    oauth2.getToken(new JsonObject().put("username", "user").put("password", "secret"), res -> {
+      if (res.failed()) {
+        // error handling...
+      } else {
+        AccessToken token = res.result();
+
+        // now check for permissions
+        token.isAuthorised("account:manage-account", r -> {
+          if (r.result()) {
+            // this user is authorized to manage its account
+          }
+        });
+      }
+    });
   }
 }

@@ -382,21 +382,71 @@ def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 
 ==== JBoss Keycloak
 
+When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
+web UI and use it as the OAuth2 config with the helper class `link:../dataobjects.html#OAuth2ClientOptions[OAuth2ClientOptions]`.
+
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
 import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
-// Set the client credentials and the OAuth2 server
-def credentials = [
-  clientID:"CLIENT_ID",
-  clientSecret:"CLIENT_SECRET",
-  site:"https://www.your-keycloak-server.com",
-  authorizationPath:"/realms/${realm}/protocol/openid-connect/auth",
-  tokenPath:"/realms/${realm}/protocol/openid-connect/token"
+// After setting up the application and users in keycloak export
+// the configuration json file from the web interface and load it in your application e.g.:
+
+def keycloakJson = [
+  realm:"master",
+  realm-public-key:"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB",
+  auth-server-url:"http://localhost:9000/auth",
+  ssl-required:"external",
+  resource:"frontend",
+  credentials:[
+    secret:"2fbf5e18-b923-4a83-9657-b4ebd5317f60"
+  ]
 ]
 
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.CLIENT, keycloakJson)
+
+----
+
+When using this approach the provider has knowledge on how to parse access tokens and extract grants from inside.
+This information is quite valuable since it allows to do authorization at the API level, for example:
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// you can now use this config with the OAuth2 provider like this:
+def keycloakJson = [
+  realm:"master",
+  realm-public-key:"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB",
+  auth-server-url:"http://localhost:9000/auth",
+  ssl-required:"external",
+  resource:"frontend",
+  credentials:[
+    secret:"2fbf5e18-b923-4a83-9657-b4ebd5317f60"
+  ]
+]
 
 // Initialize the OAuth2 Library
-def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+def oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.PASSWORD, keycloakJson)
+
+// first get a token (authenticate)
+oauth2.getToken([
+  username:"user",
+  password:"secret"
+], { res ->
+  if (res.failed()) {
+    // error handling...
+  } else {
+    def token = res.result()
+
+    // now check for permissions
+    token.isAuthorised("account:manage-account", { r ->
+      if (r.result()) {
+        // this user is authorized to manage its account
+      }
+    })
+  }
+})
 
 ----

@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
@@ -32,17 +33,10 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
  */
 public class ClientImpl implements OAuth2Flow {
 
-  private final Vertx vertx;
-  private final OAuth2ClientOptions config;
+  private final OAuth2AuthProviderImpl provider;
 
-  public ClientImpl(Vertx vertx, OAuth2ClientOptions config) {
-    this.vertx = vertx;
-    this.config = config;
-  }
-
-  @Override
-  public String authorizeURL(JsonObject params) {
-    return null;
+  public ClientImpl(OAuth2AuthProviderImpl provider) {
+    this.provider = provider;
   }
 
   /**
@@ -53,10 +47,12 @@ public class ClientImpl implements OAuth2Flow {
    */
   @Override
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
-    params.put("grant_type", "client_credentials");
-    api(vertx, config, HttpMethod.POST, config.getTokenPath(), params, res -> {
+    final JsonObject query = params.copy();
+    query.put("grant_type", "client_credentials");
+
+    api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
       if (res.succeeded()) {
-        handler.handle(Future.succeededFuture(new AccessTokenImpl(vertx, config, res.result())));
+        handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
       } else {
         handler.handle(Future.failedFuture(res.cause()));
       }

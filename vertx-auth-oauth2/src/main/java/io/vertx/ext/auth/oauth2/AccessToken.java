@@ -50,4 +50,13 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken revoke(String token_type, Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+   * available on all providers.
+   *
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken logout(Handler<AsyncResult<Void>> callback);
 }

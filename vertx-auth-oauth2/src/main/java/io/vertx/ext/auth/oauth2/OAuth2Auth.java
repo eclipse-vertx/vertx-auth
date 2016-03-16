@@ -38,6 +38,52 @@ public interface OAuth2Auth extends AuthProvider {
    * Create a OAuth2 auth provider
    *
    * @param vertx the Vertx instance
+   * @param config  the config as exported from the admin console
+   * @return the auth provider
+   */
+  static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, JsonObject config) {
+
+    final OAuth2ClientOptions options = new OAuth2ClientOptions();
+
+    // keycloak conversion to oauth2 options
+    if (config.containsKey("auth-server-url")) {
+      options.setSite(config.getString("auth-server-url"));
+    }
+
+    if (config.containsKey("resource")) {
+      options.setClientID(config.getString("resource"));
+    }
+
+    if (config.containsKey("credentials") && config.getJsonObject("credentials").containsKey("secret")) {
+      options.setClientSecret(config.getJsonObject("credentials").getString("secret"));
+    }
+
+    if (config.containsKey("public-client") && config.getBoolean("public-client", false)) {
+      options.setUseBasicAuthorizationHeader(true);
+    }
+
+    if (config.containsKey("realm")) {
+      final String realm = config.getString("realm");
+
+      options.setAuthorizationPath("/realms/" + realm + "/protocol/openid-connect/auth");
+      options.setTokenPath("/realms/" + realm + "/protocol/openid-connect/token");
+      options.setRevocationPath(null);
+      options.setLogoutPath("/realms/" + realm + "/protocol/openid-connect/logout");
+      options.setUserInfoPath("/realms/" + realm + "/protocol/openid-connect/userinfo");
+    }
+
+    if (config.containsKey("realm-public-key")) {
+      options.setPublicKey(config.getString("realm-public-key"));
+      options.setJwtToken(true);
+    }
+
+    return new OAuth2AuthProviderImpl(vertx, flow, options);
+  }
+
+  /**
+   * Create a OAuth2 auth provider
+   *
+   * @param vertx the Vertx instance
    * @param config  the config
    * @return the auth provider
    */
@@ -79,4 +125,18 @@ public interface OAuth2Auth extends AuthProvider {
    */
   @Fluent
   OAuth2Auth api(HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> handler);
+
+  /**
+   * Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+   * implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+   * by default.
+   *
+   * This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+   * token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+   * a token and all grants will be encoded on the token itself so the requester does not need to list the required
+   * grants.
+   *
+   * @return true if openid-connect is used.
+   */
+  boolean hasJWTToken();
 }

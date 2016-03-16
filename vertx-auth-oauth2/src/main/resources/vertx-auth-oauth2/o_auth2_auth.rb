@@ -20,6 +20,17 @@ module VertxAuthOauth2
     #  Create a OAuth2 auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance
     # @param [:AUTH_CODE,:CLIENT,:PASSWORD] flow 
+    # @param [Hash{String => Object}] config the config as exported from the admin console
+    # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
+    def self.create_keycloak(vertx=nil,flow=nil,config=nil)
+      if vertx.class.method_defined?(:j_del) && flow.class == Symbol && config.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:createKeycloak, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthOauth2::OAuth2Auth)
+      end
+      raise ArgumentError, "Invalid arguments when calling create_keycloak(vertx,flow,config)"
+    end
+    #  Create a OAuth2 auth provider
+    # @param [::Vertx::Vertx] vertx the Vertx instance
+    # @param [:AUTH_CODE,:CLIENT,:PASSWORD] flow 
     # @param [Hash] config the config
     # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
     def self.create(vertx=nil,flow=nil,config=nil)
@@ -61,6 +72,21 @@ module VertxAuthOauth2
         return self
       end
       raise ArgumentError, "Invalid arguments when calling api(method,path,params)"
+    end
+    #  Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+    #  implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+    #  by default.
+    # 
+    #  This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+    #  token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+    #  a token and all grants will be encoded on the token itself so the requester does not need to list the required
+    #  grants.
+    # @return [true,false] true if openid-connect is used.
+    def has_jwt_token?
+      if !block_given?
+        return @j_del.java_method(:hasJWTToken, []).call()
+      end
+      raise ArgumentError, "Invalid arguments when calling has_jwt_token?()"
     end
   end
 end

@@ -90,6 +90,28 @@ var AccessToken = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+   available on all providers.
+
+   @public
+   @param callback {function} - The callback function returning the results. 
+   @return {AccessToken}
+   */
+  this.logout = function(callback) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_accessToken["logout(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        callback(null, null);
+      } else {
+        callback(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.

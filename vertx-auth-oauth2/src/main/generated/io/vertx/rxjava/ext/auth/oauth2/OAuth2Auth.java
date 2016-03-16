@@ -52,6 +52,18 @@ public class OAuth2Auth extends AuthProvider {
    * Create a OAuth2 auth provider
    * @param vertx the Vertx instance
    * @param flow 
+   * @param config the config as exported from the admin console
+   * @return the auth provider
+   */
+  public static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, JsonObject config) { 
+    OAuth2Auth ret= OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak((io.vertx.core.Vertx) vertx.getDelegate(), flow, config));
+    return ret;
+  }
+
+  /**
+   * Create a OAuth2 auth provider
+   * @param vertx the Vertx instance
+   * @param flow 
    * @param config the config
    * @return the auth provider
    */
@@ -135,6 +147,22 @@ public class OAuth2Auth extends AuthProvider {
     io.vertx.rx.java.ObservableFuture<JsonObject> handler = io.vertx.rx.java.RxHelper.observableFuture();
     api(method, path, params, handler.toHandler());
     return handler;
+  }
+
+  /**
+   * Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+   * implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+   * by default.
+   *
+   * This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+   * token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+   * a token and all grants will be encoded on the token itself so the requester does not need to list the required
+   * grants.
+   * @return true if openid-connect is used.
+   */
+  public boolean hasJWTToken() { 
+    boolean ret = this.delegate.hasJWTToken();
+    return ret;
   }
 
 

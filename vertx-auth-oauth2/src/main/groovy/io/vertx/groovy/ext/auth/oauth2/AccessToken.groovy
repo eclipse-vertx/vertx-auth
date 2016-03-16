@@ -61,4 +61,14 @@ public class AccessToken extends User {
     this.delegate.revoke(token_type, callback);
     return this;
   }
+  /**
+   * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+   * available on all providers.
+   * @param callback - The callback function returning the results.
+   * @return 
+   */
+  public AccessToken logout(Handler<AsyncResult<Void>> callback) {
+    this.delegate.logout(callback);
+    return this;
+  }
 }

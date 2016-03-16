@@ -94,6 +94,28 @@ public class AccessToken extends User {
     return callback;
   }
 
+  /**
+   * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+   * available on all providers.
+   * @param callback - The callback function returning the results.
+   * @return 
+   */
+  public AccessToken logout(Handler<AsyncResult<Void>> callback) { 
+    this.delegate.logout(callback);
+    return this;
+  }
+
+  /**
+   * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+   * available on all providers.
+   * @return 
+   */
+  public Observable<Void> logoutObservable() { 
+    io.vertx.rx.java.ObservableFuture<Void> callback = io.vertx.rx.java.RxHelper.observableFuture();
+    logout(callback.toHandler());
+    return callback;
+  }
+
 
   public static AccessToken newInstance(io.vertx.ext.auth.oauth2.AccessToken arg) {
     return arg != null ? new AccessToken(arg) : null;

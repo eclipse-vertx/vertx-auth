@@ -44,5 +44,16 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling revoke(token_type)"
     end
+    #  Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+    #  available on all providers.
+    # @yield - The callback function returning the results.
+    # @return [self]
+    def logout
+      if block_given?
+        @j_del.java_method(:logout, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |ar| yield(ar.failed ? ar.cause : nil) }))
+        return self
+      end
+      raise ArgumentError, "Invalid arguments when calling logout()"
+    end
   end
 end

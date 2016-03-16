@@ -42,6 +42,15 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("headers") instanceof JsonObject) {
       obj.setHeaders(((JsonObject)json.getValue("headers")).copy());
     }
+    if (json.getValue("jwtToken") instanceof Boolean) {
+      obj.setJwtToken((Boolean)json.getValue("jwtToken"));
+    }
+    if (json.getValue("logoutPath") instanceof String) {
+      obj.setLogoutPath((String)json.getValue("logoutPath"));
+    }
+    if (json.getValue("publicKey") instanceof String) {
+      obj.setPublicKey((String)json.getValue("publicKey"));
+    }
     if (json.getValue("revocationPath") instanceof String) {
       obj.setRevocationPath((String)json.getValue("revocationPath"));
     }
@@ -56,6 +65,9 @@ public class OAuth2ClientOptionsConverter {
     }
     if (json.getValue("userAgent") instanceof String) {
       obj.setUserAgent((String)json.getValue("userAgent"));
+    }
+    if (json.getValue("userInfoPath") instanceof String) {
+      obj.setUserInfoPath((String)json.getValue("userInfoPath"));
     }
   }
 
@@ -75,6 +87,13 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getHeaders() != null) {
       json.put("headers", obj.getHeaders());
     }
+    json.put("jwtToken", obj.isJwtToken());
+    if (obj.getLogoutPath() != null) {
+      json.put("logoutPath", obj.getLogoutPath());
+    }
+    if (obj.getPublicKey() != null) {
+      json.put("publicKey", obj.getPublicKey());
+    }
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());
     }
@@ -87,6 +106,9 @@ public class OAuth2ClientOptionsConverter {
     json.put("useBasicAuthorizationHeader", obj.isUseBasicAuthorizationHeader());
     if (obj.getUserAgent() != null) {
       json.put("userAgent", obj.getUserAgent());
+    }
+    if (obj.getUserInfoPath() != null) {
+      json.put("userInfoPath", obj.getUserInfoPath());
     }
   }
 }

@@ -93,10 +93,47 @@ var OAuth2Auth = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+   implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+   by default.
+  
+   This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+   token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+   a token and all grants will be encoded on the token itself so the requester does not need to list the required
+   grants.
+
+   @public
+
+   @return {boolean} true if openid-connect is used.
+   */
+  this.hasJWTToken = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_oAuth2Auth["hasJWTToken()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
   this._jdel = j_oAuth2Auth;
+};
+
+/**
+ Create a OAuth2 auth provider
+
+ @memberof module:vertx-auth-oauth2-js/o_auth2_auth
+ @param vertx {Vertx} the Vertx instance 
+ @param flow {Object} 
+ @param config {Object} the config as exported from the admin console 
+ @return {OAuth2Auth} the auth provider
+ */
+OAuth2Auth.createKeycloak = function(vertx, flow, config) {
+  var __args = arguments;
+  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
+    return utils.convReturnVertxGen(JOAuth2Auth["createKeycloak(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(config)), OAuth2Auth);
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**
