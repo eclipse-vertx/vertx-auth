@@ -249,38 +249,34 @@ public class AuthOAuth2Examples {
 
   public void example12(Vertx vertx) {
     // After setting up the application and users in keycloak export
-    // the configuration json file from the web interface and save it to a file e.g.:
+    // the configuration json file from the web interface and load it in your application e.g.:
 
-    JsonObject keycloakJson = new JsonObject(
-        "{\n" +
-        "  \"realm\": \"master\",\n" +
-        "  \"realm-public-key\": " +
-            "\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1" +
-            "czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5B" +
-            "lPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3" +
-            "ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIc" +
-            "H8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB\",\n" +
-        "  \"auth-server-url\": \"http://localhost:9000/auth\",\n" +
-        "  \"ssl-required\": \"external\",\n" +
-        "  \"resource\": \"frontend\",\n" +
-        "  \"credentials\": {\n" +
-        "    \"secret\": \"2fbf5e18-b923-4a83-9657-b4ebd5317f60\"\n" +
-        "  }\n" +
-        "}");
-
-    // you can now use this config with the OAuth2 provider like this:
-    KeycloakClientOptions keycloakConfig = new KeycloakClientOptions(keycloakJson);
+    JsonObject keycloakJson = new JsonObject()
+        .put("realm", "master")
+        .put("realm-public-key", "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB")
+        .put("auth-server-url", "http://localhost:9000/auth")
+        .put("ssl-required", "external")
+        .put("resource", "frontend")
+        .put("credentials", new JsonObject()
+            .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, keycloakConfig);
+    OAuth2Auth oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.CLIENT, keycloakJson);
   }
 
   public void example13(Vertx vertx) {
     // you can now use this config with the OAuth2 provider like this:
-    KeycloakClientOptions keycloakConfig = new KeycloakClientOptions(new JsonObject("{...}"));
+    JsonObject keycloakJson = new JsonObject()
+        .put("realm", "master")
+        .put("realm-public-key", "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB")
+        .put("auth-server-url", "http://localhost:9000/auth")
+        .put("ssl-required", "external")
+        .put("resource", "frontend")
+        .put("credentials", new JsonObject()
+            .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD, keycloakConfig);
+    OAuth2Auth oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.PASSWORD, keycloakJson);
 
     // first get a token (authenticate)
     oauth2.getToken(new JsonObject().put("username", "user").put("password", "secret"), res -> {

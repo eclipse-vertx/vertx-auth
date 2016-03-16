@@ -126,6 +126,22 @@ var OAuth2Auth = function(j_val) {
  @memberof module:vertx-auth-oauth2-js/o_auth2_auth
  @param vertx {Vertx} the Vertx instance 
  @param flow {Object} 
+ @param config {Object} the config as exported from the admin console 
+ @return {OAuth2Auth} the auth provider
+ */
+OAuth2Auth.createKeycloak = function(vertx, flow, config) {
+  var __args = arguments;
+  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
+    return utils.convReturnVertxGen(JOAuth2Auth["createKeycloak(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(config)), OAuth2Auth);
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
+ Create a OAuth2 auth provider
+
+ @memberof module:vertx-auth-oauth2-js/o_auth2_auth
+ @param vertx {Vertx} the Vertx instance 
+ @param flow {Object} 
  @param config {Object} the config 
  @return {OAuth2Auth} the auth provider
  */

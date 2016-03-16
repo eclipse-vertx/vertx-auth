@@ -44,6 +44,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
+  private String userInfoPath;
 
   private String site;
   private String clientID;
@@ -216,6 +217,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setLogoutPath(String logoutPath) {
     this.logoutPath = logoutPath;
+    return this;
+  }
+
+  public String getUserInfoPath() {
+    return userInfoPath;
+  }
+
+  public OAuth2ClientOptions setUserInfoPath(String userInfoPath) {
+    this.userInfoPath = userInfoPath;
     return this;
   }
 }

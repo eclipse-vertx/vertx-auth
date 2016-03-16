@@ -178,7 +178,7 @@
  * ==== JBoss Keycloak
  *
  * When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
- * web UI and use it as the OAuth2 config with the helper class {@link io.vertx.ext.auth.oauth2.KeycloakClientOptions}.
+ * web UI and use it as the OAuth2 config with the helper class {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
  *
  * [source,$lang]
  * ----

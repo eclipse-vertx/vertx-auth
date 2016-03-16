@@ -52,6 +52,18 @@ public class OAuth2Auth extends AuthProvider {
    * Create a OAuth2 auth provider
    * @param vertx the Vertx instance
    * @param flow 
+   * @param config the config as exported from the admin console
+   * @return the auth provider
+   */
+  public static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, JsonObject config) { 
+    OAuth2Auth ret= OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak((io.vertx.core.Vertx) vertx.getDelegate(), flow, config));
+    return ret;
+  }
+
+  /**
+   * Create a OAuth2 auth provider
+   * @param vertx the Vertx instance
+   * @param flow 
    * @param config the config
    * @return the auth provider
    */
