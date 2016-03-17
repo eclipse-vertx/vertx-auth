@@ -83,8 +83,10 @@
  *
  * === The JWT keystore file
  *
- * This auth provider requires a keystore in the classpath or in the filesystem with either a {@link javax.crypto.Mac}
- * or a {@link java.security.Signature} in order to sign and verify the generated tokens.
+ * This auth provider requires a keystore in the classpath or in the filesystem with either a
+ * `https://docs.oracle.com/javase/8/docs/api/javax/crypto/Mac.html[javax.crypto.Mac]`
+ * or a `https://docs.oracle.com/javase/8/docs/api/java/security/Signature.html[java.security.Signature]` in order to
+ * sign and verify the generated tokens.
  *
  * The implementation will, by default, look for the following aliases, however not all are required to be present. As
  * a good practice `HS256` should be present:
