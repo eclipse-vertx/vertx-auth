@@ -77,8 +77,9 @@
  * {@link examples.AuthJWTExamples#example7}
  * ----
  *
- * TODO show example of authentication and authorisation with JWT and explain how the permission string passed
- * in authorisation maps to the claims in the JW token
+ * // TODO show example of authentication and authorisation with JWT and explain how the permission string passed
+ * // in authorisation maps to the claims in the JW token
+ *
  *
  * === The JWT keystore file
  *
