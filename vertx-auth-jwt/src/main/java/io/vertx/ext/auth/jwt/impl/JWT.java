@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 /**
@@ -39,6 +41,10 @@ public final class JWT {
 
   private final Map<String, Crypto> CRYPTO_MAP;
   private final boolean unsecure;
+
+  public JWT() {
+    this(null);
+  }
 
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
 
@@ -84,6 +90,29 @@ public final class JWT {
           e.printStackTrace();
           log.warn(alg + " not supported");
         }
+      }
+    }
+
+    // Spec requires "none" to always be available
+    tmp.put("none", new CryptoNone());
+
+    CRYPTO_MAP = Collections.unmodifiableMap(tmp);
+  }
+
+  public JWT(String publicKey) {
+    Map<String, Crypto> tmp = new HashMap<>();
+
+    unsecure = publicKey == null;
+
+    if (!unsecure) {
+      // load SIGNATURE (Read Only)
+      try {
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        tmp.put("RS256", new CryptoPublicKey("SHA256withRSA",  kf.generatePublic(spec)));
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
+        e.printStackTrace();
+        log.warn("RS256 not supported");
       }
     }
 

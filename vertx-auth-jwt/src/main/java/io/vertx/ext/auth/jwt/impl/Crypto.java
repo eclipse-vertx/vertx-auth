@@ -15,11 +15,7 @@
  */
 package io.vertx.ext.auth.jwt.impl;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
@@ -56,6 +52,46 @@ final class CryptoMac implements Crypto {
   @Override
   public boolean verify(byte[] signature, byte[] payload) {
     return Arrays.equals(signature, sign(payload));
+  }
+}
+
+/**
+ * Signature based Crypto implementation
+ * @author Paulo Lopes
+ */
+final class CryptoPublicKey implements Crypto {
+  private final Signature sig;
+  private final PublicKey publicKey;
+
+  CryptoPublicKey(final String algorithm, final PublicKey publicKey) {
+    this.publicKey = publicKey;
+
+    Signature signature;
+    try {
+      // use default
+      signature = Signature.getInstance(algorithm);
+    } catch (NoSuchAlgorithmException e) {
+      // error
+      throw new RuntimeException(e);
+    }
+
+    this.sig = signature;
+  }
+
+  @Override
+  public synchronized byte[] sign(byte[] payload) {
+    throw new RuntimeException("CryptoPublicKey cannot sign");
+  }
+
+  @Override
+  public synchronized boolean verify(byte[] signature, byte[] payload) {
+    try {
+      sig.initVerify(publicKey);
+      sig.update(payload);
+      return sig.verify(signature);
+    } catch (SignatureException | InvalidKeyException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
 
