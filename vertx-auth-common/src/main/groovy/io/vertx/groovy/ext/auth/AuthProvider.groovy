@@ -54,16 +54,14 @@ public class AuthProvider {
    * @param resultHandler The result handler
    */
   public void authenticate(Map<String, Object> authInfo, Handler<AsyncResult<User>> resultHandler) {
-    this.delegate.authenticate(authInfo != null ? new io.vertx.core.json.JsonObject(authInfo) : null, new Handler<AsyncResult<io.vertx.ext.auth.User>>() {
-      public void handle(AsyncResult<io.vertx.ext.auth.User> event) {
-        AsyncResult<User> f
-        if (event.succeeded()) {
-          f = InternalHelper.<User>result(new User(event.result()))
+    delegate.authenticate(authInfo != null ? new io.vertx.core.json.JsonObject(authInfo) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.auth.User>>() {
+      public void handle(AsyncResult<io.vertx.ext.auth.User> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.ext.auth.User.class)));
         } else {
-          f = InternalHelper.<User>failure(event.cause())
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        resultHandler.handle(f)
       }
-    });
+    } : null);
   }
 }

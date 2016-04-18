@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth.jwt;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -51,7 +50,7 @@ public class JWTAuth extends AuthProvider {
    * @return the auth provider
    */
   public static JWTAuth create(Vertx vertx, JsonObject config) { 
-    JWTAuth ret= JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), config));
+    JWTAuth ret = JWTAuth.newInstance(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config));
     return ret;
   }
 
@@ -62,7 +61,7 @@ public class JWTAuth extends AuthProvider {
    * @return JWT encoded token
    */
   public String generateToken(JsonObject claims, JWTOptions options) { 
-    String ret = this.delegate.generateToken(claims, options);
+    String ret = delegate.generateToken(claims, options);
     return ret;
   }
 

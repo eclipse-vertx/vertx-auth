@@ -44,7 +44,7 @@ public class ShiroAuth extends AuthProvider {
    * @return the auth provider
    */
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), realmType, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, realmType, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
   /**
@@ -54,7 +54,7 @@ public class ShiroAuth extends AuthProvider {
    * @return the auth provider
    */
   public static ShiroAuth create(Vertx vertx, Map<String, Object> options) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), options != null ? new io.vertx.ext.auth.shiro.ShiroAuthOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.ext.auth.shiro.ShiroAuthOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
   /**
@@ -63,7 +63,7 @@ public class ShiroAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public ShiroAuth setRolePrefix(String rolePrefix) {
-    def ret= InternalHelper.safeCreate(this.delegate.setRolePrefix(rolePrefix), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
+    def ret = InternalHelper.safeCreate(delegate.setRolePrefix(rolePrefix), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
 }

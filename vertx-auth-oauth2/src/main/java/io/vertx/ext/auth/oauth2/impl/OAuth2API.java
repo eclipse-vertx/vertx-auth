@@ -161,6 +161,13 @@ public class OAuth2API {
               callback.handle(Future.failedFuture(e));
             }
             break;
+          case "text/plain":
+            try {
+              callback.handle(Future.succeededFuture(queryToJSON(body.toString())));
+            } catch (UnsupportedEncodingException | RuntimeException e) {
+              callback.handle(Future.failedFuture(e));
+            }
+            break;
           default:
             callback.handle(Future.failedFuture("Cannot handle content type: " + contentType));
             break;
