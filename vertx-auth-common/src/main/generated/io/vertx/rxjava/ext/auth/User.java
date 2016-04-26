@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
@@ -51,7 +50,15 @@ public class User {
    * @return the User to enable fluent use
    */
   public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) { 
-    this.delegate.isAuthorised(authority, resultHandler);
+    delegate.isAuthorised(authority, new Handler<AsyncResult<java.lang.Boolean>>() {
+      public void handle(AsyncResult<java.lang.Boolean> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture(ar.result()));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    });
     return this;
   }
 
@@ -72,7 +79,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User clearCache() { 
-    this.delegate.clearCache();
+    delegate.clearCache();
     return this;
   }
 
@@ -87,7 +94,7 @@ public class User {
    * @return JSON representation of the Principal
    */
   public JsonObject principal() { 
-    JsonObject ret = this.delegate.principal();
+    JsonObject ret = delegate.principal();
     return ret;
   }
 
@@ -97,7 +104,7 @@ public class User {
    * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
   public void setAuthProvider(AuthProvider authProvider) { 
-    this.delegate.setAuthProvider((io.vertx.ext.auth.AuthProvider) authProvider.getDelegate());
+    delegate.setAuthProvider((io.vertx.ext.auth.AuthProvider)authProvider.getDelegate());
   }
 
 

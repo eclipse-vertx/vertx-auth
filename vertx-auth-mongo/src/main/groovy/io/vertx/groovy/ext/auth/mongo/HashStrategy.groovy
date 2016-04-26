@@ -40,7 +40,7 @@ public class HashStrategy {
    * @return the hashed password
    */
   public String computeHash(String password, User user) {
-    def ret = this.delegate.computeHash(password, (io.vertx.ext.auth.User)user.getDelegate());
+    def ret = delegate.computeHash(password, user != null ? (io.vertx.ext.auth.User)user.getDelegate() : null);
     return ret;
   }
   /**
@@ -49,7 +49,7 @@ public class HashStrategy {
    * @return the password, either as hashed version or as cleartext, depending on the preferences
    */
   public String getStoredPwd(User user) {
-    def ret = this.delegate.getStoredPwd((io.vertx.ext.auth.User)user.getDelegate());
+    def ret = delegate.getStoredPwd(user != null ? (io.vertx.ext.auth.User)user.getDelegate() : null);
     return ret;
   }
   /**
@@ -59,7 +59,7 @@ public class HashStrategy {
    * @return null in case of  the salt of the user or a defined external salt
    */
   public String getSalt(User user) {
-    def ret = this.delegate.getSalt((io.vertx.ext.auth.User)user.getDelegate());
+    def ret = delegate.getSalt(user != null ? (io.vertx.ext.auth.User)user.getDelegate() : null);
     return ret;
   }
   /**
@@ -67,21 +67,21 @@ public class HashStrategy {
    * @param salt the salt, which shall be used
    */
   public void setExternalSalt(String salt) {
-    this.delegate.setExternalSalt(salt);
+    delegate.setExternalSalt(salt);
   }
   /**
    * Set the saltstyle as defined by {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle}.
    * @param saltStyle the {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle} to be used
    */
   public void setSaltStyle(HashSaltStyle saltStyle) {
-    this.delegate.setSaltStyle(saltStyle);
+    delegate.setSaltStyle(saltStyle);
   }
   /**
    * Get the defined {@link io.vertx.groovy.ext.auth.mongo.HashSaltStyle} of the current instance
    * @return the saltStyle
    */
   public HashSaltStyle getSaltStyle() {
-    def ret = this.delegate.getSaltStyle();
+    def ret = delegate.getSaltStyle();
     return ret;
   }
 }

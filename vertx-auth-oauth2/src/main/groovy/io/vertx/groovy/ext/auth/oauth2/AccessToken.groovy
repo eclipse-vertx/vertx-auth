@@ -39,7 +39,7 @@ public class AccessToken extends User {
    * @return 
    */
   public boolean expired() {
-    def ret = this.delegate.expired();
+    def ret = delegate.expired();
     return ret;
   }
   /**
@@ -48,7 +48,7 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken refresh(Handler<AsyncResult<Void>> callback) {
-    this.delegate.refresh(callback);
+    delegate.refresh(callback);
     return this;
   }
   /**
@@ -58,7 +58,7 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken revoke(String token_type, Handler<AsyncResult<Void>> callback) {
-    this.delegate.revoke(token_type, callback);
+    delegate.revoke(token_type, callback);
     return this;
   }
   /**
@@ -68,7 +68,7 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken logout(Handler<AsyncResult<Void>> callback) {
-    this.delegate.logout(callback);
+    delegate.logout(callback);
     return this;
   }
 }

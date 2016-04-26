@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth.jdbc;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.ext.jdbc.JDBCClient;
 import io.vertx.rxjava.ext.auth.AuthProvider;
@@ -48,7 +47,7 @@ public class JDBCAuth extends AuthProvider {
    * @return the auth provider
    */
   public static JDBCAuth create(JDBCClient client) { 
-    JDBCAuth ret= JDBCAuth.newInstance(io.vertx.ext.auth.jdbc.JDBCAuth.create((io.vertx.ext.jdbc.JDBCClient) client.getDelegate()));
+    JDBCAuth ret = JDBCAuth.newInstance(io.vertx.ext.auth.jdbc.JDBCAuth.create((io.vertx.ext.jdbc.JDBCClient)client.getDelegate()));
     return ret;
   }
 
@@ -58,7 +57,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setAuthenticationQuery(String authenticationQuery) { 
-    JDBCAuth ret= JDBCAuth.newInstance(this.delegate.setAuthenticationQuery(authenticationQuery));
+    JDBCAuth ret = JDBCAuth.newInstance(delegate.setAuthenticationQuery(authenticationQuery));
     return ret;
   }
 
@@ -68,7 +67,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setRolesQuery(String rolesQuery) { 
-    JDBCAuth ret= JDBCAuth.newInstance(this.delegate.setRolesQuery(rolesQuery));
+    JDBCAuth ret = JDBCAuth.newInstance(delegate.setRolesQuery(rolesQuery));
     return ret;
   }
 
@@ -78,7 +77,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setPermissionsQuery(String permissionsQuery) { 
-    JDBCAuth ret= JDBCAuth.newInstance(this.delegate.setPermissionsQuery(permissionsQuery));
+    JDBCAuth ret = JDBCAuth.newInstance(delegate.setPermissionsQuery(permissionsQuery));
     return ret;
   }
 
@@ -88,7 +87,7 @@ public class JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public JDBCAuth setRolePrefix(String rolePrefix) { 
-    JDBCAuth ret= JDBCAuth.newInstance(this.delegate.setRolePrefix(rolePrefix));
+    JDBCAuth ret = JDBCAuth.newInstance(delegate.setRolePrefix(rolePrefix));
     return ret;
   }
 

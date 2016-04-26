@@ -41,7 +41,7 @@
       <!-- declare this dependency to force shiro to use this one. It is the version used by vert.x -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.16</version>
+      <version>1.7.21</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -94,7 +94,7 @@
     <dependency>
       <groupId>com.unboundid</groupId>
       <artifactId>unboundid-ldapsdk</artifactId>
-      <version>3.1.0</version>
+      <version>3.1.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -106,13 +106,13 @@
     <dependency>
       <groupId>com.stormpath.sdk</groupId>
       <artifactId>stormpath-sdk-api</artifactId>
-      <version>1.0.RC8.4</version>
+      <version>1.0.RC9.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.stormpath.sdk</groupId>
       <artifactId>stormpath-sdk-httpclient</artifactId>
-      <version>1.0.RC8.4</version>
+      <version>1.0.RC9.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

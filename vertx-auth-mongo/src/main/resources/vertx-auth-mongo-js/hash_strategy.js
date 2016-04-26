@@ -99,7 +99,7 @@ var HashStrategy = function(j_val) {
   this.setSaltStyle = function(saltStyle) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      j_hashStrategy["setSaltStyle(io.vertx.ext.auth.mongo.HashSaltStyle)"](io.vertx.ext.auth.mongo.HashSaltStyle.valueOf(__args[0]));
+      j_hashStrategy["setSaltStyle(io.vertx.ext.auth.mongo.HashSaltStyle)"](io.vertx.ext.auth.mongo.HashSaltStyle.valueOf(saltStyle));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

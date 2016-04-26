@@ -42,7 +42,7 @@ public class JWTAuth extends AuthProvider {
    * @return the auth provider
    */
   public static JWTAuth create(Vertx vertx, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.jwt.JWTAuth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.jwt.JWTAuth.class);
     return ret;
   }
   /**
@@ -52,7 +52,7 @@ public class JWTAuth extends AuthProvider {
    * @return JWT encoded token
    */
   public String generateToken(Map<String, Object> claims, Map<String, Object> options) {
-    def ret = this.delegate.generateToken(claims != null ? new io.vertx.core.json.JsonObject(claims) : null, options != null ? new io.vertx.ext.auth.jwt.JWTOptions(new io.vertx.core.json.JsonObject(options)) : null);
+    def ret = delegate.generateToken(claims != null ? new io.vertx.core.json.JsonObject(claims) : null, options != null ? new io.vertx.ext.auth.jwt.JWTOptions(new io.vertx.core.json.JsonObject(options)) : null);
     return ret;
   }
 }

@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth.shiro;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -53,7 +52,7 @@ public class ShiroAuth extends AuthProvider {
    * @return the auth provider
    */
   public static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) { 
-    ShiroAuth ret= ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), realmType, config));
+    ShiroAuth ret = ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), realmType, config));
     return ret;
   }
 
@@ -64,7 +63,7 @@ public class ShiroAuth extends AuthProvider {
    * @return the auth provider
    */
   public static ShiroAuth create(Vertx vertx, ShiroAuthOptions options) { 
-    ShiroAuth ret= ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx) vertx.getDelegate(), options));
+    ShiroAuth ret = ShiroAuth.newInstance(io.vertx.ext.auth.shiro.ShiroAuth.create((io.vertx.core.Vertx)vertx.getDelegate(), options));
     return ret;
   }
 
@@ -74,7 +73,7 @@ public class ShiroAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   public ShiroAuth setRolePrefix(String rolePrefix) { 
-    ShiroAuth ret= ShiroAuth.newInstance(this.delegate.setRolePrefix(rolePrefix));
+    ShiroAuth ret = ShiroAuth.newInstance(delegate.setRolePrefix(rolePrefix));
     return ret;
   }
 
