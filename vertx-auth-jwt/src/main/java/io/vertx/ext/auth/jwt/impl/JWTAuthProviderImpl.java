@@ -136,12 +136,13 @@ public class JWTAuthProviderImpl implements JWTAuth {
   @Override
   public String generateToken(JsonObject claims, final JWTOptions options) {
     final JsonObject jsonOptions = options.toJson();
+    final JsonObject _claims = claims.copy();
 
     // we do some "enhancement" of the claims to support roles and permissions
-    if (jsonOptions.containsKey("permissions") && !claims.containsKey(permissionsClaimKey)) {
-      claims.put(permissionsClaimKey, jsonOptions.getJsonArray("permissions"));
+    if (jsonOptions.containsKey("permissions") && !_claims.containsKey(permissionsClaimKey)) {
+      _claims.put(permissionsClaimKey, jsonOptions.getJsonArray("permissions"));
     }
 
-    return jwt.sign(claims, options.toJson());
+    return jwt.sign(_claims, options.toJson());
   }
 }

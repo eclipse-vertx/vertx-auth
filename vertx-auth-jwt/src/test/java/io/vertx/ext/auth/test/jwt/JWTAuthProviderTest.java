@@ -15,14 +15,14 @@
  */
 package io.vertx.ext.auth.test.jwt;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
+
+import static org.junit.Assert.assertNotEquals;
 
 public class JWTAuthProviderTest extends VertxTestBase {
 
@@ -114,6 +114,18 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
     assertNotNull(token);
     assertEquals(JWT_VALID, token);
+  }
+
+  @Test
+  public void testGenerateNewTokenImmutableClaims() {
+
+    JsonObject payload = new JsonObject()
+        .put("sub", "Paulo");
+
+    String token0 = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
+    String token1 = authProvider.generateToken(payload, new JWTOptions().addPermission("admin"));
+
+    assertNotEquals(token0, token1);
   }
 
   @Test
