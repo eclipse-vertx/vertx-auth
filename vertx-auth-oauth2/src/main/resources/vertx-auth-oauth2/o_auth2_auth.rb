@@ -61,7 +61,7 @@ module VertxAuthOauth2
       raise ArgumentError, "Invalid arguments when calling get_token(params)"
     end
     #  Call OAuth2 APIs.
-    # @param [:OPTIONS,:GET,:HEAD,:POST,:PUT,:DELETE,:TRACE,:CONNECT,:PATCH,:UNKNOWN] method HttpMethod
+    # @param [:OPTIONS,:GET,:HEAD,:POST,:PUT,:DELETE,:TRACE,:CONNECT,:PATCH,:OTHER] method HttpMethod
     # @param [String] path target path
     # @param [Hash{String => Object}] params parameters
     # @yield handler

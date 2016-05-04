@@ -318,7 +318,7 @@ var MongoAuth = function(j_val) {
   this.insertUser = function(username, password, roles, permissions, resultHandler) {
     var __args = arguments;
     if (__args.length === 5 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'object' && __args[2] instanceof Array && typeof __args[3] === 'object' && __args[3] instanceof Array && typeof __args[4] === 'function') {
-      j_mongoAuth["insertUser(java.lang.String,java.lang.String,java.util.List,java.util.List,io.vertx.core.Handler)"](username, password, roles, permissions, function(ar) {
+      j_mongoAuth["insertUser(java.lang.String,java.lang.String,java.util.List,java.util.List,io.vertx.core.Handler)"](username, password, utils.convParamListBasicOther(roles), utils.convParamListBasicOther(permissions), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {

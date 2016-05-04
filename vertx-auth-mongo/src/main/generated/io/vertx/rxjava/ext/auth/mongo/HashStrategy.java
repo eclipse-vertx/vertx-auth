@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth.mongo;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.rxjava.ext.auth.User;
@@ -49,7 +48,7 @@ public class HashStrategy {
    * @return the hashed password
    */
   public String computeHash(String password, User user) { 
-    String ret = this.delegate.computeHash(password, (io.vertx.ext.auth.User) user.getDelegate());
+    String ret = delegate.computeHash(password, (io.vertx.ext.auth.User)user.getDelegate());
     return ret;
   }
 
@@ -59,18 +58,18 @@ public class HashStrategy {
    * @return the password, either as hashed version or as cleartext, depending on the preferences
    */
   public String getStoredPwd(User user) { 
-    String ret = this.delegate.getStoredPwd((io.vertx.ext.auth.User) user.getDelegate());
+    String ret = delegate.getStoredPwd((io.vertx.ext.auth.User)user.getDelegate());
     return ret;
   }
 
   /**
    * Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
-   * depending on the defined {@link io.vertx.ext.auth.mongo.HashSaltStyle}
+   * depending on the defined {@link io.vertx.rxjava.ext.auth.mongo.HashSaltStyle}
    * @param user the user to get the salt for. This paramter is needed, if the  is declared to be used
    * @return null in case of  the salt of the user or a defined external salt
    */
   public String getSalt(User user) { 
-    String ret = this.delegate.getSalt((io.vertx.ext.auth.User) user.getDelegate());
+    String ret = delegate.getSalt((io.vertx.ext.auth.User)user.getDelegate());
     return ret;
   }
 
@@ -79,23 +78,23 @@ public class HashStrategy {
    * @param salt the salt, which shall be used
    */
   public void setExternalSalt(String salt) { 
-    this.delegate.setExternalSalt(salt);
+    delegate.setExternalSalt(salt);
   }
 
   /**
-   * Set the saltstyle as defined by {@link io.vertx.ext.auth.mongo.HashSaltStyle}.
-   * @param saltStyle the {@link io.vertx.ext.auth.mongo.HashSaltStyle} to be used
+   * Set the saltstyle as defined by {@link io.vertx.rxjava.ext.auth.mongo.HashSaltStyle}.
+   * @param saltStyle the {@link io.vertx.rxjava.ext.auth.mongo.HashSaltStyle} to be used
    */
   public void setSaltStyle(HashSaltStyle saltStyle) { 
-    this.delegate.setSaltStyle(saltStyle);
+    delegate.setSaltStyle(saltStyle);
   }
 
   /**
-   * Get the defined {@link io.vertx.ext.auth.mongo.HashSaltStyle} of the current instance
+   * Get the defined {@link io.vertx.rxjava.ext.auth.mongo.HashSaltStyle} of the current instance
    * @return the saltStyle
    */
   public HashSaltStyle getSaltStyle() { 
-    HashSaltStyle ret = this.delegate.getSaltStyle();
+    HashSaltStyle ret = delegate.getSaltStyle();
     return ret;
   }
 
