@@ -54,7 +54,7 @@
  * owner's user-agent (typically a web browser) and capable of receiving incoming requests (via redirection) from the
  * authorization server.
  *
- * For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1">Oauth2 spec#section-4.1</a>.
+ * For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1[Oauth2 specification, section 4.1].
  *
  * === Password Credentials Flow
  *
@@ -67,7 +67,7 @@
  * typically using an interactive form).  It is also used to migrate existing clients using direct authentication
  * schemes such as HTTP Basic or Digest authentication to OAuth by converting the stored credentials to an access token.
  *
- * For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.3">Oauth2 spec#section-4.3</a>.
+ * For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.3[Oauth2 specification, section 4.3].
  *
  * === Client Credentials Flow
  *
@@ -78,7 +78,7 @@
  *
  * The client credentials grant type MUST only be used by confidential clients.
  *
- * For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4">Oauth2 spec#section-4.4</a>.
+ * For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4[Oauth2 specification, section 4.4].
  *
  * === Getting Started
  *
