@@ -143,6 +143,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
       _claims.put(permissionsClaimKey, jsonOptions.getJsonArray("permissions"));
     }
 
-    return jwt.sign(_claims, options.toJson());
+    return jwt.sign(_claims, jsonOptions);
   }
 }
