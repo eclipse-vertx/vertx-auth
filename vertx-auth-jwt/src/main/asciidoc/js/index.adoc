@@ -135,4 +135,20 @@ keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret 
 keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES384 -keypass secret -sigalg SHA384withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES512 -keypass secret -sigalg SHA512withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 ----
+
+=== Read only tokens
+
+If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that
+case all you need to have is a public key im PEM format.
+
+[source,js]
+----
+var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
+
+var config = {
+  "public-key" : "BASE64-ENCODED-PUBLIC_KEY"
+};
+var provider = JWTAuth.create(vertx, config);
+
+----
 <a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a><a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>

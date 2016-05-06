@@ -1,7 +1,5 @@
 package io.vertx.ext.auth.jwt.impl;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -9,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -36,7 +35,7 @@ public class CryptoTest {
     final Crypto crypto = getMac();
     final byte[] payload = "World!".getBytes(StandardCharsets.UTF_8);
     final byte[] hash = crypto.sign(payload);
-    assertArrayEquals(Base64.decode("aNlISkpF3OORSLOWrmLonO+R/TREP/3ENb5UuEHjczE="), hash);
+    assertArrayEquals(Base64.getDecoder().decode("aNlISkpF3OORSLOWrmLonO+R/TREP/3ENb5UuEHjczE="), hash);
     assertTrue(crypto.verify(hash, payload));
   }
 
@@ -52,7 +51,7 @@ public class CryptoTest {
     final Crypto crypto = getSignature();
     final byte[] payload = "World!".getBytes(StandardCharsets.UTF_8);
     final byte[] signature = crypto.sign(payload);
-    assertArrayEquals(Base64.decode("Gncqp+4rDGS1fjU+qhIF1ky2m7HGS+LfcgWHffDQL97QJVRsiJy+ZKghTpy" +
+    assertArrayEquals(Base64.getDecoder().decode("Gncqp+4rDGS1fjU+qhIF1ky2m7HGS+LfcgWHffDQL97QJVRsiJy+ZKghTpy" +
         "ujIV+tX6KQDb5HJsR2tP7TwsUGHSvPyY8clZvrwlCshAWI6cpdRM2udIawvzwDu0iaCrfbwMQxeQvz53nX2AkPu" +
         "CSYE6fgpb9hi8xqzxDHheTwV8L2aBv1L9pVRy5yJCpWe4vMSqBOLajD+bKMD0evRc2v9gxr2ugJ1okSXu8RnOYA" +
         "zRcaNMl7R/YjR+i5jYUFjD1KrdYz+JsBVONKtZEYoY3IKJBTir/Wl6uqnGlDD0hMisRWpm8Umks1GbZTAFrJ5zM" +
@@ -82,9 +81,9 @@ public class CryptoTest {
         initialLatch.countDown();
         initialLatch.await(10, TimeUnit.SECONDS);
         if (i % 2 == 0) {
-          assertArrayEquals("sign failed", Base64.decode(expected), crypto.sign(payload));
+          assertArrayEquals("sign failed", Base64.getDecoder().decode(expected), crypto.sign(payload));
         } else {
-          assertTrue("verify failed", crypto.verify(Base64.decode(expected), payload));
+          assertTrue("verify failed", crypto.verify(Base64.getDecoder().decode(expected), payload));
         }
       } catch (Throwable e) {
         e.printStackTrace();

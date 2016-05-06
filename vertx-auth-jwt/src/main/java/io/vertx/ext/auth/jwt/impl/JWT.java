@@ -39,12 +39,8 @@ public final class JWT {
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
   private static final JsonObject EMPTY = new JsonObject();
 
-  private final Map<String, Crypto> CRYPTO_MAP;
+  private final Map<String, Crypto> cryptoMap;
   private final boolean unsecure;
-
-  public JWT() {
-    this(null);
-  }
 
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
 
@@ -96,7 +92,7 @@ public final class JWT {
     // Spec requires "none" to always be available
     tmp.put("none", new CryptoNone());
 
-    CRYPTO_MAP = Collections.unmodifiableMap(tmp);
+    cryptoMap = Collections.unmodifiableMap(tmp);
   }
 
   public JWT(String publicKey) {
@@ -119,7 +115,7 @@ public final class JWT {
     // Spec requires "none" to always be available
     tmp.put("none", new CryptoNone());
 
-    CRYPTO_MAP = Collections.unmodifiableMap(tmp);
+    cryptoMap = Collections.unmodifiableMap(tmp);
   }
 
   /**
@@ -184,7 +180,7 @@ public final class JWT {
     JsonObject header = new JsonObject(new String(base64urlDecode(headerSeg), UTF8));
     JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
 
-    Crypto crypto = CRYPTO_MAP.get(header.getString("alg"));
+    Crypto crypto = cryptoMap.get(header.getString("alg"));
 
     if (crypto == null) {
       throw new RuntimeException("Algorithm not supported");
@@ -203,7 +199,7 @@ public final class JWT {
   public String sign(JsonObject payload, JsonObject options) {
     final String algorithm = options.getString("algorithm", "HS256");
 
-    Crypto crypto = CRYPTO_MAP.get(algorithm);
+    Crypto crypto = cryptoMap.get(algorithm);
 
     if (crypto == null) {
       throw new RuntimeException("Algorithm not supported");
