@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth.oauth2;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.rxjava.core.Vertx;
@@ -56,7 +55,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, JsonObject config) { 
-    OAuth2Auth ret= OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak((io.vertx.core.Vertx) vertx.getDelegate(), flow, config));
+    OAuth2Auth ret = OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak((io.vertx.core.Vertx)vertx.getDelegate(), flow, config));
     return ret;
   }
 
@@ -68,7 +67,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) { 
-    OAuth2Auth ret= OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx) vertx.getDelegate(), flow, config));
+    OAuth2Auth ret = OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx)vertx.getDelegate(), flow, config));
     return ret;
   }
 
@@ -79,7 +78,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow) { 
-    OAuth2Auth ret= OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx) vertx.getDelegate(), flow));
+    OAuth2Auth ret = OAuth2Auth.newInstance(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx)vertx.getDelegate(), flow));
     return ret;
   }
 
@@ -89,7 +88,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return 
    */
   public String authorizeURL(JsonObject params) { 
-    String ret = this.delegate.authorizeURL(params);
+    String ret = delegate.authorizeURL(params);
     return ret;
   }
 
@@ -99,15 +98,13 @@ public class OAuth2Auth extends AuthProvider {
    * @param handler - The handler returning the results.
    */
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) { 
-    this.delegate.getToken(params, new Handler<AsyncResult<io.vertx.ext.auth.oauth2.AccessToken>>() {
-      public void handle(AsyncResult<io.vertx.ext.auth.oauth2.AccessToken> event) {
-        AsyncResult<AccessToken> f;
-        if (event.succeeded()) {
-          f = InternalHelper.<AccessToken>result(new AccessToken(event.result()));
+    delegate.getToken(params, new Handler<AsyncResult<io.vertx.ext.auth.oauth2.AccessToken>>() {
+      public void handle(AsyncResult<io.vertx.ext.auth.oauth2.AccessToken> ar) {
+        if (ar.succeeded()) {
+          handler.handle(io.vertx.core.Future.succeededFuture(AccessToken.newInstance(ar.result())));
         } else {
-          f = InternalHelper.<AccessToken>failure(event.cause());
+          handler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        handler.handle(f);
       }
     });
   }
@@ -132,7 +129,15 @@ public class OAuth2Auth extends AuthProvider {
    * @return self
    */
   public OAuth2Auth api(HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> handler) { 
-    this.delegate.api(method, path, params, handler);
+    delegate.api(method, path, params, new Handler<AsyncResult<io.vertx.core.json.JsonObject>>() {
+      public void handle(AsyncResult<io.vertx.core.json.JsonObject> ar) {
+        if (ar.succeeded()) {
+          handler.handle(io.vertx.core.Future.succeededFuture(ar.result()));
+        } else {
+          handler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    });
     return this;
   }
 
@@ -161,7 +166,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return true if openid-connect is used.
    */
   public boolean hasJWTToken() { 
-    boolean ret = this.delegate.hasJWTToken();
+    boolean ret = delegate.hasJWTToken();
     return ret;
   }
 

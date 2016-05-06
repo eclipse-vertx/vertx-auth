@@ -50,7 +50,7 @@ public class MongoAuth extends AuthProvider {
    * @return the created instance of {@link io.vertx.groovy.ext.auth.mongo.MongoAuth}s
    */
   public static MongoAuth create(MongoClient mongoClient, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.mongo.MongoAuth.create((io.vertx.ext.mongo.MongoClient)mongoClient.getDelegate(), config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.mongo.MongoAuth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.mongo.MongoAuth.create(mongoClient != null ? (io.vertx.ext.mongo.MongoClient)mongoClient.getDelegate() : null, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.mongo.MongoAuth.class);
     return ret;
   }
   /**
@@ -59,7 +59,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setCollectionName(String collectionName) {
-    this.delegate.setCollectionName(collectionName);
+    delegate.setCollectionName(collectionName);
     return this;
   }
   /**
@@ -68,7 +68,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setUsernameField(String fieldName) {
-    this.delegate.setUsernameField(fieldName);
+    delegate.setUsernameField(fieldName);
     return this;
   }
   /**
@@ -77,7 +77,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setPasswordField(String fieldName) {
-    this.delegate.setPasswordField(fieldName);
+    delegate.setPasswordField(fieldName);
     return this;
   }
   /**
@@ -87,7 +87,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setRoleField(String fieldName) {
-    this.delegate.setRoleField(fieldName);
+    delegate.setRoleField(fieldName);
     return this;
   }
   /**
@@ -97,7 +97,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setPermissionField(String fieldName) {
-    this.delegate.setPermissionField(fieldName);
+    delegate.setPermissionField(fieldName);
     return this;
   }
   /**
@@ -107,7 +107,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setUsernameCredentialField(String fieldName) {
-    this.delegate.setUsernameCredentialField(fieldName);
+    delegate.setUsernameCredentialField(fieldName);
     return this;
   }
   /**
@@ -117,7 +117,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setPasswordCredentialField(String fieldName) {
-    this.delegate.setPasswordCredentialField(fieldName);
+    delegate.setPasswordCredentialField(fieldName);
     return this;
   }
   /**
@@ -127,7 +127,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setSaltField(String fieldName) {
-    this.delegate.setSaltField(fieldName);
+    delegate.setSaltField(fieldName);
     return this;
   }
   /**
@@ -135,7 +135,7 @@ public class MongoAuth extends AuthProvider {
    * @return the collectionName
    */
   public String getCollectionName() {
-    def ret = this.delegate.getCollectionName();
+    def ret = delegate.getCollectionName();
     return ret;
   }
   /**
@@ -143,7 +143,7 @@ public class MongoAuth extends AuthProvider {
    * @return the usernameField
    */
   public String getUsernameField() {
-    def ret = this.delegate.getUsernameField();
+    def ret = delegate.getUsernameField();
     return ret;
   }
   /**
@@ -151,7 +151,7 @@ public class MongoAuth extends AuthProvider {
    * @return the passwordField
    */
   public String getPasswordField() {
-    def ret = this.delegate.getPasswordField();
+    def ret = delegate.getPasswordField();
     return ret;
   }
   /**
@@ -160,7 +160,7 @@ public class MongoAuth extends AuthProvider {
    * @return the roleField
    */
   public String getRoleField() {
-    def ret = this.delegate.getRoleField();
+    def ret = delegate.getRoleField();
     return ret;
   }
   /**
@@ -169,7 +169,7 @@ public class MongoAuth extends AuthProvider {
    * @return the permissionField
    */
   public String getPermissionField() {
-    def ret = this.delegate.getPermissionField();
+    def ret = delegate.getPermissionField();
     return ret;
   }
   /**
@@ -178,7 +178,7 @@ public class MongoAuth extends AuthProvider {
    * @return the usernameCredentialField
    */
   public String getUsernameCredentialField() {
-    def ret = this.delegate.getUsernameCredentialField();
+    def ret = delegate.getUsernameCredentialField();
     return ret;
   }
   /**
@@ -187,7 +187,7 @@ public class MongoAuth extends AuthProvider {
    * @return the passwordCredentialField
    */
   public String getPasswordCredentialField() {
-    def ret = this.delegate.getPasswordCredentialField();
+    def ret = delegate.getPasswordCredentialField();
     return ret;
   }
   /**
@@ -196,7 +196,7 @@ public class MongoAuth extends AuthProvider {
    * @return the saltField
    */
   public String getSaltField() {
-    def ret = this.delegate.getSaltField();
+    def ret = delegate.getSaltField();
     return ret;
   }
   /**
@@ -205,7 +205,7 @@ public class MongoAuth extends AuthProvider {
    * @return the current instance itself for fluent calls
    */
   public MongoAuth setHashStrategy(HashStrategy hashStrategy) {
-    this.delegate.setHashStrategy((io.vertx.ext.auth.mongo.HashStrategy)hashStrategy.getDelegate());
+    delegate.setHashStrategy(hashStrategy != null ? (io.vertx.ext.auth.mongo.HashStrategy)hashStrategy.getDelegate() : null);
     return this;
   }
   /**
@@ -213,7 +213,7 @@ public class MongoAuth extends AuthProvider {
    * @return the defined instance of {@link io.vertx.groovy.ext.auth.mongo.HashStrategy}
    */
   public HashStrategy getHashStrategy() {
-    def ret= InternalHelper.safeCreate(this.delegate.getHashStrategy(), io.vertx.groovy.ext.auth.mongo.HashStrategy.class);
+    def ret = InternalHelper.safeCreate(delegate.getHashStrategy(), io.vertx.groovy.ext.auth.mongo.HashStrategy.class);
     return ret;
   }
   /**
@@ -225,6 +225,6 @@ public class MongoAuth extends AuthProvider {
    * @param resultHandler the ResultHandler will be provided with the id of the generated record
    */
   public void insertUser(String username, String password, List<String> roles, List<String> permissions, Handler<AsyncResult<String>> resultHandler) {
-    this.delegate.insertUser(username, password, roles, permissions, resultHandler);
+    delegate.insertUser(username, password, roles != null ? (List)roles.collect({it}) : null, permissions != null ? (List)permissions.collect({it}) : null, resultHandler);
   }
 }

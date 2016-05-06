@@ -15,21 +15,21 @@
  */
 package io.vertx.ext.auth.test.jwt;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotEquals;
+
 public class JWTAuthProviderTest extends VertxTestBase {
 
   protected JWTAuth authProvider;
 
-  // {"sub":"Paulo","iat":1431695313,"exp":1747055313,"roles":["admin","developer","user"],"permissions":["read","write","execute"]}
-  private static final String JWT_VALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImlhdCI6MTQzMTY5NTMxMywiZXhwIjoxNzQ3MDU1MzEzLCJyb2xlcyI6WyJhZG1pbiIsImRldmVsb3BlciIsInVzZXIiXSwicGVybWlzc2lvbnMiOlsicmVhZCIsIndyaXRlIiwiZXhlY3V0ZSJdfQ==.D6FLewkLz4lmCsUYLQS82x6QMjgSaMg0ROYXiKXorgo=";
+  // {"sub":"Paulo","exp":1747055313,"iat":1431695313,"permissions":["read","write","execute"],"roles":["admin","developer","user"]}
+  private static final String JWT_VALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImV4cCI6MTc0NzA1NTMxMywiaWF0IjoxNDMxNjk1MzEzLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJleGVjdXRlIl0sInJvbGVzIjpbImFkbWluIiwiZGV2ZWxvcGVyIiwidXNlciJdfQ==.EorTzMRXtAKHUCvqUba69glQrbeiatZuMQypaOGqKhU=";
 
   // {"sub":"Paulo","iat":1400159434,"exp":1400245834,"roles":["admin","developer","user"],"permissions":["read","write","execute"]}
   private static final String JWT_INVALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImlhdCI6MTQwMDE1OTQzNCwiZXhwIjoxNDAwMjQ1ODM0LCJyb2xlcyI6WyJhZG1pbiIsImRldmVsb3BlciIsInVzZXIiXSwicGVybWlzc2lvbnMiOlsicmVhZCIsIndyaXRlIiwiZXhlY3V0ZSJdfQ==.NhHul0OFlmUaatFwNeGBbshVNzac2z_3twEEg57x80s=";
@@ -114,6 +114,18 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
     assertNotNull(token);
     assertEquals(JWT_VALID, token);
+  }
+
+  @Test
+  public void testGenerateNewTokenImmutableClaims() {
+
+    JsonObject payload = new JsonObject()
+        .put("sub", "Paulo");
+
+    String token0 = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
+    String token1 = authProvider.generateToken(payload, new JWTOptions().addPermission("admin"));
+
+    assertNotEquals(token0, token1);
   }
 
   @Test

@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth.oauth2;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.ext.auth.User;
 import io.vertx.core.AsyncResult;
@@ -48,7 +47,7 @@ public class AccessToken extends User {
    * @return 
    */
   public boolean expired() { 
-    boolean ret = this.delegate.expired();
+    boolean ret = delegate.expired();
     return ret;
   }
 
@@ -58,7 +57,15 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken refresh(Handler<AsyncResult<Void>> callback) { 
-    this.delegate.refresh(callback);
+    delegate.refresh(new Handler<AsyncResult<java.lang.Void>>() {
+      public void handle(AsyncResult<java.lang.Void> ar) {
+        if (ar.succeeded()) {
+          callback.handle(io.vertx.core.Future.succeededFuture(ar.result()));
+        } else {
+          callback.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    });
     return this;
   }
 
@@ -79,7 +86,15 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken revoke(String token_type, Handler<AsyncResult<Void>> callback) { 
-    this.delegate.revoke(token_type, callback);
+    delegate.revoke(token_type, new Handler<AsyncResult<java.lang.Void>>() {
+      public void handle(AsyncResult<java.lang.Void> ar) {
+        if (ar.succeeded()) {
+          callback.handle(io.vertx.core.Future.succeededFuture(ar.result()));
+        } else {
+          callback.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    });
     return this;
   }
 
@@ -101,7 +116,15 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken logout(Handler<AsyncResult<Void>> callback) { 
-    this.delegate.logout(callback);
+    delegate.logout(new Handler<AsyncResult<java.lang.Void>>() {
+      public void handle(AsyncResult<java.lang.Void> ar) {
+        if (ar.succeeded()) {
+          callback.handle(io.vertx.core.Future.succeededFuture(ar.result()));
+        } else {
+          callback.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    });
     return this;
   }
 

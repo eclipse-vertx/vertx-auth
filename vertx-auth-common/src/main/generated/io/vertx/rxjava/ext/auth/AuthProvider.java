@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.auth;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
@@ -63,15 +62,13 @@ public class AuthProvider {
    * @param resultHandler The result handler
    */
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) { 
-    this.delegate.authenticate(authInfo, new Handler<AsyncResult<io.vertx.ext.auth.User>>() {
-      public void handle(AsyncResult<io.vertx.ext.auth.User> event) {
-        AsyncResult<User> f;
-        if (event.succeeded()) {
-          f = InternalHelper.<User>result(new User(event.result()));
+    delegate.authenticate(authInfo, new Handler<AsyncResult<io.vertx.ext.auth.User>>() {
+      public void handle(AsyncResult<io.vertx.ext.auth.User> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture(User.newInstance(ar.result())));
         } else {
-          f = InternalHelper.<User>failure(event.cause());
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        resultHandler.handle(f);
       }
     });
   }
@@ -90,7 +87,7 @@ public class AuthProvider {
    * </pre>
    * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
    * <p>
-   * If the user is successfully authenticated a {@link io.vertx.ext.auth.User} object is passed to the handler in an {@link io.vertx.core.AsyncResult}.
+   * If the user is successfully authenticated a {@link io.vertx.rxjava.ext.auth.User} object is passed to the handler in an {@link io.vertx.rxjava.core.AsyncResult}.
    * The user object can then be used for authorisation.
    * @param authInfo The auth information
    * @return 

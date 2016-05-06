@@ -82,7 +82,7 @@ var OAuth2Auth = function(j_val) {
   this.api = function(method, path, params, handler) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-      j_oAuth2Auth["api(io.vertx.core.http.HttpMethod,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](io.vertx.core.http.HttpMethod.valueOf(__args[0]), path, utils.convParamJsonObject(params), function(ar) {
+      j_oAuth2Auth["api(io.vertx.core.http.HttpMethod,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](io.vertx.core.http.HttpMethod.valueOf(method), path, utils.convParamJsonObject(params), function(ar) {
       if (ar.succeeded()) {
         handler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -132,7 +132,7 @@ var OAuth2Auth = function(j_val) {
 OAuth2Auth.createKeycloak = function(vertx, flow, config) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(JOAuth2Auth["createKeycloak(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(config)), OAuth2Auth);
+    return utils.convReturnVertxGen(JOAuth2Auth["createKeycloak(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(flow), utils.convParamJsonObject(config)), OAuth2Auth);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

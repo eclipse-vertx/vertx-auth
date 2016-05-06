@@ -42,7 +42,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-    this.delegate.isAuthorised(authority, resultHandler);
+    delegate.isAuthorised(authority, resultHandler);
     return this;
   }
   /**
@@ -51,7 +51,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User clearCache() {
-    this.delegate.clearCache();
+    delegate.clearCache();
     return this;
   }
   /**
@@ -65,7 +65,7 @@ public class User {
    * @return JSON representation of the Principal
    */
   public Map<String, Object> principal() {
-    def ret = (Map<String, Object>)InternalHelper.wrapObject(this.delegate.principal());
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(delegate.principal());
     return ret;
   }
   /**
@@ -74,6 +74,6 @@ public class User {
    * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
   public void setAuthProvider(AuthProvider authProvider) {
-    this.delegate.setAuthProvider((io.vertx.ext.auth.AuthProvider)authProvider.getDelegate());
+    delegate.setAuthProvider(authProvider != null ? (io.vertx.ext.auth.AuthProvider)authProvider.getDelegate() : null);
   }
 }

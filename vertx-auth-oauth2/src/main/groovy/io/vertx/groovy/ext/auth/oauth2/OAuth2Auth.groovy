@@ -47,7 +47,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak((io.vertx.core.Vertx)vertx.getDelegate(), flow, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.createKeycloak(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, flow, config != null ? new io.vertx.core.json.JsonObject(config) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
     return ret;
   }
   /**
@@ -58,7 +58,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, Map<String, Object> config) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx)vertx.getDelegate(), flow, config != null ? new io.vertx.ext.auth.oauth2.OAuth2ClientOptions(new io.vertx.core.json.JsonObject(config)) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, flow, config != null ? new io.vertx.ext.auth.oauth2.OAuth2ClientOptions(new io.vertx.core.json.JsonObject(config)) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
     return ret;
   }
   /**
@@ -68,7 +68,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create((io.vertx.core.Vertx)vertx.getDelegate(), flow), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, flow), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
     return ret;
   }
   /**
@@ -77,7 +77,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return 
    */
   public String authorizeURL(Map<String, Object> params) {
-    def ret = this.delegate.authorizeURL(params != null ? new io.vertx.core.json.JsonObject(params) : null);
+    def ret = delegate.authorizeURL(params != null ? new io.vertx.core.json.JsonObject(params) : null);
     return ret;
   }
   /**
@@ -86,17 +86,15 @@ public class OAuth2Auth extends AuthProvider {
    * @param handler - The handler returning the results.
    */
   public void getToken(Map<String, Object> params, Handler<AsyncResult<AccessToken>> handler) {
-    this.delegate.getToken(params != null ? new io.vertx.core.json.JsonObject(params) : null, new Handler<AsyncResult<io.vertx.ext.auth.oauth2.AccessToken>>() {
-      public void handle(AsyncResult<io.vertx.ext.auth.oauth2.AccessToken> event) {
-        AsyncResult<AccessToken> f
-        if (event.succeeded()) {
-          f = InternalHelper.<AccessToken>result(new AccessToken(event.result()))
+    delegate.getToken(params != null ? new io.vertx.core.json.JsonObject(params) : null, handler != null ? new Handler<AsyncResult<io.vertx.ext.auth.oauth2.AccessToken>>() {
+      public void handle(AsyncResult<io.vertx.ext.auth.oauth2.AccessToken> ar) {
+        if (ar.succeeded()) {
+          handler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.ext.auth.oauth2.AccessToken.class)));
         } else {
-          f = InternalHelper.<AccessToken>failure(event.cause())
+          handler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        handler.handle(f)
       }
-    });
+    } : null);
   }
   /**
    * Call OAuth2 APIs.
@@ -107,17 +105,15 @@ public class OAuth2Auth extends AuthProvider {
    * @return self
    */
   public OAuth2Auth api(HttpMethod method, String path, Map<String, Object> params, Handler<AsyncResult<Map<String, Object>>> handler) {
-    this.delegate.api(method, path, params != null ? new io.vertx.core.json.JsonObject(params) : null, new Handler<AsyncResult<io.vertx.core.json.JsonObject>>() {
-      public void handle(AsyncResult<io.vertx.core.json.JsonObject> event) {
-        AsyncResult<Map<String, Object>> f
-        if (event.succeeded()) {
-          f = InternalHelper.<Map<String, Object>>result((Map<String, Object>)InternalHelper.wrapObject(event.result()))
+    delegate.api(method, path, params != null ? new io.vertx.core.json.JsonObject(params) : null, handler != null ? new Handler<AsyncResult<io.vertx.core.json.JsonObject>>() {
+      public void handle(AsyncResult<io.vertx.core.json.JsonObject> ar) {
+        if (ar.succeeded()) {
+          handler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result())));
         } else {
-          f = InternalHelper.<Map<String, Object>>failure(event.cause())
+          handler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        handler.handle(f)
       }
-    });
+    } : null);
     return this;
   }
   /**
@@ -132,7 +128,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return true if openid-connect is used.
    */
   public boolean hasJWTToken() {
-    def ret = this.delegate.hasJWTToken();
+    def ret = delegate.hasJWTToken();
     return ret;
   }
 }
