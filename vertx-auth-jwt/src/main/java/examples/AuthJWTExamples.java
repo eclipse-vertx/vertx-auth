@@ -54,5 +54,10 @@ public class AuthJWTExamples {
     }
   }
 
+  public void example8(Vertx vertx) {
+
+    JsonObject config = new JsonObject().put("public-key", "BASE64-ENCODED-PUBLIC_KEY");
+    AuthProvider provider = JWTAuth.create(vertx, config);
+  }
 
 }

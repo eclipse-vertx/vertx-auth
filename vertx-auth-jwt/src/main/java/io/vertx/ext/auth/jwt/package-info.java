@@ -121,6 +121,20 @@
  * keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES384 -keypass secret -sigalg SHA384withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
  * keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES512 -keypass secret -sigalg SHA512withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
  * ----
+ *
+ * === Read only tokens
+ *
+ * If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that
+ * case all you need to have is a public key im PEM format.
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthJWTExamples#example8}
+ * ----
+ *
+ * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+ * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-auth-jwt", groupPackage = "io.vertx")

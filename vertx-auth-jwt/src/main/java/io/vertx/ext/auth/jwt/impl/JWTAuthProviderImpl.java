@@ -64,7 +64,9 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         this.jwt = new JWT(ks, keyStore.getString("password").toCharArray());
       } else {
-        this.jwt = new JWT(null, null);
+        // in the case of not having a key store we will try to load a public key in pem format
+        // this is how keycloak works as an example.
+        this.jwt = new JWT(config.getString("public-key"));
       }
 
     } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {

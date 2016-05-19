@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 /**
@@ -37,7 +39,7 @@ public final class JWT {
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
   private static final JsonObject EMPTY = new JsonObject();
 
-  private final Map<String, Crypto> CRYPTO_MAP;
+  private final Map<String, Crypto> cryptoMap;
   private final boolean unsecure;
 
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
@@ -90,7 +92,30 @@ public final class JWT {
     // Spec requires "none" to always be available
     tmp.put("none", new CryptoNone());
 
-    CRYPTO_MAP = Collections.unmodifiableMap(tmp);
+    cryptoMap = Collections.unmodifiableMap(tmp);
+  }
+
+  public JWT(String publicKey) {
+    Map<String, Crypto> tmp = new HashMap<>();
+
+    unsecure = publicKey == null;
+
+    if (!unsecure) {
+      // load SIGNATURE (Read Only)
+      try {
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        tmp.put("RS256", new CryptoPublicKey("SHA256withRSA",  kf.generatePublic(spec)));
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
+        e.printStackTrace();
+        log.warn("RS256 not supported");
+      }
+    }
+
+    // Spec requires "none" to always be available
+    tmp.put("none", new CryptoNone());
+
+    cryptoMap = Collections.unmodifiableMap(tmp);
   }
 
   /**
@@ -155,7 +180,7 @@ public final class JWT {
     JsonObject header = new JsonObject(new String(base64urlDecode(headerSeg), UTF8));
     JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
 
-    Crypto crypto = CRYPTO_MAP.get(header.getString("alg"));
+    Crypto crypto = cryptoMap.get(header.getString("alg"));
 
     if (crypto == null) {
       throw new RuntimeException("Algorithm not supported");
@@ -174,7 +199,7 @@ public final class JWT {
   public String sign(JsonObject payload, JsonObject options) {
     final String algorithm = options.getString("algorithm", "HS256");
 
-    Crypto crypto = CRYPTO_MAP.get(algorithm);
+    Crypto crypto = cryptoMap.get(algorithm);
 
     if (crypto == null) {
       throw new RuntimeException("Algorithm not supported");
