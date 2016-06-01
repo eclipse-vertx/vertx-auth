@@ -180,10 +180,17 @@ public final class JWT {
     JsonObject header = new JsonObject(new String(base64urlDecode(headerSeg), UTF8));
     JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
 
-    Crypto crypto = cryptoMap.get(header.getString("alg"));
+    String alg = header.getString("alg");
+
+    Crypto crypto = cryptoMap.get(alg);
 
     if (crypto == null) {
       throw new RuntimeException("Algorithm not supported");
+    }
+
+    // if we only allow secure alg, then none is not a valid option
+    if (!unsecure && "none".equals(alg)) {
+      throw new RuntimeException("Algorithm \"none\" not allowed");
     }
 
     // verify signature. `sign` will return base64 string.

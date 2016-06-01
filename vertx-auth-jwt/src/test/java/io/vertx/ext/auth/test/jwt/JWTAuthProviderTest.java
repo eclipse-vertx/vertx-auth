@@ -22,6 +22,9 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import static org.junit.Assert.assertNotEquals;
 
 public class JWTAuthProviderTest extends VertxTestBase {
@@ -307,6 +310,35 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testAcceptInvalidJWT() {
+    String[] segments = JWT_INVALID.split("\\.");
+    // All segment should be base64
+    String headerSeg = segments[0];
+
+    // change alg to none
+    JsonObject headerJson = new JsonObject(new String(Base64.getUrlDecoder().decode(headerSeg.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+    headerJson.put("alg", "none");
+    headerSeg = Base64.getUrlEncoder().encodeToString(headerJson.encode().getBytes(StandardCharsets.UTF_8));
+
+    // fix time exp
+    String payloadSeg = segments[1];
+    JsonObject bodyJson = new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+    bodyJson.put("exp", System.currentTimeMillis() + 10000);
+    payloadSeg = Base64.getUrlEncoder().encodeToString(headerJson.encode().getBytes(StandardCharsets.UTF_8));
+
+    String signatureSeg = segments[2];
+
+    // build attack token
+    String attackerJWT = headerSeg+"."+payloadSeg+"."+signatureSeg;
+    JsonObject authInfo = new JsonObject().put("jwt", attackerJWT);
+    authProvider.authenticate(authInfo, onFailure(thr -> {
+      assertNotNull(thr);
       testComplete();
     }));
     await();
