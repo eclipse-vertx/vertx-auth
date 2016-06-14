@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-oauth2</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-oauth2:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-auth-oauth2:3.3.0.CR2'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
@@ -39,7 +39,7 @@ confidential clients. As a redirection-based flow, the client must be capable of
 owner's user-agent (typically a web browser) and capable of receiving incoming requests (via redirection) from the
 authorization server.
 
-For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1">Oauth2 spec#section-4.1</a>.
+For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1[Oauth2 specification, section 4.1].
 
 === Password Credentials Flow
 
@@ -52,7 +52,7 @@ The grant type is suitable for clients capable of obtaining the resource owner's
 typically using an interactive form).  It is also used to migrate existing clients using direct authentication
 schemes such as HTTP Basic or Digest authentication to OAuth by converting the stored credentials to an access token.
 
-For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.3">Oauth2 spec#section-4.3</a>.
+For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.3[Oauth2 specification, section 4.3].
 
 === Client Credentials Flow
 
@@ -63,7 +63,7 @@ specification).
 
 The client credentials grant type MUST only be used by confidential clients.
 
-For more details see <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4">Oauth2 spec#section-4.4</a>.
+For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4[Oauth2 specification, section 4.4].
 
 === Getting Started
 
@@ -394,9 +394,9 @@ import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 
 def keycloakJson = [
   realm:"master",
-  realm-public-key:"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB",
-  auth-server-url:"http://localhost:9000/auth",
-  ssl-required:"external",
+  'realm-public-key':"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB",
+  'auth-server-url':"http://localhost:9000/auth",
+  'ssl-required':"external",
   resource:"frontend",
   credentials:[
     secret:"2fbf5e18-b923-4a83-9657-b4ebd5317f60"
@@ -418,9 +418,9 @@ import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // you can now use this config with the OAuth2 provider like this:
 def keycloakJson = [
   realm:"master",
-  realm-public-key:"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB",
-  auth-server-url:"http://localhost:9000/auth",
-  ssl-required:"external",
+  'realm-public-key':"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB",
+  'auth-server-url':"http://localhost:9000/auth",
+  'ssl-required':"external",
   resource:"frontend",
   credentials:[
     secret:"2fbf5e18-b923-4a83-9657-b4ebd5317f60"

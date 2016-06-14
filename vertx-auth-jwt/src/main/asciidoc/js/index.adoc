@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jwt</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jwt:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-auth-jwt:3.3.0.CR2'
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
@@ -43,7 +43,7 @@ Its main advantages are:
 * It has a json body to contain any variable amount of data you want.
 * It's completely stateless.
 
-To create an instance of the provider you use `link:../../jsdoc/jwt_auth-JWTAuth.html[JWTAuth]`. You specify the configuration
+To create an instance of the provider you use `link:../../jsdoc/module-vertx-auth-jwt-js_jwt_auth-JWTAuth.html[JWTAuth]`. You specify the configuration
 in a JSON object.
 
 Here's an example of creating a JWT auth provider:

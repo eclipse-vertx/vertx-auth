@@ -252,15 +252,7 @@ public class MongoAuth extends AuthProvider {
    * @param resultHandler the ResultHandler will be provided with the id of the generated record
    */
   public void insertUser(String username, String password, List<String> roles, List<String> permissions, Handler<AsyncResult<String>> resultHandler) { 
-    delegate.insertUser(username, password, roles, permissions, new Handler<AsyncResult<java.lang.String>>() {
-      public void handle(AsyncResult<java.lang.String> ar) {
-        if (ar.succeeded()) {
-          resultHandler.handle(io.vertx.core.Future.succeededFuture(ar.result()));
-        } else {
-          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
-        }
-      }
-    });
+    delegate.insertUser(username, password, roles, permissions, resultHandler);
   }
 
   /**

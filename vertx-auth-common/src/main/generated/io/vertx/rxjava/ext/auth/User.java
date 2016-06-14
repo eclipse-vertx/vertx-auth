@@ -50,15 +50,7 @@ public class User {
    * @return the User to enable fluent use
    */
   public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) { 
-    delegate.isAuthorised(authority, new Handler<AsyncResult<java.lang.Boolean>>() {
-      public void handle(AsyncResult<java.lang.Boolean> ar) {
-        if (ar.succeeded()) {
-          resultHandler.handle(io.vertx.core.Future.succeededFuture(ar.result()));
-        } else {
-          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
-        }
-      }
-    });
+    delegate.isAuthorised(authority, resultHandler);
     return this;
   }
 

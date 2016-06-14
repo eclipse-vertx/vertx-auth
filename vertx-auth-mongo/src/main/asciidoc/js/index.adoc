@@ -1,6 +1,6 @@
 == Mongo Auth Provider implementation
 
-We provide an implementation of `link:../../jsdoc/auth_provider-AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../jsdoc/mongo_client-MongoClient.html[MongoClient]`
+We provide an implementation of `link:../../jsdoc/module-vertx-auth-common-js_auth_provider-AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../jsdoc/module-vertx-mongo-js_mongo_client-MongoClient.html[MongoClient]`
 to perform authentication and authorisation against a MongoDb.
 
 To use this project, add the following
@@ -13,7 +13,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-mongo</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -21,13 +21,13 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-mongo:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-auth-mongo:3.3.0.CR2'
 ----
 
-To create an instance you first need an instance of `link:../../jsdoc/mongo_client-MongoClient.html[MongoClient]`. To learn how to create one
+To create an instance you first need an instance of `link:../../jsdoc/module-vertx-mongo-js_mongo_client-MongoClient.html[MongoClient]`. To learn how to create one
 of those please consult the documentation for the MongoClient.
 
-Once you've got one of those you can create a `link:../../jsdoc/mongo_auth-MongoAuth.html[MongoAuth]` instance as follows:
+Once you've got one of those you can create a `link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html[MongoAuth]` instance as follows:
 
 [source,js]
 ----
@@ -40,7 +40,7 @@ var authProvider = MongoAuth.create(client, authProperties);
 
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any `link:../../jsdoc/auth_provider-AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../jsdoc/module-vertx-auth-common-js_auth_provider-AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
 some others.
@@ -58,28 +58,28 @@ insert the row and fail if duplicate.
 
 You can also change all the defaults for the mongo collection and column names using any of the methods:
 
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setCollectionName[setCollectionName]`
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setUsernameField[setUsernameField]`
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setPasswordField[setPasswordField]`
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setPermissionField[setPermissionField]`
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setRoleField[setRoleField]`
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setCollectionName[setCollectionName]`
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setUsernameField[setUsernameField]`
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setPasswordField[setPasswordField]`
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setPermissionField[setPermissionField]`
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setRoleField[setRoleField]`
 if you want to adapt that to your needs.
 
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
 concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
-stored can be set by `link:../../jsdoc/mongo_auth-MongoAuth.html#setSaltField[setSaltField]`, the default is "salt".
-You are able to change this behaviour by using `link:../../jsdoc/hash_strategy-HashStrategy.html#setSaltStyle[setSaltStyle]`.
-The HashStrategy you can retrieve by  `link:../../jsdoc/mongo_auth-MongoAuth.html#getHashStrategy[getHashStrategy]`.
+stored can be set by `link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setSaltField[setSaltField]`, the default is "salt".
+You are able to change this behaviour by using `link:../../jsdoc/module-vertx-auth-mongo-js_hash_strategy-HashStrategy.html#setSaltStyle[setSaltStyle]`.
+The HashStrategy you can retrieve by  `link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#getHashStrategy[getHashStrategy]`.
 By using this, you are able to set:
 `link:todo[NO_SALT]` by which passwords are not crypted and stored
 in cleartext. ( see the warning below! )
 `link:todo[COLUMN]`, which will create a salt per user and store this
 inside the defined column of the user. ( see the warning below! )
 `link:todo[EXTERNAL]`, which will store only the crypted password in the
-database and will use a salt from external, which you will have to set by `link:../../jsdoc/hash_strategy-HashStrategy.html#setExternalSalt[setExternalSalt]`
+database and will use a salt from external, which you will have to set by `link:../../jsdoc/module-vertx-auth-mongo-js_hash_strategy-HashStrategy.html#setExternalSalt[setExternalSalt]`
 
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
- `link:../../jsdoc/mongo_auth-MongoAuth.html#setHashStrategy[setHashStrategy]`
+ `link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setHashStrategy[setHashStrategy]`
 
 WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option.
 The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
@@ -106,8 +106,8 @@ authProvider.authenticate(authInfo, function (res, res_err) {
 
 ----
 Instead of the `username` and `password` field names used in the previous snippet, you should use:
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setUsernameCredentialField[setUsernameCredentialField]` and
-`link:../../jsdoc/mongo_auth-MongoAuth.html#setPasswordCredentialField[setPasswordCredentialField]`
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setUsernameCredentialField[setUsernameCredentialField]` and
+`link:../../jsdoc/module-vertx-auth-mongo-js_mongo_auth-MongoAuth.html#setPasswordCredentialField[setPasswordCredentialField]`
 
 == Authorisation - Permission-Role Model
 
@@ -116,7 +116,7 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
+`link:../../jsdoc/module-vertx-auth-common-js_user-User.html#isAuthorised[isAuthorised]` as follows:
 
 [source,js]
 ----

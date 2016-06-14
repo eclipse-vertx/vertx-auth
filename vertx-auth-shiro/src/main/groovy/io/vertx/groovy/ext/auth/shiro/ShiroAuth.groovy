@@ -54,7 +54,7 @@ public class ShiroAuth extends AuthProvider {
    * @return the auth provider
    */
   public static ShiroAuth create(Vertx vertx, Map<String, Object> options) {
-    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.ext.auth.shiro.ShiroAuthOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.shiro.ShiroAuth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.ext.auth.shiro.ShiroAuthOptions(io.vertx.lang.groovy.InternalHelper.toJsonObject(options)) : null), io.vertx.groovy.ext.auth.shiro.ShiroAuth.class);
     return ret;
   }
   /**

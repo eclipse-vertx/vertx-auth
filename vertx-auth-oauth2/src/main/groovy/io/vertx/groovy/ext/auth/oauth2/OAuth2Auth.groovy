@@ -58,7 +58,7 @@ public class OAuth2Auth extends AuthProvider {
    * @return the auth provider
    */
   public static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, Map<String, Object> config) {
-    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, flow, config != null ? new io.vertx.ext.auth.oauth2.OAuth2ClientOptions(new io.vertx.core.json.JsonObject(config)) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.auth.oauth2.OAuth2Auth.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, flow, config != null ? new io.vertx.ext.auth.oauth2.OAuth2ClientOptions(io.vertx.lang.groovy.InternalHelper.toJsonObject(config)) : null), io.vertx.groovy.ext.auth.oauth2.OAuth2Auth.class);
     return ret;
   }
   /**

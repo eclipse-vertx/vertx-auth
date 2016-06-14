@@ -52,7 +52,7 @@ public class JWTAuth extends AuthProvider {
    * @return JWT encoded token
    */
   public String generateToken(Map<String, Object> claims, Map<String, Object> options) {
-    def ret = delegate.generateToken(claims != null ? new io.vertx.core.json.JsonObject(claims) : null, options != null ? new io.vertx.ext.auth.jwt.JWTOptions(new io.vertx.core.json.JsonObject(options)) : null);
+    def ret = delegate.generateToken(claims != null ? new io.vertx.core.json.JsonObject(claims) : null, options != null ? new io.vertx.ext.auth.jwt.JWTOptions(io.vertx.lang.groovy.InternalHelper.toJsonObject(options)) : null);
     return ret;
   }
 }

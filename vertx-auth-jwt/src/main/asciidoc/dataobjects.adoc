@@ -38,6 +38,7 @@ The expiration time for the token in minutes
 The expiration time for the token in seconds
 +++
 |[[header]]`header`|`Json object`|-
+|[[headers]]`headers`|`String`|-
 |[[issuer]]`issuer`|`String`|
 +++
 The issuer of this token

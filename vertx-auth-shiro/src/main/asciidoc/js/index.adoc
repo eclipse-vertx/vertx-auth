@@ -12,7 +12,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-shiro</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -20,13 +20,13 @@ project, add the following dependency to the _dependencies_ section of your buil
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-shiro:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-auth-shiro:3.3.0.CR2'
 ----
 
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
 other Shiro Realm which expects username and password for credentials.
 
-To create an instance of the provider you use `link:../../jsdoc/shiro_auth-ShiroAuth.html[ShiroAuth]`. You specify the type of
+To create an instance of the provider you use `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html[ShiroAuth]`. You specify the type of
 Shiro auth provider that you want with `link:../enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`, and you specify the
 configuration in a JSON object.
 
@@ -75,7 +75,7 @@ implementation uses a familiar user/role/permission model, where a user can have
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../jsdoc/user-User.html#isAuthorised[isAuthorised]` as follows:
+`link:../../jsdoc/module-vertx-auth-common-js_user-User.html#isAuthorised[isAuthorised]` as follows:
 
 [source,java]
 ----
@@ -106,7 +106,7 @@ user.isAuthorised("role:manager", function (res, res_err) {
 
 ----
 
-The default role prefix is `role:`. You can change this with `link:../../jsdoc/shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
+The default role prefix is `role:`. You can change this with `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
 
 === The Shiro properties auth provider
 
@@ -114,7 +114,7 @@ This auth provider implementation uses Apache Shiro to get user/role/permission 
 
 Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
 possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
-with `link:../../jsdoc/shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
+with `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
 
 The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
 
