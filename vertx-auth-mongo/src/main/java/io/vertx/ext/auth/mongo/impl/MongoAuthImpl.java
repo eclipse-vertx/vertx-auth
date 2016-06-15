@@ -219,7 +219,7 @@ public class MongoAuthImpl implements MongoAuth {
     }
 
     String permissionField = config.getString(PROPERTY_PERMISSION_FIELD);
-    if (roleField != null) {
+    if (permissionField != null) {
       setPermissionField(permissionField);
     }
 
