@@ -19,14 +19,15 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -56,10 +57,13 @@ public class JWTAuthProviderImpl implements JWTAuth {
       if (keyStore != null) {
         KeyStore ks = KeyStore.getInstance(keyStore.getString("type", "jceks"));
 
-        VertxInternal vertxInternal = (VertxInternal) vertx;
+        // synchronize on the class to avoid the case where multiple file accesses will overlap
+        synchronized (JWTAuthProviderImpl.class) {
+          final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getString("path"));
 
-        try (InputStream in = new FileInputStream(vertxInternal.resolveFile(keyStore.getString("path")))) {
-          ks.load(in, keyStore.getString("password").toCharArray());
+          try (InputStream in = new ByteArrayInputStream(keystore.getBytes())) {
+            ks.load(in, keyStore.getString("password").toCharArray());
+          }
         }
 
         this.jwt = new JWT(ks, keyStore.getString("password").toCharArray());
@@ -69,7 +73,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         this.jwt = new JWT(config.getString("public-key"));
       }
 
-    } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+    } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
   }
