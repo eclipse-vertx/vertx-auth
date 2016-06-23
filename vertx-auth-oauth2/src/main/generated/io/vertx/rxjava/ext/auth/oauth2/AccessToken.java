@@ -57,15 +57,7 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken refresh(Handler<AsyncResult<Void>> callback) { 
-    delegate.refresh(new Handler<AsyncResult<java.lang.Void>>() {
-      public void handle(AsyncResult<java.lang.Void> ar) {
-        if (ar.succeeded()) {
-          callback.handle(io.vertx.core.Future.succeededFuture(ar.result()));
-        } else {
-          callback.handle(io.vertx.core.Future.failedFuture(ar.cause()));
-        }
-      }
-    });
+    delegate.refresh(callback);
     return this;
   }
 
@@ -86,15 +78,7 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken revoke(String token_type, Handler<AsyncResult<Void>> callback) { 
-    delegate.revoke(token_type, new Handler<AsyncResult<java.lang.Void>>() {
-      public void handle(AsyncResult<java.lang.Void> ar) {
-        if (ar.succeeded()) {
-          callback.handle(io.vertx.core.Future.succeededFuture(ar.result()));
-        } else {
-          callback.handle(io.vertx.core.Future.failedFuture(ar.cause()));
-        }
-      }
-    });
+    delegate.revoke(token_type, callback);
     return this;
   }
 
@@ -116,15 +100,7 @@ public class AccessToken extends User {
    * @return 
    */
   public AccessToken logout(Handler<AsyncResult<Void>> callback) { 
-    delegate.logout(new Handler<AsyncResult<java.lang.Void>>() {
-      public void handle(AsyncResult<java.lang.Void> ar) {
-        if (ar.succeeded()) {
-          callback.handle(io.vertx.core.Future.succeededFuture(ar.result()));
-        } else {
-          callback.handle(io.vertx.core.Future.failedFuture(ar.cause()));
-        }
-      }
-    });
+    delegate.logout(callback);
     return this;
   }
 
