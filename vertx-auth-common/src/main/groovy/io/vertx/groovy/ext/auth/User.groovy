@@ -76,4 +76,11 @@ public class User {
   public void setAuthProvider(AuthProvider authProvider) {
     delegate.setAuthProvider(authProvider != null ? (io.vertx.ext.auth.AuthProvider)authProvider.getDelegate() : null);
   }
+  /**
+   * Reset session timeout counter. For AuthProviders that implement a timeout scheme, this resets the clock
+   * to prevent the Users session from being timed out.
+   */
+  public void touch() {
+    delegate.touch();
+  }
 }

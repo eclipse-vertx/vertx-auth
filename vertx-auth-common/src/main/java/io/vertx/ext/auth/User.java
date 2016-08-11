@@ -76,4 +76,10 @@ public interface User {
    * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
   void setAuthProvider(AuthProvider authProvider);
+
+  /**
+   * Reset session timeout counter. For AuthProviders that implement a timeout scheme, this resets the clock
+   * to prevent the Users session from being timed out.
+   */
+  void touch();
 }

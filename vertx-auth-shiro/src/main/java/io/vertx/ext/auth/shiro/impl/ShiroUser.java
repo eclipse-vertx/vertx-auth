@@ -23,6 +23,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -116,5 +117,17 @@ public class ShiroUser extends AbstractUser {
     } else {
       throw new IllegalArgumentException("Not a ShiroAuthProviderImpl");
     }
+  }
+
+  @Override
+  public void touch() {
+    Session session = subject.getSession(false);
+    if (session != null) {
+      session.touch();
+    }
+  }
+
+  public void setSessionTimeout(long timeout) {
+    subject.getSession().setTimeout(timeout);
   }
 }

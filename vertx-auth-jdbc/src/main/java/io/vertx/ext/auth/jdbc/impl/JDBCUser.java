@@ -75,6 +75,11 @@ public class JDBCUser extends AbstractUser {
   }
 
   @Override
+  public void touch() {
+    //NOOP
+  }
+
+  @Override
   public void writeToBuffer(Buffer buff) {
     super.writeToBuffer(buff);
     byte[] bytes = username.getBytes(StandardCharsets.UTF_8);

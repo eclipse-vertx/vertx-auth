@@ -280,6 +280,11 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   }
 
   @Override
+  public void touch() {
+    //NOOP
+  }
+
+  @Override
   public void writeToBuffer(Buffer buff) {
     super.writeToBuffer(buff);
     byte[] bytes = token.encode().getBytes(StandardCharsets.UTF_8);

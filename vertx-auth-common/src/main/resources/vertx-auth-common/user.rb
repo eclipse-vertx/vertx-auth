@@ -61,5 +61,14 @@ module VertxAuthCommon
       end
       raise ArgumentError, "Invalid arguments when calling set_auth_provider(authProvider)"
     end
+    #  Reset session timeout counter. For AuthProviders that implement a timeout scheme, this resets the clock
+    #  to prevent the Users session from being timed out.
+    # @return [void]
+    def touch
+      if !block_given?
+        return @j_del.java_method(:touch, []).call()
+      end
+      raise ArgumentError, "Invalid arguments when calling touch()"
+    end
   end
 end

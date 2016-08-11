@@ -103,4 +103,9 @@ public class JWTUser extends AbstractUser {
 
     return pos;
   }
+
+  @Override
+  public void touch() {
+    //NOOP
+  }
 }

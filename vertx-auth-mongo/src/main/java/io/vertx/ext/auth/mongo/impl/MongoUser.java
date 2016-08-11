@@ -84,6 +84,7 @@ public class MongoUser extends AbstractUser {
     this.mongoAuth = (MongoAuth) authProvider;
   }
 
+
   /**
    * check wether the current user has the given role
    * 
@@ -136,6 +137,11 @@ public class MongoUser extends AbstractUser {
     } catch (Throwable e) {
       resultHandler.handle(Future.failedFuture(e));
     }
+  }
+
+  @Override
+  public void touch() {
+    //NOOP
   }
 
   @Override

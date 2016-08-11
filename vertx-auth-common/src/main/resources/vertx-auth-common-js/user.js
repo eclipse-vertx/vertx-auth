@@ -106,6 +106,20 @@ var User = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Reset session timeout counter. For AuthProviders that implement a timeout scheme, this resets the clock
+   to prevent the Users session from being timed out.
+
+   @public
+
+   */
+  this.touch = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      j_user["touch()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
