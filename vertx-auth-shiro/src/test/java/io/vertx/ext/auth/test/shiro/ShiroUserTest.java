@@ -42,7 +42,6 @@ public class ShiroUserTest extends VertxTestBase {
 
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      ((ShiroUser) user).setSessionTimeout(10);
 
       onLoggedIn.handle(user);
     }));
@@ -51,6 +50,8 @@ public class ShiroUserTest extends VertxTestBase {
   @Test
   public void userDoesTimeout() {
     authenticate(user -> {
+      ((ShiroUser) user).setSessionTimeout(0);
+
       vertx.setTimer(20, IGNORE -> {
         user.isAuthorised("foo", result -> {
           assertFalse(result.succeeded());
@@ -65,11 +66,16 @@ public class ShiroUserTest extends VertxTestBase {
   @Test
   public void userDoesNotTimeout() {
     authenticate(user -> {
-      vertx.setPeriodic(1, IGNORE -> {
+
+      vertx.setPeriodic(10, IGNORE -> {
         user.touch();
+
+        // Set the timeout after the initial touch to reduce the possibility that a block in execution
+        // could cause an incorrect timeout and fail the test
+        ((ShiroUser) user).setSessionTimeout(200);
       });
 
-      vertx.setTimer(20, IGNORE -> {
+      vertx.setTimer(300, IGNORE -> {
         user.isAuthorised("foo", result -> {
           assertTrue(result.succeeded());
           testComplete();
