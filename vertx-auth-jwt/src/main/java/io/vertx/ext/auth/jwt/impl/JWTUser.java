@@ -46,7 +46,29 @@ public class JWTUser extends AbstractUser {
 
   public JWTUser(JsonObject jwtToken, String permissionsClaimKey) {
     this.jwtToken = jwtToken;
-    this.permissions = jwtToken.getJsonArray(permissionsClaimKey, null);
+
+    if(permissionsClaimKey.contains("/")) {
+      getNestedJsonValue(jwtToken, permissionsClaimKey);
+    } else {
+      this.permissions = jwtToken.getJsonArray(permissionsClaimKey, null);
+    }
+
+  }
+
+  private void getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
+    String[] keys = permissionsClaimKey.split("/");
+    JsonObject obj = null;
+    for(int i = 0; i < keys.length; i++) {
+        if(i == 0) {
+          obj = jwtToken.getJsonObject(keys[i]);
+        } else if (i == keys.length -1) {
+          if(obj != null) {
+            this.permissions = obj.getJsonArray(keys[i]);
+          }
+        } else {
+            obj = obj.getJsonObject(keys[i]);
+        }
+    }
   }
 
   @Override
