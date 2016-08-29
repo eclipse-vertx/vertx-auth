@@ -127,6 +127,11 @@ public class OAuth2API {
         return;
       }
 
+      resp.exceptionHandler(t -> {
+        callback.handle(Future.failedFuture(t));
+        client.close();
+      });
+
       resp.bodyHandler(body -> {
         if (body == null) {
           callback.handle(Future.failedFuture("No Body"));
