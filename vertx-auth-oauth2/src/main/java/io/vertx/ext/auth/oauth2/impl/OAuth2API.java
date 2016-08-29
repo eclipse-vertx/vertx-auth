@@ -15,7 +15,9 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
@@ -125,6 +127,11 @@ public class OAuth2API {
         return;
       }
 
+      resp.exceptionHandler(t -> {
+        callback.handle(Future.failedFuture(t));
+        client.close();
+      });
+
       resp.bodyHandler(body -> {
         if (body == null) {
           callback.handle(Future.failedFuture("No Body"));
@@ -174,6 +181,11 @@ public class OAuth2API {
         }
         client.close();
       });
+    });
+
+    request.exceptionHandler(t -> {
+      callback.handle(Future.failedFuture(t));
+      client.close();
     });
 
     // write the headers
