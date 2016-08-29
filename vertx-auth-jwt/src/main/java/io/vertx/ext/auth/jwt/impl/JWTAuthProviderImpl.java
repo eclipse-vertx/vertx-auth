@@ -117,7 +117,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
       if (options.containsKey("audience")) {
         JsonArray audiences = options.getJsonArray("audience", EMPTY_ARRAY);
-        JsonArray target = payload.getJsonArray("aud", EMPTY_ARRAY);
+        JsonArray target;
+        if (payload.getValue("aud") instanceof String) {
+          target = new JsonArray().add(payload.getValue("aud", ""));
+        } else {
+          target = payload.getJsonArray("aud", EMPTY_ARRAY);
+        }
 
         if (Collections.disjoint(audiences.getList(), target.getList())) {
           resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + audiences.encode()));
