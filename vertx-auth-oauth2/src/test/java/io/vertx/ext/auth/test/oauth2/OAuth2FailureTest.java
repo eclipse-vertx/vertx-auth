@@ -3,17 +3,17 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
+import static org.hamcrest.CoreMatchers.*;
 
 public class OAuth2FailureTest extends VertxTestBase {
 
@@ -92,6 +92,23 @@ public class OAuth2FailureTest extends VertxTestBase {
     oauth2.getToken(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("Internal Server Error", res.cause().getMessage());
+        testComplete();
+      } else {
+        fail("Should have failed");
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void unknownHost() {
+    OAuth2Auth auth = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
+      .setClientID("client-id")
+      .setClientSecret("client-secret")
+      .setSite("http://zlouklfoux.net.com.info.pimpo.molo"));
+    auth.getToken(tokenConfig, res -> {
+      if (res.failed()) {
+        assertThat(res.cause(), instanceOf(UnknownHostException.class));
         testComplete();
       } else {
         fail("Should have failed");
