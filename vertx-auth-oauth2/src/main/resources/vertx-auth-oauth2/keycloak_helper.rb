@@ -18,116 +18,116 @@ module VertxAuthOauth2
     #  Get raw `id_token` string from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [String] the raw id token string
-    def self.get_raw_id_token(principal=nil)
+    def self.raw_id_token(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getRawIdToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:rawIdToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_raw_id_token(principal)"
+      raise ArgumentError, "Invalid arguments when calling raw_id_token(principal)"
     end
 
     #  Get decoded `id_token` from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [Hash{String => Object}] the id token
-    def self.get_id_token(principal=nil)
+    def self.id_token(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getIdToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)) != nil ? JSON.parse(Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getIdToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)).encode) : nil
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:idToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)) != nil ? JSON.parse(Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:idToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)).encode) : nil
       end
-      raise ArgumentError, "Invalid arguments when calling get_id_token(principal)"
+      raise ArgumentError, "Invalid arguments when calling id_token(principal)"
     end
 
     #  Get raw `access_token` string from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [String] the raw access token string
-    def self.get_raw_access_token(principal=nil)
+    def self.raw_access_token(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getRawAccessToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:rawAccessToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_raw_access_token(principal)"
+      raise ArgumentError, "Invalid arguments when calling raw_access_token(principal)"
     end
 
     #  Get decoded `access_token` from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [Hash{String => Object}] the access token
-    def self.get_access_token(principal=nil)
+    def self.access_token(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getAccessToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)) != nil ? JSON.parse(Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getAccessToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)).encode) : nil
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:accessToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)) != nil ? JSON.parse(Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:accessToken, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal)).encode) : nil
       end
-      raise ArgumentError, "Invalid arguments when calling get_access_token(principal)"
+      raise ArgumentError, "Invalid arguments when calling access_token(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [Fixnum]
-    def self.get_auth_time(principal=nil)
+    def self.auth_time(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getAuthTime, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:authTime, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_auth_time(principal)"
+      raise ArgumentError, "Invalid arguments when calling auth_time(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [String]
-    def self.get_session_state(principal=nil)
+    def self.session_state(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getSessionState, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:sessionState, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_session_state(principal)"
+      raise ArgumentError, "Invalid arguments when calling session_state(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [String]
-    def self.get_acr(principal=nil)
+    def self.acr(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getAcr, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:acr, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_acr(principal)"
+      raise ArgumentError, "Invalid arguments when calling acr(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [String]
-    def self.get_name(principal=nil)
+    def self.name(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getName, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:name, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_name(principal)"
+      raise ArgumentError, "Invalid arguments when calling name(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [String]
-    def self.get_email(principal=nil)
+    def self.email(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getEmail, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:email, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_email(principal)"
+      raise ArgumentError, "Invalid arguments when calling email(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [String]
-    def self.get_preferred_username(principal=nil)
+    def self.preferred_username(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getPreferredUsername, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:preferredUsername, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_preferred_username(principal)"
+      raise ArgumentError, "Invalid arguments when calling preferred_username(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [String]
-    def self.get_nick_name(principal=nil)
+    def self.nick_name(principal=nil)
       if principal.class == Hash && !block_given?
-        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getNickName, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
+        return Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:nickName, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))
       end
-      raise ArgumentError, "Invalid arguments when calling get_nick_name(principal)"
+      raise ArgumentError, "Invalid arguments when calling nick_name(principal)"
     end
 
     # @param [Hash{String => Object}] principal
     # @return [Set<String>]
-    def self.get_allowed_origins(principal=nil)
+    def self.allowed_origins(principal=nil)
       if principal.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.to_set(Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:getAllowedOrigins, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))).map! { |elt| elt }
+        return ::Vertx::Util::Utils.to_set(Java::IoVertxExtAuthOauth2::KeycloakHelper.java_method(:allowedOrigins, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(principal))).map! { |elt| elt }
       end
-      raise ArgumentError, "Invalid arguments when calling get_allowed_origins(principal)"
+      raise ArgumentError, "Invalid arguments when calling allowed_origins(principal)"
     end
 
-    #  Parse the token string with base64 encoder.
+    #  Parse the token string with base64 decoder.
     #  This will only obtain the "payload" part of the token.
     # @param [String] token token string
     # @return [Hash{String => Object}] token payload json object

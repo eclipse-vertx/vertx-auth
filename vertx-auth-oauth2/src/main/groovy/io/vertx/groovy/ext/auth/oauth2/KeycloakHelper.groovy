@@ -41,8 +41,8 @@ public class KeycloakHelper {
    * @param principal user principal
    * @return the raw id token string
    */
-  public static String getRawIdToken(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getRawIdToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String rawIdToken(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.rawIdToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
   /**
@@ -50,8 +50,8 @@ public class KeycloakHelper {
    * @param principal user principal
    * @return the id token
    */
-  public static Map<String, Object> getIdToken(Map<String, Object> principal) {
-    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.getIdToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
+  public static Map<String, Object> idToken(Map<String, Object> principal) {
+    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.idToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
     return ret;
   }
   /**
@@ -59,8 +59,8 @@ public class KeycloakHelper {
    * @param principal user principal
    * @return the raw access token string
    */
-  public static String getRawAccessToken(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getRawAccessToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String rawAccessToken(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.rawAccessToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
   /**
@@ -68,52 +68,52 @@ public class KeycloakHelper {
    * @param principal user principal
    * @return the access token
    */
-  public static Map<String, Object> getAccessToken(Map<String, Object> principal) {
-    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.getAccessToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
+  public static Map<String, Object> accessToken(Map<String, Object> principal) {
+    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.accessToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
     return ret;
   }
 
-  public static int getAuthTime(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getAuthTime(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static int authTime(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.authTime(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static String getSessionState(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getSessionState(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String sessionState(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.sessionState(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static String getAcr(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getAcr(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String acr(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.acr(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static String getName(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getName(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String name(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.name(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static String getEmail(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getEmail(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String email(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.email(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static String getPreferredUsername(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getPreferredUsername(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String preferredUsername(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.preferredUsername(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static String getNickName(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getNickName(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static String nickName(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.nickName(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
 
-  public static Set<String> getAllowedOrigins(Map<String, Object> principal) {
-    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.getAllowedOrigins(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
+  public static Set<String> allowedOrigins(Map<String, Object> principal) {
+    def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.allowedOrigins(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
   /**
-   * Parse the token string with base64 encoder.
+   * Parse the token string with base64 decoder.
    * This will only obtain the "payload" part of the token.
    * @param token token string
    * @return token payload json object

@@ -22,7 +22,7 @@ public interface KeycloakHelper {
    * @param principal user principal
    * @return the raw id token string
    */
-  static String getRawIdToken(JsonObject principal) {
+  static String rawIdToken(JsonObject principal) {
     return principal.getString("id_token");
   }
 
@@ -32,8 +32,8 @@ public interface KeycloakHelper {
    * @param principal user principal
    * @return the id token
    */
-  static JsonObject getIdToken(JsonObject principal) {
-    return parseToken(getRawIdToken(principal));
+  static JsonObject idToken(JsonObject principal) {
+    return parseToken(rawIdToken(principal));
   }
 
   /**
@@ -42,7 +42,7 @@ public interface KeycloakHelper {
    * @param principal user principal
    * @return the raw access token string
    */
-  static String getRawAccessToken(JsonObject principal) {
+  static String rawAccessToken(JsonObject principal) {
     return principal.getString("access_token");
   }
 
@@ -52,43 +52,43 @@ public interface KeycloakHelper {
    * @param principal user principal
    * @return the access token
    */
-  static JsonObject getAccessToken(JsonObject principal) {
-    return parseToken(getRawAccessToken(principal));
+  static JsonObject accessToken(JsonObject principal) {
+    return parseToken(rawAccessToken(principal));
   }
 
   // helper methods for getting fields from the principal
 
-  static int getAuthTime(JsonObject principal) {
-    return getIdToken(principal).getInteger("auth_time");
+  static int authTime(JsonObject principal) {
+    return idToken(principal).getInteger("auth_time");
   }
 
-  static String getSessionState(JsonObject principal) {
-    return getIdToken(principal).getString("session_state");
+  static String sessionState(JsonObject principal) {
+    return idToken(principal).getString("session_state");
   }
 
-  static String getAcr(JsonObject principal) {
-    return getIdToken(principal).getString("acr");
+  static String acr(JsonObject principal) {
+    return idToken(principal).getString("acr");
   }
 
-  static String getName(JsonObject principal) {
-    return getIdToken(principal).getString("name");
+  static String name(JsonObject principal) {
+    return idToken(principal).getString("name");
   }
 
-  static String getEmail(JsonObject principal) {
-    return getIdToken(principal).getString("email");
+  static String email(JsonObject principal) {
+    return idToken(principal).getString("email");
   }
 
-  static String getPreferredUsername(JsonObject principal) {
-    return getIdToken(principal).getString("preferred_username");
+  static String preferredUsername(JsonObject principal) {
+    return idToken(principal).getString("preferred_username");
   }
 
-  static String getNickName(JsonObject principal) {
-    return getIdToken(principal).getString("nickname");
+  static String nickName(JsonObject principal) {
+    return idToken(principal).getString("nickname");
   }
 
   @SuppressWarnings("unchecked")
-  static Set<String> getAllowedOrigins(JsonObject principal) {
-    List<String> allowedOrigins = getAccessToken(principal)
+  static Set<String> allowedOrigins(JsonObject principal) {
+    List<String> allowedOrigins = accessToken(principal)
       .getJsonArray("allowed-origins")
       .getList();
     return new HashSet<>(allowedOrigins);

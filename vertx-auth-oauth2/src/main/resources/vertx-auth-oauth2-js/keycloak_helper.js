@@ -44,10 +44,10 @@ var KeycloakHelper = function (j_val) {
  @param principal {Object} user principal
  @return {string} the raw id token string
  */
-KeycloakHelper.getRawIdToken = function (principal) {
+KeycloakHelper.rawIdToken = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getRawIdToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["rawIdToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -58,10 +58,10 @@ KeycloakHelper.getRawIdToken = function (principal) {
  @param principal {Object} user principal
  @return {Object} the id token
  */
-KeycloakHelper.getIdToken = function (principal) {
+KeycloakHelper.idToken = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return utils.convReturnJson(JKeycloakHelper["getIdToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
+    return utils.convReturnJson(JKeycloakHelper["idToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -72,10 +72,10 @@ KeycloakHelper.getIdToken = function (principal) {
  @param principal {Object} user principal
  @return {string} the raw access token string
  */
-KeycloakHelper.getRawAccessToken = function (principal) {
+KeycloakHelper.rawAccessToken = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getRawAccessToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["rawAccessToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -86,10 +86,10 @@ KeycloakHelper.getRawAccessToken = function (principal) {
  @param principal {Object} user principal
  @return {Object} the access token
  */
-KeycloakHelper.getAccessToken = function (principal) {
+KeycloakHelper.accessToken = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return utils.convReturnJson(JKeycloakHelper["getAccessToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
+    return utils.convReturnJson(JKeycloakHelper["accessToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -99,10 +99,10 @@ KeycloakHelper.getAccessToken = function (principal) {
  @param principal {Object}
  @return {number}
  */
-KeycloakHelper.getAuthTime = function (principal) {
+KeycloakHelper.authTime = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getAuthTime(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["authTime(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -112,10 +112,10 @@ KeycloakHelper.getAuthTime = function (principal) {
  @param principal {Object}
  @return {string}
  */
-KeycloakHelper.getSessionState = function (principal) {
+KeycloakHelper.sessionState = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getSessionState(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["sessionState(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -125,10 +125,10 @@ KeycloakHelper.getSessionState = function (principal) {
  @param principal {Object}
  @return {string}
  */
-KeycloakHelper.getAcr = function (principal) {
+KeycloakHelper.acr = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getAcr(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["acr(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -138,10 +138,10 @@ KeycloakHelper.getAcr = function (principal) {
  @param principal {Object}
  @return {string}
  */
-KeycloakHelper.getName = function (principal) {
+KeycloakHelper.name = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getName(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["name(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -151,10 +151,10 @@ KeycloakHelper.getName = function (principal) {
  @param principal {Object}
  @return {string}
  */
-KeycloakHelper.getEmail = function (principal) {
+KeycloakHelper.email = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getEmail(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["email(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -164,10 +164,10 @@ KeycloakHelper.getEmail = function (principal) {
  @param principal {Object}
  @return {string}
  */
-KeycloakHelper.getPreferredUsername = function (principal) {
+KeycloakHelper.preferredUsername = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getPreferredUsername(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["preferredUsername(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -177,10 +177,10 @@ KeycloakHelper.getPreferredUsername = function (principal) {
  @param principal {Object}
  @return {string}
  */
-KeycloakHelper.getNickName = function (principal) {
+KeycloakHelper.nickName = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return JKeycloakHelper["getNickName(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
+    return JKeycloakHelper["nickName(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -190,15 +190,15 @@ KeycloakHelper.getNickName = function (principal) {
  @param principal {Object}
  @return {Array.<string>}
  */
-KeycloakHelper.getAllowedOrigins = function (principal) {
+KeycloakHelper.allowedOrigins = function (principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return utils.convReturnSet(JKeycloakHelper["getAllowedOrigins(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
+    return utils.convReturnSet(JKeycloakHelper["allowedOrigins(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**
- Parse the token string with base64 encoder.
+ Parse the token string with base64 decoder.
  This will only obtain the "payload" part of the token.
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
