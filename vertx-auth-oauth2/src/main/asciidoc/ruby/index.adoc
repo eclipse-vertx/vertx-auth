@@ -439,3 +439,18 @@ oauth2.get_token({
 }
 
 ----
+
+We also provide a helper class for Keycloak so that we can we can easily retrieve decoded token and some necessary
+data (e.g. `preferred_username`) from the Keycloak principal. For example:
+
+[source,ruby]
+----
+require 'vertx-auth-oauth2/keycloak_helper'
+# you can get the decoded `id_token` from the Keycloak principal
+idToken = VertxAuthOauth2::KeycloakHelper.id_token(principal)
+
+# you can also retrieve some properties directly from the Keycloak principal
+# e.g. `preferred_username`
+username = VertxAuthOauth2::KeycloakHelper.preferred_username(principal)
+
+----
