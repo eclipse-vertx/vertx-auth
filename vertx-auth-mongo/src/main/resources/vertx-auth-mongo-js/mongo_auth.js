@@ -16,6 +16,7 @@
 
 /** @module vertx-auth-mongo-js/mongo_auth */
 var utils = require('vertx-js/util/utils');
+var User = require('vertx-auth-common-js/user');
 var MongoClient = require('vertx-mongo-js/mongo_client');
 var HashStrategy = require('vertx-auth-mongo-js/hash_strategy');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
@@ -33,6 +34,25 @@ var MongoAuth = function(j_val) {
   var j_mongoAuth = j_val;
   var that = this;
   AuthProvider.call(this, j_val);
+
+  /**
+
+   @public
+   @param arg0 {Object} 
+   @param arg1 {function} 
+   */
+  this.authenticate = function(arg0, arg1) {
+    var __args = arguments;
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      j_mongoAuth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
+      if (ar.succeeded()) {
+        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+      } else {
+        arg1(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
 
   /**
    Set the name of the collection to be used. Defaults to DEFAULT_COLLECTION_NAME

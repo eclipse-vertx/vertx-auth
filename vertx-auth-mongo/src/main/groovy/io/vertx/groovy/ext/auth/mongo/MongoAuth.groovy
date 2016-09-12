@@ -19,6 +19,7 @@ import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import java.util.List
+import io.vertx.groovy.ext.auth.User
 import io.vertx.groovy.ext.mongo.MongoClient
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult

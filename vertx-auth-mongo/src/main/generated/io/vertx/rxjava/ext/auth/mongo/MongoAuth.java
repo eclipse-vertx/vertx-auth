@@ -19,6 +19,7 @@ package io.vertx.rxjava.ext.auth.mongo;
 import java.util.Map;
 import rx.Observable;
 import java.util.List;
+import io.vertx.rxjava.ext.auth.User;
 import io.vertx.rxjava.ext.mongo.MongoClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;

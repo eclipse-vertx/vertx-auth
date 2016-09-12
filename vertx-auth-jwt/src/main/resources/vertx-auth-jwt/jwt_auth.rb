@@ -1,3 +1,4 @@
+require 'vertx-auth-common/user'
 require 'vertx/vertx'
 require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
@@ -15,6 +16,15 @@ module VertxAuthJwt
     # @return [::VertxAuthJwt::JWTAuth] the underlying java delegate
     def j_del
       @j_del
+    end
+    # @param [Hash{String => Object}] arg0 
+    # @yield 
+    # @return [void]
+    def authenticate(arg0=nil)
+      if arg0.class == Hash && block_given?
+        return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(arg0),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
+      end
+      raise ArgumentError, "Invalid arguments when calling authenticate(arg0)"
     end
     #  Create a JWT auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance

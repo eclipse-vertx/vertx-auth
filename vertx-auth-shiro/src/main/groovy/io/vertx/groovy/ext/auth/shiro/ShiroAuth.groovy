@@ -18,8 +18,11 @@ package io.vertx.groovy.ext.auth.shiro;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.groovy.ext.auth.User
 import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
+import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 import io.vertx.groovy.ext.auth.AuthProvider

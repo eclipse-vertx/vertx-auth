@@ -18,7 +18,11 @@ package io.vertx.rxjava.ext.auth.jdbc;
 
 import java.util.Map;
 import rx.Observable;
+import io.vertx.rxjava.ext.auth.User;
 import io.vertx.rxjava.ext.jdbc.JDBCClient;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**

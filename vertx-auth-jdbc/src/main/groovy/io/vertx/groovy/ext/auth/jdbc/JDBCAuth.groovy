@@ -18,7 +18,11 @@ package io.vertx.groovy.ext.auth.jdbc;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.groovy.ext.auth.User
 import io.vertx.groovy.ext.jdbc.JDBCClient
+import io.vertx.core.json.JsonObject
+import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
 import io.vertx.groovy.ext.auth.AuthProvider
 /**
  * Factory interface for creating {@link io.vertx.groovy.ext.auth.AuthProvider} instances that use the Vert.x JDBC client

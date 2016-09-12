@@ -17,6 +17,7 @@
 /** @module vertx-auth-oauth2-js/access_token */
 var utils = require('vertx-js/util/utils');
 var User = require('vertx-auth-common-js/user');
+var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -32,6 +33,66 @@ var AccessToken = function(j_val) {
   var j_accessToken = j_val;
   var that = this;
   User.call(this, j_val);
+
+  /**
+
+   @public
+   @param arg0 {string} 
+   @param arg1 {function} 
+   @return {User}
+   */
+  this.isAuthorised = function(arg0, arg1) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_accessToken["isAuthorised(java.lang.String,io.vertx.core.Handler)"](arg0, function(ar) {
+      if (ar.succeeded()) {
+        arg1(ar.result(), null);
+      } else {
+        arg1(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+
+   @return {User}
+   */
+  this.clearCache = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      j_accessToken["clearCache()"]();
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+
+   @return {Object}
+   */
+  this.principal = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return utils.convReturnJson(j_accessToken["principal()"]());
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param arg0 {AuthProvider} 
+   */
+  this.setAuthProvider = function(arg0) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      j_accessToken["setAuthProvider(io.vertx.ext.auth.AuthProvider)"](arg0._jdel);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
 
   /**
    Check if the access token is expired or not.

@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-oauth2</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.3.3</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-oauth2:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-auth-oauth2:3.3.3'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility

@@ -1,4 +1,5 @@
 require 'vertx-auth-common/user'
+require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.oauth2.AccessToken
 module VertxAuthOauth2
@@ -14,6 +15,39 @@ module VertxAuthOauth2
     # @return [::VertxAuthOauth2::AccessToken] the underlying java delegate
     def j_del
       @j_del
+    end
+    # @param [String] arg0 
+    # @yield 
+    # @return [self]
+    def is_authorised(arg0=nil)
+      if arg0.class == String && block_given?
+        @j_del.java_method(:isAuthorised, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(arg0,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
+        return self
+      end
+      raise ArgumentError, "Invalid arguments when calling is_authorised(arg0)"
+    end
+    # @return [self]
+    def clear_cache
+      if !block_given?
+        @j_del.java_method(:clearCache, []).call()
+        return self
+      end
+      raise ArgumentError, "Invalid arguments when calling clear_cache()"
+    end
+    # @return [Hash{String => Object}]
+    def principal
+      if !block_given?
+        return @j_del.java_method(:principal, []).call() != nil ? JSON.parse(@j_del.java_method(:principal, []).call().encode) : nil
+      end
+      raise ArgumentError, "Invalid arguments when calling principal()"
+    end
+    # @param [::VertxAuthCommon::AuthProvider] arg0 
+    # @return [void]
+    def set_auth_provider(arg0=nil)
+      if arg0.class.method_defined?(:j_del) && !block_given?
+        return @j_del.java_method(:setAuthProvider, [Java::IoVertxExtAuth::AuthProvider.java_class]).call(arg0.j_del)
+      end
+      raise ArgumentError, "Invalid arguments when calling set_auth_provider(arg0)"
     end
     #  Check if the access token is expired or not.
     # @return [true,false]

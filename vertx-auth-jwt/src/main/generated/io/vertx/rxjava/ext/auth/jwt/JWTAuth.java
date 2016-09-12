@@ -18,8 +18,11 @@ package io.vertx.rxjava.ext.auth.jwt;
 
 import java.util.Map;
 import rx.Observable;
+import io.vertx.rxjava.ext.auth.User;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.AuthProvider;
 

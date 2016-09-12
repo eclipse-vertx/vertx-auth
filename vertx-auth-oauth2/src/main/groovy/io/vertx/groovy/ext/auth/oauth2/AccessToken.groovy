@@ -19,8 +19,10 @@ import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import io.vertx.groovy.ext.auth.User
+import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import io.vertx.groovy.ext.auth.AuthProvider
 /**
  * AccessToken extension to the User interface
 */

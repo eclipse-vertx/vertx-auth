@@ -19,8 +19,10 @@ package io.vertx.rxjava.ext.auth.oauth2;
 import java.util.Map;
 import rx.Observable;
 import io.vertx.rxjava.ext.auth.User;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.rxjava.ext.auth.AuthProvider;
 
 /**
  * AccessToken extension to the User interface

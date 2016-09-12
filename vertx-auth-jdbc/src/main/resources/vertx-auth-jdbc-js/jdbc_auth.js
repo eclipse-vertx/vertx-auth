@@ -16,6 +16,7 @@
 
 /** @module vertx-auth-jdbc-js/jdbc_auth */
 var utils = require('vertx-js/util/utils');
+var User = require('vertx-auth-common-js/user');
 var JDBCClient = require('vertx-jdbc-js/jdbc_client');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
@@ -32,6 +33,25 @@ var JDBCAuth = function(j_val) {
   var j_jDBCAuth = j_val;
   var that = this;
   AuthProvider.call(this, j_val);
+
+  /**
+
+   @public
+   @param arg0 {Object} 
+   @param arg1 {function} 
+   */
+  this.authenticate = function(arg0, arg1) {
+    var __args = arguments;
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      j_jDBCAuth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
+      if (ar.succeeded()) {
+        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+      } else {
+        arg1(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
 
   /**
    Set the authentication query to use. Use this if you want to override the default authentication query.
