@@ -111,7 +111,7 @@ public class OAuth2API {
         }
       }
 
-      client = provider.getVertx().createHttpClient(new HttpClientOptions()
+      client = provider.getVertx().createHttpClient(new HttpClientOptions(config)
           .setSsl(isSecure)
           .setDefaultHost(host)
           .setDefaultPort(port));
