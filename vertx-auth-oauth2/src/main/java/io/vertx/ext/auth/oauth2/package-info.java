@@ -193,6 +193,14 @@
  * {@link examples.AuthOAuth2Examples#example13}
  * ----
  *
+ * We also provide a helper class for Keycloak so that we can we can easily retrieve decoded token and some necessary
+ * data (e.g. `preferred_username`) from the Keycloak principal. For example:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example14}
+ * ----
+ *
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-auth-oauth2", groupPackage = "io.vertx")
