@@ -156,21 +156,15 @@ public class OAuth2API {
         switch (contentType) {
           case "application/json":
             try {
-              callback.handle(Future.succeededFuture(new JsonObject(body.toString())));
+              handleToken(new JsonObject(body.toString()), callback);
             } catch (RuntimeException e) {
               callback.handle(Future.failedFuture(e));
             }
             break;
           case "application/x-www-form-urlencoded":
-            try {
-              callback.handle(Future.succeededFuture(queryToJSON(body.toString())));
-            } catch (UnsupportedEncodingException | RuntimeException e) {
-              callback.handle(Future.failedFuture(e));
-            }
-            break;
           case "text/plain":
             try {
-              callback.handle(Future.succeededFuture(queryToJSON(body.toString())));
+              handleToken(queryToJSON(body.toString()), callback);
             } catch (UnsupportedEncodingException | RuntimeException e) {
               callback.handle(Future.failedFuture(e));
             }
@@ -211,6 +205,16 @@ public class OAuth2API {
 
     // Make sure the request is ended when you're done with it
     request.end();
+  }
+
+  private static void handleToken(final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {
+    if (json.containsKey("error")) {
+      String error = json.getString("error");
+      String description = json.getString("error_description", null);
+      callback.handle(Future.failedFuture(description != null ? error + ": " + description : error));
+    } else {
+      callback.handle(Future.succeededFuture(json));
+    }
   }
 
   public static String stringify(JsonObject json) {
