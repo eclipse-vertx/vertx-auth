@@ -35,6 +35,7 @@
 |[[jwtToken]]`jwtToken`|`Boolean`|-
 |[[keepAlive]]`keepAlive`|`Boolean`|-
 |[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
+|[[localAddress]]`localAddress`|`String`|-
 |[[logActivity]]`logActivity`|`Boolean`|-
 |[[logoutPath]]`logoutPath`|`String`|-
 |[[maxChunkSize]]`maxChunkSize`|`Number (int)`|-

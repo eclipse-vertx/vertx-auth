@@ -175,6 +175,13 @@
  * {@link examples.AuthOAuth2Examples#example11}
  * ----
  *
+ * ==== Azure AD
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example15}
+ * ----
+ *
  * ==== JBoss Keycloak
  *
  * When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the

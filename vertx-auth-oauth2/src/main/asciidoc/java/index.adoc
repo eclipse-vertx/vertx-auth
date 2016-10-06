@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-oauth2</artifactId>
-  <version>3.3.3</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-oauth2:3.3.3'
+compile 'io.vertx:vertx-auth-oauth2:3.4.0-SNAPSHOT'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
@@ -316,6 +316,22 @@ OAuth2ClientOptions credentials = new OAuth2ClientOptions()
     .setSite("https://www.facebook.com")
     .setAuthorizationPath("/dialog/oauth")
     .setTokenPath("https://graph.facebook.com/oauth/access_token");
+
+
+// Initialize the OAuth2 Library
+OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+----
+
+==== Azure AD
+
+[source,java]
+----
+OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+        .setClientID("CLIENT_ID") // your Azure Application Id
+        .setClientSecret("CLIENT_SECRET") // Your keys config
+        .setSite("https://login.windows.net/< SOME GUID >") // see the endpoints panel
+        .setAuthorizationPath("/dialog/oauth")
+        .setTokenPath("https://graph.facebook.com/oauth/access_token");
 
 
 // Initialize the OAuth2 Library

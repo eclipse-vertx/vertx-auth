@@ -303,4 +303,19 @@ public class AuthOAuth2Examples {
     // e.g. `preferred_username`
     String username = KeycloakHelper.preferredUsername(principal);
   }
+
+  public void example15(Vertx vertx) {
+    // Set the client credentials and the OAuth2 server
+    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+            .setClientID("CLIENT_ID") // your Azure Application Id
+            .setClientSecret("CLIENT_SECRET") // Your keys config
+            .setSite("https://login.windows.net/< SOME GUID >") // see the endpoints panel
+            .setAuthorizationPath("/dialog/oauth")
+            .setTokenPath("https://graph.facebook.com/oauth/access_token");
+
+
+    // Initialize the OAuth2 Library
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+  }
+
 }

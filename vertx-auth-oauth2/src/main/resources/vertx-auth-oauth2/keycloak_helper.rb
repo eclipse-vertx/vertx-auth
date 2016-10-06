@@ -8,13 +8,11 @@ module VertxAuthOauth2
     def initialize(j_del)
       @j_del = j_del
     end
-
     # @private
     # @return [::VertxAuthOauth2::KeycloakHelper] the underlying java delegate
     def j_del
       @j_del
     end
-
     #  Get raw `id_token` string from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [String] the raw id token string
@@ -24,7 +22,6 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling raw_id_token(principal)"
     end
-
     #  Get decoded `id_token` from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [Hash{String => Object}] the id token
@@ -34,7 +31,6 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling id_token(principal)"
     end
-
     #  Get raw `access_token` string from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [String] the raw access token string
@@ -44,7 +40,6 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling raw_access_token(principal)"
     end
-
     #  Get decoded `access_token` from the principal.
     # @param [Hash{String => Object}] principal user principal
     # @return [Hash{String => Object}] the access token
@@ -54,8 +49,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling access_token(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [Fixnum]
     def self.auth_time(principal=nil)
       if principal.class == Hash && !block_given?
@@ -63,8 +57,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling auth_time(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [String]
     def self.session_state(principal=nil)
       if principal.class == Hash && !block_given?
@@ -72,8 +65,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling session_state(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [String]
     def self.acr(principal=nil)
       if principal.class == Hash && !block_given?
@@ -81,8 +73,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling acr(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [String]
     def self.name(principal=nil)
       if principal.class == Hash && !block_given?
@@ -90,8 +81,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling name(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [String]
     def self.email(principal=nil)
       if principal.class == Hash && !block_given?
@@ -99,8 +89,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling email(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [String]
     def self.preferred_username(principal=nil)
       if principal.class == Hash && !block_given?
@@ -108,8 +97,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling preferred_username(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [String]
     def self.nick_name(principal=nil)
       if principal.class == Hash && !block_given?
@@ -117,8 +105,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling nick_name(principal)"
     end
-
-    # @param [Hash{String => Object}] principal
+    # @param [Hash{String => Object}] principal 
     # @return [Set<String>]
     def self.allowed_origins(principal=nil)
       if principal.class == Hash && !block_given?
@@ -126,7 +113,6 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling allowed_origins(principal)"
     end
-
     #  Parse the token string with base64 decoder.
     #  This will only obtain the "payload" part of the token.
     # @param [String] token token string

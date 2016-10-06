@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -112,21 +113,15 @@ public class OAuth2API {
       }
 
       client = provider.getVertx().createHttpClient(new HttpClientOptions(config)
-          .setSsl(isSecure)
-          .setDefaultHost(host)
-          .setDefaultPort(port));
+              .setSsl(isSecure)
+              .setDefaultHost(host)
+              .setDefaultPort(port));
 
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
 
     HttpClientRequest request = client.request(method, uri, resp -> {
-      if (resp.statusCode() >= 400) {
-        callback.handle(Future.failedFuture(resp.statusMessage()));
-        client.close();
-        return;
-      }
-
       resp.exceptionHandler(t -> {
         callback.handle(Future.failedFuture(t));
         client.close();
@@ -141,7 +136,11 @@ public class OAuth2API {
 
         if (body.length() == 0) {
           // no body
-          callback.handle(Future.succeededFuture());
+          if (resp.statusCode() >= 400) {
+            callback.handle(Future.failedFuture(resp.statusMessage()));
+          } else {
+            callback.handle(Future.succeededFuture());
+          }
           client.close();
           return;
         }
@@ -156,21 +155,15 @@ public class OAuth2API {
         switch (contentType) {
           case "application/json":
             try {
-              callback.handle(Future.succeededFuture(new JsonObject(body.toString())));
+              handleToken(resp.statusCode(), new JsonObject(body.toString()), callback);
             } catch (RuntimeException e) {
               callback.handle(Future.failedFuture(e));
             }
             break;
           case "application/x-www-form-urlencoded":
-            try {
-              callback.handle(Future.succeededFuture(queryToJSON(body.toString())));
-            } catch (UnsupportedEncodingException | RuntimeException e) {
-              callback.handle(Future.failedFuture(e));
-            }
-            break;
           case "text/plain":
             try {
-              callback.handle(Future.succeededFuture(queryToJSON(body.toString())));
+              handleToken(resp.statusCode(), queryToJSON(body.toString()), callback);
             } catch (UnsupportedEncodingException | RuntimeException e) {
               callback.handle(Future.failedFuture(e));
             }
@@ -211,6 +204,20 @@ public class OAuth2API {
 
     // Make sure the request is ended when you're done with it
     request.end();
+  }
+
+  private static void handleToken(final int statusCode, final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {
+    if (json.containsKey("error")) {
+      String error = json.getString("error");
+      String description = json.getString("error_description", null);
+      callback.handle(Future.failedFuture(description != null ? error + ": " + description : error));
+    } else {
+      // for the case there was a http protocol error
+      if (statusCode >= 400) {
+        callback.handle(Future.failedFuture(HttpResponseStatus.valueOf(statusCode).reasonPhrase()));
+      }
+      callback.handle(Future.succeededFuture(json));
+    }
   }
 
   public static String stringify(JsonObject json) {

@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-oauth2</artifactId>
-  <version>3.3.3</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-oauth2:3.3.3'
+compile 'io.vertx:vertx-auth-oauth2:3.4.0-SNAPSHOT'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
@@ -361,6 +361,26 @@ credentials = {
   'clientID' => "CLIENT_ID",
   'clientSecret' => "CLIENT_SECRET",
   'site' => "https://www.facebook.com",
+  'authorizationPath' => "/dialog/oauth",
+  'tokenPath' => "https://graph.facebook.com/oauth/access_token"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
+
+==== Azure AD
+
+[source,ruby]
+----
+require 'vertx-auth-oauth2/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://login.windows.net/< SOME GUID >",
   'authorizationPath' => "/dialog/oauth",
   'tokenPath' => "https://graph.facebook.com/oauth/access_token"
 }
