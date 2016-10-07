@@ -343,4 +343,29 @@ public class JWTAuthProviderTest extends VertxTestBase {
     }));
     await();
   }
+
+  @Test
+  public void testAlgNone() {
+
+    JWTAuth authProvider = JWTAuth.create(vertx, new JsonObject());
+
+    JsonObject payload = new JsonObject()
+            .put("sub", "UserUnderTest")
+            .put("aud", "OrganizationUnderTest")
+            .put("iat", 1431695313)
+            .put("exp", 1747055313)
+            .put("roles", new JsonArray().add("admin").add("developer").add("user"))
+            .put("permissions", new JsonArray().add("read").add("write").add("execute"));
+
+    final String token = authProvider.generateToken(payload, new JWTOptions().setSubject("UserUnderTest").setAlgorithm("none"));
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
 }
