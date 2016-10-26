@@ -67,7 +67,7 @@ public class OAuth2API {
       params.remove("access_token");
     } else if (config.isUseBasicAuthorizationHeader() && config.getClientID() != null && !params.containsKey("client_id")) {
       String basic = config.getClientID() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getUrlEncoder().encodeToString(basic.getBytes()));
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
     }
 
     JsonObject tmp = config.getHeaders();
