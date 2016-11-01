@@ -25,8 +25,8 @@ var JKeycloakHelper = io.vertx.ext.auth.oauth2.KeycloakHelper;
  Helper class for processing Keycloak principal.
 
  @class
- */
-var KeycloakHelper = function (j_val) {
+*/
+var KeycloakHelper = function(j_val) {
 
   var j_keycloakHelper = j_val;
   var that = this;
@@ -41,10 +41,10 @@ var KeycloakHelper = function (j_val) {
  Get raw `id_token` string from the principal.
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object} user principal
+ @param principal {Object} user principal 
  @return {string} the raw id token string
  */
-KeycloakHelper.rawIdToken = function (principal) {
+KeycloakHelper.rawIdToken = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["rawIdToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -55,10 +55,10 @@ KeycloakHelper.rawIdToken = function (principal) {
  Get decoded `id_token` from the principal.
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object} user principal
+ @param principal {Object} user principal 
  @return {Object} the id token
  */
-KeycloakHelper.idToken = function (principal) {
+KeycloakHelper.idToken = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return utils.convReturnJson(JKeycloakHelper["idToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
@@ -69,10 +69,10 @@ KeycloakHelper.idToken = function (principal) {
  Get raw `access_token` string from the principal.
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object} user principal
+ @param principal {Object} user principal 
  @return {string} the raw access token string
  */
-KeycloakHelper.rawAccessToken = function (principal) {
+KeycloakHelper.rawAccessToken = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["rawAccessToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -83,10 +83,10 @@ KeycloakHelper.rawAccessToken = function (principal) {
  Get decoded `access_token` from the principal.
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object} user principal
+ @param principal {Object} user principal 
  @return {Object} the access token
  */
-KeycloakHelper.accessToken = function (principal) {
+KeycloakHelper.accessToken = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return utils.convReturnJson(JKeycloakHelper["accessToken(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
@@ -96,10 +96,10 @@ KeycloakHelper.accessToken = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {number}
  */
-KeycloakHelper.authTime = function (principal) {
+KeycloakHelper.authTime = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["authTime(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -109,10 +109,10 @@ KeycloakHelper.authTime = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {string}
  */
-KeycloakHelper.sessionState = function (principal) {
+KeycloakHelper.sessionState = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["sessionState(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -122,10 +122,10 @@ KeycloakHelper.sessionState = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {string}
  */
-KeycloakHelper.acr = function (principal) {
+KeycloakHelper.acr = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["acr(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -135,10 +135,10 @@ KeycloakHelper.acr = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {string}
  */
-KeycloakHelper.name = function (principal) {
+KeycloakHelper.name = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["name(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -148,10 +148,10 @@ KeycloakHelper.name = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {string}
  */
-KeycloakHelper.email = function (principal) {
+KeycloakHelper.email = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["email(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -161,10 +161,10 @@ KeycloakHelper.email = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {string}
  */
-KeycloakHelper.preferredUsername = function (principal) {
+KeycloakHelper.preferredUsername = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["preferredUsername(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -174,10 +174,10 @@ KeycloakHelper.preferredUsername = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {string}
  */
-KeycloakHelper.nickName = function (principal) {
+KeycloakHelper.nickName = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return JKeycloakHelper["nickName(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal));
@@ -187,10 +187,10 @@ KeycloakHelper.nickName = function (principal) {
 /**
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param principal {Object}
+ @param principal {Object} 
  @return {Array.<string>}
  */
-KeycloakHelper.allowedOrigins = function (principal) {
+KeycloakHelper.allowedOrigins = function(principal) {
   var __args = arguments;
   if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
     return utils.convReturnSet(JKeycloakHelper["allowedOrigins(io.vertx.core.json.JsonObject)"](utils.convParamJsonObject(principal)));
@@ -202,10 +202,10 @@ KeycloakHelper.allowedOrigins = function (principal) {
  This will only obtain the "payload" part of the token.
 
  @memberof module:vertx-auth-oauth2-js/keycloak_helper
- @param token {string} token string
+ @param token {string} token string 
  @return {Object} token payload json object
  */
-KeycloakHelper.parseToken = function (token) {
+KeycloakHelper.parseToken = function(token) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'string') {
     return utils.convReturnJson(JKeycloakHelper["parseToken(java.lang.String)"](token));

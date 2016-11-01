@@ -15,24 +15,20 @@
  */
 
 package io.vertx.groovy.ext.auth.oauth2;
-
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import java.util.Set
 import io.vertx.core.json.JsonObject
-
 /**
  * Helper class for processing Keycloak principal.
- */
+*/
 @CompileStatic
 public class KeycloakHelper {
   private final def io.vertx.ext.auth.oauth2.KeycloakHelper delegate;
-
   public KeycloakHelper(Object delegate) {
     this.delegate = (io.vertx.ext.auth.oauth2.KeycloakHelper) delegate;
   }
-
   public Object getDelegate() {
     return delegate;
   }
@@ -51,7 +47,7 @@ public class KeycloakHelper {
    * @return the id token
    */
   public static Map<String, Object> idToken(Map<String, Object> principal) {
-    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.idToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.idToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
     return ret;
   }
   /**
@@ -69,45 +65,37 @@ public class KeycloakHelper {
    * @return the access token
    */
   public static Map<String, Object> accessToken(Map<String, Object> principal) {
-    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.accessToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.accessToken(principal != null ? new io.vertx.core.json.JsonObject(principal) : null));
     return ret;
   }
-
   public static int authTime(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.authTime(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static String sessionState(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.sessionState(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static String acr(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.acr(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static String name(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.name(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static String email(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.email(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static String preferredUsername(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.preferredUsername(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static String nickName(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.nickName(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
   }
-
   public static Set<String> allowedOrigins(Map<String, Object> principal) {
     def ret = io.vertx.ext.auth.oauth2.KeycloakHelper.allowedOrigins(principal != null ? new io.vertx.core.json.JsonObject(principal) : null);
     return ret;
@@ -119,7 +107,7 @@ public class KeycloakHelper {
    * @return token payload json object
    */
   public static Map<String, Object> parseToken(String token) {
-    def ret = (Map<String, Object>) InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.parseToken(token));
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(io.vertx.ext.auth.oauth2.KeycloakHelper.parseToken(token));
     return ret;
   }
 }
