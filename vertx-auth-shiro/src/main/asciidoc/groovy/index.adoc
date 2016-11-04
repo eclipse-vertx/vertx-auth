@@ -26,8 +26,8 @@ compile 'io.vertx:vertx-auth-shiro:3.4.0-SNAPSHOT'
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
 other Shiro Realm which expects username and password for credentials.
 
-To create an instance of the provider you use `link:../../groovydoc/io/vertx/groovy/ext/auth/shiro/ShiroAuth.html[ShiroAuth]`. You specify the type of
-Shiro auth provider that you want with `link:../enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`, and you specify the
+To create an instance of the provider you use `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html[ShiroAuth]`. You specify the type of
+Shiro auth provider that you want with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuthRealmType.html[ShiroAuthRealmType]`, and you specify the
 configuration in a JSON object.
 
 Here's an example of creating a Shiro auth provider by specifying the type:
@@ -35,7 +35,7 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 [source,java]
 ----
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
-import io.vertx.groovy.ext.auth.shiro.ShiroAuth
+import io.vertx.ext.auth.shiro.ShiroAuth
 
 def config = [
   properties_path:"classpath:test-auth.properties"
@@ -76,7 +76,7 @@ implementation uses a familiar user/role/permission model, where a user can have
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]` as follows:
+`link:../../apidocs/io/vertx/ext/auth/User.html#isAuthorised-java.lang.String-io.vertx.core.Handler-[isAuthorised]` as follows:
 
 [source,java]
 ----
@@ -107,7 +107,7 @@ user.isAuthorised("role:manager", { res ->
 
 ----
 
-The default role prefix is `role:`. You can change this with `link:../../groovydoc/io/vertx/groovy/ext/auth/shiro/ShiroAuth.html#setRolePrefix(java.lang.String)[setRolePrefix]`.
+The default role prefix is `role:`. You can change this with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
 
 === The Shiro properties auth provider
 
@@ -115,7 +115,7 @@ This auth provider implementation uses Apache Shiro to get user/role/permission 
 
 Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
 possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
-with `link:../../groovydoc/io/vertx/groovy/ext/auth/shiro/ShiroAuth.html#setRolePrefix(java.lang.String)[setRolePrefix]`.
+with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
 
 The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
 
@@ -180,7 +180,7 @@ This is done as follows:
 
 [source,java]
 ----
-import io.vertx.groovy.ext.auth.shiro.ShiroAuth
+import io.vertx.ext.auth.shiro.ShiroAuth
 
 def provider = ShiroAuth.create(vertx, realm)
 
