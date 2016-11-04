@@ -103,16 +103,16 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     JsonObject payload = new JsonObject()
         .put("sub", "Paulo")
+      .put("exp", 1747055313)
         .put("iat", 1431695313)
-        .put("exp", 1747055313)
-        .put("roles", new JsonArray()
-            .add("admin")
-            .add("developer")
-            .add("user"))
         .put("permissions", new JsonArray()
             .add("read")
             .add("write")
-            .add("execute"));
+            .add("execute"))
+        .put("roles", new JsonArray()
+          .add("admin")
+          .add("developer")
+          .add("user"));
 
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
     assertNotNull(token);

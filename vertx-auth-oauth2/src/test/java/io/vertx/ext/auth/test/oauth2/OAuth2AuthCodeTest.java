@@ -10,9 +10,11 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.concurrent.CountDownLatch;
 
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
 
 public class OAuth2AuthCodeTest extends VertxTestBase {
@@ -59,8 +61,11 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
-          // this is a tricky assertion because it assumes the order while it should not matter...
-          assertEquals(stringify(config), buffer.toString());
+          try {
+            assertEquals(config, queryToJSON(buffer.toString()));
+          } catch (UnsupportedEncodingException e) {
+            fail(e);
+          }
           req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else {
@@ -85,7 +90,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
 
   @Test
   public void generateAuthorizeURL() throws Exception {
-    String expected = "http://localhost:8080/oauth/authorize?response_type=code&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&state=02afe928b&client_id=client-id&scope=user";
+    String expected = "http://localhost:8080/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
     assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
   }
 

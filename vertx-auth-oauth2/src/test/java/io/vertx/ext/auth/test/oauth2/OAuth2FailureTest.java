@@ -9,6 +9,7 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
@@ -46,8 +47,11 @@ public class OAuth2FailureTest extends VertxTestBase {
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
-          // this is a tricky assertion because it assumes the order while it should not matter...
-          assertEquals(stringify(config), buffer.toString());
+          try {
+            assertEquals(config, queryToJSON(buffer.toString()));
+          } catch (UnsupportedEncodingException e) {
+            fail(e);
+          }
           req.response().setStatusCode(code).end();
         });
       } else {
