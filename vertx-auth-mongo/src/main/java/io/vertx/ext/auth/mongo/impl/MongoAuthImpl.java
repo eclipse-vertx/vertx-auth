@@ -162,11 +162,11 @@ public class MongoAuthImpl implements MongoAuth {
     principal.put(getUsernameField(), username);
 
     if (roles != null) {
-      principal.put(MongoAuth.DEFAULT_ROLE_FIELD, new JsonArray(roles));
+      principal.put(roleField, new JsonArray(roles));
     }
 
     if (permissions != null) {
-      principal.put(MongoAuth.DEFAULT_PERMISSION_FIELD, new JsonArray(permissions));
+      principal.put(permissionField, new JsonArray(permissions));
     }
     MongoUser user = new MongoUser(principal, this);
 
