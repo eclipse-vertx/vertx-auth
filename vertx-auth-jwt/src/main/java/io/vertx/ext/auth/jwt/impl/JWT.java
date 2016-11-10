@@ -163,16 +163,16 @@ public final class JWT {
 
   public JsonObject decode(final String token) {
     String[] segments = token.split("\\.");
-    if (segments.length != 3) {
+    if (segments.length != (unsecure ? 2 : 3)) {
       throw new RuntimeException("Not enough or too many segments");
     }
 
     // All segment should be base64
     String headerSeg = segments[0];
     String payloadSeg = segments[1];
-    String signatureSeg = segments[2];
+    String signatureSeg = unsecure ? null : segments[2];
 
-    if ("".equals(signatureSeg) && !unsecure) {
+    if ("".equals(signatureSeg)) {
       throw new RuntimeException("Signature is required");
     }
 
@@ -194,10 +194,12 @@ public final class JWT {
     }
 
     // verify signature. `sign` will return base64 string.
-    String signingInput = headerSeg + "." + payloadSeg;
+    if (!unsecure) {
+      String signingInput = headerSeg + "." + payloadSeg;
 
-    if (!crypto.verify(base64urlDecode(signatureSeg), signingInput.getBytes(UTF8))) {
-      throw new RuntimeException("Signature verification failed");
+      if (!crypto.verify(base64urlDecode(signatureSeg), signingInput.getBytes(UTF8))) {
+        throw new RuntimeException("Signature verification failed");
+      }
     }
 
     return payload;
