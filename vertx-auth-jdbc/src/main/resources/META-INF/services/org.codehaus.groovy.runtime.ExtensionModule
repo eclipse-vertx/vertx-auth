@@ -1,4 +1,0 @@
-moduleName = vertx-auth-jdbc-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.auth.jdbc.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.ext.auth.jdbc.GroovyStaticExtension

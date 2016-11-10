@@ -1,6 +1,6 @@
 == Mongo Auth Provider implementation
 
-We provide an implementation of `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`
+We provide an implementation of `link:../../groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../groovydoc/io/vertx/groovy/ext/mongo/MongoClient.html[MongoClient]`
 to perform authentication and authorisation against a MongoDb.
 
 To use this project, add the following
@@ -24,22 +24,22 @@ dependency to the _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-auth-mongo:3.4.0-SNAPSHOT'
 ----
 
-To create an instance you first need an instance of `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`. To learn how to create one
+To create an instance you first need an instance of `link:../../groovydoc/io/vertx/groovy/ext/mongo/MongoClient.html[MongoClient]`. To learn how to create one
 of those please consult the documentation for the MongoClient.
 
-Once you've got one of those you can create a `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html[MongoAuth]` instance as follows:
+Once you've got one of those you can create a `link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html[MongoAuth]` instance as follows:
 
 [source,groovy]
 ----
-import io.vertx.ext.mongo.MongoClient
-import io.vertx.ext.auth.mongo.MongoAuth
+import io.vertx.groovy.ext.mongo.MongoClient
+import io.vertx.groovy.ext.auth.mongo.MongoAuth
 def client = MongoClient.createShared(vertx, mongoClientConfig)
 def authProperties = [:]
 def authProvider = MongoAuth.create(client, authProperties)
 
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate and authorise with it just like any `link:../../groovydoc/io/vertx/groovy/ext/auth/AuthProvider.html[AuthProvider]`.
 
 The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
 some others.
@@ -57,30 +57,30 @@ insert the row and fail if duplicate.
 
 You can also change all the defaults for the mongo collection and column names using any of the methods:
 
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setCollectionName-java.lang.String-[setCollectionName]`
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameField-java.lang.String-[setUsernameField]`
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setPasswordField-java.lang.String-[setPasswordField]`
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setPermissionField-java.lang.String-[setPermissionField]`
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setRoleField-java.lang.String-[setRoleField]`
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setCollectionName(java.lang.String)[setCollectionName]`
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setUsernameField(java.lang.String)[setUsernameField]`
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setPasswordField(java.lang.String)[setPasswordField]`
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setPermissionField(java.lang.String)[setPermissionField]`
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setRoleField(java.lang.String)[setRoleField]`
 if you want to adapt that to your needs.
 
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
 concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
-stored can be set by `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setSaltField-java.lang.String-[setSaltField]`, the default is "salt".
-You are able to change this behaviour by using `link:../../apidocs/io/vertx/ext/auth/mongo/HashStrategy.html#setSaltStyle-io.vertx.ext.auth.mongo.HashSaltStyle-[setSaltStyle]`.
-The HashStrategy you can retrieve by  `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#getHashStrategy--[getHashStrategy]`.
+stored can be set by `link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setSaltField(java.lang.String)[setSaltField]`, the default is "salt".
+You are able to change this behaviour by using `link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/HashStrategy.html#setSaltStyle(io.vertx.ext.auth.mongo.HashSaltStyle)[setSaltStyle]`.
+The HashStrategy you can retrieve by  `link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#getHashStrategy()[getHashStrategy]`.
 By using this, you are able to set:
-`link:../../apidocs/io/vertx/ext/auth/mongo/HashSaltStyle.html#NO_SALT[NO_SALT]` by which passwords are not crypted and stored
+`link:todo[NO_SALT]` by which passwords are not crypted and stored
 in cleartext. ( see the warning below! )
-`link:../../apidocs/io/vertx/ext/auth/mongo/HashSaltStyle.html#COLUMN[COLUMN]`, which will create a salt per user and store this
+`link:todo[COLUMN]`, which will create a salt per user and store this
 inside the defined column of the user. ( see the warning below! )
-`link:../../apidocs/io/vertx/ext/auth/mongo/HashSaltStyle.html#EXTERNAL[EXTERNAL]`, which will store only the crypted password in the
-database and will use a salt from external, which you will have to set by `link:../../apidocs/io/vertx/ext/auth/mongo/HashStrategy.html#setExternalSalt-java.lang.String-[setExternalSalt]`
+`link:todo[EXTERNAL]`, which will store only the crypted password in the
+database and will use a salt from external, which you will have to set by `link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/HashStrategy.html#setExternalSalt(java.lang.String)[setExternalSalt]`
 
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
- `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setHashStrategy-io.vertx.ext.auth.mongo.HashStrategy-[setHashStrategy]`
+ `link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setHashStrategy(io.vertx.ext.auth.mongo.HashStrategy)[setHashStrategy]`
 
-WARNING: It is strongly advised to use the `link:../../apidocs/io/vertx/ext/auth/mongo/HashSaltStyle.html#EXTERNAL[EXTERNAL]` option.
+WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option.
 The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
 salt and password are stored inside the same place!
 
@@ -105,8 +105,8 @@ authProvider.authenticate(authInfo, { res ->
 
 ----
 Instead of the `username` and `password` field names used in the previous snippet, you should use:
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField-java.lang.String-[setUsernameCredentialField]` and
-`link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setPasswordCredentialField-java.lang.String-[setPasswordCredentialField]`
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField(java.lang.String)[setUsernameCredentialField]` and
+`link:../../groovydoc/io/vertx/groovy/ext/auth/mongo/MongoAuth.html#setPasswordCredentialField(java.lang.String)[setPasswordCredentialField]`
 
 == Authorisation - Permission-Role Model
 
@@ -115,7 +115,7 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../apidocs/io/vertx/ext/auth/User.html#isAuthorised-java.lang.String-io.vertx.core.Handler-[isAuthorised]` as follows:
+`link:../../groovydoc/io/vertx/groovy/ext/auth/User.html#isAuthorised(java.lang.String,%20io.vertx.core.Handler)[isAuthorised]` as follows:
 
 [source,groovy]
 ----
@@ -135,7 +135,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.mongo.MongoAuth
+import io.vertx.groovy.ext.auth.mongo.MongoAuth
 
 user.isAuthorised("${MongoAuth.ROLE_PREFIX}manager", { res ->
   if (res.succeeded()) {

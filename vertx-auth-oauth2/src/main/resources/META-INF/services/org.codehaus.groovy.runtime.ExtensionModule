@@ -1,4 +1,0 @@
-moduleName = vertx-auth-oauth2-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.auth.oauth2.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.ext.auth.oauth2.GroovyStaticExtension

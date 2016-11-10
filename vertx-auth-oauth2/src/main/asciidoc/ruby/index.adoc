@@ -371,6 +371,26 @@ oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
 
 ----
 
+==== Azure AD
+
+[source,ruby]
+----
+require 'vertx-auth-oauth2/o_auth2_auth'
+# Set the client credentials and the OAuth2 server
+credentials = {
+  'clientID' => "CLIENT_ID",
+  'clientSecret' => "CLIENT_SECRET",
+  'site' => "https://login.windows.net/< SOME GUID >",
+  'authorizationPath' => "/dialog/oauth",
+  'tokenPath' => "https://graph.facebook.com/oauth/access_token"
+}
+
+
+# Initialize the OAuth2 Library
+oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :CLIENT, credentials)
+
+----
+
 ==== JBoss Keycloak
 
 When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the

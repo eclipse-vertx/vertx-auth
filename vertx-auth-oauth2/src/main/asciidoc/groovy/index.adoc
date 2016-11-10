@@ -72,7 +72,7 @@ An example on how to use this provider and authenticate with GitHub can be imple
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 
 def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, [
   clientID:"YOUR_CLIENT_ID",
@@ -121,7 +121,7 @@ access token.
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 
 // Set the client credentials and the OAuth2 server
 def credentials = [
@@ -171,7 +171,7 @@ need a fast way to test your application.
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 import io.vertx.core.http.HttpMethod
 
 // Initialize the OAuth2 Library
@@ -208,7 +208,7 @@ This flow is suitable when client is requesting access to the protected resource
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 
 // Set the client credentials and the OAuth2 server
 def credentials = [
@@ -280,7 +280,7 @@ token.revoke("access_token", { res ->
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // Set the client credentials and the OAuth2 server
 def credentials = [
   clientID:"CLIENT_ID",
@@ -301,7 +301,7 @@ def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // Set the client credentials and the OAuth2 server
 def credentials = [
   clientID:"CLIENT_ID",
@@ -322,7 +322,7 @@ def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // Set the client credentials and the OAuth2 server
 def credentials = [
   clientID:"CLIENT_ID",
@@ -343,7 +343,7 @@ def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // Set the client credentials and the OAuth2 server
 def credentials = [
   clientID:"CLIENT_ID",
@@ -364,7 +364,7 @@ def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // Set the client credentials and the OAuth2 server
 def credentials = [
   clientID:"CLIENT_ID",
@@ -380,15 +380,36 @@ def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 
 ----
 
-==== JBoss Keycloak
-
-When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
-web UI and use it as the OAuth2 config with the helper class `link:../../apidocs/io/vertx/ext/auth/oauth2/OAuth2ClientOptions.html[OAuth2ClientOptions]`.
+==== Azure AD
 
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
+// Set the client credentials and the OAuth2 server
+def credentials = [
+  clientID:"CLIENT_ID",
+  clientSecret:"CLIENT_SECRET",
+  site:"https://login.windows.net/< SOME GUID >",
+  authorizationPath:"/dialog/oauth",
+  tokenPath:"https://graph.facebook.com/oauth/access_token"
+]
+
+
+// Initialize the OAuth2 Library
+def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
+
+----
+
+==== JBoss Keycloak
+
+When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
+web UI and use it as the OAuth2 config with the helper class `link:../dataobjects.html#OAuth2ClientOptions[OAuth2ClientOptions]`.
+
+[source,groovy]
+----
+import io.vertx.ext.auth.oauth2.OAuth2FlowType
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // After setting up the application and users in keycloak export
 // the configuration json file from the web interface and load it in your application e.g.:
 
@@ -414,7 +435,7 @@ This information is quite valuable since it allows to do authorization at the AP
 [source,groovy]
 ----
 import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
+import io.vertx.groovy.ext.auth.oauth2.OAuth2Auth
 // you can now use this config with the OAuth2 provider like this:
 def keycloakJson = [
   realm:"master",
@@ -456,7 +477,7 @@ data (e.g. `preferred_username`) from the Keycloak principal. For example:
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.KeycloakHelper
+import io.vertx.groovy.ext.auth.oauth2.KeycloakHelper
 // you can get the decoded `id_token` from the Keycloak principal
 def idToken = KeycloakHelper.idToken(principal)
 
