@@ -10,21 +10,17 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.concurrent.CountDownLatch;
 
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
 
-public class OAuth2AuthCodeTest extends VertxTestBase {
+public class OAuth2AuthCodeErrorTest extends VertxTestBase {
 
   private static final JsonObject fixture = new JsonObject(
       "{" +
-          "  \"access_token\": \"4adc339e0\"," +
-          "  \"refresh_token\": \"ec1a59d298\"," +
-          "  \"token_type\": \"bearer\"," +
-          "  \"expires_in\": 7200" +
+          "  \"error\": \"bad_verification_code\"," +
+          "  \"error_description\": \"bad verification code\"" +
           "}");
 
   private static final JsonObject tokenConfig = new JsonObject()
@@ -61,11 +57,8 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
-          try {
-            assertEquals(config, queryToJSON(buffer.toString()));
-          } catch (UnsupportedEncodingException e) {
-            fail(e);
-          }
+          // this is a tricky assertion because it assumes the order while it should not matter...
+          assertEquals(stringify(config), buffer.toString());
           req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else {
@@ -89,22 +82,14 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   }
 
   @Test
-  public void generateAuthorizeURL() throws Exception {
-    String expected = "http://localhost:8080/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
-    assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
-  }
-
-  @Test
   public void getToken() {
     config = oauthConfig;
     oauth2.getToken(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
-      } else {
-        AccessToken token = res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
+        assertNotNull(res.cause());
         testComplete();
+      } else {
+        fail("Should fail with bad verification code");
       }
     });
     await();

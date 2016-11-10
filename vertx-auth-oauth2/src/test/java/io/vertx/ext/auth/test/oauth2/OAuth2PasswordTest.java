@@ -10,8 +10,10 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
 
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
 
 public class OAuth2PasswordTest extends VertxTestBase {
@@ -52,8 +54,11 @@ public class OAuth2PasswordTest extends VertxTestBase {
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
-          // this is a tricky assertion because it assumes the order while it should not matter...
-          assertEquals(stringify(config), buffer.toString());
+          try {
+            assertEquals(config, queryToJSON(buffer.toString()));
+          } catch (UnsupportedEncodingException e) {
+            fail(e);
+          }
           req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else {
