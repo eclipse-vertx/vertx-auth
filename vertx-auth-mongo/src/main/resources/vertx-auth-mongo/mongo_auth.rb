@@ -18,6 +18,22 @@ module VertxAuthMongo
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == MongoAuth
+    end
+    def @@j_api_type.wrap(obj)
+      MongoAuth.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuthMongo::MongoAuth.java_class
+    end
     # @param [Hash{String => Object}] arg0 
     # @yield 
     # @return [void]
@@ -25,7 +41,7 @@ module VertxAuthMongo
       if arg0.class == Hash && block_given?
         return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(arg0),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling authenticate(arg0)"
+      raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     #  Creates an instance of MongoAuth by using the given  and configuration object. An example for a
     #  configuration object:
@@ -41,7 +57,7 @@ module VertxAuthMongo
       if mongoClient.class.method_defined?(:j_del) && config.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthMongo::MongoAuth.java_method(:create, [Java::IoVertxExtMongo::MongoClient.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(mongoClient.j_del,::Vertx::Util::Utils.to_json_object(config)),::VertxAuthMongo::MongoAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(mongoClient,config)"
+      raise ArgumentError, "Invalid arguments when calling create(#{mongoClient},#{config})"
     end
     #  Set the name of the collection to be used. Defaults to DEFAULT_COLLECTION_NAME
     # @param [String] collectionName the name of the collection to be used for storing and reading user data
@@ -51,7 +67,7 @@ module VertxAuthMongo
         @j_del.java_method(:setCollectionName, [Java::java.lang.String.java_class]).call(collectionName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_collection_name(collectionName)"
+      raise ArgumentError, "Invalid arguments when calling set_collection_name(#{collectionName})"
     end
     #  Set the name of the field to be used for the username. Defaults to DEFAULT_USERNAME_FIELD
     # @param [String] fieldName the name of the field to be used
@@ -61,7 +77,7 @@ module VertxAuthMongo
         @j_del.java_method(:setUsernameField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_username_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_username_field(#{fieldName})"
     end
     #  Set the name of the field to be used for the password Defaults to DEFAULT_PASSWORD_FIELD
     # @param [String] fieldName the name of the field to be used
@@ -71,7 +87,7 @@ module VertxAuthMongo
         @j_del.java_method(:setPasswordField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_password_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_password_field(#{fieldName})"
     end
     #  Set the name of the field to be used for the roles. Defaults to DEFAULT_ROLE_FIELD. Roles are expected to
     #  be saved as JsonArray
@@ -82,7 +98,7 @@ module VertxAuthMongo
         @j_del.java_method(:setRoleField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_role_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_role_field(#{fieldName})"
     end
     #  Set the name of the field to be used for the permissions. Defaults to DEFAULT_PERMISSION_FIELD.
     #  Permissions are expected to be saved as JsonArray
@@ -93,7 +109,7 @@ module VertxAuthMongo
         @j_del.java_method(:setPermissionField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_permission_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_permission_field(#{fieldName})"
     end
     #  Set the name of the field to be used as property for the username in the method
     #  {::VertxAuthCommon::AuthProvider#authenticate}. Defaults to DEFAULT_CREDENTIAL_USERNAME_FIELD
@@ -104,7 +120,7 @@ module VertxAuthMongo
         @j_del.java_method(:setUsernameCredentialField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_username_credential_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_username_credential_field(#{fieldName})"
     end
     #  Set the name of the field to be used as property for the password of credentials in the method
     #  {::VertxAuthCommon::AuthProvider#authenticate}. Defaults to DEFAULT_CREDENTIAL_PASSWORD_FIELD
@@ -115,7 +131,7 @@ module VertxAuthMongo
         @j_del.java_method(:setPasswordCredentialField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_password_credential_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_password_credential_field(#{fieldName})"
     end
     #  Set the name of the field to be used for the salt. Only used when {::VertxAuthMongo::HashStrategy#set_salt_style} is
     #  set to 
@@ -126,7 +142,7 @@ module VertxAuthMongo
         @j_del.java_method(:setSaltField, [Java::java.lang.String.java_class]).call(fieldName)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_salt_field(fieldName)"
+      raise ArgumentError, "Invalid arguments when calling set_salt_field(#{fieldName})"
     end
     #  The name of the collection used to store User objects inside. Defaults to DEFAULT_COLLECTION_NAME
     # @return [String] the collectionName
@@ -205,7 +221,7 @@ module VertxAuthMongo
         @j_del.java_method(:setHashStrategy, [Java::IoVertxExtAuthMongo::HashStrategy.java_class]).call(hashStrategy.j_del)
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling set_hash_strategy(hashStrategy)"
+      raise ArgumentError, "Invalid arguments when calling set_hash_strategy(#{hashStrategy})"
     end
     #  The HashStrategy which is used by the current instance
     # @return [::VertxAuthMongo::HashStrategy] the defined instance of {::VertxAuthMongo::HashStrategy}
@@ -226,7 +242,7 @@ module VertxAuthMongo
       if username.class == String && password.class == String && roles.class == Array && permissions.class == Array && block_given?
         return @j_del.java_method(:insertUser, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::JavaUtil::List.java_class,Java::JavaUtil::List.java_class,Java::IoVertxCore::Handler.java_class]).call(username,password,roles.map { |element| element },permissions.map { |element| element },(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling insert_user(username,password,roles,permissions)"
+      raise ArgumentError, "Invalid arguments when calling insert_user(#{username},#{password},#{roles},#{permissions})"
     end
   end
 end

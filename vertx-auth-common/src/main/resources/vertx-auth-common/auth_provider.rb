@@ -15,6 +15,22 @@ module VertxAuthCommon
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == AuthProvider
+    end
+    def @@j_api_type.wrap(obj)
+      AuthProvider.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuth::AuthProvider.java_class
+    end
     #  Authenticate a user.
     #  <p>
     #  The first argument is a JSON object containing information for authenticating the user. What this actually contains
@@ -37,7 +53,7 @@ module VertxAuthCommon
       if authInfo.class == Hash && block_given?
         return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(authInfo),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling authenticate(authInfo)"
+      raise ArgumentError, "Invalid arguments when calling authenticate(#{authInfo})"
     end
   end
 end

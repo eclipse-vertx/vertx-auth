@@ -46,7 +46,7 @@ var MongoAuth = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_mongoAuth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
       if (ar.succeeded()) {
-        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+        arg1(utils.convReturnVertxGen(User, ar.result()), null);
       } else {
         arg1(null, ar.cause());
       }
@@ -321,7 +321,7 @@ var MongoAuth = function(j_val) {
   this.getHashStrategy = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnVertxGen(j_mongoAuth["getHashStrategy()"](), HashStrategy);
+      return utils.convReturnVertxGen(HashStrategy, j_mongoAuth["getHashStrategy()"]());
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -354,6 +354,25 @@ var MongoAuth = function(j_val) {
   this._jdel = j_mongoAuth;
 };
 
+MongoAuth._jclass = utils.getJavaClass("io.vertx.ext.auth.mongo.MongoAuth");
+MongoAuth._jtype = {
+  accept: function(obj) {
+    return MongoAuth._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(MongoAuth.prototype, {});
+    MongoAuth.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+MongoAuth._create = function(jdel) {
+  var obj = Object.create(MongoAuth.prototype, {});
+  MongoAuth.apply(obj, arguments);
+  return obj;
+}
 /**
  Creates an instance of MongoAuth by using the given  and configuration object. An example for a
  configuration object:
@@ -371,9 +390,8 @@ var MongoAuth = function(j_val) {
 MongoAuth.create = function(mongoClient, config) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JMongoAuth["create(io.vertx.ext.mongo.MongoClient,io.vertx.core.json.JsonObject)"](mongoClient._jdel, utils.convParamJsonObject(config)), MongoAuth);
+    return utils.convReturnVertxGen(MongoAuth, JMongoAuth["create(io.vertx.ext.mongo.MongoClient,io.vertx.core.json.JsonObject)"](mongoClient._jdel, utils.convParamJsonObject(config)));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = MongoAuth;

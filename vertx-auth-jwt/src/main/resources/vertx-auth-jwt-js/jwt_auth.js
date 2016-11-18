@@ -46,7 +46,7 @@ var JWTAuth = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_jWTAuth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
       if (ar.succeeded()) {
-        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+        arg1(utils.convReturnVertxGen(User, ar.result()), null);
       } else {
         arg1(null, ar.cause());
       }
@@ -75,6 +75,25 @@ var JWTAuth = function(j_val) {
   this._jdel = j_jWTAuth;
 };
 
+JWTAuth._jclass = utils.getJavaClass("io.vertx.ext.auth.jwt.JWTAuth");
+JWTAuth._jtype = {
+  accept: function(obj) {
+    return JWTAuth._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(JWTAuth.prototype, {});
+    JWTAuth.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+JWTAuth._create = function(jdel) {
+  var obj = Object.create(JWTAuth.prototype, {});
+  JWTAuth.apply(obj, arguments);
+  return obj;
+}
 /**
  Create a JWT auth provider
 
@@ -86,9 +105,8 @@ var JWTAuth = function(j_val) {
 JWTAuth.create = function(vertx, config) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)), JWTAuth);
+    return utils.convReturnVertxGen(JWTAuth, JJWTAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject)"](vertx._jdel, utils.convParamJsonObject(config)));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = JWTAuth;

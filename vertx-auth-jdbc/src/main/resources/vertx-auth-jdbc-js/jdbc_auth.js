@@ -45,7 +45,7 @@ var JDBCAuth = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_jDBCAuth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
       if (ar.succeeded()) {
-        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+        arg1(utils.convReturnVertxGen(User, ar.result()), null);
       } else {
         arg1(null, ar.cause());
       }
@@ -63,7 +63,7 @@ var JDBCAuth = function(j_val) {
   this.setAuthenticationQuery = function(authenticationQuery) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return utils.convReturnVertxGen(j_jDBCAuth["setAuthenticationQuery(java.lang.String)"](authenticationQuery), JDBCAuth);
+      return utils.convReturnVertxGen(JDBCAuth, j_jDBCAuth["setAuthenticationQuery(java.lang.String)"](authenticationQuery));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -77,7 +77,7 @@ var JDBCAuth = function(j_val) {
   this.setRolesQuery = function(rolesQuery) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return utils.convReturnVertxGen(j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery), JDBCAuth);
+      return utils.convReturnVertxGen(JDBCAuth, j_jDBCAuth["setRolesQuery(java.lang.String)"](rolesQuery));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -91,7 +91,7 @@ var JDBCAuth = function(j_val) {
   this.setPermissionsQuery = function(permissionsQuery) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return utils.convReturnVertxGen(j_jDBCAuth["setPermissionsQuery(java.lang.String)"](permissionsQuery), JDBCAuth);
+      return utils.convReturnVertxGen(JDBCAuth, j_jDBCAuth["setPermissionsQuery(java.lang.String)"](permissionsQuery));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -105,7 +105,7 @@ var JDBCAuth = function(j_val) {
   this.setRolePrefix = function(rolePrefix) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return utils.convReturnVertxGen(j_jDBCAuth["setRolePrefix(java.lang.String)"](rolePrefix), JDBCAuth);
+      return utils.convReturnVertxGen(JDBCAuth, j_jDBCAuth["setRolePrefix(java.lang.String)"](rolePrefix));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -115,6 +115,25 @@ var JDBCAuth = function(j_val) {
   this._jdel = j_jDBCAuth;
 };
 
+JDBCAuth._jclass = utils.getJavaClass("io.vertx.ext.auth.jdbc.JDBCAuth");
+JDBCAuth._jtype = {
+  accept: function(obj) {
+    return JDBCAuth._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(JDBCAuth.prototype, {});
+    JDBCAuth.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+JDBCAuth._create = function(jdel) {
+  var obj = Object.create(JDBCAuth.prototype, {});
+  JDBCAuth.apply(obj, arguments);
+  return obj;
+}
 /**
  Create a JDBC auth provider implementation
 
@@ -125,9 +144,8 @@ var JDBCAuth = function(j_val) {
 JDBCAuth.create = function(client) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel), JDBCAuth);
+    return utils.convReturnVertxGen(JDBCAuth, JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = JDBCAuth;

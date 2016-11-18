@@ -112,5 +112,23 @@ var User = function(j_val) {
   this._jdel = j_user;
 };
 
-// We export the Constructor function
+User._jclass = utils.getJavaClass("io.vertx.ext.auth.User");
+User._jtype = {
+  accept: function(obj) {
+    return User._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(User.prototype, {});
+    User.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+User._create = function(jdel) {
+  var obj = Object.create(User.prototype, {});
+  User.apply(obj, arguments);
+  return obj;
+}
 module.exports = User;

@@ -17,6 +17,22 @@ module VertxAuthJdbc
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == JDBCAuth
+    end
+    def @@j_api_type.wrap(obj)
+      JDBCAuth.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuthJdbc::JDBCAuth.java_class
+    end
     # @param [Hash{String => Object}] arg0 
     # @yield 
     # @return [void]
@@ -24,7 +40,7 @@ module VertxAuthJdbc
       if arg0.class == Hash && block_given?
         return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(arg0),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling authenticate(arg0)"
+      raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     #  Create a JDBC auth provider implementation
     # @param [::VertxJdbc::JDBCClient] client the JDBC client instance
@@ -33,7 +49,7 @@ module VertxAuthJdbc
       if client.class.method_defined?(:j_del) && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthJdbc::JDBCAuth.java_method(:create, [Java::IoVertxExtJdbc::JDBCClient.java_class]).call(client.j_del),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(client)"
+      raise ArgumentError, "Invalid arguments when calling create(#{client})"
     end
     #  Set the authentication query to use. Use this if you want to override the default authentication query.
     # @param [String] authenticationQuery the authentication query
@@ -42,7 +58,7 @@ module VertxAuthJdbc
       if authenticationQuery.class == String && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setAuthenticationQuery, [Java::java.lang.String.java_class]).call(authenticationQuery),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling set_authentication_query(authenticationQuery)"
+      raise ArgumentError, "Invalid arguments when calling set_authentication_query(#{authenticationQuery})"
     end
     #  Set the roles query to use. Use this if you want to override the default roles query.
     # @param [String] rolesQuery the roles query
@@ -51,7 +67,7 @@ module VertxAuthJdbc
       if rolesQuery.class == String && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setRolesQuery, [Java::java.lang.String.java_class]).call(rolesQuery),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling set_roles_query(rolesQuery)"
+      raise ArgumentError, "Invalid arguments when calling set_roles_query(#{rolesQuery})"
     end
     #  Set the permissions query to use. Use this if you want to override the default permissions query.
     # @param [String] permissionsQuery the permissions query
@@ -60,7 +76,7 @@ module VertxAuthJdbc
       if permissionsQuery.class == String && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setPermissionsQuery, [Java::java.lang.String.java_class]).call(permissionsQuery),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling set_permissions_query(permissionsQuery)"
+      raise ArgumentError, "Invalid arguments when calling set_permissions_query(#{permissionsQuery})"
     end
     #  Set the role prefix to distinguish from permissions when checking for isPermitted requests.
     # @param [String] rolePrefix a Prefix e.g.: "role:"
@@ -69,7 +85,7 @@ module VertxAuthJdbc
       if rolePrefix.class == String && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setRolePrefix, [Java::java.lang.String.java_class]).call(rolePrefix),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling set_role_prefix(rolePrefix)"
+      raise ArgumentError, "Invalid arguments when calling set_role_prefix(#{rolePrefix})"
     end
   end
 end

@@ -15,6 +15,22 @@ module VertxAuthMongo
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == HashStrategy
+    end
+    def @@j_api_type.wrap(obj)
+      HashStrategy.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuthMongo::HashStrategy.java_class
+    end
     #  Compute the hashed password given the unhashed password and the user
     # @param [String] password the unhashed password
     # @param [::VertxAuthCommon::User] user the user to get the salt for. This paramter is needed, if the  is declared to be used
@@ -23,7 +39,7 @@ module VertxAuthMongo
       if password.class == String && user.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:computeHash, [Java::java.lang.String.java_class,Java::IoVertxExtAuth::User.java_class]).call(password,user.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling compute_hash(password,user)"
+      raise ArgumentError, "Invalid arguments when calling compute_hash(#{password},#{user})"
     end
     #  Retrieve the password from the user, or as clear text or as hashed version, depending on the definition
     # @param [::VertxAuthCommon::User] user the user to get the stored password for
@@ -32,7 +48,7 @@ module VertxAuthMongo
       if user.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:getStoredPwd, [Java::IoVertxExtAuth::User.java_class]).call(user.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling get_stored_pwd(user)"
+      raise ArgumentError, "Invalid arguments when calling get_stored_pwd(#{user})"
     end
     #  Retrieve the salt. The source of the salt can be the external salt or the propriate column of the given user,
     #  depending on the defined HashSaltStyle
@@ -42,7 +58,7 @@ module VertxAuthMongo
       if user.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:getSalt, [Java::IoVertxExtAuth::User.java_class]).call(user.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling get_salt(user)"
+      raise ArgumentError, "Invalid arguments when calling get_salt(#{user})"
     end
     #  Set an external salt. This method should be used in case of 
     # @param [String] salt the salt, which shall be used
@@ -51,7 +67,7 @@ module VertxAuthMongo
       if salt.class == String && !block_given?
         return @j_del.java_method(:setExternalSalt, [Java::java.lang.String.java_class]).call(salt)
       end
-      raise ArgumentError, "Invalid arguments when calling set_external_salt(salt)"
+      raise ArgumentError, "Invalid arguments when calling set_external_salt(#{salt})"
     end
     #  Set the saltstyle as defined by HashSaltStyle.
     # @param [:NO_SALT,:COLUMN,:EXTERNAL] saltStyle the HashSaltStyle to be used
@@ -60,7 +76,7 @@ module VertxAuthMongo
       if saltStyle.class == Symbol && !block_given?
         return @j_del.java_method(:setSaltStyle, [Java::IoVertxExtAuthMongo::HashSaltStyle.java_class]).call(Java::IoVertxExtAuthMongo::HashSaltStyle.valueOf(saltStyle))
       end
-      raise ArgumentError, "Invalid arguments when calling set_salt_style(saltStyle)"
+      raise ArgumentError, "Invalid arguments when calling set_salt_style(#{saltStyle})"
     end
     #  Get the defined HashSaltStyle of the current instance
     # @return [:NO_SALT,:COLUMN,:EXTERNAL] the saltStyle

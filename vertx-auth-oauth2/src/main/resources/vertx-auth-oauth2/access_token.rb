@@ -16,6 +16,22 @@ module VertxAuthOauth2
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == AccessToken
+    end
+    def @@j_api_type.wrap(obj)
+      AccessToken.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuthOauth2::AccessToken.java_class
+    end
     # @param [String] arg0 
     # @yield 
     # @return [self]
@@ -24,7 +40,7 @@ module VertxAuthOauth2
         @j_del.java_method(:isAuthorised, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(arg0,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling is_authorised(arg0)"
+      raise ArgumentError, "Invalid arguments when calling is_authorised(#{arg0})"
     end
     # @return [self]
     def clear_cache
@@ -47,7 +63,7 @@ module VertxAuthOauth2
       if arg0.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:setAuthProvider, [Java::IoVertxExtAuth::AuthProvider.java_class]).call(arg0.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling set_auth_provider(arg0)"
+      raise ArgumentError, "Invalid arguments when calling set_auth_provider(#{arg0})"
     end
     #  Check if the access token is expired or not.
     # @return [true,false]
@@ -76,7 +92,7 @@ module VertxAuthOauth2
         @j_del.java_method(:revoke, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(token_type,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil) }))
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling revoke(token_type)"
+      raise ArgumentError, "Invalid arguments when calling revoke(#{token_type})"
     end
     #  Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
     #  available on all providers.

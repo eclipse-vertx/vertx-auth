@@ -37,6 +37,25 @@ var KeycloakHelper = function(j_val) {
   this._jdel = j_keycloakHelper;
 };
 
+KeycloakHelper._jclass = utils.getJavaClass("io.vertx.ext.auth.oauth2.KeycloakHelper");
+KeycloakHelper._jtype = {
+  accept: function(obj) {
+    return KeycloakHelper._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(KeycloakHelper.prototype, {});
+    KeycloakHelper.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+KeycloakHelper._create = function(jdel) {
+  var obj = Object.create(KeycloakHelper.prototype, {});
+  KeycloakHelper.apply(obj, arguments);
+  return obj;
+}
 /**
  Get raw `id_token` string from the principal.
 
@@ -212,5 +231,4 @@ KeycloakHelper.parseToken = function(token) {
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = KeycloakHelper;

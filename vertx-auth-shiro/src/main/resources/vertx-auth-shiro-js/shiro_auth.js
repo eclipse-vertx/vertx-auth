@@ -46,7 +46,7 @@ var ShiroAuth = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_shiroAuth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
       if (ar.succeeded()) {
-        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+        arg1(utils.convReturnVertxGen(User, ar.result()), null);
       } else {
         arg1(null, ar.cause());
       }
@@ -64,7 +64,7 @@ var ShiroAuth = function(j_val) {
   this.setRolePrefix = function(rolePrefix) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'string') {
-      return utils.convReturnVertxGen(j_shiroAuth["setRolePrefix(java.lang.String)"](rolePrefix), ShiroAuth);
+      return utils.convReturnVertxGen(ShiroAuth, j_shiroAuth["setRolePrefix(java.lang.String)"](rolePrefix));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -74,6 +74,25 @@ var ShiroAuth = function(j_val) {
   this._jdel = j_shiroAuth;
 };
 
+ShiroAuth._jclass = utils.getJavaClass("io.vertx.ext.auth.shiro.ShiroAuth");
+ShiroAuth._jtype = {
+  accept: function(obj) {
+    return ShiroAuth._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(ShiroAuth.prototype, {});
+    ShiroAuth.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+ShiroAuth._create = function(jdel) {
+  var obj = Object.create(ShiroAuth.prototype, {});
+  ShiroAuth.apply(obj, arguments);
+  return obj;
+}
 /**
  Create a Shiro auth provider
 
@@ -86,11 +105,10 @@ var ShiroAuth = function(j_val) {
 ShiroAuth.create = function() {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthOptions)"](__args[0]._jdel, __args[1] != null ? new ShiroAuthOptions(new JsonObject(JSON.stringify(__args[1]))) : null), ShiroAuth);
+    return utils.convReturnVertxGen(ShiroAuth, JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthOptions)"](__args[0]._jdel, __args[1] != null ? new ShiroAuthOptions(new JsonObject(JSON.stringify(__args[1]))) : null));
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](__args[0]._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(__args[2])), ShiroAuth);
+    return utils.convReturnVertxGen(ShiroAuth, JShiroAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.shiro.ShiroAuthRealmType,io.vertx.core.json.JsonObject)"](__args[0]._jdel, io.vertx.ext.auth.shiro.ShiroAuthRealmType.valueOf(__args[1]), utils.convParamJsonObject(__args[2])));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = ShiroAuth;

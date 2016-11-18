@@ -47,7 +47,7 @@ var OAuth2Auth = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_oAuth2Auth["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(arg0), function(ar) {
       if (ar.succeeded()) {
-        arg1(utils.convReturnVertxGen(ar.result(), User), null);
+        arg1(utils.convReturnVertxGen(User, ar.result()), null);
       } else {
         arg1(null, ar.cause());
       }
@@ -81,7 +81,7 @@ var OAuth2Auth = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_oAuth2Auth["getToken(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(params), function(ar) {
       if (ar.succeeded()) {
-        handler(utils.convReturnVertxGen(ar.result(), AccessToken), null);
+        handler(utils.convReturnVertxGen(AccessToken, ar.result()), null);
       } else {
         handler(null, ar.cause());
       }
@@ -140,6 +140,25 @@ var OAuth2Auth = function(j_val) {
   this._jdel = j_oAuth2Auth;
 };
 
+OAuth2Auth._jclass = utils.getJavaClass("io.vertx.ext.auth.oauth2.OAuth2Auth");
+OAuth2Auth._jtype = {
+  accept: function(obj) {
+    return OAuth2Auth._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(OAuth2Auth.prototype, {});
+    OAuth2Auth.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+OAuth2Auth._create = function(jdel) {
+  var obj = Object.create(OAuth2Auth.prototype, {});
+  OAuth2Auth.apply(obj, arguments);
+  return obj;
+}
 /**
  Create a OAuth2 auth provider
 
@@ -152,7 +171,7 @@ var OAuth2Auth = function(j_val) {
 OAuth2Auth.createKeycloak = function(vertx, flow, config) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(JOAuth2Auth["createKeycloak(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(flow), utils.convParamJsonObject(config)), OAuth2Auth);
+    return utils.convReturnVertxGen(OAuth2Auth, JOAuth2Auth["createKeycloak(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](vertx._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(flow), utils.convParamJsonObject(config)));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -168,11 +187,10 @@ OAuth2Auth.createKeycloak = function(vertx, flow, config) {
 OAuth2Auth.create = function() {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
-    return utils.convReturnVertxGen(JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1])), OAuth2Auth);
+    return utils.convReturnVertxGen(OAuth2Auth, JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1])));
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.ext.auth.oauth2.OAuth2ClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), __args[2] != null ? new OAuth2ClientOptions(new JsonObject(JSON.stringify(__args[2]))) : null), OAuth2Auth);
+    return utils.convReturnVertxGen(OAuth2Auth, JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.ext.auth.oauth2.OAuth2ClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), __args[2] != null ? new OAuth2ClientOptions(new JsonObject(JSON.stringify(__args[2]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = OAuth2Auth;

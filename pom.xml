@@ -34,7 +34,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>21</version>
+    <version>23</version>
   </parent>
 
   <artifactId>vertx-auth</artifactId>
@@ -93,6 +93,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-lang-ruby</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-kotlin</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>

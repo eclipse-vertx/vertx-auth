@@ -59,7 +59,7 @@ var AuthProvider = function(j_val) {
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
       j_authProvider["authenticate(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(authInfo), function(ar) {
       if (ar.succeeded()) {
-        resultHandler(utils.convReturnVertxGen(ar.result(), User), null);
+        resultHandler(utils.convReturnVertxGen(User, ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -73,5 +73,23 @@ var AuthProvider = function(j_val) {
   this._jdel = j_authProvider;
 };
 
-// We export the Constructor function
+AuthProvider._jclass = utils.getJavaClass("io.vertx.ext.auth.AuthProvider");
+AuthProvider._jtype = {
+  accept: function(obj) {
+    return AuthProvider._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(AuthProvider.prototype, {});
+    AuthProvider.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+AuthProvider._create = function(jdel) {
+  var obj = Object.create(AuthProvider.prototype, {});
+  AuthProvider.apply(obj, arguments);
+  return obj;
+}
 module.exports = AuthProvider;

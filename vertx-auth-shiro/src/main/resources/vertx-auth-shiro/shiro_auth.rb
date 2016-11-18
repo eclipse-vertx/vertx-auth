@@ -17,6 +17,22 @@ module VertxAuthShiro
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == ShiroAuth
+    end
+    def @@j_api_type.wrap(obj)
+      ShiroAuth.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuthShiro::ShiroAuth.java_class
+    end
     # @param [Hash{String => Object}] arg0 
     # @yield 
     # @return [void]
@@ -24,7 +40,7 @@ module VertxAuthShiro
       if arg0.class == Hash && block_given?
         return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(arg0),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling authenticate(arg0)"
+      raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     #  Create a Shiro auth provider
     # @overload create(vertx,options)
@@ -41,7 +57,7 @@ module VertxAuthShiro
       elsif param_1.class.method_defined?(:j_del) && param_2.class == Symbol && param_3.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(param_2),::Vertx::Util::Utils.to_json_object(param_3)),::VertxAuthShiro::ShiroAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(param_1,param_2,param_3)"
+      raise ArgumentError, "Invalid arguments when calling create(#{param_1},#{param_2},#{param_3})"
     end
     #  Set the role prefix to distinguish from permissions when checking for isPermitted requests.
     # @param [String] rolePrefix a Prefix e.g.: "role:"
@@ -50,7 +66,7 @@ module VertxAuthShiro
       if rolePrefix.class == String && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setRolePrefix, [Java::java.lang.String.java_class]).call(rolePrefix),::VertxAuthShiro::ShiroAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling set_role_prefix(rolePrefix)"
+      raise ArgumentError, "Invalid arguments when calling set_role_prefix(#{rolePrefix})"
     end
   end
 end

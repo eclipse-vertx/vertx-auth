@@ -16,6 +16,22 @@ module VertxAuthCommon
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == User
+    end
+    def @@j_api_type.wrap(obj)
+      User.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuth::User.java_class
+    end
     #  Is the user authorised to
     # @param [String] authority the authority - what this really means is determined by the specific implementation. It might represent a permission to access a resource e.g. `printers:printer34` or it might represent authority to a role in a roles based model, e.g. `role:admin`.
     # @yield handler that will be called with an {AsyncResult} containing the value `true` if the they has the authority or `false` otherwise.
@@ -25,7 +41,7 @@ module VertxAuthCommon
         @j_del.java_method(:isAuthorised, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(authority,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling is_authorised(authority)"
+      raise ArgumentError, "Invalid arguments when calling is_authorised(#{authority})"
     end
     #  The User object will cache any authorities that it knows it has to avoid hitting the
     #  underlying auth provider each time.  Use this method if you want to clear this cache.
@@ -59,7 +75,7 @@ module VertxAuthCommon
       if authProvider.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:setAuthProvider, [Java::IoVertxExtAuth::AuthProvider.java_class]).call(authProvider.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling set_auth_provider(authProvider)"
+      raise ArgumentError, "Invalid arguments when calling set_auth_provider(#{authProvider})"
     end
   end
 end

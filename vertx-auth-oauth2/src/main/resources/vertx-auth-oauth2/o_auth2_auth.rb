@@ -18,6 +18,22 @@ module VertxAuthOauth2
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == OAuth2Auth
+    end
+    def @@j_api_type.wrap(obj)
+      OAuth2Auth.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtAuthOauth2::OAuth2Auth.java_class
+    end
     # @param [Hash{String => Object}] arg0 
     # @yield 
     # @return [void]
@@ -25,7 +41,7 @@ module VertxAuthOauth2
       if arg0.class == Hash && block_given?
         return @j_del.java_method(:authenticate, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(arg0),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthCommon::User) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling authenticate(arg0)"
+      raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     #  Create a OAuth2 auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance
@@ -36,7 +52,7 @@ module VertxAuthOauth2
       if vertx.class.method_defined?(:j_del) && flow.class == Symbol && config.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:createKeycloak, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthOauth2::OAuth2Auth)
       end
-      raise ArgumentError, "Invalid arguments when calling create_keycloak(vertx,flow,config)"
+      raise ArgumentError, "Invalid arguments when calling create_keycloak(#{vertx},#{flow},#{config})"
     end
     #  Create a OAuth2 auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance
@@ -49,7 +65,7 @@ module VertxAuthOauth2
       elsif vertx.class.method_defined?(:j_del) && flow.class == Symbol && config.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.new(::Vertx::Util::Utils.to_json_object(config))),::VertxAuthOauth2::OAuth2Auth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(vertx,flow,config)"
+      raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{flow},#{config})"
     end
     #  Generate a redirect URL to the authN/Z backend. It only applies to auth_code flow.
     # @param [Hash{String => Object}] params 
@@ -58,7 +74,7 @@ module VertxAuthOauth2
       if params.class == Hash && !block_given?
         return @j_del.java_method(:authorizeURL, [Java::IoVertxCoreJson::JsonObject.java_class]).call(::Vertx::Util::Utils.to_json_object(params))
       end
-      raise ArgumentError, "Invalid arguments when calling authorize_url(params)"
+      raise ArgumentError, "Invalid arguments when calling authorize_url(#{params})"
     end
     #  Returns the Access Token object.
     # @param [Hash{String => Object}] params - JSON with the options, each flow requires different options.
@@ -68,7 +84,7 @@ module VertxAuthOauth2
       if params.class == Hash && block_given?
         return @j_del.java_method(:getToken, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(params),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthOauth2::AccessToken) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_token(params)"
+      raise ArgumentError, "Invalid arguments when calling get_token(#{params})"
     end
     #  Call OAuth2 APIs.
     # @param [:OPTIONS,:GET,:HEAD,:POST,:PUT,:DELETE,:TRACE,:CONNECT,:PATCH,:OTHER] method HttpMethod
@@ -81,7 +97,7 @@ module VertxAuthOauth2
         @j_del.java_method(:api, [Java::IoVertxCoreHttp::HttpMethod.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::IoVertxCoreHttp::HttpMethod.valueOf(method),path,::Vertx::Util::Utils.to_json_object(params),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
         return self
       end
-      raise ArgumentError, "Invalid arguments when calling api(method,path,params)"
+      raise ArgumentError, "Invalid arguments when calling api(#{method},#{path},#{params})"
     end
     #  Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
     #  implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
