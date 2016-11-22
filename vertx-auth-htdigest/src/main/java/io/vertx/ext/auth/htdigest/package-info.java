@@ -18,7 +18,8 @@
  * == .htdigest Auth Provider implementation
  *
  * We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the .digest file format
- * to perform authentication.
+ * to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
+ * user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
  *
  * To use this project, add the following
  * dependency to the _dependencies_ section of your build descriptor:
@@ -69,7 +70,7 @@
  * The provider will load the specified .htdigest file at start time and will not watch for modifications. If you
  * require dynamic reloads, you will need to restart the provider.
  *
- * The implementation is does not have any other state than the digest file itself, this means that validation and
+ * The implementation does not have any other state than the digest file itself, this means that validation and
  * generation of `nonce` strings and counters must be handled outside this provider.
  *
  * Finally `auth-int` `qop` is not supported to avoid having to consume potential large blobs of data in order to
