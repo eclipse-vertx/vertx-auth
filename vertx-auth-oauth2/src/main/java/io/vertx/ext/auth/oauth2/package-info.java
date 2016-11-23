@@ -154,13 +154,6 @@
  * * Shopify {@link io.vertx.ext.auth.oauth2.providers.ShopifyAuth}
  * * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
  *
- * ==== Azure AD
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example15}
- * ----
- *
  * ==== JBoss Keycloak
  *
  * When using this Keycloak the provider has knowledge on how to parse access tokens and extract grants from inside.
