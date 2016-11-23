@@ -49,6 +49,12 @@ public class AuthCodeImpl implements OAuth2Flow {
     final JsonObject query = params.copy();
     final OAuth2ClientOptions config = provider.getConfig();
 
+    if (query.containsKey("scopes")) {
+      // scopes have been passed as a list so the provider must generate the correct string for it
+      query.put("scope", String.join(config.getScopeSeparator(), query.getJsonArray("scopes").getList()));
+      query.remove("scopes");
+    }
+
     query.put("response_type", "code");
     query.put("client_id", config.getClientID());
 
