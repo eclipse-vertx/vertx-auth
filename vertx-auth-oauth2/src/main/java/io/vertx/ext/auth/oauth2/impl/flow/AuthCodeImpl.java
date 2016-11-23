@@ -42,6 +42,7 @@ public class AuthCodeImpl implements OAuth2Flow {
    * Redirect the user to the authorization page
    * @param params  - redirectURI: A String that represents the registered application URI where the user is redirected after authorization.
    *                  scope:       A String that represents the application privileges.
+   *                  scopes:      A array of strings that will encoded as a single string "scope" following the provider requirements
    *                  state:       A String that represents an optional opaque value used by the client to maintain state between the request and the callback.
    */
   @Override
