@@ -140,40 +140,19 @@
  *
  * === Example configuration for common OAuth2 providers
  *
- * ==== Google
+ * For convenience there are several helpers to assist your with your configuration. Currently we provide:
  *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example7}
- * ----
- *
- * ==== GitHub
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example8}
- * ----
- *
- * ==== Linkedin
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example9}
- * ----
- *
- * ==== Twitter
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example10}
- * ----
- *
- * ==== Facebook
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example11}
- * ----
+ * * App.net {@link io.vertx.ext.auth.oauth2.providers.AppNetAuth}
+ * * Azure Active Directory {@link io.vertx.ext.auth.oauth2.providers.AzureADAuth}
+ * * Facebook {@link io.vertx.ext.auth.oauth2.providers.FacebookAuth}
+ * * Github {@link io.vertx.ext.auth.oauth2.providers.GithubAuth}
+ * * Google {@link io.vertx.ext.auth.oauth2.providers.GoogleAuth}
+ * * Instagram {@link io.vertx.ext.auth.oauth2.providers.InstagramAuth}
+ * * Keycloak {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth}
+ * * LinkedIn {@link io.vertx.ext.auth.oauth2.providers.LinkedInAuth}
+ * * Salesforce {@link io.vertx.ext.auth.oauth2.providers.SalesforceAuth}
+ * * Shopify {@link io.vertx.ext.auth.oauth2.providers.ShopifyAuth}
+ * * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
  *
  * ==== Azure AD
  *
@@ -184,15 +163,7 @@
  *
  * ==== JBoss Keycloak
  *
- * When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
- * web UI and use it as the OAuth2 config with the helper class {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example12}
- * ----
- *
- * When using this approach the provider has knowledge on how to parse access tokens and extract grants from inside.
+ * When using this Keycloak the provider has knowledge on how to parse access tokens and extract grants from inside.
  * This information is quite valuable since it allows to do authorization at the API level, for example:
  *
  * [source,$lang]

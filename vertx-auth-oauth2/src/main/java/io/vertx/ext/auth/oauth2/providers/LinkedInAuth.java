@@ -14,6 +14,12 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 @VertxGen
 public interface LinkedInAuth {
 
+  /**
+   * Create a OAuth2Auth provider for LinkedIn
+   *
+   * @param clientId the client id given to you by LinkedIn
+   * @param clientSecret the client secret given to you by LinkedIn
+   */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret) {
     return
       OAuth2Auth.create(vertx, flow, new OAuth2ClientOptions()

@@ -14,6 +14,12 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 @VertxGen
 public interface FacebookAuth {
 
+  /**
+   * Create a OAuth2Auth provider for Facebook
+   *
+   * @param clientId the client id given to you by Facebook
+   * @param clientSecret the client secret given to you by Facebook
+   */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret) {
     return
       OAuth2Auth.create(vertx, flow, new OAuth2ClientOptions()

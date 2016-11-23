@@ -15,6 +15,11 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 @VertxGen
 public interface KeycloakAuth {
 
+  /**
+   * Create a OAuth2Auth provider for Keycloak
+   *
+   * @param config the json config file exported from Keycloak admin console
+   */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, JsonObject config) {
     final OAuth2ClientOptions options = new OAuth2ClientOptions();
 

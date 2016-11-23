@@ -14,6 +14,13 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 @VertxGen
 public interface AzureADAuth {
 
+  /**
+   * Create a OAuth2Auth provider for Microsoft Azure Active Directory
+   *
+   * @param clientId the client id given to you by Azure
+   * @param clientSecret the client secret given to you by Azure
+   * @param guid the guid of your application given to you by Azure
+   */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret, String guid) {
     return
       OAuth2Auth.create(vertx, flow, new OAuth2ClientOptions()
