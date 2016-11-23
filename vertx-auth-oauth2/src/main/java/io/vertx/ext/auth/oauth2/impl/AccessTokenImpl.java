@@ -74,7 +74,14 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   private void init(JsonObject json) {
     if (json.containsKey("expires_in")) {
       json = json.copy();
-      json.put("expires_at", System.currentTimeMillis() + 1000 * json.getLong("expires_in"));
+      Long expiresIn;
+      try {
+        expiresIn = json.getLong("expires_in");
+      } catch (ClassCastException e) {
+        // for some reason someone decided to send a number as a String...
+        expiresIn = Long.valueOf(json.getString("expires_in"));
+      }
+      json.put("expires_at", System.currentTimeMillis() + 1000 * expiresIn);
     }
 
     this.token = json;
