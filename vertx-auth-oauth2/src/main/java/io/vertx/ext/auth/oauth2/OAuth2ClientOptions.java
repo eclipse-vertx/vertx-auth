@@ -55,6 +55,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private JsonObject headers;
   private String publicKey;
   private boolean jwtToken;
+  // extra parameters to be added while requesting a token
+  private JsonObject extraParams;
 
   public String getSite() {
     return site;
@@ -88,6 +90,13 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientSecret = other.getClientSecret();
     publicKey = other.getPublicKey();
     logoutPath = other.getLogoutPath();
+    // extras
+    final JsonObject obj = other.getExtraParameters();
+    if (obj != null) {
+      extraParams = obj.copy();
+    } else {
+      extraParams = null;
+    }
   }
 
   private void init() {
@@ -98,6 +107,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtToken = JWT_TOKEN;
+    extraParams = null;
   }
 
   /**
@@ -239,6 +249,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setScopeSeparator(String scopeSeparator) {
     this.scopeSeparator = scopeSeparator;
+    return this;
+  }
+
+  public JsonObject getExtraParameters() {
+    return extraParams;
+  }
+
+  public OAuth2ClientOptions setExtraParameters(JsonObject extraParams) {
+    this.extraParams = extraParams;
     return this;
   }
 }

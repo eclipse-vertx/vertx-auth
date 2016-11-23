@@ -2,6 +2,7 @@ package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -17,9 +18,9 @@ public interface AzureADAuth {
   /**
    * Create a OAuth2Auth provider for Microsoft Azure Active Directory
    *
-   * @param clientId the client id given to you by Azure
+   * @param clientId     the client id given to you by Azure
    * @param clientSecret the client secret given to you by Azure
-   * @param guid the guid of your application given to you by Azure
+   * @param guid         the guid of your application given to you by Azure
    */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret, String guid) {
     return
@@ -29,6 +30,8 @@ public interface AzureADAuth {
         .setAuthorizationPath("/oauth2/authorize")
         .setScopeSeparator(",")
         .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setClientSecret(clientSecret)
+        .setExtraParameters(
+          new JsonObject().put("resource", guid)));
   }
 }
