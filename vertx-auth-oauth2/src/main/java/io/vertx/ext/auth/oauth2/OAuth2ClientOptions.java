@@ -36,10 +36,12 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final boolean JWT_TOKEN = false;
+  private static final String SCOPE_SEPARATOR = " ";
 
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
+  private String scopeSeparator;
   // this is an openid-connect extension
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
@@ -77,6 +79,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
     revocationPath = other.getRevocationPath();
+    scopeSeparator = other.getScopeSeparator();
     useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
     clientSecretParameterName = other.getClientSecretParameterName();
     // specialization
@@ -91,6 +94,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
     revocationPath = REVOKATION_PATH;
+    scopeSeparator = SCOPE_SEPARATOR;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtToken = JWT_TOKEN;
@@ -226,6 +230,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setUserInfoPath(String userInfoPath) {
     this.userInfoPath = userInfoPath;
+    return this;
+  }
+
+  public String getScopeSeparator() {
+    return scopeSeparator;
+  }
+
+  public OAuth2ClientOptions setScopeSeparator(String scopeSeparator) {
+    this.scopeSeparator = scopeSeparator;
     return this;
   }
 }

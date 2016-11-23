@@ -35,12 +35,15 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 public interface OAuth2Auth extends AuthProvider {
 
   /**
+   * @deprecated You should use the provider helper {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth} instead.
+   *
    * Create a OAuth2 auth provider
    *
    * @param vertx the Vertx instance
    * @param config  the config as exported from the admin console
    * @return the auth provider
    */
+  @Deprecated
   static OAuth2Auth createKeycloak(Vertx vertx, OAuth2FlowType flow, JsonObject config) {
 
     final OAuth2ClientOptions options = new OAuth2ClientOptions();
@@ -139,4 +142,16 @@ public interface OAuth2Auth extends AuthProvider {
    * @return true if openid-connect is used.
    */
   boolean hasJWTToken();
+
+
+  /**
+   * Returns the scope separator.
+   *
+   * The RFC 6749 states that a scope is expressed as a set of case-sensitive and space-delimited strings, however
+   * vendors tend not to agree on this and we see the following cases being used: space, plus sign, comma.
+   *
+   * @return what value was used in the configuration of the object, falling back to the default value
+   * which is a space.
+   */
+  String getScopeSeparator();
 }

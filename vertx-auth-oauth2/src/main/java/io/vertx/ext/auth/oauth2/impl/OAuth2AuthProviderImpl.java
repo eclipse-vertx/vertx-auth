@@ -96,4 +96,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   public boolean hasJWTToken() {
     return config.isJwtToken();
   }
+
+  @Override
+  public String getScopeSeparator() {
+    final String sep = config.getScopeSeparator();
+    return sep == null ? " " : sep;
+  }
 }

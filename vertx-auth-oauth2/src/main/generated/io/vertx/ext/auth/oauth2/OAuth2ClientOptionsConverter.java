@@ -54,6 +54,9 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("revocationPath") instanceof String) {
       obj.setRevocationPath((String)json.getValue("revocationPath"));
     }
+    if (json.getValue("scopeSeparator") instanceof String) {
+      obj.setScopeSeparator((String)json.getValue("scopeSeparator"));
+    }
     if (json.getValue("site") instanceof String) {
       obj.setSite((String)json.getValue("site"));
     }
@@ -96,6 +99,9 @@ public class OAuth2ClientOptionsConverter {
     }
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());
+    }
+    if (obj.getScopeSeparator() != null) {
+      json.put("scopeSeparator", obj.getScopeSeparator());
     }
     if (obj.getSite() != null) {
       json.put("site", obj.getSite());
