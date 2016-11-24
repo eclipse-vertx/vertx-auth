@@ -20,9 +20,9 @@ public interface LinkedInAuth {
    * @param clientId the client id given to you by LinkedIn
    * @param clientSecret the client secret given to you by LinkedIn
    */
-  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret) {
+  static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret) {
     return
-      OAuth2Auth.create(vertx, flow, new OAuth2ClientOptions()
+      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
         .setSite("https://www.linkedin.com")
         .setTokenPath("/uas/oauth2/accessToken")
         .setAuthorizationPath("/uas/oauth2/authorization")

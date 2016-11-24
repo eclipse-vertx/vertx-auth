@@ -20,9 +20,9 @@ public interface AppNetAuth {
    * @param clientId the client id given to you by App.net
    * @param clientSecret the client secret given to you by App.net
    */
-  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret) {
+  static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret) {
     return
-      OAuth2Auth.create(vertx, flow, new OAuth2ClientOptions()
+      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
         .setSite("https://account.app.net")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authenticate")

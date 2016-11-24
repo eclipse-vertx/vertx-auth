@@ -43,7 +43,6 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
-    #  Create a OAuth2 auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance
     # @param [:AUTH_CODE,:CLIENT,:PASSWORD] flow 
     # @param [Hash{String => Object}] config the config as exported from the admin console
@@ -113,6 +112,17 @@ module VertxAuthOauth2
         return @j_del.java_method(:hasJWTToken, []).call()
       end
       raise ArgumentError, "Invalid arguments when calling has_jwt_token?()"
+    end
+    #  Returns the scope separator.
+    # 
+    #  The RFC 6749 states that a scope is expressed as a set of case-sensitive and space-delimited strings, however
+    #  vendors tend not to agree on this and we see the following cases being used: space, plus sign, comma.
+    # @return [String] what value was used in the configuration of the object, falling back to the default value which is a space.
+    def get_scope_separator
+      if !block_given?
+        return @j_del.java_method(:getScopeSeparator, []).call()
+      end
+      raise ArgumentError, "Invalid arguments when calling get_scope_separator()"
     end
   end
 end

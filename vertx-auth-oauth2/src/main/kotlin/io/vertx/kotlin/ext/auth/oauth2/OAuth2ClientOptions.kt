@@ -12,6 +12,7 @@ fun OAuth2ClientOptions(
   connectTimeout: Int? = null,
   defaultHost: String? = null,
   defaultPort: Int? = null,
+  extraParameters: io.vertx.core.json.JsonObject? = null,
   headers: io.vertx.core.json.JsonObject? = null,
   http2ClearTextUpgrade: Boolean? = null,
   http2ConnectionWindowSize: Int? = null,
@@ -37,6 +38,7 @@ fun OAuth2ClientOptions(
   receiveBufferSize: Int? = null,
   reuseAddress: Boolean? = null,
   revocationPath: String? = null,
+  scopeSeparator: String? = null,
   sendBufferSize: Int? = null,
   site: String? = null,
   soLinger: Int? = null,
@@ -84,6 +86,10 @@ fun OAuth2ClientOptions(
 
   if (defaultPort != null) {
     this.defaultPort = defaultPort
+  }
+
+  if (extraParameters != null) {
+    this.extraParameters = extraParameters
   }
 
   if (headers != null) {
@@ -184,6 +190,10 @@ fun OAuth2ClientOptions(
 
   if (revocationPath != null) {
     this.revocationPath = revocationPath
+  }
+
+  if (scopeSeparator != null) {
+    this.scopeSeparator = scopeSeparator
   }
 
   if (sendBufferSize != null) {

@@ -22,9 +22,9 @@ public interface AzureADAuth {
    * @param clientSecret the client secret given to you by Azure
    * @param guid         the guid of your application given to you by Azure
    */
-  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret, String guid) {
+  static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, String guid) {
     return
-      OAuth2Auth.create(vertx, flow, new OAuth2ClientOptions()
+      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
         .setSite("https://login.windows.net/" + guid)
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
