@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.oauth2.impl;
 
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -67,7 +68,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return vertx;
   }
 
-  public TokenVerifier getVerifier() {
+  TokenVerifier getVerifier() {
     return verifier;
   }
 

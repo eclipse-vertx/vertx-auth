@@ -144,14 +144,20 @@
  *
  * * App.net {@link io.vertx.ext.auth.oauth2.providers.AppNetAuth}
  * * Azure Active Directory {@link io.vertx.ext.auth.oauth2.providers.AzureADAuth}
+ * * Box.com {@link io.vertx.ext.auth.oauth2.providers.BoxAuth}
+ * * Dropbox {@link io.vertx.ext.auth.oauth2.providers.DropboxAuth}
  * * Facebook {@link io.vertx.ext.auth.oauth2.providers.FacebookAuth}
+ * * Foursquare {@link io.vertx.ext.auth.oauth2.providers.FoursquareAuth}
  * * Github {@link io.vertx.ext.auth.oauth2.providers.GithubAuth}
  * * Google {@link io.vertx.ext.auth.oauth2.providers.GoogleAuth}
  * * Instagram {@link io.vertx.ext.auth.oauth2.providers.InstagramAuth}
  * * Keycloak {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth}
  * * LinkedIn {@link io.vertx.ext.auth.oauth2.providers.LinkedInAuth}
+ * * Mailchimp {@link io.vertx.ext.auth.oauth2.providers.MailchimpAuth}
  * * Salesforce {@link io.vertx.ext.auth.oauth2.providers.SalesforceAuth}
  * * Shopify {@link io.vertx.ext.auth.oauth2.providers.ShopifyAuth}
+ * * Soundcloud {@link io.vertx.ext.auth.oauth2.providers.SoundcloudAuth}
+ * * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
  * * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
  *
  * ==== JBoss Keycloak

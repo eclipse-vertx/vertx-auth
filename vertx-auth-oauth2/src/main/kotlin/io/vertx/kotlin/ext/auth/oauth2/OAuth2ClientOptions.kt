@@ -26,6 +26,8 @@ fun OAuth2ClientOptions(
   logActivity: Boolean? = null,
   logoutPath: String? = null,
   maxChunkSize: Int? = null,
+  maxHeaderSize: Int? = null,
+  maxInitialLineLength: Int? = null,
   maxPoolSize: Int? = null,
   maxWaitQueueSize: Int? = null,
   maxWebsocketFrameSize: Int? = null,
@@ -142,6 +144,14 @@ fun OAuth2ClientOptions(
 
   if (maxChunkSize != null) {
     this.maxChunkSize = maxChunkSize
+  }
+
+  if (maxHeaderSize != null) {
+    this.maxHeaderSize = maxHeaderSize
+  }
+
+  if (maxInitialLineLength != null) {
+    this.maxInitialLineLength = maxInitialLineLength
   }
 
   if (maxPoolSize != null) {

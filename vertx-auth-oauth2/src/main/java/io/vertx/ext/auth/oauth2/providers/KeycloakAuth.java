@@ -20,7 +20,7 @@ public interface KeycloakAuth {
    *
    * @param config the json config file exported from Keycloak admin console
    */
-  static OAuth2Auth create(Vertx vertx, JsonObject config) {
+  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, JsonObject config) {
     final OAuth2ClientOptions options = new OAuth2ClientOptions();
 
     // keycloak conversion to oauth2 options
@@ -55,6 +55,6 @@ public interface KeycloakAuth {
       options.setJwtToken(true);
     }
 
-    return OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, options);
+    return OAuth2Auth.create(vertx, flow, options);
   }
 }
