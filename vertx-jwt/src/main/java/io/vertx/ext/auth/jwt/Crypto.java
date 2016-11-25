@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.jwt.impl;
+package io.vertx.ext.auth.jwt;
 
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -56,7 +56,7 @@ final class CryptoMac implements Crypto {
 }
 
 /**
- * Signature based Crypto implementation
+ * Public Key based Crypto implementation
  * @author Paulo Lopes
  */
 final class CryptoPublicKey implements Crypto {
@@ -95,6 +95,45 @@ final class CryptoPublicKey implements Crypto {
   }
 }
 
+/**
+ * Public Key based Crypto implementation
+ * @author Paulo Lopes
+ */
+final class CryptoPrivateKey implements Crypto {
+  private final Signature sig;
+  private final PrivateKey privateKey;
+
+  CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
+    this.privateKey = privateKey;
+
+    Signature signature;
+    try {
+      // use default
+      signature = Signature.getInstance(algorithm);
+    } catch (NoSuchAlgorithmException e) {
+      // error
+      throw new RuntimeException(e);
+    }
+
+    this.sig = signature;
+  }
+
+  @Override
+  public synchronized byte[] sign(byte[] payload) {
+    try {
+      sig.initSign(privateKey);
+      sig.update(payload);
+      return sig.sign();
+    } catch (SignatureException | InvalidKeyException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public synchronized boolean verify(byte[] signature, byte[] payload) {
+    throw new RuntimeException("CryptoPrivateKey cannot verify");
+  }
+}
 
 /**
  * Signature based Crypto implementation

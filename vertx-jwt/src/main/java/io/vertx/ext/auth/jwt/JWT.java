@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.jwt.impl;
+package io.vertx.ext.auth.jwt;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -25,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
@@ -50,7 +52,7 @@ public final class JWT {
 
     if (!unsecure) {
       // load MACs
-      for (String alg : Arrays.<String>asList("HS256", "HS384", "HS512")) {
+      for (String alg : Arrays.asList("HS256", "HS384", "HS512")) {
         try {
           Mac mac = getMac(keyStore, keyStorePassword, alg);
           if (mac != null) {
@@ -73,7 +75,7 @@ public final class JWT {
         put("ES512", "SHA512withECDSA");
       }};
 
-      for (String alg : Arrays.<String>asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
+      for (String alg : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
         try {
           X509Certificate certificate = getCertificate(keyStore, alg);
           PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
@@ -95,17 +97,22 @@ public final class JWT {
     cryptoMap = Collections.unmodifiableMap(tmp);
   }
 
-  public JWT(String publicKey) {
+  public JWT(String key, boolean keyPrivate) {
     Map<String, Crypto> tmp = new HashMap<>();
 
-    unsecure = publicKey == null;
+    unsecure = key == null;
 
     if (!unsecure) {
       // load SIGNATURE (Read Only)
       try {
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        tmp.put("RS256", new CryptoPublicKey("SHA256withRSA",  kf.generatePublic(spec)));
+        if (keyPrivate) {
+          KeySpec spec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(key));
+          tmp.put("RS256", new CryptoPrivateKey("SHA256withRSA",  kf.generatePrivate(spec)));
+        } else {
+          X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(key));
+          tmp.put("RS256", new CryptoPublicKey("SHA256withRSA",  kf.generatePublic(spec)));
+        }
       } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
         e.printStackTrace();
         log.warn("RS256 not supported");
@@ -128,7 +135,7 @@ public final class JWT {
   private Mac getMac(final KeyStore keyStore, final char[] keyStorePassword, final String alias) {
     try {
       final Key secretKey = keyStore.getKey(alias, keyStorePassword);
-      
+
       // key store does not have the requested algorithm
       if (secretKey == null) {
         return null;
@@ -270,5 +277,13 @@ public final class JWT {
 
   private static String base64urlEncode(byte[] bytes) {
     return Base64.getUrlEncoder().encodeToString(bytes);
+  }
+
+  public boolean isUnsecure() {
+    return unsecure;
+  }
+
+  public Collection<String> availableAlgorithms() {
+    return cryptoMap.keySet();
   }
 }

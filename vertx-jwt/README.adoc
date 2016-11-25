@@ -1,0 +1,4 @@
+# Vert.x JWT
+
+This module contains contains the JWT implementation of the RFC it is not to be considered a component but to be reused
+by the JWT auth and OAuth2 auth providers.
