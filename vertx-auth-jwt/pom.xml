@@ -36,6 +36,11 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-jwt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   <build>
 

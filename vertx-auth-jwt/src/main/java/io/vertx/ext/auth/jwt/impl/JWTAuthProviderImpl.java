@@ -24,6 +24,7 @@ import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jwt.JWT;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 
@@ -70,7 +71,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
       } else {
         // in the case of not having a key store we will try to load a public key in pem format
         // this is how keycloak works as an example.
-        this.jwt = new JWT(config.getString("public-key"));
+        this.jwt = new JWT(config.getString("public-key"), false);
       }
 
     } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException e) {
