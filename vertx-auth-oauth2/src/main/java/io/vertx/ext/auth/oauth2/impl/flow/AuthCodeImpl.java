@@ -83,7 +83,11 @@ public class AuthCodeImpl implements OAuth2Flow {
 
     api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
       if (res.succeeded()) {
-        handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
+        try {
+          handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
       } else {
         handler.handle(Future.failedFuture(res.cause()));
       }

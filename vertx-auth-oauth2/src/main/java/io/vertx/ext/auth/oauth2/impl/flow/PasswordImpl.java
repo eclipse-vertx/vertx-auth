@@ -50,9 +50,20 @@ public class PasswordImpl implements OAuth2Flow {
     final JsonObject query = params.copy();
     query.put("grant_type", "password");
 
+    final JsonObject extraParameters = provider.getConfig().getExtraParameters();
+
+    // if the provider needs extra parameters they are merged here
+    if (extraParameters != null) {
+      query.mergeIn(extraParameters);
+    }
+
     api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
       if (res.succeeded()) {
-        handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
+        try {
+          handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
       } else {
         handler.handle(Future.failedFuture(res.cause()));
       }

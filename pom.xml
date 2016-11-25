@@ -26,8 +26,9 @@
     <module>vertx-auth-common</module>
     <module>vertx-auth-shiro</module>
     <module>vertx-auth-jdbc</module>
-    <module>vertx-auth-jwt</module>
     <module>vertx-auth-mongo</module>
+    <module>vertx-jwt</module>
+    <module>vertx-auth-jwt</module>
     <module>vertx-auth-oauth2</module>
   </modules>
 

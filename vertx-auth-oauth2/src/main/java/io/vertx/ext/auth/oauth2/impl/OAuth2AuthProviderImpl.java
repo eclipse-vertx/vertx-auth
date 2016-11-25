@@ -22,12 +22,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jwt.JWT;
 import io.vertx.ext.auth.oauth2.*;
-import io.vertx.ext.auth.oauth2.impl.crypto.TokenVerifier;
-import io.vertx.ext.auth.oauth2.impl.flow.OAuth2Flow;
-import io.vertx.ext.auth.oauth2.impl.flow.AuthCodeImpl;
-import io.vertx.ext.auth.oauth2.impl.flow.ClientImpl;
-import io.vertx.ext.auth.oauth2.impl.flow.PasswordImpl;
+import io.vertx.ext.auth.oauth2.impl.flow.*;
 
 /**
  * @author Paulo Lopes
@@ -36,24 +33,30 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private final Vertx vertx;
   private final OAuth2ClientOptions config;
-  private final TokenVerifier verifier;
+  private final JWT jwt;
 
   private final OAuth2Flow flow;
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
-    verifier = new TokenVerifier(config.getPublicKey());
 
     switch (flow) {
       case AUTH_CODE:
+        jwt = new JWT(config.getPublicKey(), false);
         this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
+        jwt = new JWT(config.getPublicKey(), false);
         this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
+        jwt = new JWT(config.getPublicKey(), false);
         this.flow = new PasswordImpl(this);
+        break;
+      case AUTH_JWT:
+        jwt = new JWT(config.getPrivateKey(), true);
+        this.flow = new AuthJWTImpl(this);
         break;
       default:
         throw new IllegalArgumentException("Invalid oauth2 flow type: " + flow);
@@ -68,13 +71,17 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return vertx;
   }
 
-  TokenVerifier getVerifier() {
-    return verifier;
+  public JsonObject decode(String token) {
+    return jwt.decode(token);
+  }
+
+  public String sign(JsonObject payload) {
+    return jwt.sign(payload, config.getExtraParameters());
   }
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-
+    resultHandler.handle(Future.failedFuture("JWT cannot be used for AuthN"));
   }
 
   @Override

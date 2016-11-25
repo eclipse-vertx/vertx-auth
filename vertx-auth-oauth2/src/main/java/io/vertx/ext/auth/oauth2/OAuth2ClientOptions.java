@@ -54,6 +54,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String userAgent;
   private JsonObject headers;
   private String publicKey;
+  private String privateKey;
   private boolean jwtToken;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
@@ -89,6 +90,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
     publicKey = other.getPublicKey();
+    privateKey = other.getPrivateKey();
     logoutPath = other.getLogoutPath();
     // extras
     final JsonObject obj = other.getExtraParameters();
@@ -213,6 +215,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setPublicKey(String publicKey) {
     this.publicKey = publicKey;
+    return this;
+  }
+
+  public String getPrivateKey() {
+    return privateKey;
+  }
+
+  public OAuth2ClientOptions setPrivateKey(String privateKey) {
+    this.privateKey = privateKey;
     return this;
   }
 

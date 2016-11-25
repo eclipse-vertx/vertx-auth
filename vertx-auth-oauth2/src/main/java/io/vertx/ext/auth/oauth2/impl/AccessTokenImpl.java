@@ -88,7 +88,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
     // try to parse the access_token
     if (provider.getConfig().isJwtToken() && json.containsKey("access_token")) {
-      content = provider.getVerifier().verify(json.getString("access_token"));
+      content = provider.decode(json.getString("access_token"));
     }
   }
 

@@ -80,6 +80,10 @@
  *
  * For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4[Oauth2 specification, section 4.4].
  *
+ * === Extensions
+ *
+ * The provider supports RFC7523 an extension to allow server to server authorization based on JWT.
+ *
  * === Getting Started
  *
  * An example on how to use this provider and authenticate with GitHub can be implemented as:
@@ -177,6 +181,12 @@
  * ----
  * {@link examples.AuthOAuth2Examples#example14}
  * ----
+ *
+ * ==== Google Server to Server
+ *
+ * The provider also supports Server to Server or the RFC7523 extension. This is a feature present on Google with their
+ * service account.
+ *
  *
  */
 @Document(fileName = "index.adoc")
