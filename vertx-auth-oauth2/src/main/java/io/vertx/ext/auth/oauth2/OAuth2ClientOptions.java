@@ -76,6 +76,16 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    *
    * @param other the options to copy
    */
+  public OAuth2ClientOptions(HttpClientOptions other) {
+    super(other);
+    init();
+  }
+
+  /**
+   * Copy constructor
+   *
+   * @param other the options to copy
+   */
   public OAuth2ClientOptions(OAuth2ClientOptions other) {
     super(other);
     // defaults
