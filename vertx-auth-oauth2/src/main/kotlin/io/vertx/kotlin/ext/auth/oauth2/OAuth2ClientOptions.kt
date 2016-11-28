@@ -34,6 +34,7 @@ fun OAuth2ClientOptions(
   metricsName: String? = null,
   pipelining: Boolean? = null,
   pipeliningLimit: Int? = null,
+  privateKey: String? = null,
   protocolVersion: HttpVersion? = null,
   proxyOptions: io.vertx.core.net.ProxyOptions? = null,
   publicKey: String? = null,
@@ -176,6 +177,10 @@ fun OAuth2ClientOptions(
 
   if (pipeliningLimit != null) {
     this.pipeliningLimit = pipeliningLimit
+  }
+
+  if (privateKey != null) {
+    this.privateKey = privateKey
   }
 
   if (protocolVersion != null) {

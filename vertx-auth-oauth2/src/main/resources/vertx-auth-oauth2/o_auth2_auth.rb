@@ -44,7 +44,7 @@ module VertxAuthOauth2
       raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     # @param [::Vertx::Vertx] vertx the Vertx instance
-    # @param [:AUTH_CODE,:CLIENT,:PASSWORD] flow 
+    # @param [:AUTH_CODE,:CLIENT,:PASSWORD,:AUTH_JWT] flow 
     # @param [Hash{String => Object}] config the config as exported from the admin console
     # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
     def self.create_keycloak(vertx=nil,flow=nil,config=nil)
@@ -55,7 +55,7 @@ module VertxAuthOauth2
     end
     #  Create a OAuth2 auth provider
     # @param [::Vertx::Vertx] vertx the Vertx instance
-    # @param [:AUTH_CODE,:CLIENT,:PASSWORD] flow 
+    # @param [:AUTH_CODE,:CLIENT,:PASSWORD,:AUTH_JWT] flow 
     # @param [Hash] config the config
     # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
     def self.create(vertx=nil,flow=nil,config=nil)
