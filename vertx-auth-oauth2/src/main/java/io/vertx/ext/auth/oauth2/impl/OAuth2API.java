@@ -19,10 +19,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -50,6 +47,18 @@ public class OAuth2API {
     }
 
     call(provider, method, url, params, callback);
+  }
+
+  public static void post(OAuth2AuthProviderImpl provider, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+    final String url;
+
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      url = path ;
+    } else {
+      url = provider.getConfig().getSite() + path ;
+    }
+
+    call(provider, url, params, callback);
   }
 
   private static void call(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
@@ -96,6 +105,50 @@ public class OAuth2API {
       }
     }
 
+    final HttpClientRequest request = makeRequest(provider, uri, callback);
+
+    // write the headers
+    for (Map.Entry<String, ?> kv : headers) {
+      request.putHeader(kv.getKey(), kv.getValue().toString());
+    }
+
+    // specific UA
+    if (config.getUserAgent() != null) {
+      request.putHeader("User-Agent", config.getUserAgent());
+    }
+
+    // specify preferred content type
+    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    if (form != null) {
+      request.putHeader("Content-Type", "application/x-www-form-urlencoded");
+      final String payload = stringify(form);
+
+      request.putHeader("Content-Length", Integer.toString(payload.length()));
+      request.write(payload);
+    }
+
+    // Make sure the request is ended when you're done with it
+    request.end();
+  }
+
+  private static void call(OAuth2AuthProviderImpl provider, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+    JsonObject form = params.copy();
+
+    final HttpClientRequest request = makeRequest(provider, uri, callback);
+
+    // specify preferred content type
+    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+    request.putHeader("Content-Type", "application/x-www-form-urlencoded");
+    final String payload = stringify(form);
+    request.putHeader("Content-Length", Integer.toString(payload.length()));
+    request.write(payload);
+
+    // Make sure the request is ended when you're done with it
+    request.end();
+  }
+
+  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, String uri, final Handler<AsyncResult<JsonObject>> callback) {
     HttpClient client;
 
     try {
@@ -112,16 +165,16 @@ public class OAuth2API {
         }
       }
 
-      client = provider.getVertx().createHttpClient(new HttpClientOptions(config)
-              .setSsl(isSecure)
-              .setDefaultHost(host)
-              .setDefaultPort(port));
+      client = provider.getVertx().createHttpClient(new HttpClientOptions(provider.getConfig())
+        .setSsl(isSecure)
+        .setDefaultHost(host)
+        .setDefaultPort(port));
 
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
 
-    HttpClientRequest request = client.request(method, uri, resp -> {
+    final HttpClientRequest request = client.request(HttpMethod.POST, uri, resp -> {
       resp.exceptionHandler(t -> {
         callback.handle(Future.failedFuture(t));
         client.close();
@@ -181,29 +234,7 @@ public class OAuth2API {
       client.close();
     });
 
-    // write the headers
-    for (Map.Entry<String, ?> kv : headers) {
-      request.putHeader(kv.getKey(), kv.getValue().toString());
-    }
-
-    // specific UA
-    if (config.getUserAgent() != null) {
-      request.putHeader("User-Agent", config.getUserAgent());
-    }
-
-    // specify preferred content type
-    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-    if (form != null) {
-      request.putHeader("Content-Type", "application/x-www-form-urlencoded");
-      final String payload = stringify(form);
-
-      request.putHeader("Content-Length", Integer.toString(payload.length()));
-      request.write(payload);
-    }
-
-    // Make sure the request is ended when you're done with it
-    request.end();
+    return request;
   }
 
   private static void handleToken(final int statusCode, final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {

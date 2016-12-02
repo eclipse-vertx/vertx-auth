@@ -18,11 +18,9 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
@@ -31,33 +29,28 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class ClientImpl implements OAuth2Flow {
+public class AuthJWTImpl implements OAuth2Flow {
 
   private final OAuth2AuthProviderImpl provider;
 
-  public ClientImpl(OAuth2AuthProviderImpl provider) {
+  public AuthJWTImpl(OAuth2AuthProviderImpl provider) {
     this.provider = provider;
   }
 
   /**
    * Returns the Access Token object.
    *
-   * @param params - scope: A String that represents the application privileges.
+   * @param params - jwt: a JWT to be traded for a token
    * @param handler - The handler returning the results.
    */
   @Override
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
-    final JsonObject query = params.copy();
-    query.put("grant_type", "client_credentials");
 
-    final JsonObject extraParameters = provider.getConfig().getExtraParameters();
+    final JsonObject query = new JsonObject()
+      .put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+      .put("assertion", provider.sign(params));
 
-    // if the provider needs extra parameters they are merged here
-    if (extraParameters != null) {
-      query.mergeIn(extraParameters);
-    }
-
-    api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
+    post(provider, provider.getConfig().getTokenPath(), query, res -> {
       if (res.succeeded()) {
         try {
           handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));

@@ -42,12 +42,19 @@ public class AuthCodeImpl implements OAuth2Flow {
    * Redirect the user to the authorization page
    * @param params  - redirectURI: A String that represents the registered application URI where the user is redirected after authorization.
    *                  scope:       A String that represents the application privileges.
+   *                  scopes:      A array of strings that will encoded as a single string "scope" following the provider requirements
    *                  state:       A String that represents an optional opaque value used by the client to maintain state between the request and the callback.
    */
   @Override
   public String authorizeURL(JsonObject params) {
     final JsonObject query = params.copy();
     final OAuth2ClientOptions config = provider.getConfig();
+
+    if (query.containsKey("scopes")) {
+      // scopes have been passed as a list so the provider must generate the correct string for it
+      query.put("scope", String.join(config.getScopeSeparator(), query.getJsonArray("scopes").getList()));
+      query.remove("scopes");
+    }
 
     query.put("response_type", "code");
     query.put("client_id", config.getClientID());
@@ -67,9 +74,20 @@ public class AuthCodeImpl implements OAuth2Flow {
     final JsonObject query = params.copy();
     query.put("grant_type", "authorization_code");
 
+    final JsonObject extraParameters = provider.getConfig().getExtraParameters();
+
+    // if the provider needs extra parameters they are merged here
+    if (extraParameters != null) {
+      query.mergeIn(extraParameters);
+    }
+
     api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
       if (res.succeeded()) {
-        handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
+        try {
+          handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
       } else {
         handler.handle(Future.failedFuture(res.cause()));
       }

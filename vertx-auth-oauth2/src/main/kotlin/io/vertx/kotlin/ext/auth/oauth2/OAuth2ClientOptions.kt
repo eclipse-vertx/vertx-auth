@@ -12,6 +12,7 @@ fun OAuth2ClientOptions(
   connectTimeout: Int? = null,
   defaultHost: String? = null,
   defaultPort: Int? = null,
+  extraParameters: io.vertx.core.json.JsonObject? = null,
   headers: io.vertx.core.json.JsonObject? = null,
   http2ClearTextUpgrade: Boolean? = null,
   http2ConnectionWindowSize: Int? = null,
@@ -25,18 +26,22 @@ fun OAuth2ClientOptions(
   logActivity: Boolean? = null,
   logoutPath: String? = null,
   maxChunkSize: Int? = null,
+  maxHeaderSize: Int? = null,
+  maxInitialLineLength: Int? = null,
   maxPoolSize: Int? = null,
   maxWaitQueueSize: Int? = null,
   maxWebsocketFrameSize: Int? = null,
   metricsName: String? = null,
   pipelining: Boolean? = null,
   pipeliningLimit: Int? = null,
+  privateKey: String? = null,
   protocolVersion: HttpVersion? = null,
   proxyOptions: io.vertx.core.net.ProxyOptions? = null,
   publicKey: String? = null,
   receiveBufferSize: Int? = null,
   reuseAddress: Boolean? = null,
   revocationPath: String? = null,
+  scopeSeparator: String? = null,
   sendBufferSize: Int? = null,
   site: String? = null,
   soLinger: Int? = null,
@@ -84,6 +89,10 @@ fun OAuth2ClientOptions(
 
   if (defaultPort != null) {
     this.defaultPort = defaultPort
+  }
+
+  if (extraParameters != null) {
+    this.extraParameters = extraParameters
   }
 
   if (headers != null) {
@@ -138,6 +147,14 @@ fun OAuth2ClientOptions(
     this.maxChunkSize = maxChunkSize
   }
 
+  if (maxHeaderSize != null) {
+    this.maxHeaderSize = maxHeaderSize
+  }
+
+  if (maxInitialLineLength != null) {
+    this.maxInitialLineLength = maxInitialLineLength
+  }
+
   if (maxPoolSize != null) {
     this.maxPoolSize = maxPoolSize
   }
@@ -162,6 +179,10 @@ fun OAuth2ClientOptions(
     this.pipeliningLimit = pipeliningLimit
   }
 
+  if (privateKey != null) {
+    this.privateKey = privateKey
+  }
+
   if (protocolVersion != null) {
     this.protocolVersion = protocolVersion
   }
@@ -184,6 +205,10 @@ fun OAuth2ClientOptions(
 
   if (revocationPath != null) {
     this.revocationPath = revocationPath
+  }
+
+  if (scopeSeparator != null) {
+    this.scopeSeparator = scopeSeparator
   }
 
   if (sendBufferSize != null) {

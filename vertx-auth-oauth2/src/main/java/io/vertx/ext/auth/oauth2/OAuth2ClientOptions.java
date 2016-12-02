@@ -36,10 +36,12 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final boolean JWT_TOKEN = false;
+  private static final String SCOPE_SEPARATOR = " ";
 
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
+  private String scopeSeparator;
   // this is an openid-connect extension
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
@@ -52,7 +54,10 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String userAgent;
   private JsonObject headers;
   private String publicKey;
+  private String privateKey;
   private boolean jwtToken;
+  // extra parameters to be added while requesting a token
+  private JsonObject extraParams;
 
   public String getSite() {
     return site;
@@ -71,12 +76,23 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    *
    * @param other the options to copy
    */
+  public OAuth2ClientOptions(HttpClientOptions other) {
+    super(other);
+    init();
+  }
+
+  /**
+   * Copy constructor
+   *
+   * @param other the options to copy
+   */
   public OAuth2ClientOptions(OAuth2ClientOptions other) {
     super(other);
     // defaults
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
     revocationPath = other.getRevocationPath();
+    scopeSeparator = other.getScopeSeparator();
     useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
     clientSecretParameterName = other.getClientSecretParameterName();
     // specialization
@@ -84,16 +100,26 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
     publicKey = other.getPublicKey();
+    privateKey = other.getPrivateKey();
     logoutPath = other.getLogoutPath();
+    // extras
+    final JsonObject obj = other.getExtraParameters();
+    if (obj != null) {
+      extraParams = obj.copy();
+    } else {
+      extraParams = null;
+    }
   }
 
   private void init() {
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
     revocationPath = REVOKATION_PATH;
+    scopeSeparator = SCOPE_SEPARATOR;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtToken = JWT_TOKEN;
+    extraParams = null;
   }
 
   /**
@@ -202,6 +228,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     return this;
   }
 
+  public String getPrivateKey() {
+    return privateKey;
+  }
+
+  public OAuth2ClientOptions setPrivateKey(String privateKey) {
+    this.privateKey = privateKey;
+    return this;
+  }
+
   public boolean isJwtToken() {
     return jwtToken;
   }
@@ -226,6 +261,24 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setUserInfoPath(String userInfoPath) {
     this.userInfoPath = userInfoPath;
+    return this;
+  }
+
+  public String getScopeSeparator() {
+    return scopeSeparator;
+  }
+
+  public OAuth2ClientOptions setScopeSeparator(String scopeSeparator) {
+    this.scopeSeparator = scopeSeparator;
+    return this;
+  }
+
+  public JsonObject getExtraParameters() {
+    return extraParams;
+  }
+
+  public OAuth2ClientOptions setExtraParameters(JsonObject extraParams) {
+    this.extraParams = extraParams;
     return this;
   }
 }

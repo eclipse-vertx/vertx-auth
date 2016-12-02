@@ -23,5 +23,9 @@ package io.vertx.ext.auth.oauth2;
 public enum OAuth2FlowType {
   AUTH_CODE,
   CLIENT,
-  PASSWORD
+  PASSWORD,
+  /**
+   * RFC7523
+   */
+  AUTH_JWT
 }

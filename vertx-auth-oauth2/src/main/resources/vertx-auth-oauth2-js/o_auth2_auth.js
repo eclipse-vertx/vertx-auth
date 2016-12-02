@@ -134,6 +134,23 @@ var OAuth2Auth = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Returns the scope separator.
+  
+   The RFC 6749 states that a scope is expressed as a set of case-sensitive and space-delimited strings, however
+   vendors tend not to agree on this and we see the following cases being used: space, plus sign, comma.
+
+   @public
+
+   @return {string} what value was used in the configuration of the object, falling back to the default value which is a space.
+   */
+  this.getScopeSeparator = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_oAuth2Auth["getScopeSeparator()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
@@ -160,7 +177,6 @@ OAuth2Auth._create = function(jdel) {
   return obj;
 }
 /**
- Create a OAuth2 auth provider
 
  @memberof module:vertx-auth-oauth2-js/o_auth2_auth
  @param vertx {Vertx} the Vertx instance 

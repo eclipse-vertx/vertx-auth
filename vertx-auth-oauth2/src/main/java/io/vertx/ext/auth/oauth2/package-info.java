@@ -80,6 +80,10 @@
  *
  * For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4[Oauth2 specification, section 4.4].
  *
+ * === Extensions
+ *
+ * The provider supports RFC7523 an extension to allow server to server authorization based on JWT.
+ *
  * === Getting Started
  *
  * An example on how to use this provider and authenticate with GitHub can be implemented as:
@@ -140,59 +144,29 @@
  *
  * === Example configuration for common OAuth2 providers
  *
- * ==== Google
+ * For convenience there are several helpers to assist your with your configuration. Currently we provide:
  *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example7}
- * ----
- *
- * ==== GitHub
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example8}
- * ----
- *
- * ==== Linkedin
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example9}
- * ----
- *
- * ==== Twitter
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example10}
- * ----
- *
- * ==== Facebook
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example11}
- * ----
- *
- * ==== Azure AD
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example15}
- * ----
+ * * App.net {@link io.vertx.ext.auth.oauth2.providers.AppNetAuth}
+ * * Azure Active Directory {@link io.vertx.ext.auth.oauth2.providers.AzureADAuth}
+ * * Box.com {@link io.vertx.ext.auth.oauth2.providers.BoxAuth}
+ * * Dropbox {@link io.vertx.ext.auth.oauth2.providers.DropboxAuth}
+ * * Facebook {@link io.vertx.ext.auth.oauth2.providers.FacebookAuth}
+ * * Foursquare {@link io.vertx.ext.auth.oauth2.providers.FoursquareAuth}
+ * * Github {@link io.vertx.ext.auth.oauth2.providers.GithubAuth}
+ * * Google {@link io.vertx.ext.auth.oauth2.providers.GoogleAuth}
+ * * Instagram {@link io.vertx.ext.auth.oauth2.providers.InstagramAuth}
+ * * Keycloak {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth}
+ * * LinkedIn {@link io.vertx.ext.auth.oauth2.providers.LinkedInAuth}
+ * * Mailchimp {@link io.vertx.ext.auth.oauth2.providers.MailchimpAuth}
+ * * Salesforce {@link io.vertx.ext.auth.oauth2.providers.SalesforceAuth}
+ * * Shopify {@link io.vertx.ext.auth.oauth2.providers.ShopifyAuth}
+ * * Soundcloud {@link io.vertx.ext.auth.oauth2.providers.SoundcloudAuth}
+ * * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
+ * * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
  *
  * ==== JBoss Keycloak
  *
- * When working with keycloak it will be quite simple to setup the OAuth2 provider, just export the JSON config from the
- * web UI and use it as the OAuth2 config with the helper class {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
- *
- * [source,$lang]
- * ----
- * {@link examples.AuthOAuth2Examples#example12}
- * ----
- *
- * When using this approach the provider has knowledge on how to parse access tokens and extract grants from inside.
+ * When using this Keycloak the provider has knowledge on how to parse access tokens and extract grants from inside.
  * This information is quite valuable since it allows to do authorization at the API level, for example:
  *
  * [source,$lang]
@@ -207,6 +181,12 @@
  * ----
  * {@link examples.AuthOAuth2Examples#example14}
  * ----
+ *
+ * ==== Google Server to Server
+ *
+ * The provider also supports Server to Server or the RFC7523 extension. This is a feature present on Google with their
+ * service account.
+ *
  *
  */
 @Document(fileName = "index.adoc")
