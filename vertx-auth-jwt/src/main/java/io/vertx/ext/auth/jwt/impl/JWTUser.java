@@ -66,7 +66,9 @@ public class JWTUser extends AbstractUser {
             this.permissions = obj.getJsonArray(keys[i]);
           }
         } else {
+          if(obj != null) {
             obj = obj.getJsonObject(keys[i]);
+          }
         }
     }
   }
@@ -102,10 +104,13 @@ public class JWTUser extends AbstractUser {
     byte[] bytes = jwtToken.encode().getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length);
     buff.appendBytes(bytes);
-
-    bytes = permissions.encode().getBytes(StandardCharsets.UTF_8);
-    buff.appendInt(bytes.length);
-    buff.appendBytes(bytes);
+    if (permissions != null) {
+      bytes = permissions.encode().getBytes(StandardCharsets.UTF_8);
+      buff.appendInt(bytes.length);
+      buff.appendBytes(bytes);
+    } else {
+      buff.appendInt(0);
+    }
   }
 
   @Override
@@ -119,10 +124,11 @@ public class JWTUser extends AbstractUser {
 
     len = buffer.getInt(pos);
     pos += 4;
-    bytes = buffer.getBytes(pos, pos + len);
-    permissions = new JsonArray(new String(bytes, StandardCharsets.UTF_8));
-    pos += len;
-
+    if (len > 0) {
+      bytes = buffer.getBytes(pos, pos + len);
+      permissions = new JsonArray(new String(bytes, StandardCharsets.UTF_8));
+      pos += len;
+    }
     return pos;
   }
 }
