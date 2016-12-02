@@ -29,6 +29,7 @@
     <module>vertx-auth-jwt</module>
     <module>vertx-auth-mongo</module>
     <module>vertx-auth-oauth2</module>
+    <module>vertx-auth-htdigest</module>
   </modules>
 
   <parent>
