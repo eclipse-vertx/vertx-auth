@@ -101,6 +101,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientSecret = other.getClientSecret();
     publicKey = other.getPublicKey();
     privateKey = other.getPrivateKey();
+    jwtToken = other.isJwtToken();
     logoutPath = other.getLogoutPath();
     // extras
     final JsonObject obj = other.getExtraParameters();

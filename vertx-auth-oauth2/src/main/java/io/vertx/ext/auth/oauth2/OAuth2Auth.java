@@ -24,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -143,6 +144,16 @@ public interface OAuth2Auth extends AuthProvider {
    */
   boolean hasJWTToken();
 
+
+  /**
+   * Decode a token to a {@link AccessToken} object. This is useful to handle bearer tokens.
+   *
+   * @param token the access token (base64 string)
+   * @param handler A handler to receive the event
+   * @return self
+   */
+  @Fluent
+  OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler);
 
   /**
    * Returns the scope separator.

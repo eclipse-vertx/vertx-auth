@@ -135,6 +135,28 @@ var OAuth2Auth = function(j_val) {
   };
 
   /**
+   Decode a token to a {@link AccessToken} object. This is useful to handle bearer tokens.
+
+   @public
+   @param token {string} the access token (base64 string) 
+   @param handler {function} A handler to receive the event 
+   @return {OAuth2Auth} self
+   */
+  this.decodeToken = function(token, handler) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_oAuth2Auth["decodeToken(java.lang.String,io.vertx.core.Handler)"](token, function(ar) {
+      if (ar.succeeded()) {
+        handler(utils.convReturnVertxGen(AccessToken, ar.result()), null);
+      } else {
+        handler(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
    Returns the scope separator.
   
    The RFC 6749 states that a scope is expressed as a set of case-sensitive and space-delimited strings, however

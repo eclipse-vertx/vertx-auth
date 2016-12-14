@@ -113,6 +113,17 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling has_jwt_token?()"
     end
+    #  Decode a token to a {::VertxAuthOauth2::AccessToken} object. This is useful to handle bearer tokens.
+    # @param [String] token the access token (base64 string)
+    # @yield A handler to receive the event
+    # @return [self]
+    def decode_token(token=nil)
+      if token.class == String && block_given?
+        @j_del.java_method(:decodeToken, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(token,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthOauth2::AccessToken) : nil) }))
+        return self
+      end
+      raise ArgumentError, "Invalid arguments when calling decode_token(#{token})"
+    end
     #  Returns the scope separator.
     # 
     #  The RFC 6749 states that a scope is expressed as a set of case-sensitive and space-delimited strings, however

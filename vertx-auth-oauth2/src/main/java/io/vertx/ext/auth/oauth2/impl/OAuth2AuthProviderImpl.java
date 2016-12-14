@@ -71,7 +71,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return vertx;
   }
 
-  public JsonObject decode(String token) {
+  JsonObject decode(String token) {
     return jwt.decode(token);
   }
 
@@ -103,6 +103,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public boolean hasJWTToken() {
     return config.isJwtToken();
+  }
+
+  @Override
+  public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
+    if (!config.isJwtToken()) {
+      handler.handle(Future.failedFuture("Provider does not support JWT tokens"));
+    } else {
+      try {
+        handler.handle(Future.succeededFuture(new AccessTokenImpl(this, new JsonObject().put("access_token", token))));
+      } catch (RuntimeException e) {
+        handler.handle(Future.failedFuture(e));
+      }
+    }
+    return this;
   }
 
   @Override
