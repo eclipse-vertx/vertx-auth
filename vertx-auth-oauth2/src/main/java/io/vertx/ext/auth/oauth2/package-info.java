@@ -187,6 +187,31 @@
  * The provider also supports Server to Server or the RFC7523 extension. This is a feature present on Google with their
  * service account.
  *
+ * === Token Introspection
+ *
+ * Tokens can be introspected in order to assert that they are still valid, although there is RFC7660 for this purpose
+ * not many providers implement it. Instead there are variations also known as `TokenInfo` end points. The OAuth2
+ * provider will accept both end points as a configuration. Currently we are known to work with `Google` and `Keycloak`.
+ *
+ * Token introspection assumes that tokens are opaque, so they need to be validated on the provider server. Every time a
+ * token is validated it requires a round trip to the provider. Introspection can be performed at the OAuth2 level or at
+ * the User level:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example15}
+ * ----
+ *
+ * === Verifying JWT tokens
+ *
+ * We've just covered how to introspect a token however when dealing with JWT tokens one can reduce the amount of trips
+ * to the provider server thus enhancing your overall response times. In this case tokens will be verified using the
+ * JWT protocol at your application side only.
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example16}
+ * ----
  *
  */
 @Document(fileName = "index.adoc")

@@ -20,6 +20,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.api;
@@ -30,9 +31,11 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.api;
 abstract class CommonFlow implements OAuth2Flow {
 
   protected final OAuth2AuthProviderImpl provider;
+  protected final OAuth2ClientOptions config;
 
   CommonFlow(OAuth2AuthProviderImpl provider) {
     this.provider = provider;
+    this.config = provider.getConfig();
   }
 
   /**
@@ -54,20 +57,25 @@ abstract class CommonFlow implements OAuth2Flow {
       query.put("token_type_hint", tokenType);
     }
 
-    api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
+    api(provider, HttpMethod.POST, config.getIntrospectionPath(), query, res -> {
       if (res.succeeded()) {
-        final JsonObject json = res.result();
+        try {
+          final JsonObject json = res.result();
+          // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
+          if (json.containsKey("active") && !json.getBoolean("active", false)) {
+            handler.handle(Future.failedFuture("Inactive Token"));
+            return;
+          }
 
-        if (res.result().getBoolean("active", false)) {
           // validate client id
-          if (json.containsKey("client_id") && !json.getString("client_id", "").equals(provider.getConfig().getClientID())) {
+          if (json.containsKey("client_id") && !json.getString("client_id", "").equals(config.getClientID())) {
             handler.handle(Future.failedFuture("Wrong client_id"));
             return;
           }
 
           handler.handle(Future.succeededFuture(res.result()));
-        } else {
-          handler.handle(Future.failedFuture("Inactive Token"));
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
         }
       } else {
         handler.handle(Future.failedFuture(res.cause()));

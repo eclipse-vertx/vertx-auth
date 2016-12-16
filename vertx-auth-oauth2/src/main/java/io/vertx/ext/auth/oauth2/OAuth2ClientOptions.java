@@ -33,7 +33,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOKATION_PATH = "/oauth/revoke";
-  private static final String INTROSPECTION_PATH = "/oauth/introspect";
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final boolean JWT_TOKEN = false;
@@ -42,13 +41,14 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
-  private String introspectionPath;
   private String scopeSeparator;
   // this is an openid-connect extension
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
   private String userInfoPath;
+  // introspection RFC7662
+  private String introspectionPath;
 
   private String site;
   private String clientID;
@@ -119,7 +119,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
     revocationPath = REVOKATION_PATH;
-    introspectionPath = INTROSPECTION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;

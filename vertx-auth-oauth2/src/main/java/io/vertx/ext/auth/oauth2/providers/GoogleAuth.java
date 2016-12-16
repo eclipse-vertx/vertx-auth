@@ -39,6 +39,7 @@ public interface GoogleAuth {
         .setSite("https://accounts.google.com")
         .setTokenPath("https://www.googleapis.com/oauth2/v3/token")
         .setAuthorizationPath("/o/oauth2/auth")
+        .setIntrospectionPath("https://www.googleapis.com/oauth2/v3/tokeninfo")
         .setScopeSeparator(" ")
         .setClientID(clientId)
         .setClientSecret(clientSecret));

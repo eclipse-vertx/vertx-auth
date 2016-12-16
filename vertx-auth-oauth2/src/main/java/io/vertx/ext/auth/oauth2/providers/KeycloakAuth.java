@@ -80,6 +80,7 @@ public interface KeycloakAuth {
       options.setRevocationPath(null);
       options.setLogoutPath("/realms/" + realm + "/protocol/openid-connect/logout");
       options.setUserInfoPath("/realms/" + realm + "/protocol/openid-connect/userinfo");
+      // keycloak follows the RFC7662
       options.setIntrospectionPath("/realms/" + realm + "/protocol/openid-connect/token/introspect");
     }
 

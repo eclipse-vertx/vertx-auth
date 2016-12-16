@@ -128,16 +128,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       }
       // convert from json to AccessToken
       final JsonObject json = res.result();
-      // will perform validation and strip properties that are not JWT compliant
-      json.remove("token_type");
-      json.remove("active");
-      json.remove("client_id");
 
       try {
         final AccessToken accessToken = new AccessTokenImpl(this,
           new JsonObject()
             .put("access_token", token)
-            .put("introspect", json));
+            .mergeIn(json));
 
         if (accessToken.expired()) {
           handler.handle(Future.failedFuture("Expired token"));
