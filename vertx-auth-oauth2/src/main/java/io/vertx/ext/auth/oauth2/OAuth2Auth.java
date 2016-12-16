@@ -146,7 +146,7 @@ public interface OAuth2Auth extends AuthProvider {
 
 
   /**
-   * Decode a token to a {@link AccessToken} object. This is useful to handle bearer tokens.
+   * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
    *
    * @param token the access token (base64 string)
    * @param handler A handler to receive the event
@@ -154,6 +154,29 @@ public interface OAuth2Auth extends AuthProvider {
    */
   @Fluent
   OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler);
+
+  /**
+   * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
+   * meta-information about this token.
+   *
+   * @param token the access token (base64 string)
+   * @param handler A handler to receive the event
+   * @return self
+   */
+  @Fluent
+  OAuth2Auth introspectToken(String token, Handler<AsyncResult<AccessToken>> handler);
+
+  /**
+   * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
+   * meta-information about this token.
+   *
+   * @param token the access token (base64 string)
+   * @param tokenType hint to the token type e.g.: `access_token`
+   * @param handler A handler to receive the event
+   * @return self
+   */
+  @Fluent
+  OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler);
 
   /**
    * Returns the scope separator.

@@ -80,6 +80,7 @@ public interface KeycloakAuth {
       options.setRevocationPath(null);
       options.setLogoutPath("/realms/" + realm + "/protocol/openid-connect/logout");
       options.setUserInfoPath("/realms/" + realm + "/protocol/openid-connect/userinfo");
+      options.setIntrospectionPath("/realms/" + realm + "/protocol/openid-connect/token/introspect");
     }
 
     if (config.containsKey("realm-public-key")) {

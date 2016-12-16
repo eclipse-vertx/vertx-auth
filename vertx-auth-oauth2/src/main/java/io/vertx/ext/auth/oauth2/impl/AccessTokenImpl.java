@@ -29,6 +29,10 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.regex.Pattern;
+
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.api;
 
 /**
  * @author Paulo Lopes
@@ -85,10 +89,43 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     }
 
     this.token = json;
+    this.content = null;
+
+    // init from introspection (in this case we bypass the decode)
+    if (token.containsKey("introspect")) {
+      content = token.getJsonObject("introspect");
+      token.remove("introspect");
+
+      // the permission cache needs to be clear
+      clearCache();
+      // rebuild cache
+      if (content.containsKey("scope")) {
+        String[] scopes = content.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator()));
+        Collections.addAll(cachedPermissions, scopes);
+        // not JWT property
+        content.remove("scope");
+      }
+      // validate expiration
+      if (content.containsKey("exp")) {
+        Long exp;
+        try {
+          exp = content.getLong("exp");
+        } catch (ClassCastException e) {
+          // for some reason someone decided to send a number as a String...
+          exp = Long.valueOf(content.getString("exp"));
+        }
+        token.put("expires_at", 1000 * exp);
+      }
+    }
 
     // try to parse the access_token
     if (provider.getConfig().isJwtToken() && json.containsKey("access_token")) {
-      content = provider.decode(json.getString("access_token"));
+      final JsonObject jwt = provider.decode(json.getString("access_token"));
+      if (content != null) {
+        content.mergeIn(jwt);
+      } else {
+        content = jwt;
+      }
     }
   }
 
@@ -97,7 +134,41 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    */
   @Override
   public boolean expired() {
-    return token.containsKey("expires_at") && token.getLong("expires_at", 0L) < System.currentTimeMillis();
+
+    // All dates in JWT are of type NumericDate
+    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+    // the specified UTC date/time, ignoring leap seconds
+    final long now = System.currentTimeMillis() / 1000;
+
+    if (token.containsKey("expires_at") && token.getLong("expires_at", 0L) < System.currentTimeMillis()) {
+      return true;
+    }
+
+    if (content != null) {
+      if (content.containsKey("exp")) {
+        if (now >= content.getLong("exp")) {
+          return true;
+        }
+      }
+
+      if (token.containsKey("iat")) {
+        Long iat = content.getLong("iat");
+        // issue at must be in the past
+        if (iat > now) {
+          return true;
+        }
+      }
+
+      if (content.containsKey("nbf")) {
+        Long nbf = content.getLong("nbf");
+        // not before must be after now
+        if (nbf > now) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -181,6 +252,98 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
         content = null;
 
         callback.handle(Future.succeededFuture());
+      } else {
+        callback.handle(Future.failedFuture(res.cause()));
+      }
+    });
+
+    return this;
+  }
+
+  @Override
+  public AccessToken introspect(Handler<AsyncResult<Void>> callback) {
+    final JsonObject query = new JsonObject()
+      .put("token", token.getString("access_token"))
+      .put("authorizationHeaderOnly", true);
+
+    api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
+      if (res.succeeded()) {
+        final JsonObject json = res.result();
+        // will perform validation and strip properties that are not JWT compliant
+        json.remove("token_type");
+
+        if (json.getBoolean("active", false)) {
+          // not JWT property
+          json.remove("active");
+
+          // validate client id
+          if (json.containsKey("client_id")) {
+            if (!json.getString("client_id").equals(provider.getConfig().getClientID())) {
+              callback.handle(Future.failedFuture("Wrong client_id"));
+              return;
+            }
+            // not JWT property
+            json.remove("client_id");
+          }
+
+          // the permission cache needs to be clear
+          clearCache();
+          // rebuild cache
+          if (json.containsKey("scope")) {
+            String [] scopes = json.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator()));
+            Collections.addAll(cachedPermissions, scopes);
+            // not JWT property
+            json.remove("scope");
+          }
+
+          // validate expiration
+          if (json.containsKey("exp")) {
+            Long exp;
+            try {
+              exp = json.getLong("exp");
+            } catch (ClassCastException e) {
+              // for some reason someone decided to send a number as a String...
+              exp = Long.valueOf(json.getString("exp"));
+            }
+            token.put("expires_at", 1000 * exp);
+          }
+
+          if (expired()) {
+            callback.handle(Future.failedFuture("Expired token"));
+            return;
+          }
+
+          // replace the original decoded token
+          content = json.copy();
+
+          callback.handle(Future.succeededFuture());
+        } else {
+          callback.handle(Future.failedFuture("Inactive Token"));
+        }
+      } else {
+        callback.handle(Future.failedFuture(res.cause()));
+      }
+    });
+
+    return this;
+  }
+
+  @Override
+  public AccessToken introspect(String tokenType, Handler<AsyncResult<Void>> callback) {
+    final JsonObject query = new JsonObject()
+      .put("token", token.getString(tokenType))
+      .put("token_type_hint", tokenType)
+      .put("authorizationHeaderOnly", true);
+
+    api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
+      if (res.succeeded()) {
+        final JsonObject json = res.result();
+
+        if (json.getBoolean("active", false)) {
+          callback.handle(Future.succeededFuture());
+        } else {
+          callback.handle(Future.failedFuture("Inactive Token"));
+        }
       } else {
         callback.handle(Future.failedFuture(res.cause()));
       }

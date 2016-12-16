@@ -37,4 +37,9 @@ public interface OAuth2Flow {
    * See implementations for specific documentation
    */
   void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler);
+
+  /**
+   * See implementations for specific documentation
+   */
+  void introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler);
 }

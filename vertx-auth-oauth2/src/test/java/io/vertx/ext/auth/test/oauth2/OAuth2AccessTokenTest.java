@@ -25,6 +25,18 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
           "  \"expires_in\": 7200" +
           "}");
 
+  private static final JsonObject fixtureIntrospect = new JsonObject(
+    "{" +
+      "  \"active\": true," +
+      "  \"scope\": \"scopeA scopeB\"," +
+      "  \"client_id\": \"client-id\"," +
+      "  \"username\": \"username\"," +
+      "  \"token_type\": \"bearer\"," +
+      "  \"exp\": 99999999999," +
+      "  \"iat\": 7200," +
+      "  \"nbf\": 7200" +
+      "}");
+
   private static final JsonObject tokenConfig = new JsonObject()
       .put("code", "code")
       .put("redirect_uri", "http://callback.com");
@@ -48,8 +60,10 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       .put("grant_type", "authorization_code")
       .put("client_id", "client-id");
 
+  private static final JsonObject oauthInstrospect = new JsonObject()
+    .put("token", "4adc339e0");
 
-  protected OAuth2Auth oauth2;
+  private OAuth2Auth oauth2;
   private HttpServer server;
   private JsonObject config;
 
@@ -82,6 +96,15 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
           }
           req.response().end();
         });
+      } else if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
+        req.setExpectMultipart(true).bodyHandler(buffer -> {
+          try {
+            assertEquals(config, queryToJSON(buffer.toString()));
+          } catch (UnsupportedEncodingException e) {
+            fail(e);
+          }
+          req.response().putHeader("Content-Type", "application/json").end(fixtureIntrospect.encode());
+        });
       } else {
         req.response().setStatusCode(400).end();
       }
@@ -112,6 +135,21 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
         AccessToken token = res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
+        testComplete();
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void introspectAccessToken() {
+    config = oauthInstrospect;
+    oauth2.introspectToken("4adc339e0", res -> {
+      if (res.failed()) {
+        fail(res.cause().getMessage());
+      } else {
+        AccessToken token = res.result();
+        assertNotNull(token);
         testComplete();
       }
     });
