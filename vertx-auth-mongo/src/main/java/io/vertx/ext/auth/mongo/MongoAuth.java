@@ -1,16 +1,16 @@
 /*
  * Copyright 2014 Red Hat, Inc.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * and Apache License v2.0 which accompanies this distribution.
- * 
+ *
  * The Eclipse Public License is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * The Apache License v2.0 is available at
  * http://www.opensource.org/licenses/apache2.0.php
- * 
+ *
  * You may elect to redistribute this code under either of these licenses.
  */
 
@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * An extension of AuthProvider which is using {@link MongoClient} as store
- * 
+ *
  * @author mremme
  */
 @VertxGen
@@ -78,7 +78,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * The property name to be used to set the name of the field, where the salt style is stored inside
-   * 
+   *
    * @see HashSaltStyle
    */
   String PROPERTY_SALT_STYLE = "saltStyle";
@@ -135,12 +135,12 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Creates an instance of MongoAuth by using the given {@link MongoClient} and configuration object. An example for a
    * configuration object:
-   * 
+   *
    * <pre>
    * JsonObject js = new JsonObject();
    * js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
    * </pre>
-   * 
+   *
    * @param mongoClient
    *          an instance of {@link MongoClient} to be used for data storage and retrival
    * @param config
@@ -153,7 +153,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * Set the name of the collection to be used. Defaults to {@link #DEFAULT_COLLECTION_NAME}
-   * 
+   *
    * @param collectionName
    *          the name of the collection to be used for storing and reading user data
    * @return the current instance itself for fluent calls
@@ -163,7 +163,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * Set the name of the field to be used for the username. Defaults to {@link #DEFAULT_USERNAME_FIELD}
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -173,7 +173,7 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * Set the name of the field to be used for the password Defaults to {@link #DEFAULT_PASSWORD_FIELD}
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -184,7 +184,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Set the name of the field to be used for the roles. Defaults to {@link #DEFAULT_ROLE_FIELD}. Roles are expected to
    * be saved as JsonArray
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -195,7 +195,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Set the name of the field to be used for the permissions. Defaults to {@link #DEFAULT_PERMISSION_FIELD}.
    * Permissions are expected to be saved as JsonArray
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -206,7 +206,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Set the name of the field to be used as property for the username in the method
    * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_USERNAME_FIELD}
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -217,7 +217,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Set the name of the field to be used as property for the password of credentials in the method
    * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_PASSWORD_FIELD}
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -228,7 +228,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Set the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(HashSaltStyle)} is
    * set to {@link HashSaltStyle#COLUMN}
-   * 
+   *
    * @param fieldName
    *          the name of the field to be used
    * @return the current instance itself for fluent calls
@@ -238,21 +238,21 @@ public interface MongoAuth extends AuthProvider {
 
   /**
    * The name of the collection used to store User objects inside. Defaults to {@link #DEFAULT_COLLECTION_NAME}
-   * 
+   *
    * @return the collectionName
    */
   String getCollectionName();
 
   /**
    * Get the name of the field to be used for the username. Defaults to {@link #DEFAULT_USERNAME_FIELD}
-   * 
+   *
    * @return the usernameField
    */
   String getUsernameField();
 
   /**
    * Get the name of the field to be used for the password Defaults to {@link #DEFAULT_PASSWORD_FIELD}
-   * 
+   *
    * @return the passwordField
    */
   String getPasswordField();
@@ -260,7 +260,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Get the name of the field to be used for the roles. Defaults to {@link #DEFAULT_ROLE_FIELD}. Roles are expected to
    * be saved as JsonArray
-   * 
+   *
    * @return the roleField
    */
   String getRoleField();
@@ -268,7 +268,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Get the name of the field to be used for the permissions. Defaults to {@link #DEFAULT_PERMISSION_FIELD}.
    * Permissions are expected to be saved as JsonArray
-   * 
+   *
    * @return the permissionField
    */
   String getPermissionField();
@@ -276,7 +276,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Get the name of the field to be used as property for the username in the method
    * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_USERNAME_FIELD}
-   * 
+   *
    * @return the usernameCredentialField
    */
   String getUsernameCredentialField();
@@ -284,7 +284,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Get the name of the field to be used as property for the password of credentials in the method
    * {@link #authenticate(JsonObject, io.vertx.core.Handler)}. Defaults to {@link #DEFAULT_CREDENTIAL_PASSWORD_FIELD}
-   * 
+   *
    * @return the passwordCredentialField
    */
   String getPasswordCredentialField();
@@ -292,36 +292,36 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Get the name of the field to be used for the salt. Only used when {@link HashStrategy#setSaltStyle(HashSaltStyle)} is
    * set to {@link HashSaltStyle#COLUMN}
-   * 
+   *
    * @return the saltField
    */
   String getSaltField();
 
   /**
    * The HashStrategy which is used by the current instance
-   * 
+   *
    * @param hashStrategy
    *          the {@link HashStrategy} to be set
    * @return the current instance itself for fluent calls
-   * 
+   *
    */
   @Fluent
   MongoAuth setHashStrategy(HashStrategy hashStrategy);
 
   /**
    * The HashStrategy which is used by the current instance
-   * 
+   *
    * @return the defined instance of {@link HashStrategy}
    */
   HashStrategy getHashStrategy();
 
   /**
    * Insert a new user into mongo in the convenient way
-   * 
+   *
    * @param username
    *          the username to be set
    * @param password
-   *          the passsword in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
+   *          the password in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
    * @param roles
    *          a list of roles to be set
    * @param permissions
@@ -332,4 +332,26 @@ public interface MongoAuth extends AuthProvider {
   void insertUser(String username, String password, List<String> roles, List<String> permissions,
       Handler<AsyncResult<String>> resultHandler);
 
+  /**
+   * Inserts a new user into mongo. The inserted json object will be a composition of the {@code principal} and
+   * all other specified information.
+   *
+   * @param principal
+   *          the base object for the new user
+   * @param username
+   *          the username, or {@code null} if this is already set in {@code principal}
+   * @param password
+   *          the password in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
+   * @param roles
+   *          a list of roles to be set, or {@code null} if this is already set in {@code principal}
+   * @param permissions
+   *          a list of permissions to be set, or {@code null} if this is already set in {@code principal}
+   * @param resultHandler
+   *          the ResultHandler will be provided with the id of the generated record
+   * @throws IllegalArgumentException
+   *          if the salt or password keys are present in the {@code principal}, or if the corresponding key for
+   *          username, roles or permission in the {@code principal} object is already occupied by a different value.
+   */
+  void insertUser(JsonObject principal, String username, String password, List<String> roles, List<String> permissions,
+                  Handler<AsyncResult<String>> resultHandler) throws IllegalArgumentException;
 }

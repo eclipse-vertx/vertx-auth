@@ -1,16 +1,16 @@
 /*
  * Copyright 2014 Red Hat, Inc.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * and Apache License v2.0 which accompanies this distribution.
- * 
+ *
  * The Eclipse Public License is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * The Apache License v2.0 is available at
  * http://www.opensource.org/licenses/apache2.0.php
- * 
+ *
  * You may elect to redistribute this code under either of these licenses.
  */
 
@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * An implementation of {@link MongoAuth}
- * 
+ *
  * @author mremme
  */
 public class MongoAuthImpl implements MongoAuth {
@@ -55,7 +55,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /**
    * Creates a new instance
-   * 
+   *
    * @param mongoClient
    *          the {@link MongoClient} to be used
    * @param config
@@ -105,7 +105,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /**
    * The default implementation uses the usernameField as search field
-   * 
+   *
    * @param username
    * @return
    */
@@ -115,7 +115,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /**
    * Examine the selection of found users and return one, if password is fitting,
-   * 
+   *
    * @param resultList
    * @param authToken
    * @return
@@ -151,22 +151,44 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#insertUser(java.lang.String, java.lang.String, java.util.List,
    * java.util.List, io.vertx.core.Handler)
    */
   @Override
   public void insertUser(String username, String password, List<String> roles, List<String> permissions,
       Handler<AsyncResult<String>> resultHandler) {
-    JsonObject principal = new JsonObject();
-    principal.put(getUsernameField(), username);
+    insertUser(new JsonObject(), username, password, roles, permissions, resultHandler);
+  }
+
+  @Override
+  public void insertUser(JsonObject principal, String username, String password, List<String> roles,
+      List<String> permissions, Handler<AsyncResult<String>> resultHandler) throws IllegalArgumentException {
+    // Salt and password field should only be set by us.
+    if (principal.containsKey(getSaltField()) || principal.containsKey(getPasswordField()))
+      throw new IllegalArgumentException("Salt and password field should not be specified.");
+
+    // Shallow copy to prevent details leaking out.
+    principal = principal.copy();
+
+    if (username != null){
+      if (!username.equals(principal.getValue(getUsernameField(), username)))
+        throw new IllegalArgumentException("Conflicting values for username.");
+      principal.put(getUsernameField(), username);
+    }
 
     if (roles != null) {
-      principal.put(roleField, new JsonArray(roles));
+      JsonArray rolesArray = new JsonArray(roles);
+      if (!rolesArray.equals(principal.getValue(roleField, rolesArray)))
+        throw new IllegalArgumentException("Conflicting values for roles.");
+      principal.put(roleField, rolesArray);
     }
 
     if (permissions != null) {
-      principal.put(permissionField, new JsonArray(permissions));
+      JsonArray permissionsArray = new JsonArray(permissions);
+      if (!permissionsArray.equals(principal.getValue(permissionField, permissionsArray)))
+        throw new IllegalArgumentException("Conflicting values for permissions.");
+      principal.put(permissionField, permissionsArray);
     }
     MongoUser user = new MongoUser(principal, this);
 
@@ -182,7 +204,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /**
    * Examine the given user object. Returns true, if object fits the given authentication
-   * 
+   *
    * @param user
    * @param authToken
    * @return
@@ -247,7 +269,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setCollectionName(java.lang.String)
    */
   @Override
@@ -258,7 +280,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setUsernameField(java.lang.String)
    */
   @Override
@@ -269,7 +291,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setPasswordField(java.lang.String)
    */
   @Override
@@ -280,7 +302,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setRoleField(java.lang.String)
    */
   @Override
@@ -291,7 +313,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(java.lang. String)
    */
   @Override
@@ -302,7 +324,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(java.lang. String)
    */
   @Override
@@ -313,7 +335,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setSaltField(java.lang.String)
    */
   @Override
@@ -324,7 +346,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getCollectionName()
    */
   @Override
@@ -334,7 +356,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getUsernameField()
    */
   @Override
@@ -344,7 +366,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getPasswordField()
    */
   @Override
@@ -354,7 +376,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getRoleField()
    */
   @Override
@@ -364,7 +386,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getUsernameCredentialField()
    */
   @Override
@@ -374,7 +396,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getPasswordCredentialField()
    */
   @Override
@@ -384,7 +406,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getSaltField()
    */
   @Override
@@ -394,7 +416,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setPermissionField(java.lang.String)
    */
   @Override
@@ -405,7 +427,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getPermissionField()
    */
   @Override
@@ -415,7 +437,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#setHashStrategy(io.vertx.ext.auth.mongo.HashStrategy)
    */
   @Override
@@ -426,7 +448,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.ext.auth.mongo.MongoAuth#getHashStrategy()
    */
   @Override
@@ -438,7 +460,7 @@ public class MongoAuthImpl implements MongoAuth {
 
   /**
    * The incoming data from an authentication request
-   * 
+   *
    * @author mremme
    */
   static class AuthToken {
