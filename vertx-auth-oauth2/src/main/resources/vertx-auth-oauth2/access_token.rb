@@ -105,5 +105,15 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling logout()"
     end
+    #  Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+    # @yield - The callback function returning the results.
+    # @return [self]
+    def introspect
+      if block_given?
+        @j_del.java_method(:introspect, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |ar| yield(ar.failed ? ar.cause : nil) }))
+        return self
+      end
+      raise ArgumentError, "Invalid arguments when calling introspect()"
+    end
   end
 end

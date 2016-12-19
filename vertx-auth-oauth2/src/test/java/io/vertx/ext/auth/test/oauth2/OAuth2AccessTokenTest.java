@@ -60,9 +60,6 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       .put("grant_type", "authorization_code")
       .put("client_id", "client-id");
 
-  private static final JsonObject oauthInstrospect = new JsonObject()
-    .put("token", "4adc339e0");
-
   private OAuth2Auth oauth2;
   private HttpServer server;
   private JsonObject config;
@@ -135,21 +132,6 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
         AccessToken token = res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
-        testComplete();
-      }
-    });
-    await();
-  }
-
-  @Test
-  public void introspectAccessToken() {
-    config = oauthInstrospect;
-    oauth2.introspectToken("4adc339e0", res -> {
-      if (res.failed()) {
-        fail(res.cause().getMessage());
-      } else {
-        AccessToken token = res.result();
-        assertNotNull(token);
         testComplete();
       }
     });
