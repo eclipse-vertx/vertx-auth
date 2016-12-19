@@ -189,7 +189,7 @@
  *
  * === Token Introspection
  *
- * Tokens can be introspected in order to assert that they are still valid, although there is RFC7660 for this purpose
+ * Tokens can be introspected in order to assert that they are still valid. Although there is RFC7660 for this purpose
  * not many providers implement it. Instead there are variations also known as `TokenInfo` end points. The OAuth2
  * provider will accept both end points as a configuration. Currently we are known to work with `Google` and `Keycloak`.
  *
@@ -206,7 +206,9 @@
  *
  * We've just covered how to introspect a token however when dealing with JWT tokens one can reduce the amount of trips
  * to the provider server thus enhancing your overall response times. In this case tokens will be verified using the
- * JWT protocol at your application side only.
+ * JWT protocol at your application side only. Verifying JWT tokens is cheaper and offers better performance, however
+ * due to the stateless nature of JWTs it is not possible to know if a user is logged out and a token is invalid. For
+ * this specific case one needs to use the token introspection if the provider supports it.
  *
  * [source,$lang]
  * ----

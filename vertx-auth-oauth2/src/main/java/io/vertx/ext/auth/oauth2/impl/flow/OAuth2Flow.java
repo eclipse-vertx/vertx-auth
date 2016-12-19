@@ -27,19 +27,19 @@ import io.vertx.ext.auth.oauth2.AccessToken;
 public interface OAuth2Flow {
 
   /**
-   * See implementations for specific documentation
+   * See implementations for specific documentation.
    */
   default String authorizeURL(JsonObject params) {
     return null;
   }
 
   /**
-   * See implementations for specific documentation
+   * See implementations for specific documentation.
    */
   void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler);
 
   /**
-   * See implementations for specific documentation
+   * See implementations for specific documentation.
    */
   void introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler);
 }

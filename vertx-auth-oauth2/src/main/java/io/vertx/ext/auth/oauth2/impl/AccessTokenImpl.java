@@ -144,14 +144,17 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   @Override
   public boolean expired() {
 
+    long now = System.currentTimeMillis();
+
+    // expires_at is a computed field always in millis
+    if (token.containsKey("expires_at") && token.getLong("expires_at", 0L) < now) {
+      return true;
+    }
+
     // All dates in JWT are of type NumericDate
     // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
     // the specified UTC date/time, ignoring leap seconds
-    final long now = System.currentTimeMillis() / 1000;
-
-    if (token.containsKey("expires_at") && token.getLong("expires_at", 0L) < System.currentTimeMillis()) {
-      return true;
-    }
+    now = System.currentTimeMillis() / 1000;
 
     if (content != null) {
       if (content.containsKey("exp")) {
