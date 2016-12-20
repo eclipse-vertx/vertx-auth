@@ -47,6 +47,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
   private String userInfoPath;
+  // introspection RFC7662
+  private String introspectionPath;
 
   private String site;
   private String clientID;
@@ -92,6 +94,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
     revocationPath = other.getRevocationPath();
+    introspectionPath = other.getIntrospectionPath();
     scopeSeparator = other.getScopeSeparator();
     useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
     clientSecretParameterName = other.getClientSecretParameterName();
@@ -280,6 +283,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setExtraParameters(JsonObject extraParams) {
     this.extraParams = extraParams;
+    return this;
+  }
+
+  public String getIntrospectionPath() {
+    return introspectionPath;
+  }
+
+  public OAuth2ClientOptions setIntrospectionPath(String introspectionPath) {
+    this.introspectionPath = introspectionPath;
     return this;
   }
 }

@@ -29,12 +29,10 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class PasswordImpl implements OAuth2Flow {
-
-  private final OAuth2AuthProviderImpl provider;
+public class PasswordImpl extends CommonFlow implements OAuth2Flow {
 
   public PasswordImpl(OAuth2AuthProviderImpl provider) {
-    this.provider = provider;
+    super(provider);
   }
 
   /**

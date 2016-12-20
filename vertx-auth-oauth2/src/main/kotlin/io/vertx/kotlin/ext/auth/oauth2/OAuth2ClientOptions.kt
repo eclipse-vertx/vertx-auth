@@ -20,6 +20,7 @@ fun OAuth2ClientOptions(
   http2MultiplexingLimit: Int? = null,
   idleTimeout: Int? = null,
   initialSettings: io.vertx.core.http.Http2Settings? = null,
+  introspectionPath: String? = null,
   jwtToken: Boolean? = null,
   keepAlive: Boolean? = null,
   localAddress: String? = null,
@@ -121,6 +122,10 @@ fun OAuth2ClientOptions(
 
   if (initialSettings != null) {
     this.initialSettings = initialSettings
+  }
+
+  if (introspectionPath != null) {
+    this.introspectionPath = introspectionPath
   }
 
   if (jwtToken != null) {
