@@ -107,10 +107,10 @@ public final class JWT {
       try {
         KeyFactory kf = KeyFactory.getInstance("RSA");
         if (keyPrivate) {
-          KeySpec spec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(key));
+          KeySpec spec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(key));
           tmp.put("RS256", new CryptoPrivateKey("SHA256withRSA",  kf.generatePrivate(spec)));
         } else {
-          X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(key));
+          X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(key));
           tmp.put("RS256", new CryptoPublicKey("SHA256withRSA",  kf.generatePublic(spec)));
         }
       } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
