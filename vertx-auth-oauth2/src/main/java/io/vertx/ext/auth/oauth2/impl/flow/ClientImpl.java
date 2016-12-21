@@ -18,11 +18,9 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
@@ -31,12 +29,10 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class ClientImpl implements OAuth2Flow {
-
-  private final OAuth2AuthProviderImpl provider;
+public class ClientImpl extends CommonFlow implements OAuth2Flow {
 
   public ClientImpl(OAuth2AuthProviderImpl provider) {
-    this.provider = provider;
+    super(provider);
   }
 
   /**

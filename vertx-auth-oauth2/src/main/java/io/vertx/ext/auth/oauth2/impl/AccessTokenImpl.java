@@ -29,6 +29,10 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.regex.Pattern;
+
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.api;
 
 /**
  * @author Paulo Lopes
@@ -84,11 +88,53 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
       json.put("expires_at", System.currentTimeMillis() + 1000 * expiresIn);
     }
 
-    this.token = json;
+    token = json;
+    content = null;
 
     // try to parse the access_token
     if (provider.getConfig().isJwtToken() && json.containsKey("access_token")) {
       content = provider.decode(json.getString("access_token"));
+    }
+
+    // the permission cache needs to be clear
+    clearCache();
+    // rebuild cache
+    if (token.containsKey("scope")) {
+      Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
+    }
+
+    // validate expiration
+    if (token.containsKey("exp")) {
+      Long exp;
+      try {
+        exp = token.getLong("exp");
+      } catch (ClassCastException e) {
+        // for some reason someone decided to send a number as a String...
+        exp = Long.valueOf(token.getString("exp"));
+      }
+      token.put("expires_at", 1000 * exp);
+    }
+
+    // move JWT fields into "content"
+    moveProperty("exp");
+    moveProperty("iat");
+    moveProperty("nbf");
+    moveProperty("sub");
+    moveProperty("aud");
+    moveProperty("iss");
+    moveProperty("jti");
+    // known implementation fields
+    moveProperty("permissions");
+    moveProperty("resource_access");
+    moveProperty("realm_access");
+  }
+
+  private void moveProperty(String name) {
+    if (token.containsKey(name)) {
+      if (content == null) {
+        content = new JsonObject();
+      }
+      content.put(name, token.remove(name));
     }
   }
 
@@ -97,7 +143,44 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    */
   @Override
   public boolean expired() {
-    return token.containsKey("expires_at") && token.getLong("expires_at", 0L) < System.currentTimeMillis();
+
+    long now = System.currentTimeMillis();
+
+    // expires_at is a computed field always in millis
+    if (token.containsKey("expires_at") && token.getLong("expires_at", 0L) < now) {
+      return true;
+    }
+
+    // All dates in JWT are of type NumericDate
+    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+    // the specified UTC date/time, ignoring leap seconds
+    now = System.currentTimeMillis() / 1000;
+
+    if (content != null) {
+      if (content.containsKey("exp")) {
+        if (now >= content.getLong("exp")) {
+          return true;
+        }
+      }
+
+      if (content.containsKey("iat")) {
+        Long iat = content.getLong("iat");
+        // issue at must be in the past
+        if (iat > now) {
+          return true;
+        }
+      }
+
+      if (content.containsKey("nbf")) {
+        Long nbf = content.getLong("nbf");
+        // not before must be after now
+        if (nbf > now) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -181,6 +264,53 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
         content = null;
 
         callback.handle(Future.succeededFuture());
+      } else {
+        callback.handle(Future.failedFuture(res.cause()));
+      }
+    });
+
+    return this;
+  }
+
+  @Override
+  public AccessToken introspect(Handler<AsyncResult<Void>> callback) {
+    final JsonObject query = new JsonObject()
+      .put("token", token.getString("access_token"))
+      .put("authorizationHeaderOnly", true);
+
+    api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
+      if (res.succeeded()) {
+        try {
+          final JsonObject json = res.result();
+
+          // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
+          if (json.containsKey("active") && !json.getBoolean("active", false)) {
+            callback.handle(Future.failedFuture("Inactive Token"));
+            return;
+          }
+
+          // validate client id
+          if (json.containsKey("client_id") && !json.getString("client_id", "").equals(provider.getConfig().getClientID())) {
+            callback.handle(Future.failedFuture("Wrong client_id"));
+            return;
+          }
+
+          try {
+            // reset the access token
+            init(new JsonObject().put("access_token", token).mergeIn(json));
+
+            if (expired()) {
+              callback.handle(Future.failedFuture("Expired token"));
+              return;
+            }
+
+            callback.handle(Future.succeededFuture());
+          } catch (RuntimeException e) {
+            callback.handle(Future.failedFuture(e));
+          }
+        } catch (RuntimeException e) {
+          callback.handle(Future.failedFuture(e));
+        }
       } else {
         callback.handle(Future.failedFuture(res.cause()));
       }
