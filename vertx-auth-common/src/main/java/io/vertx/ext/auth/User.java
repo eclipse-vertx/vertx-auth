@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth;
 
-import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
