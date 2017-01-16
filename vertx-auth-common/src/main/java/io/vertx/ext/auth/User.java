@@ -44,7 +44,6 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
-  @CacheReturn
   User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
@@ -54,7 +53,6 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
-  @CacheReturn
   User clearCache();
 
   /**
