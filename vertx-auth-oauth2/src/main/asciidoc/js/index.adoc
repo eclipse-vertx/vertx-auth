@@ -277,7 +277,6 @@ token.revoke("access_token", function (res, res_err) {
 
 For convenience there are several helpers to assist your with your configuration. Currently we provide:
 
-* App.net `link:../../jsdoc/module-vertx-auth-oauth2-js_app_net_auth-AppNetAuth.html[AppNetAuth]`
 * Azure Active Directory `link:../../jsdoc/module-vertx-auth-oauth2-js_azure_ad_auth-AzureADAuth.html[AzureADAuth]`
 * Box.com `link:../../jsdoc/module-vertx-auth-oauth2-js_box_auth-BoxAuth.html[BoxAuth]`
 * Dropbox `link:../../jsdoc/module-vertx-auth-oauth2-js_dropbox_auth-DropboxAuth.html[DropboxAuth]`

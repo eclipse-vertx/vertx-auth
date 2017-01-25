@@ -281,7 +281,6 @@ token.revoke("access_token", { res ->
 
 For convenience there are several helpers to assist your with your configuration. Currently we provide:
 
-* App.net `link:../../apidocs/io/vertx/ext/auth/oauth2/providers/AppNetAuth.html[AppNetAuth]`
 * Azure Active Directory `link:../../apidocs/io/vertx/ext/auth/oauth2/providers/AzureADAuth.html[AzureADAuth]`
 * Box.com `link:../../apidocs/io/vertx/ext/auth/oauth2/providers/BoxAuth.html[BoxAuth]`
 * Dropbox `link:../../apidocs/io/vertx/ext/auth/oauth2/providers/DropboxAuth.html[DropboxAuth]`

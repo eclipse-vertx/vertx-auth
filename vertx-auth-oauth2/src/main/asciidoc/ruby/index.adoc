@@ -277,7 +277,6 @@ token.revoke("access_token") { |res_err,res|
 
 For convenience there are several helpers to assist your with your configuration. Currently we provide:
 
-* App.net `link:../../yardoc/VertxAuthOauth2/AppNetAuth.html[AppNetAuth]`
 * Azure Active Directory `link:../../yardoc/VertxAuthOauth2/AzureADAuth.html[AzureADAuth]`
 * Box.com `link:../../yardoc/VertxAuthOauth2/BoxAuth.html[BoxAuth]`
 * Dropbox `link:../../yardoc/VertxAuthOauth2/DropboxAuth.html[DropboxAuth]`
