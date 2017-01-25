@@ -146,7 +146,6 @@
  *
  * For convenience there are several helpers to assist your with your configuration. Currently we provide:
  *
- * * App.net {@link io.vertx.ext.auth.oauth2.providers.AppNetAuth}
  * * Azure Active Directory {@link io.vertx.ext.auth.oauth2.providers.AzureADAuth}
  * * Box.com {@link io.vertx.ext.auth.oauth2.providers.BoxAuth}
  * * Dropbox {@link io.vertx.ext.auth.oauth2.providers.DropboxAuth}
