@@ -1,4 +1,4 @@
-moduleName = vertx-auth-htdigest-module
+moduleName = io.vertx.ext.auth.htdigest.HtdigestAuth-module
 moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.auth.htdigest.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.ext.auth.htdigest.GroovyStaticExtension
+extensionClasses = 
+staticExtensionClasses = 

@@ -22,7 +22,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JJDBCAuth = io.vertx.ext.auth.jdbc.JDBCAuth;
+var JJDBCAuth = Java.type('io.vertx.ext.auth.jdbc.JDBCAuth');
 
 /**
 

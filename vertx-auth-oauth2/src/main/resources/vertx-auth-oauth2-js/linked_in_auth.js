@@ -21,8 +21,8 @@ var OAuth2Auth = require('vertx-auth-oauth2-js/o_auth2_auth');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JLinkedInAuth = io.vertx.ext.auth.oauth2.providers.LinkedInAuth;
-var HttpClientOptions = io.vertx.core.http.HttpClientOptions;
+var JLinkedInAuth = Java.type('io.vertx.ext.auth.oauth2.providers.LinkedInAuth');
+var HttpClientOptions = Java.type('io.vertx.core.http.HttpClientOptions');
 
 /**
 
@@ -73,7 +73,7 @@ LinkedInAuth.create = function() {
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'string') {
     return utils.convReturnVertxGen(OAuth2Auth, JLinkedInAuth["create(io.vertx.core.Vertx,java.lang.String,java.lang.String)"](__args[0]._jdel, __args[1], __args[2]));
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'string' && (typeof __args[3] === 'object' && __args[3] != null)) {
-    return utils.convReturnVertxGen(OAuth2Auth, JLinkedInAuth["create(io.vertx.core.Vertx,java.lang.String,java.lang.String,io.vertx.core.http.HttpClientOptions)"](__args[0]._jdel, __args[1], __args[2], __args[3] != null ? new HttpClientOptions(new JsonObject(JSON.stringify(__args[3]))) : null));
+    return utils.convReturnVertxGen(OAuth2Auth, JLinkedInAuth["create(io.vertx.core.Vertx,java.lang.String,java.lang.String,io.vertx.core.http.HttpClientOptions)"](__args[0]._jdel, __args[1], __args[2], __args[3] != null ? new HttpClientOptions(new JsonObject(Java.asJSONCompatible(__args[3]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

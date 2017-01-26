@@ -22,7 +22,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JHtdigestAuth = io.vertx.ext.auth.htdigest.HtdigestAuth;
+var JHtdigestAuth = Java.type('io.vertx.ext.auth.htdigest.HtdigestAuth');
 
 /**
  An extension of AuthProvider which is using .htdigest file as store

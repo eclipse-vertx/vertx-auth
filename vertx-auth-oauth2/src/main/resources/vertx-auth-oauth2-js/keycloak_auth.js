@@ -21,8 +21,8 @@ var OAuth2Auth = require('vertx-auth-oauth2-js/o_auth2_auth');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JKeycloakAuth = io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
-var HttpClientOptions = io.vertx.core.http.HttpClientOptions;
+var JKeycloakAuth = Java.type('io.vertx.ext.auth.oauth2.providers.KeycloakAuth');
+var HttpClientOptions = Java.type('io.vertx.core.http.HttpClientOptions');
 
 /**
 
@@ -75,9 +75,9 @@ KeycloakAuth.create = function() {
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
     return utils.convReturnVertxGen(OAuth2Auth, JKeycloakAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(__args[2])));
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(OAuth2Auth, JKeycloakAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject,io.vertx.core.http.HttpClientOptions)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), __args[2] != null ? new HttpClientOptions(new JsonObject(JSON.stringify(__args[2]))) : null));
+    return utils.convReturnVertxGen(OAuth2Auth, JKeycloakAuth["create(io.vertx.core.Vertx,io.vertx.core.json.JsonObject,io.vertx.core.http.HttpClientOptions)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), __args[2] != null ? new HttpClientOptions(new JsonObject(Java.asJSONCompatible(__args[2]))) : null));
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && (typeof __args[3] === 'object' && __args[3] != null)) {
-    return utils.convReturnVertxGen(OAuth2Auth, JKeycloakAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject,io.vertx.core.http.HttpClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(__args[2]), __args[3] != null ? new HttpClientOptions(new JsonObject(JSON.stringify(__args[3]))) : null));
+    return utils.convReturnVertxGen(OAuth2Auth, JKeycloakAuth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.core.json.JsonObject,io.vertx.core.http.HttpClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), utils.convParamJsonObject(__args[2]), __args[3] != null ? new HttpClientOptions(new JsonObject(Java.asJSONCompatible(__args[3]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

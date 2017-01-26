@@ -23,7 +23,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JMongoAuth = io.vertx.ext.auth.mongo.MongoAuth;
+var JMongoAuth = Java.type('io.vertx.ext.auth.mongo.MongoAuth');
 
 /**
 

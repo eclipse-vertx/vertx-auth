@@ -19,7 +19,7 @@ var utils = require('vertx-js/util/utils');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JKeycloakHelper = io.vertx.ext.auth.oauth2.KeycloakHelper;
+var JKeycloakHelper = Java.type('io.vertx.ext.auth.oauth2.KeycloakHelper');
 
 /**
  Helper class for processing Keycloak principal.

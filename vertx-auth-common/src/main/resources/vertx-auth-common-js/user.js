@@ -20,7 +20,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JUser = io.vertx.ext.auth.User;
+var JUser = Java.type('io.vertx.ext.auth.User');
 
 /**
  Represents an authenticates User and contains operations to authorise the user.

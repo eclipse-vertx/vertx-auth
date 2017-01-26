@@ -20,7 +20,7 @@ var User = require('vertx-auth-common-js/user');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JHashStrategy = io.vertx.ext.auth.mongo.HashStrategy;
+var JHashStrategy = Java.type('io.vertx.ext.auth.mongo.HashStrategy');
 
 /**
  Determines how the hashing is computed in the implementation You can implement this to provide a different hashing
