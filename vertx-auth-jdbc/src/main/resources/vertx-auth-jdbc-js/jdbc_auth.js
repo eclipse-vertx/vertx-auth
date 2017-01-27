@@ -109,6 +109,39 @@ var JDBCAuth = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Compute the hashed password given the unhashed password and the salt
+  
+   The implementation relays to the JDBCHashStrategy provided.
+
+   @public
+   @param password {string} the unhashed password 
+   @param salt {string} the salt 
+   @return {string} the hashed password
+   */
+  this.computeHash = function(password, salt) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'string') {
+      return j_jDBCAuth["computeHash(java.lang.String,java.lang.String)"](password, salt);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Compute a salt string.
+  
+   The implementation relays to the JDBCHashStrategy provided.
+
+   @public
+
+   @return {string} a non null salt value
+   */
+  this.generateSalt = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_jDBCAuth["generateSalt()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.

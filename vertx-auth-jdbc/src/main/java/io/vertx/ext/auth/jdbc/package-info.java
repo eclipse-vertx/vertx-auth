@@ -44,7 +44,7 @@
  *
  * Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuth} instance as follows:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example5}
  * ----
@@ -99,12 +99,27 @@
  * with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
  * never to store your passwords as plain text.
  *
+ * == Hashing passwords
+ *
+ * Like any application there will be a time where you need to store new users into the database. Has you have learn
+ * passwords are not stored in plain text but hashed according to the hashing strategy. The same strategy is required
+ * to hash new password before storing it to the database. Doing it is a 3 step task.
+ *
+ * 1. Generate a salt string
+ * 2. Hash the password given the salt string
+ * 3. Store it to the database
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthJDBCExamples#example9}
+ * ----
+ *
  * == Authentication
  *
  * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
  * authentication info:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example6}
  * ----
@@ -118,14 +133,14 @@
  * If validating if a user has a particular permission simply pass the permission into.
  * {@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example7}
  * ----
  *
  * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example8}
  * ----

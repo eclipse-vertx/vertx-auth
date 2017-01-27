@@ -17,15 +17,12 @@
 package io.vertx.ext.auth.test.jdbc;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
-import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.*;
@@ -83,21 +80,6 @@ public class JDBCAuthTest extends VertxTestBase {
     return new JsonObject()
       .put("url", "jdbc:hsqldb:mem:test?shutdown=true")
       .put("driver_class", "org.hsqldb.jdbcDriver");
-  }
-
-  public static String genSalt() {
-    final Random r = new SecureRandom();
-    byte[] salt = new byte[32];
-    r.nextBytes(salt);
-    return JDBCAuthImpl.bytesToHex(salt);
-  }
-
-  public static void main(String[] args) {
-    String pwd = "sausages";
-    String salt = genSalt();
-    String hashedPwd = JDBCAuthImpl.computeHash(pwd, salt, "SHA-512");
-    System.out.println("salt is:" + salt);
-    System.out.println("hashed pwd is:" + hashedPwd);
   }
 
   protected JDBCAuth authProvider;

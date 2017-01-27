@@ -87,5 +87,27 @@ module VertxAuthJdbc
       end
       raise ArgumentError, "Invalid arguments when calling set_role_prefix(#{rolePrefix})"
     end
+    #  Compute the hashed password given the unhashed password and the salt
+    # 
+    #  The implementation relays to the JDBCHashStrategy provided.
+    # @param [String] password the unhashed password
+    # @param [String] salt the salt
+    # @return [String] the hashed password
+    def compute_hash(password=nil,salt=nil)
+      if password.class == String && salt.class == String && !block_given?
+        return @j_del.java_method(:computeHash, [Java::java.lang.String.java_class,Java::java.lang.String.java_class]).call(password,salt)
+      end
+      raise ArgumentError, "Invalid arguments when calling compute_hash(#{password},#{salt})"
+    end
+    #  Compute a salt string.
+    # 
+    #  The implementation relays to the JDBCHashStrategy provided.
+    # @return [String] a non null salt value
+    def generate_salt
+      if !block_given?
+        return @j_del.java_method(:generateSalt, []).call()
+      end
+      raise ArgumentError, "Invalid arguments when calling generate_salt()"
+    end
   end
 end

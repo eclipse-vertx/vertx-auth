@@ -16,15 +16,12 @@
 
 package io.vertx.ext.auth.jdbc.impl;
 
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
@@ -36,16 +33,14 @@ import io.vertx.ext.sql.SQLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
 import java.util.function.Consumer;
 
-
 /**
- *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
-
-  private static final Logger log = LoggerFactory.getLogger(JDBCAuthImpl.class);
 
   private JDBCClient client;
   private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
@@ -130,8 +125,8 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     return this;
   }
 
-  protected <T> void executeQuery(String query, JsonArray params, Handler<AsyncResult<T>> resultHandler,
-                                Consumer<ResultSet> resultSetConsumer) {
+  <T> void executeQuery(String query, JsonArray params, Handler<AsyncResult<T>> resultHandler,
+                                  Consumer<ResultSet> resultSetConsumer) {
     client.getConnection(res -> {
       if (res.succeeded()) {
         SQLConnection conn = res.result();
@@ -142,7 +137,8 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
           } else {
             resultHandler.handle(Future.failedFuture(queryRes.cause()));
           }
-          conn.close(closeRes -> {});
+          conn.close(closeRes -> {
+          });
         });
       } else {
         resultHandler.handle(Future.failedFuture(res.cause()));
@@ -150,27 +146,15 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     });
   }
 
-  private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
-  public static String bytesToHex(byte[] bytes) {
-    char[] chars = new char[bytes.length * 2];
-    for (int i = 0; i < bytes.length; i++) {
-      int x = 0xFF & bytes[i];
-      chars[i * 2] = HEX_CHARS[x >>> 4];
-      chars[1 + i * 2] = HEX_CHARS[0x0F & x];
-    }
-    return new String(chars);
+  @Override
+  public String computeHash(String password, String salt) {
+    return strategy.computeHash(password, salt);
   }
 
-  public static String computeHash(String password, String salt, String algo) {
-    try {
-      MessageDigest md = MessageDigest.getInstance(algo);
-      String concat = (salt == null ? "" : salt) + password;
-      byte[] bHash = md.digest(concat.getBytes(StandardCharsets.UTF_8));
-      return bytesToHex(bHash);
-    } catch (NoSuchAlgorithmException e) {
-      throw new VertxException(e);
-    }
+  @Override
+  public String generateSalt() {
+    return strategy.generateSalt();
   }
 
   String getRolesQuery() {
@@ -183,9 +167,26 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   private class DefaultHashStrategy implements JDBCHashStrategy {
 
+    private final Random random = new SecureRandom();
+
+    @Override
+    public String generateSalt() {
+      byte[] salt = new byte[32];
+      random.nextBytes(salt);
+
+      return bytesToHex(salt);
+    }
+
     @Override
     public String computeHash(String password, String salt) {
-      return JDBCAuthImpl.computeHash(password, salt, "SHA-512");
+      try {
+        MessageDigest md = MessageDigest.getInstance("SHA-512");
+        String concat = (salt == null ? "" : salt) + password;
+        byte[] bHash = md.digest(concat.getBytes(StandardCharsets.UTF_8));
+        return bytesToHex(bHash);
+      } catch (NoSuchAlgorithmException e) {
+        throw new VertxException(e);
+      }
     }
 
     @Override
@@ -196,6 +197,18 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     @Override
     public String getSalt(JsonArray row) {
       return row.getString(1);
+    }
+
+    private final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
+
+    private String bytesToHex(byte[] bytes) {
+      char[] chars = new char[bytes.length * 2];
+      for (int i = 0; i < bytes.length; i++) {
+        int x = 0xFF & bytes[i];
+        chars[i * 2] = HEX_CHARS[x >>> 4];
+        chars[1 + i * 2] = HEX_CHARS[0x0F & x];
+      }
+      return new String(chars);
     }
   }
 

@@ -29,7 +29,7 @@ of those please consult the documentation for the JDBC client.
 
 Once you've got one of those you can create a `link:../../jsdoc/module-vertx-auth-jdbc-js_jdbc_auth-JDBCAuth.html[JDBCAuth]` instance as follows:
 
-[source,java]
+[source,js]
 ----
 var JDBCClient = require("vertx-jdbc-js/jdbc_client");
 var JDBCAuth = require("vertx-auth-jdbc-js/jdbc_auth");
@@ -90,12 +90,40 @@ WARNING: It is advised to always store your passwords as hashes in your database
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
 
+== Hashing passwords
+
+Like any application there will be a time where you need to store new users into the database. Has you have learn
+passwords are not stored in plain text but hashed according to the hashing strategy. The same strategy is required
+to hash new password before storing it to the database. Doing it is a 3 step task.
+
+1. Generate a salt string
+2. Hash the password given the salt string
+3. Store it to the database
+
+[source,js]
+----
+
+var salt = auth.generateSalt();
+var hash = auth.computeHash("sausages", salt);
+// save to the database
+conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", [
+  "tim",
+  hash,
+  salt
+], function (res, res_err) {
+  if (res_err == null) {
+    // success!
+  }
+});
+
+----
+
 == Authentication
 
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
 authentication info:
 
-[source,java]
+[source,js]
 ----
 
 var authInfo = {
@@ -122,7 +150,7 @@ can have zero or more permissions.
 If validating if a user has a particular permission simply pass the permission into.
 `link:../../jsdoc/module-vertx-auth-common-js_user-User.html#isAuthorised[isAuthorised]` as follows:
 
-[source,java]
+[source,js]
 ----
 
 user.isAuthorised("commit_code", function (res, res_err) {
@@ -138,7 +166,7 @@ user.isAuthorised("commit_code", function (res, res_err) {
 
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
-[source,java]
+[source,js]
 ----
 
 user.isAuthorised("role:manager", function (res, res_err) {
