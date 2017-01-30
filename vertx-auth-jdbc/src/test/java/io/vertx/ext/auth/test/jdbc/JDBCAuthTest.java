@@ -93,7 +93,7 @@ public class JDBCAuthTest extends VertxTestBase {
 
   protected JDBCAuth createProvider() {
     JDBCClient client = JDBCClient.createNonShared(vertx, config());
-    return JDBCAuth.create(client);
+    return JDBCAuth.create(vertx, client);
   }
 
   @Override

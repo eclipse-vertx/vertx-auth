@@ -18,6 +18,7 @@
 var utils = require('vertx-js/util/utils');
 var User = require('vertx-auth-common-js/user');
 var JDBCClient = require('vertx-jdbc-js/jdbc_client');
+var Vertx = require('vertx-js/vertx');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
@@ -171,13 +172,14 @@ JDBCAuth._create = function(jdel) {
  Create a JDBC auth provider implementation
 
  @memberof module:vertx-auth-jdbc-js/jdbc_auth
+ @param vertx {Vertx} 
  @param client {JDBCClient} the JDBC client instance 
  @return {JDBCAuth} the auth provider
  */
-JDBCAuth.create = function(client) {
+JDBCAuth.create = function(vertx, client) {
   var __args = arguments;
-  if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(JDBCAuth, JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel));
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel) {
+    return utils.convReturnVertxGen(JDBCAuth, JJDBCAuth["create(io.vertx.core.Vertx,io.vertx.ext.jdbc.JDBCClient)"](vertx._jdel, client._jdel));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

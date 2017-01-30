@@ -1,5 +1,6 @@
 require 'vertx-auth-common/user'
 require 'vertx-jdbc/jdbc_client'
+require 'vertx/vertx'
 require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.jdbc.JDBCAuth
@@ -43,13 +44,14 @@ module VertxAuthJdbc
       raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     #  Create a JDBC auth provider implementation
+    # @param [::Vertx::Vertx] vertx 
     # @param [::VertxJdbc::JDBCClient] client the JDBC client instance
     # @return [::VertxAuthJdbc::JDBCAuth] the auth provider
-    def self.create(client=nil)
-      if client.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthJdbc::JDBCAuth.java_method(:create, [Java::IoVertxExtJdbc::JDBCClient.java_class]).call(client.j_del),::VertxAuthJdbc::JDBCAuth)
+    def self.create(vertx=nil,client=nil)
+      if vertx.class.method_defined?(:j_del) && client.class.method_defined?(:j_del) && !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthJdbc::JDBCAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtJdbc::JDBCClient.java_class]).call(vertx.j_del,client.j_del),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(#{client})"
+      raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{client})"
     end
     #  Set the authentication query to use. Use this if you want to override the default authentication query.
     # @param [String] authenticationQuery the authentication query

@@ -36,7 +36,7 @@ import io.vertx.ext.auth.jdbc.JDBCAuth
 
 def jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig)
 
-def authProvider = JDBCAuth.create(jdbcClient)
+def authProvider = JDBCAuth.create(vertx, jdbcClient)
 
 ----
 

@@ -35,7 +35,7 @@ public class AuthJDBCExamples {
 
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
-    JDBCAuth authProvider = JDBCAuth.create(jdbcClient);
+    JDBCAuth authProvider = JDBCAuth.create(vertx, jdbcClient);
   }
 
   public void example6(AuthProvider authProvider) {

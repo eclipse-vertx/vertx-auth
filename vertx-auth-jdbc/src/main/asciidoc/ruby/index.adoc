@@ -36,7 +36,7 @@ require 'vertx-auth-jdbc/jdbc_auth'
 
 jdbcClient = VertxJdbc::JDBCClient.create_shared(vertx, jdbcClientConfig)
 
-authProvider = VertxAuthJdbc::JDBCAuth.create(jdbcClient)
+authProvider = VertxAuthJdbc::JDBCAuth.create(vertx, jdbcClient)
 
 ----
 

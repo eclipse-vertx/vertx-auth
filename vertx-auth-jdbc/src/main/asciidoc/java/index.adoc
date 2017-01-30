@@ -33,7 +33,7 @@ Once you've got one of those you can create a `link:../../apidocs/io/vertx/ext/a
 ----
 JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
-JDBCAuth authProvider = JDBCAuth.create(jdbcClient);
+JDBCAuth authProvider = JDBCAuth.create(vertx, jdbcClient);
 ----
 
 Once you've got your instance you can authenticate and authorise with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.

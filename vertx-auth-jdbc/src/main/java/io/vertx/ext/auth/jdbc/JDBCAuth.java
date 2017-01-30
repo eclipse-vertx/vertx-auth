@@ -18,6 +18,7 @@ package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Vertx;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -56,8 +57,8 @@ public interface JDBCAuth extends AuthProvider {
    * @param client  the JDBC client instance
    * @return  the auth provider
    */
-  static JDBCAuth create(JDBCClient client) {
-    return new JDBCAuthImpl(client);
+  static JDBCAuth create(Vertx vertx, JDBCClient client) {
+    return new JDBCAuthImpl(vertx, client);
   }
 
   /**

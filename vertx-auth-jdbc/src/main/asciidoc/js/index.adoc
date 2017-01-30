@@ -36,7 +36,7 @@ var JDBCAuth = require("vertx-auth-jdbc-js/jdbc_auth");
 
 var jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
-var authProvider = JDBCAuth.create(jdbcClient);
+var authProvider = JDBCAuth.create(vertx, jdbcClient);
 
 ----
 

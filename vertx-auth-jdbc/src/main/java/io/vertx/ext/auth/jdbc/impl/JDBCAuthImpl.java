@@ -16,13 +16,11 @@
 
 package io.vertx.ext.auth.jdbc.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.VertxException;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -33,8 +31,6 @@ import io.vertx.ext.sql.SQLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Random;
 import java.util.function.Consumer;
 
 /**
@@ -47,10 +43,11 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   private String rolesQuery = DEFAULT_ROLES_QUERY;
   private String permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
   private String rolePrefix = DEFAULT_ROLE_PREFIX;
-  private JDBCHashStrategy strategy = new DefaultHashStrategy();
+  private JDBCHashStrategy strategy;
 
-  public JDBCAuthImpl(JDBCClient client) {
+  public JDBCAuthImpl(Vertx vertx, JDBCClient client) {
     this.client = client;
+    strategy = new DefaultHashStrategy(vertx);
   }
 
   @Override
@@ -167,7 +164,11 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   private class DefaultHashStrategy implements JDBCHashStrategy {
 
-    private final Random random = new SecureRandom();
+    private final PRNG random;
+
+    DefaultHashStrategy(Vertx vertx) {
+      random = new PRNG(vertx);
+    }
 
     @Override
     public String generateSalt() {
