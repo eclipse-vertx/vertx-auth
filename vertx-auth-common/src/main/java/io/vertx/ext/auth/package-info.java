@@ -127,6 +127,21 @@
  *
  * If you wish your user objects to be clusterable you should make sure they implement {@link io.vertx.core.shareddata.impl.ClusterSerializable}.
  *
+ * == Pseudo Random Number Generator
+ *
+ * Since Secure Random from java can block during the aquisition of entropy from the system, we provide a simple wrapper
+ * around it that can be used without the danger of blocking the event loop.
+ *
+ * By default this PRNG uses a mixed mode, blocking for seeding, non blocking for generating. The PRNG will also reseed
+ * every 5 minutes with 64bits of new entropy. However this can all be configured using the system properties:
+ *
+ * * io.vertx.ext.auth.prng.algorithm e.g.: SHA1PRNG
+ * * io.vertx.ext.auth.prng.seed.interval e.g.: 1000 (every second)
+ * * io.vertx.ext.auth.prng.seed.bits e.g.: 128
+ *
+ * Most users should not need to configure these values unless if you notice that the performance of your application is
+ * being affected by the PRNG algorithm.
+ *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
