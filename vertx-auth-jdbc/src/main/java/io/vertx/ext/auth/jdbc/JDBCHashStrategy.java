@@ -28,6 +28,13 @@ import io.vertx.core.json.JsonArray;
 public interface JDBCHashStrategy {
 
   /**
+   * Compute a random salt.
+   *
+   * @return a non null salt value
+   */
+  String generateSalt();
+
+  /**
    * Compute the hashed password given the unhashed password and the salt
    * @param password  the unhashed password
    * @param salt  the salt

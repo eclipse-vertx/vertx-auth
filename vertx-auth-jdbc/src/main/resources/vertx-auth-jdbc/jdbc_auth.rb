@@ -1,5 +1,6 @@
 require 'vertx-auth-common/user'
 require 'vertx-jdbc/jdbc_client'
+require 'vertx/vertx'
 require 'vertx-auth-common/auth_provider'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.auth.jdbc.JDBCAuth
@@ -43,13 +44,14 @@ module VertxAuthJdbc
       raise ArgumentError, "Invalid arguments when calling authenticate(#{arg0})"
     end
     #  Create a JDBC auth provider implementation
+    # @param [::Vertx::Vertx] vertx 
     # @param [::VertxJdbc::JDBCClient] client the JDBC client instance
     # @return [::VertxAuthJdbc::JDBCAuth] the auth provider
-    def self.create(client=nil)
-      if client.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthJdbc::JDBCAuth.java_method(:create, [Java::IoVertxExtJdbc::JDBCClient.java_class]).call(client.j_del),::VertxAuthJdbc::JDBCAuth)
+    def self.create(vertx=nil,client=nil)
+      if vertx.class.method_defined?(:j_del) && client.class.method_defined?(:j_del) && !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthJdbc::JDBCAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtJdbc::JDBCClient.java_class]).call(vertx.j_del,client.j_del),::VertxAuthJdbc::JDBCAuth)
       end
-      raise ArgumentError, "Invalid arguments when calling create(#{client})"
+      raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{client})"
     end
     #  Set the authentication query to use. Use this if you want to override the default authentication query.
     # @param [String] authenticationQuery the authentication query
@@ -86,6 +88,28 @@ module VertxAuthJdbc
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:setRolePrefix, [Java::java.lang.String.java_class]).call(rolePrefix),::VertxAuthJdbc::JDBCAuth)
       end
       raise ArgumentError, "Invalid arguments when calling set_role_prefix(#{rolePrefix})"
+    end
+    #  Compute the hashed password given the unhashed password and the salt
+    # 
+    #  The implementation relays to the JDBCHashStrategy provided.
+    # @param [String] password the unhashed password
+    # @param [String] salt the salt
+    # @return [String] the hashed password
+    def compute_hash(password=nil,salt=nil)
+      if password.class == String && salt.class == String && !block_given?
+        return @j_del.java_method(:computeHash, [Java::java.lang.String.java_class,Java::java.lang.String.java_class]).call(password,salt)
+      end
+      raise ArgumentError, "Invalid arguments when calling compute_hash(#{password},#{salt})"
+    end
+    #  Compute a salt string.
+    # 
+    #  The implementation relays to the JDBCHashStrategy provided.
+    # @return [String] a non null salt value
+    def generate_salt
+      if !block_given?
+        return @j_del.java_method(:generateSalt, []).call()
+      end
+      raise ArgumentError, "Invalid arguments when calling generate_salt()"
     end
   end
 end

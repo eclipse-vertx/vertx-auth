@@ -33,7 +33,7 @@ Once you've got one of those you can create a `link:../../apidocs/io/vertx/ext/a
 ----
 JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
-JDBCAuth authProvider = JDBCAuth.create(jdbcClient);
+JDBCAuth authProvider = JDBCAuth.create(vertx, jdbcClient);
 ----
 
 Once you've got your instance you can authenticate and authorise with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
@@ -85,6 +85,28 @@ If you want to override this behaviour you can do so by providing an alternative
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
+
+== Hashing passwords
+
+Like any application there will be a time where you need to store new users into the database. Has you have learn
+passwords are not stored in plain text but hashed according to the hashing strategy. The same strategy is required
+to hash new password before storing it to the database. Doing it is a 3 step task.
+
+1. Generate a salt string
+2. Hash the password given the salt string
+3. Store it to the database
+
+[source,java]
+----
+String salt = auth.generateSalt();
+String hash = auth.computeHash("sausages", salt);
+// save to the database
+conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
+  if (res.succeeded()) {
+    // success!
+  }
+});
+----
 
 == Authentication
 
