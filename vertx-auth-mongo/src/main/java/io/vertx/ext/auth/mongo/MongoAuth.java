@@ -348,10 +348,7 @@ public interface MongoAuth extends AuthProvider {
    *          a list of permissions to be set, or {@code null} if this is already set in {@code principal}
    * @param resultHandler
    *          the ResultHandler will be provided with the id of the generated record
-   * @throws IllegalArgumentException
-   *          if the salt or password keys are present in the {@code principal}, or if the corresponding key for
-   *          username, roles or permission in the {@code principal} object is already occupied by a different value.
    */
   void insertUser(JsonObject principal, String username, String password, List<String> roles, List<String> permissions,
-                  Handler<AsyncResult<String>> resultHandler) throws IllegalArgumentException;
+                  Handler<AsyncResult<String>> resultHandler);
 }
