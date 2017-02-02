@@ -44,7 +44,7 @@
  *
  * Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuth} instance as follows:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example5}
  * ----
@@ -60,6 +60,38 @@
  * The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
  * concatenated with a salt. It also assumes the salt is stored in the table too.
  *
+ * The basic data definition for the storage should look like this:
+ *
+ * [source,sql]
+ * ----
+ * --
+ * -- Take this script with a grain of salt and adapt it to your RDBMS
+ * --
+ * CREATE TABLE `user` (
+ *   `username` VARCHAR(255) NOT NULL,
+ *   `password` VARCHAR(255) NOT NULL,
+ *   `password_salt` VARCHAR(255) NOT NULL
+ * );
+ *
+ * CREATE TABLE `user_roles` (
+ *   `username` VARCHAR(255) NOT NULL,
+ *   `role` VARCHAR(255) NOT NULL
+ * );
+ *
+ * CREATE TABLE `roles_perms` (
+ *   `role` VARCHAR(255) NOT NULL,
+ *   `perm` VARCHAR(255) NOT NULL
+ * );
+ *
+ * ALTER TABLE user ADD CONSTRAINT `pk_username` PRIMARY KEY (username);
+ * ALTER TABLE user_roles ADD CONSTRAINT `pk_user_roles` PRIMARY KEY (username, role);
+ * ALTER TABLE roles_perms ADD CONSTRAINT `pk_roles_perms` PRIMARY KEY (role);
+ *
+ * ALTER TABLE user_roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFERENCES user(username);
+ * ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES roles_perms(role);
+ *
+ * ----
+ *
  * If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
  * {@link io.vertx.ext.auth.jdbc.JDBCAuth#setHashStrategy(JDBCHashStrategy)}.
  *
@@ -67,12 +99,27 @@
  * with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
  * never to store your passwords as plain text.
  *
+ * == Hashing passwords
+ *
+ * Like any application there will be a time where you need to store new users into the database. Has you have learn
+ * passwords are not stored in plain text but hashed according to the hashing strategy. The same strategy is required
+ * to hash new password before storing it to the database. Doing it is a 3 step task.
+ *
+ * 1. Generate a salt string
+ * 2. Hash the password given the salt string
+ * 3. Store it to the database
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthJDBCExamples#example9}
+ * ----
+ *
  * == Authentication
  *
  * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
  * authentication info:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example6}
  * ----
@@ -86,14 +133,14 @@
  * If validating if a user has a particular permission simply pass the permission into.
  * {@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example7}
  * ----
  *
  * If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthJDBCExamples#example8}
  * ----

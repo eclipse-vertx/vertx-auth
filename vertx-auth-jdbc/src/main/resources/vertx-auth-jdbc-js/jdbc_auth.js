@@ -18,11 +18,12 @@
 var utils = require('vertx-js/util/utils');
 var User = require('vertx-auth-common-js/user');
 var JDBCClient = require('vertx-jdbc-js/jdbc_client');
+var Vertx = require('vertx-js/vertx');
 var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JJDBCAuth = io.vertx.ext.auth.jdbc.JDBCAuth;
+var JJDBCAuth = Java.type('io.vertx.ext.auth.jdbc.JDBCAuth');
 
 /**
 
@@ -109,6 +110,39 @@ var JDBCAuth = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   Compute the hashed password given the unhashed password and the salt
+  
+   The implementation relays to the JDBCHashStrategy provided.
+
+   @public
+   @param password {string} the unhashed password 
+   @param salt {string} the salt 
+   @return {string} the hashed password
+   */
+  this.computeHash = function(password, salt) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'string') {
+      return j_jDBCAuth["computeHash(java.lang.String,java.lang.String)"](password, salt);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Compute a salt string.
+  
+   The implementation relays to the JDBCHashStrategy provided.
+
+   @public
+
+   @return {string} a non null salt value
+   */
+  this.generateSalt = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_jDBCAuth["generateSalt()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
@@ -138,13 +172,14 @@ JDBCAuth._create = function(jdel) {
  Create a JDBC auth provider implementation
 
  @memberof module:vertx-auth-jdbc-js/jdbc_auth
+ @param vertx {Vertx} 
  @param client {JDBCClient} the JDBC client instance 
  @return {JDBCAuth} the auth provider
  */
-JDBCAuth.create = function(client) {
+JDBCAuth.create = function(vertx, client) {
   var __args = arguments;
-  if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(JDBCAuth, JJDBCAuth["create(io.vertx.ext.jdbc.JDBCClient)"](client._jdel));
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel) {
+    return utils.convReturnVertxGen(JDBCAuth, JJDBCAuth["create(io.vertx.core.Vertx,io.vertx.ext.jdbc.JDBCClient)"](vertx._jdel, client._jdel));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

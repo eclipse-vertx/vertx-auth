@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth;
 
-import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
@@ -44,7 +43,6 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
-  @CacheReturn
   User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
@@ -54,7 +52,6 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
-  @CacheReturn
   User clearCache();
 
   /**

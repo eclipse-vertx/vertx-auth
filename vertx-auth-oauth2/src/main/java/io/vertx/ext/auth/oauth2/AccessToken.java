@@ -59,4 +59,12 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken logout(Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+   *
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken introspect(Handler<AsyncResult<Void>> callback);
 }

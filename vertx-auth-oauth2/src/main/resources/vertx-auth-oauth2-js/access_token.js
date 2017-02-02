@@ -21,7 +21,7 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JAccessToken = io.vertx.ext.auth.oauth2.AccessToken;
+var JAccessToken = Java.type('io.vertx.ext.auth.oauth2.AccessToken');
 
 /**
  AccessToken extension to the User interface
@@ -163,6 +163,27 @@ var AccessToken = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
       j_accessToken["logout(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        callback(null, null);
+      } else {
+        callback(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+
+   @public
+   @param callback {function} - The callback function returning the results. 
+   @return {AccessToken}
+   */
+  this.introspect = function(callback) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_accessToken["introspect(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
         callback(null, null);
       } else {

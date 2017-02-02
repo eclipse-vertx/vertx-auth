@@ -4,9 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 
@@ -44,5 +42,33 @@ public class JWTTest {
     assertFalse(jwt.isUnsecure());
     System.out.println(jwt.availableAlgorithms());
     assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("RS256", "none")));
+  }
+
+  @Test
+  public void createPublicKey2() throws Exception {
+    JWT jwt = new JWT(
+      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuGbXWiK3dQTyCbX5xdE4\n" +
+      "yCuYp0AF2d15Qq1JSXT/lx8CEcXb9RbDddl8jGDv+spi5qPa8qEHiK7FwV2KpRE9\n" +
+      "83wGPnYsAm9BxLFb4YrLYcDFOIGULuk2FtrPS512Qea1bXASuvYXEpQNpGbnTGVs\n" +
+      "WXI9C+yjHztqyL2h8P6mlThPY9E9ue2fCqdgixfTFIF9Dm4SLHbphUS2iw7w1JgT\n" +
+      "69s7of9+I9l5lsJ9cozf1rxrXX4V1u/SotUuNB3Fp8oB4C1fLBEhSlMcUJirz1E8\n" +
+      "AziMCxS+VrRPDM+zfvpIJg3JljAh3PJHDiLu902v9w+Iplu1WyoB2aPfitxEhRN0\n" +
+      "YwIDAQAB", false);
+    assertFalse(jwt.isUnsecure());
+    assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("RS256", "none")));
+    System.out.println(
+      jwt.decode("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.dxXF3MdsyW-AuvwJpaQtrZ33fAde9xWxpLIg9cO2tMLH2GSRNuLAe61KsJusZhqZB9Iy7DvflcmRz-9OZndm6cj_ThGeJH2LLc90K83UEvvRPo8l85RrQb8PcanxCgIs2RcZOLygERizB3pr5icGkzR7R2y6zgNCjKJ5_NJ6EiZsGN6_nc2PRK_DbyY-Wn0QDxIxKoA5YgQJ9qafe7IN980pXvQv2Z62c3XR8dYuaXBqhthBj-AbaFHEpZapN-V-TmuLNzR2MCB6Xr7BYMuCaqWf_XU8og4XNe8f_8w9Wv5vvgqMM1KhqVpG5VdMJv4o_L4NoCROHhtUQSLRh2M9cA").encodePrettily()
+    );
+  }
+
+  @Test
+  public void createPublicKey3() throws Exception {
+    JWT jwt = new JWT(
+      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjoVg6150oqh7csrGMsttu7r+s4YBkYDkKrg2v6Gd5NhJw9NKnFlojPnLPoDSlxpNpN2sWegexcsFdDdmtuMzTxQ3hnkFWHDDXsyfj2fKQwDjgcxg95nRaaI+/OGhWbEsGdt/A5jxg2f4Vp4VLTwCj7Ujq4hVx67vO/zbJ2k0cD2uz5T731tvqweC7H/Os+G8B1+PpH5e1jGkDPZohe4ERCEdwNcC9IAt1tPr/LKfh+84hOkE3i9mGG/LGUiJShtw7ia2jXTMb1JErlJsLJOjh+guz6OztQOICN//+rRA4AACB//+IeJ8mr/jN/dww+RfYyeAd/SId56ae8H4SE4HQQIDAQAB", false);
+    assertFalse(jwt.isUnsecure());
+    assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("RS256", "none")));
+    System.out.println(
+      jwt.decode("eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIxOWZkMzViZi0yNzRkLTRjNDItOTNlNi02ZjI4MjA2YmNkNjAiLCJleHAiOjE0ODIyNDUzNDIsIm5iZiI6MCwiaWF0IjoxNDgyMjQ1MjgyLCJpc3MiOiJodHRwczovL3NlY3VyZS1zc28tc3NvLmU4Y2EuZW5naW50Lm9wZW5zaGlmdGFwcHMuY29tL2F1dGgvcmVhbG1zL21hc3RlciIsImF1ZCI6ImRlbW9hcHAiLCJzdWIiOiJkZDZiMTZiMS1mM2RiLTQxMGEtYjBjNC1kMWIwZmMyMzAwOGMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJkZW1vYXBwIiwic2Vzc2lvbl9zdGF0ZSI6Ijc0Nzg3NmNmLTFiN2YtNGQyZC05OTdjLTRkODhhNmNlMjU2ZSIsImNsaWVudF9zZXNzaW9uIjoiZjlkODZiNTYtZWQzNy00Mjg1LWE2MjEtNTcyOTk4M2MzNjkyIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImNyZWF0ZS1yZWFsbSIsImFkbWluIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibWFzdGVyLXJlYWxtIjp7InJvbGVzIjpbIm1hbmFnZS1ldmVudHMiLCJ2aWV3LXJlYWxtIiwidmlldy1pZGVudGl0eS1wcm92aWRlcnMiLCJtYW5hZ2UtcmVhbG0iLCJtYW5hZ2UtaWRlbnRpdHktcHJvdmlkZXJzIiwiaW1wZXJzb25hdGlvbiIsInZpZXctZXZlbnRzIiwiY3JlYXRlLWNsaWVudCIsIm1hbmFnZS11c2VycyIsInZpZXctdXNlcnMiLCJ2aWV3LWNsaWVudHMiLCJtYW5hZ2UtY2xpZW50cyJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbiJ9.UNVAIx7bA4_sxyjluz3NwdP43zE9ItxhCWW9SuMnvVn4J849Mgu7HX3pSrQcDDZyTNiHSJ6a_XoSNoUKFiG8CmiGSiQvu2v8mY3KvJDTQ7mIw9hKjLgBj7Ybm_QE55mlEf6lviohNGvt4SeOEiMNsV07NAtAUDS7qYh9IWEYFUKWBgeXlSipfHmCCmBSUwavNmJinOO2Fx27sZIjJ-icVrim0mHjGSkytzBdrb9mUOyoCkZyFzWOOhW5pZfa5JJFfLOxrJlUCglbkn-K5qneGItisRQRtCckV-fN9lL6hq8dmSB6VvDBfMRzYZ1ORQMP57ydYYJeYMDYDAF8enMNEA").encodePrettily()
+    );
   }
 }

@@ -120,6 +120,40 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
+  public OAuth2Auth introspectToken(String token, Handler<AsyncResult<AccessToken>> handler) {
+    return introspectToken(token, null, res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+        return;
+      }
+      // convert from json to AccessToken
+      final JsonObject json = res.result();
+
+      try {
+        final AccessToken accessToken = new AccessTokenImpl(this,
+          new JsonObject()
+            .put("access_token", token)
+            .mergeIn(json));
+
+        if (accessToken.expired()) {
+          handler.handle(Future.failedFuture("Expired token"));
+          return;
+        }
+
+        handler.handle(Future.succeededFuture(accessToken));
+      } catch (RuntimeException e) {
+        handler.handle(Future.failedFuture(e));
+      }
+    });
+  }
+
+  @Override
+  public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler) {
+    flow.introspectToken(token, tokenType, handler);
+    return this;
+  }
+
+  @Override
   public String getScopeSeparator() {
     final String sep = config.getScopeSeparator();
     return sep == null ? " " : sep;

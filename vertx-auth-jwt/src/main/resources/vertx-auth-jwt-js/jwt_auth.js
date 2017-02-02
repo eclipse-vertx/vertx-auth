@@ -22,8 +22,8 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JJWTAuth = io.vertx.ext.auth.jwt.JWTAuth;
-var JWTOptions = io.vertx.ext.auth.jwt.JWTOptions;
+var JJWTAuth = Java.type('io.vertx.ext.auth.jwt.JWTAuth');
+var JWTOptions = Java.type('io.vertx.ext.auth.jwt.JWTOptions');
 
 /**
 
@@ -65,7 +65,7 @@ var JWTAuth = function(j_val) {
   this.generateToken = function(claims, options) {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return j_jWTAuth["generateToken(io.vertx.core.json.JsonObject,io.vertx.ext.auth.jwt.JWTOptions)"](utils.convParamJsonObject(claims), options != null ? new JWTOptions(new JsonObject(JSON.stringify(options))) : null);
+      return j_jWTAuth["generateToken(io.vertx.core.json.JsonObject,io.vertx.ext.auth.jwt.JWTOptions)"](utils.convParamJsonObject(claims), options != null ? new JWTOptions(new JsonObject(Java.asJSONCompatible(options))) : null);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

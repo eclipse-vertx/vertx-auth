@@ -217,4 +217,32 @@ public class AuthOAuth2Examples {
     // e.g. `preferred_username`
     String username = KeycloakHelper.preferredUsername(principal);
   }
+
+
+  public void example15(OAuth2Auth oauth2, AccessToken token) {
+    // OAuth2Auth level
+    oauth2.introspectToken("opaque string", res -> {
+      if (res.succeeded()) {
+        // token is valid!
+        AccessToken accessToken = res.result();
+      }
+    });
+
+    // User level
+    token.introspect(res -> {
+      if (res.succeeded()) {
+        // Token is valid!
+      }
+    });
+  }
+
+  public void example16(OAuth2Auth oauth2) {
+    // OAuth2Auth level
+    oauth2.decodeToken("jwt-token", res -> {
+      if (res.succeeded()) {
+        // token is valid!
+        AccessToken accessToken = res.result();
+      }
+    });
+  }
 }

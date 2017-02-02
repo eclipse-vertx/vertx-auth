@@ -20,7 +20,7 @@ var User = require('vertx-auth-common-js/user');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JAuthProvider = io.vertx.ext.auth.AuthProvider;
+var JAuthProvider = Java.type('io.vertx.ext.auth.AuthProvider');
 
 /**
 

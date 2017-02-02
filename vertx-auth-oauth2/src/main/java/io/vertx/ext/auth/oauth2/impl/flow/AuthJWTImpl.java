@@ -18,7 +18,6 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
@@ -61,5 +60,10 @@ public class AuthJWTImpl implements OAuth2Flow {
         handler.handle(Future.failedFuture(res.cause()));
       }
     });
+  }
+
+  @Override
+  public void introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler) {
+    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 }

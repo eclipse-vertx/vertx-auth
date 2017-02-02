@@ -1,4 +1,4 @@
-moduleName = vertx-auth-jwt-module
+moduleName = io.vertx.ext.auth.jwt.JWTAuth-module
 moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.auth.jwt.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.ext.auth.jwt.GroovyStaticExtension
+extensionClasses = io.vertx.groovy.ext.auth.jwt.JWTAuth_GroovyExtension
+staticExtensionClasses = io.vertx.groovy.ext.auth.jwt.JWTAuth_GroovyStaticExtension

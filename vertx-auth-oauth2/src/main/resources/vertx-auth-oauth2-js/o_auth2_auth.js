@@ -23,8 +23,8 @@ var AuthProvider = require('vertx-auth-common-js/auth_provider');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JOAuth2Auth = io.vertx.ext.auth.oauth2.OAuth2Auth;
-var OAuth2ClientOptions = io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+var JOAuth2Auth = Java.type('io.vertx.ext.auth.oauth2.OAuth2Auth');
+var OAuth2ClientOptions = Java.type('io.vertx.ext.auth.oauth2.OAuth2ClientOptions');
 
 /**
 
@@ -135,7 +135,7 @@ var OAuth2Auth = function(j_val) {
   };
 
   /**
-   Decode a token to a {@link AccessToken} object. This is useful to handle bearer tokens.
+   Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
 
    @public
    @param token {string} the access token (base64 string) 
@@ -150,6 +150,39 @@ var OAuth2Auth = function(j_val) {
         handler(utils.convReturnVertxGen(AccessToken, ar.result()), null);
       } else {
         handler(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
+   meta-information about this token.
+
+   @public
+   @param token {string} the access token (base64 string) 
+   @param tokenType {string} hint to the token type e.g.: `access_token` 
+   @param handler {function} A handler to receive the event 
+   @return {OAuth2Auth} self
+   */
+  this.introspectToken = function() {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_oAuth2Auth["introspectToken(java.lang.String,io.vertx.core.Handler)"](__args[0], function(ar) {
+      if (ar.succeeded()) {
+        __args[1](utils.convReturnVertxGen(AccessToken, ar.result()), null);
+      } else {
+        __args[1](null, ar.cause());
+      }
+    });
+      return that;
+    }  else if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
+      j_oAuth2Auth["introspectToken(java.lang.String,java.lang.String,io.vertx.core.Handler)"](__args[0], __args[1], function(ar) {
+      if (ar.succeeded()) {
+        __args[2](utils.convReturnJson(ar.result()), null);
+      } else {
+        __args[2](null, ar.cause());
       }
     });
       return that;
@@ -227,7 +260,7 @@ OAuth2Auth.create = function() {
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
     return utils.convReturnVertxGen(OAuth2Auth, JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1])));
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(OAuth2Auth, JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.ext.auth.oauth2.OAuth2ClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), __args[2] != null ? new OAuth2ClientOptions(new JsonObject(JSON.stringify(__args[2]))) : null));
+    return utils.convReturnVertxGen(OAuth2Auth, JOAuth2Auth["create(io.vertx.core.Vertx,io.vertx.ext.auth.oauth2.OAuth2FlowType,io.vertx.ext.auth.oauth2.OAuth2ClientOptions)"](__args[0]._jdel, io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf(__args[1]), __args[2] != null ? new OAuth2ClientOptions(new JsonObject(Java.asJSONCompatible(__args[2]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

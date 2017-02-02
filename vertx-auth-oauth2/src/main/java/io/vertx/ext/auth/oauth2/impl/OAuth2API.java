@@ -97,8 +97,14 @@ public class OAuth2API {
       }
     }
 
+    final boolean authorizationHeaderOnly = params.getBoolean("authorizationHeaderOnly", false);
+    // this is a control variable not to be sent to the provider
+    if (form != null) {
+      form.remove("authorizationHeaderOnly");
+    }
+
     // Enable the system to send authorization params in the body (for example github does not require to be in the header)
-    if (method != HttpMethod.GET && form != null) {
+    if (method != HttpMethod.GET && !authorizationHeaderOnly) {
       form.put("client_id", config.getClientID());
       if (config.getClientSecretParameterName() != null) {
         form.put(config.getClientSecretParameterName(), config.getClientSecret());

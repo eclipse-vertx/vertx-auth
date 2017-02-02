@@ -30,20 +30,19 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class AuthCodeImpl implements OAuth2Flow {
-
-  private final OAuth2AuthProviderImpl provider;
+public class AuthCodeImpl extends CommonFlow implements OAuth2Flow {
 
   public AuthCodeImpl(OAuth2AuthProviderImpl provider) {
-    this.provider = provider;
+    super(provider);
   }
 
   /**
    * Redirect the user to the authorization page
-   * @param params  - redirectURI: A String that represents the registered application URI where the user is redirected after authorization.
-   *                  scope:       A String that represents the application privileges.
-   *                  scopes:      A array of strings that will encoded as a single string "scope" following the provider requirements
-   *                  state:       A String that represents an optional opaque value used by the client to maintain state between the request and the callback.
+   *
+   * @param params - redirectURI: A String that represents the registered application URI where the user is redirected after authorization.
+   *               scope:       A String that represents the application privileges.
+   *               scopes:      A array of strings that will encoded as a single string "scope" following the provider requirements
+   *               state:       A String that represents an optional opaque value used by the client to maintain state between the request and the callback.
    */
   @Override
   public String authorizeURL(JsonObject params) {
@@ -65,8 +64,8 @@ public class AuthCodeImpl implements OAuth2Flow {
   /**
    * Returns the Access Token object.
    *
-   * @param params - code:        Authorization code (from previous step).
-   *                 redirectURI: A String that represents the callback uri.
+   * @param params  - code:        Authorization code (from previous step).
+   *                redirectURI: A String that represents the callback uri.
    * @param handler - The handler returning the results.
    */
   @Override

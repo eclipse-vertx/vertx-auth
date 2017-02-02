@@ -113,7 +113,7 @@ module VertxAuthOauth2
       end
       raise ArgumentError, "Invalid arguments when calling has_jwt_token?()"
     end
-    #  Decode a token to a {::VertxAuthOauth2::AccessToken} object. This is useful to handle bearer tokens.
+    #  Decode a token to a {::VertxAuthOauth2::AccessToken} object. This is useful to handle bearer JWT tokens.
     # @param [String] token the access token (base64 string)
     # @yield A handler to receive the event
     # @return [self]
@@ -123,6 +123,22 @@ module VertxAuthOauth2
         return self
       end
       raise ArgumentError, "Invalid arguments when calling decode_token(#{token})"
+    end
+    #  Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
+    #  meta-information about this token.
+    # @param [String] token the access token (base64 string)
+    # @param [String] tokenType hint to the token type e.g.: `access_token`
+    # @yield A handler to receive the event
+    # @return [self]
+    def introspect_token(token=nil,tokenType=nil)
+      if token.class == String && block_given? && tokenType == nil
+        @j_del.java_method(:introspectToken, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(token,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxAuthOauth2::AccessToken) : nil) }))
+        return self
+      elsif token.class == String && tokenType.class == String && block_given?
+        @j_del.java_method(:introspectToken, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(token,tokenType,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
+        return self
+      end
+      raise ArgumentError, "Invalid arguments when calling introspect_token(#{token},#{tokenType})"
     end
     #  Returns the scope separator.
     # 
