@@ -164,30 +164,41 @@ public class MongoAuthImpl implements MongoAuth {
   @Override
   public void insertUser(JsonObject principal, String username, String password, List<String> roles,
       List<String> permissions, Handler<AsyncResult<String>> resultHandler) {
+    // Note: IllegalArgumentExceptions are passed to the handler rather than thrown in order to provide
+    // the same functionality for generated code.
+
     // Salt and password field should only be set by us.
-    if (principal.containsKey(getSaltField()) || principal.containsKey(getPasswordField()))
-      Future.failedFuture(new IllegalArgumentException("Salt and password field should not be specified."));
+    if (principal.containsKey(getSaltField()) || principal.containsKey(getPasswordField())) {
+      resultHandler.handle(Future.failedFuture(new IllegalArgumentException("Salt and password field should not be specified.")));
+      return;
+    }
 
     // Shallow copy to prevent details leaking out.
     principal = principal.copy();
 
     if (username != null){
-      if (!username.equals(principal.getValue(getUsernameField(), username)))
-        Future.failedFuture(new IllegalArgumentException("Conflicting values for username."));
+      if (!username.equals(principal.getValue(getUsernameField(), username))) {
+        resultHandler.handle(Future.failedFuture(new IllegalArgumentException("Conflicting values for username.")));
+        return;
+      }
       principal.put(getUsernameField(), username);
     }
 
     if (roles != null) {
       JsonArray rolesArray = new JsonArray(roles);
-      if (!rolesArray.equals(principal.getValue(roleField, rolesArray)))
-        Future.failedFuture(new IllegalArgumentException("Conflicting values for roles."));
+      if (!rolesArray.equals(principal.getValue(roleField, rolesArray))) {
+        resultHandler.handle(Future.failedFuture(new IllegalArgumentException("Conflicting values for roles.")));
+        return;
+      }
       principal.put(roleField, rolesArray);
     }
 
     if (permissions != null) {
       JsonArray permissionsArray = new JsonArray(permissions);
-      if (!permissionsArray.equals(principal.getValue(permissionField, permissionsArray)))
-        Future.failedFuture(new IllegalArgumentException("Conflicting values for permissions."));
+      if (!permissionsArray.equals(principal.getValue(permissionField, permissionsArray))) {
+        resultHandler.handle(Future.failedFuture(new IllegalArgumentException("Conflicting values for permissions.")));
+        return;
+      }
       principal.put(permissionField, permissionsArray);
     }
     MongoUser user = new MongoUser(principal, this);

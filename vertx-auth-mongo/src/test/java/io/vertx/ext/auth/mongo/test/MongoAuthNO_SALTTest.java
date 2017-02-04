@@ -33,7 +33,7 @@ import org.junit.runners.model.InitializationError;
 
 /**
  * Testing MongoAuth with no encryption for the user password
- * 
+ *
  * @author mremme
  */
 
@@ -144,6 +144,59 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     await();
   }
 
+  @Test
+  public void testInsertWithConflictingTemplate() throws InterruptedException {
+    List<JsonObject> incompatibleTemplates = Arrays.asList(
+      new JsonObject().put(authProvider.getSaltField(), ""), // May not contain salt field
+      new JsonObject().put(authProvider.getPasswordField(), ""), // May not contain PW field
+      new JsonObject().put(authProvider.getUsernameField(), "bob"), // Name may not conflict
+      new JsonObject().put(authProvider.getRoleField(), Arrays.asList("other_role")), // Role may not conflict
+      new JsonObject().put(authProvider.getPermissionField(), Arrays.asList("commit_code")) // Perm may not conflict
+    );
+
+    final List<String> roles = Arrays.asList("developer");
+    final List<String> permissions = Arrays.asList("commit_code", "comment");
+
+    CountDownLatch latch = new CountDownLatch(incompatibleTemplates.size());
+    for (JsonObject template : incompatibleTemplates) {
+      authProvider.insertUser(template, "name", "pw", roles, permissions, onFailure(err -> {
+        assertTrue(err instanceof IllegalArgumentException);
+        latch.countDown();
+      }));
+    }
+    awaitLatch(latch);
+    testComplete();
+  }
+
+  @Test
+  public void testInsertWithTemplate() throws InterruptedException {
+    List<JsonObject> compatibleTemplates = Arrays.asList(
+      new JsonObject() // No shared fields
+        .put("myfield", "hello"),
+      new JsonObject() // Partial overlap
+        .put(authProvider.getUsernameField(), "name")
+        .put(authProvider.getRoleField(), Arrays.asList("developer"))
+        .put("myfield", "hello"),
+      new JsonObject() // Complete overlap
+        .put(authProvider.getUsernameField(), "name")
+        .put(authProvider.getRoleField(), Arrays.asList("developer"))
+        .put(authProvider.getPermissionField(), Arrays.asList("commit_code"))
+        .put("myfield", "hello")
+    );
+
+    final List<String> roles = Arrays.asList("developer");
+    final List<String> permissions = Arrays.asList("commit_code");
+
+    CountDownLatch latch = new CountDownLatch(compatibleTemplates.size());
+    for (JsonObject template : compatibleTemplates) {
+      authProvider.insertUser(template, "name", "pw", roles, permissions, onSuccess(id -> {
+        latch.countDown();
+      }));
+    }
+    awaitLatch(latch);
+    testComplete();
+  }
+
   /*
    * ################################################## preparation methods
    * ##################################################
@@ -214,7 +267,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   /**
    * Creates a user inside mongo. Returns true, if user was successfully added
-   * 
+   *
    * @param user
    * @param latch
    * @return
@@ -241,7 +294,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   /**
    * Creates JsonObject for login in the convenient way
-   * 
+   *
    * @param username
    *          the username to be used
    * @param password
