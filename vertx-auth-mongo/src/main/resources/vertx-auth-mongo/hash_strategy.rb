@@ -74,7 +74,7 @@ module VertxAuthMongo
     # @return [void]
     def set_salt_style(saltStyle=nil)
       if saltStyle.class == Symbol && !block_given?
-        return @j_del.java_method(:setSaltStyle, [Java::IoVertxExtAuthMongo::HashSaltStyle.java_class]).call(Java::IoVertxExtAuthMongo::HashSaltStyle.valueOf(saltStyle))
+        return @j_del.java_method(:setSaltStyle, [Java::IoVertxExtAuthMongo::HashSaltStyle.java_class]).call(Java::IoVertxExtAuthMongo::HashSaltStyle.valueOf(saltStyle.to_s))
       end
       raise ArgumentError, "Invalid arguments when calling set_salt_style(#{saltStyle})"
     end

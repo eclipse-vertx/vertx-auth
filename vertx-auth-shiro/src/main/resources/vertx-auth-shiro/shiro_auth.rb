@@ -55,7 +55,7 @@ module VertxAuthShiro
       if param_1.class.method_defined?(:j_del) && param_2.class == Hash && !block_given? && param_3 == nil
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthOptions.java_class]).call(param_1.j_del,Java::IoVertxExtAuthShiro::ShiroAuthOptions.new(::Vertx::Util::Utils.to_json_object(param_2))),::VertxAuthShiro::ShiroAuth)
       elsif param_1.class.method_defined?(:j_del) && param_2.class == Symbol && param_3.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(param_2),::Vertx::Util::Utils.to_json_object(param_3)),::VertxAuthShiro::ShiroAuth)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthShiro::ShiroAuth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1.j_del,Java::IoVertxExtAuthShiro::ShiroAuthRealmType.valueOf(param_2.to_s),::Vertx::Util::Utils.to_json_object(param_3)),::VertxAuthShiro::ShiroAuth)
       end
       raise ArgumentError, "Invalid arguments when calling create(#{param_1},#{param_2},#{param_3})"
     end

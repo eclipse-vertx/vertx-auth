@@ -28,21 +28,21 @@ import io.vertx.ext.auth.jwt.JWTOptions
  */
 fun JWTOptions(
   algorithm: String? = null,
-  audience: List<String>? = null,
-  audiences: List<String>? = null,
+  audience: Iterable<String>? = null,
+  audiences: Iterable<String>? = null,
   expiresInMinutes: Long? = null,
   expiresInSeconds: Long? = null,
   headers: Map<String, String>? = null,
   issuer: String? = null,
   noTimestamp: Boolean? = null,
-  permissions: List<String>? = null,
+  permissions: Iterable<String>? = null,
   subject: String? = null): JWTOptions = io.vertx.ext.auth.jwt.JWTOptions().apply {
 
   if (algorithm != null) {
     this.setAlgorithm(algorithm)
   }
   if (audience != null) {
-    this.setAudience(audience)
+    this.setAudience(audience.toList())
   }
   if (audiences != null) {
     for (item in audiences) {
@@ -67,7 +67,7 @@ fun JWTOptions(
     this.setNoTimestamp(noTimestamp)
   }
   if (permissions != null) {
-    this.setPermissions(permissions)
+    this.setPermissions(permissions.toList())
   }
   if (subject != null) {
     this.setSubject(subject)

@@ -63,6 +63,7 @@
 |[[revocationPath]]`revocationPath`|`String`|-
 |[[scopeSeparator]]`scopeSeparator`|`String`|-
 |[[sendBufferSize]]`sendBufferSize`|`Number (int)`|-
+|[[sendUnmaskedFrames]]`sendUnmaskedFrames`|`Boolean`|-
 |[[site]]`site`|`String`|-
 |[[soLinger]]`soLinger`|`Number (int)`|-
 |[[ssl]]`ssl`|`Boolean`|-

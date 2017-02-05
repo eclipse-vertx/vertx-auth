@@ -49,7 +49,7 @@ module VertxAuthOauth2
     # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
     def self.create_keycloak(vertx=nil,flow=nil,config=nil)
       if vertx.class.method_defined?(:j_del) && flow.class == Symbol && config.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:createKeycloak, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthOauth2::OAuth2Auth)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:createKeycloak, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow.to_s),::Vertx::Util::Utils.to_json_object(config)),::VertxAuthOauth2::OAuth2Auth)
       end
       raise ArgumentError, "Invalid arguments when calling create_keycloak(#{vertx},#{flow},#{config})"
     end
@@ -60,9 +60,9 @@ module VertxAuthOauth2
     # @return [::VertxAuthOauth2::OAuth2Auth] the auth provider
     def self.create(vertx=nil,flow=nil,config=nil)
       if vertx.class.method_defined?(:j_del) && flow.class == Symbol && !block_given? && config == nil
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow)),::VertxAuthOauth2::OAuth2Auth)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow.to_s)),::VertxAuthOauth2::OAuth2Auth)
       elsif vertx.class.method_defined?(:j_del) && flow.class == Symbol && config.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow),Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.new(::Vertx::Util::Utils.to_json_object(config))),::VertxAuthOauth2::OAuth2Auth)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtAuthOauth2::OAuth2Auth.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtAuthOauth2::OAuth2FlowType.java_class,Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.java_class]).call(vertx.j_del,Java::IoVertxExtAuthOauth2::OAuth2FlowType.valueOf(flow.to_s),Java::IoVertxExtAuthOauth2::OAuth2ClientOptions.new(::Vertx::Util::Utils.to_json_object(config))),::VertxAuthOauth2::OAuth2Auth)
       end
       raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{flow},#{config})"
     end
@@ -93,7 +93,7 @@ module VertxAuthOauth2
     # @return [self]
     def api(method=nil,path=nil,params=nil)
       if method.class == Symbol && path.class == String && params.class == Hash && block_given?
-        @j_del.java_method(:api, [Java::IoVertxCoreHttp::HttpMethod.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::IoVertxCoreHttp::HttpMethod.valueOf(method),path,::Vertx::Util::Utils.to_json_object(params),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
+        @j_del.java_method(:api, [Java::IoVertxCoreHttp::HttpMethod.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::IoVertxCoreHttp::HttpMethod.valueOf(method.to_s),path,::Vertx::Util::Utils.to_json_object(params),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
         return self
       end
       raise ArgumentError, "Invalid arguments when calling api(#{method},#{path},#{params})"
