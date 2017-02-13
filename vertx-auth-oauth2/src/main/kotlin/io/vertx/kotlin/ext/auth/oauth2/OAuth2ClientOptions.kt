@@ -67,6 +67,7 @@ import io.vertx.core.net.ProxyOptions
  * @param revocationPath 
  * @param scopeSeparator 
  * @param sendBufferSize 
+ * @param sendUnmaskedFrames 
  * @param site 
  * @param soLinger 
  * @param ssl 
@@ -88,18 +89,18 @@ import io.vertx.core.net.ProxyOptions
  * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.oauth2.OAuth2ClientOptions original] using Vert.x codegen.
  */
 fun OAuth2ClientOptions(
-  alpnVersions: List<HttpVersion>? = null,
+  alpnVersions: Iterable<HttpVersion>? = null,
   authorizationPath: String? = null,
   clientID: String? = null,
   clientSecret: String? = null,
   clientSecretParameterName: String? = null,
   connectTimeout: Int? = null,
-  crlPaths: List<String>? = null,
-  crlValues: List<io.vertx.core.buffer.Buffer>? = null,
+  crlPaths: Iterable<String>? = null,
+  crlValues: Iterable<io.vertx.core.buffer.Buffer>? = null,
   defaultHost: String? = null,
   defaultPort: Int? = null,
-  enabledCipherSuites: Set<String>? = null,
-  enabledSecureTransportProtocols: Set<String>? = null,
+  enabledCipherSuites: Iterable<String>? = null,
+  enabledSecureTransportProtocols: Iterable<String>? = null,
   extraParameters: io.vertx.core.json.JsonObject? = null,
   headers: io.vertx.core.json.JsonObject? = null,
   http2ClearTextUpgrade: Boolean? = null,
@@ -139,6 +140,7 @@ fun OAuth2ClientOptions(
   revocationPath: String? = null,
   scopeSeparator: String? = null,
   sendBufferSize: Int? = null,
+  sendUnmaskedFrames: Boolean? = null,
   site: String? = null,
   soLinger: Int? = null,
   ssl: Boolean? = null,
@@ -157,7 +159,7 @@ fun OAuth2ClientOptions(
   verifyHost: Boolean? = null): OAuth2ClientOptions = io.vertx.ext.auth.oauth2.OAuth2ClientOptions().apply {
 
   if (alpnVersions != null) {
-    this.setAlpnVersions(alpnVersions)
+    this.setAlpnVersions(alpnVersions.toList())
   }
   if (authorizationPath != null) {
     this.setAuthorizationPath(authorizationPath)
@@ -316,6 +318,9 @@ fun OAuth2ClientOptions(
   }
   if (sendBufferSize != null) {
     this.setSendBufferSize(sendBufferSize)
+  }
+  if (sendUnmaskedFrames != null) {
+    this.setSendUnmaskedFrames(sendUnmaskedFrames)
   }
   if (site != null) {
     this.setSite(site)

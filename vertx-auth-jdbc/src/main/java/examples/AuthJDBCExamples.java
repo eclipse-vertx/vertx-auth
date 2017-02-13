@@ -17,11 +17,13 @@
 package examples;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.SQLConnection;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -33,7 +35,7 @@ public class AuthJDBCExamples {
 
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
-    JDBCAuth authProvider = JDBCAuth.create(jdbcClient);
+    JDBCAuth authProvider = JDBCAuth.create(vertx, jdbcClient);
   }
 
   public void example6(AuthProvider authProvider) {
@@ -73,4 +75,15 @@ public class AuthJDBCExamples {
 
   }
 
+  public void example9(JDBCAuth auth, SQLConnection conn) {
+
+    String salt = auth.generateSalt();
+    String hash = auth.computeHash("sausages", salt);
+    // save to the database
+    conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
+      if (res.succeeded()) {
+        // success!
+      }
+    });
+  }
 }

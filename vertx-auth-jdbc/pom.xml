@@ -67,6 +67,8 @@
           <bnd><![CDATA[
           Import-Package: \
             groovy.lang.*;resolution:=optional,\
+            org.codehaus.groovy.*;resolution:=optional,\
+            kotlin.*;resolution:=optional,\
             io.vertx.codegen.annotations;resolution:=optional,\
             io.vertx.rxjava.*;resolution:=optional,\
             io.vertx.lang.groovy.*;resolution:=optional,\
