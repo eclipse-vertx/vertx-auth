@@ -252,6 +252,7 @@ public class OAuth2API {
       // for the case there was a http protocol error
       if (statusCode >= 400) {
         callback.handle(Future.failedFuture(HttpResponseStatus.valueOf(statusCode).reasonPhrase()));
+        return;
       }
       callback.handle(Future.succeededFuture(json));
     }
