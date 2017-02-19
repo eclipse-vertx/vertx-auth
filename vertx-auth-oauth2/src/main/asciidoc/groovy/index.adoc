@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-oauth2</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-oauth2:3.4.0.Beta1'
+compile 'io.vertx:vertx-auth-oauth2:3.4.0-SNAPSHOT'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility
@@ -75,8 +75,6 @@ An example on how to use this provider and authenticate with GitHub can be imple
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
 
 def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, [
   clientID:"YOUR_CLIENT_ID",
@@ -124,8 +122,6 @@ access token.
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
 
 // Set the client credentials and the OAuth2 server
 def credentials = [
@@ -174,9 +170,6 @@ need a fast way to test your application.
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
-import io.vertx.core.http.HttpMethod
 
 // Initialize the OAuth2 Library
 def oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD)
@@ -211,8 +204,6 @@ This flow is suitable when client is requesting access to the protected resource
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.OAuth2Auth
 
 // Set the client credentials and the OAuth2 server
 def credentials = [
@@ -305,8 +296,6 @@ This information is quite valuable since it allows to do authorization at the AP
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.OAuth2FlowType
-import io.vertx.ext.auth.oauth2.providers.KeycloakAuth
 // you would get this config from the keycloak admin console
 def keycloakJson = [
   realm:"master",
@@ -348,7 +337,6 @@ data (e.g. `preferred_username`) from the Keycloak principal. For example:
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.oauth2.KeycloakHelper
 // you can get the decoded `id_token` from the Keycloak principal
 def idToken = KeycloakHelper.idToken(principal)
 

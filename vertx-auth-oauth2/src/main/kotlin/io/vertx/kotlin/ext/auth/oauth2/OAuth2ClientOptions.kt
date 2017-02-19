@@ -48,6 +48,7 @@ import io.vertx.core.net.ProxyOptions
  * @param maxHeaderSize 
  * @param maxInitialLineLength 
  * @param maxPoolSize 
+ * @param maxRedirects 
  * @param maxWaitQueueSize 
  * @param maxWebsocketFrameSize 
  * @param metricsName 
@@ -121,6 +122,7 @@ fun OAuth2ClientOptions(
   maxHeaderSize: Int? = null,
   maxInitialLineLength: Int? = null,
   maxPoolSize: Int? = null,
+  maxRedirects: Int? = null,
   maxWaitQueueSize: Int? = null,
   maxWebsocketFrameSize: Int? = null,
   metricsName: String? = null,
@@ -261,6 +263,9 @@ fun OAuth2ClientOptions(
   }
   if (maxPoolSize != null) {
     this.setMaxPoolSize(maxPoolSize)
+  }
+  if (maxRedirects != null) {
+    this.setMaxRedirects(maxRedirects)
   }
   if (maxWaitQueueSize != null) {
     this.setMaxWaitQueueSize(maxWaitQueueSize)

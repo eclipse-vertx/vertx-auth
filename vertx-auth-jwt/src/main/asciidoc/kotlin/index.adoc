@@ -43,24 +43,23 @@ Its main advantages are:
 * It has a json body to contain any variable amount of data you want.
 * It's completely stateless.
 
-To create an instance of the provider you use `link:../../yardoc/VertxAuthJwt/JWTAuth.html[JWTAuth]`. You specify the configuration
+To create an instance of the provider you use `link:../../apidocs/io/vertx/ext/auth/jwt/JWTAuth.html[JWTAuth]`. You specify the configuration
 in a JSON object.
 
 Here's an example of creating a JWT auth provider:
 
 [source,java]
 ----
-require 'vertx-auth-jwt/jwt_auth'
 
-config = {
-  'keyStore' => {
-    'path' => "keystore.jceks",
-    'type' => "jceks",
-    'password' => "secret"
-  }
+var config = json {
+  obj("keyStore" to obj(
+      "path" to "keystore.jceks",
+      "type" to "jceks",
+      "password" to "secret"
+    ))
 }
 
-provider = VertxAuthJwt::JWTAuth.create(vertx, config)
+var provider = JWTAuth.create(vertx, config)
 
 ----
 
@@ -70,27 +69,25 @@ do:
 
 [source,java]
 ----
-require 'vertx-auth-jwt/jwt_auth'
 
-config = {
-  'keyStore' => {
-    'path' => "keystore.jceks",
-    'type' => "jceks",
-    'password' => "secret"
-  }
+var config = json {
+  obj("keyStore" to obj(
+      "path" to "keystore.jceks",
+      "type" to "jceks",
+      "password" to "secret"
+    ))
 }
 
-provider = VertxAuthJwt::JWTAuth.create(vertx, config)
+var provider = JWTAuth.create(vertx, config)
 
-# on the verify endpoint once you verify the identity of the user by its username/password
-if ("paulo".==(username) && "super_secret".==(password))
-  token = provider.generate_token({
-    'sub' => "paulo"
-  }, {
-  })
-  # now for any request to protected resources you should pass this string in the HTTP header Authorization as:
-  # Authorization: Bearer <token>
-end
+// on the verify endpoint once you verify the identity of the user by its username/password
+if ("paulo" == username && "super_secret" == password) {
+  var token = provider.generateToken(json {
+    obj("sub" to "paulo")
+  }, JWTOptions())
+  // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
+  // Authorization: Bearer <token>
+}
 
 ----
 
@@ -144,14 +141,13 @@ keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret 
 If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that
 case all you need to have is a public key im PEM format.
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx-auth-jwt/jwt_auth'
 
-config = {
-  'public-key' => "BASE64-ENCODED-PUBLIC_KEY"
+var config = json {
+  obj("public-key" to "BASE64-ENCODED-PUBLIC_KEY")
 }
-provider = VertxAuthJwt::JWTAuth.create(vertx, config)
+var provider = JWTAuth.create(vertx, config)
 
 ----
 <a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a><a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>

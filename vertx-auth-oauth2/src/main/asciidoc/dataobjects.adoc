@@ -44,6 +44,7 @@
 |[[maxHeaderSize]]`maxHeaderSize`|`Number (int)`|-
 |[[maxInitialLineLength]]`maxInitialLineLength`|`Number (int)`|-
 |[[maxPoolSize]]`maxPoolSize`|`Number (int)`|-
+|[[maxRedirects]]`maxRedirects`|`Number (int)`|-
 |[[maxWaitQueueSize]]`maxWaitQueueSize`|`Number (int)`|-
 |[[maxWebsocketFrameSize]]`maxWebsocketFrameSize`|`Number (int)`|-
 |[[metricsName]]`metricsName`|`String`|-

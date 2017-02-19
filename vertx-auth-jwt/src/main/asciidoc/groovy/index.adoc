@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jwt</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jwt:3.4.0.Beta1'
+compile 'io.vertx:vertx-auth-jwt:3.4.0-SNAPSHOT'
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
@@ -50,7 +50,6 @@ Here's an example of creating a JWT auth provider:
 
 [source,java]
 ----
-import io.vertx.ext.auth.jwt.JWTAuth
 
 def config = [
   keyStore:[
@@ -70,7 +69,6 @@ do:
 
 [source,java]
 ----
-import io.vertx.ext.auth.jwt.JWTAuth
 
 def config = [
   keyStore:[
@@ -145,7 +143,6 @@ case all you need to have is a public key im PEM format.
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.jwt.JWTAuth
 
 def config = [
   'public-key':"BASE64-ENCODED-PUBLIC_KEY"

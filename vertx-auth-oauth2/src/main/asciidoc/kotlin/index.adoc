@@ -73,38 +73,47 @@ The provider supports RFC7523 an extension to allow server to server authorizati
 
 An example on how to use this provider and authenticate with GitHub can be implemented as:
 
-[source,java]
+[source,kotlin]
 ----
-OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
-        .setClientID("YOUR_CLIENT_ID")
-        .setClientSecret("YOUR_CLIENT_SECRET")
-        .setSite("https://github.com/login")
-        .setTokenPath("/oauth/access_token")
-        .setAuthorizationPath("/oauth/authorize")
-);
+
+var oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, OAuth2ClientOptions(
+  clientID = "YOUR_CLIENT_ID",
+  clientSecret = "YOUR_CLIENT_SECRET",
+  site = "https://github.com/login",
+  tokenPath = "/oauth/access_token",
+  authorizationPath = "/oauth/authorize"))
 
 // when there is a need to access a protected resource or call a protected method,
 // call the authZ url for a challenge
 
-String authorization_uri = oauth2.authorizeURL(new JsonObject()
-    .put("redirect_uri", "http://localhost:8080/callback")
-    .put("scope", "notifications")
-    .put("state", "3(#0/!~"));
+var authorization_uri = oauth2.authorizeURL(json {
+  obj(
+    "redirect_uri" to "http://localhost:8080/callback",
+    "scope" to "notifications",
+    "state" to "3(#0/!~"
+  )
+})
 
 // when working with web application use the above string as a redirect url
 
 // in this case GitHub will call you back in the callback uri one should now complete the handshake as:
 
 
-String code = "xxxxxxxxxxxxxxxxxxxxxxxx"; // the code is provided as a url parameter by github callback call
+var code = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
-oauth2.getToken(new JsonObject().put("code", code).put("redirect_uri", "http://localhost:8080/callback"), res -> {
+oauth2.getToken(json {
+  obj(
+    "code" to code,
+    "redirect_uri" to "http://localhost:8080/callback"
+  )
+}, { res ->
   if (res.failed()) {
     // error, the code provided is not valid
   } else {
     // save the token and continue...
   }
-});
+})
+
 ----
 
 ==== Authorization Code flow
@@ -114,42 +123,49 @@ access their data. If the user approves the OAuth2 server sends to the client an
 part, the client POST the authorization code along with its client secret to the authority server in order to get the
 access token.
 
-[source,java]
+[source,kotlin]
 ----
-OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-    .setClientID("<client-id>")
-    .setClientSecret("<client-secret>")
-    .setSite("https://api.oauth.com");
+
+// Set the client credentials and the OAuth2 server
+var credentials = OAuth2ClientOptions(
+  clientID = "<client-id>",
+  clientSecret = "<client-secret>",
+  site = "https://api.oauth.com")
 
 
 // Initialize the OAuth2 Library
-OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
+var oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials)
 
 // Authorization oauth2 URI
-String authorization_uri = oauth2.authorizeURL(new JsonObject()
-    .put("redirect_uri", "http://localhost:8080/callback")
-    .put("scope", "<scope>")
-    .put("state", "<state>"));
+var authorization_uri = oauth2.authorizeURL(json {
+  obj(
+    "redirect_uri" to "http://localhost:8080/callback",
+    "scope" to "<scope>",
+    "state" to "<state>"
+  )
+})
 
 // Redirect example using Vert.x
-response.putHeader("Location", authorization_uri)
-    .setStatusCode(302)
-    .end();
+response.putHeader("Location", authorization_uri).setStatusCode(302).end()
 
-JsonObject tokenConfig = new JsonObject()
-    .put("code", "<code>")
-    .put("redirect_uri", "http://localhost:3000/callback");
+var tokenConfig = json {
+  obj(
+    "code" to "<code>",
+    "redirect_uri" to "http://localhost:3000/callback"
+  )
+}
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, res -> {
+oauth2.getToken(tokenConfig, { res ->
   if (res.failed()) {
-    System.err.println("Access Token Error: " + res.cause().getMessage());
+    System.err.println("Access Token Error: ${res.cause().getMessage()}")
   } else {
     // Get the access token object (the authorization code is given from the previous step).
-    AccessToken token = res.result();
+    var token = res.result()
   }
-});
+})
+
 ----
 
 ==== Password Credentials Flow
@@ -158,57 +174,70 @@ This flow is suitable when the resource owner has a trust relationship with the 
 operating system or a highly privileged application. Use this flow only when other flows are not viable or when you
 need a fast way to test your application.
 
-[source,java]
+[source,kotlin]
 ----
-OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD);
 
-JsonObject tokenConfig = new JsonObject()
-    .put("username", "username")
-    .put("password", "password");
+// Initialize the OAuth2 Library
+var oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD)
+
+var tokenConfig = json {
+  obj(
+    "username" to "username",
+    "password" to "password"
+  )
+}
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, res -> {
+oauth2.getToken(tokenConfig, { res ->
   if (res.failed()) {
-    System.err.println("Access Token Error: " + res.cause().getMessage());
+    System.err.println("Access Token Error: ${res.cause().getMessage()}")
   } else {
     // Get the access token object (the authorization code is given from the previous step).
-    AccessToken token = res.result();
+    var token = res.result()
 
-    oauth2.api(HttpMethod.GET, "/users", new JsonObject().put("access_token", token.principal().getString("access_token")), res2 -> {
+    oauth2.api(HttpMethod.GET, "/users", json {
+      obj("access_token" to token.principal().getString("access_token"))
+    }, { res2 ->
       // the user object should be returned here...
-    });
+    })
   }
-});
+})
+
 ----
 
 ==== Client Credentials Flow
 
 This flow is suitable when client is requesting access to the protected resources under its control.
 
-[source,java]
+[source,kotlin]
 ----
-OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-    .setClientID("<client-id>")
-    .setClientSecret("<client-secret>")
-    .setSite("https://api.oauth.com");
+
+// Set the client credentials and the OAuth2 server
+var credentials = OAuth2ClientOptions(
+  clientID = "<client-id>",
+  clientSecret = "<client-secret>",
+  site = "https://api.oauth.com")
 
 
 // Initialize the OAuth2 Library
-OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+var oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials)
 
-JsonObject tokenConfig = new JsonObject();
+var tokenConfig = json {
+  obj()
+}
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, res -> {
+oauth2.getToken(tokenConfig, { res ->
   if (res.failed()) {
-    System.err.println("Access Token Error: " + res.cause().getMessage());
+    System.err.println("Access Token Error: ${res.cause().getMessage()}")
   } else {
     // Get the access token object (the authorization code is given from the previous step).
-    AccessToken token = res.result();
+    var token = res.result()
   }
-});
+})
+
 ----
 
 === AccessToken object
@@ -216,32 +245,36 @@ oauth2.getToken(tokenConfig, res -> {
 When a token expires we need to refresh it. OAuth2 offers the AccessToken class that add a couple of useful methods
 to refresh the access token when it is expired.
 
-[source,java]
+[source,kotlin]
 ----
+// Check if the token is expired. If expired it is refreshed.
 if (token.expired()) {
   // Callbacks
-  token.refresh(res -> {
+  token.refresh({ res ->
     if (res.succeeded()) {
       // success
     } else {
       // error handling...
     }
-  });
+  })
 }
+
 ----
 
 When you've done with the token or you want to log out, you can revoke the access token and refresh token.
 
-[source,java]
+[source,kotlin]
 ----
-token.revoke("access_token", res -> {
+// Revoke only the access token
+token.revoke("access_token", { res ->
   // Session ended. But the refresh_token is still valid.
 
   // Revoke the refresh_token
-  token.revoke("refresh_token", res1 -> {
-    System.out.println("token revoked.");
-  });
-});
+  token.revoke("refresh_token", { res1 ->
+    println("token revoked.")
+  })
+})
+
 ----
 
 === Example configuration for common OAuth2 providers
@@ -270,47 +303,58 @@ For convenience there are several helpers to assist your with your configuration
 When using this Keycloak the provider has knowledge on how to parse access tokens and extract grants from inside.
 This information is quite valuable since it allows to do authorization at the API level, for example:
 
-[source,java]
+[source,kotlin]
 ----
-JsonObject keycloakJson = new JsonObject()
-    .put("realm", "master")
-    .put("realm-public-key", "MIIBIjANBgkqhk...wIDAQAB")
-    .put("auth-server-url", "http://localhost:9000/auth")
-    .put("ssl-required", "external")
-    .put("resource", "frontend")
-    .put("credentials", new JsonObject()
-        .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
+// you would get this config from the keycloak admin console
+var keycloakJson = json {
+  obj(
+    "realm" to "master",
+    "realm-public-key" to "MIIBIjANBgkqhk...wIDAQAB",
+    "auth-server-url" to "http://localhost:9000/auth",
+    "ssl-required" to "external",
+    "resource" to "frontend",
+    "credentials" to obj("secret" to "2fbf5e18-b923-4a83-9657-b4ebd5317f60")
+  )
+}
 
 // Initialize the OAuth2 Library
-OAuth2Auth oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, keycloakJson);
+var oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, keycloakJson)
 
 // first get a token (authenticate)
-oauth2.getToken(new JsonObject().put("username", "user").put("password", "secret"), res -> {
+oauth2.getToken(json {
+  obj(
+    "username" to "user",
+    "password" to "secret"
+  )
+}, { res ->
   if (res.failed()) {
     // error handling...
   } else {
-    AccessToken token = res.result();
+    var token = res.result()
 
     // now check for permissions
-    token.isAuthorised("account:manage-account", r -> {
+    token.isAuthorised("account:manage-account", { r ->
       if (r.result()) {
         // this user is authorized to manage its account
       }
-    });
+    })
   }
-});
+})
+
 ----
 
 We also provide a helper class for Keycloak so that we can we can easily retrieve decoded token and some necessary
 data (e.g. `preferred_username`) from the Keycloak principal. For example:
 
-[source,java]
+[source,kotlin]
 ----
-JsonObject idToken = KeycloakHelper.idToken(principal);
+// you can get the decoded `id_token` from the Keycloak principal
+var idToken = KeycloakHelper.idToken(principal)
 
 // you can also retrieve some properties directly from the Keycloak principal
 // e.g. `preferred_username`
-String username = KeycloakHelper.preferredUsername(principal);
+var username = KeycloakHelper.preferredUsername(principal)
+
 ----
 
 ==== Google Server to Server
@@ -328,21 +372,23 @@ Token introspection assumes that tokens are opaque, so they need to be validated
 token is validated it requires a round trip to the provider. Introspection can be performed at the OAuth2 level or at
 the User level:
 
-[source,java]
+[source,kotlin]
 ----
-oauth2.introspectToken("opaque string", res -> {
+// OAuth2Auth level
+oauth2.introspectToken("opaque string", { res ->
   if (res.succeeded()) {
     // token is valid!
-    AccessToken accessToken = res.result();
+    var accessToken = res.result()
   }
-});
+})
 
 // User level
-token.introspect(res -> {
+token.introspect({ res ->
   if (res.succeeded()) {
     // Token is valid!
   }
-});
+})
+
 ----
 
 === Verifying JWT tokens
@@ -353,12 +399,14 @@ JWT protocol at your application side only. Verifying JWT tokens is cheaper and 
 due to the stateless nature of JWTs it is not possible to know if a user is logged out and a token is invalid. For
 this specific case one needs to use the token introspection if the provider supports it.
 
-[source,java]
+[source,kotlin]
 ----
-oauth2.decodeToken("jwt-token", res -> {
+// OAuth2Auth level
+oauth2.decodeToken("jwt-token", { res ->
   if (res.succeeded()) {
     // token is valid!
-    AccessToken accessToken = res.result();
+    var accessToken = res.result()
   }
-});
+})
+
 ----

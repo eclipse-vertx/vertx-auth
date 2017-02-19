@@ -34,9 +34,14 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties");
 
-AuthProvider provider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, config);
+var config = json {
+  obj("properties_path" to "classpath:test-auth.properties")
+}
+
+var provider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, config)
+
+
 ----
 
 == Authentication
@@ -46,15 +51,22 @@ authentication info:
 
 [source,java]
 ----
-JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
 
-authProvider.authenticate(authInfo, res -> {
+var authInfo = json {
+  obj(
+    "username" to "tim",
+    "password" to "sausages"
+  )
+}
+
+authProvider.authenticate(authInfo, { res ->
   if (res.succeeded()) {
-    User user = res.result();
+    var user = res.result()
   } else {
     // Failed!
   }
-});
+})
+
 ----
 
 == Authorisation - Permission-Role Model
@@ -68,25 +80,31 @@ If validating if a user has a particular permission simply pass the permission i
 
 [source,java]
 ----
-user.isAuthorised("newsletter:edit:13", res -> {
+
+user.isAuthorised("newsletter:edit:13", { res ->
   if (res.succeeded()) {
-    boolean hasPermission = res.result();
+    var hasPermission = res.result()
   } else {
     // Failed to
   }
-});
+})
+
+
 ----
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
 [source,java]
 ----
-user.isAuthorised("role:manager", res -> {
+
+user.isAuthorised("role:manager", { res ->
   if (res.succeeded()) {
-    boolean hasRole = res.result();
+    var hasRole = res.result()
   } else {
     // Failed to
   }
-});
+})
+
+
 ----
 
 The default role prefix is `role:`. You can change this with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
@@ -162,7 +180,10 @@ This is done as follows:
 
 [source,java]
 ----
-AuthProvider provider = ShiroAuth.create(vertx, realm);
+
+var provider = ShiroAuth.create(vertx, realm)
+
+
 ----
 
 The implementation currently assumes that user/password based authentication is used.

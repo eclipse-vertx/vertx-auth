@@ -29,11 +29,14 @@ of those please consult the documentation for the MongoClient.
 
 Once you've got one of those you can create a `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html[MongoAuth]` instance as follows:
 
-[source,java]
+[source,kotlin]
 ----
-MongoClient client = MongoClient.createShared(vertx, mongoClientConfig);
-JsonObject authProperties = new JsonObject();
-MongoAuth authProvider = MongoAuth.create(client, authProperties);
+var client = MongoClient.createShared(vertx, mongoClientConfig)
+var authProperties = json {
+  obj()
+}
+var authProvider = MongoAuth.create(client, authProperties)
+
 ----
 
 Once you've got your instance you can authenticate and authorise with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
@@ -86,18 +89,22 @@ salt and password are stored inside the same place!
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
 authentication info:
 
-[source,java]
+[source,kotlin]
 ----
-JsonObject authInfo = new JsonObject()
-    .put("username", "tim")
-    .put("password", "sausages");
-authProvider.authenticate(authInfo, res -> {
+var authInfo = json {
+  obj(
+    "username" to "tim",
+    "password" to "sausages"
+  )
+}
+authProvider.authenticate(authInfo, { res ->
   if (res.succeeded()) {
-    User user = res.result();
+    var user = res.result()
   } else {
     // Failed!
   }
-});
+})
+
 ----
 Instead of the `username` and `password` field names used in the previous snippet, you should use:
 `link:../../apidocs/io/vertx/ext/auth/mongo/MongoAuth.html#setUsernameCredentialField-java.lang.String-[setUsernameCredentialField]` and
@@ -112,26 +119,32 @@ can have zero or more permissions.
 If validating if a user has a particular permission simply pass the permission into.
 `link:../../apidocs/io/vertx/ext/auth/User.html#isAuthorised-java.lang.String-io.vertx.core.Handler-[isAuthorised]` as follows:
 
-[source,java]
+[source,kotlin]
 ----
-user.isAuthorised("commit_code", res -> {
+
+user.isAuthorised("commit_code", { res ->
   if (res.succeeded()) {
-    boolean hasPermission = res.result();
+    var hasPermission = res.result()
   } else {
     // Failed to
   }
-});
+})
+
+
 ----
 
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
-[source,java]
+[source,kotlin]
 ----
-user.isAuthorised(MongoAuth.ROLE_PREFIX + "manager", res -> {
+
+user.isAuthorised("${MongoAuth.ROLE_PREFIX}manager", { res ->
   if (res.succeeded()) {
-    boolean hasRole = res.result();
+    var hasRole = res.result()
   } else {
     // Failed to
   }
-});
+})
+
+
 ----
