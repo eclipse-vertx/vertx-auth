@@ -12,7 +12,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-shiro</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-shiro:3.4.0.Beta1'
+compile 'io.vertx:vertx-auth-shiro:3.4.0-SNAPSHOT'
 ----
 
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
@@ -34,8 +34,6 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-import io.vertx.ext.auth.shiro.ShiroAuthRealmType
-import io.vertx.ext.auth.shiro.ShiroAuth
 
 def config = [
   properties_path:"classpath:test-auth.properties"
@@ -180,7 +178,6 @@ This is done as follows:
 
 [source,java]
 ----
-import io.vertx.ext.auth.shiro.ShiroAuth
 
 def provider = ShiroAuth.create(vertx, realm)
 

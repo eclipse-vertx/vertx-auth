@@ -65,19 +65,26 @@ Here's an example of authenticating a user using a simple username/password impl
 
 [source,java]
 ----
-JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "mypassword");
 
-authProvider.authenticate(authInfo, res -> {
+var authInfo = json {
+  obj(
+    "username" to "tim",
+    "password" to "mypassword"
+  )
+}
+
+authProvider.authenticate(authInfo, { res ->
   if (res.succeeded()) {
 
-    User user = res.result();
+    var user = res.result()
 
-    System.out.println("User " + user.principal() + " is now authenticated");
+    println("User ${user.principal()} is now authenticated")
 
   } else {
-    res.cause().printStackTrace();
+    res.cause().printStackTrace()
   }
-});
+})
+
 ----
 
 == Authorisation
@@ -92,21 +99,23 @@ Here's an example of authorising a user:
 
 [source,java]
 ----
-user.isAuthorised("printers:printer1234", res -> {
+
+user.isAuthorised("printers:printer1234", { res ->
   if (res.succeeded()) {
 
-    boolean hasAuthority = res.result();
+    var hasAuthority = res.result()
 
     if (hasAuthority) {
-      System.out.println("User has the authority");
+      println("User has the authority")
     } else {
-      System.out.println("User does not have the authority");
+      println("User does not have the authority")
     }
 
   } else {
-    res.cause().printStackTrace();
+    res.cause().printStackTrace()
   }
-});
+})
+
 ----
 
 And another example of authorising in a roles based model which uses `role:` as a prefix.

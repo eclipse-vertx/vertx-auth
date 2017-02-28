@@ -1,4 +1,0 @@
-moduleName = io.vertx.ext.auth.shiro.ShiroAuth-module
-moduleVersion = 1.0
-extensionClasses = 
-staticExtensionClasses = io.vertx.groovy.ext.auth.shiro.ShiroAuth_GroovyStaticExtension

@@ -31,9 +31,10 @@ To create an instance you first need an .htdigest file. This file is created usi
 
 Once you've got one of these you can create a `link:../../apidocs/io/vertx/ext/auth/htdigest/HtdigestAuth.html[HtdigestAuth]` instance as follows:
 
-[source,java]
+[source,kotlin]
 ----
-HtdigestAuth authProvider = HtdigestAuth.create(vertx, ".htdigest");
+var authProvider = HtdigestAuth.create(vertx, ".htdigest")
+
 ----
 
 Once you've got your instance you can authenticate with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
@@ -45,23 +46,27 @@ The out of the box config assumes the usage of the file .htdigest in the root of
 When authenticating using this implementation, it assumes that the digest authorization header is parsed as a JSON
 object which we refer from now on as authentication info:
 
-[source,java]
+[source,kotlin]
 ----
-JsonObject authInfo = new JsonObject()
-  .put("username", "Mufasa")
-  .put("realm", "testrealm@host.com")
-  .put("nonce", "dcd98b7102dd2f0e8b11d0f600bfb0c093")
-  .put("method", "GET")
-  .put("uri", "/dir/index.html")
-  .put("response", "6629fae49393a05397450978507c4ef1");
+var authInfo = json {
+  obj(
+    "username" to "Mufasa",
+    "realm" to "testrealm@host.com",
+    "nonce" to "dcd98b7102dd2f0e8b11d0f600bfb0c093",
+    "method" to "GET",
+    "uri" to "/dir/index.html",
+    "response" to "6629fae49393a05397450978507c4ef1"
+  )
+}
 
-authProvider.authenticate(authInfo, res -> {
+authProvider.authenticate(authInfo, { res ->
   if (res.succeeded()) {
-    User user = res.result();
+    var user = res.result()
   } else {
     // Failed!
   }
-});
+})
+
 ----
 
 == Provider internal behavior

@@ -13,7 +13,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-mongo</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -21,7 +21,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-mongo:3.4.0.Beta1'
+compile 'io.vertx:vertx-auth-mongo:3.4.0-SNAPSHOT'
 ----
 
 To create an instance you first need an instance of `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`. To learn how to create one
@@ -31,8 +31,6 @@ Once you've got one of those you can create a `link:../../apidocs/io/vertx/ext/a
 
 [source,groovy]
 ----
-import io.vertx.ext.mongo.MongoClient
-import io.vertx.ext.auth.mongo.MongoAuth
 def client = MongoClient.createShared(vertx, mongoClientConfig)
 def authProperties = [:]
 def authProvider = MongoAuth.create(client, authProperties)
@@ -135,7 +133,6 @@ If validating that a user has a particular _role_ then you should prefix the arg
 
 [source,groovy]
 ----
-import io.vertx.ext.auth.mongo.MongoAuth
 
 user.isAuthorised("${MongoAuth.ROLE_PREFIX}manager", { res ->
   if (res.succeeded()) {

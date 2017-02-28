@@ -1,4 +1,0 @@
-moduleName = io.vertx.ext.auth.User-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.auth.AuthProvider_GroovyExtension, io.vertx.groovy.ext.auth.User_GroovyExtension
-staticExtensionClasses = 

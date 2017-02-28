@@ -1,4 +1,0 @@
-moduleName = io.vertx.ext.auth.mongo.MongoAuth-module
-moduleVersion = 1.0
-extensionClasses = 
-staticExtensionClasses = io.vertx.groovy.ext.auth.mongo.MongoAuth_GroovyStaticExtension
