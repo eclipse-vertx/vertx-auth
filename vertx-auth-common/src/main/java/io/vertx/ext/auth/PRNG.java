@@ -19,9 +19,12 @@ import io.vertx.core.Vertx;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Wrapper around secure random that periodically seeds the PRNG with new entropy.
+ * Wrapper around secure random that periodically seeds the PRNG with new entropy. To avoid entropy exhaustion
+ * the entropy is only refreshed if the PRNG is used. This introduces a new variable which reduces the probability
+ * of cracking the random number generator.
  *
  * @author Paulo Lopes
  */
@@ -34,6 +37,8 @@ public class PRNG {
   private final long seedID;
 
   private final Vertx vertx;
+  // Track if the current seed has been used for random number generation
+  private volatile boolean dirty = false;
 
   public PRNG(Vertx vertx) {
     this.vertx = vertx;
@@ -62,14 +67,23 @@ public class PRNG {
 
     // seed internal and bits must be enabled
     if (seedInterval > 0 && seedBits > 0) {
+      final AtomicBoolean seeding = new AtomicBoolean(false);
       // Add a 64bit entropy every five minutes
       // see: https://www.owasp.org/index.php/Session_Management_Cheat_Sheet#Session_ID_Entropy
       seedID = vertx.setPeriodic(
         seedInterval,
-        id -> vertx.<byte[]>executeBlocking(
-          future -> future.complete(random.generateSeed(seedBits / 8)),
-          false,
-          asyncResult -> random.setSeed(asyncResult.result())));
+        id -> {
+          if (dirty && seeding.compareAndSet(false, true)) {
+            vertx.<byte[]>executeBlocking(
+              future -> future.complete(random.generateSeed(seedBits / 8)),
+              false,
+              generateSeed -> {
+                seeding.set(false);
+                dirty = false;
+                random.setSeed(generateSeed.result());
+              });
+          }
+        });
     } else {
       seedID = -1;
     }
@@ -84,5 +98,6 @@ public class PRNG {
 
   public void nextBytes(byte[] bytes) {
     random.nextBytes(bytes);
+    dirty = true;
   }
 }
