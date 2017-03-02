@@ -47,6 +47,7 @@
 |[[maxRedirects]]`maxRedirects`|`Number (int)`|-
 |[[maxWaitQueueSize]]`maxWaitQueueSize`|`Number (int)`|-
 |[[maxWebsocketFrameSize]]`maxWebsocketFrameSize`|`Number (int)`|-
+|[[maxWebsocketMessageSize]]`maxWebsocketMessageSize`|`Number (int)`|-
 |[[metricsName]]`metricsName`|`String`|-
 |[[openSslEngineOptions]]`openSslEngineOptions`|`link:dataobjects.html#OpenSSLEngineOptions[OpenSSLEngineOptions]`|-
 |[[pemKeyCertOptions]]`pemKeyCertOptions`|`link:dataobjects.html#PemKeyCertOptions[PemKeyCertOptions]`|-
