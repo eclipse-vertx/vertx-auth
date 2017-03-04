@@ -38,11 +38,10 @@
       <artifactId>vertx-auth-common</artifactId>
     </dependency>
     <dependency>
-      <!-- declare this dependency to force shiro to use this one. It is the version used by vert.x -->
+      <!-- Shiro requires SLF4J: declare this dependency to force shiro to use this one. It is the version used by vert.x -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.21</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.shiro</groupId>
