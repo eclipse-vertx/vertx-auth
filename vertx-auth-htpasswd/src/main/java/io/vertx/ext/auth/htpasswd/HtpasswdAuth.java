@@ -9,14 +9,12 @@ import io.vertx.ext.auth.htpasswd.impl.HtpasswdAuthImpl;
  */
 public interface HtpasswdAuth extends AuthProvider {
 
-  String HTPASSWD_FILE = "htpasswd";
-
   static HtpasswdAuth create(Vertx vertx) {
-    return new HtpasswdAuthImpl(vertx, HTPASSWD_FILE);
+    return new HtpasswdAuthImpl(vertx, new HtpasswdAuthOptions());
   }
 
-  static HtpasswdAuth create(Vertx vertx, String htpasswdfile) {
-    return new HtpasswdAuthImpl(vertx, htpasswdfile);
+  static HtpasswdAuth create(Vertx vertx, HtpasswdAuthOptions htpasswdAuthOptions) {
+    return new HtpasswdAuthImpl(vertx, htpasswdAuthOptions);
   }
 
 }

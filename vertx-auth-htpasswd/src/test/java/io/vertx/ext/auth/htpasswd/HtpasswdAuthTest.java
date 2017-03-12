@@ -9,12 +9,14 @@ import org.junit.Test;
  */
 public class HtpasswdAuthTest extends VertxTestBase {
 
-  private HtpasswdAuth authProvider;
+  private HtpasswdAuth authProviderCrypt;
+  private HtpasswdAuth authProviderPlainText;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = HtpasswdAuth.create(vertx);
+    authProviderCrypt = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().enableCryptAndDisablePlainTextPwd());
+    authProviderPlainText = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().enablePlainTextAndDisableCryptPwd());
   }
 
   @Test
@@ -23,7 +25,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
       .put("username", "bcrypt")
       .put("password", "myPassword");
 
-    authProvider.authenticate(authInfo, onFailure(v -> {
+    authProviderCrypt.authenticate(authInfo, onFailure(v -> {
       //assertTrue(v instanceof AuthenticationException);
       testComplete();
     }));
@@ -36,7 +38,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
       .put("username", "md5")
       .put("password", "myPassword");
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -49,7 +51,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
       .put("username", "sha1")
       .put("password", "myPassword");
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -62,7 +64,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
       .put("username", "crypt")
       .put("password", "myPassword");
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -75,7 +77,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
       .put("username", "plaintext")
       .put("password", "myPassword");
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
+    authProviderPlainText.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
