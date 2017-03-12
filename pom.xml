@@ -28,6 +28,7 @@
     <module>vertx-auth-jwt</module>
     <module>vertx-auth-oauth2</module>
     <module>vertx-auth-htdigest</module>
+    <module>vertx-auth-htpasswd</module>
   </modules>
 
   <parent>
