@@ -9,11 +9,11 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
+import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.Crypt;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.Md5Crypt;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +30,12 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
   private Pattern entry = Pattern.compile("^([^:]+):(.+)");
 
   private final Map<String, String> htUsers = new HashMap<>();
+  private HtpasswdAuthOptions htpasswdAuthOptions;
 
-  public HtpasswdAuthImpl(Vertx vertx, String htpasswdFile) {
+  public HtpasswdAuthImpl(Vertx vertx, HtpasswdAuthOptions htpasswdAuthOptions) {
+    this.htpasswdAuthOptions = htpasswdAuthOptions;
 
-    for (String line : vertx.fileSystem().readFileBlocking(htpasswdFile).toString().split("\\r?\\n")) {
+    for (String line : vertx.fileSystem().readFileBlocking(htpasswdAuthOptions.getHtpasswdFile()).toString().split("\\r?\\n")) {
       line = line.trim();
 
       if (line.isEmpty() || line.startsWith("#")) continue;
@@ -87,11 +89,11 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
       }
     }
 // test libc crypt() encoded password
-    else if (storedPwd.equals(Crypt.crypt(password, storedPwd))) {
+    else if (htpasswdAuthOptions.isEnabledCryptPwd() && storedPwd.equals(Crypt.crypt(password, storedPwd))) {
       authenticated = true;
     }
 // test clear text
-    else if (storedPwd.equals(password)) {
+    else if (htpasswdAuthOptions.isEnabledPlainTextPwd() && storedPwd.equals(password)) {
       authenticated = true;
     }
 

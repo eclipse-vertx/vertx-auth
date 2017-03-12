@@ -21,7 +21,7 @@ public class HtpasswdUser extends AbstractUser {
 
   @Override
   protected void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    resultHandler.handle(Future.failedFuture("Not permited"));
+    resultHandler.handle(Future.failedFuture("Not permitted"));
   }
 
   @Override
