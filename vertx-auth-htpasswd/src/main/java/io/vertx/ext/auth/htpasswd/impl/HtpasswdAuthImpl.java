@@ -21,7 +21,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by nevenr on 11/03/2017.
+ * An implementation of {@link HtpasswdAuth}
+ *
+ * @author Neven Radovanović
  */
 public class HtpasswdAuthImpl implements HtpasswdAuth {
 

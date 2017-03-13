@@ -5,7 +5,8 @@ import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 /**
- * Created by nevenr on 12/03/2017.
+ *
+ * @author Neven Radovanović
  */
 public class HtpasswdAuthTest extends VertxTestBase {
 

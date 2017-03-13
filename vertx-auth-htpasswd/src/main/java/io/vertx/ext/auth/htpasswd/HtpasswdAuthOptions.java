@@ -5,7 +5,9 @@ import io.vertx.ext.auth.AuthOptions;
 import io.vertx.ext.auth.AuthProvider;
 
 /**
- * Created by nevenr on 12/03/2017.
+ * Options configuring htpasswd authentication.
+ *
+ * @author Neven Radovanović
  */
 public class HtpasswdAuthOptions implements AuthOptions {
 
