@@ -5,7 +5,9 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.htpasswd.impl.HtpasswdAuthImpl;
 
 /**
- * Created by nevenr on 11/03/2017.
+ * An extension of AuthProvider which is using htpasswd file as store
+ *
+ * @author Neven Radovanović
  */
 public interface HtpasswdAuth extends AuthProvider {
 
