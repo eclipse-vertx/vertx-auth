@@ -9,6 +9,7 @@ import io.vertx.ext.auth.AuthProvider;
  */
 public class HtpasswdAuthOptions implements AuthOptions {
 
+  private boolean usersAuthorizedForEverything;
   private String htpasswdFile;
   private boolean enabledPlainTextPwd;
 
@@ -18,6 +19,8 @@ public class HtpasswdAuthOptions implements AuthOptions {
 
     String os = System.getProperty("os.name").toLowerCase();
     enabledPlainTextPwd = os.startsWith("windows") || os.startsWith("netware");
+
+    usersAuthorizedForEverything = false;
 
   }
 
@@ -61,5 +64,14 @@ public class HtpasswdAuthOptions implements AuthOptions {
   @Override
   public AuthProvider createProvider(Vertx vertx) {
     return HtpasswdAuth.create(vertx,this);
+  }
+
+  public boolean areUsersAuthorizedForEverything() {
+    return usersAuthorizedForEverything;
+  }
+
+  public HtpasswdAuthOptions setUsersAuthorizedForEverything(boolean usersAuthorizedForEverything) {
+    this.usersAuthorizedForEverything = usersAuthorizedForEverything;
+    return this;
   }
 }

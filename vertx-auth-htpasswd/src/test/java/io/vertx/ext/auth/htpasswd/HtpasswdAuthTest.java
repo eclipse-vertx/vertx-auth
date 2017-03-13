@@ -11,12 +11,17 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   private HtpasswdAuth authProviderCrypt;
   private HtpasswdAuth authProviderPlainText;
+  private HtpasswdAuth authProviderUsersAreAuthorizedForEverything;
+  private HtpasswdAuth authProviderUsersAreAuthorizedForNothing;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     authProviderCrypt = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().enableCryptAndDisablePlainTextPwd());
     authProviderPlainText = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().enablePlainTextAndDisableCryptPwd());
+
+    authProviderUsersAreAuthorizedForEverything = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(true));
+    authProviderUsersAreAuthorizedForNothing = HtpasswdAuth.create(vertx);
   }
 
   @Test
@@ -84,5 +89,36 @@ public class HtpasswdAuthTest extends VertxTestBase {
     await();
   }
 
+  @Test
+  public void authzTrue() {
+    JsonObject authInfo = new JsonObject()
+      .put("username", "md5")
+      .put("password", "myPassword");
+
+    authProviderUsersAreAuthorizedForEverything.authenticate(authInfo, onSuccess(user -> {
+      assertNotNull(user);
+      user.isAuthorised("something", onSuccess(res -> {
+        assertTrue(res);
+        testComplete();
+      }));
+    }));
+    await();
+  }
+
+  @Test
+  public void authzFalse() {
+    JsonObject authInfo = new JsonObject()
+      .put("username", "md5")
+      .put("password", "myPassword");
+
+    authProviderUsersAreAuthorizedForNothing.authenticate(authInfo, onSuccess(user -> {
+      assertNotNull(user);
+      user.isAuthorised("something", onSuccess(res -> {
+        assertFalse(res);
+        testComplete();
+      }));
+    }));
+    await();
+  }
 
 }

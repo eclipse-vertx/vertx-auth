@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
 
 /**
  * Created by nevenr on 11/03/2017.
@@ -14,14 +13,20 @@ import io.vertx.ext.auth.User;
 public class HtpasswdUser extends AbstractUser {
 
   private final String username;
+  private boolean userAuthorizedForEverything;
 
-  HtpasswdUser(String username) {
+  HtpasswdUser(String username, boolean userAuthorizedForEverything) {
     this.username = username;
+    this.userAuthorizedForEverything = userAuthorizedForEverything;
   }
 
   @Override
   protected void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    resultHandler.handle(Future.failedFuture("Not permitted"));
+    if (userAuthorizedForEverything) {
+      resultHandler.handle(Future.succeededFuture(true));
+    } else {
+      resultHandler.handle(Future.succeededFuture(false));
+    }
   }
 
   @Override
