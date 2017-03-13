@@ -98,7 +98,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     }
 
     if (authenticated) {
-      resultHandler.handle(Future.succeededFuture(new HtpasswdUser(username)));
+      resultHandler.handle(Future.succeededFuture(new HtpasswdUser(username, htpasswdAuthOptions.areUsersAuthorizedForEverything())));
     } else {
       resultHandler.handle(Future.failedFuture("Bad response"));
     }
