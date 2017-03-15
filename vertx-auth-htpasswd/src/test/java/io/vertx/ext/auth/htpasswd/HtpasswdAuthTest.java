@@ -31,8 +31,8 @@ public class HtpasswdAuthTest extends VertxTestBase {
       .put("username", "bcrypt")
       .put("password", "myPassword");
 
-    authProviderCrypt.authenticate(authInfo, onFailure(v -> {
-      //assertTrue(v instanceof AuthenticationException);
+    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
       testComplete();
     }));
     await();
