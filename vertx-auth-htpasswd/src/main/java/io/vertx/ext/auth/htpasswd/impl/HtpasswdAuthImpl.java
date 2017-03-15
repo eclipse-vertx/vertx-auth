@@ -8,13 +8,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.htpasswd.digest.BCrypt;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.Crypt;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.codec.digest.Md5Crypt;
+import io.vertx.ext.auth.htpasswd.digest.Crypt;
+import io.vertx.ext.auth.htpasswd.digest.DigestUtils;
+import io.vertx.ext.auth.htpasswd.digest.Md5Crypt;
 
+
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,8 +31,6 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
 
   private Logger logger = LoggerFactory.getLogger(HtpasswdAuthImpl.class);
 
-  private Pattern entry = Pattern.compile("^([^:]+):(.+)");
-
   private final Map<String, String> htUsers = new HashMap<>();
   private HtpasswdAuthOptions htpasswdAuthOptions;
 
@@ -42,6 +42,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
 
       if (line.isEmpty() || line.startsWith("#")) continue;
 
+      Pattern entry = Pattern.compile("^([^:]+):(.+)");
       Matcher m = entry.matcher(line);
       if (m.matches()) {
         htUsers.put(m.group(1), m.group(2));
@@ -71,11 +72,11 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     boolean authenticated = false;
 
 // BCrypt
-    if (storedPwd.startsWith("$2y$")) {
+    if (storedPwd.startsWith("$2y$") || storedPwd.startsWith("$2a$")) {
       logger.warn("Currently bcrypt hashing algorithm is not supported. Can't authenticate user " + username);
-//      if (BCrypt.checkpw(password, storedPwd)) {
-//        authenticated = true;
-//      }
+      if (BCrypt.checkpw(password, storedPwd)) {
+        authenticated = true;
+      }
     }
 // test MD5 variant encrypted password
     else if (storedPwd.startsWith("$apr1$")) {
@@ -85,7 +86,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     }
 // test unsalted SHA password
     else if (storedPwd.startsWith("{SHA}")) {
-      String passwd64 = Base64.encodeBase64String(DigestUtils.sha1(password));
+      String passwd64 = Base64.getEncoder().encodeToString(DigestUtils.sha1(password));
       if (storedPwd.substring("{SHA}".length()).equals(passwd64)) {
         authenticated = true;
       }
