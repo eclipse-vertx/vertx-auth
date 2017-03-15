@@ -73,7 +73,6 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
 
 // BCrypt
     if (storedPwd.startsWith("$2y$") || storedPwd.startsWith("$2a$")) {
-      logger.warn("Currently bcrypt hashing algorithm is not supported. Can't authenticate user " + username);
       if (BCrypt.checkpw(password, storedPwd)) {
         authenticated = true;
       }
