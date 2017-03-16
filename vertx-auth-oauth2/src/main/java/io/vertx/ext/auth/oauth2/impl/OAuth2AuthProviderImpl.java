@@ -32,6 +32,7 @@ import io.vertx.ext.auth.oauth2.impl.flow.*;
 public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private final Vertx vertx;
+  private final OAuth2FlowType flowType;
   private final OAuth2ClientOptions config;
   private final JWT jwt;
 
@@ -40,6 +41,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
+    this.flowType = flow;
 
     switch (flow) {
       case AUTH_CODE:
@@ -157,5 +159,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   public String getScopeSeparator() {
     final String sep = config.getScopeSeparator();
     return sep == null ? " " : sep;
+  }
+
+  @Override
+  public OAuth2FlowType getFlowType() {
+    return flowType;
   }
 }
