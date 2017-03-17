@@ -25,10 +25,7 @@ import java.security.MessageDigest;
  * <p>
  * This class is immutable and thread-safe.
  *
- * @version $Id: MessageDigestAlgorithms.java 1465850 2013-04-09 00:46:31Z sebb $
- * @see <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html">Java Cryptography
- * Architecture Standard Algorithm Name Documentation</a>
- * @since 1.7
+ * Taken from Apache commons codec.
  */
 public class MessageDigestAlgorithms {
 

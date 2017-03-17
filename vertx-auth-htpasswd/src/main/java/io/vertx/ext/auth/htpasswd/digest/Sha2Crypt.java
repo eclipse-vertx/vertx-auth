@@ -34,8 +34,7 @@ import java.util.regex.Pattern;
  * <p>
  * This class is immutable and thread-safe.
  *
- * @version $Id: Sha2Crypt.java 1552696 2013-12-20 15:01:34Z ggregory $
- * @since 1.7
+ * Taken from Apache commons codec.
  */
 public class Sha2Crypt {
 

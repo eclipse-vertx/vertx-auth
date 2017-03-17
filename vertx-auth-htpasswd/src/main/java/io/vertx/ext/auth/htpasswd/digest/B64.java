@@ -19,16 +19,9 @@ package io.vertx.ext.auth.htpasswd.digest;
 import java.util.Random;
 
 /**
- * Base64 like method to convert binary bytes into ASCII chars.
- * <p>
- * TODO: Can Base64 be reused?
- * <p>
- * <p>
+ * Base64 <u>like</u> method to convert binary bytes into ASCII chars.
  * This class is immutable and thread-safe.
- * </p>
- *
- * @version $Id: B64.java 1435550 2013-01-19 14:09:52Z tn $
- * @since 1.7
+ * Taken from Apache commons codec.
  */
 class B64 {
 
