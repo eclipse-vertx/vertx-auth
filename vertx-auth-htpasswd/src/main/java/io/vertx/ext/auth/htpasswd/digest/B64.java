@@ -71,8 +71,9 @@ class B64 {
      */
     static String getRandomSalt(final int num) {
         final StringBuilder saltString = new StringBuilder();
+        Random random = new Random();
         for (int i = 1; i <= num; i++) {
-            saltString.append(B64T.charAt(new Random().nextInt(B64T.length())));
+          saltString.append(B64T.charAt(random.nextInt(B64T.length())));
         }
         return saltString.toString();
     }
