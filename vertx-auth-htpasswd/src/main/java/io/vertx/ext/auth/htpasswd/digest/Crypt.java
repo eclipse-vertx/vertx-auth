@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
  * This class is immutable and thread-safe.
  * Taken from Apache commons codec.
  */
-public class Crypt {
+class Crypt {
 
   /**
    * Encrypts a password in a crypt(3) compatible way.
@@ -39,7 +39,7 @@ public class Crypt {
    * @return hash value
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String crypt(final byte[] keyBytes) {
+  static String crypt(final byte[] keyBytes) {
     return crypt(keyBytes, null);
   }
 
@@ -55,7 +55,7 @@ public class Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String crypt(final byte[] keyBytes, final String salt) {
+  static String crypt(final byte[] keyBytes, final String salt) {
     if (salt == null) {
       return Sha2Crypt.sha512Crypt(keyBytes);
     } else if (salt.startsWith(Sha2Crypt.SHA512_PREFIX)) {
@@ -79,7 +79,7 @@ public class Crypt {
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught.
    * @see #crypt(String, String)
    */
-  public static String crypt(final String key) {
+  static String crypt(final String key) {
     return crypt(key, null);
   }
 
@@ -132,7 +132,7 @@ public class Crypt {
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught. *
    * @see "The man page of the libc crypt (3) function."
    */
-  public static String crypt(final String key, final String salt) {
+  static String crypt(final String key, final String salt) {
     return crypt(key.getBytes(StandardCharsets.UTF_8), salt);
   }
 }

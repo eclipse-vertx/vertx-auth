@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  *
  * Taken from Apache commons codec.
  */
-public class Sha2Crypt {
+class Sha2Crypt {
 
   /**
    * Default number of rounds if not explicitly specified.
@@ -93,7 +93,7 @@ public class Sha2Crypt {
    * @return complete hash value
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String sha256Crypt(final byte[] keyBytes) {
+  static String sha256Crypt(final byte[] keyBytes) {
     return sha256Crypt(keyBytes, null);
   }
 
@@ -108,7 +108,7 @@ public class Sha2Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String sha256Crypt(final byte[] keyBytes, String salt) {
+  static String sha256Crypt(final byte[] keyBytes, String salt) {
     if (salt == null) {
       salt = SHA256_PREFIX + B64.getRandomSalt(8);
     }
@@ -518,7 +518,7 @@ public class Sha2Crypt {
    * @return complete hash value
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String sha512Crypt(final byte[] keyBytes) {
+  static String sha512Crypt(final byte[] keyBytes) {
     return sha512Crypt(keyBytes, null);
   }
 
@@ -533,7 +533,7 @@ public class Sha2Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String sha512Crypt(final byte[] keyBytes, String salt) {
+  static String sha512Crypt(final byte[] keyBytes, String salt) {
     if (salt == null) {
       salt = SHA512_PREFIX + B64.getRandomSalt(8);
     }
