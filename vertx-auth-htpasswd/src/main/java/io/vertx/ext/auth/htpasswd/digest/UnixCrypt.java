@@ -34,8 +34,7 @@ import java.util.Random;
  * <p>
  * This class is immutable and thread-safe.
  *
- * @version $Id: UnixCrypt.java 1429868 2013-01-07 16:08:05Z ggregory $
- * @since 1.7
+ * Taken from Apache commons codec.
  */
 public class UnixCrypt {
 

@@ -1,13 +1,15 @@
 package io.vertx.ext.auth.htpasswd.digest;
 
 /**
- * Created by nevenr on 15/03/2017.
+ * @author Neven Radovanović
  */
 public class Hex {
 
   final protected static char[] hexArray = "0123456789abcdef".toCharArray();
 
   public static String bytesToHex(byte[] bytes) {
+    if (bytes == null) return null;
+    if (bytes.length == 0)  return "";
     char[] hexChars = new char[bytes.length * 2];
     for (int j = 0; j < bytes.length; j++) {
       int v = bytes[j] & 0xFF;

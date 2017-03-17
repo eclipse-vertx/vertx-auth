@@ -25,9 +25,7 @@ import java.nio.charset.StandardCharsets;
  * See {@link #crypt(String, String)} for further details.
  * <p>
  * This class is immutable and thread-safe.
- *
- * @version $Id: Crypt.java 1429868 2013-01-07 16:08:05Z ggregory $
- * @since 1.7
+ * Taken from Apache commons codec.
  */
 public class Crypt {
 

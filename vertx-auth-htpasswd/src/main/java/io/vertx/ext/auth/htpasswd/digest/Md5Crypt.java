@@ -41,8 +41,7 @@ import java.util.regex.Pattern;
  * <p>
  * This class is immutable and thread-safe.
  *
- * @version $Id: Md5Crypt.java 1552861 2013-12-21 02:03:17Z ggregory $
- * @since 1.7
+ * Taken from Apache commons codec.
  */
 public class Md5Crypt {
 
