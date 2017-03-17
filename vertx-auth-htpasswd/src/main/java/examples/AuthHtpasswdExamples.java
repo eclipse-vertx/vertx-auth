@@ -23,7 +23,6 @@ import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 
 /**
- *
  * @author Neven Radovanović
  */
 public class AuthHtpasswdExamples {

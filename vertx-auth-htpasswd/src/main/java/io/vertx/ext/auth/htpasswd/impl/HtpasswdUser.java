@@ -8,7 +8,6 @@ import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 
 /**
- *
  * @author Neven Radovanović
  */
 public class HtpasswdUser extends AbstractUser {

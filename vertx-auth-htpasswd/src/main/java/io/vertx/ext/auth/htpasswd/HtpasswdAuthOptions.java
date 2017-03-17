@@ -65,7 +65,7 @@ public class HtpasswdAuthOptions implements AuthOptions {
 
   @Override
   public AuthProvider createProvider(Vertx vertx) {
-    return HtpasswdAuth.create(vertx,this);
+    return HtpasswdAuth.create(vertx, this);
   }
 
   public boolean areUsersAuthorizedForEverything() {
