@@ -36,7 +36,7 @@ import java.util.Random;
  *
  * Taken from Apache commons codec.
  */
-public class UnixCrypt {
+class UnixCrypt {
 
   private static final int CON_SALT[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 5, 6,
@@ -176,7 +176,7 @@ public class UnixCrypt {
    * @param original plaintext password
    * @return a 13 character string starting with the salt string
    */
-  public static String crypt(final byte[] original) {
+  static String crypt(final byte[] original) {
     return crypt(original, null);
   }
 
@@ -190,7 +190,7 @@ public class UnixCrypt {
    * @return a 13 character string starting with the salt string
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    */
-  public static String crypt(final byte[] original, String salt) {
+  static String crypt(final byte[] original, String salt) {
     if (salt == null) {
       final Random randomGenerator = new Random();
       final int numSaltChars = SALT_CHARS.length;
@@ -253,7 +253,7 @@ public class UnixCrypt {
    * @param original plaintext password
    * @return a 13 character string starting with the salt string
    */
-  public static String crypt(final String original) {
+  static String crypt(final String original) {
     return crypt(original.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -265,7 +265,7 @@ public class UnixCrypt {
    * @return a 13 character string starting with the salt string
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    */
-  public static String crypt(final String original, final String salt) {
+  static String crypt(final String original, final String salt) {
     return crypt(original.getBytes(StandardCharsets.UTF_8), salt);
   }
 

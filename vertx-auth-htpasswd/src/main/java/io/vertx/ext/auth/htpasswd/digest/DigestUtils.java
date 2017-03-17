@@ -32,7 +32,7 @@ import java.security.NoSuchAlgorithmException;
  *
  * Taken from Apache commons codec.
  */
-public class DigestUtils {
+class DigestUtils {
 
   private static final int STREAM_BUFFER_LENGTH = 1024;
 
@@ -59,7 +59,7 @@ public class DigestUtils {
    * @throws IllegalArgumentException when a {@link NoSuchAlgorithmException} is caught.
    * @see MessageDigest#getInstance(String)
    */
-  public static MessageDigest getDigest(final String algorithm) {
+  static MessageDigest getDigest(final String algorithm) {
     try {
       return MessageDigest.getInstance(algorithm);
     } catch (final NoSuchAlgorithmException e) {
@@ -75,7 +75,7 @@ public class DigestUtils {
    *                                  built-in algorithm
    * @see MessageDigestAlgorithms#MD2
      */
-  public static MessageDigest getMd2Digest() {
+  static MessageDigest getMd2Digest() {
     return getDigest(MessageDigestAlgorithms.MD2);
   }
 
@@ -87,7 +87,7 @@ public class DigestUtils {
    *                                  built-in algorithm
    * @see MessageDigestAlgorithms#MD5
    */
-  public static MessageDigest getMd5Digest() {
+  static MessageDigest getMd5Digest() {
     return getDigest(MessageDigestAlgorithms.MD5);
   }
 
@@ -99,7 +99,7 @@ public class DigestUtils {
    *                                  built-in algorithm
    * @see MessageDigestAlgorithms#SHA_1
      */
-  public static MessageDigest getSha1Digest() {
+  static MessageDigest getSha1Digest() {
     return getDigest(MessageDigestAlgorithms.SHA_1);
   }
 
@@ -114,7 +114,7 @@ public class DigestUtils {
    *                                  built-in algorithm
    * @see MessageDigestAlgorithms#SHA_256
    */
-  public static MessageDigest getSha256Digest() {
+  static MessageDigest getSha256Digest() {
     return getDigest(MessageDigestAlgorithms.SHA_256);
   }
 
@@ -129,7 +129,7 @@ public class DigestUtils {
    *                                  built-in algorithm
    * @see MessageDigestAlgorithms#SHA_384
    */
-  public static MessageDigest getSha384Digest() {
+  static MessageDigest getSha384Digest() {
     return getDigest(MessageDigestAlgorithms.SHA_384);
   }
 
@@ -144,7 +144,7 @@ public class DigestUtils {
    *                                  built-in algorithm
    * @see MessageDigestAlgorithms#SHA_512
    */
-  public static MessageDigest getSha512Digest() {
+  static MessageDigest getSha512Digest() {
     return getDigest(MessageDigestAlgorithms.SHA_512);
   }
 
@@ -156,7 +156,7 @@ public class DigestUtils {
    * @deprecated Use {@link #getSha1Digest()}
    */
   @Deprecated
-  public static MessageDigest getShaDigest() {
+  static MessageDigest getShaDigest() {
     return getSha1Digest();
   }
 
@@ -166,7 +166,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return MD2 digest
      */
-  public static byte[] md2(final byte[] data) {
+  static byte[] md2(final byte[] data) {
     return getMd2Digest().digest(data);
   }
 
@@ -177,7 +177,7 @@ public class DigestUtils {
    * @return MD2 digest
    * @throws IOException On error reading from the stream
      */
-  public static byte[] md2(final InputStream data) throws IOException {
+  static byte[] md2(final InputStream data) throws IOException {
     return digest(getMd2Digest(), data);
   }
 
@@ -187,7 +187,7 @@ public class DigestUtils {
    * @param data Data to digest; converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return MD2 digest
      */
-  public static byte[] md2(final String data) {
+  static byte[] md2(final String data) {
     return md2(data.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -197,7 +197,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return MD2 digest as a hex string
      */
-  public static String md2Hex(final byte[] data) {
+  static String md2Hex(final byte[] data) {
     return bytesToHex(md2(data));
   }
 
@@ -208,7 +208,7 @@ public class DigestUtils {
    * @return MD2 digest as a hex string
    * @throws IOException On error reading from the stream
      */
-  public static String md2Hex(final InputStream data) throws IOException {
+  static String md2Hex(final InputStream data) throws IOException {
     return bytesToHex(md2(data));
   }
 
@@ -218,7 +218,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return MD2 digest as a hex string
      */
-  public static String md2Hex(final String data) {
+  static String md2Hex(final String data) {
     return bytesToHex(md2(data));
   }
 
@@ -228,7 +228,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return MD5 digest
    */
-  public static byte[] md5(final byte[] data) {
+  static byte[] md5(final byte[] data) {
     return getMd5Digest().digest(data);
   }
 
@@ -239,7 +239,7 @@ public class DigestUtils {
    * @return MD5 digest
    * @throws IOException On error reading from the stream
      */
-  public static byte[] md5(final InputStream data) throws IOException {
+  static byte[] md5(final InputStream data) throws IOException {
     return digest(getMd5Digest(), data);
   }
 
@@ -249,7 +249,7 @@ public class DigestUtils {
    * @param data Data to digest; converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return MD5 digest
    */
-  public static byte[] md5(final String data) {
+  static byte[] md5(final String data) {
     return md5(data.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -259,7 +259,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return MD5 digest as a hex string
    */
-  public static String md5Hex(final byte[] data) {
+  static String md5Hex(final byte[] data) {
     return bytesToHex(md5(data));
   }
 
@@ -270,7 +270,7 @@ public class DigestUtils {
    * @return MD5 digest as a hex string
    * @throws IOException On error reading from the stream
      */
-  public static String md5Hex(final InputStream data) throws IOException {
+  static String md5Hex(final InputStream data) throws IOException {
     return bytesToHex(md5(data));
   }
 
@@ -280,7 +280,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return MD5 digest as a hex string
    */
-  public static String md5Hex(final String data) {
+  static String md5Hex(final String data) {
     return bytesToHex(md5(data));
   }
 
@@ -292,7 +292,7 @@ public class DigestUtils {
    * @deprecated Use {@link #sha1(byte[])}
    */
   @Deprecated
-  public static byte[] sha(final byte[] data) {
+  static byte[] sha(final byte[] data) {
     return sha1(data);
   }
 
@@ -305,7 +305,7 @@ public class DigestUtils {
      * @deprecated Use {@link #sha1(InputStream)}
    */
   @Deprecated
-  public static byte[] sha(final InputStream data) throws IOException {
+  static byte[] sha(final InputStream data) throws IOException {
     return sha1(data);
   }
 
@@ -317,7 +317,7 @@ public class DigestUtils {
    * @deprecated Use {@link #sha1(String)}
    */
   @Deprecated
-  public static byte[] sha(final String data) {
+  static byte[] sha(final String data) {
     return sha1(data);
   }
 
@@ -327,7 +327,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-1 digest
      */
-  public static byte[] sha1(final byte[] data) {
+  static byte[] sha1(final byte[] data) {
     return getSha1Digest().digest(data);
   }
 
@@ -338,7 +338,7 @@ public class DigestUtils {
    * @return SHA-1 digest
    * @throws IOException On error reading from the stream
      */
-  public static byte[] sha1(final InputStream data) throws IOException {
+  static byte[] sha1(final InputStream data) throws IOException {
     return digest(getSha1Digest(), data);
   }
 
@@ -348,7 +348,7 @@ public class DigestUtils {
    * @param data Data to digest; converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return SHA-1 digest
    */
-  public static byte[] sha1(final String data) {
+  static byte[] sha1(final String data) {
     return sha1(data.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -358,7 +358,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-1 digest as a hex string
      */
-  public static String sha1Hex(final byte[] data) {
+  static String sha1Hex(final byte[] data) {
     return bytesToHex(sha1(data));
   }
 
@@ -369,7 +369,7 @@ public class DigestUtils {
    * @return SHA-1 digest as a hex string
    * @throws IOException On error reading from the stream
      */
-  public static String sha1Hex(final InputStream data) throws IOException {
+  static String sha1Hex(final InputStream data) throws IOException {
     return bytesToHex(sha1(data));
   }
 
@@ -379,7 +379,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-1 digest as a hex string
      */
-  public static String sha1Hex(final String data) {
+  static String sha1Hex(final String data) {
     return bytesToHex(sha1(data));
   }
 
@@ -392,7 +392,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-256 digest
      */
-  public static byte[] sha256(final byte[] data) {
+  static byte[] sha256(final byte[] data) {
     return getSha256Digest().digest(data);
   }
 
@@ -406,7 +406,7 @@ public class DigestUtils {
    * @return SHA-256 digest
    * @throws IOException On error reading from the stream
      */
-  public static byte[] sha256(final InputStream data) throws IOException {
+  static byte[] sha256(final InputStream data) throws IOException {
     return digest(getSha256Digest(), data);
   }
 
@@ -419,7 +419,7 @@ public class DigestUtils {
    * @param data Data to digest; converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return SHA-256 digest
      */
-  public static byte[] sha256(final String data) {
+  static byte[] sha256(final String data) {
     return sha256(data.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -432,7 +432,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-256 digest as a hex string
      */
-  public static String sha256Hex(final byte[] data) {
+  static String sha256Hex(final byte[] data) {
     return bytesToHex(sha256(data));
   }
 
@@ -446,7 +446,7 @@ public class DigestUtils {
    * @return SHA-256 digest as a hex string
    * @throws IOException On error reading from the stream
      */
-  public static String sha256Hex(final InputStream data) throws IOException {
+  static String sha256Hex(final InputStream data) throws IOException {
     return bytesToHex(sha256(data));
   }
 
@@ -459,7 +459,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-256 digest as a hex string
      */
-  public static String sha256Hex(final String data) {
+  static String sha256Hex(final String data) {
     return bytesToHex(sha256(data));
   }
 
@@ -472,7 +472,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-384 digest
      */
-  public static byte[] sha384(final byte[] data) {
+  static byte[] sha384(final byte[] data) {
     return getSha384Digest().digest(data);
   }
 
@@ -486,7 +486,7 @@ public class DigestUtils {
    * @return SHA-384 digest
    * @throws IOException On error reading from the stream
      */
-  public static byte[] sha384(final InputStream data) throws IOException {
+  static byte[] sha384(final InputStream data) throws IOException {
     return digest(getSha384Digest(), data);
   }
 
@@ -499,7 +499,7 @@ public class DigestUtils {
    * @param data Data to digest; converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return SHA-384 digest
      */
-  public static byte[] sha384(final String data) {
+  static byte[] sha384(final String data) {
     return sha384(data.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -512,7 +512,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-384 digest as a hex string
      */
-  public static String sha384Hex(final byte[] data) {
+  static String sha384Hex(final byte[] data) {
     return bytesToHex(sha384(data));
   }
 
@@ -526,7 +526,7 @@ public class DigestUtils {
    * @return SHA-384 digest as a hex string
    * @throws IOException On error reading from the stream
      */
-  public static String sha384Hex(final InputStream data) throws IOException {
+  static String sha384Hex(final InputStream data) throws IOException {
     return bytesToHex(sha384(data));
   }
 
@@ -539,7 +539,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-384 digest as a hex string
      */
-  public static String sha384Hex(final String data) {
+  static String sha384Hex(final String data) {
     return bytesToHex(sha384(data));
   }
 
@@ -552,7 +552,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-512 digest
      */
-  public static byte[] sha512(final byte[] data) {
+  static byte[] sha512(final byte[] data) {
     return getSha512Digest().digest(data);
   }
 
@@ -566,7 +566,7 @@ public class DigestUtils {
    * @return SHA-512 digest
    * @throws IOException On error reading from the stream
      */
-  public static byte[] sha512(final InputStream data) throws IOException {
+  static byte[] sha512(final InputStream data) throws IOException {
     return digest(getSha512Digest(), data);
   }
 
@@ -579,7 +579,7 @@ public class DigestUtils {
    * @param data Data to digest; converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return SHA-512 digest
      */
-  public static byte[] sha512(final String data) {
+  static byte[] sha512(final String data) {
     return sha512(data.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -592,7 +592,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-512 digest as a hex string
      */
-  public static String sha512Hex(final byte[] data) {
+  static String sha512Hex(final byte[] data) {
     return bytesToHex(sha512(data));
   }
 
@@ -606,7 +606,7 @@ public class DigestUtils {
    * @return SHA-512 digest as a hex string
    * @throws IOException On error reading from the stream
      */
-  public static String sha512Hex(final InputStream data) throws IOException {
+  static String sha512Hex(final InputStream data) throws IOException {
     return bytesToHex(sha512(data));
   }
 
@@ -619,7 +619,7 @@ public class DigestUtils {
    * @param data Data to digest
    * @return SHA-512 digest as a hex string
      */
-  public static String sha512Hex(final String data) {
+  static String sha512Hex(final String data) {
     return bytesToHex(sha512(data));
   }
 
@@ -631,7 +631,7 @@ public class DigestUtils {
    * @deprecated Use {@link #sha1Hex(byte[])}
    */
   @Deprecated
-  public static String shaHex(final byte[] data) {
+  static String shaHex(final byte[] data) {
     return sha1Hex(data);
   }
 
@@ -644,7 +644,7 @@ public class DigestUtils {
      * @deprecated Use {@link #sha1Hex(InputStream)}
    */
   @Deprecated
-  public static String shaHex(final InputStream data) throws IOException {
+  static String shaHex(final InputStream data) throws IOException {
     return sha1Hex(data);
   }
 
@@ -656,7 +656,7 @@ public class DigestUtils {
    * @deprecated Use {@link #sha1Hex(String)}
    */
   @Deprecated
-  public static String shaHex(final String data) {
+  static String shaHex(final String data) {
     return sha1Hex(data);
   }
 
@@ -667,7 +667,7 @@ public class DigestUtils {
    * @param valueToDigest the value to update the {@link MessageDigest} with
    * @return the updated {@link MessageDigest}
      */
-  public static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) {
+  static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) {
     messageDigest.update(valueToDigest);
     return messageDigest;
   }
@@ -680,7 +680,7 @@ public class DigestUtils {
    * @return the digest
    * @throws IOException On error reading from the stream
      */
-  public static MessageDigest updateDigest(final MessageDigest digest, final InputStream data) throws IOException {
+  static MessageDigest updateDigest(final MessageDigest digest, final InputStream data) throws IOException {
     final byte[] buffer = new byte[STREAM_BUFFER_LENGTH];
     int read = data.read(buffer, 0, STREAM_BUFFER_LENGTH);
 
@@ -700,7 +700,7 @@ public class DigestUtils {
    *                      converted to bytes using {@link StandardCharsets#UTF_8 }
    * @return the updated {@link MessageDigest}
      */
-  public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
+  static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
     messageDigest.update(valueToDigest.getBytes(StandardCharsets.UTF_8));
     return messageDigest;
   }

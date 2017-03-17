@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 /**
  * The libc crypt() "$1$" and Apache "$apr1$" MD5-based hash algorithm.
  * <p>
- * Based on the public domain ("beer-ware") C implementation from Poul-Henning Kamp which was found at: <a
+ * Based on the domain ("beer-ware") C implementation from Poul-Henning Kamp which was found at: <a
  * href="http://www.freebsd.org/cgi/cvsweb.cgi/src/lib/libcrypt/crypt-md5.c?rev=1.1;content-type=text%2Fplain">
  * crypt-md5.c @ freebsd.org</a><br/>
  * <p>
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  *
  * Taken from Apache commons codec.
  */
-public class Md5Crypt {
+class Md5Crypt {
 
   /**
    * The Identifier of the Apache variant.
@@ -72,7 +72,7 @@ public class Md5Crypt {
    * @return the hash value
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught. *
    */
-  public static String apr1Crypt(final byte[] keyBytes) {
+  static String apr1Crypt(final byte[] keyBytes) {
     return apr1Crypt(keyBytes, APR1_PREFIX + B64.getRandomSalt(8));
   }
 
@@ -85,7 +85,7 @@ public class Md5Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String apr1Crypt(final byte[] keyBytes, String salt) {
+  static String apr1Crypt(final byte[] keyBytes, String salt) {
     // to make the md5Crypt regex happy
     if (salt != null && !salt.startsWith(APR1_PREFIX)) {
       salt = APR1_PREFIX + salt;
@@ -100,7 +100,7 @@ public class Md5Crypt {
    * @return the hash value
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String apr1Crypt(final String keyBytes) {
+  static String apr1Crypt(final String keyBytes) {
     return apr1Crypt(keyBytes.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -117,7 +117,7 @@ public class Md5Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String apr1Crypt(final String keyBytes, final String salt) {
+  static String apr1Crypt(final String keyBytes, final String salt) {
     return apr1Crypt(keyBytes.getBytes(StandardCharsets.UTF_8), salt);
   }
 
@@ -130,7 +130,7 @@ public class Md5Crypt {
    * @return the hash value
    * @throws RuntimeException when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String md5Crypt(final byte[] keyBytes) {
+  static String md5Crypt(final byte[] keyBytes) {
     return md5Crypt(keyBytes, MD5_PREFIX + B64.getRandomSalt(8));
   }
 
@@ -146,7 +146,7 @@ public class Md5Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String md5Crypt(final byte[] keyBytes, final String salt) {
+  static String md5Crypt(final byte[] keyBytes, final String salt) {
     return md5Crypt(keyBytes, salt, MD5_PREFIX);
   }
 
@@ -162,7 +162,7 @@ public class Md5Crypt {
    * @throws IllegalArgumentException if the salt does not match the allowed pattern
    * @throws RuntimeException         when a {@link java.security.NoSuchAlgorithmException} is caught.
    */
-  public static String md5Crypt(final byte[] keyBytes, final String salt, final String prefix) {
+  static String md5Crypt(final byte[] keyBytes, final String salt, final String prefix) {
     final int keyLen = keyBytes.length;
 
     // Extract the real salt from the given string which can be a complete hash string.

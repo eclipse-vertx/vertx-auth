@@ -5,22 +5,17 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.htpasswd.digest.BCrypt;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
-import io.vertx.ext.auth.htpasswd.digest.Crypt;
-import io.vertx.ext.auth.htpasswd.digest.DigestUtils;
-import io.vertx.ext.auth.htpasswd.digest.Md5Crypt;
 
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static io.vertx.ext.auth.htpasswd.digest.Digest.*;
 
 /**
  * An implementation of {@link HtpasswdAuth}
@@ -28,8 +23,6 @@ import java.util.regex.Pattern;
  * @author Neven Radovanović
  */
 public class HtpasswdAuthImpl implements HtpasswdAuth {
-
-  private Logger logger = LoggerFactory.getLogger(HtpasswdAuthImpl.class);
 
   private final Map<String, String> htUsers = new HashMap<>();
   private HtpasswdAuthOptions htpasswdAuthOptions;
@@ -56,7 +49,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     String username = authInfo.getString("username");
     String password = authInfo.getString("password");
 
-//    Null or empty username is invalid
+    // Null or empty username is invalid
     if (username == null || username.length() == 0) {
       resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
       return;
@@ -71,32 +64,35 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
 
     boolean authenticated = false;
 
-// BCrypt
-    if (storedPwd.startsWith("$2y$") || storedPwd.startsWith("$2a$")) {
-      if (BCrypt.checkpw(password, storedPwd)) {
+    // BCrypt
+    if (isBcryptHashed(storedPwd)) {
+      if (bcryptCheck(password, storedPwd)) {
         authenticated = true;
       }
     }
-// test MD5 variant encrypted password
-    else if (storedPwd.startsWith("$apr1$")) {
-      if (storedPwd.equals(Md5Crypt.apr1Crypt(password, storedPwd))) {
+    // test MD5 variant encrypted password
+    else if (isMd5Hashed(storedPwd)) {
+      if (md5Check(password, storedPwd)) {
         authenticated = true;
       }
     }
-// test unsalted SHA password
-    else if (storedPwd.startsWith("{SHA}")) {
-      String passwd64 = Base64.getEncoder().encodeToString(DigestUtils.sha1(password));
-      if (storedPwd.substring("{SHA}".length()).equals(passwd64)) {
+    // test unsalted SHA password
+    else if (isShaHashed(storedPwd)) {
+      if (shaCheck(password, storedPwd)) {
         authenticated = true;
       }
     }
-// test libc crypt() encoded password
-    else if (htpasswdAuthOptions.isEnabledCryptPwd() && storedPwd.equals(Crypt.crypt(password, storedPwd))) {
-      authenticated = true;
+    // test libc crypt() encoded password
+    else if (htpasswdAuthOptions.isEnabledCryptPwd()) {
+      if (cryptCheck(password, storedPwd)) {
+        authenticated = true;
+      }
     }
-// test clear text
-    else if (htpasswdAuthOptions.isEnabledPlainTextPwd() && storedPwd.equals(password)) {
-      authenticated = true;
+    // test clear text
+    else if (htpasswdAuthOptions.isEnabledPlainTextPwd()) {
+      if (storedPwd.equals(password)) {
+        authenticated = true;
+      }
     }
 
     if (authenticated) {
@@ -106,5 +102,6 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     }
 
   }
+
 
 }
