@@ -16,7 +16,7 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 public interface SoundcloudAuth {
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for SoundCloud
    *
    * @param clientId     the client id given to you by SoundCloud
    * @param clientSecret the client secret given to you by SoundCloud
@@ -26,7 +26,7 @@ public interface SoundcloudAuth {
   }
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for SoundCloud
    *
    * @param clientId          the client id given to you by SoundCloud
    * @param clientSecret      the client secret given to you by SoundCloud

@@ -16,7 +16,7 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 public interface StripeAuth {
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for Stripe
    *
    * @param clientId     the client id given to you by Stripe
    * @param clientSecret the client secret given to you by Stripe
@@ -26,7 +26,7 @@ public interface StripeAuth {
   }
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for Stripe
    *
    * @param clientId          the client id given to you by Stripe
    * @param clientSecret      the client secret given to you by Stripe

@@ -8,7 +8,7 @@ import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
 /**
- * Simplified factory to create an {@link OAuth2Auth} for Dropbox.
+ * Simplified factory to create an {@link OAuth2Auth} for Foursquare.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
@@ -16,20 +16,20 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 public interface FoursquareAuth {
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for Foursquare
    *
-   * @param clientId     the client id given to you by Dropbox
-   * @param clientSecret the client secret given to you by Dropbox
+   * @param clientId     the client id given to you by Foursquare
+   * @param clientSecret the client secret given to you by Foursquare
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret) {
     return create(vertx, clientId, clientSecret, new HttpClientOptions());
   }
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for Foursquare
    *
-   * @param clientId          the client id given to you by Dropbox
-   * @param clientSecret      the client secret given to you by Dropbox
+   * @param clientId          the client id given to you by Foursquare
+   * @param clientSecret      the client secret given to you by Foursquare
    * @param httpClientOptions custom http client options
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
