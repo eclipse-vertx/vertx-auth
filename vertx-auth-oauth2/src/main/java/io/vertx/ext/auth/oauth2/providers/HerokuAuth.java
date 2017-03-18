@@ -26,7 +26,7 @@ public interface HerokuAuth {
   }
 
   /**
-   * Create a OAuth2Auth provider for live.com
+   * Create a OAuth2Auth provider for Heroku
    *
    * @param clientId          the client id given to you by Heroku
    * @param clientSecret      the client secret given to you by Heroku

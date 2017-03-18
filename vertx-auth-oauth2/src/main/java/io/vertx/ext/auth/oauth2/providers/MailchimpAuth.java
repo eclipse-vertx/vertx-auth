@@ -16,7 +16,7 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 public interface MailchimpAuth {
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for Mailchimp
    *
    * @param clientId     the client id given to you by Mailchimp
    * @param clientSecret the client secret given to you by Mailchimp
@@ -26,7 +26,7 @@ public interface MailchimpAuth {
   }
 
   /**
-   * Create a OAuth2Auth provider for Dropbox
+   * Create a OAuth2Auth provider for Mailchimp
    *
    * @param clientId          the client id given to you by Mailchimp
    * @param clientSecret      the client secret given to you by Mailchimp
