@@ -37,7 +37,7 @@ public interface JWTAuth extends AuthProvider {
    * @param config  the config
    * @return the auth provider
    */
-  static JWTAuth create(Vertx vertx, JsonObject config) {
+  static JWTAuth create(Vertx vertx, JWTAuthOptions config) {
     return new JWTAuthProviderImpl(vertx, config);
   }
 

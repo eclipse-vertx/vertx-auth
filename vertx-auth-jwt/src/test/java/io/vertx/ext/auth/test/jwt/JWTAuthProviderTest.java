@@ -18,6 +18,8 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.JWTKeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -29,7 +31,7 @@ import static org.junit.Assert.assertNotEquals;
 
 public class JWTAuthProviderTest extends VertxTestBase {
 
-  protected JWTAuth authProvider;
+  private JWTAuth authProvider;
 
   // {"sub":"Paulo","exp":1747055313,"iat":1431695313,"permissions":["read","write","execute"],"roles":["admin","developer","user"]}
   private static final String JWT_VALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImV4cCI6MTc0NzA1NTMxMywiaWF0IjoxNDMxNjk1MzEzLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJleGVjdXRlIl0sInJvbGVzIjpbImFkbWluIiwiZGV2ZWxvcGVyIiwidXNlciJdfQ==.EorTzMRXtAKHUCvqUba69glQrbeiatZuMQypaOGqKhU=";
@@ -43,11 +45,12 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider = JWTAuth.create(vertx, getConfig());
   }
 
-  protected JsonObject getConfig() {
-    return new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret"));
+  private JWTAuthOptions getConfig() {
+    return new JWTAuthOptions()
+      .setKeyStore(new JWTKeyStoreOptions()
+        .setPath("keystore.jceks")
+        .setType("jceks")
+        .setPassword("secret"));
   }
 
   @Test
@@ -273,10 +276,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testGenerateNewTokenES256() {
-    authProvider = JWTAuth.create(vertx, new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "es256-keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret")));
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .setKeyStore(new JWTKeyStoreOptions()
+        .setPath("es256-keystore.jceks")
+        .setPassword("secret")));
 
     String token = authProvider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions().setAlgorithm("ES256"));
     assertNotNull(token);
@@ -298,10 +301,11 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testGenerateNewTokenForceAlgorithm() {
-    authProvider = JWTAuth.create(vertx, new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "gce.jks")
-        .put("type", "jks")
-        .put("password", "notasecret")));
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .setKeyStore(new JWTKeyStoreOptions()
+        .setPath("gce.jks")
+        .setType("jks")
+        .setPassword("notasecret")));
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("RS256"));
     assertNotNull(token);
@@ -347,7 +351,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testAlgNone() {
 
-    JWTAuth authProvider = JWTAuth.create(vertx, new JsonObject());
+    JWTAuth authProvider = JWTAuth.create(vertx, new JWTAuthOptions());
 
     JsonObject payload = new JsonObject()
             .put("sub", "UserUnderTest")
