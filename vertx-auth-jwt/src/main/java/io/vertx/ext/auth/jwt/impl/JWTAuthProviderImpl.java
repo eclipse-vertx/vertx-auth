@@ -24,9 +24,7 @@ import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.jwt.JWT;
-import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTOptions;
+import io.vertx.ext.jwt.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,32 +47,32 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   private final String permissionsClaimKey;
 
-  public JWTAuthProviderImpl(Vertx vertx, JsonObject config) {
-    this.permissionsClaimKey = config.getString("permissionsClaimKey", "permissions");
+  public JWTAuthProviderImpl(Vertx vertx, JWTAuthOptions config) {
+    this.permissionsClaimKey = config.getPermissionsClaimKey();
 
-    final JsonObject keyStore = config.getJsonObject("keyStore");
+    final JWTKeyStoreOptions keyStore = config.getKeyStore();
 
     try {
       if (keyStore != null) {
-        KeyStore ks = KeyStore.getInstance(keyStore.getString("type", "jceks"));
+        KeyStore ks = KeyStore.getInstance(keyStore.getType());
 
         // synchronize on the class to avoid the case where multiple file accesses will overlap
         synchronized (JWTAuthProviderImpl.class) {
-          final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getString("path"));
+          final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getPath());
 
           try (InputStream in = new ByteArrayInputStream(keystore.getBytes())) {
-            ks.load(in, keyStore.getString("password").toCharArray());
+            ks.load(in, keyStore.getPassword().toCharArray());
           }
         }
 
-        this.jwt = new JWT(ks, keyStore.getString("password").toCharArray());
+        this.jwt = new JWT(ks, keyStore.getPassword().toCharArray());
       } else {
         // in the case of not having a key store we will try to load a public key in pem format
         // this is how keycloak works as an example.
         this.jwt = new JWT();
 
         if (config.containsKey("public-key")) {
-          this.jwt.addPublicKey("RS256", config.getString("public-key"));
+          this.jwt.addPublicKey("RS256", config.getPublicKey());
 
         }
       }

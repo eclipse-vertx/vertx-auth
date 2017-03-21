@@ -22,6 +22,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.JWTKeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTOptions;
 
 /**
@@ -31,20 +33,20 @@ public class AuthJWTExamples {
 
   public void example6(Vertx vertx) {
 
-    JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret"));
+    JWTAuthOptions config = new JWTAuthOptions()
+      .setKeyStore(new JWTKeyStoreOptions()
+        .setPath("keystore.jceks")
+        .setPassword("secret"));
 
     AuthProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example7(Vertx vertx, String username, String password) {
 
-    JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-        .put("path", "keystore.jceks")
-        .put("type", "jceks")
-        .put("password", "secret"));
+    JWTAuthOptions config = new JWTAuthOptions()
+      .setKeyStore(new JWTKeyStoreOptions()
+        .setPath("keystore.jceks")
+        .setPassword("secret"));
 
     JWTAuth provider = JWTAuth.create(vertx, config);
 
@@ -58,7 +60,9 @@ public class AuthJWTExamples {
 
   public void example8(Vertx vertx) {
 
-    JsonObject config = new JsonObject().put("public-key", "BASE64-ENCODED-PUBLIC_KEY");
+    JWTAuthOptions config = new JWTAuthOptions()
+      .setPublicKey("BASE64-ENCODED-PUBLIC_KEY");
+
     AuthProvider provider = JWTAuth.create(vertx, config);
   }
 
