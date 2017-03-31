@@ -245,4 +245,89 @@ public class AuthOAuth2Examples {
       }
     });
   }
+
+
+  public void example17(AccessToken user) {
+    user.isAuthorised("print", res ->{
+      // in this case it is assumed that the role is the current application
+      if (res.succeeded() && res.result()) {
+        // Yes the user can print
+      }
+    });
+  }
+
+  public void example18(AccessToken user) {
+    user.isAuthorised("realm:add-user", res ->{
+      // the role is "realm"
+      // the authority is "add-user"
+      if (res.succeeded() && res.result()) {
+        // Yes the user can add users to the application
+      }
+    });
+  }
+
+  public void example19(AccessToken user) {
+    user.isAuthorised("finance:year-report", res ->{
+      // the role is "finance"
+      // the authority is "year-report"
+      if (res.succeeded() && res.result()) {
+        // Yes the user can access the year report from the finance department
+      }
+    });
+  }
+
+  public void example20(AccessToken user) {
+    user.logout(res -> {
+      if (res.succeeded()) {
+        // the logout call succeeded
+      } else {
+        // the user might not have been logged out
+        // to know why:
+        System.out.println(res.cause());
+      }
+    });
+  }
+
+  public void example21(AccessToken user) {
+    // internal validation against, expiration date
+    boolean isExpired = user.expired();
+  }
+
+  public void example22(AccessToken user) {
+    user.refresh(res -> {
+      if (res.succeeded()) {
+        // the refresh call succeeded
+      } else {
+        // the token was not refreshed, a best practise would be
+        // to forcefully logout the user since this could be a
+        // symptom that you're logged out by the server and this
+        // token is not valid anymore.
+      }
+    });
+  }
+
+  public void example23(AccessToken user) {
+    user.revoke("access_token", res -> {
+      if (res.succeeded()) {
+        // the refresh call succeeded
+      } else {
+        // the token was not refreshed, a best practise would be
+        // to forcefully logout the user since this could be a
+        // symptom that you're logged out by the server and this
+        // token is not valid anymore.
+      }
+    });
+  }
+
+  public void example24(AccessToken user) {
+    user.introspect(res -> {
+      if (res.succeeded()) {
+        // the introspection call succeeded
+      } else {
+        // the token failed the introspection. You should proceed
+        // to logout the user since this means that this token is
+        // not valid anymore.
+      }
+    });
+  }
 }
