@@ -48,30 +48,25 @@ public class ChainAuthImpl implements ChainAuth {
 
   @Override
   public void authenticate(final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler) {
-    new Handler<Integer>() {
-      @Override
-      public void handle(final Integer i) {
-        final Handler<Integer> self = this;
+    iterate(0, authInfo, resultHandler);
+  }
 
-        // stop condition
-        if (i == providers.size()) {
-          // no more providers, means that we failed to find a provider capable of performing this operation
-          resultHandler.handle(Future.failedFuture("No more providers"));
-          return;
-        }
-
-        // attempt to perform operation
-        providers.get(i).authenticate(authInfo, res -> {
-          if (res.succeeded()) {
-            resultHandler.handle(res);
-          } else {
-            // try again with next provider
-            self.handle(i + 1);
-          }
-        });
-      }
+  private void iterate(final int idx, final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler) {
+    // stop condition
+    if (idx >= providers.size()) {
+      // no more providers, means that we failed to find a provider capable of performing this operation
+      resultHandler.handle(Future.failedFuture("No more providers in the auth chain."));
+      return;
     }
-    // start the iterator
-    .handle(0);
+
+    // attempt to perform operation
+    providers.get(idx).authenticate(authInfo, res -> {
+      if (res.succeeded()) {
+        resultHandler.handle(res);
+      } else {
+        // try again with next provider
+        iterate(idx + 1, authInfo, resultHandler);
+      }
+    });
   }
 }
