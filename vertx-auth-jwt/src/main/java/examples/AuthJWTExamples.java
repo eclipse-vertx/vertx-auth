@@ -17,8 +17,10 @@
 package examples;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 
@@ -60,4 +62,88 @@ public class AuthJWTExamples {
     AuthProvider provider = JWTAuth.create(vertx, config);
   }
 
+  public void example9(JWTAuth jwtAuth) {
+    // This string is what you see after the string "Bearer" in the
+    // HTTP Authorization header
+    jwtAuth.authenticate(new JsonObject().put("jwt", "BASE64-ENCODED-STRING"), res -> {
+      if (res.succeeded()) {
+        User theUser = res.result();
+      } else {
+        // Failed!
+      }
+    });
+  }
+
+  public void example10(JWTAuth jwtAuth) {
+
+    // This string is what you see after the string "Bearer" in the
+    // HTTP Authorization header
+
+    // In this case we are forcing the provider to ignore the `exp` field
+    jwtAuth.authenticate(new JsonObject()
+      .put("jwt", "BASE64-ENCODED-STRING")
+      .put("options", new JsonObject()
+        .put("ignoreExpiration", true)), res -> {
+      if (res.succeeded()) {
+        User theUser = res.result();
+      } else {
+        // Failed!
+      }
+    });
+  }
+
+  public void example11(JWTAuth jwtAuth) {
+
+    // This string is what you see after the string "Bearer" in the
+    // HTTP Authorization header
+
+    // In this case we are forcing the provider to ignore the `exp` field
+    jwtAuth.authenticate(new JsonObject()
+      .put("jwt", "BASE64-ENCODED-STRING")
+      .put("options", new JsonObject()
+        .put("audience", new JsonArray().add("paulo@server.com"))), res -> {
+      if (res.succeeded()) {
+        User theUser = res.result();
+      } else {
+        // Failed!
+      }
+    });
+  }
+
+  public void example12(JWTAuth jwtAuth) {
+
+    // This string is what you see after the string "Bearer" in the
+    // HTTP Authorization header
+
+    // In this case we are forcing the provider to ignore the `exp` field
+    jwtAuth.authenticate(new JsonObject()
+      .put("jwt", "BASE64-ENCODED-STRING")
+      .put("options", new JsonObject()
+        .put("issuer", "mycorp.com")), res -> {
+      if (res.succeeded()) {
+        User theUser = res.result();
+      } else {
+        // Failed!
+      }
+    });
+  }
+
+  public void example13(User user) {
+    user.isAuthorised("create-report", res -> {
+      if (res.succeeded() && res.result()) {
+        // Yes the user can create reports
+      }
+    });
+  }
+
+
+  public void example14(Vertx vertx) {
+
+    JsonObject config = new JsonObject()
+      .put("public-key", "BASE64-ENCODED-PUBLIC_KEY")
+      // since we're consuming keycloak JWTs we need to locate the permission claims in the token
+      .put("permissionsClaimKey", "realm_access/roles");
+
+    AuthProvider provider = JWTAuth.create(vertx, config);
+  }
 }
