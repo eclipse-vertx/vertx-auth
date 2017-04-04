@@ -21,6 +21,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -34,21 +35,27 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Paulo Lopes
  */
 public class JWTAuthProviderImpl implements JWTAuth {
 
-  private static final JsonObject EMPTY_OBJECT = new JsonObject();
   private static final JsonArray EMPTY_ARRAY = new JsonArray();
 
   private final JWT jwt;
 
   private final String permissionsClaimKey;
+  private final String issuer;
+  private final List<String> audience;
+  private final boolean ignoreExpiration;
 
   public JWTAuthProviderImpl(Vertx vertx, JWTAuthOptions config) {
     this.permissionsClaimKey = config.getPermissionsClaimKey();
+    this.issuer = config.getIssuer();
+    this.audience = config.getAudience();
+    this.ignoreExpiration = config.isIgnoreExpiration();
 
     final JWTKeyStoreOptions keyStore = config.getKeyStore();
 
@@ -87,14 +94,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
     try {
       final JsonObject payload = jwt.decode(authInfo.getString("jwt"));
 
-      final JsonObject options = authInfo.getJsonObject("options", EMPTY_OBJECT);
-
       // All dates in JWT are of type NumericDate
       // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
       // the specified UTC date/time, ignoring leap seconds
       final long now = System.currentTimeMillis() / 1000;
 
-      if (payload.containsKey("exp") && !options.getBoolean("ignoreExpiration", false)) {
+      if (payload.containsKey("exp") && !ignoreExpiration) {
         if (now >= payload.getLong("exp")) {
           resultHandler.handle(Future.failedFuture("Expired JWT token: exp <= now"));
           return;
@@ -119,8 +124,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
 
-      if (options.containsKey("audience")) {
-        JsonArray audiences = options.getJsonArray("audience", EMPTY_ARRAY);
+      if (audience != null) {
         JsonArray target;
         if (payload.getValue("aud") instanceof String) {
           target = new JsonArray().add(payload.getValue("aud", ""));
@@ -128,14 +132,14 @@ public class JWTAuthProviderImpl implements JWTAuth {
           target = payload.getJsonArray("aud", EMPTY_ARRAY);
         }
 
-        if (Collections.disjoint(audiences.getList(), target.getList())) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + audiences.encode()));
+        if (Collections.disjoint(audience, target.getList())) {
+          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + Json.encode(audience)));
           return;
         }
       }
 
-      if (options.containsKey("issuer")) {
-        if (!options.getString("issuer").equals(payload.getString("iss"))) {
+      if (issuer != null) {
+        if (!issuer.equals(payload.getString("iss"))) {
           resultHandler.handle(Future.failedFuture("Invalid JWT issuer"));
           return;
         }
