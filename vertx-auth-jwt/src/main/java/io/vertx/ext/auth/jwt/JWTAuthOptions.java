@@ -18,6 +18,9 @@ package io.vertx.ext.auth.jwt;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Options describing how an JWT Auth should behave.
  *
@@ -28,11 +31,15 @@ public class JWTAuthOptions {
 
   // Defaults
   private static final String PERMISSIONS_CLAIM_KEY = "permissions";
+  private static final boolean IGNORE_EXPIRATION = false;
 
 
   private String permissionsClaimKey;
   private JWTKeyStoreOptions keyStore;
   private String publicKey;
+  private List<String> audience;
+  private String issuer;
+  private boolean ignoreExpiration;
 
   /**
    * Default constructor
@@ -50,10 +57,14 @@ public class JWTAuthOptions {
     permissionsClaimKey = other.getPermissionsClaimKey();
     keyStore = other.getKeyStore();
     publicKey = other.getPublicKey();
+    audience = other.getAudience();
+    issuer = other.getIssuer();
+    ignoreExpiration = other.isIgnoreExpiration();
   }
 
   private void init() {
     permissionsClaimKey = PERMISSIONS_CLAIM_KEY;
+    ignoreExpiration = IGNORE_EXPIRATION;
   }
 
   /**
@@ -91,6 +102,61 @@ public class JWTAuthOptions {
 
   public JWTAuthOptions setPublicKey(String publicKey) {
     this.publicKey = publicKey;
+    return this;
+  }
+
+  public List<String> getAudience() {
+    return audience;
+  }
+
+  /**
+   * Set the audience list
+   * @param audience  the audience list
+   * @return a reference to this for fluency
+   */
+  public JWTAuthOptions setAudience(List<String> audience) {
+    this.audience = audience;
+    return this;
+  }
+
+  /**
+   * Set the audience list
+   * @param audience  the audience list
+   * @return a reference to this for fluency
+   */
+  public JWTAuthOptions addAudience(String audience) {
+    if (this.audience == null) {
+      this.audience = new ArrayList<>();
+    }
+    this.audience.add(audience);
+    return this;
+  }
+
+  public String getIssuer() {
+    return issuer;
+  }
+
+  /**
+   * Set the issuer
+   * @param issuer  the issuer
+   * @return a reference to this for fluency
+   */
+  public JWTAuthOptions setIssuer(String issuer) {
+    this.issuer = issuer;
+    return this;
+  }
+
+  public boolean isIgnoreExpiration() {
+    return ignoreExpiration;
+  }
+
+  /**
+   * Set whether expiration is ignored
+   * @param ignoreExpiration  whether expiration is ignored
+   * @return a reference to this for fluency
+   */
+  public JWTAuthOptions setIgnoreExpiration(boolean ignoreExpiration) {
+    this.ignoreExpiration = ignoreExpiration;
     return this;
   }
 }

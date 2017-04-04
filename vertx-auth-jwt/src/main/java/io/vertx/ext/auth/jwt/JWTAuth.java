@@ -16,11 +16,14 @@
 
 package io.vertx.ext.auth.jwt;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
+
+import java.util.List;
 
 /**
  * Factory interface for creating JWT based {@link io.vertx.ext.auth.AuthProvider} instances.

@@ -105,17 +105,17 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testGenerateNewToken() {
 
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo")
+      .put("sub", "Paulo")
       .put("exp", 1747055313)
-        .put("iat", 1431695313)
-        .put("permissions", new JsonArray()
-            .add("read")
-            .add("write")
-            .add("execute"))
-        .put("roles", new JsonArray()
-          .add("admin")
-          .add("developer")
-          .add("user"));
+      .put("iat", 1431695313)
+      .put("permissions", new JsonArray()
+        .add("read")
+        .add("write")
+        .add("execute"))
+      .put("roles", new JsonArray()
+        .add("admin")
+        .add("developer")
+        .add("user"));
 
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
     assertNotNull(token);
@@ -126,7 +126,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testGenerateNewTokenImmutableClaims() {
 
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     String token0 = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
     String token1 = authProvider.generateToken(payload, new JWTOptions().addPermission("admin"));
@@ -137,10 +137,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testTokenWithoutTimestamp() {
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().setExpiresInMinutes(5L).setNoTimestamp(true));
+      new JWTOptions().setExpiresInMinutes(5L).setNoTimestamp(true));
 
     assertNotNull(token);
 
@@ -159,7 +159,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testTokenWithTimestamp() {
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions());
     assertNotNull(token);
@@ -176,10 +176,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testExpiration() {
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().setExpiresInMinutes(-5L).setNoTimestamp(true));
+      new JWTOptions().setExpiresInMinutes(-5L).setNoTimestamp(true));
 
     assertNotNull(token);
 
@@ -194,15 +194,15 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGoodIssuer() {
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://vertx.io"));
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-        .put("jwt", token)
-        .put("options", new JsonObject()
-            .put("issuer", "https://vertx.io"));
+      .put("jwt", token)
+      .put("options", new JsonObject()
+        .put("issuer", "https://vertx.io"));
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -213,15 +213,16 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testBadIssuer() {
+
+    authProvider = JWTAuth.create(vertx, getConfig().setIssuer("https://vertx.io"));
+
     JsonObject payload = new JsonObject().put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://auth0.io"));
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-        .put("jwt", token)
-        .put("options", new JsonObject()
-            .put("issuer", "https://vertx.io"));
+      .put("jwt", token);
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -233,17 +234,17 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGoodAudience() {
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
+      new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
 
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-        .put("jwt", token)
-        .put("options", new JsonObject()
-            .put("audience", new JsonArray().add("b").add("d")));
+      .put("jwt", token)
+      .put("options", new JsonObject()
+        .put("audience", new JsonArray().add("b").add("d")));
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -254,18 +255,21 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testBadAudience() {
+
+    authProvider = JWTAuth.create(vertx, getConfig()
+      .addAudience("e")
+      .addAudience("d"));
+
     JsonObject payload = new JsonObject()
-        .put("sub", "Paulo");
+      .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-        new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
+      new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
 
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-        .put("jwt", token)
-        .put("options", new JsonObject()
-            .put("audience", new JsonArray().add("e").add("d")));
+      .put("jwt", token);
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -285,7 +289,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-        .put("jwt", token);
+      .put("jwt", token);
 
     authProvider.authenticate(authInfo, res -> {
       if (res.failed()) {
@@ -339,7 +343,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String signatureSeg = segments[2];
 
     // build attack token
-    String attackerJWT = headerSeg+"."+payloadSeg+"."+signatureSeg;
+    String attackerJWT = headerSeg + "." + payloadSeg + "." + signatureSeg;
     JsonObject authInfo = new JsonObject().put("jwt", attackerJWT);
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -354,12 +358,12 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JWTAuth authProvider = JWTAuth.create(vertx, new JWTAuthOptions());
 
     JsonObject payload = new JsonObject()
-            .put("sub", "UserUnderTest")
-            .put("aud", "OrganizationUnderTest")
-            .put("iat", 1431695313)
-            .put("exp", 1747055313)
-            .put("roles", new JsonArray().add("admin").add("developer").add("user"))
-            .put("permissions", new JsonArray().add("read").add("write").add("execute"));
+      .put("sub", "UserUnderTest")
+      .put("aud", "OrganizationUnderTest")
+      .put("iat", 1431695313)
+      .put("exp", 1747055313)
+      .put("roles", new JsonArray().add("admin").add("developer").add("user"))
+      .put("permissions", new JsonArray().add("read").add("write").add("execute"));
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setSubject("UserUnderTest").setAlgorithm("none"));
     assertNotNull(token);

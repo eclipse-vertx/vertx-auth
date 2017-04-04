@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jwt</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jwt:3.4.1'
+compile 'io.vertx:vertx-auth-jwt:3.4.2-SNAPSHOT'
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
@@ -51,13 +51,10 @@ Here's an example of creating a JWT auth provider:
 [source,java]
 ----
 
-var config = json {
-  obj("keyStore" to obj(
-      "path" to "keystore.jceks",
-      "type" to "jceks",
-      "password" to "secret"
-    ))
-}
+var config = JWTAuthOptions(
+  keyStore = JWTKeyStoreOptions(
+    path = "keystore.jceks",
+    password = "secret"))
 
 var provider = JWTAuth.create(vertx, config)
 
@@ -70,13 +67,10 @@ do:
 [source,java]
 ----
 
-var config = json {
-  obj("keyStore" to obj(
-      "path" to "keystore.jceks",
-      "type" to "jceks",
-      "password" to "secret"
-    ))
-}
+var config = JWTAuthOptions(
+  keyStore = JWTKeyStoreOptions(
+    path = "keystore.jceks",
+    password = "secret"))
 
 var provider = JWTAuth.create(vertx, config)
 
@@ -144,9 +138,9 @@ case all you need to have is a public key im PEM format.
 [source,kotlin]
 ----
 
-var config = json {
-  obj("public-key" to "BASE64-ENCODED-PUBLIC_KEY")
-}
+var config = JWTAuthOptions(
+  publicKey = "BASE64-ENCODED-PUBLIC_KEY")
+
 var provider = JWTAuth.create(vertx, config)
 
 ----

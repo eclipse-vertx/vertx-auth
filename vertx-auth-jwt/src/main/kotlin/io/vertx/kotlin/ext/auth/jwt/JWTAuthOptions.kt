@@ -8,6 +8,10 @@ import io.vertx.ext.auth.jwt.JWTKeyStoreOptions
  *
  * Options describing how an JWT Auth should behave.
  *
+ * @param audience  Set the audience list
+ * @param audiences  Set the audience list
+ * @param ignoreExpiration  Set whether expiration is ignored
+ * @param issuer  Set the issuer
  * @param keyStore 
  * @param permissionsClaimKey 
  * @param publicKey 
@@ -16,10 +20,28 @@ import io.vertx.ext.auth.jwt.JWTKeyStoreOptions
  * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.jwt.JWTAuthOptions original] using Vert.x codegen.
  */
 fun JWTAuthOptions(
+  audience: Iterable<String>? = null,
+  audiences: Iterable<String>? = null,
+  ignoreExpiration: Boolean? = null,
+  issuer: String? = null,
   keyStore: io.vertx.ext.auth.jwt.JWTKeyStoreOptions? = null,
   permissionsClaimKey: String? = null,
   publicKey: String? = null): JWTAuthOptions = io.vertx.ext.auth.jwt.JWTAuthOptions().apply {
 
+  if (audience != null) {
+    this.setAudience(audience.toList())
+  }
+  if (audiences != null) {
+    for (item in audiences) {
+      this.addAudience(item)
+    }
+  }
+  if (ignoreExpiration != null) {
+    this.setIgnoreExpiration(ignoreExpiration)
+  }
+  if (issuer != null) {
+    this.setIssuer(issuer)
+  }
   if (keyStore != null) {
     this.setKeyStore(keyStore)
   }

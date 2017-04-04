@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jwt</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jwt:3.4.1'
+compile 'io.vertx:vertx-auth-jwt:3.4.2-SNAPSHOT'
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
@@ -50,10 +50,10 @@ Here's an example of creating a JWT auth provider:
 
 [source,java]
 ----
-JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-    .put("path", "keystore.jceks")
-    .put("type", "jceks")
-    .put("password", "secret"));
+JWTAuthOptions config = new JWTAuthOptions()
+  .setKeyStore(new JWTKeyStoreOptions()
+    .setPath("keystore.jceks")
+    .setPassword("secret"));
 
 AuthProvider provider = JWTAuth.create(vertx, config);
 ----
@@ -64,10 +64,10 @@ do:
 
 [source,java]
 ----
-JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-    .put("path", "keystore.jceks")
-    .put("type", "jceks")
-    .put("password", "secret"));
+JWTAuthOptions config = new JWTAuthOptions()
+  .setKeyStore(new JWTKeyStoreOptions()
+    .setPath("keystore.jceks")
+    .setPassword("secret"));
 
 JWTAuth provider = JWTAuth.create(vertx, config);
 
@@ -131,7 +131,9 @@ case all you need to have is a public key im PEM format.
 
 [source,java]
 ----
-JsonObject config = new JsonObject().put("public-key", "BASE64-ENCODED-PUBLIC_KEY");
+JWTAuthOptions config = new JWTAuthOptions()
+  .setPublicKey("BASE64-ENCODED-PUBLIC_KEY");
+
 AuthProvider provider = JWTAuth.create(vertx, config);
 ----
 <a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a><a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
