@@ -80,7 +80,7 @@
  *
  * Here's an example of authenticating a user using a simple username/password implementation:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthCommonExamples#example1}
  * ----
@@ -95,7 +95,7 @@
  *
  * Here's an example of authorising a user:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.AuthCommonExamples#example2}
  * ----
@@ -129,7 +129,7 @@
  *
  * == Pseudo Random Number Generator
  *
- * Since Secure Random from java can block during the aquisition of entropy from the system, we provide a simple wrapper
+ * Since Secure Random from java can block during the acquisition of entropy from the system, we provide a simple wrapper
  * around it that can be used without the danger of blocking the event loop.
  *
  * By default this PRNG uses a mixed mode, blocking for seeding, non blocking for generating. The PRNG will also reseed
@@ -141,6 +141,20 @@
  *
  * Most users should not need to configure these values unless if you notice that the performance of your application is
  * being affected by the PRNG algorithm.
+ *
+ * === Sharing Pseudo Random Number Generator
+ *
+ * Since the Pseudo Random Number Generator objects are expensive in resources, they consume system entropy which is a
+ * scarce resource it can be wise to share the PRNG's across all your handlers. In order to do this and to make this
+ * available to all languages supported by Vert.x you should look into the {@link io.vertx.ext.auth.VertxContextRandom}.
+ *
+ * This interface relaxes the lifecycle management of PRNG's for the end user and ensures it can be reused across all
+ * your application, for example:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthCommonExamples#example4}
+ * ----
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  * @author <a href="http://tfox.org">Tim Fox</a>
