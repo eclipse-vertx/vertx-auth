@@ -16,7 +16,7 @@
 
 package examples;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
@@ -82,8 +82,8 @@ public class AuthCommonExamples {
     });
   }
 
-  public void example4(Vertx vertx) {
+  public void example4(Context context) {
     // Generate a secure token of 32 bytes as a base64 string
-    String token = VertxContextRandom.current(vertx).nextString(32);
+    String token = VertxContextRandom.current(context).nextString(32);
   }
 }
