@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.jwt;
+package io.vertx.ext.jwt;
 
 import java.security.*;
 import java.security.cert.X509Certificate;

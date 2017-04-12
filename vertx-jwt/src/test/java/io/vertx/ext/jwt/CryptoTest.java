@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.jwt;
+package io.vertx.ext.jwt;
 
 import org.junit.Test;
 
