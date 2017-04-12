@@ -12,7 +12,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jwt</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jwt:3.4.1'
+compile 'io.vertx:vertx-auth-jwt:3.4.2-SNAPSHOT'
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
@@ -91,10 +91,6 @@ if ("paulo" == username && "super_secret" == password) {
 
 ----
 
-// TODO show example of authentication and authorisation with JWT and explain how the permission string passed
-// in authorisation maps to the claims in the JW token
-
-
 === The JWT keystore file
 
 This auth provider requires a keystore in the classpath or in the filesystem with either a
@@ -150,4 +146,153 @@ def config = [
 def provider = JWTAuth.create(vertx, config)
 
 ----
+
+== AuthN/AuthZ with JWT
+
+A common scenario when developing for example micro services is that you want you application to consume APIs. These
+api's are not meant to be consumed by humans so we should remove all the interactive part of authenticating the
+consumer out of the picture.
+
+In this scenario one can use HTTP as the protocol to consume this API and the HTTP protocol already defines that there
+is a header `Authorization` that should be used for passing authorization information. In most cases you will see that
+tokens are sent as bearer tokens, i.e.: `Authorization: Bearer some+base64+string`.
+
+=== Authenticating (AuthN)
+
+For this provider a user is authenticated if the token passes the signature checks and that the token is not expired.
+For this reason it is imperative that private keys are kept private and not copy pasted across project since it would
+be a security hole.
+
+[source,groovy]
+----
+// This string is what you see after the string "Bearer" in the
+// HTTP Authorization header
+jwtAuth.authenticate([
+  jwt:"BASE64-ENCODED-STRING"
+], { res ->
+  if (res.succeeded()) {
+    def theUser = res.result()
+  } else {
+    // Failed!
+  }
+})
+
+----
+
+In a nutshell the provider is checking for several things:
+
+* token signature is valid against internal private key
+* fields: `exp`, `iat`, `nbf`, `audience`, `issuer` are valid according to the config
+
+If all these are valid then the token is considered good and a user object is returned.
+
+While the fields `exp`, `iat` and `nbf` are simple timestamp checks only `exp` can be configured to be ignored:
+
+[source,groovy]
+----
+
+// This string is what you see after the string "Bearer" in the
+// HTTP Authorization header
+
+// In this case we are forcing the provider to ignore the `exp` field
+jwtAuth.authenticate([
+  jwt:"BASE64-ENCODED-STRING",
+  options:[
+    ignoreExpiration:true
+  ]
+], { res ->
+  if (res.succeeded()) {
+    def theUser = res.result()
+  } else {
+    // Failed!
+  }
+})
+
+----
+
+In order to verify the `aud` field one needs to pass the options like before:
+
+[source,groovy]
+----
+
+// This string is what you see after the string "Bearer" in the
+// HTTP Authorization header
+
+// In this case we are forcing the provider to ignore the `exp` field
+jwtAuth.authenticate([
+  jwt:"BASE64-ENCODED-STRING",
+  options:[
+    audience:[
+      "paulo@server.com"
+    ]
+  ]
+], { res ->
+  if (res.succeeded()) {
+    def theUser = res.result()
+  } else {
+    // Failed!
+  }
+})
+
+----
+
+And the same for the issuer:
+
+[source,groovy]
+----
+
+// This string is what you see after the string "Bearer" in the
+// HTTP Authorization header
+
+// In this case we are forcing the provider to ignore the `exp` field
+jwtAuth.authenticate([
+  jwt:"BASE64-ENCODED-STRING",
+  options:[
+    issuer:"mycorp.com"
+  ]
+], { res ->
+  if (res.succeeded()) {
+    def theUser = res.result()
+  } else {
+    // Failed!
+  }
+})
+
+----
+
+=== Authorizing (AuthZ)
+
+Once a token is parsed and is valid we can use it to perform authorization tasks. The most simple is to verify if a
+user has a specific authority. In this case one needs to to:
+
+[source,groovy]
+----
+user.isAuthorised("create-report", { res ->
+  if (res.succeeded() && res.result()) {
+    // Yes the user can create reports
+  }
+})
+
+----
+
+By default the provider will lookup under the key `permissions` but like the other providers one can extend the
+concept to authorities to roles by using the `:` as a splitter, so `role:authority` can be used to lookup the token.
+
+Since JWT are quite free form and there is no standard on where to lookup for the claims the location can be
+configured to use something else than `permissions`, for example one can even lookup under a path like this:
+
+[source,groovy]
+----
+
+def config = [
+  'public-key':"BASE64-ENCODED-PUBLIC_KEY",
+  permissionsClaimKey:"realm_access/roles"
+]
+
+def provider = JWTAuth.create(vertx, config)
+
+----
+
+So in this example we configure the JWT to work with Keycloak token format. In this case the claims will be checked
+under the path `realm_access/roles` rather than `permissions`.
 <a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a><a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
