@@ -108,6 +108,42 @@ conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("
 });
 ----
 
+WARNING: Hashing user password with salt can be not enough, this approach his good enough for avoiding rainbow tables
+attacks or precomputed table attacks but if the attacker gets the database it will be easier to setup a brute force
+attack. This kind of attack is slower but all required information is given: the hash and the salt.
+
+To make the hash attack more complex the default strategy allows you to provide an application level list of nonces
+to be used in the computation. This list should not be stored in the database since it add an extra variable to the
+computation that is unknown, making the brute force attack as potentially the only way to crack the hash. You might
+want to refresh the nonces now and then so you should add and never remove entries to the list, for example:
+
+[source,java]
+----
+auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+----
+
+In order to decode there is no change required to the code, however to generate a new user you must specify which
+nonce (by it's index) you want to use. If you look at the previous example, the usage is quite similar:
+
+1. Generate a salt string
+2. Hash the password given the salt string and choosen nonce
+3. Store it to the database
+
+[source,java]
+----
+auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+
+String salt = auth.generateSalt();
+// we will pick the second nonce
+String hash = auth.computeHash("sausages", salt, 1);
+// save to the database
+conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
+  if (res.succeeded()) {
+    // success!
+  }
+});
+----
+
 == Authentication
 
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the

@@ -31,6 +31,8 @@ import io.vertx.ext.sql.SQLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -75,7 +77,19 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
           JsonArray row = rs.getResults().get(0);
           String hashedStoredPwd = strategy.getHashedStoredPwd(row);
           String salt = strategy.getSalt(row);
-          String hashedPassword = strategy.computeHash(password, salt);
+          // extract the version (-1 means no version)
+          int version = -1;
+          int sep = hashedStoredPwd.lastIndexOf('$');
+          if (sep != -1) {
+            try {
+              version = Integer.parseInt(hashedStoredPwd.substring(sep + 1));
+            } catch (NumberFormatException e) {
+              // the nonce version is not a number
+              resultHandler.handle(Future.failedFuture("Invalid nonce version: " + version));
+              return;
+            }
+          }
+          String hashedPassword = strategy.computeHash(password, salt, version);
           if (hashedStoredPwd.equals(hashedPassword)) {
             resultHandler.handle(Future.succeededFuture(new JDBCUser(username, this, rolePrefix)));
           } else {
@@ -145,13 +159,19 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
 
   @Override
-  public String computeHash(String password, String salt) {
-    return strategy.computeHash(password, salt);
+  public String computeHash(String password, String salt, int version) {
+    return strategy.computeHash(password, salt, version);
   }
 
   @Override
   public String generateSalt() {
     return strategy.generateSalt();
+  }
+
+  @Override
+  public JDBCAuth setNonces(JsonArray nonces) {
+    strategy.setNonces(nonces.getList());
+    return this;
   }
 
   String getRolesQuery() {
@@ -166,6 +186,8 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
     private final PRNG random;
 
+    private List<String> nonces;
+
     DefaultHashStrategy(Vertx vertx) {
       random = new PRNG(vertx);
     }
@@ -179,12 +201,29 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     }
 
     @Override
-    public String computeHash(String password, String salt) {
+    public String computeHash(String password, String salt, int version) {
       try {
+        String concat =
+          (salt == null ? "" : salt) +
+          password;
+
+        if (version >= 0) {
+          if (nonces == null) {
+            // the nonce version is not a number
+            throw new VertxException("nonces are not available");
+          }
+          if (version < nonces.size()) {
+            concat += nonces.get(version);
+          }
+        }
+
         MessageDigest md = MessageDigest.getInstance("SHA-512");
-        String concat = (salt == null ? "" : salt) + password;
         byte[] bHash = md.digest(concat.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(bHash);
+        if (version >= 0) {
+          return bytesToHex(bHash) + '$' + version;
+        } else {
+          return bytesToHex(bHash);
+        }
       } catch (NoSuchAlgorithmException e) {
         throw new VertxException(e);
       }
@@ -198,6 +237,11 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
     @Override
     public String getSalt(JsonArray row) {
       return row.getString(1);
+    }
+
+    @Override
+    public void setNonces(List<String> nonces) {
+      this.nonces = Collections.unmodifiableList(nonces);
     }
 
     private final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
