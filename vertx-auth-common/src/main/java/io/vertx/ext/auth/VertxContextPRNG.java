@@ -26,15 +26,15 @@ import java.util.Base64;
  * A secure non blocking random number generator isolated to the current context. The PRNG is bound to the vert.x
  * context and setup to close when the context shuts down.
  * <p>
- * When applicable, use of VertxContextRandom rather than create new PRNG objects is helpful to keep the system entropy
+ * When applicable, use of VertxContextPRNG rather than create new PRNG objects is helpful to keep the system entropy
  * usage to the minimum avoiding potential blocking across the application.
  * <p>
- * The use of VertxContextRandom is particularly appropriate when multiple handlers use random numbers.
+ * The use of VertxContextPRNG is particularly appropriate when multiple handlers use random numbers.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface VertxContextRandom {
+public interface VertxContextPRNG {
 
   /**
    * Get or create a secure non blocking random number generator using the current vert.x context. If there is no
@@ -43,7 +43,7 @@ public interface VertxContextRandom {
    * @return A secure non blocking random number generator.
    * @throws IllegalStateException when there is no context available.
    */
-  static VertxContextRandom current() {
+  static VertxContextPRNG current() {
     final Context currentContext = Vertx.currentContext();
     if (currentContext != null) {
       return current(currentContext);
@@ -53,29 +53,30 @@ public interface VertxContextRandom {
   }
 
   /**
-   * Get or create a secure non blocking random number generator using the current vert.x context. This method will not
+   * Get or create a secure non blocking random number generator using the provided vert.x context. This method will not
    * throw an exception.
    *
    * @param context a Vert.x context.
    * @return A secure non blocking random number generator.
    */
-  static VertxContextRandom current(final Context context) {
-
+  @GenIgnore
+  static VertxContextPRNG current(final Context context) {
+    final String contextKey = "__vertx.VertxContextPRNG";
     // attempt to load a PRNG from the current context
-    PRNG random = context.get(VertxContextRandom.class.getName());
+    PRNG random = context.get(contextKey);
 
     if (random == null) {
       synchronized (context) {
         // attempt to reload to avoid double creation when we were
         // waiting for the lock
-        random = context.get(VertxContextRandom.class.getName());
+        random = context.get(contextKey);
         if (random == null) {
           // there was no PRNG in the context, create one
           random = new PRNG(context.owner());
           // need to make the random final
           final PRNG rand = random;
           // save to the context
-          context.put(VertxContextRandom.class.getName(), rand);
+          context.put(contextKey, rand);
           // add a close hook to shutdown the PRNG
           context.addCloseHook(v -> rand.close());
         }
@@ -93,7 +94,7 @@ public interface VertxContextRandom {
    * @param vertx a Vert.x instance.
    * @return A secure non blocking random number generator.
    */
-  static VertxContextRandom current(final Vertx vertx) {
+  static VertxContextPRNG current(final Vertx vertx) {
     final Context currentContext = Vertx.currentContext();
     if (currentContext != null) {
       return current(currentContext);

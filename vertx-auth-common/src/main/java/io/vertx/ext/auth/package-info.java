@@ -146,7 +146,7 @@
  *
  * Since the Pseudo Random Number Generator objects are expensive in resources, they consume system entropy which is a
  * scarce resource it can be wise to share the PRNG's across all your handlers. In order to do this and to make this
- * available to all languages supported by Vert.x you should look into the {@link io.vertx.ext.auth.VertxContextRandom}.
+ * available to all languages supported by Vert.x you should look into the {@link io.vertx.ext.auth.VertxContextPRNG}.
  *
  * This interface relaxes the lifecycle management of PRNG's for the end user and ensures it can be reused across all
  * your application, for example:

@@ -14,7 +14,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-common</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -22,7 +22,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-common:3.4.1'
+compile 'io.vertx:vertx-auth-common:3.4.2-SNAPSHOT'
 ----
 
 == Basic concepts
@@ -63,7 +63,7 @@ user and contains operations which allow the user to be authorised.
 
 Here's an example of authenticating a user using a simple username/password implementation:
 
-[source,java]
+[source,js]
 ----
 
 var authInfo = {
@@ -95,7 +95,7 @@ The results of all the above are provided asynchronously in the handler.
 
 Here's an example of authorising a user:
 
-[source,java]
+[source,js]
 ----
 
 user.isAuthorised("printers:printer1234", function (res, res_err) {
@@ -145,7 +145,7 @@ If you wish your user objects to be clusterable you should make sure they implem
 
 == Pseudo Random Number Generator
 
-Since Secure Random from java can block during the aquisition of entropy from the system, we provide a simple wrapper
+Since Secure Random from java can block during the acquisition of entropy from the system, we provide a simple wrapper
 around it that can be used without the danger of blocking the event loop.
 
 By default this PRNG uses a mixed mode, blocking for seeding, non blocking for generating. The PRNG will also reseed
@@ -157,4 +157,23 @@ every 5 minutes with 64bits of new entropy. However this can all be configured u
 
 Most users should not need to configure these values unless if you notice that the performance of your application is
 being affected by the PRNG algorithm.
+
+=== Sharing Pseudo Random Number Generator
+
+Since the Pseudo Random Number Generator objects are expensive in resources, they consume system entropy which is a
+scarce resource it can be wise to share the PRNG's across all your handlers. In order to do this and to make this
+available to all languages supported by Vert.x you should look into the `link:../../jsdoc/module-vertx-auth-common-js_vertx_context_prng-VertxContextPRNG.html[VertxContextPRNG]`.
+
+This interface relaxes the lifecycle management of PRNG's for the end user and ensures it can be reused across all
+your application, for example:
+
+[source,js]
+----
+var VertxContextPRNG = require("vertx-auth-common-js/vertx_context_prng");
+// Generate a secure token of 32 bytes as a base64 string
+var token = VertxContextPRNG.current(vertx).nextString(32);
+// Generate a secure random integer
+var randomInt = VertxContextPRNG.current(vertx).nextInt();
+
+----
 <a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a>

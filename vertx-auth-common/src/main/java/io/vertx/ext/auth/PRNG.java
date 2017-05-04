@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Paulo Lopes
  */
-public class PRNG implements VertxContextRandom {
+public class PRNG implements VertxContextPRNG {
 
   private static final int DEFAULT_SEED_INTERVAL_MILLIS = 300000;
   private static final int DEFAULT_SEED_BITS = 64;

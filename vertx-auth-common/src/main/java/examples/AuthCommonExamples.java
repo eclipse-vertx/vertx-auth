@@ -17,10 +17,11 @@
 package examples;
 
 import io.vertx.core.Context;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.VertxContextRandom;
+import io.vertx.ext.auth.VertxContextPRNG;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -82,8 +83,10 @@ public class AuthCommonExamples {
     });
   }
 
-  public void example4(Context context) {
+  public void example4(Vertx vertx) {
     // Generate a secure token of 32 bytes as a base64 string
-    String token = VertxContextRandom.current(context).nextString(32);
+    String token = VertxContextPRNG.current(vertx).nextString(32);
+    // Generate a secure random integer
+    int randomInt = VertxContextPRNG.current(vertx).nextInt();
   }
 }
