@@ -245,9 +245,19 @@ public class OAuth2API {
 
   private static void handleToken(final int statusCode, final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {
     if (json.containsKey("error")) {
-      String error = json.getString("error");
-      String description = json.getString("error_description", null);
-      callback.handle(Future.failedFuture(description != null ? error + ": " + description : error));
+      String description;
+      Object error = json.getValue("error");
+      if (error instanceof JsonObject) {
+        description = ((JsonObject) error).getString("message");
+      } else {
+        // attempt to handle the error as a string
+        try {
+          description = json.getString("error_description", json.getString("error"));
+        } catch (RuntimeException e) {
+          description = error.toString();
+        }
+      }
+      callback.handle(Future.failedFuture(description));
     } else {
       // for the case there was a http protocol error
       if (statusCode >= 400) {
