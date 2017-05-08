@@ -86,4 +86,23 @@ public class AuthJDBCExamples {
       }
     });
   }
+
+  public void example10(JDBCAuth auth) {
+    auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+  }
+
+  public void example11(JDBCAuth auth, SQLConnection conn) {
+
+    auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+
+    String salt = auth.generateSalt();
+    // we will pick the second nonce
+    String hash = auth.computeHash("sausages", salt, 1);
+    // save to the database
+    conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
+      if (res.succeeded()) {
+        // success!
+      }
+    });
+  }
 }

@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.test.jdbc;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -49,6 +50,9 @@ public class JDBCAuthTest extends VertxTestBase {
     SQL.add("insert into roles_perms values ('dev', 'eat_pizza');");
     SQL.add("insert into roles_perms values ('admin', 'merge_pr');");
 
+    // add another user using nonces
+    SQL.add("insert into user values ('paulo', '4EFC18C18180F20905B79EA06D24F866382E9888957195E3C36EFA603C5194AD4E56685579FC4A9C5144EE093B00E1E208C344E80703DEEE28D4FCF3C7778F24$0', 'E1BDFAF66074169738F593626ABDE48E013CA17D87CDFF07F18FC5D7FBBFA427');");
+
     // and a second set of tables with slight differences
 
     SQL.add("drop table if exists user2;");
@@ -65,6 +69,8 @@ public class JDBCAuthTest extends VertxTestBase {
     SQL.add("insert into roles_perms2 values ('dev', 'eat_pizza');");
     SQL.add("insert into roles_perms2 values ('admin', 'merge_pr');");
 
+    // add another user using nonces
+    SQL.add("insert into user2 values ('paulo', '4EFC18C18180F20905B79EA06D24F866382E9888957195E3C36EFA603C5194AD4E56685579FC4A9C5144EE093B00E1E208C344E80703DEEE28D4FCF3C7778F24$0', 'E1BDFAF66074169738F593626ABDE48E013CA17D87CDFF07F18FC5D7FBBFA427');");
   }
 
   @BeforeClass
@@ -87,8 +93,7 @@ public class JDBCAuthTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = createProvider();
-
+    authProvider = createProvider().setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
   }
 
   protected JDBCAuth createProvider() {
@@ -186,6 +191,17 @@ public class JDBCAuthTest extends VertxTestBase {
         assertFalse(has);
         testComplete();
       }));
+    }));
+    await();
+  }
+
+  @Test
+  public void testAuthenticateWithNonce() {
+    JsonObject authInfo = new JsonObject();
+    authInfo.put("username", "paulo").put("password", "secret");
+    authProvider.authenticate(authInfo, onSuccess(user -> {
+      assertNotNull(user);
+      testComplete();
     }));
     await();
   }

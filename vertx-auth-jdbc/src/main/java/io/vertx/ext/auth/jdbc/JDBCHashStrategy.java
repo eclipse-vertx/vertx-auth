@@ -18,6 +18,8 @@ package io.vertx.ext.auth.jdbc;
 
 import io.vertx.core.json.JsonArray;
 
+import java.util.List;
+
 /**
  * Determines how the hashing is computed in the implementation
  *
@@ -38,9 +40,10 @@ public interface JDBCHashStrategy {
    * Compute the hashed password given the unhashed password and the salt
    * @param password  the unhashed password
    * @param salt  the salt
+   * @param version the nonce version to use
    * @return  the hashed password
    */
-  String computeHash(String password, String salt);
+  String computeHash(String password, String salt, int version);
 
   /**
    * Retrieve the hashed password from the result of the authentication query
@@ -55,4 +58,17 @@ public interface JDBCHashStrategy {
    * @return  the salt
    */
   String getSalt(JsonArray row);
+
+  /**
+   * Sets a ordered list of nonces where each position corresponds to a version.
+   *
+   * The nonces are supposed not to be stored in the underlying jdbc storage but to
+   * be provided as a application configuration. The idea is to add one extra variable
+   * to the hash function in order to make breaking the passwords using rainbow tables
+   * or precomputed hashes harder. Leaving the attacker only with the brute force
+   * approach.
+   *
+   * @param nonces a List of non null Strings.
+   */
+  void setNonces(List<String> nonces);
 }
