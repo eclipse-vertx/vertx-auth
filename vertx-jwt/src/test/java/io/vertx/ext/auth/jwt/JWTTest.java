@@ -2,11 +2,22 @@ package io.vertx.ext.auth.jwt;
 
 import org.junit.Test;
 
+import io.vertx.core.json.JsonObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +34,70 @@ public class JWTTest {
   }
 
   @Test
+  public void createPublicKeys() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    KeyFactory kf = KeyFactory.getInstance("RSA");
+    String encodedKeyData = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB";
+    X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(encodedKeyData));
+    PublicKey key = kf.generatePublic(spec);
+    
+    Map<String, PublicKey> keyMap = new LinkedHashMap<>();
+    keyMap.put("RS256", key);
+    keyMap.put("RS384", key);
+    keyMap.put("RS512", key);
+    keyMap.put("ES256", key);
+    keyMap.put("ES384", key);
+    keyMap.put("ES512", key);
+    
+    JWT jwt = new JWT(keyMap);
+    assertFalse(jwt.isUnsecure());
+    
+    List<String> expectedAlgorithms = new ArrayList<>(keyMap.keySet());
+    expectedAlgorithms.add("none");
+    assertTrue(jwt.availableAlgorithms().containsAll(expectedAlgorithms));
+  }  
+
+  @Test
+  public void publicKeyRoundtrip() throws NoSuchAlgorithmException, InvalidKeySpecException, KeyStoreException, CertificateException, IOException, UnrecoverableKeyException {
+    KeyStore ks = KeyStore.getInstance("jceks");
+
+    try (InputStream in = JWTTest.class.getResourceAsStream("/keystore.jceks")) {
+      ks.load(in, "secret".toCharArray());
+    }
+
+    JWT jwt = new JWT(ks, "secret".toCharArray());
+    JsonObject payload = new JsonObject();
+    payload.put("hello", "world");
+    
+    String jwtToken = jwt.sign(payload, new JsonObject().put("algorithm", "RS256"));
+    
+    Map<String, PublicKey> publicKeys = extractPublicKeys(ks, "secret".toCharArray());
+    JWT publicJwt = new JWT(publicKeys);
+    JsonObject decodedPayload = publicJwt.decode(jwtToken);
+    
+    assertEquals(payload, decodedPayload);
+  }
+
+  private static Map<String, PublicKey> extractPublicKeys(KeyStore keyStore, char[] keystorePassword)
+      throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+    Map<String, PublicKey> publicKeys = new LinkedHashMap<>();
+    Enumeration<String> aliasEnum = keyStore.aliases();
+    while (aliasEnum.hasMoreElements()) {
+      String alias = aliasEnum.nextElement();
+      if (keyStore.isKeyEntry(alias)) {
+        Key key = keyStore.getKey(alias, keystorePassword);
+        if (key instanceof PrivateKey) {
+          Certificate cert = keyStore.getCertificate(alias);
+          PublicKey publicKey = cert.getPublicKey();
+          publicKeys.put(alias.toUpperCase(), publicKey);
+        } else if (key instanceof PublicKey) {
+          publicKeys.put(alias.toUpperCase(), (PublicKey) key);
+        }
+      }
+    }
+    return publicKeys;
+  }  
+  
+  @Test
   public void createKeystore() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
     KeyStore ks = KeyStore.getInstance("jceks");
 
@@ -36,6 +111,20 @@ public class JWTTest {
     assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("HS256", "HS512", "RS256", "HS384", "none")));
   }
 
+  @Test
+  public void create() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    KeyStore ks = KeyStore.getInstance("jceks");
+
+    try (InputStream in = JWTTest.class.getResourceAsStream("/keystore.jceks")) {
+      ks.load(in, "secret".toCharArray());
+    }
+
+    JWT jwt = new JWT(ks, "secret".toCharArray());
+    assertFalse(jwt.isUnsecure());
+    // assert algorithms are available
+    assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("HS256", "HS512", "RS256", "HS384", "none")));
+  }  
+  
   @Test
   public void createPrivateKey() {
     JWT jwt = new JWT("MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC+LyhQqgy0hkUtdJfcBs/dleD+486n8xQkzNl0doRQZ2mEA72uU4HE6q9cDXDJJFMOJsYuwmyj2Zk590e+iWvWuV2DlXXH0mbCKlDajk4Kux6Z8XB8kVXGi3SjbiQ2CcoMe674ki2Yz0I78VZy9vZ1rz3f2z8eFsUnL+ywF6TCvptYeLqCJJSEJhTOFrGHowHYagUucEhVIodyrwWdHNyo4IguzgKJ/Ke1Aq5hZYRhJYiETD15TcbvT0yUTY96bIRSQzk5Z66S3AyCuai/UtKaJy5v8FcjpJuYutoy+zSgUj14Bhp/cvL8xgbypPwi3a9TAuFTzXBsORstUzvNh1IfAgMBAAECggEAXHSocK56hrhPoQ1xVfGp09stCjzNFjDBtjIv9MI5CK19SkRXTgwipgxBO8r87YvPJK4M4mZ6Uh1StC9WnXZJCpYKtBFQtNfARNw1ekp7/hOBiO0q9iPhQyhAh8Lfr7WKmA74vLazm/oGBQYKNNGCdyu+NLltMb94ENjng6O64UDZXJa5m1k0TqjBveu0B3ti8xYOKuO2expZieflWuW6g/9sPa1gqKauciVGkshleSpPKxV9fjlauQ2yUwI/4naPfOovCc8F0A+A6sDTCq66E2jZCwxr7xEahzU1fYPPnMZNXf8VaJxeDWsiUoJxSabmerH/icm6mubdiHUw07R04QKBgQDrnM4ECMB5zfeFtYZkcrVIMt1wpQJ/40Hn6bIntg7CancjqxYo4eOVVHVNy18ciiSB2ih7LdrmwjjzUsDbT0+NIM5kCOwlJPA7qzLY/G0p9iZfZlU0437OckXUHbnnyEyzygmU/AIQ7Mq2vM6Bjt+B0nDczRrRqD8Phf9rmq09nQKBgQDOpAr0z3DmKa/LDH/UVgSfNQyFnbHIEZPVh39tjHVDNY60uol8FDlpmaLfoy3GnCgCihcXRtykkW1LROt2lM3R2ZpG5yc8K7Nu7GdtiyasUdQIgXqNJ4UFbQo/PUJ69f5SM9k0KwICOIibBTwsYRSkmj80nDjFnlQJJu+WqOTf6wKBgQDoWSEc/1h4hfJDzIh0xF4bjfWsIT2+ymjzABYtbS9O8Fj/NrfKp0CcwcZQam8oIN7xoybqmoTVrdElu4TugV8M6L5ADkB6PNwfq6ugKgapK9IZoDwExRgHFM/h51KuzWs+nc4nOwH6mNkrrjPjtfaZ+uJMDIQXH1jYwSbqgYW4TQKBgHdcinee27gXnFPNhIlCpqjQG8uSq37FqH9PJWxCFfoclbIPjhr+E6vL8yj7ORXgXbwZx/zKEel9l4RC60Az9C+jYlpSa3d2Rs9r/tJn7o7bNX80S3X9vfjEY4bj++LK9XzGNlDMBv0BaucgvwFjkmkCMEBTfPep3SDsPLjqFkrBAoGBALaaBgulePsvrdNHDyt1S2VL/InoGGPHN/6NLYW/Nv8NYA+mhizyrFKwMYJIgrm09Z9Je7UQkYImrozfE7j3LaSWeXHy5kUjdJc458ile+Lzb4MyJ/ytu+BeGSdCvBZc/jZf8LpiLrGoIz+oDMWD0cC+r1OmFtjn4uy3S7MCmuKO", true);

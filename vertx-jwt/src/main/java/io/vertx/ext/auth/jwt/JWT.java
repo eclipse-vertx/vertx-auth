@@ -37,6 +37,15 @@ import java.util.*;
  */
 public final class JWT {
 
+  private final static Map<String, String> KEY_ALIASES = new HashMap<String, String>() {{
+    put("RS256", "SHA256withRSA");
+    put("RS384", "SHA384withRSA");
+    put("RS512", "SHA512withRSA");
+    put("ES256", "SHA256withECDSA");
+    put("ES384", "SHA384withECDSA");
+    put("ES512", "SHA512withECDSA");
+  }};  
+  
   private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
   private static final JsonObject EMPTY = new JsonObject();
@@ -69,22 +78,12 @@ public final class JWT {
         }
       }
 
-      // load SIGNATUREs
-      final Map<String, String> alias = new HashMap<String, String>() {{
-        put("RS256", "SHA256withRSA");
-        put("RS384", "SHA384withRSA");
-        put("RS512", "SHA512withRSA");
-        put("ES256", "SHA256withECDSA");
-        put("ES384", "SHA384withECDSA");
-        put("ES512", "SHA512withECDSA");
-      }};
-
-      for (String alg : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
+      for (String alg : KEY_ALIASES.keySet()) {
         try {
           X509Certificate certificate = getCertificate(keyStore, alg);
           PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
           if (certificate != null && privateKey != null) {
-            tmp.put(alg, new CryptoSignature(alias.get(alg), certificate, privateKey));
+            tmp.put(alg, new CryptoSignature(KEY_ALIASES.get(alg), certificate, privateKey));
           } else {
             log.info(alg + " not available");
           }
@@ -120,6 +119,28 @@ public final class JWT {
       } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
         e.printStackTrace();
         log.warn("RS256 not supported");
+      }
+    }
+
+    // Spec requires "none" to always be available
+    tmp.put("none", new CryptoNone());
+
+    cryptoMap = Collections.unmodifiableMap(tmp);
+  }
+  
+  public JWT(Map<String, PublicKey> publicKeys) {
+    Map<String, Crypto> tmp = new HashMap<>();
+
+    unsecure = publicKeys == null;
+
+    if (!unsecure) {
+      for (Map.Entry<String, String> algAliases : KEY_ALIASES.entrySet()) {
+        String alg = algAliases.getKey();
+        PublicKey publicKey = publicKeys.get(alg);
+        if (publicKey != null) {
+          String alias = algAliases.getValue();
+          tmp.put(alg, new CryptoPublicKey(alias,  publicKey));
+        }
       }
     }
 
