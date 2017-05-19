@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.jwt;
+package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -40,6 +40,10 @@ public final class JWT {
   private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
   private static final JsonObject EMPTY = new JsonObject();
+
+  // as described in the terminology section: https://tools.ietf.org/html/rfc7515#section-2
+  private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+  private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
   private final Map<String, Crypto> cryptoMap;
   private final boolean unsecure;
@@ -268,7 +272,7 @@ public final class JWT {
   }
 
   private static byte[] base64urlDecode(String str) {
-    return Base64.getUrlDecoder().decode(str.getBytes(UTF8));
+    return decoder.decode(str.getBytes(UTF8));
   }
 
   private static String base64urlEncode(String str) {
@@ -276,7 +280,7 @@ public final class JWT {
   }
 
   private static String base64urlEncode(byte[] bytes) {
-    return Base64.getUrlEncoder().encodeToString(bytes);
+    return encoder.encodeToString(bytes);
   }
 
   public boolean isUnsecure() {

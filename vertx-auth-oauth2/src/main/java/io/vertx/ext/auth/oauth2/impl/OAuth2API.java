@@ -111,7 +111,7 @@ public class OAuth2API {
       }
     }
 
-    final HttpClientRequest request = makeRequest(provider, uri, callback);
+    final HttpClientRequest request = makeRequest(provider, method, uri, callback);
 
     // write the headers
     for (Map.Entry<String, ?> kv : headers) {
@@ -141,7 +141,7 @@ public class OAuth2API {
   private static void call(OAuth2AuthProviderImpl provider, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
     JsonObject form = params.copy();
 
-    final HttpClientRequest request = makeRequest(provider, uri, callback);
+    final HttpClientRequest request = makeRequest(provider, HttpMethod.POST, uri, callback);
 
     // specify preferred content type
     request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
@@ -154,7 +154,7 @@ public class OAuth2API {
     request.end();
   }
 
-  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, String uri, final Handler<AsyncResult<JsonObject>> callback) {
+  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, final Handler<AsyncResult<JsonObject>> callback) {
     HttpClient client;
 
     try {
@@ -180,7 +180,7 @@ public class OAuth2API {
       throw new RuntimeException(e);
     }
 
-    final HttpClientRequest request = client.request(HttpMethod.POST, uri, resp -> {
+    final HttpClientRequest request = client.requestAbs(method, uri, resp -> {
       resp.exceptionHandler(t -> {
         callback.handle(Future.failedFuture(t));
         client.close();
@@ -245,9 +245,19 @@ public class OAuth2API {
 
   private static void handleToken(final int statusCode, final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {
     if (json.containsKey("error")) {
-      String error = json.getString("error");
-      String description = json.getString("error_description", null);
-      callback.handle(Future.failedFuture(description != null ? error + ": " + description : error));
+      String description;
+      Object error = json.getValue("error");
+      if (error instanceof JsonObject) {
+        description = ((JsonObject) error).getString("message");
+      } else {
+        // attempt to handle the error as a string
+        try {
+          description = json.getString("error_description", json.getString("error"));
+        } catch (RuntimeException e) {
+          description = error.toString();
+        }
+      }
+      callback.handle(Future.failedFuture(description));
     } else {
       // for the case there was a http protocol error
       if (statusCode >= 400) {

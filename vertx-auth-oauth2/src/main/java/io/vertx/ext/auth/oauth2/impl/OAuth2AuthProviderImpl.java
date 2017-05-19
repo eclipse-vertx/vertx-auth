@@ -22,7 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jwt.JWT;
+import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.impl.flow.*;
 
@@ -83,7 +83,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    resultHandler.handle(Future.failedFuture("JWT cannot be used for AuthN"));
+    resultHandler.handle(Future.failedFuture("OAuth2 cannot be used for AuthN (the implementation is a Client Relay only)"));
   }
 
   @Override

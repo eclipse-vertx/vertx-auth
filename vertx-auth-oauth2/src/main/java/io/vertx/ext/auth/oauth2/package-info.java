@@ -17,7 +17,7 @@
 /**
  * == The OAuth2 auth provider
  *
- * This component contains an out of the box OAuth2 implementation. To use this project, add the following
+ * This component contains an out of the box OAuth2 Relay Party implementation. To use this project, add the following
  * dependency to the _dependencies_ section of your build descriptor:
  *
  * * Maven (in your `pom.xml`):
@@ -212,6 +212,126 @@
  * [source,$lang]
  * ----
  * {@link examples.AuthOAuth2Examples#example16}
+ * ----
+ *
+ * Until now we covered mostly authentication, although the implementation is relay party (that means that the real
+ * authentication happens somewhere else), there is more you can do with the handler. For example you can also do
+ * authorization if the provider is known to support JSON web tokens. This is a common feature if your provider is a
+ * OpenId Connect provider or if the provider does support `access_token`s as JWTs.
+ *
+ * Such provider is Keycloak that is a OpenId Connect implementation. In that case you will be able to perform
+ * authorization in a very easy way.
+ *
+ * == Authorization with JWT tokens
+ *
+ * Given that Keycloak does provide `JWT` `access_token`s one can authorize at two distinct levels:
+ *
+ * * role
+ * * authority
+ *
+ * To distinct the two, the auth provider follows the same recommendations from the base user class, i.e.: use the`:` as
+ * a separator for the two. It should be noted that both role and authorities do not need to be together, in the most
+ * simple case an authority is enough.
+ *
+ * In order to map to keycloak's token format the following checks are performed:
+ *
+ * 1. If no role is provided, it is assumed to the the provider realm name
+ * 2. If the role is `realm` then the lookup happens in `realm_access` list
+ * 3. If a role is provided then the lookup happends in the `resource_access` list under the role name
+ *
+ * === Check for a specific authorities
+ *
+ * Here is one example how you can perform authorization after the user has been loaded from the oauth2 handshake, for
+ * example you want to see if the user can `print` in the current application:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example17}
+ * ----
+ *
+ * However this is quite specific, you might want to verify if the user can `add-user` to the whole system (the realm):
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example18}
+ * ----
+ *
+ * Or if the user can access the `year-report` in the `finance` department:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example19}
+ * ----
+ *
+ * == Token Management
+ *
+ * === Check if it is expired
+ *
+ * Tokens are usually fetched from the server and cached, in this case when used later they might have already expired
+ * and be invalid, you can verify if the token is still valid like this:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example21}
+ * ----
+ *
+ * This call is totally offline, it could still happen that the Oauth2 server invalidated your token but you get a non
+ * expired token result. The reason behind this is that the expiration is checked against the token expiration dates,
+ * not before date and such values.
+ *
+ * === Refresh token
+ *
+ * There are times you know the token is about to expire and would like to avoid to redirect the user again to the login
+ * screen. In this case you can refresh the token. To refresh a token you need to have already a user and call:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example22}
+ * ----
+ *
+ * === Revoke token
+ *
+ * Since tokens can be shared across various applications you might want to disallow the usage of the current token by
+ * any application. In order to do this one needs to revoke the token against the Oauth2 server:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example23}
+ * ----
+ *
+ * It is important to note that this call requires a token type. The reason is because some providers will return more
+ * than one token e.g.:
+ *
+ * * id_token
+ * * refresh_token
+ * * access_token
+ *
+ * So one needs to know what token to invalidate. It should be obvious that if you invalidate the `refresh_token` you're
+ * still logged in but you won't be able to refresh anymore, which means that once the token expires you need to redirect
+ * the user again to the login page.
+ *
+ * === Introspect
+ *
+ * Introspect a token is similar to a expiration check, however one needs to note that this check is fully online. This
+ * means that the check happens on the OAuth2 server.
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example24}
+ * ----
+ *
+ * Important note is that even if the `expired()` call is `true` the return from the `introspect` call can still be an
+ * error. This is because the OAuth2 might have received a request to invalidate the token or a loggout in between.
+ *
+ * === Logging out
+ *
+ * Logging out is not a `Oauth2` feature but it is present on `OpenID Connect` and most providers do support some sort
+ * of logging out. This provider also covers this area if the configuration is enough to let it make the call. For the
+ * user this is as simple as:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthOAuth2Examples#example20}
  * ----
  *
  */

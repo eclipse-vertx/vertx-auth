@@ -13,7 +13,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jdbc</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -21,7 +21,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jdbc:3.4.1'
+compile 'io.vertx:vertx-auth-jdbc:3.4.2-SNAPSHOT'
 ----
 
 To create an instance you first need an instance of `link:../../jsdoc/module-vertx-jdbc-js_jdbc_client-JDBCClient.html[JDBCClient]`. To learn how to create one
@@ -105,6 +105,55 @@ to hash new password before storing it to the database. Doing it is a 3 step tas
 
 var salt = auth.generateSalt();
 var hash = auth.computeHash("sausages", salt);
+// save to the database
+conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", [
+  "tim",
+  hash,
+  salt
+], function (res, res_err) {
+  if (res_err == null) {
+    // success!
+  }
+});
+
+----
+
+WARNING: Hashing user password with salt can be not enough, this approach his good enough for avoiding rainbow tables
+attacks or precomputed table attacks but if the attacker gets the database it will be easier to setup a brute force
+attack. This kind of attack is slower but all required information is given: the hash and the salt.
+
+To make the hash attack more complex the default strategy allows you to provide an application level list of nonces
+to be used in the computation. This list should not be stored in the database since it add an extra variable to the
+computation that is unknown, making the brute force attack as potentially the only way to crack the hash. You might
+want to refresh the nonces now and then so you should add and never remove entries to the list, for example:
+
+[source,js]
+----
+auth.setNonces([
+  "random_hash_1",
+  "random_hash_1"
+]);
+
+----
+
+In order to decode there is no change required to the code, however to generate a new user you must specify which
+nonce (by it's index) you want to use. If you look at the previous example, the usage is quite similar:
+
+1. Generate a salt string
+2. Hash the password given the salt string and choosen nonce
+3. Store it to the database
+
+[source,js]
+----
+
+auth.setNonces([
+  "random_hash_1",
+  "random_hash_1"
+]);
+
+var salt = auth.generateSalt();
+// we will pick the second nonce
+var hash = auth.computeHash("sausages", salt, 1);
 // save to the database
 conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", [
   "tim",
