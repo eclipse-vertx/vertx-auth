@@ -176,6 +176,12 @@ public class OAuth2IntrospectTest extends VertxTestBase {
           } else {
             if (res0.result()) {
               // Issue #142
+
+              // the test is a replay of the same test so all checks have
+              // been done above.
+
+              // the replay shows that the api can be used from the user object
+              // directly too
               token.introspect(v -> {
                 if (v.failed()) {
                   fail(v.cause());
