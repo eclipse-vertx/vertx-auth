@@ -297,7 +297,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
           try {
             // reset the access token
-            init(new JsonObject().put("access_token", token).mergeIn(json));
+            init(token.mergeIn(json));
 
             if (expired()) {
               callback.handle(Future.failedFuture("Expired token"));

@@ -24,11 +24,13 @@ import io.vertx.core.net.ProxyOptions
  * @param connectTimeout 
  * @param crlPaths 
  * @param crlValues 
+ * @param decoderInitialBufferSize 
  * @param defaultHost 
  * @param defaultPort 
  * @param enabledCipherSuites 
  * @param enabledSecureTransportProtocols 
  * @param extraParameters 
+ * @param forceSni 
  * @param headers 
  * @param http2ClearTextUpgrade 
  * @param http2ConnectionWindowSize 
@@ -99,11 +101,13 @@ fun OAuth2ClientOptions(
   connectTimeout: Int? = null,
   crlPaths: Iterable<String>? = null,
   crlValues: Iterable<io.vertx.core.buffer.Buffer>? = null,
+  decoderInitialBufferSize: Int? = null,
   defaultHost: String? = null,
   defaultPort: Int? = null,
   enabledCipherSuites: Iterable<String>? = null,
   enabledSecureTransportProtocols: Iterable<String>? = null,
   extraParameters: io.vertx.core.json.JsonObject? = null,
+  forceSni: Boolean? = null,
   headers: io.vertx.core.json.JsonObject? = null,
   http2ClearTextUpgrade: Boolean? = null,
   http2ConnectionWindowSize: Int? = null,
@@ -190,6 +194,9 @@ fun OAuth2ClientOptions(
       this.addCrlValue(item)
     }
   }
+  if (decoderInitialBufferSize != null) {
+    this.setDecoderInitialBufferSize(decoderInitialBufferSize)
+  }
   if (defaultHost != null) {
     this.setDefaultHost(defaultHost)
   }
@@ -208,6 +215,9 @@ fun OAuth2ClientOptions(
   }
   if (extraParameters != null) {
     this.setExtraParameters(extraParameters)
+  }
+  if (forceSni != null) {
+    this.setForceSni(forceSni)
   }
   if (headers != null) {
     this.setHeaders(headers)

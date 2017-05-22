@@ -161,7 +161,8 @@ public class OAuth2IntrospectTest extends VertxTestBase {
       } else {
         AccessToken token = res.result();
         assertNotNull(token);
-        JsonObject principal = token.principal();
+        // make a copy because later we need to original data
+        JsonObject principal = token.principal().copy();
 
         // clean time specific value
         principal.remove("expires_at");
@@ -174,7 +175,20 @@ public class OAuth2IntrospectTest extends VertxTestBase {
             fail(res0.cause().getMessage());
           } else {
             if (res0.result()) {
-              testComplete();
+              // Issue #142
+
+              // the test is a replay of the same test so all checks have
+              // been done above.
+
+              // the replay shows that the api can be used from the user object
+              // directly too
+              token.introspect(v -> {
+                if (v.failed()) {
+                  fail(v.cause());
+                } else {
+                  testComplete();
+                }
+              });
             } else {
               fail("Should be allowed");
             }
