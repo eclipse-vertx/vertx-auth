@@ -20,11 +20,13 @@
 |[[connectTimeout]]`connectTimeout`|`Number (int)`|-
 |[[crlPaths]]`crlPaths`|`Array of String`|-
 |[[crlValues]]`crlValues`|`Array of Buffer`|-
+|[[decoderInitialBufferSize]]`decoderInitialBufferSize`|`Number (int)`|-
 |[[defaultHost]]`defaultHost`|`String`|-
 |[[defaultPort]]`defaultPort`|`Number (int)`|-
 |[[enabledCipherSuites]]`enabledCipherSuites`|`Array of String`|-
 |[[enabledSecureTransportProtocols]]`enabledSecureTransportProtocols`|`Array of String`|-
 |[[extraParameters]]`extraParameters`|`Json object`|-
+|[[forceSni]]`forceSni`|`Boolean`|-
 |[[headers]]`headers`|`Json object`|-
 |[[http2ClearTextUpgrade]]`http2ClearTextUpgrade`|`Boolean`|-
 |[[http2ConnectionWindowSize]]`http2ConnectionWindowSize`|`Number (int)`|-
