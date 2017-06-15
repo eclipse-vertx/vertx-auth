@@ -16,7 +16,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-htdigest</artifactId>
-  <version>3.4.2-SNAPSHOT</version>
+  <version>3.4.2</version>
 </dependency>
 ----
 
@@ -24,7 +24,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-htdigest:3.4.2-SNAPSHOT'
+compile 'io.vertx:vertx-auth-htdigest:3.4.2'
 ----
 
 To create an instance you first need an .htdigest file. This file is created using the apache htdigest tool.
