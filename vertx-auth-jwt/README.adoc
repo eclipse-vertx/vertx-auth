@@ -3,3 +3,7 @@
 This module contains contains a Vert.x auth implementation which uses JSON Web Tokens (JWT)
 
 Please see the http://vertx.io/docs/#authentication_and_authorisation[documentation] for more information.
+
+NOTE:
+
+If you're developing on this code you will need Oracle JDK in order to run the tests. The reason why is because we test strong cryptography algorithms such as Elliptic Curve and these are not available by default with OpenJDK itself.
