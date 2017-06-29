@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.jwt;
 
+import io.vertx.ext.jwt.impl.SignatureHelper;
+
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -28,13 +30,44 @@ import javax.crypto.Mac;
  * @author Paulo Lopes
  */
 public interface Crypto {
+
+  String[] ECDSA_ALGORITHMS = {
+    "SHA256withECDSA",
+    "SHA384withECDSA",
+    "SHA512withECDSA"
+  };
+
   byte[] sign(byte[] payload);
 
   boolean verify(byte[] signature, byte[] payload);
+
+  default boolean isECDSA(String algorithm) {
+    for (String alg : ECDSA_ALGORITHMS) {
+      if (alg.equals(algorithm)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  default int ECDSALength(String algorithm) {
+    switch (algorithm) {
+      case "SHA256withECDSA":
+        return 64;
+      case "SHA384withECDSA":
+        return 96;
+      case "SHA512withECDSA":
+        return 132;
+    }
+
+    return -1;
+  }
 }
 
 /**
  * MAC based Crypto implementation
+ *
  * @author Paulo Lopes
  */
 final class CryptoMac implements Crypto {
@@ -57,14 +90,17 @@ final class CryptoMac implements Crypto {
 
 /**
  * Public Key based Crypto implementation
+ *
  * @author Paulo Lopes
  */
 final class CryptoPublicKey implements Crypto {
   private final Signature sig;
   private final PublicKey publicKey;
+  private final boolean ecdsa;
 
   CryptoPublicKey(final String algorithm, final PublicKey publicKey) {
     this.publicKey = publicKey;
+    this.ecdsa = isECDSA(algorithm);
 
     Signature signature;
     try {
@@ -88,7 +124,11 @@ final class CryptoPublicKey implements Crypto {
     try {
       sig.initVerify(publicKey);
       sig.update(payload);
-      return sig.verify(signature);
+      if (ecdsa) {
+        return sig.verify(SignatureHelper.toDER(signature));
+      } else {
+        return sig.verify(signature);
+      }
     } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
@@ -97,14 +137,19 @@ final class CryptoPublicKey implements Crypto {
 
 /**
  * Public Key based Crypto implementation
+ *
  * @author Paulo Lopes
  */
 final class CryptoPrivateKey implements Crypto {
   private final Signature sig;
   private final PrivateKey privateKey;
+  private final boolean ecdsa;
+  private final int ecdsaSignatureLength;
 
   CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
     this.privateKey = privateKey;
+    this.ecdsa = isECDSA(algorithm);
+    this.ecdsaSignatureLength = ECDSALength(algorithm);
 
     Signature signature;
     try {
@@ -123,7 +168,11 @@ final class CryptoPrivateKey implements Crypto {
     try {
       sig.initSign(privateKey);
       sig.update(payload);
-      return sig.sign();
+      if (ecdsa) {
+        return SignatureHelper.toJWS(sig.sign(), ecdsaSignatureLength);
+      } else {
+        return sig.sign();
+      }
     } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
@@ -137,16 +186,22 @@ final class CryptoPrivateKey implements Crypto {
 
 /**
  * Signature based Crypto implementation
+ *
  * @author Paulo Lopes
  */
 final class CryptoSignature implements Crypto {
   private final Signature sig;
   private final PrivateKey privateKey;
   private final X509Certificate certificate;
+  private final boolean ecdsa;
+  // the expected length of the ECDSA JWS signature.
+  private final int ecdsaSignatureLength;
 
   CryptoSignature(final String algorithm, final X509Certificate certificate, final PrivateKey privateKey) {
     this.certificate = certificate;
     this.privateKey = privateKey;
+    this.ecdsa = isECDSA(algorithm);
+    this.ecdsaSignatureLength = ECDSALength(algorithm);
 
     Signature signature;
     try {
@@ -170,7 +225,11 @@ final class CryptoSignature implements Crypto {
     try {
       sig.initSign(privateKey);
       sig.update(payload);
-      return sig.sign();
+      if (ecdsa) {
+        return SignatureHelper.toJWS(sig.sign(), ecdsaSignatureLength);
+      } else {
+        return sig.sign();
+      }
     } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
@@ -181,7 +240,11 @@ final class CryptoSignature implements Crypto {
     try {
       sig.initVerify(certificate);
       sig.update(payload);
-      return sig.verify(signature);
+      if (ecdsa) {
+        return sig.verify(SignatureHelper.toDER(signature));
+      } else {
+        return sig.verify(signature);
+      }
     } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
@@ -193,11 +256,11 @@ final class CryptoNone implements Crypto {
 
   @Override
   public byte[] sign(byte[] payload) {
-      return NOOP;
-    }
+    return NOOP;
+  }
 
   @Override
   public boolean verify(byte[] signature, byte[] payload) {
-      return true;
-    }
+    return true;
+  }
 }

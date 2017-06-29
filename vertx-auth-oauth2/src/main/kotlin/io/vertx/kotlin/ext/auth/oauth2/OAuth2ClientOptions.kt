@@ -42,6 +42,7 @@ import io.vertx.core.net.ProxyOptions
  * @param jdkSslEngineOptions 
  * @param jwtToken 
  * @param keepAlive 
+ * @param keyAlgorithm 
  * @param keyStoreOptions 
  * @param localAddress 
  * @param logActivity 
@@ -119,6 +120,7 @@ fun OAuth2ClientOptions(
   jdkSslEngineOptions: io.vertx.core.net.JdkSSLEngineOptions? = null,
   jwtToken: Boolean? = null,
   keepAlive: Boolean? = null,
+  keyAlgorithm: String? = null,
   keyStoreOptions: io.vertx.core.net.JksOptions? = null,
   localAddress: String? = null,
   logActivity: Boolean? = null,
@@ -251,6 +253,9 @@ fun OAuth2ClientOptions(
   }
   if (keepAlive != null) {
     this.setKeepAlive(keepAlive)
+  }
+  if (keyAlgorithm != null) {
+    this.setKeyAlgorithm(keyAlgorithm)
   }
   if (keyStoreOptions != null) {
     this.setKeyStoreOptions(keyStoreOptions)

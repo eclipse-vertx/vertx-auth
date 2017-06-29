@@ -20,6 +20,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -37,6 +38,20 @@ import java.util.*;
  */
 public final class JWT {
 
+  private static final List<String> ALGORITHMS = Arrays.asList("HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512");
+
+  private static final Map<String, String> ALGORITHM_ALIAS = new HashMap<String, String>() {{
+    put("HS256", "HMacSHA256");
+    put("HS384", "HMacSHA384");
+    put("HS512", "HMacSHA512");
+    put("RS256", "SHA256withRSA");
+    put("RS384", "SHA384withRSA");
+    put("RS512", "SHA512withRSA");
+    put("ES256", "SHA256withECDSA");
+    put("ES384", "SHA384withECDSA");
+    put("ES512", "SHA512withECDSA");
+  }};
+
   private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
   private static final JsonObject EMPTY = new JsonObject();
@@ -45,88 +60,157 @@ public final class JWT {
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
-  private final Map<String, Crypto> cryptoMap;
-  private final boolean unsecure;
+  private final Map<String, Crypto> cryptoMap = new HashMap<>();
 
-  public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
+  private boolean unsecure = true;
 
-    Map<String, Crypto> tmp = new HashMap<>();
-
-    unsecure = keyStore == null;
-
-    if (!unsecure) {
-      // load MACs
-      for (String alg : Arrays.asList("HS256", "HS384", "HS512")) {
-        try {
-          Mac mac = getMac(keyStore, keyStorePassword, alg);
-          if (mac != null) {
-            tmp.put(alg, new CryptoMac(mac));
-          } else {
-            log.info(alg + " not available");
-          }
-        } catch (RuntimeException e) {
-          log.warn(alg + " not supported", e);
-        }
-      }
-
-      // load SIGNATUREs
-      final Map<String, String> alias = new HashMap<String, String>() {{
-        put("RS256", "SHA256withRSA");
-        put("RS384", "SHA384withRSA");
-        put("RS512", "SHA512withRSA");
-        put("ES256", "SHA256withECDSA");
-        put("ES384", "SHA384withECDSA");
-        put("ES512", "SHA512withECDSA");
-      }};
-
-      for (String alg : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
-        try {
-          X509Certificate certificate = getCertificate(keyStore, alg);
-          PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
-          if (certificate != null && privateKey != null) {
-            tmp.put(alg, new CryptoSignature(alias.get(alg), certificate, privateKey));
-          } else {
-            log.info(alg + " not available");
-          }
-        } catch (RuntimeException e) {
-          e.printStackTrace();
-          log.warn(alg + " not supported");
-        }
-      }
-    }
-
+  public JWT() {
     // Spec requires "none" to always be available
-    tmp.put("none", new CryptoNone());
-
-    cryptoMap = Collections.unmodifiableMap(tmp);
+    cryptoMap.put("none", new CryptoNone());
   }
 
-  public JWT(String key, boolean keyPrivate) {
-    Map<String, Crypto> tmp = new HashMap<>();
+  public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
+    this();
 
-    unsecure = key == null;
-
-    if (!unsecure) {
-      // load SIGNATURE (Read Only)
+    // load MACs
+    for (String alg : Arrays.asList("HS256", "HS384", "HS512")) {
       try {
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        if (keyPrivate) {
-          KeySpec spec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(key));
-          tmp.put("RS256", new CryptoPrivateKey("SHA256withRSA",  kf.generatePrivate(spec)));
+        Mac mac = getMac(keyStore, keyStorePassword, alg);
+        if (mac != null) {
+          cryptoMap.put(alg, new CryptoMac(mac));
         } else {
-          X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(key));
-          tmp.put("RS256", new CryptoPublicKey("SHA256withRSA",  kf.generatePublic(spec)));
+          log.info(alg + " not available");
         }
-      } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
-        e.printStackTrace();
-        log.warn("RS256 not supported");
+      } catch (RuntimeException e) {
+        log.warn(alg + " not supported", e);
       }
     }
 
-    // Spec requires "none" to always be available
-    tmp.put("none", new CryptoNone());
+    for (String alg : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
+      try {
+        X509Certificate certificate = getCertificate(keyStore, alg);
+        PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
+        if (certificate != null && privateKey != null) {
+          cryptoMap.put(alg, new CryptoSignature(ALGORITHM_ALIAS.get(alg), certificate, privateKey));
+        } else {
+          log.info(alg + " not available");
+        }
+      } catch (RuntimeException e) {
+        e.printStackTrace();
+        log.warn(alg + " not supported");
+      }
+    }
 
-    cryptoMap = Collections.unmodifiableMap(tmp);
+    unsecure = cryptoMap.size() == 1;
+  }
+
+  @Deprecated
+  public JWT(String key, boolean keyPrivate) {
+    // make sure the none is present
+    this();
+
+    if (keyPrivate) {
+      addPrivateKey("RS256", key);
+    } else {
+      addPublicKey("RS256", key);
+    }
+  }
+
+  private static KeyFactory getKeyFactoryFor(String algorithm) throws NoSuchAlgorithmException {
+    switch (algorithm.charAt(0)) {
+      case 'R':
+        return KeyFactory.getInstance("RSA");
+      case 'E':
+        return KeyFactory.getInstance("EC");
+      default:
+        throw new RuntimeException("Unknown algorithm factory for: " + algorithm);
+    }
+  }
+
+  /**
+   * Adds a public key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
+   * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
+   *
+   * @param algorithm the JWS algorithm, e.g.: RS256
+   * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @return self
+   */
+  public JWT addPublicKey(String algorithm, String key) {
+
+    if (!ALGORITHMS.contains(algorithm)) {
+      throw new RuntimeException("Unknown algorithm: " + algorithm);
+    }
+
+    if (key == null) {
+      cryptoMap.remove(algorithm);
+
+      unsecure = cryptoMap.size() == 1;
+      return this;
+    }
+
+    try {
+      final KeyFactory kf = getKeyFactoryFor(algorithm);
+      final X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(key));
+      if (cryptoMap.containsKey(algorithm)) {
+        log.warn("Replacing existing algorithm: " + algorithm);
+      }
+      cryptoMap.put(algorithm, new CryptoPublicKey(ALGORITHM_ALIAS.get(algorithm),  kf.generatePublic(spec)));
+
+    } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
+      throw new RuntimeException(algorithm + " not supported", e);
+    }
+
+    unsecure = cryptoMap.size() == 1;
+    return this;
+  }
+
+  /**
+   * Adds a private key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
+   * it is common to see these keys when dealing with 3rd party services such as Google.
+   *
+   * @param algorithm the JWS algorithm, e.g.: RS256
+   * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @return self
+   */
+  public JWT addPrivateKey(String algorithm, String key) {
+
+    if (!ALGORITHMS.contains(algorithm)) {
+      throw new RuntimeException("Unknown algorithm: " + algorithm);
+    }
+
+    if (key == null) {
+      cryptoMap.remove(algorithm);
+
+      unsecure = cryptoMap.size() == 1;
+      return this;
+    }
+
+    try {
+      if (algorithm.charAt(0) == 'H') {
+        final Mac mac = Mac.getInstance(ALGORITHM_ALIAS.get(algorithm));
+        mac.init(new SecretKeySpec(key.getBytes(), ALGORITHM_ALIAS.get(algorithm)));
+
+        if (cryptoMap.containsKey(algorithm)) {
+          log.warn("Replacing existing algorithm: " + algorithm);
+        }
+        cryptoMap.put(algorithm, new CryptoMac(mac));
+
+      } else {
+        final KeyFactory kf = getKeyFactoryFor(algorithm);
+        final KeySpec spec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(key));
+
+        if (cryptoMap.containsKey(algorithm)) {
+          log.warn("Replacing existing algorithm: " + algorithm);
+        }
+        cryptoMap.put(algorithm, new CryptoPrivateKey(ALGORITHM_ALIAS.get(algorithm),  kf.generatePrivate(spec)));
+      }
+
+    } catch (InvalidKeySpecException | InvalidKeyException | NoSuchAlgorithmException | RuntimeException e) {
+      throw new RuntimeException(algorithm + " not supported", e);
+    }
+
+    unsecure = cryptoMap.size() == 1;
+    return this;
   }
 
   /**
