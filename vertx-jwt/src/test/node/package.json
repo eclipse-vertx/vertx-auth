@@ -1,0 +1,11 @@
+{
+  "name": "jwt-interop-tester",
+  "private": true,
+  "dependencies": {
+    "jsonwebtoken": "7.4.1",
+    "mocha": "3.4.2"
+  },
+  "scripts": {
+    "start": "mocha"
+  }
+}

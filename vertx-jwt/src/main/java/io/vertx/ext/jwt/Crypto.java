@@ -70,7 +70,7 @@ public interface Crypto {
  *
  * @author Paulo Lopes
  */
-final class CryptoMac implements Crypto {
+class CryptoMac implements Crypto {
   private final Mac mac;
 
   CryptoMac(final Mac mac) {
@@ -93,45 +93,9 @@ final class CryptoMac implements Crypto {
  *
  * @author Paulo Lopes
  */
-final class CryptoPublicKey implements Crypto {
-  private final Signature sig;
-  private final PublicKey publicKey;
-  private final boolean ecdsa;
-
+class CryptoPublicKey extends CryptoKeyPair {
   CryptoPublicKey(final String algorithm, final PublicKey publicKey) {
-    this.publicKey = publicKey;
-    this.ecdsa = isECDSA(algorithm);
-
-    Signature signature;
-    try {
-      // use default
-      signature = Signature.getInstance(algorithm);
-    } catch (NoSuchAlgorithmException e) {
-      // error
-      throw new RuntimeException(e);
-    }
-
-    this.sig = signature;
-  }
-
-  @Override
-  public synchronized byte[] sign(byte[] payload) {
-    throw new RuntimeException("CryptoPublicKey cannot sign");
-  }
-
-  @Override
-  public synchronized boolean verify(byte[] signature, byte[] payload) {
-    try {
-      sig.initVerify(publicKey);
-      sig.update(payload);
-      if (ecdsa) {
-        return sig.verify(SignatureHelper.toDER(signature));
-      } else {
-        return sig.verify(signature);
-      }
-    } catch (SignatureException | InvalidKeyException e) {
-      throw new RuntimeException(e);
-    }
+    super(algorithm, publicKey, null);
   }
 }
 
@@ -140,13 +104,26 @@ final class CryptoPublicKey implements Crypto {
  *
  * @author Paulo Lopes
  */
-final class CryptoPrivateKey implements Crypto {
+class CryptoPrivateKey extends CryptoKeyPair {
+  CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
+    super(algorithm, null, privateKey);
+  }
+}
+
+/**
+ * Public Key based Crypto implementation
+ *
+ * @author Paulo Lopes
+ */
+class CryptoKeyPair implements Crypto {
   private final Signature sig;
+  private final PublicKey publicKey;
   private final PrivateKey privateKey;
   private final boolean ecdsa;
   private final int ecdsaSignatureLength;
 
-  CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
+  CryptoKeyPair(final String algorithm, final PublicKey publicKey, final PrivateKey privateKey) {
+    this.publicKey = publicKey;
     this.privateKey = privateKey;
     this.ecdsa = isECDSA(algorithm);
     this.ecdsaSignatureLength = ECDSALength(algorithm);
@@ -165,6 +142,10 @@ final class CryptoPrivateKey implements Crypto {
 
   @Override
   public synchronized byte[] sign(byte[] payload) {
+    if (privateKey == null) {
+      throw new RuntimeException("Cannot sign (no private key)");
+    }
+
     try {
       sig.initSign(privateKey);
       sig.update(payload);
@@ -180,7 +161,21 @@ final class CryptoPrivateKey implements Crypto {
 
   @Override
   public synchronized boolean verify(byte[] signature, byte[] payload) {
-    throw new RuntimeException("CryptoPrivateKey cannot verify");
+    if (publicKey == null) {
+      throw new RuntimeException("Cannot verify (no public key)");
+    }
+
+    try {
+      sig.initVerify(publicKey);
+      sig.update(payload);
+      if (ecdsa) {
+        return sig.verify(SignatureHelper.toDER(signature));
+      } else {
+        return sig.verify(signature);
+      }
+    } catch (SignatureException | InvalidKeyException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
 
@@ -189,19 +184,15 @@ final class CryptoPrivateKey implements Crypto {
  *
  * @author Paulo Lopes
  */
-final class CryptoSignature implements Crypto {
+class CryptoSignature extends CryptoKeyPair {
   private final Signature sig;
-  private final PrivateKey privateKey;
   private final X509Certificate certificate;
   private final boolean ecdsa;
-  // the expected length of the ECDSA JWS signature.
-  private final int ecdsaSignatureLength;
 
   CryptoSignature(final String algorithm, final X509Certificate certificate, final PrivateKey privateKey) {
+    super(algorithm, null, privateKey);
     this.certificate = certificate;
-    this.privateKey = privateKey;
     this.ecdsa = isECDSA(algorithm);
-    this.ecdsaSignatureLength = ECDSALength(algorithm);
 
     Signature signature;
     try {
@@ -218,21 +209,6 @@ final class CryptoSignature implements Crypto {
     }
 
     this.sig = signature;
-  }
-
-  @Override
-  public synchronized byte[] sign(byte[] payload) {
-    try {
-      sig.initSign(privateKey);
-      sig.update(payload);
-      if (ecdsa) {
-        return SignatureHelper.toJWS(sig.sign(), ecdsaSignatureLength);
-      } else {
-        return sig.sign();
-      }
-    } catch (SignatureException | InvalidKeyException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override

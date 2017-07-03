@@ -75,7 +75,7 @@ public class JWTTest {
 
   @Test
   public void createHMac() throws Exception {
-    JWT jwt = new JWT().addPrivateKey("HS256","qnscAdgRlkIhAUPY44oiexBKtQbGY0orf7OV1I50");
+    JWT jwt = new JWT().addSecret("HS256","qnscAdgRlkIhAUPY44oiexBKtQbGY0orf7OV1I50");
     assertFalse(jwt.isUnsecure());
     assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("HS256", "none")));
 
@@ -84,5 +84,17 @@ public class JWTTest {
     // verify
     assertNotNull(jwt.decode(token));
     assertTrue(jwt.decode(token).containsKey("test"));
+  }
+
+  @Test
+  public void testECKeyPair() {
+    JWT vk = new JWT().addPublicKey("ES256","MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEwq481nd4jdkvwYCck6CaC+obxrrLOdArA28iPxkKyRw687M7WJZI4OGnIMx97uSuANNCb7SllqoKvYJix+0OMg==");
+    JWT sk = new JWT().addPrivateKey("ES256","MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQguQt7y3Vy2llRyEi6deLKm5ywIEnYReXYJfKXNtrvMFugCgYIKoZIzj0DAQehRANCAATCrjzWd3iN2S/BgJyToJoL6hvGuss50CsDbyI/GQrJHDrzsztYlkjg4acgzH3u5K4A00JvtKWWqgq9gmLH7Q4y");
+
+    String signed = sk.sign(new JsonObject().put("test", "test"), new JsonObject().put("algorithm", "ES256"));
+
+    JsonObject decoded = vk.decode(signed);
+
+    assertEquals("test", decoded.getString("test"));
   }
 }

@@ -38,7 +38,8 @@ import java.util.*;
  */
 public final class JWT {
 
-  private static final List<String> ALGORITHMS = Arrays.asList("HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512");
+  private static final List<String> PUBSEC_ALGS = Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512");
+  private static final List<String> MAC_ALGS = Arrays.asList("HS256", "HS384", "HS512");
 
   private static final Map<String, String> ALGORITHM_ALIAS = new HashMap<String, String>() {{
     put("HS256", "HMacSHA256");
@@ -136,25 +137,48 @@ public final class JWT {
    * @return self
    */
   public JWT addPublicKey(String algorithm, String key) {
+    return addKeyPair(algorithm, key, null);
+  }
 
-    if (!ALGORITHMS.contains(algorithm)) {
+  public JWT addKeyPair(String algorithm, String publicKey, String privateKey) {
+    if (!PUBSEC_ALGS.contains(algorithm)) {
       throw new RuntimeException("Unknown algorithm: " + algorithm);
     }
 
-    if (key == null) {
+    if (publicKey == null || privateKey == null) {
       cryptoMap.remove(algorithm);
-
-      unsecure = cryptoMap.size() == 1;
-      return this;
+      if (publicKey == null && privateKey == null) {
+        unsecure = cryptoMap.size() == 1;
+        return this;
+      }
     }
 
     try {
-      final KeyFactory kf = getKeyFactoryFor(algorithm);
-      final X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(key));
+      final PublicKey pub;
+      final PrivateKey sec;
+
+      if (publicKey != null) {
+        // factory for public key
+        final KeyFactory pubkf = getKeyFactoryFor(algorithm);
+        final X509EncodedKeySpec pubspec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(publicKey));
+        pub = pubkf.generatePublic(pubspec);
+      } else {
+        pub = null;
+      }
+
+      if (privateKey != null) {
+        // factory for the private key
+        final KeyFactory seckf = getKeyFactoryFor(algorithm);
+        final KeySpec secspec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(privateKey));
+        sec = seckf.generatePrivate(secspec);
+      } else {
+        sec = null;
+      }
+
       if (cryptoMap.containsKey(algorithm)) {
         log.warn("Replacing existing algorithm: " + algorithm);
       }
-      cryptoMap.put(algorithm, new CryptoPublicKey(ALGORITHM_ALIAS.get(algorithm),  kf.generatePublic(spec)));
+      cryptoMap.put(algorithm, new CryptoKeyPair(ALGORITHM_ALIAS.get(algorithm),  pub, sec));
 
     } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
       throw new RuntimeException(algorithm + " not supported", e);
@@ -173,8 +197,19 @@ public final class JWT {
    * @return self
    */
   public JWT addPrivateKey(String algorithm, String key) {
+    return addKeyPair(algorithm, null, key);
+  }
 
-    if (!ALGORITHMS.contains(algorithm)) {
+  /**
+   * Adds a private key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
+   * it is common to see these keys when dealing with 3rd party services such as Google.
+   *
+   * @param algorithm the JWS algorithm, e.g.: RS256
+   * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @return self
+   */
+  public JWT addSecret(String algorithm, String key) {
+    if (!MAC_ALGS.contains(algorithm)) {
       throw new RuntimeException("Unknown algorithm: " + algorithm);
     }
 
@@ -186,26 +221,15 @@ public final class JWT {
     }
 
     try {
-      if (algorithm.charAt(0) == 'H') {
-        final Mac mac = Mac.getInstance(ALGORITHM_ALIAS.get(algorithm));
-        mac.init(new SecretKeySpec(key.getBytes(), ALGORITHM_ALIAS.get(algorithm)));
+      final Mac mac = Mac.getInstance(ALGORITHM_ALIAS.get(algorithm));
+      mac.init(new SecretKeySpec(key.getBytes(), ALGORITHM_ALIAS.get(algorithm)));
 
-        if (cryptoMap.containsKey(algorithm)) {
-          log.warn("Replacing existing algorithm: " + algorithm);
-        }
-        cryptoMap.put(algorithm, new CryptoMac(mac));
-
-      } else {
-        final KeyFactory kf = getKeyFactoryFor(algorithm);
-        final KeySpec spec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(key));
-
-        if (cryptoMap.containsKey(algorithm)) {
-          log.warn("Replacing existing algorithm: " + algorithm);
-        }
-        cryptoMap.put(algorithm, new CryptoPrivateKey(ALGORITHM_ALIAS.get(algorithm),  kf.generatePrivate(spec)));
+      if (cryptoMap.containsKey(algorithm)) {
+        log.warn("Replacing existing algorithm: " + algorithm);
       }
+      cryptoMap.put(algorithm, new CryptoMac(mac));
 
-    } catch (InvalidKeySpecException | InvalidKeyException | NoSuchAlgorithmException | RuntimeException e) {
+    } catch (InvalidKeyException | NoSuchAlgorithmException | RuntimeException e) {
       throw new RuntimeException(algorithm + " not supported", e);
     }
 
