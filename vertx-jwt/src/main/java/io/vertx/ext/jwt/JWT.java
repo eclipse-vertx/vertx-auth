@@ -140,6 +140,15 @@ public final class JWT {
     return addKeyPair(algorithm, key, null);
   }
 
+  /**
+   * Adds a key pair for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
+   * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
+   *
+   * @param algorithm the JWS algorithm, e.g.: RS256
+   * @param publicKey the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @param privateKey the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @return self
+   */
   public JWT addKeyPair(String algorithm, String publicKey, String privateKey) {
     if (!PUBSEC_ALGS.contains(algorithm)) {
       throw new RuntimeException("Unknown algorithm: " + algorithm);
@@ -201,10 +210,10 @@ public final class JWT {
   }
 
   /**
-   * Adds a private key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
+   * Adds a secret (password) for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google.
    *
-   * @param algorithm the JWS algorithm, e.g.: RS256
+   * @param algorithm the JWS algorithm, e.g.: HS256
    * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
