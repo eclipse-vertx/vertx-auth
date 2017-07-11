@@ -33,6 +33,23 @@ Set the issuer
 |[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |===
 
+[[JWTKeyStoreOptions]]
+== JWTKeyStoreOptions
+
+++++
+ Options describing how an JWT KeyStore should behave.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[password]]`password`|`String`|-
+|[[path]]`path`|`String`|-
+|[[type]]`type`|`String`|-
+|===
+
 [[JWTOptions]]
 == JWTOptions
 
