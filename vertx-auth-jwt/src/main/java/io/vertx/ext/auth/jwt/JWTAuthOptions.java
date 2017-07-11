@@ -17,6 +17,8 @@ package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +37,8 @@ public class JWTAuthOptions {
 
 
   private String permissionsClaimKey;
-  private JWTKeyStoreOptions keyStore;
-  private String publicKey;
+  private KeyStoreOptions keyStore;
+  private List<PubSecKeyOptions> pubSecKeys;
   private List<String> audience;
   private String issuer;
   private boolean ignoreExpiration;
@@ -56,7 +58,7 @@ public class JWTAuthOptions {
   public JWTAuthOptions(JWTAuthOptions other) {
     permissionsClaimKey = other.getPermissionsClaimKey();
     keyStore = other.getKeyStore();
-    publicKey = other.getPublicKey();
+    pubSecKeys = other.getPubSecKeys();
     audience = other.getAudience();
     issuer = other.getIssuer();
     ignoreExpiration = other.isIgnoreExpiration();
@@ -87,21 +89,29 @@ public class JWTAuthOptions {
     return this;
   }
 
-  public JWTKeyStoreOptions getKeyStore() {
+  public KeyStoreOptions getKeyStore() {
     return keyStore;
   }
 
-  public JWTAuthOptions setKeyStore(JWTKeyStoreOptions keyStore) {
+  public JWTAuthOptions setKeyStore(KeyStoreOptions keyStore) {
     this.keyStore = keyStore;
     return this;
   }
 
-  public String getPublicKey() {
-    return publicKey;
+  public List<PubSecKeyOptions> getPubSecKeys() {
+    return pubSecKeys;
   }
 
-  public JWTAuthOptions setPublicKey(String publicKey) {
-    this.publicKey = publicKey;
+  public JWTAuthOptions setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
+    this.pubSecKeys = pubSecKeys;
+    return this;
+  }
+
+  public JWTAuthOptions addPubSecKey(PubSecKeyOptions pubSecKey) {
+    if (this.pubSecKeys == null) {
+      this.pubSecKeys = new ArrayList<>();
+    }
+    this.pubSecKeys.add(pubSecKey);
     return this;
   }
 

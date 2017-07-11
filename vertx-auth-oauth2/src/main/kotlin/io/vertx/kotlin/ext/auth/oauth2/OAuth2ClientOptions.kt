@@ -10,6 +10,7 @@ import io.vertx.core.net.PemKeyCertOptions
 import io.vertx.core.net.PemTrustOptions
 import io.vertx.core.net.PfxOptions
 import io.vertx.core.net.ProxyOptions
+import io.vertx.ext.auth.PubSecKeyOptions
 
 /**
  * A function providing a DSL for building [io.vertx.ext.auth.oauth2.OAuth2ClientOptions] objects.
@@ -42,7 +43,6 @@ import io.vertx.core.net.ProxyOptions
  * @param jdkSslEngineOptions 
  * @param jwtToken 
  * @param keepAlive 
- * @param keyAlgorithm 
  * @param keyStoreOptions 
  * @param localAddress 
  * @param logActivity 
@@ -63,10 +63,9 @@ import io.vertx.core.net.ProxyOptions
  * @param pfxTrustOptions 
  * @param pipelining 
  * @param pipeliningLimit 
- * @param privateKey 
  * @param protocolVersion 
  * @param proxyOptions 
- * @param publicKey 
+ * @param pubSecKeyOptions 
  * @param receiveBufferSize 
  * @param reuseAddress 
  * @param revocationPath 
@@ -120,7 +119,6 @@ fun OAuth2ClientOptions(
   jdkSslEngineOptions: io.vertx.core.net.JdkSSLEngineOptions? = null,
   jwtToken: Boolean? = null,
   keepAlive: Boolean? = null,
-  keyAlgorithm: String? = null,
   keyStoreOptions: io.vertx.core.net.JksOptions? = null,
   localAddress: String? = null,
   logActivity: Boolean? = null,
@@ -141,10 +139,9 @@ fun OAuth2ClientOptions(
   pfxTrustOptions: io.vertx.core.net.PfxOptions? = null,
   pipelining: Boolean? = null,
   pipeliningLimit: Int? = null,
-  privateKey: String? = null,
   protocolVersion: HttpVersion? = null,
   proxyOptions: io.vertx.core.net.ProxyOptions? = null,
-  publicKey: String? = null,
+  pubSecKeyOptions: io.vertx.ext.auth.PubSecKeyOptions? = null,
   receiveBufferSize: Int? = null,
   reuseAddress: Boolean? = null,
   revocationPath: String? = null,
@@ -254,9 +251,6 @@ fun OAuth2ClientOptions(
   if (keepAlive != null) {
     this.setKeepAlive(keepAlive)
   }
-  if (keyAlgorithm != null) {
-    this.setKeyAlgorithm(keyAlgorithm)
-  }
   if (keyStoreOptions != null) {
     this.setKeyStoreOptions(keyStoreOptions)
   }
@@ -317,17 +311,14 @@ fun OAuth2ClientOptions(
   if (pipeliningLimit != null) {
     this.setPipeliningLimit(pipeliningLimit)
   }
-  if (privateKey != null) {
-    this.setPrivateKey(privateKey)
-  }
   if (protocolVersion != null) {
     this.setProtocolVersion(protocolVersion)
   }
   if (proxyOptions != null) {
     this.setProxyOptions(proxyOptions)
   }
-  if (publicKey != null) {
-    this.setPublicKey(publicKey)
+  if (pubSecKeyOptions != null) {
+    this.setPubSecKeyOptions(pubSecKeyOptions)
   }
   if (receiveBufferSize != null) {
     this.setReceiveBufferSize(receiveBufferSize)

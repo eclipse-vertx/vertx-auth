@@ -17,9 +17,9 @@ package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.auth.jwt.JWTKeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   private JWTAuthOptions getConfig() {
     return new JWTAuthOptions()
-      .setKeyStore(new JWTKeyStoreOptions()
+      .setKeyStore(new KeyStoreOptions()
         .setPath("keystore.jceks")
         .setType("jceks")
         .setPassword("secret"));
@@ -281,7 +281,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGenerateNewTokenES256() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .setKeyStore(new JWTKeyStoreOptions()
+      .setKeyStore(new KeyStoreOptions()
         .setPath("es256-keystore.jceks")
         .setPassword("secret")));
 
@@ -306,7 +306,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGenerateNewTokenForceAlgorithm() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .setKeyStore(new JWTKeyStoreOptions()
+      .setKeyStore(new KeyStoreOptions()
         .setPath("gce.jks")
         .setType("jks")
         .setPassword("notasecret")));

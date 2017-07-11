@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.PubSecKeyOptions;
 
 /**
  * Options describing how an OAuth2 {@link HttpClient} will make connections.
@@ -37,7 +38,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final boolean JWT_TOKEN = false;
   private static final String SCOPE_SEPARATOR = " ";
-  private static final String KEY_ALGORITHM = "RS256";
 
   private String authorizationPath;
   private String tokenPath;
@@ -56,9 +56,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String clientSecret;
   private String userAgent;
   private JsonObject headers;
-  private String publicKey;
-  private String privateKey;
-  private String keyAlgorithm;
+  private PubSecKeyOptions pubSecKey;
   private boolean jwtToken;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
@@ -104,9 +102,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     site = other.getSite();
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
-    publicKey = other.getPublicKey();
-    privateKey = other.getPrivateKey();
-    keyAlgorithm = other.getKeyAlgorithm();
+    pubSecKey = other.getPubSecKey();
     jwtToken = other.isJwtToken();
     logoutPath = other.getLogoutPath();
     // extras
@@ -126,7 +122,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtToken = JWT_TOKEN;
-    keyAlgorithm = KEY_ALGORITHM;
     extraParams = null;
   }
 
@@ -227,30 +222,12 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     return this;
   }
 
-  public String getPublicKey() {
-    return publicKey;
+  public PubSecKeyOptions getPubSecKey() {
+    return pubSecKey;
   }
 
-  public OAuth2ClientOptions setPublicKey(String publicKey) {
-    this.publicKey = publicKey;
-    return this;
-  }
-
-  public String getPrivateKey() {
-    return privateKey;
-  }
-
-  public OAuth2ClientOptions setPrivateKey(String privateKey) {
-    this.privateKey = privateKey;
-    return this;
-  }
-
-  public String getKeyAlgorithm() {
-    return keyAlgorithm;
-  }
-
-  public OAuth2ClientOptions setKeyAlgorithm(String keyAlgorithm) {
-    this.keyAlgorithm = keyAlgorithm;
+  public OAuth2ClientOptions setPubSecKeyOptions(PubSecKeyOptions pubSecKey) {
+    this.pubSecKey = pubSecKey;
     return this;
   }
 

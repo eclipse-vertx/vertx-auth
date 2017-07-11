@@ -38,7 +38,6 @@
 |[[jdkSslEngineOptions]]`jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
 |[[jwtToken]]`jwtToken`|`Boolean`|-
 |[[keepAlive]]`keepAlive`|`Boolean`|-
-|[[keyAlgorithm]]`keyAlgorithm`|`String`|-
 |[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[localAddress]]`localAddress`|`String`|-
 |[[logActivity]]`logActivity`|`Boolean`|-
@@ -59,10 +58,10 @@
 |[[pfxTrustOptions]]`pfxTrustOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
 |[[pipelining]]`pipelining`|`Boolean`|-
 |[[pipeliningLimit]]`pipeliningLimit`|`Number (int)`|-
-|[[privateKey]]`privateKey`|`String`|-
 |[[protocolVersion]]`protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
 |[[proxyOptions]]`proxyOptions`|`link:dataobjects.html#ProxyOptions[ProxyOptions]`|-
-|[[publicKey]]`publicKey`|`String`|-
+|[[pubSecKey]]`pubSecKey`|`link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
+|[[pubSecKeyOptions]]`pubSecKeyOptions`|`link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |[[receiveBufferSize]]`receiveBufferSize`|`Number (int)`|-
 |[[reuseAddress]]`reuseAddress`|`Boolean`|-
 |[[revocationPath]]`revocationPath`|`String`|-

@@ -51,17 +51,11 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("jwtToken") instanceof Boolean) {
       obj.setJwtToken((Boolean)json.getValue("jwtToken"));
     }
-    if (json.getValue("keyAlgorithm") instanceof String) {
-      obj.setKeyAlgorithm((String)json.getValue("keyAlgorithm"));
-    }
     if (json.getValue("logoutPath") instanceof String) {
       obj.setLogoutPath((String)json.getValue("logoutPath"));
     }
-    if (json.getValue("privateKey") instanceof String) {
-      obj.setPrivateKey((String)json.getValue("privateKey"));
-    }
-    if (json.getValue("publicKey") instanceof String) {
-      obj.setPublicKey((String)json.getValue("publicKey"));
+    if (json.getValue("pubSecKeyOptions") instanceof JsonObject) {
+      obj.setPubSecKeyOptions(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)json.getValue("pubSecKeyOptions")));
     }
     if (json.getValue("revocationPath") instanceof String) {
       obj.setRevocationPath((String)json.getValue("revocationPath"));
@@ -109,17 +103,8 @@ public class OAuth2ClientOptionsConverter {
       json.put("introspectionPath", obj.getIntrospectionPath());
     }
     json.put("jwtToken", obj.isJwtToken());
-    if (obj.getKeyAlgorithm() != null) {
-      json.put("keyAlgorithm", obj.getKeyAlgorithm());
-    }
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
-    }
-    if (obj.getPrivateKey() != null) {
-      json.put("privateKey", obj.getPrivateKey());
-    }
-    if (obj.getPublicKey() != null) {
-      json.put("publicKey", obj.getPublicKey());
     }
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());

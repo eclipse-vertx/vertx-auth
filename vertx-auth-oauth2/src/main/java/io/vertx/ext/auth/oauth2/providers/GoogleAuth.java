@@ -4,6 +4,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -73,7 +74,9 @@ public interface GoogleAuth {
       OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_JWT, new OAuth2ClientOptions(httpClientOptions)
         .setSite("https://accounts.google.com")
         .setTokenPath(serviceAccountJson.getString("token_uri"))
-        .setPrivateKey(privateKey.toString())
+        .setPubSecKeyOptions(new PubSecKeyOptions()
+          .setType("RS256")
+          .setSecretKey(privateKey.toString()))
         .setExtraParameters(new JsonObject()
           .put("algorithm", "RS256")
           .put("expiresInMinutes", 60)

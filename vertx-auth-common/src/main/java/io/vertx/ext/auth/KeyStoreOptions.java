@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.jwt;
+package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
@@ -24,7 +24,7 @@ import io.vertx.core.json.JsonObject;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @DataObject(generateConverter = true)
-public class JWTKeyStoreOptions {
+public class KeyStoreOptions {
 
   // Defaults
   private static final String TYPE = "jceks";
@@ -36,7 +36,7 @@ public class JWTKeyStoreOptions {
   /**
    * Default constructor
    */
-  public JWTKeyStoreOptions() {
+  public KeyStoreOptions() {
     init();
   }
 
@@ -45,7 +45,7 @@ public class JWTKeyStoreOptions {
    *
    * @param other the options to copy
    */
-  public JWTKeyStoreOptions(JWTKeyStoreOptions other) {
+  public KeyStoreOptions(KeyStoreOptions other) {
     type = other.getType();
     path = other.getPath();
     password = other.getPassword();
@@ -60,16 +60,16 @@ public class JWTKeyStoreOptions {
    *
    * @param json the JSON
    */
-  public JWTKeyStoreOptions(JsonObject json) {
+  public KeyStoreOptions(JsonObject json) {
     init();
-    JWTKeyStoreOptionsConverter.fromJson(json, this);
+    KeyStoreOptionsConverter.fromJson(json, this);
   }
 
   public String getType() {
     return type;
   }
 
-  public JWTKeyStoreOptions setType(String type) {
+  public KeyStoreOptions setType(String type) {
     this.type = type;
     return this;
   }
@@ -78,7 +78,7 @@ public class JWTKeyStoreOptions {
     return path;
   }
 
-  public JWTKeyStoreOptions setPath(String path) {
+  public KeyStoreOptions setPath(String path) {
     this.path = path;
     return this;
   }
@@ -87,7 +87,7 @@ public class JWTKeyStoreOptions {
     return password;
   }
 
-  public JWTKeyStoreOptions setPassword(String password) {
+  public KeyStoreOptions setPassword(String password) {
     this.password = password;
     return this;
   }

@@ -4,6 +4,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -85,7 +86,9 @@ public interface KeycloakAuth {
     }
 
     if (config.containsKey("realm-public-key")) {
-      options.setPublicKey(config.getString("realm-public-key"));
+      options.setPubSecKeyOptions(new PubSecKeyOptions()
+        .setType("RS256")
+        .setPublicKey(config.getString("realm-public-key")));
       options.setJwtToken(true);
     }
 

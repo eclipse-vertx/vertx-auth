@@ -28,26 +28,9 @@ Set whether expiration is ignored
 +++
 Set the issuer
 +++
-|[[keyStore]]`keyStore`|`link:dataobjects.html#JWTKeyStoreOptions[JWTKeyStoreOptions]`|-
+|[[keyStore]]`keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
 |[[permissionsClaimKey]]`permissionsClaimKey`|`String`|-
-|[[publicKey]]`publicKey`|`String`|-
-|===
-
-[[JWTKeyStoreOptions]]
-== JWTKeyStoreOptions
-
-++++
- Options describing how an JWT KeyStore should behave.
-++++
-'''
-
-[cols=">25%,^25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[password]]`password`|`String`|-
-|[[path]]`path`|`String`|-
-|[[type]]`type`|`String`|-
+|[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |===
 
 [[JWTOptions]]

@@ -1,23 +1,23 @@
 package io.vertx.kotlin.ext.auth.jwt
 
-import io.vertx.ext.auth.jwt.JWTKeyStoreOptions
+import io.vertx.ext.auth.KeyStoreOptions
 
 /**
- * A function providing a DSL for building [io.vertx.ext.auth.jwt.JWTKeyStoreOptions] objects.
+ * A function providing a DSL for building [io.vertx.ext.auth.jwt.KeyStoreOptions] objects.
  *
  * Options describing how an JWT KeyStore should behave.
  *
- * @param password 
- * @param path 
- * @param type 
+ * @param password
+ * @param path
+ * @param type
  *
  * <p/>
- * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.jwt.JWTKeyStoreOptions original] using Vert.x codegen.
+ * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.KeyStoreOptions original] using Vert.x codegen.
  */
 fun JWTKeyStoreOptions(
   password: String? = null,
   path: String? = null,
-  type: String? = null): JWTKeyStoreOptions = io.vertx.ext.auth.jwt.JWTKeyStoreOptions().apply {
+  type: String? = null): KeyStoreOptions = KeyStoreOptions().apply {
 
   if (password != null) {
     this.setPassword(password)

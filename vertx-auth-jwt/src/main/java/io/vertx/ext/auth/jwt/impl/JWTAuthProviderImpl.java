@@ -24,7 +24,12 @@ import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.ext.jwt.*;
 
 import java.io.ByteArrayInputStream;
@@ -57,8 +62,9 @@ public class JWTAuthProviderImpl implements JWTAuth {
     this.audience = config.getAudience();
     this.ignoreExpiration = config.isIgnoreExpiration();
 
-    final JWTKeyStoreOptions keyStore = config.getKeyStore();
+    final KeyStoreOptions keyStore = config.getKeyStore();
 
+    // attempt to load a Key file
     try {
       if (keyStore != null) {
         KeyStore ks = KeyStore.getInstance(keyStore.getType());
@@ -74,13 +80,15 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         this.jwt = new JWT(ks, keyStore.getPassword().toCharArray());
       } else {
-        // in the case of not having a key store we will try to load a public key in pem format
-        // this is how keycloak works as an example.
+        // no key file attempt to load pem keys
         this.jwt = new JWT();
 
-        if (config.containsKey("public-key")) {
-          this.jwt.addPublicKey("RS256", config.getPublicKey());
+        final List<PubSecKeyOptions> keys = config.getPubSecKeys();
 
+        if (keys != null) {
+          for (PubSecKeyOptions key : keys) {
+            this.jwt.addKeyPair(key.getType(), key.getPublicKey(), key.getSecretKey());
+          }
         }
       }
 

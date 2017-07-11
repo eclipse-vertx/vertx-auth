@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -32,6 +33,19 @@ import java.util.List;
  */
 @VertxGen
 public interface JWTAuth extends AuthProvider {
+
+  /**
+   * Create a JWT auth provider
+   *
+   * @param vertx the Vertx instance
+   * @param config  the config
+   * @return the auth provider
+   */
+  @Deprecated
+  @GenIgnore
+  static JWTAuth create(Vertx vertx, JsonObject config) {
+    return create(vertx, new JWTAuthOptions(config));
+  }
 
   /**
    * Create a JWT auth provider
