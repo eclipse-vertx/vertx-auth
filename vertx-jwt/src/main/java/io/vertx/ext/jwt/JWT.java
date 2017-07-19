@@ -111,7 +111,7 @@ public final class JWT {
     this();
 
     if (keyPrivate) {
-      addPrivateKey("RS256", key);
+      addSecretKey("RS256", key);
     } else {
       addPublicKey("RS256", key);
     }
@@ -205,7 +205,7 @@ public final class JWT {
    * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
-  public JWT addPrivateKey(String algorithm, String key) {
+  public JWT addSecretKey(String algorithm, String key) {
     return addKeyPair(algorithm, null, key);
   }
 

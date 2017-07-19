@@ -43,21 +43,21 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     this.config = config;
     this.flowType = flow;
 
+    if (config.getPubSecKey() != null) {
+      jwt.addKeyPair(config.getPubSecKey().getType(), config.getPubSecKey().getPublicKey(), config.getPubSecKey().getSecretKey());
+    }
+
     switch (flow) {
       case AUTH_CODE:
-        jwt.addPublicKey(config.getKeyAlgorithm(), config.getPublicKey());
         this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
-        jwt.addPublicKey(config.getKeyAlgorithm(), config.getPublicKey());
         this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
-        jwt.addPublicKey(config.getKeyAlgorithm(), config.getPublicKey());
         this.flow = new PasswordImpl(this);
         break;
       case AUTH_JWT:
-        jwt.addPrivateKey(config.getKeyAlgorithm(), config.getPrivateKey());
         this.flow = new AuthJWTImpl(this);
         break;
       default:

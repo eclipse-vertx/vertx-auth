@@ -24,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -76,7 +77,9 @@ public interface OAuth2Auth extends AuthProvider {
     }
 
     if (config.containsKey("realm-public-key")) {
-      options.setPublicKey(config.getString("realm-public-key"));
+      options.setPubSecKeyOptions(new PubSecKeyOptions()
+        .setType("RS256")
+        .setPublicKey(config.getString("realm-public-key")));
       options.setJwtToken(true);
     }
 

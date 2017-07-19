@@ -1,15 +1,16 @@
 package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 
 public class DummyVerticle extends AbstractVerticle {
 
-    private static final JsonObject config = new JsonObject().put("keyStore", new JsonObject()
-            .put("path", "keystore.jceks")
-            .put("type", "jceks")
-            .put("password", "secret"));
+    private static final JWTAuthOptions config = new JWTAuthOptions()
+      .setKeyStore(new KeyStoreOptions()
+        .setPath("keystore.jceks")
+        .setPassword("secret"));
 
     public void start() {
         System.out.println(this);

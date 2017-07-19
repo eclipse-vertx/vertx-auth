@@ -16,11 +16,15 @@
 
 package io.vertx.ext.auth.jwt;
 
+import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
+
+import java.util.List;
 
 /**
  * Factory interface for creating JWT based {@link io.vertx.ext.auth.AuthProvider} instances.
@@ -37,7 +41,20 @@ public interface JWTAuth extends AuthProvider {
    * @param config  the config
    * @return the auth provider
    */
+  @Deprecated
+  @GenIgnore
   static JWTAuth create(Vertx vertx, JsonObject config) {
+    return create(vertx, new JWTAuthOptions(config));
+  }
+
+  /**
+   * Create a JWT auth provider
+   *
+   * @param vertx the Vertx instance
+   * @param config  the config
+   * @return the auth provider
+   */
+  static JWTAuth create(Vertx vertx, JWTAuthOptions config) {
     return new JWTAuthProviderImpl(vertx, config);
   }
 

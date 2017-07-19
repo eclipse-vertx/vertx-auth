@@ -14,3 +14,37 @@
 ^|Name | Type ^| Description
 |===
 
+[[KeyStoreOptions]]
+== KeyStoreOptions
+
+++++
+ Options describing how an JWT KeyStore should behave.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[password]]`password`|`String`|-
+|[[path]]`path`|`String`|-
+|[[type]]`type`|`String`|-
+|===
+
+[[PubSecKeyOptions]]
+== PubSecKeyOptions
+
+++++
+ Options describing how a Cryptographic Key.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[publicKey]]`publicKey`|`String`|-
+|[[secretKey]]`secretKey`|`String`|-
+|[[type]]`type`|`String`|-
+|===
+

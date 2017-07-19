@@ -1,5 +1,55 @@
 = Cheatsheets
 
+[[JWTAuthOptions]]
+== JWTAuthOptions
+
+++++
+ Options describing how an JWT Auth should behave.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[audience]]`audience`|`Array of String`|
++++
+Set the audience list
++++
+|[[audiences]]`audiences`|`Array of String`|
++++
+Set the audience list
++++
+|[[ignoreExpiration]]`ignoreExpiration`|`Boolean`|
++++
+Set whether expiration is ignored
++++
+|[[issuer]]`issuer`|`String`|
++++
+Set the issuer
++++
+|[[keyStore]]`keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
+|[[permissionsClaimKey]]`permissionsClaimKey`|`String`|-
+|[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
+|===
+
+[[JWTKeyStoreOptions]]
+== JWTKeyStoreOptions
+
+++++
+ Options describing how an JWT KeyStore should behave.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[password]]`password`|`String`|-
+|[[path]]`path`|`String`|-
+|[[type]]`type`|`String`|-
+|===
+
 [[JWTOptions]]
 == JWTOptions
 

@@ -51,13 +51,10 @@ Here's an example of creating a JWT auth provider:
 [source,java]
 ----
 
-var config = json {
-  obj("keyStore" to obj(
-      "path" to "keystore.jceks",
-      "type" to "jceks",
-      "password" to "secret"
-    ))
-}
+var config = JWTAuthOptions(
+  keyStore = KeyStoreOptions(
+    path = "keystore.jceks",
+    password = "secret"))
 
 var provider = JWTAuth.create(vertx, config)
 
@@ -70,13 +67,10 @@ do:
 [source,java]
 ----
 
-var config = json {
-  obj("keyStore" to obj(
-      "path" to "keystore.jceks",
-      "type" to "jceks",
-      "password" to "secret"
-    ))
-}
+var config = JWTAuthOptions(
+  keyStore = KeyStoreOptions(
+    path = "keystore.jceks",
+    password = "secret"))
 
 var provider = JWTAuth.create(vertx, config)
 
@@ -128,8 +122,8 @@ keytool -genkey -keystore keystore.jceks -storetype jceks -storepass secret -key
 keytool -genkey -keystore keystore.jceks -storetype jceks -storepass secret -keyalg RSA -keysize 2048 -alias RS384 -keypass secret -sigalg SHA384withRSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 keytool -genkey -keystore keystore.jceks -storetype jceks -storepass secret -keyalg RSA -keysize 2048 -alias RS512 -keypass secret -sigalg SHA512withRSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES256 -keypass secret -sigalg SHA256withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
-keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES384 -keypass secret -sigalg SHA384withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
-keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 256 -alias ES512 -keypass secret -sigalg SHA512withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
+keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 384 -alias ES384 -keypass secret -sigalg SHA384withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
+keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 521 -alias ES512 -keypass secret -sigalg SHA512withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 ----
 
 === Read only tokens
@@ -140,9 +134,11 @@ case all you need to have is a public key im PEM format.
 [source,kotlin]
 ----
 
-var config = json {
-  obj("public-key" to "BASE64-ENCODED-PUBLIC_KEY")
-}
+var config = JWTAuthOptions(
+  pubSecKeys = listOf(PubSecKeyOptions(
+    type = "RS256",
+    publicKey = "BASE64-ENCODED-PUBLIC_KEY")))
+
 var provider = JWTAuth.create(vertx, config)
 
 ----
