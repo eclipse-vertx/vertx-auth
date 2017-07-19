@@ -37,6 +37,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final boolean JWT_TOKEN = false;
   private static final String SCOPE_SEPARATOR = " ";
+  private static final String KEY_ALGORITHM = "RS256";
 
   private String authorizationPath;
   private String tokenPath;
@@ -57,6 +58,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private JsonObject headers;
   private String publicKey;
   private String privateKey;
+  private String keyAlgorithm;
   private boolean jwtToken;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
@@ -104,6 +106,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientSecret = other.getClientSecret();
     publicKey = other.getPublicKey();
     privateKey = other.getPrivateKey();
+    keyAlgorithm = other.getKeyAlgorithm();
     jwtToken = other.isJwtToken();
     logoutPath = other.getLogoutPath();
     // extras
@@ -123,6 +126,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtToken = JWT_TOKEN;
+    keyAlgorithm = KEY_ALGORITHM;
     extraParams = null;
   }
 
@@ -238,6 +242,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setPrivateKey(String privateKey) {
     this.privateKey = privateKey;
+    return this;
+  }
+
+  public String getKeyAlgorithm() {
+    return keyAlgorithm;
+  }
+
+  public OAuth2ClientOptions setKeyAlgorithm(String keyAlgorithm) {
+    this.keyAlgorithm = keyAlgorithm;
     return this;
   }
 

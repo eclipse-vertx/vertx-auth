@@ -34,7 +34,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   private final Vertx vertx;
   private final OAuth2FlowType flowType;
   private final OAuth2ClientOptions config;
-  private final JWT jwt;
+  private final JWT jwt = new JWT();
 
   private final OAuth2Flow flow;
 
@@ -45,19 +45,19 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
     switch (flow) {
       case AUTH_CODE:
-        jwt = new JWT(config.getPublicKey(), false);
+        jwt.addPublicKey(config.getKeyAlgorithm(), config.getPublicKey());
         this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
-        jwt = new JWT(config.getPublicKey(), false);
+        jwt.addPublicKey(config.getKeyAlgorithm(), config.getPublicKey());
         this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
-        jwt = new JWT(config.getPublicKey(), false);
+        jwt.addPublicKey(config.getKeyAlgorithm(), config.getPublicKey());
         this.flow = new PasswordImpl(this);
         break;
       case AUTH_JWT:
-        jwt = new JWT(config.getPrivateKey(), true);
+        jwt.addPrivateKey(config.getKeyAlgorithm(), config.getPrivateKey());
         this.flow = new AuthJWTImpl(this);
         break;
       default:

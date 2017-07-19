@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.jwt;
 
+import io.vertx.ext.jwt.impl.SignatureHelper;
+
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -28,16 +30,47 @@ import javax.crypto.Mac;
  * @author Paulo Lopes
  */
 public interface Crypto {
+
+  String[] ECDSA_ALGORITHMS = {
+    "SHA256withECDSA",
+    "SHA384withECDSA",
+    "SHA512withECDSA"
+  };
+
   byte[] sign(byte[] payload);
 
   boolean verify(byte[] signature, byte[] payload);
+
+  default boolean isECDSA(String algorithm) {
+    for (String alg : ECDSA_ALGORITHMS) {
+      if (alg.equals(algorithm)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  default int ECDSALength(String algorithm) {
+    switch (algorithm) {
+      case "SHA256withECDSA":
+        return 64;
+      case "SHA384withECDSA":
+        return 96;
+      case "SHA512withECDSA":
+        return 132;
+    }
+
+    return -1;
+  }
 }
 
 /**
  * MAC based Crypto implementation
+ *
  * @author Paulo Lopes
  */
-final class CryptoMac implements Crypto {
+class CryptoMac implements Crypto {
   private final Mac mac;
 
   CryptoMac(final Mac mac) {
@@ -57,54 +90,43 @@ final class CryptoMac implements Crypto {
 
 /**
  * Public Key based Crypto implementation
+ *
  * @author Paulo Lopes
  */
-final class CryptoPublicKey implements Crypto {
-  private final Signature sig;
-  private final PublicKey publicKey;
-
+class CryptoPublicKey extends CryptoKeyPair {
   CryptoPublicKey(final String algorithm, final PublicKey publicKey) {
-    this.publicKey = publicKey;
-
-    Signature signature;
-    try {
-      // use default
-      signature = Signature.getInstance(algorithm);
-    } catch (NoSuchAlgorithmException e) {
-      // error
-      throw new RuntimeException(e);
-    }
-
-    this.sig = signature;
-  }
-
-  @Override
-  public synchronized byte[] sign(byte[] payload) {
-    throw new RuntimeException("CryptoPublicKey cannot sign");
-  }
-
-  @Override
-  public synchronized boolean verify(byte[] signature, byte[] payload) {
-    try {
-      sig.initVerify(publicKey);
-      sig.update(payload);
-      return sig.verify(signature);
-    } catch (SignatureException | InvalidKeyException e) {
-      throw new RuntimeException(e);
-    }
+    super(algorithm, publicKey, null);
   }
 }
 
 /**
  * Public Key based Crypto implementation
+ *
  * @author Paulo Lopes
  */
-final class CryptoPrivateKey implements Crypto {
-  private final Signature sig;
-  private final PrivateKey privateKey;
-
+class CryptoPrivateKey extends CryptoKeyPair {
   CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
+    super(algorithm, null, privateKey);
+  }
+}
+
+/**
+ * Public Key based Crypto implementation
+ *
+ * @author Paulo Lopes
+ */
+class CryptoKeyPair implements Crypto {
+  private final Signature sig;
+  private final PublicKey publicKey;
+  private final PrivateKey privateKey;
+  private final boolean ecdsa;
+  private final int ecdsaSignatureLength;
+
+  CryptoKeyPair(final String algorithm, final PublicKey publicKey, final PrivateKey privateKey) {
+    this.publicKey = publicKey;
     this.privateKey = privateKey;
+    this.ecdsa = isECDSA(algorithm);
+    this.ecdsaSignatureLength = ECDSALength(algorithm);
 
     Signature signature;
     try {
@@ -120,10 +142,18 @@ final class CryptoPrivateKey implements Crypto {
 
   @Override
   public synchronized byte[] sign(byte[] payload) {
+    if (privateKey == null) {
+      throw new RuntimeException("Cannot sign (no private key)");
+    }
+
     try {
       sig.initSign(privateKey);
       sig.update(payload);
-      return sig.sign();
+      if (ecdsa) {
+        return SignatureHelper.toJWS(sig.sign(), ecdsaSignatureLength);
+      } else {
+        return sig.sign();
+      }
     } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
@@ -131,22 +161,38 @@ final class CryptoPrivateKey implements Crypto {
 
   @Override
   public synchronized boolean verify(byte[] signature, byte[] payload) {
-    throw new RuntimeException("CryptoPrivateKey cannot verify");
+    if (publicKey == null) {
+      throw new RuntimeException("Cannot verify (no public key)");
+    }
+
+    try {
+      sig.initVerify(publicKey);
+      sig.update(payload);
+      if (ecdsa) {
+        return sig.verify(SignatureHelper.toDER(signature));
+      } else {
+        return sig.verify(signature);
+      }
+    } catch (SignatureException | InvalidKeyException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
 
 /**
  * Signature based Crypto implementation
+ *
  * @author Paulo Lopes
  */
-final class CryptoSignature implements Crypto {
+class CryptoSignature extends CryptoKeyPair {
   private final Signature sig;
-  private final PrivateKey privateKey;
   private final X509Certificate certificate;
+  private final boolean ecdsa;
 
   CryptoSignature(final String algorithm, final X509Certificate certificate, final PrivateKey privateKey) {
+    super(algorithm, null, privateKey);
     this.certificate = certificate;
-    this.privateKey = privateKey;
+    this.ecdsa = isECDSA(algorithm);
 
     Signature signature;
     try {
@@ -166,22 +212,15 @@ final class CryptoSignature implements Crypto {
   }
 
   @Override
-  public synchronized byte[] sign(byte[] payload) {
-    try {
-      sig.initSign(privateKey);
-      sig.update(payload);
-      return sig.sign();
-    } catch (SignatureException | InvalidKeyException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
   public synchronized boolean verify(byte[] signature, byte[] payload) {
     try {
       sig.initVerify(certificate);
       sig.update(payload);
-      return sig.verify(signature);
+      if (ecdsa) {
+        return sig.verify(SignatureHelper.toDER(signature));
+      } else {
+        return sig.verify(signature);
+      }
     } catch (SignatureException | InvalidKeyException e) {
       throw new RuntimeException(e);
     }
@@ -193,11 +232,11 @@ final class CryptoNone implements Crypto {
 
   @Override
   public byte[] sign(byte[] payload) {
-      return NOOP;
-    }
+    return NOOP;
+  }
 
   @Override
   public boolean verify(byte[] signature, byte[] payload) {
-      return true;
-    }
+    return true;
+  }
 }

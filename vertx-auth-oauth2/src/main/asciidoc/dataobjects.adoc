@@ -38,6 +38,7 @@
 |[[jdkSslEngineOptions]]`jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
 |[[jwtToken]]`jwtToken`|`Boolean`|-
 |[[keepAlive]]`keepAlive`|`Boolean`|-
+|[[keyAlgorithm]]`keyAlgorithm`|`String`|-
 |[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[localAddress]]`localAddress`|`String`|-
 |[[logActivity]]`logActivity`|`Boolean`|-
