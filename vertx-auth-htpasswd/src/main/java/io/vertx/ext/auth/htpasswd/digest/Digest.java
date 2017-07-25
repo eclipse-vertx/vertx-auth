@@ -1,5 +1,9 @@
 package io.vertx.ext.auth.htpasswd.digest;
 
+import org.apache.commons.codec.digest.Crypt;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.Md5Crypt;
+
 import java.util.Base64;
 
 
@@ -13,7 +17,8 @@ public class Digest {
   }
 
   public static boolean bcryptCheck(String plaintext, String hashed) {
-    return BCrypt.checkpw(plaintext, hashed);
+    //return BCrypt.checkpw(plaintext, hashed);
+    throw new UnsupportedOperationException("Not jet implemented.");
   }
 
   public static boolean isMd5Hashed(String hashed) {

@@ -2,6 +2,7 @@ package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.test.core.VertxTestBase;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -26,6 +27,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void bcrypt() {
     JsonObject authInfo = new JsonObject()
       .put("username", "bcrypt")

@@ -10,13 +10,13 @@ import static org.junit.Assert.*;
  */
 public class DigestTest {
 
-  @Test
+  @Test()
   public void testIsBcryptHashed() {
     assertTrue(isBcryptHashed("$2y$05$QwbS8vp1A/yQ1AlQ8ySDOuzONdR3U6A.xATjBHno/.nvp8O55eVaG"));
     assertFalse(isBcryptHashed("something"));
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void testBcryptCheck() {
     assertTrue(bcryptCheck("myPassword", "$2y$05$QwbS8vp1A/yQ1AlQ8ySDOuzONdR3U6A.xATjBHno/.nvp8O55eVaG"));
     assertFalse(bcryptCheck("myPassword", "$2y$10$rzA1p/MV49PSfigoPaRP.OE3TkamFV0v.eV9dH72SP9lN1wksd.WS"));
