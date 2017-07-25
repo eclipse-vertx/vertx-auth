@@ -1,0 +1,93 @@
+== htpasswd Auth Provider implementation
+
+<p>
+We provide an implementation of `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]` which uses the Apache htpasswd file format
+to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
+user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
+<p>
+To use this project, add the following
+dependency to the _dependencies_ section of your build descriptor:
+<p>
+* Maven (in your `pom.xml`):
+<p>
+[source,xml,subs="+attributes"]
+----
+<dependency>
+<groupId>io.vertx</groupId>
+<artifactId>vertx-auth-htpasswd</artifactId>
+<version>3.5.0-SNAPSHOT</version>
+</dependency>
+----
+<p>
+* Gradle (in your `build.gradle` file):
+<p>
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-htpasswd:3.5.0-SNAPSHOT'
+----
+<p>
+To create an instance you first need an htpasswd file. This file is created using the apache htpasswd tool.
+<p>
+Once you've got one of these you can create a `link:../../apidocs/io/vertx/ext/auth/htpasswd/HtpasswdAuth.html[HtpasswdAuth]` instance as follows:
+<p>
+[source,java]
+----
+HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions());
+----
+<p>
+Once you've got your instance you can authenticate with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
+<p>
+The out of the box config assumes the usage of the file htpasswd in the root of the project.
+<p>
+== Provider internal behavior
+<p>
+The provider will load the specified htpasswd file at start time and will not watch for modifications. If you
+require dynamic reloads, you will need to restart the provider.
+<p>
+The implementation does not have any other state than the htpasswd file itself.
+<p>
+== Authentication
+<p>
+When authenticating using this implementation, it assumes that the username and password are parsed as a JSON
+object which we refer from now on as authentication info:
+<p>
+[source,java]
+----
+JsonObject authInfo = new JsonObject()
+  .put("username", "someUser")
+  .put("password", "somePassword");
+
+authProvider.authenticate(authInfo, res -> {
+  if (res.succeeded()) {
+    User user = res.result();
+  } else {
+    // Failed!
+  }
+});
+----
+<p>
+== Autorization
+<p>
+Apache htpasswd file is a pure authentication mechanism and not authorization but still it is possible to configure
+default authorization response for all users and for all authorities. It can ether allow or deny all.
+<p>
+* Configuration example:
+<p>
+[source,java]
+----
+HtpasswdAuth authProviderUsersAuthorizedForNothing = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(false));
+HtpasswdAuth authProviderUsersAuthorizedForEverything = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(true));
+----
+<p>
+* Authorization checking:
+<p>
+[source,java]
+----
+user.isAuthorised("anyAuthority", res -> {
+  if (res.succeeded()) {
+    boolean hasRole = res.result();
+  } else {
+    // Failed
+  }
+});
+----
