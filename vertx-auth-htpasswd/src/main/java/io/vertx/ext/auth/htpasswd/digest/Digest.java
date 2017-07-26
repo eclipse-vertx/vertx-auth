@@ -3,6 +3,7 @@ package io.vertx.ext.auth.htpasswd.digest;
 import org.apache.commons.codec.digest.Crypt;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.Md5Crypt;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Base64;
 
@@ -17,8 +18,10 @@ public class Digest {
   }
 
   public static boolean bcryptCheck(String plaintext, String hashed) {
-    //return BCrypt.checkpw(plaintext, hashed);
-    throw new UnsupportedOperationException("Not jet implemented.");
+    if (hashed.startsWith("$2a$")) {
+      return BCrypt.checkpw(plaintext, hashed);
+    }
+    throw new IllegalArgumentException("This bcrypt version is currently not supported.");
   }
 
   public static boolean isMd5Hashed(String hashed) {
