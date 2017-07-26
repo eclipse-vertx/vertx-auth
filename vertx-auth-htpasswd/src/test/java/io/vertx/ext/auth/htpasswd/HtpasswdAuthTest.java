@@ -28,10 +28,23 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   @Ignore
-  public void bcrypt() {
+  public void bcrypt2y() {
     JsonObject authInfo = new JsonObject()
-      .put("username", "bcrypt")
+      .put("username", "bcrypt2y")
       .put("password", "myPassword");
+
+    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void bcrypt2a() {
+    JsonObject authInfo = new JsonObject()
+      .put("username", "bcrypt2a")
+      .put("password", "abcdefghijklmnopqrstuvwxyz");
 
     authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
