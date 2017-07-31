@@ -3,6 +3,7 @@ package io.vertx.kotlin.ext.auth.jwt
 import io.vertx.ext.auth.jwt.JWTAuthOptions
 import io.vertx.ext.auth.KeyStoreOptions
 import io.vertx.ext.auth.PubSecKeyOptions
+import io.vertx.ext.auth.SecretOptions
 
 /**
  * A function providing a DSL for building [io.vertx.ext.auth.jwt.JWTAuthOptions] objects.
@@ -16,6 +17,7 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param keyStore 
  * @param permissionsClaimKey 
  * @param pubSecKeys 
+ * @param secrets 
  *
  * <p/>
  * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.jwt.JWTAuthOptions original] using Vert.x codegen.
@@ -27,7 +29,8 @@ fun JWTAuthOptions(
   issuer: String? = null,
   keyStore: io.vertx.ext.auth.KeyStoreOptions? = null,
   permissionsClaimKey: String? = null,
-  pubSecKeys: Iterable<io.vertx.ext.auth.PubSecKeyOptions>? = null): JWTAuthOptions = io.vertx.ext.auth.jwt.JWTAuthOptions().apply {
+  pubSecKeys: Iterable<io.vertx.ext.auth.PubSecKeyOptions>? = null,
+  secrets: Iterable<io.vertx.ext.auth.SecretOptions>? = null): JWTAuthOptions = io.vertx.ext.auth.jwt.JWTAuthOptions().apply {
 
   if (audience != null) {
     this.setAudience(audience.toList())
@@ -51,6 +54,9 @@ fun JWTAuthOptions(
   }
   if (pubSecKeys != null) {
     this.setPubSecKeys(pubSecKeys.toList())
+  }
+  if (secrets != null) {
+    this.setSecrets(secrets.toList())
   }
 }
 
