@@ -76,6 +76,7 @@
             io.vertx.groovy.*;resolution:=optional,\
             io.reactivex.*;resolution:=optional,\
             io.vertx.reactivex.*;resolution:=optional,\
+            io.vertx.lang.reactivex.*;resolution:=optional,\
             *
           -exportcontents: !*impl,!examples,*
           ]]></bnd>
