@@ -70,6 +70,8 @@
             io.vertx.lang.groovy.*;resolution:=optional,\
             org.codehaus.groovy.*;resolution:=optional,\
             io.vertx.groovy.*;resolution:=optional,\
+            io.reactivex.*;resolution:=optional,\
+            io.vertx.reactivex.*;resolution:=optional,\
             *
           -exportcontents: !*impl,!examples,*
           ]]></bnd>
