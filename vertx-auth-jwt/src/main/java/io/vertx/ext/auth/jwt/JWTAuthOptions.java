@@ -19,6 +19,7 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.SecretOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class JWTAuthOptions {
   private String permissionsClaimKey;
   private KeyStoreOptions keyStore;
   private List<PubSecKeyOptions> pubSecKeys;
+  private List<SecretOptions> secrets;
   private List<String> audience;
   private String issuer;
   private boolean ignoreExpiration;
@@ -59,6 +61,7 @@ public class JWTAuthOptions {
     permissionsClaimKey = other.getPermissionsClaimKey();
     keyStore = other.getKeyStore();
     pubSecKeys = other.getPubSecKeys();
+    secrets = other.getSecrets();
     audience = other.getAudience();
     issuer = other.getIssuer();
     ignoreExpiration = other.isIgnoreExpiration();
@@ -104,6 +107,22 @@ public class JWTAuthOptions {
 
   public JWTAuthOptions setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
     this.pubSecKeys = pubSecKeys;
+    return this;
+  }
+
+  public List<SecretOptions> getSecrets() {
+    return secrets;
+  }
+
+  public void setSecrets(List<SecretOptions> secrets) {
+    this.secrets = secrets;
+  }
+
+  public JWTAuthOptions addSecret(SecretOptions secret) {
+    if (this.secrets == null) {
+      this.secrets = new ArrayList<>();
+    }
+    this.secrets.add(secret);
     return this;
   }
 

@@ -18,6 +18,7 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.JWTOptions;
@@ -300,6 +301,58 @@ public class JWTAuthProviderTest extends VertxTestBase {
       assertNotNull(res.result());
       testComplete();
     });
+    await();
+  }
+
+  @Test
+  public void testGenerateNewTokenWithMacSecret() {
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .addSecret(new SecretOptions()
+      .setType("HS256")
+      .setSecret("notasecret"))
+    );
+
+    String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("HS256"));
+    assertNotNull(token);
+
+    // reverse
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testValidateTokenWithInvalidMacSecret() {
+    String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .addSecret(new SecretOptions()
+        .setType("HS256")
+        .setSecret("a bad secret"))
+    );
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    authProvider.authenticate(authInfo, onFailure(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testValidateTokenWithValidMacSecret() {
+    String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .addSecret(new SecretOptions()
+        .setType("HS256")
+        .setSecret("notasecret"))
+    );
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
     await();
   }
 

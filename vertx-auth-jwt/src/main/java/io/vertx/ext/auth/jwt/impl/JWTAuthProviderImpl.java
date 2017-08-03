@@ -26,11 +26,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.JWTOptions;
-import io.vertx.ext.jwt.*;
+import io.vertx.ext.jwt.JWT;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -88,6 +89,14 @@ public class JWTAuthProviderImpl implements JWTAuth {
         if (keys != null) {
           for (PubSecKeyOptions key : keys) {
             this.jwt.addKeyPair(key.getType(), key.getPublicKey(), key.getSecretKey());
+          }
+        }
+
+        final List<SecretOptions> secrets = config.getSecrets();
+
+        if (secrets != null) {
+          for (SecretOptions secret: secrets) {
+            this.jwt.addSecret(secret.getType(), secret.getSecret());
           }
         }
       }
