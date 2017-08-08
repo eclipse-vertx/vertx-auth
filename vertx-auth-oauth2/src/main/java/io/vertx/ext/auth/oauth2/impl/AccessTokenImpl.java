@@ -192,7 +192,8 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   public AccessTokenImpl refresh(Handler<AsyncResult<Void>> callback) {
     JsonObject params = new JsonObject()
         .put("grant_type", "refresh_token")
-        .put("refresh_token", token.getString("refresh_token"));
+        .put("refresh_token", token.getString("refresh_token"))
+        .put("authorizationHeaderOnly", true);
 
     OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), params, res -> {
       if (res.succeeded()) {
@@ -221,7 +222,8 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
       JsonObject params = new JsonObject()
           .put("token", tokenValue)
-          .put("token_type_hint", token_type);
+          .put("token_type_hint", token_type)
+          .put("authorizationHeaderOnly", true);
 
       OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getRevocationPath(), params, res -> {
         if (res.succeeded()) {
