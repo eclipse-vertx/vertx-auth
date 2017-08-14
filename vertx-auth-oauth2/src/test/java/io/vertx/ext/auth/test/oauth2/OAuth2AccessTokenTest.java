@@ -78,7 +78,14 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, queryToJSON(buffer.toString()));
+            JsonObject expectedRequest = config;
+
+            if("refresh_token".equals(config.getString("grant_type"))) {
+              //Refresh does not pass auth details
+              expectedRequest = removeAuthDetails(expectedRequest);
+            }
+
+            assertEquals(expectedRequest, queryToJSON(buffer.toString()));
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }
@@ -86,8 +93,10 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
         });
       } else if (req.method() == HttpMethod.POST && "/oauth/revoke".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
+          //Revoke does not pass auth details
+          JsonObject expectedRequest = removeAuthDetails(config);
           try {
-            assertEquals(config, queryToJSON(buffer.toString()));
+            assertEquals(expectedRequest, queryToJSON(buffer.toString()));
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }
@@ -114,6 +123,13 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
     });
 
     latch.await();
+  }
+
+  private JsonObject removeAuthDetails(JsonObject config) {
+    JsonObject request = config.copy();
+    request.remove("client_secret");
+    request.remove("client_id");
+    return request;
   }
 
   @Override
