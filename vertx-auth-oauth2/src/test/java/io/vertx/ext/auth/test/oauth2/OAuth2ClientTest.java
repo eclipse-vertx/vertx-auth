@@ -3,6 +3,7 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -76,11 +77,11 @@ public class OAuth2ClientTest extends VertxTestBase {
   @Test
   public void getToken() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        User token = res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
         testComplete();

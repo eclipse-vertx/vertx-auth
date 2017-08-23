@@ -78,7 +78,7 @@ public class OAuth2FailureTest extends VertxTestBase {
   public void getUnauthorizedToken() {
     config = oauthConfig;
     code = 401;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("Unauthorized", res.cause().getMessage());
         testComplete();
@@ -93,7 +93,7 @@ public class OAuth2FailureTest extends VertxTestBase {
   public void getTokenServerCrash() {
     config = oauthConfig;
     code = 500;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("Internal Server Error", res.cause().getMessage());
         testComplete();
@@ -110,7 +110,7 @@ public class OAuth2FailureTest extends VertxTestBase {
       .setClientID("client-id")
       .setClientSecret("client-secret")
       .setSite("http://zlouklfoux.net.com.info.pimpo.molo"));
-    auth.getToken(tokenConfig, res -> {
+    auth.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertThat(res.cause(), instanceOf(UnknownHostException.class));
         testComplete();

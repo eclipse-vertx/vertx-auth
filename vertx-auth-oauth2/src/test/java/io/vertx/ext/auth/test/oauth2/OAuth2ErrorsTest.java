@@ -64,7 +64,7 @@ public class OAuth2ErrorsTest extends VertxTestBase {
         .put("type", "OAuthException")
         .put("code", 190));
 
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("Error validating access token: User USER_ID has not authorized application APP_ID.", res.cause().getMessage());
         testComplete();
@@ -83,7 +83,7 @@ public class OAuth2ErrorsTest extends VertxTestBase {
       .put("error_description", "The client_id and/or client_secret passed are incorrect.")
       .put("error_uri", "https://developer.github.com/v3/oauth/#incorrect-client-credentials");
 
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("The client_id and/or client_secret passed are incorrect.", res.cause().getMessage());
         testComplete();
@@ -99,7 +99,7 @@ public class OAuth2ErrorsTest extends VertxTestBase {
     fixture = new JsonObject()
       .put("error", "incorrect_client_credentials");
 
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("incorrect_client_credentials", res.cause().getMessage());
         testComplete();
@@ -115,7 +115,7 @@ public class OAuth2ErrorsTest extends VertxTestBase {
     fixture = new JsonObject()
       .put("error", 190);
 
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertEquals("190", res.cause().getMessage());
         testComplete();

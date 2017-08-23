@@ -89,7 +89,7 @@ public class OAuth2AuthCodeErrorTest extends VertxTestBase {
   @Test
   public void getToken() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         assertNotNull(res.cause());
         testComplete();

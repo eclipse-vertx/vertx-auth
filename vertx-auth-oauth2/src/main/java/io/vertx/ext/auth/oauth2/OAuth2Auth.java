@@ -115,9 +115,12 @@ public interface OAuth2Auth extends AuthProvider {
   /**
    * Returns the Access Token object.
    *
+   * @deprecated use {@link AuthProvider#authenticate(JsonObject, Handler)} instead.
+   *
    * @param params - JSON with the options, each flow requires different options.
    * @param handler - The handler returning the results.
    */
+  @Deprecated
   void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler);
 
   /**
