@@ -19,6 +19,7 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 
 /**
@@ -67,4 +68,12 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken introspect(Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Load the user info as per OIDC spec.
+   *
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback);
 }

@@ -86,6 +86,7 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param useBasicAuthorizationHeader 
  * @param usePooledBuffers 
  * @param userAgent 
+ * @param userInfoParameters 
  * @param userInfoPath 
  * @param verifyHost 
  *
@@ -162,6 +163,7 @@ fun OAuth2ClientOptions(
   useBasicAuthorizationHeader: Boolean? = null,
   usePooledBuffers: Boolean? = null,
   userAgent: String? = null,
+  userInfoParameters: io.vertx.core.json.JsonObject? = null,
   userInfoPath: String? = null,
   verifyHost: Boolean? = null): OAuth2ClientOptions = io.vertx.ext.auth.oauth2.OAuth2ClientOptions().apply {
 
@@ -379,6 +381,9 @@ fun OAuth2ClientOptions(
   }
   if (userAgent != null) {
     this.setUserAgent(userAgent)
+  }
+  if (userInfoParameters != null) {
+    this.setUserInfoParameters(userInfoParameters)
   }
   if (userInfoPath != null) {
     this.setUserInfoPath(userInfoPath)

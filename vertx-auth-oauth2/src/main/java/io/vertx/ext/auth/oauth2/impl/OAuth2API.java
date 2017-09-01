@@ -91,10 +91,9 @@ public class OAuth2API {
       form = params.copy();
     }
 
-    if (method == HttpMethod.GET) {
-      if (uri.indexOf('?') != -1) {
-        uri += "&" + stringify(params);
-      }
+    if (method == HttpMethod.GET && params.size() > 0) {
+      uri += uri.indexOf('?') != -1 ? "&" : "?";
+      uri += stringify(params);
     }
 
     final boolean authorizationHeaderOnly = params.getBoolean("authorizationHeaderOnly", false);
@@ -105,6 +104,9 @@ public class OAuth2API {
 
     // Enable the system to send authorization params in the body (for example github does not require to be in the header)
     if (method != HttpMethod.GET && !authorizationHeaderOnly) {
+      if (form == null) {
+        form = new JsonObject();
+      }
       form.put("client_id", config.getClientID());
       if (config.getClientSecretParameterName() != null) {
         form.put(config.getClientSecretParameterName(), config.getClientSecret());

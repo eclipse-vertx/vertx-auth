@@ -38,6 +38,7 @@ public interface StripeAuth {
         .setSite("https://connect.stripe.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
+        .setUserInfoPath("/v1/account")
         .setScopeSeparator(" ")
         .setClientID(clientId)
         .setClientSecret(clientSecret));

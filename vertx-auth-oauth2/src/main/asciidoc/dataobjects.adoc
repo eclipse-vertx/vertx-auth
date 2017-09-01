@@ -82,6 +82,7 @@
 |[[useBasicAuthorizationHeader]]`useBasicAuthorizationHeader`|`Boolean`|-
 |[[usePooledBuffers]]`usePooledBuffers`|`Boolean`|-
 |[[userAgent]]`userAgent`|`String`|-
+|[[userInfoParameters]]`userInfoParameters`|`Json object`|-
 |[[userInfoPath]]`userInfoPath`|`String`|-
 |[[verifyHost]]`verifyHost`|`Boolean`|-
 |===

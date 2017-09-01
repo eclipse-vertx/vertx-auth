@@ -48,6 +48,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
   private String userInfoPath;
+  // extra parameters to be added while requesting the user info
+  private JsonObject userInfoParams;
   // introspection RFC7662
   private String introspectionPath;
 
@@ -94,6 +96,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
     revocationPath = other.getRevocationPath();
+    userInfoPath = other.getUserInfoPath();
     introspectionPath = other.getIntrospectionPath();
     scopeSeparator = other.getScopeSeparator();
     useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
@@ -112,6 +115,13 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     } else {
       extraParams = null;
     }
+    // user info params
+    final JsonObject obj2 = other.getUserInfoParameters();
+    if (obj2 != null) {
+      userInfoParams = obj2.copy();
+    } else {
+      userInfoParams = null;
+    }
   }
 
   private void init() {
@@ -123,6 +133,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtToken = JWT_TOKEN;
     extraParams = null;
+    userInfoParams = null;
   }
 
   /**
@@ -282,6 +293,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setIntrospectionPath(String introspectionPath) {
     this.introspectionPath = introspectionPath;
+    return this;
+  }
+
+  public JsonObject getUserInfoParameters() {
+    return userInfoParams;
+  }
+
+  public OAuth2ClientOptions setUserInfoParameters(JsonObject userInfoParams) {
+    this.userInfoParams = userInfoParams;
     return this;
   }
 }

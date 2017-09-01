@@ -39,6 +39,7 @@ public interface DropboxAuth {
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setRevocationPath("/oauth2/token/revoke")
+        .setUserInfoPath("/account/info")
         .setClientID(clientId)
         .setClientSecret(clientSecret));
   }

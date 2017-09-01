@@ -38,6 +38,7 @@ public interface LinkedInAuth {
         .setSite("https://www.linkedin.com")
         .setTokenPath("/uas/oauth2/accessToken")
         .setAuthorizationPath("/uas/oauth2/authorization")
+        .setUserInfoPath("/people/~")
         .setScopeSeparator(" ")
         .setClientID(clientId)
         .setClientSecret(clientSecret));

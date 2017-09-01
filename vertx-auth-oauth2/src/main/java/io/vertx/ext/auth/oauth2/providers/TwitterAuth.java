@@ -38,6 +38,7 @@ public interface TwitterAuth {
         .setSite("https://api.twitter.com")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
+        .setUserInfoPath("/1.1/users/show.json")
         .setClientID(clientId)
         .setClientSecret(clientSecret));
   }

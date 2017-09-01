@@ -40,6 +40,7 @@ public interface ShopifyAuth {
         .setSite("https://" + shop + ".myshopify.com")
         .setTokenPath("/admin/oauth/access_token")
         .setAuthorizationPath("/admin/oauth/authorize")
+        .setUserInfoPath("/admin/shop.json")
         .setScopeSeparator(",")
         .setClientID(clientId)
         .setClientSecret(clientSecret));

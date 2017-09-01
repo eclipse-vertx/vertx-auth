@@ -20,6 +20,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -317,6 +318,22 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
         callback.handle(Future.failedFuture(res.cause()));
       }
     });
+
+    return this;
+  }
+
+  @Override
+  public AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback) {
+    final JsonObject query = new JsonObject()
+      .put("access_token", token.getString("access_token"));
+
+    final JsonObject extraParams = provider.getConfig().getUserInfoParameters();
+
+    if (extraParams != null) {
+      query.mergeIn(provider.getConfig().getUserInfoParameters());
+    }
+
+    api(provider, HttpMethod.GET, provider.getConfig().getUserInfoPath(), query, callback);
 
     return this;
   }

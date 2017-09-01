@@ -75,6 +75,9 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("userAgent") instanceof String) {
       obj.setUserAgent((String)json.getValue("userAgent"));
     }
+    if (json.getValue("userInfoParameters") instanceof JsonObject) {
+      obj.setUserInfoParameters(((JsonObject)json.getValue("userInfoParameters")).copy());
+    }
     if (json.getValue("userInfoPath") instanceof String) {
       obj.setUserInfoPath((String)json.getValue("userInfoPath"));
     }
@@ -121,6 +124,9 @@ public class OAuth2ClientOptionsConverter {
     json.put("useBasicAuthorizationHeader", obj.isUseBasicAuthorizationHeader());
     if (obj.getUserAgent() != null) {
       json.put("userAgent", obj.getUserAgent());
+    }
+    if (obj.getUserInfoParameters() != null) {
+      json.put("userInfoParameters", obj.getUserInfoParameters());
     }
     if (obj.getUserInfoPath() != null) {
       json.put("userInfoPath", obj.getUserInfoPath());

@@ -38,6 +38,7 @@ public interface GithubAuth {
         .setSite("https://github.com/login")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
+        .setUserInfoPath("https://api.github.com/user")
         .setScopeSeparator(" ")
         .setClientID(clientId)
         .setClientSecret(clientSecret));
