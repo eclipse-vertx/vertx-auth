@@ -15,6 +15,7 @@ import io.vertx.ext.auth.SecretOptions
  * @param ignoreExpiration  Set whether expiration is ignored
  * @param issuer  Set the issuer
  * @param keyStore 
+ * @param leeway  Set the leeway in seconds
  * @param permissionsClaimKey 
  * @param pubSecKeys 
  * @param secrets 
@@ -28,6 +29,7 @@ fun JWTAuthOptions(
   ignoreExpiration: Boolean? = null,
   issuer: String? = null,
   keyStore: io.vertx.ext.auth.KeyStoreOptions? = null,
+  leeway: Int? = null,
   permissionsClaimKey: String? = null,
   pubSecKeys: Iterable<io.vertx.ext.auth.PubSecKeyOptions>? = null,
   secrets: Iterable<io.vertx.ext.auth.SecretOptions>? = null): JWTAuthOptions = io.vertx.ext.auth.jwt.JWTAuthOptions().apply {
@@ -48,6 +50,9 @@ fun JWTAuthOptions(
   }
   if (keyStore != null) {
     this.setKeyStore(keyStore)
+  }
+  if (leeway != null) {
+    this.setLeeway(leeway)
   }
   if (permissionsClaimKey != null) {
     this.setPermissionsClaimKey(permissionsClaimKey)
