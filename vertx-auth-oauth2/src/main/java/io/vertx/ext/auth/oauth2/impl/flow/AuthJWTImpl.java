@@ -18,6 +18,7 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
@@ -46,10 +47,11 @@ public class AuthJWTImpl implements OAuth2Flow {
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
 
     final JsonObject query = new JsonObject()
+      .put("Content-Type", "application/x-www-form-urlencoded")
       .put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
       .put("assertion", provider.sign(params));
 
-    post(provider, provider.getConfig().getTokenPath(), query, res -> {
+    fetch(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
       if (res.succeeded()) {
         try {
           handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));

@@ -20,7 +20,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -32,8 +31,6 @@ import io.vertx.ext.auth.oauth2.AccessToken;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.regex.Pattern;
-
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.api;
 
 /**
  * @author Paulo Lopes
@@ -281,7 +278,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
       .put("token", token.getString("access_token"))
       .put("authorizationHeaderOnly", true);
 
-    api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
+    OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
       if (res.succeeded()) {
         try {
           final JsonObject json = res.result();
@@ -330,11 +327,29 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     final JsonObject extraParams = provider.getConfig().getUserInfoParameters();
 
     if (extraParams != null) {
-      query.mergeIn(provider.getConfig().getUserInfoParameters());
+      query.mergeIn(extraParams);
     }
 
-    api(provider, HttpMethod.GET, provider.getConfig().getUserInfoPath(), query, callback);
+    final JsonArray mergeHeaders = provider.getConfig().getUserInfoMergeHeaders();
 
+    if (mergeHeaders != null) {
+      query.put("mergeHeaders", mergeHeaders);
+    }
+
+    OAuth2API.fetch(provider, HttpMethod.GET, provider.getConfig().getUserInfoPath(), query, callback);
+    return this;
+  }
+
+  @Override
+  public AccessToken fetch(HttpMethod method, String resource, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+    final JsonObject query = new JsonObject()
+      .put("access_token", token.getString("access_token"));
+
+    if (params != null) {
+      query.mergeIn(params);
+    }
+
+    OAuth2API.fetch(provider, method, resource, query, callback);
     return this;
   }
 

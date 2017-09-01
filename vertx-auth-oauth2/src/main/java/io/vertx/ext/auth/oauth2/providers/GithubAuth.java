@@ -3,6 +3,8 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -39,8 +41,13 @@ public interface GithubAuth {
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
         .setUserInfoPath("https://api.github.com/user")
+        .setUserInfoMergeHeaders(new JsonArray()
+          .add("X-OAuth-Scopes")
+          .add("X-Accepted-OAuth-Scopes"))
         .setScopeSeparator(" ")
         .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setClientSecret(clientSecret)
+        .setHeaders(new JsonObject()
+          .put("User-Agent", "vertx-auth-oauth2")));
   }
 }

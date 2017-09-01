@@ -19,6 +19,7 @@ package io.vertx.ext.auth.oauth2;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 
@@ -62,6 +63,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private boolean jwtToken;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
+  private JsonArray userInfoMergeHeaders;
 
   public String getSite() {
     return site;
@@ -122,6 +124,20 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     } else {
       userInfoParams = null;
     }
+    // user info headers
+    final JsonArray obj3 = other.getUserInfoMergeHeaders();
+    if (obj3 != null) {
+      userInfoMergeHeaders = obj3.copy();
+    } else {
+      userInfoMergeHeaders = null;
+    }
+    // custom headers
+    final JsonObject obj4 = other.getHeaders();
+    if (obj4 != null) {
+      headers = obj4.copy();
+    } else {
+      headers = null;
+    }
   }
 
   private void init() {
@@ -134,6 +150,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     jwtToken = JWT_TOKEN;
     extraParams = null;
     userInfoParams = null;
+    userInfoMergeHeaders = null;
+    headers = null;
   }
 
   /**
@@ -303,5 +321,14 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   public OAuth2ClientOptions setUserInfoParameters(JsonObject userInfoParams) {
     this.userInfoParams = userInfoParams;
     return this;
+  }
+
+  public OAuth2ClientOptions setUserInfoMergeHeaders(JsonArray userInfoMergeHeaders) {
+    this.userInfoMergeHeaders = userInfoMergeHeaders;
+    return this;
+  }
+
+  public JsonArray getUserInfoMergeHeaders() {
+    return userInfoMergeHeaders;
   }
 }

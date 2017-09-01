@@ -49,6 +49,80 @@ public class OAuth2API {
     call(provider, method, url, params, callback);
   }
 
+  public static void fetch(OAuth2AuthProviderImpl provider, HttpMethod method, String path, JsonObject query, Handler<AsyncResult<JsonObject>> callback) {
+
+    final JsonObject params = query.copy();
+
+    String url;
+
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      url = path;
+    } else {
+      url = provider.getConfig().getSite() + path;
+    }
+
+    // extract the non query params
+    final JsonArray mergeHeaders = params.getJsonArray("mergeHeaders");
+    final String accessToken = params.getString("access_token");
+    final String contentType = params.getString("Content-Type", "application/json");
+    params.remove("mergeHeaders");
+    params.remove("access_token");
+    params.remove("Content-Type");
+
+    // if method is get any payload must go in the query string
+    if (method == HttpMethod.GET && params.size() > 0) {
+      url += url.indexOf('?') != -1 ? "&" : "?";
+      url += stringify(params);
+    }
+
+    // create a request
+    final HttpClientRequest request = makeRequest(provider, method, url, mergeHeaders, callback);
+
+    // apply the provider required headers
+    JsonObject tmp = provider.getConfig().getHeaders();
+    if (tmp != null) {
+      for (Map.Entry<String, Object> kv : tmp) {
+        request.putHeader(kv.getKey(), (String) kv.getValue());
+      }
+    }
+
+    // specify preferred content type
+    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+    // add access token if present
+    if (accessToken != null) {
+      request.putHeader("Authorization", "Bearer " + accessToken);
+    }
+
+    if (params.size() > 0) {
+      if (method == HttpMethod.POST || method == HttpMethod.PATCH || method == HttpMethod.PUT) {
+        String payload;
+
+        // handle content-type
+        switch (contentType) {
+          case "application/json":
+            request.putHeader("Content-Type", contentType);
+            payload = params.encode();
+            request.putHeader("Content-Length", Integer.toString(payload.length()));
+            request.write(payload);
+            break;
+          case "application/x-www-form-urlencoded":
+            request.putHeader("Content-Type", contentType);
+            payload = stringify(params);
+            request.putHeader("Content-Length", Integer.toString(payload.length()));
+            request.write(payload);
+            break;
+          default:
+            // fail
+            callback.handle(Future.failedFuture("Invalid Content-Type: " + contentType));
+            return;
+        }
+      }
+    }
+
+    // Make sure the request is ended when you're done with it
+    request.end();
+  }
+
   public static void post(OAuth2AuthProviderImpl provider, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
     final String url;
 
@@ -113,7 +187,7 @@ public class OAuth2API {
       }
     }
 
-    final HttpClientRequest request = makeRequest(provider, method, uri, callback);
+    final HttpClientRequest request = makeRequest(provider, method, uri, null, callback);
 
     // write the headers
     for (Map.Entry<String, ?> kv : headers) {
@@ -143,7 +217,7 @@ public class OAuth2API {
   private static void call(OAuth2AuthProviderImpl provider, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
     JsonObject form = params.copy();
 
-    final HttpClientRequest request = makeRequest(provider, HttpMethod.POST, uri, callback);
+    final HttpClientRequest request = makeRequest(provider, HttpMethod.POST, uri, null, callback);
 
     // specify preferred content type
     request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
@@ -156,7 +230,7 @@ public class OAuth2API {
     request.end();
   }
 
-  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, final Handler<AsyncResult<JsonObject>> callback) {
+  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, JsonArray mergeHeaders, final Handler<AsyncResult<JsonObject>> callback) {
     HttpClient client;
 
     try {
@@ -216,7 +290,10 @@ public class OAuth2API {
         switch (contentType) {
           case "application/json":
             try {
-              handleToken(resp.statusCode(), new JsonObject(body.toString()), callback);
+              handleToken(
+                resp.statusCode(),
+                mergeHeaders(resp, mergeHeaders, new JsonObject(body.toString())),
+                callback);
             } catch (RuntimeException e) {
               callback.handle(Future.failedFuture(e));
             }
@@ -224,7 +301,10 @@ public class OAuth2API {
           case "application/x-www-form-urlencoded":
           case "text/plain":
             try {
-              handleToken(resp.statusCode(), queryToJSON(body.toString()), callback);
+              handleToken(
+                resp.statusCode(),
+                mergeHeaders(resp, mergeHeaders, queryToJSON(body.toString())),
+                callback);
             } catch (UnsupportedEncodingException | RuntimeException e) {
               callback.handle(Future.failedFuture(e));
             }
@@ -243,6 +323,19 @@ public class OAuth2API {
     });
 
     return request;
+  }
+
+  private static JsonObject mergeHeaders(HttpClientResponse res, JsonArray headers, JsonObject token) {
+    if (headers != null) {
+      for (Object header : headers) {
+        String value = res.getHeader((String) header);
+        if (value != null) {
+          token.put((String) header, value);
+        }
+      }
+    }
+
+    return token;
   }
 
   private static void handleToken(final int statusCode, final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {

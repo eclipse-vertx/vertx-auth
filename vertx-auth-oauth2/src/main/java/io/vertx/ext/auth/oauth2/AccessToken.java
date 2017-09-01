@@ -19,6 +19,7 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 
@@ -76,4 +77,26 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback);
+
+  /**
+   * Fetches a JSON resource using this Access Token.
+   *
+   * @param resource - the resource to fetch.
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  default AccessToken fetch(String resource, Handler<AsyncResult<JsonObject>> callback) {
+    return fetch(HttpMethod.GET, resource, null, callback);
+  }
+
+  /**
+   * Fetches a JSON resource using this Access Token.
+   *
+   * @param method - the HTTP method to user.
+   * @param resource - the resource to fetch.
+   * @param params - extra params to pass to the request
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken fetch(HttpMethod method, String resource, JsonObject params, Handler<AsyncResult<JsonObject>> callback);
 }
