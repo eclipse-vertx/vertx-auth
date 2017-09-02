@@ -49,15 +49,27 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
     switch (flow) {
       case AUTH_CODE:
+        if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
+        if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
+        if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new PasswordImpl(this);
         break;
       case AUTH_JWT:
+        if (config.getPubSecKey() == null || config.getPubSecKey().getSecretKey() == null || config.getPubSecKey().getType() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the private key, the key type and the oauth2 server");
+        }
         this.flow = new AuthJWTImpl(this);
         break;
       default:
@@ -94,12 +106,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
     flow.getToken(params, handler);
-  }
-
-  @Override
-  public OAuth2Auth api(HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> handler) {
-    OAuth2API.api(this, method, path, params, handler);
-    return this;
   }
 
   @Override
@@ -164,5 +170,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public OAuth2FlowType getFlowType() {
     return flowType;
+  }
+
+  public OAuth2Flow getFlow() {
+    return flow;
   }
 }

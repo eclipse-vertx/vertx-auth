@@ -80,11 +80,6 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
           try {
             JsonObject expectedRequest = config;
 
-            if("refresh_token".equals(config.getString("grant_type"))) {
-              //Refresh does not pass auth details
-              expectedRequest = removeAuthDetails(expectedRequest);
-            }
-
             assertEquals(expectedRequest, queryToJSON(buffer.toString()));
           } catch (UnsupportedEncodingException e) {
             fail(e);

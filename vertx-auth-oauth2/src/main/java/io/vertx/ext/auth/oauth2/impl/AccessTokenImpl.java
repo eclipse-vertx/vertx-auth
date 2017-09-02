@@ -27,10 +27,15 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2Response;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.regex.Pattern;
+
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
 
 /**
  * @author Paulo Lopes
@@ -65,6 +70,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
   /**
    * Creates an AccessToken instance.
+   *
    * @param token - An object containing the token object returned from the OAuth2 server.
    */
   public AccessTokenImpl(OAuth2AuthProviderImpl provider, JsonObject token) {
@@ -184,23 +190,99 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   /**
    * Refresh the access token
    *
-   * @param callback - The callback function returning the results.
+   * @param handler - The callback function returning the results.
    */
   @Override
-  public AccessTokenImpl refresh(Handler<AsyncResult<Void>> callback) {
-    JsonObject params = new JsonObject()
-        .put("grant_type", "refresh_token")
-        .put("refresh_token", token.getString("refresh_token"))
-        .put("authorizationHeaderOnly", true);
+  public AccessTokenImpl refresh(Handler<AsyncResult<Void>> handler) {
 
-    OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), params, res -> {
-      if (res.succeeded()) {
-        init(res.result());
-        callback.handle(Future.succeededFuture());
-      } else {
-        callback.handle(Future.failedFuture(res.cause()));
-      }
-    });
+    final JsonObject headers = new JsonObject();
+
+    JsonObject tmp = provider.getConfig().getHeaders();
+
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    final JsonObject form = new JsonObject();
+
+    form
+      .put("grant_type", "refresh_token")
+      .put("refresh_token", token.getString("refresh_token"))
+    // Salesforce does seem to require them
+      .put("client_id", provider.getConfig().getClientID());
+
+    if (provider.getConfig().getClientSecretParameterName() != null) {
+      form.put(provider.getConfig().getClientSecretParameterName(), provider.getConfig().getClientSecret());
+    }
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+    // specify preferred accepted content type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    OAuth2API.fetch(
+      provider,
+      HttpMethod.POST,
+      provider.getConfig().getTokenPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null || reply.body().length() == 0) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        JsonObject json;
+
+        if (reply.is("application/json")) {
+          try {
+            json = reply.jsonObject();
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
+          try {
+            json = queryToJSON(reply.body().toString());
+          } catch (UnsupportedEncodingException | RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          return;
+        }
+
+        try {
+          if (json.containsKey("error")) {
+            String description;
+            Object error = json.getValue("error");
+            if (error instanceof JsonObject) {
+              description = ((JsonObject) error).getString("message");
+            } else {
+              // attempt to handle the error as a string
+              try {
+                description = json.getString("error_description", json.getString("error"));
+              } catch (RuntimeException e) {
+                description = error.toString();
+              }
+            }
+            handler.handle(Future.failedFuture(description));
+          } else {
+            init(json);
+            handler.handle(Future.succeededFuture());
+          }
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+      });
 
     return this;
   }
@@ -209,36 +291,64 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * Revoke access or refresh token
    *
    * @param token_type - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
-   * @param callback - The callback function returning the results.
+   * @param handler   - The callback function returning the results.
    */
   @Override
-  public AccessTokenImpl revoke(String token_type, Handler<AsyncResult<Void>> callback) {
+  public AccessTokenImpl revoke(String token_type, Handler<AsyncResult<Void>> handler) {
 
     final String tokenValue = token.getString(token_type);
 
     if (tokenValue != null) {
 
-      JsonObject params = new JsonObject()
-          .put("token", tokenValue)
-          .put("token_type_hint", token_type)
-          .put("authorizationHeaderOnly", true);
 
-      OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getRevocationPath(), params, res -> {
-        if (res.succeeded()) {
+    final JsonObject headers = new JsonObject();
 
-          // invalidate ourselves
-          token.remove(token_type);
-          if ("access_token".equals(token_type)) {
-            content = null;
-          }
+    JsonObject tmp = provider.getConfig().getHeaders();
 
-          callback.handle(Future.succeededFuture());
-        } else {
-          callback.handle(Future.failedFuture(res.cause()));
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    final JsonObject form = new JsonObject();
+
+    form
+      .put("token", tokenValue)
+      .put("token_type_hint", token_type);
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+    // specify preferred accepted content type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    OAuth2API.fetch(
+      provider,
+      HttpMethod.POST,
+      provider.getConfig().getRevocationPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
         }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        // invalidate ourselves
+        token.remove(token_type);
+        if ("access_token".equals(token_type)) {
+          content = null;
+        }
+
+        handler.handle(Future.succeededFuture());
       });
     } else {
-      callback.handle(Future.failedFuture("Invalid token: " + token_type));
+      handler.handle(Future.failedFuture("Invalid token: " + token_type));
     }
 
     return this;
@@ -252,33 +362,53 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   @Override
   public AccessTokenImpl logout(Handler<AsyncResult<Void>> callback) {
 
-    JsonObject params = new JsonObject()
-        .put("access_token", token.getString("access_token"))
-        .put("refresh_token", token.getString("refresh_token"));
+    final JsonObject headers = new JsonObject();
 
-    OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getLogoutPath(), params, res -> {
-      if (res.succeeded()) {
+    headers.put("Authorization", "Bearer " + token.getString("access_token"));
 
-        // invalidate ourselves
-        token = null;
-        content = null;
+    JsonObject tmp = provider.getConfig().getHeaders();
 
-        callback.handle(Future.succeededFuture());
-      } else {
-        callback.handle(Future.failedFuture(res.cause()));
-      }
-    });
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    final JsonObject form = new JsonObject();
+
+    form.put("client_id", provider.getConfig().getClientID());
+
+    if (provider.getConfig().getClientSecretParameterName() != null) {
+      form.put(provider.getConfig().getClientSecretParameterName(), provider.getConfig().getClientSecret());
+    }
+
+    form.put("refresh_token", token.getString("refresh_token"));
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+
+    OAuth2API.fetch(
+      provider,
+      HttpMethod.POST,
+      provider.getConfig().getLogoutPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.succeeded()) {
+          // invalidate ourselves
+          token = null;
+          content = null;
+
+          callback.handle(Future.succeededFuture());
+        } else {
+          callback.handle(Future.failedFuture(res.cause()));
+        }
+      });
 
     return this;
   }
 
   @Override
   public AccessToken introspect(Handler<AsyncResult<Void>> callback) {
-    final JsonObject query = new JsonObject()
-      .put("token", token.getString("access_token"))
-      .put("authorizationHeaderOnly", true);
-
-    OAuth2API.api(provider, HttpMethod.POST, provider.getConfig().getIntrospectionPath(), query, res -> {
+    provider.getFlow().introspectToken(token.getString("access_token"), null, res -> {
       if (res.succeeded()) {
         try {
           final JsonObject json = res.result();
@@ -321,35 +451,83 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
   @Override
   public AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback) {
-    final JsonObject query = new JsonObject()
-      .put("access_token", token.getString("access_token"));
-
     final JsonObject extraParams = provider.getConfig().getUserInfoParameters();
+    String path = provider.getConfig().getUserInfoPath();
 
     if (extraParams != null) {
-      query.mergeIn(extraParams);
+      path += "?" + OAuth2API.stringify(extraParams);
     }
 
-    final JsonArray mergeHeaders = provider.getConfig().getUserInfoMergeHeaders();
+    OAuth2API.fetch(
+      provider,
+      HttpMethod.GET,
+      path,
+      new JsonObject().put("Authorization", "Bearer " + token.getString("access_token")),
+      null,
+      fetch -> {
+        if (fetch.failed()) {
+          callback.handle(Future.failedFuture(fetch.cause()));
+          return;
+        }
 
-    if (mergeHeaders != null) {
-      query.put("mergeHeaders", mergeHeaders);
-    }
+        final OAuth2Response res = fetch.result();
+        // userInfo is expected to be an object
+        JsonObject userInfo;
 
-    OAuth2API.fetch(provider, HttpMethod.GET, provider.getConfig().getUserInfoPath(), query, callback);
+        if (res.is("application/json")) {
+          try {
+            // userInfo is expected to be an object
+            userInfo = res.jsonObject();
+          } catch (RuntimeException e) {
+            callback.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (res.is("application/x-www-form-urlencoded") || res.is("text/plain")) {
+          try {
+            // attempt to convert url encoded string to json
+            userInfo = OAuth2API.queryToJSON(res.body().toString());
+          } catch (RuntimeException | UnsupportedEncodingException e) {
+            callback.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          callback.handle(Future.failedFuture("Cannot handle Content-Type: " + res.headers().get("Content-Type")));
+          return;
+        }
+
+        final JsonArray mergeHeaders = provider.getConfig().getUserInfoMergeHeaders();
+
+        if (mergeHeaders != null && res.headers() != null) {
+          for (Object header : mergeHeaders) {
+            String value = res.headers().get((String) header);
+            if (value != null) {
+              userInfo.put((String) header, value);
+            }
+          }
+        }
+
+        callback.handle(Future.succeededFuture(userInfo));
+      });
     return this;
   }
 
   @Override
-  public AccessToken fetch(HttpMethod method, String resource, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
-    final JsonObject query = new JsonObject()
-      .put("access_token", token.getString("access_token"));
-
-    if (params != null) {
-      query.mergeIn(params);
+  public AccessToken fetch(HttpMethod method, String resource, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
+    if (headers == null) {
+      headers = new JsonObject();
     }
 
-    OAuth2API.fetch(provider, method, resource, query, callback);
+    // add the access token
+    headers.put("Authorization", "Bearer " + token.getString("access_token"));
+
+    OAuth2API.fetch(provider, method, resource, headers, payload, fetch -> {
+      if (fetch.failed()) {
+        callback.handle(Future.failedFuture(fetch.cause()));
+        return;
+      }
+
+      callback.handle(Future.succeededFuture(fetch.result()));
+    });
     return this;
   }
 
@@ -370,7 +548,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * taken as the name of an arbitrary application, and the subsequent portion
    * as the name of a role with that app.
    *
-   * @param permission The role name specifier.
+   * @param permission    The role name specifier.
    * @param resultHandler `true` if this token has the specified role, otherwise `false`.
    */
   @Override
@@ -386,7 +564,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
       if (parts.length == 1) {
         resultHandler.handle(Future.succeededFuture(hasApplicationRole(provider.getConfig().getClientID(), parts[0])));
-        return ;
+        return;
       }
 
       if ("realm".equals(parts[0])) {
@@ -412,16 +590,16 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    */
   private boolean hasApplicationRole(String appName, String roleName) {
     JsonObject appRoles = content
-        .getJsonObject("resource_access", EMPTY_JSON)
-        .getJsonObject(appName);
+      .getJsonObject("resource_access", EMPTY_JSON)
+      .getJsonObject(appName);
 
     if (appRoles == null) {
       return false;
     }
 
     return appRoles
-        .getJsonArray("roles", EMPTY_ARRAY)
-        .contains(roleName);
+      .getJsonArray("roles", EMPTY_ARRAY)
+      .contains(roleName);
   }
 
   /**
@@ -435,9 +613,9 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    */
   private boolean hasRealmRole(String roleName) {
     return content
-        .getJsonObject("realm_access", EMPTY_JSON)
-        .getJsonArray("roles", EMPTY_ARRAY)
-        .contains(roleName);
+      .getJsonObject("realm_access", EMPTY_JSON)
+      .getJsonArray("roles", EMPTY_ARRAY)
+      .contains(roleName);
   }
 
   @Override

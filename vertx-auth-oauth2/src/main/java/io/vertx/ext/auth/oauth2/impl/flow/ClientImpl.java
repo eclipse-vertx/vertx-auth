@@ -43,26 +43,22 @@ public class ClientImpl extends CommonFlow implements OAuth2Flow {
    */
   @Override
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
-    final JsonObject query = params.copy();
-    query.put("grant_type", "client_credentials");
-
-    final JsonObject extraParameters = provider.getConfig().getExtraParameters();
-
-    // if the provider needs extra parameters they are merged here
-    if (extraParameters != null) {
-      query.mergeIn(extraParameters);
-    }
-
-    api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
-      if (res.succeeded()) {
-        try {
-          handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
-        } catch (RuntimeException e) {
-          handler.handle(Future.failedFuture(e));
-        }
-      } else {
+    getToken("client_credentials", params, res -> {
+      if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
+        return;
       }
+
+      AccessToken token;
+
+      try {
+        token = new AccessTokenImpl(provider, res.result());
+      } catch (RuntimeException e) {
+        handler.handle(Future.failedFuture(e));
+        return;
+      }
+
+      handler.handle(Future.succeededFuture(token));
     });
   }
 }

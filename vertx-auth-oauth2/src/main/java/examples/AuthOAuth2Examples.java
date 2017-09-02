@@ -17,7 +17,6 @@
 package examples;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.*;
@@ -119,7 +118,7 @@ public class AuthOAuth2Examples {
         // Get the access token object (the authorization code is given from the previous step).
         AccessToken token = res.result();
 
-        oauth2.api(HttpMethod.GET, "/users", new JsonObject().put("access_token", token.principal().getString("access_token")), res2 -> {
+        token.fetch("/users", res2 -> {
           // the user object should be returned here...
         });
       }

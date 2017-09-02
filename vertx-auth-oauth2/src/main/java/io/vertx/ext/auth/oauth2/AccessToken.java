@@ -19,6 +19,7 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -85,8 +86,8 @@ public interface AccessToken extends User {
    * @param callback - The callback function returning the results.
    */
   @Fluent
-  default AccessToken fetch(String resource, Handler<AsyncResult<JsonObject>> callback) {
-    return fetch(HttpMethod.GET, resource, null, callback);
+  default AccessToken fetch(String resource, Handler<AsyncResult<OAuth2Response>> callback) {
+    return fetch(HttpMethod.GET, resource, null, null, callback);
   }
 
   /**
@@ -94,9 +95,10 @@ public interface AccessToken extends User {
    *
    * @param method - the HTTP method to user.
    * @param resource - the resource to fetch.
-   * @param params - extra params to pass to the request
+   * @param headers - extra headers to pass to the request.
+   * @param payload - payload to send to the server.
    * @param callback - The callback function returning the results.
    */
   @Fluent
-  AccessToken fetch(HttpMethod method, String resource, JsonObject params, Handler<AsyncResult<JsonObject>> callback);
+  AccessToken fetch(HttpMethod method, String resource, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback);
 }

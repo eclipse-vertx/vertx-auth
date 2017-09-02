@@ -121,18 +121,6 @@ public interface OAuth2Auth extends AuthProvider {
   void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler);
 
   /**
-   * Call OAuth2 APIs.
-   *
-   * @param method HttpMethod
-   * @param path target path
-   * @param params parameters
-   * @param handler handler
-   * @return self
-   */
-  @Fluent
-  OAuth2Auth api(HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> handler);
-
-  /**
    * Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
    * implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
    * by default.

@@ -18,11 +18,17 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2Response;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
+import io.vertx.ext.auth.oauth2.impl.OAuth2API;
+import io.vertx.ext.auth.oauth2.impl.OAuth2ResponseImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
+
+import java.io.UnsupportedEncodingException;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
@@ -41,27 +47,55 @@ public class AuthJWTImpl implements OAuth2Flow {
    * Returns the Access Token object.
    *
    * @param params - jwt: a JWT to be traded for a token
-   * @param handler - The handler returning the results.
+   * @param callback- The handler returning the results.
    */
   @Override
-  public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
+  public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> callback) {
 
-    final JsonObject query = new JsonObject()
-      .put("Content-Type", "application/x-www-form-urlencoded")
+    final JsonObject body = new JsonObject()
       .put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
       .put("assertion", provider.sign(params));
 
-    fetch(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
-      if (res.succeeded()) {
-        try {
-          handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
-        } catch (RuntimeException e) {
-          handler.handle(Future.failedFuture(e));
+    fetch(
+      provider,
+      HttpMethod.POST,
+      provider.getConfig().getTokenPath(),
+      new JsonObject().put("Content-Type", "application/x-www-form-urlencoded"),
+      Buffer.buffer(OAuth2API.stringify(body)),
+      fetch -> {
+        if (fetch.failed()) {
+          callback.handle(Future.failedFuture(fetch.cause()));
+          return;
         }
-      } else {
-        handler.handle(Future.failedFuture(res.cause()));
-      }
-    });
+
+        final OAuth2Response res = fetch.result();
+
+        // token is expected to be an object
+        JsonObject token;
+
+        if (res.is("application/json")) {
+          try {
+            // userInfo is expected to be an object
+            token = res.jsonObject();
+          } catch (RuntimeException e) {
+            callback.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (res.is("application/x-www-form-urlencoded") || res.is("text/plain")) {
+          try {
+            // attempt to convert url encoded string to json
+            token = OAuth2API.queryToJSON(res.body().toString());
+          } catch (RuntimeException | UnsupportedEncodingException e) {
+            callback.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          callback.handle(Future.failedFuture("Cannot handle Content-Type: " + res.headers().get("Content-Type")));
+          return;
+        }
+
+        callback.handle(Future.succeededFuture(new AccessTokenImpl(provider, token)));
+      });
   }
 
   @Override
