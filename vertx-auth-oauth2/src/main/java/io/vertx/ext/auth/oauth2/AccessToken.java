@@ -72,6 +72,15 @@ public interface AccessToken extends User {
   AccessToken introspect(Handler<AsyncResult<Void>> callback);
 
   /**
+   * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+   *
+   * @param tokenType - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken introspect(String tokenType, Handler<AsyncResult<Void>> callback);
+
+  /**
    * Load the user info as per OIDC spec.
    *
    * @param callback - The callback function returning the results.

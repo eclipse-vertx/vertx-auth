@@ -27,15 +27,16 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.stringify;
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
 /**
  * @author Paulo Lopes
@@ -208,7 +209,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     form
       .put("grant_type", "refresh_token")
       .put("refresh_token", token.getString("refresh_token"))
-    // Salesforce does seem to require them
+      // Salesforce does seem to require them
       .put("client_id", provider.getConfig().getClientID());
 
     if (provider.getConfig().getClientSecretParameterName() != null) {
@@ -276,6 +277,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
             }
             handler.handle(Future.failedFuture(description));
           } else {
+            OAuth2API.processNonStandardHeaders(json, reply, provider.getConfig().getScopeSeparator());
             init(json);
             handler.handle(Future.succeededFuture());
           }
@@ -291,7 +293,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * Revoke access or refresh token
    *
    * @param token_type - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
-   * @param handler   - The callback function returning the results.
+   * @param handler    - The callback function returning the results.
    */
   @Override
   public AccessTokenImpl revoke(String token_type, Handler<AsyncResult<Void>> handler) {
@@ -301,52 +303,52 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     if (tokenValue != null) {
 
 
-    final JsonObject headers = new JsonObject();
+      final JsonObject headers = new JsonObject();
 
-    JsonObject tmp = provider.getConfig().getHeaders();
+      JsonObject tmp = provider.getConfig().getHeaders();
 
-    if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
+      if (tmp != null) {
+        headers.mergeIn(tmp);
+      }
 
-    final JsonObject form = new JsonObject();
+      final JsonObject form = new JsonObject();
 
-    form
-      .put("token", tokenValue)
-      .put("token_type_hint", token_type);
+      form
+        .put("token", tokenValue)
+        .put("token_type_hint", token_type);
 
-    headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
-    // specify preferred accepted content type
-    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+      headers.put("Content-Type", "application/x-www-form-urlencoded");
+      final Buffer payload = Buffer.buffer(stringify(form));
+      // specify preferred accepted content type
+      headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    OAuth2API.fetch(
-      provider,
-      HttpMethod.POST,
-      provider.getConfig().getRevocationPath(),
-      headers,
-      payload,
-      res -> {
-        if (res.failed()) {
-          handler.handle(Future.failedFuture(res.cause()));
-          return;
-        }
+      OAuth2API.fetch(
+        provider,
+        HttpMethod.POST,
+        provider.getConfig().getRevocationPath(),
+        headers,
+        payload,
+        res -> {
+          if (res.failed()) {
+            handler.handle(Future.failedFuture(res.cause()));
+            return;
+          }
 
-        final OAuth2Response reply = res.result();
+          final OAuth2Response reply = res.result();
 
-        if (reply.body() == null) {
-          handler.handle(Future.failedFuture("No Body"));
-          return;
-        }
+          if (reply.body() == null) {
+            handler.handle(Future.failedFuture("No Body"));
+            return;
+          }
 
-        // invalidate ourselves
-        token.remove(token_type);
-        if ("access_token".equals(token_type)) {
-          content = null;
-        }
+          // invalidate ourselves
+          token.remove(token_type);
+          if ("access_token".equals(token_type)) {
+            content = null;
+          }
 
-        handler.handle(Future.succeededFuture());
-      });
+          handler.handle(Future.succeededFuture());
+        });
     } else {
       handler.handle(Future.failedFuture("Invalid token: " + token_type));
     }
@@ -407,46 +409,137 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   }
 
   @Override
-  public AccessToken introspect(Handler<AsyncResult<Void>> callback) {
-    provider.getFlow().introspectToken(token.getString("access_token"), null, res -> {
-      if (res.succeeded()) {
-        try {
-          final JsonObject json = res.result();
+  public AccessToken introspect(String tokenType, Handler<AsyncResult<Void>> handler) {
+    final JsonObject headers = new JsonObject();
+    final OAuth2ClientOptions config = provider.getConfig();
 
-          // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
-          if (json.containsKey("active") && !json.getBoolean("active", false)) {
-            callback.handle(Future.failedFuture("Inactive Token"));
-            return;
-          }
+    if (config.isUseBasicAuthorizationHeader()) {
+      String basic = config.getClientID() + ":" + config.getClientSecret();
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+    }
 
-          // validate client id
-          if (json.containsKey("client_id") && !json.getString("client_id", "").equals(provider.getConfig().getClientID())) {
-            callback.handle(Future.failedFuture("Wrong client_id"));
-            return;
-          }
+    JsonObject tmp = config.getHeaders();
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
 
+    final JsonObject form = new JsonObject()
+      .put("token", token.getString(tokenType))
+      // optional param from RFC7662
+      .put("token_type_hint", tokenType);
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+
+    // specify preferred accepted content type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    OAuth2API.fetch(
+      provider,
+      HttpMethod.POST,
+      config.getIntrospectionPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null || reply.body().length() == 0) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        JsonObject json;
+
+        if (reply.is("application/json")) {
           try {
-            // reset the access token
-            init(token.mergeIn(json));
+            json = reply.jsonObject();
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
+          try {
+            json = queryToJSON(reply.body().toString());
+          } catch (UnsupportedEncodingException | RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          return;
+        }
 
-            if (expired()) {
-              callback.handle(Future.failedFuture("Expired token"));
+        try {
+          if (json.containsKey("error")) {
+            String description;
+            Object error = json.getValue("error");
+            if (error instanceof JsonObject) {
+              description = ((JsonObject) error).getString("message");
+            } else {
+              // attempt to handle the error as a string
+              try {
+                description = json.getString("error_description", json.getString("error"));
+              } catch (RuntimeException e) {
+                description = error.toString();
+              }
+            }
+            handler.handle(Future.failedFuture(description));
+          } else {
+            // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
+            if (json.containsKey("active") && !json.getBoolean("active", false)) {
+              handler.handle(Future.failedFuture("Inactive Token"));
               return;
             }
 
-            callback.handle(Future.succeededFuture());
-          } catch (RuntimeException e) {
-            callback.handle(Future.failedFuture(e));
+            // validate client id
+            if (json.containsKey("client_id") && !json.getString("client_id", "").equals(config.getClientID())) {
+              handler.handle(Future.failedFuture("Wrong client_id"));
+              return;
+            }
+
+            // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
+            if (json.containsKey("active") && !json.getBoolean("active", false)) {
+              handler.handle(Future.failedFuture("Inactive Token"));
+              return;
+            }
+
+            // validate client id
+            if (json.containsKey("client_id") && !json.getString("client_id", "").equals(provider.getConfig().getClientID())) {
+              handler.handle(Future.failedFuture("Wrong client_id"));
+              return;
+            }
+
+            try {
+              processNonStandardHeaders(json, reply, config.getScopeSeparator());
+              // reset the access token
+              init(token.mergeIn(json));
+
+              if (expired()) {
+                handler.handle(Future.failedFuture("Expired token"));
+                return;
+              }
+
+              handler.handle(Future.succeededFuture());
+            } catch (RuntimeException e) {
+              handler.handle(Future.failedFuture(e));
+            }
           }
         } catch (RuntimeException e) {
-          callback.handle(Future.failedFuture(e));
+          handler.handle(Future.failedFuture(e));
         }
-      } else {
-        callback.handle(Future.failedFuture(res.cause()));
-      }
-    });
+      });
 
     return this;
+  }
+
+  @Override
+  public AccessToken introspect(Handler<AsyncResult<Void>> handler) {
+    return introspect("access_token", handler);
   }
 
   @Override
@@ -470,42 +563,34 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
           return;
         }
 
-        final OAuth2Response res = fetch.result();
+        final OAuth2Response reply = fetch.result();
         // userInfo is expected to be an object
         JsonObject userInfo;
 
-        if (res.is("application/json")) {
+        if (reply.is("application/json")) {
           try {
             // userInfo is expected to be an object
-            userInfo = res.jsonObject();
+            userInfo = reply.jsonObject();
           } catch (RuntimeException e) {
             callback.handle(Future.failedFuture(e));
             return;
           }
-        } else if (res.is("application/x-www-form-urlencoded") || res.is("text/plain")) {
+        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
             // attempt to convert url encoded string to json
-            userInfo = OAuth2API.queryToJSON(res.body().toString());
+            userInfo = OAuth2API.queryToJSON(reply.body().toString());
           } catch (RuntimeException | UnsupportedEncodingException e) {
             callback.handle(Future.failedFuture(e));
             return;
           }
         } else {
-          callback.handle(Future.failedFuture("Cannot handle Content-Type: " + res.headers().get("Content-Type")));
+          callback.handle(Future.failedFuture("Cannot handle Content-Type: " + reply.headers().get("Content-Type")));
           return;
         }
 
-        final JsonArray mergeHeaders = provider.getConfig().getUserInfoMergeHeaders();
-
-        if (mergeHeaders != null && res.headers() != null) {
-          for (Object header : mergeHeaders) {
-            String value = res.headers().get((String) header);
-            if (value != null) {
-              userInfo.put((String) header, value);
-            }
-          }
-        }
-
+        OAuth2API.processNonStandardHeaders(token, reply, provider.getConfig().getScopeSeparator());
+        // re-init to reparse the authorities
+        init(token);
         callback.handle(Future.succeededFuture(userInfo));
       });
     return this;

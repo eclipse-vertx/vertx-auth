@@ -18,24 +18,18 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2Response;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
 /**
  * @author Paulo Lopes
  */
-public class AuthCodeImpl extends CommonFlow implements OAuth2Flow {
+public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
 
   public AuthCodeImpl(OAuth2AuthProviderImpl provider) {
     super(provider);

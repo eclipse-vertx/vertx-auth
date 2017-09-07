@@ -191,9 +191,7 @@ oauth2.getToken(tokenConfig, function (res, res_err) {
     // Get the access token object (the authorization code is given from the previous step).
     var token = res;
 
-    oauth2.api('GET', "/users", {
-      "access_token" : token.principal().access_token
-    }, function (res2, res2_err) {
+    token.fetch("/users", function (res2, res2_err) {
       // the user object should be returned here...
     });
   }

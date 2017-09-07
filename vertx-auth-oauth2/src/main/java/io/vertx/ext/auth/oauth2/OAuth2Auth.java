@@ -154,7 +154,9 @@ public interface OAuth2Auth extends AuthProvider {
    * @return self
    */
   @Fluent
-  OAuth2Auth introspectToken(String token, Handler<AsyncResult<AccessToken>> handler);
+  default OAuth2Auth introspectToken(String token, Handler<AsyncResult<AccessToken>> handler) {
+    return introspectToken(token, "access_token", handler);
+  }
 
   /**
    * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
@@ -166,7 +168,7 @@ public interface OAuth2Auth extends AuthProvider {
    * @return self
    */
   @Fluent
-  OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler);
+  OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler);
 
   /**
    * Returns the scope separator.

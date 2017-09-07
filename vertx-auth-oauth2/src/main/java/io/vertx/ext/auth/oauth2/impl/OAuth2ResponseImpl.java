@@ -30,6 +30,14 @@ public class OAuth2ResponseImpl implements OAuth2Response {
   }
 
   @Override
+  public String getHeader(String header) {
+    if (headers != null) {
+      return headers.get(header);
+    }
+    return null;
+  }
+
+  @Override
   public Buffer body() {
     return body;
   }

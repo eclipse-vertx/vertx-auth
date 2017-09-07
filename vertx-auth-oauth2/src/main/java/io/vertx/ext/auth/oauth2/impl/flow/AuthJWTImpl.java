@@ -25,7 +25,6 @@ import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2API;
-import io.vertx.ext.auth.oauth2.impl.OAuth2ResponseImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 import java.io.UnsupportedEncodingException;
@@ -96,10 +95,5 @@ public class AuthJWTImpl implements OAuth2Flow {
 
         callback.handle(Future.succeededFuture(new AccessTokenImpl(provider, token)));
       });
-  }
-
-  @Override
-  public void introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler) {
-    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 }

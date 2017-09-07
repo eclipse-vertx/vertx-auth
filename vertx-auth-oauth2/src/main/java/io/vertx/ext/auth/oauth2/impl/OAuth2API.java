@@ -185,4 +185,24 @@ public class OAuth2API {
 
     return json;
   }
+
+  public static void processNonStandardHeaders(JsonObject json, OAuth2Response reply, String sep) {
+    // inspect the response headers for the non-standard:
+    // X-OAuth-Scopes and X-Accepted-OAuth-Scopes
+    final String xOAuthScopes = reply.getHeader("X-OAuth-Scopes");
+    final String xAcceptedOAuthScopes = reply.getHeader("X-Accepted-OAuth-Scopes");
+
+    if (xOAuthScopes != null) {
+      if (json.containsKey("scope")) {
+        json.put("scope", json.getString("scope") + sep + xOAuthScopes);
+      } else {
+        json.put("scope", xOAuthScopes);
+      }
+    }
+
+    if (xAcceptedOAuthScopes != null) {
+      json.put("acceptedScopes", xAcceptedOAuthScopes);
+    }
+  }
+
 }

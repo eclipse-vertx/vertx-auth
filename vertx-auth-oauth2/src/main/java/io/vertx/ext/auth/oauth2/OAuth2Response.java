@@ -36,6 +36,8 @@ public interface OAuth2Response {
 
   MultiMap headers();
 
+  String getHeader(String name);
+
   Buffer body();
 
   JsonObject jsonObject();
