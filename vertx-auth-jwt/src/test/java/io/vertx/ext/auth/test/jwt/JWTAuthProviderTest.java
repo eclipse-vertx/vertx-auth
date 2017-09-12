@@ -429,4 +429,81 @@ public class JWTAuthProviderTest extends VertxTestBase {
     }));
     await();
   }
+
+  @Test
+  public void testLeeway() {
+    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(0));
+
+    long now = System.currentTimeMillis() / 1000;
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo")
+      .put("exp", now);
+
+    String token = authProvider.generateToken(payload);
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    // fail because exp is <= to now
+    authProvider.authenticate(authInfo, onFailure(t -> testComplete()));
+    await();
+  }
+
+  @Test
+  public void testLeeway2() {
+    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(0));
+
+    long now = (System.currentTimeMillis() / 1000) + 2;
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo")
+      .put("iat", now);
+
+    String token = authProvider.generateToken(payload);
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    // fail because iat is > now (clock drifted 2 sec)
+    authProvider.authenticate(authInfo, onFailure(t -> testComplete()));
+    await();
+  }
+
+  @Test
+  public void testLeeway3() {
+    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(5));
+
+    long now = System.currentTimeMillis() / 1000;
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo")
+      .put("exp", now)
+      .put("iat", now);
+
+    String token = authProvider.generateToken(payload);
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    // fail because exp is <= to now
+    authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
+    await();
+  }
+
+  @Test
+  public void testLeeway4() {
+    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(5));
+
+    long now = (System.currentTimeMillis() / 1000) + 2;
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo")
+      .put("iat", now);
+
+    String token = authProvider.generateToken(payload);
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+    // pass because iat is > now (clock drifted 2 sec) and we have a leeway of 5sec
+    authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
+    await();
+  }
 }

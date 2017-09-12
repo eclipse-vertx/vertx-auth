@@ -68,4 +68,16 @@ public interface JWTAuth extends AuthProvider {
    * @return JWT encoded token
    */
   String generateToken(JsonObject claims, JWTOptions options);
+
+  /**
+   * Generate a new JWT token.
+   *
+   * @param claims Json with user defined claims for a list of official claims
+   *               @see <a href="http://www.iana.org/assignments/jwt/jwt.xhtml">www.iana.org/assignments/jwt/jwt.xhtml</a>
+   *
+   * @return JWT encoded token
+   */
+  default String generateToken(JsonObject claims) {
+    return generateToken(claims, new JWTOptions());
+  }
 }

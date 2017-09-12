@@ -29,6 +29,10 @@ Set whether expiration is ignored
 Set the issuer
 +++
 |[[keyStore]]`keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
+|[[leeway]]`leeway`|`Number (int)`|
++++
+Set the leeway in seconds
++++
 |[[permissionsClaimKey]]`permissionsClaimKey`|`String`|-
 |[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |[[secrets]]`secrets`|`Array of link:dataobjects.html#SecretOptions[SecretOptions]`|-

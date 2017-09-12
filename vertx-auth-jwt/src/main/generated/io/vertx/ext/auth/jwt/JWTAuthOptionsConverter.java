@@ -50,6 +50,9 @@ public class JWTAuthOptionsConverter {
     if (json.getValue("keyStore") instanceof JsonObject) {
       obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((JsonObject)json.getValue("keyStore")));
     }
+    if (json.getValue("leeway") instanceof Number) {
+      obj.setLeeway(((Number)json.getValue("leeway")).intValue());
+    }
     if (json.getValue("permissionsClaimKey") instanceof String) {
       obj.setPermissionsClaimKey((String)json.getValue("permissionsClaimKey"));
     }
@@ -77,6 +80,7 @@ public class JWTAuthOptionsConverter {
     if (obj.getIssuer() != null) {
       json.put("issuer", obj.getIssuer());
     }
+    json.put("leeway", obj.getLeeway());
     if (obj.getPermissionsClaimKey() != null) {
       json.put("permissionsClaimKey", obj.getPermissionsClaimKey());
     }

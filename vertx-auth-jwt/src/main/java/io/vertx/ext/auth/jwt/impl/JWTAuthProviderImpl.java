@@ -56,12 +56,14 @@ public class JWTAuthProviderImpl implements JWTAuth {
   private final String issuer;
   private final List<String> audience;
   private final boolean ignoreExpiration;
+  private final int leeway;
 
   public JWTAuthProviderImpl(Vertx vertx, JWTAuthOptions config) {
     this.permissionsClaimKey = config.getPermissionsClaimKey();
     this.issuer = config.getIssuer();
     this.audience = config.getAudience();
     this.ignoreExpiration = config.isIgnoreExpiration();
+    this.leeway = config.getLeeway();
 
     final KeyStoreOptions keyStore = config.getKeyStore();
 
@@ -114,10 +116,10 @@ public class JWTAuthProviderImpl implements JWTAuth {
       // All dates in JWT are of type NumericDate
       // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
       // the specified UTC date/time, ignoring leap seconds
-      final long now = System.currentTimeMillis() / 1000;
+      final long now = (System.currentTimeMillis() / 1000);
 
       if (payload.containsKey("exp") && !ignoreExpiration) {
-        if (now >= payload.getLong("exp")) {
+        if (now - leeway >= payload.getLong("exp")) {
           resultHandler.handle(Future.failedFuture("Expired JWT token: exp <= now"));
           return;
         }
@@ -126,7 +128,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
       if (payload.containsKey("iat")) {
         Long iat = payload.getLong("iat");
         // issue at must be in the past
-        if (iat > now) {
+        if (iat > now + leeway) {
           resultHandler.handle(Future.failedFuture("Invalid JWT token: iat > now"));
           return;
         }
@@ -135,7 +137,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
       if (payload.containsKey("nbf")) {
         Long nbf = payload.getLong("nbf");
         // not before must be after now
-        if (nbf > now) {
+        if (nbf > now + leeway) {
           resultHandler.handle(Future.failedFuture("Invalid JWT token: nbf > now"));
           return;
         }

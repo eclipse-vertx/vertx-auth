@@ -35,6 +35,7 @@ public class JWTAuthOptions {
   // Defaults
   private static final String PERMISSIONS_CLAIM_KEY = "permissions";
   private static final boolean IGNORE_EXPIRATION = false;
+  private static final int LEEWAY = 0;
 
 
   private String permissionsClaimKey;
@@ -44,6 +45,7 @@ public class JWTAuthOptions {
   private List<String> audience;
   private String issuer;
   private boolean ignoreExpiration;
+  private int leeway;
 
   /**
    * Default constructor
@@ -65,11 +67,13 @@ public class JWTAuthOptions {
     audience = other.getAudience();
     issuer = other.getIssuer();
     ignoreExpiration = other.isIgnoreExpiration();
+    leeway = other.getLeeway();
   }
 
   private void init() {
     permissionsClaimKey = PERMISSIONS_CLAIM_KEY;
     ignoreExpiration = IGNORE_EXPIRATION;
+    leeway = LEEWAY;
   }
 
   /**
@@ -186,6 +190,20 @@ public class JWTAuthOptions {
    */
   public JWTAuthOptions setIgnoreExpiration(boolean ignoreExpiration) {
     this.ignoreExpiration = ignoreExpiration;
+    return this;
+  }
+
+  public int getLeeway() {
+    return leeway;
+  }
+
+  /**
+   * Set the leeway in seconds
+   * @param leeway  in seconds
+   * @return a reference to this for fluency
+   */
+  public JWTAuthOptions setLeeway(int leeway) {
+    this.leeway = leeway;
     return this;
   }
 }
