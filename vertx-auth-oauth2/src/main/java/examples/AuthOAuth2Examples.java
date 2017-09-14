@@ -117,7 +117,7 @@ public class AuthOAuth2Examples {
         System.err.println("Access Token Error: " + res.cause().getMessage());
       } else {
         // Get the access token object (the authorization code is given from the previous step).
-        User token = res.result();
+        AccessToken token = (AccessToken) res.result();
 
         token.fetch("/users", res2 -> {
           // the user object should be returned here...

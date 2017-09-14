@@ -101,7 +101,7 @@ var authorization_uri = oauth2.authorizeURL({
 
 var code = "xxxxxxxxxxxxxxxxxxxxxxxx";
 
-oauth2.getToken({
+oauth2.authenticate({
   "code" : code,
   "redirect_uri" : "http://localhost:8080/callback"
 }, function (res, res_err) {
@@ -153,7 +153,7 @@ var tokenConfig = {
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, function (res, res_err) {
+oauth2.authenticate(tokenConfig, function (res, res_err) {
   if (res_err != null) {
     console.error("Access Token Error: " + res_err.getMessage());
   } else {
@@ -173,6 +173,7 @@ need a fast way to test your application.
 [source,js]
 ----
 var OAuth2Auth = require("vertx-auth-oauth2-js/o_auth2_auth");
+var AccessToken = require("vertx-auth-oauth2-js/access_token");
 
 // Initialize the OAuth2 Library
 var oauth2 = OAuth2Auth.create(vertx, 'PASSWORD');
@@ -184,7 +185,7 @@ var tokenConfig = {
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, function (res, res_err) {
+oauth2.authenticate(tokenConfig, function (res, res_err) {
   if (res_err != null) {
     console.error("Access Token Error: " + res_err.getMessage());
   } else {
@@ -223,7 +224,7 @@ var tokenConfig = {
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, function (res, res_err) {
+oauth2.authenticate(tokenConfig, function (res, res_err) {
   if (res_err != null) {
     console.error("Access Token Error: " + res_err.getMessage());
   } else {
@@ -300,6 +301,7 @@ This information is quite valuable since it allows to do authorization at the AP
 [source,js]
 ----
 var KeycloakAuth = require("vertx-auth-oauth2-js/keycloak_auth");
+var AccessToken = require("vertx-auth-oauth2-js/access_token");
 // you would get this config from the keycloak admin console
 var keycloakJson = {
   "realm" : "master",
@@ -316,7 +318,7 @@ var keycloakJson = {
 var oauth2 = KeycloakAuth.create(vertx, 'PASSWORD', keycloakJson);
 
 // first get a token (authenticate)
-oauth2.getToken({
+oauth2.authenticate({
   "username" : "user",
   "password" : "secret"
 }, function (res, res_err) {

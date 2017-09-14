@@ -36,7 +36,7 @@ public class HtdigestUser implements User {
   }
 
   @Override
-  public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+  public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(false));
     return this;
   }

@@ -99,7 +99,7 @@ public class ChainAuthTest extends VertxTestBase {
   private User createUser(final JsonObject principal) {
     return new User() {
       @Override
-      public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+      public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
         return null;
       }
 

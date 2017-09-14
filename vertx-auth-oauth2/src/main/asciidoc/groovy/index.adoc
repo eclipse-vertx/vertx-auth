@@ -100,7 +100,7 @@ def authorization_uri = oauth2.authorizeURL([
 
 def code = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
-oauth2.getToken([
+oauth2.authenticate([
   code:code,
   redirect_uri:"http://localhost:8080/callback"
 ], { res ->
@@ -151,7 +151,7 @@ def tokenConfig = [
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, { res ->
+oauth2.authenticate(tokenConfig, { res ->
   if (res.failed()) {
     System.err.println("Access Token Error: ${res.cause().getMessage()}")
   } else {
@@ -181,7 +181,7 @@ def tokenConfig = [
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, { res ->
+oauth2.authenticate(tokenConfig, { res ->
   if (res.failed()) {
     System.err.println("Access Token Error: ${res.cause().getMessage()}")
   } else {
@@ -218,7 +218,7 @@ def tokenConfig = [:]
 
 // Callbacks
 // Save the access token
-oauth2.getToken(tokenConfig, { res ->
+oauth2.authenticate(tokenConfig, { res ->
   if (res.failed()) {
     System.err.println("Access Token Error: ${res.cause().getMessage()}")
   } else {
@@ -310,7 +310,7 @@ def keycloakJson = [
 def oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, keycloakJson)
 
 // first get a token (authenticate)
-oauth2.getToken([
+oauth2.authenticate([
   username:"user",
   password:"secret"
 ], { res ->

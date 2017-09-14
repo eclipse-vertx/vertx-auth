@@ -101,7 +101,7 @@ authorization_uri = oauth2.authorize_url({
 
 code = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
-oauth2.get_token({
+oauth2.authenticate({
   'code' => code,
   'redirect_uri' => "http://localhost:8080/callback"
 }) { |res_err,res|
@@ -153,7 +153,7 @@ tokenConfig = {
 
 # Callbacks
 # Save the access token
-oauth2.get_token(tokenConfig) { |res_err,res|
+oauth2.authenticate(tokenConfig) { |res_err,res|
   if (res_err != nil)
     STDERR.puts "Access Token Error: #{res_err.get_message()}"
   else
@@ -173,6 +173,7 @@ need a fast way to test your application.
 [source,ruby]
 ----
 require 'vertx-auth-oauth2/o_auth2_auth'
+require 'vertx-auth-oauth2/access_token'
 
 # Initialize the OAuth2 Library
 oauth2 = VertxAuthOauth2::OAuth2Auth.create(vertx, :PASSWORD)
@@ -184,7 +185,7 @@ tokenConfig = {
 
 # Callbacks
 # Save the access token
-oauth2.get_token(tokenConfig) { |res_err,res|
+oauth2.authenticate(tokenConfig) { |res_err,res|
   if (res_err != nil)
     STDERR.puts "Access Token Error: #{res_err.get_message()}"
   else
@@ -223,7 +224,7 @@ tokenConfig = {
 
 # Callbacks
 # Save the access token
-oauth2.get_token(tokenConfig) { |res_err,res|
+oauth2.authenticate(tokenConfig) { |res_err,res|
   if (res_err != nil)
     STDERR.puts "Access Token Error: #{res_err.get_message()}"
   else
@@ -300,6 +301,7 @@ This information is quite valuable since it allows to do authorization at the AP
 [source,ruby]
 ----
 require 'vertx-auth-oauth2/keycloak_auth'
+require 'vertx-auth-oauth2/access_token'
 # you would get this config from the keycloak admin console
 keycloakJson = {
   'realm' => "master",
@@ -316,7 +318,7 @@ keycloakJson = {
 oauth2 = VertxAuthOauth2::KeycloakAuth.create(vertx, :PASSWORD, keycloakJson)
 
 # first get a token (authenticate)
-oauth2.get_token({
+oauth2.authenticate({
   'username' => "user",
   'password' => "secret"
 }) { |res_err,res|

@@ -43,7 +43,16 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
-  User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler);
+  User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler);
+
+  /**
+   * @deprecated See {@link #isAuthorized(String, Handler)}
+   */
+  @Deprecated
+  @Fluent
+  default User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+    return isAuthorized(authority, resultHandler);
+  }
 
   /**
    * The User object will cache any authorities that it knows it has to avoid hitting the

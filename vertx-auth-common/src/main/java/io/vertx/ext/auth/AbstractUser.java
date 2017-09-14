@@ -40,7 +40,7 @@ public abstract class AbstractUser implements User, ClusterSerializable {
   protected final Set<String> cachedPermissions = new HashSet<>();
 
   @Override
-  public User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+  public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
     if (cachedPermissions.contains(authority)) {
       resultHandler.handle(Future.succeededFuture(true));
     } else {
