@@ -94,7 +94,13 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    resultHandler.handle(Future.failedFuture("OAuth2 cannot be used for AuthN (the implementation is a Client Relay only)"));
+    flow.getToken(authInfo, getToken -> {
+      if (getToken.failed()) {
+        resultHandler.handle(Future.failedFuture(getToken.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(getToken.result()));
+      }
+    });
   }
 
   @Override
@@ -103,8 +109,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
-    flow.getToken(params, handler);
+  public void getToken(JsonObject credentials, Handler<AsyncResult<AccessToken>> handler) {
+    flow.getToken(credentials, handler);
   }
 
   @Override

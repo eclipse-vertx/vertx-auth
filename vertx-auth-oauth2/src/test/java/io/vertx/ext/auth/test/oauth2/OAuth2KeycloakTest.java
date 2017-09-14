@@ -33,11 +33,11 @@ public class OAuth2KeycloakTest extends VertxTestBase {
   @Test
   @Ignore
   public void testFullCycle() {
-    oauth2.getToken(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
+    oauth2.authenticate(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
 
@@ -70,11 +70,11 @@ public class OAuth2KeycloakTest extends VertxTestBase {
   @Test
   @Ignore
   public void testLogout() {
-    oauth2.getToken(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
+    oauth2.authenticate(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
 

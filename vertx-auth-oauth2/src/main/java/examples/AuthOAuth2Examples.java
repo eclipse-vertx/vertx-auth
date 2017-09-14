@@ -19,6 +19,7 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 
@@ -52,7 +53,7 @@ public class AuthOAuth2Examples {
 
     String code = "xxxxxxxxxxxxxxxxxxxxxxxx"; // the code is provided as a url parameter by github callback call
 
-    oauth2.getToken(new JsonObject().put("code", code).put("redirect_uri", "http://localhost:8080/callback"), res -> {
+    oauth2.authenticate(new JsonObject().put("code", code).put("redirect_uri", "http://localhost:8080/callback"), res -> {
       if (res.failed()) {
         // error, the code provided is not valid
       } else {
@@ -90,12 +91,12 @@ public class AuthOAuth2Examples {
 
     // Callbacks
     // Save the access token
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         System.err.println("Access Token Error: " + res.cause().getMessage());
       } else {
         // Get the access token object (the authorization code is given from the previous step).
-        AccessToken token = res.result();
+        User token = res.result();
       }
     });
   }
@@ -111,12 +112,12 @@ public class AuthOAuth2Examples {
 
     // Callbacks
     // Save the access token
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         System.err.println("Access Token Error: " + res.cause().getMessage());
       } else {
         // Get the access token object (the authorization code is given from the previous step).
-        AccessToken token = res.result();
+        User token = res.result();
 
         token.fetch("/users", res2 -> {
           // the user object should be returned here...
@@ -141,12 +142,12 @@ public class AuthOAuth2Examples {
 
     // Callbacks
     // Save the access token
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         System.err.println("Access Token Error: " + res.cause().getMessage());
       } else {
         // Get the access token object (the authorization code is given from the previous step).
-        AccessToken token = res.result();
+        User token = res.result();
       }
     });
   }
@@ -192,11 +193,11 @@ public class AuthOAuth2Examples {
     OAuth2Auth oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, keycloakJson);
 
     // first get a token (authenticate)
-    oauth2.getToken(new JsonObject().put("username", "user").put("password", "secret"), res -> {
+    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "secret"), res -> {
       if (res.failed()) {
         // error handling...
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
 
         // now check for permissions
         token.isAuthorised("account:manage-account", r -> {

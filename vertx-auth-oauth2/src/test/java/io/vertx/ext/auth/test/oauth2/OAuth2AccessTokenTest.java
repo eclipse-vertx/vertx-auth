@@ -3,6 +3,7 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -136,11 +137,11 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   @Test
   public void createAccessToken() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        User token = res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
         testComplete();
@@ -152,11 +153,11 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   @Test
   public void tokenShouldNotBeExpired() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
         assertFalse(token.expired());
         testComplete();
       }
@@ -167,11 +168,11 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   @Test
   public void tokenShouldBeExpiredWhenExpirationDateIsInThePast() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
         // hack the token to set the expires_at (to yesterday)
         token.principal().put("expires_at", System.currentTimeMillis() - 24 * 60 * 60 * 1000);
         assertTrue(token.expired());
@@ -184,11 +185,11 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   @Test
   public void whenRefreshingTokenShouldGetNewAccessToken() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
         final long origTTl = token.principal().getLong("expires_at");
         // refresh the token
         config = refreshConfig;
@@ -208,11 +209,11 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   @Test
   public void shouldRevokeAToken() {
     config = oauthConfig;
-    oauth2.getToken(tokenConfig, res -> {
+    oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        AccessToken token = (AccessToken) res.result();
         // refresh the token
         config = revokeConfig;
         token.revoke("refresh_token", v -> {
