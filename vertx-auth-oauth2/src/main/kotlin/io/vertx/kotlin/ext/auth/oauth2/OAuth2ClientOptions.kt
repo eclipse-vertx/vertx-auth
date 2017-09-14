@@ -18,10 +18,10 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * Options describing how an OAuth2  will make connections.
  *
  * @param alpnVersions 
- * @param authorizationPath 
- * @param clientID 
- * @param clientSecret 
- * @param clientSecretParameterName 
+ * @param authorizationPath  Get the Oauth2 authorization resource path. e.g.: /oauth/authorize
+ * @param clientID  Set the provider client id
+ * @param clientSecret  Set the provider client secret
+ * @param clientSecretParameterName  Override the HTTP form field name for client secret
  * @param connectTimeout 
  * @param crlPaths 
  * @param crlValues 
@@ -30,23 +30,23 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param defaultPort 
  * @param enabledCipherSuites 
  * @param enabledSecureTransportProtocols 
- * @param extraParameters 
+ * @param extraParameters  Set extra parameters to be sent to the provider on each request
  * @param forceSni 
- * @param headers 
+ * @param headers  Set custom headers to be sent with every request to the provider
  * @param http2ClearTextUpgrade 
  * @param http2ConnectionWindowSize 
  * @param http2MaxPoolSize 
  * @param http2MultiplexingLimit 
  * @param idleTimeout 
  * @param initialSettings 
- * @param introspectionPath 
+ * @param introspectionPath  Set the provider token introspection resource path
  * @param jdkSslEngineOptions 
- * @param jwtToken 
+ * @param jwtToken  Signal that this provider tokens are in JWT format
  * @param keepAlive 
  * @param keyStoreOptions 
  * @param localAddress 
  * @param logActivity 
- * @param logoutPath 
+ * @param logoutPath  Set the provider logout path
  * @param maxChunkSize 
  * @param maxHeaderSize 
  * @param maxInitialLineLength 
@@ -68,26 +68,26 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param pubSecKeyOptions 
  * @param receiveBufferSize 
  * @param reuseAddress 
- * @param revocationPath 
- * @param scopeSeparator 
+ * @param revocationPath  Set the Oauth2 revocation resource path. e.g.: /oauth/revoke
+ * @param scopeSeparator  Set the provider scope separator
  * @param sendBufferSize 
  * @param sendUnmaskedFrames 
- * @param site 
+ * @param site  Root URL for the provider
  * @param soLinger 
  * @param ssl 
  * @param tcpKeepAlive 
  * @param tcpNoDelay 
- * @param tokenPath 
+ * @param tokenPath  Get the Oauth2 token resource path. e.g.: /oauth/token
  * @param trafficClass 
  * @param trustAll 
  * @param trustStoreOptions 
  * @param tryUseCompression 
  * @param useAlpn 
- * @param useBasicAuthorizationHeader 
+ * @param useBasicAuthorizationHeader  Flag to use HTTP basic auth header with client id, client secret.
  * @param usePooledBuffers 
- * @param userAgent 
- * @param userInfoParameters 
- * @param userInfoPath 
+ * @param userAgent  Set a custom user agent to use when communicating to a provider
+ * @param userInfoParameters  Set custom parameters to be sent during the userInfo resource request
+ * @param userInfoPath  Set the provider userInfo resource path
  * @param verifyHost 
  *
  * <p/>
