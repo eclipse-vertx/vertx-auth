@@ -19,7 +19,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.jwt.JWT;
@@ -49,15 +48,27 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
     switch (flow) {
       case AUTH_CODE:
+        if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
+        if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
+        if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new PasswordImpl(this);
         break;
       case AUTH_JWT:
+        if (config.getPubSecKey() == null || config.getPubSecKey().getSecretKey() == null || config.getPubSecKey().getType() == null || config.getSite() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the private key, the key type and the oauth2 server");
+        }
         this.flow = new AuthJWTImpl(this);
         break;
       default:
@@ -97,12 +108,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth api(HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> handler) {
-    OAuth2API.api(this, method, path, params, handler);
-    return this;
-  }
-
-  @Override
   public boolean hasJWTToken() {
     return config.isJwtToken();
   }
@@ -122,36 +127,32 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth introspectToken(String token, Handler<AsyncResult<AccessToken>> handler) {
-    return introspectToken(token, null, res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-        return;
+  public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
+    try {
+      // attempt to create a token object from the given string representation
+      final AccessToken accessToken = new AccessTokenImpl(this, new JsonObject().put(tokenType, token));
+      // if token is expired avoid going to the server
+      if (accessToken.expired()) {
+        handler.handle(Future.failedFuture("Expired token"));
+        return this;
       }
-      // convert from json to AccessToken
-      final JsonObject json = res.result();
-
-      try {
-        final AccessToken accessToken = new AccessTokenImpl(this,
-          new JsonObject()
-            .put("access_token", token)
-            .mergeIn(json));
-
+      // perform the introspection
+      accessToken.introspect(introspect -> {
+        if (introspect.failed()) {
+          handler.handle(Future.failedFuture(introspect.cause()));
+          return;
+        }
+        // the access token object should have updated it's claims/authorities plus expiration, recheck
         if (accessToken.expired()) {
           handler.handle(Future.failedFuture("Expired token"));
           return;
         }
-
+        // return self
         handler.handle(Future.succeededFuture(accessToken));
-      } catch (RuntimeException e) {
-        handler.handle(Future.failedFuture(e));
-      }
-    });
-  }
-
-  @Override
-  public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<JsonObject>> handler) {
-    flow.introspectToken(token, tokenType, handler);
+      });
+    } catch (RuntimeException e) {
+      handler.handle(Future.failedFuture(e));
+    }
     return this;
   }
 
@@ -164,5 +165,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public OAuth2FlowType getFlowType() {
     return flowType;
+  }
+
+  public OAuth2Flow getFlow() {
+    return flow;
   }
 }

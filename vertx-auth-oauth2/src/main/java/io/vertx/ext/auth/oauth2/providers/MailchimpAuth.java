@@ -38,6 +38,7 @@ public interface MailchimpAuth {
         .setSite("https://login.mailchimp.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
+        .setUserInfoPath("/oauth2/metadata")
         .setClientID(clientId)
         .setClientSecret(clientSecret));
   }

@@ -19,6 +19,9 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 
 /**
@@ -67,4 +70,44 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken introspect(Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+   *
+   * @param tokenType - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken introspect(String tokenType, Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Load the user info as per OIDC spec.
+   *
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback);
+
+  /**
+   * Fetches a JSON resource using this Access Token.
+   *
+   * @param resource - the resource to fetch.
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  default AccessToken fetch(String resource, Handler<AsyncResult<OAuth2Response>> callback) {
+    return fetch(HttpMethod.GET, resource, null, null, callback);
+  }
+
+  /**
+   * Fetches a JSON resource using this Access Token.
+   *
+   * @param method - the HTTP method to user.
+   * @param resource - the resource to fetch.
+   * @param headers - extra headers to pass to the request.
+   * @param payload - payload to send to the server.
+   * @param callback - The callback function returning the results.
+   */
+  @Fluent
+  AccessToken fetch(HttpMethod method, String resource, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback);
 }

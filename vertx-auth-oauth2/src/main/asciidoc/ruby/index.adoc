@@ -191,9 +191,7 @@ oauth2.get_token(tokenConfig) { |res_err,res|
     # Get the access token object (the authorization code is given from the previous step).
     token = res
 
-    oauth2.api(:GET, "/users", {
-      'access_token' => token.principal()['access_token']
-    }) { |res2_err,res2|
+    token.fetch("/users") { |res2_err,res2|
       # the user object should be returned here...
     }
   end

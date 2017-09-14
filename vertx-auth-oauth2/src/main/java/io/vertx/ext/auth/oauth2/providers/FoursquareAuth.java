@@ -38,6 +38,7 @@ public interface FoursquareAuth {
         .setSite("https://foursquare.com")
         .setTokenPath("/oauth2/access_token")
         .setAuthorizationPath("/oauth2/authenticate")
+        .setUserInfoPath("/users/self")
         .setClientID(clientId)
         .setClientSecret(clientSecret));
   }

@@ -52,7 +52,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
   private static final String token = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdXRob3JpemF0aW9uIjp7InBlcm1pc3Npb25zIjpbeyJyZXNvdXJjZV9zZXRfaWQiOiJkMmZlOTg0My02NDYyLTRiZmMtYmFiYS1iNTc4N2JiNmUwZTciLCJyZXNvdXJjZV9zZXRfbmFtZSI6IkhlbGxvIFdvcmxkIFJlc291cmNlIn1dfSwianRpIjoiZDYxMDlhMDktNzhmZC00OTk4LWJmODktOTU3MzBkZmQwODkyLTE0NjQ5MDY2Nzk0MDUiLCJleHAiOjk5OTk5OTk5OTksIm5iZiI6MCwiaWF0IjoxNDY0OTA2NjcxLCJzdWIiOiJmMTg4OGY0ZC01MTcyLTQzNTktYmUwYy1hZjMzODUwNWQ4NmMiLCJ0eXAiOiJrY19ldHQiLCJhenAiOiJoZWxsby13b3JsZC1hdXRoei1zZXJ2aWNlIn0";
 
-  private static final JsonObject oauthInstrospect = new JsonObject()
+  private static final JsonObject oauthIntrospect = new JsonObject()
     .put("token", token);
 
   private OAuth2Auth oauth2;
@@ -77,7 +77,12 @@ public class OAuth2IntrospectTest extends VertxTestBase {
       if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, queryToJSON(buffer.toString()));
+            JsonObject body = queryToJSON(buffer.toString());
+            assertEquals(config.getString("token"), body.getString("token"));
+            // conditional test for token_type_hint
+            if (config.containsKey("token_type_hint")) {
+              assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
+            }
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }
@@ -114,7 +119,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
   @Test
   public void introspectAccessToken() {
-    config = oauthInstrospect;
+    config = oauthIntrospect;
     fixture = fixtureIntrospect;
     oauth2.introspectToken(token, res -> {
       if (res.failed()) {
@@ -153,7 +158,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
   @Test
   public void introspectAccessTokenGoogleWay() {
-    config = oauthInstrospect;
+    config = oauthIntrospect;
     fixture = fixtureGoogle;
     oauth2.introspectToken(token, res -> {
       if (res.failed()) {
@@ -202,7 +207,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   @Test
   public void introspectAccessTokenKeyCloakWay() {
     ((OAuth2AuthProviderImpl) oauth2).getConfig().setJwtToken(true);
-    config = oauthInstrospect;
+    config = oauthIntrospect;
     fixture = fixtureKeycloak;
     oauth2.introspectToken(token, res -> {
       if (res.failed()) {

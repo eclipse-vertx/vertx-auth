@@ -15,21 +15,20 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Base64;
 import java.util.Map;
 
 /**
@@ -37,124 +36,49 @@ import java.util.Map;
  */
 public class OAuth2API {
 
-  public static void api(OAuth2AuthProviderImpl provider, HttpMethod method, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
+  public static void fetch(OAuth2AuthProviderImpl provider, HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
     final String url;
 
     if (path.startsWith("http://") || path.startsWith("https://")) {
-      url = path ;
+      url = path;
     } else {
-      url = provider.getConfig().getSite() + path ;
+      url = provider.getConfig().getSite() + path;
     }
 
-    call(provider, method, url, params, callback);
-  }
+    // create a request
+    final HttpClientRequest request = makeRequest(provider, method, url, callback);
 
-  public static void post(OAuth2AuthProviderImpl provider, String path, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
-    final String url;
-
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      url = path ;
-    } else {
-      url = provider.getConfig().getSite() + path ;
-    }
-
-    call(provider, url, params, callback);
-  }
-
-  private static void call(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
-
-    final OAuth2ClientOptions config = provider.getConfig();
-
-    if (config.getClientID() == null || config.getClientSecret() == null || config.getSite() == null) {
-      callback.handle(Future.failedFuture("Configuration missing. You need to specify the client id, the client secret and the oauth2 server"));
-      return;
-    }
-
-    final JsonObject headers = new JsonObject();
-
-    if (params.containsKey("access_token") && !params.containsKey("client_id")) {
-      headers.put("Authorization", "Bearer " + params.getString("access_token"));
-      params.remove("access_token");
-    } else if (config.isUseBasicAuthorizationHeader() && config.getClientID() != null && !params.containsKey("client_id")) {
-      String basic = config.getClientID() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
-    }
-
-    JsonObject tmp = config.getHeaders();
+    // apply the provider required headers
+    JsonObject tmp = provider.getConfig().getHeaders();
     if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
-
-    JsonObject form = null;
-
-    if (method != HttpMethod.GET) {
-      form = params.copy();
-    }
-
-    if (method == HttpMethod.GET) {
-      if (uri.indexOf('?') != -1) {
-        uri += "&" + stringify(params);
+      for (Map.Entry<String, Object> kv : tmp) {
+        request.putHeader(kv.getKey(), (String) kv.getValue());
       }
     }
 
-    final boolean authorizationHeaderOnly = params.getBoolean("authorizationHeaderOnly", false);
-    // this is a control variable not to be sent to the provider
-    if (form != null) {
-      form.remove("authorizationHeaderOnly");
-    }
-
-    // Enable the system to send authorization params in the body (for example github does not require to be in the header)
-    if (method != HttpMethod.GET && !authorizationHeaderOnly) {
-      form.put("client_id", config.getClientID());
-      if (config.getClientSecretParameterName() != null) {
-        form.put(config.getClientSecretParameterName(), config.getClientSecret());
+    if (headers != null) {
+      for (Map.Entry<String, Object> kv : headers) {
+        request.putHeader(kv.getKey(), (String) kv.getValue());
       }
-    }
-
-    final HttpClientRequest request = makeRequest(provider, method, uri, callback);
-
-    // write the headers
-    for (Map.Entry<String, ?> kv : headers) {
-      request.putHeader(kv.getKey(), kv.getValue().toString());
     }
 
     // specific UA
-    if (config.getUserAgent() != null) {
-      request.putHeader("User-Agent", config.getUserAgent());
+    if (provider.getConfig().getUserAgent() != null) {
+      request.putHeader("User-Agent", provider.getConfig().getUserAgent());
     }
 
-    // specify preferred content type
-    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-    if (form != null) {
-      request.putHeader("Content-Type", "application/x-www-form-urlencoded");
-      final String payload = stringify(form);
-
-      request.putHeader("Content-Length", Integer.toString(payload.length()));
-      request.write(payload);
+    if (payload != null) {
+      if (method == HttpMethod.POST || method == HttpMethod.PATCH || method == HttpMethod.PUT) {
+        request.putHeader("Content-Length", Integer.toString(payload.length()));
+        request.write(payload);
+      }
     }
 
     // Make sure the request is ended when you're done with it
     request.end();
   }
 
-  private static void call(OAuth2AuthProviderImpl provider, String uri, JsonObject params, Handler<AsyncResult<JsonObject>> callback) {
-    JsonObject form = params.copy();
-
-    final HttpClientRequest request = makeRequest(provider, HttpMethod.POST, uri, callback);
-
-    // specify preferred content type
-    request.putHeader("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-    request.putHeader("Content-Type", "application/x-www-form-urlencoded");
-    final String payload = stringify(form);
-    request.putHeader("Content-Length", Integer.toString(payload.length()));
-    request.write(payload);
-
-    // Make sure the request is ended when you're done with it
-    request.end();
-  }
-
-  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, final Handler<AsyncResult<JsonObject>> callback) {
+  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
     HttpClient client;
 
     try {
@@ -187,49 +111,14 @@ public class OAuth2API {
       });
 
       resp.bodyHandler(body -> {
-        if (body == null) {
-          callback.handle(Future.failedFuture("No Body"));
-          client.close();
-          return;
-        }
-
-        if (body.length() == 0) {
-          // no body
-          if (resp.statusCode() >= 400) {
+        if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
+          if (body == null || body.length() == 0) {
             callback.handle(Future.failedFuture(resp.statusMessage()));
           } else {
-            callback.handle(Future.succeededFuture());
+            callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
           }
-          client.close();
-          return;
-        }
-
-        String contentType = resp.getHeader("Content-Type");
-        int sep = contentType.indexOf(';');
-        // exclude charset
-        if (sep != -1) {
-          contentType = contentType.substring(0, sep);
-        }
-
-        switch (contentType) {
-          case "application/json":
-            try {
-              handleToken(resp.statusCode(), new JsonObject(body.toString()), callback);
-            } catch (RuntimeException e) {
-              callback.handle(Future.failedFuture(e));
-            }
-            break;
-          case "application/x-www-form-urlencoded":
-          case "text/plain":
-            try {
-              handleToken(resp.statusCode(), queryToJSON(body.toString()), callback);
-            } catch (UnsupportedEncodingException | RuntimeException e) {
-              callback.handle(Future.failedFuture(e));
-            }
-            break;
-          default:
-            callback.handle(Future.failedFuture("Cannot handle content type: " + contentType));
-            break;
+        } else {
+          callback.handle(Future.succeededFuture(new OAuth2ResponseImpl(resp.statusCode(), resp.headers(), body)));
         }
         client.close();
       });
@@ -241,31 +130,6 @@ public class OAuth2API {
     });
 
     return request;
-  }
-
-  private static void handleToken(final int statusCode, final JsonObject json, final Handler<AsyncResult<JsonObject>> callback) {
-    if (json.containsKey("error")) {
-      String description;
-      Object error = json.getValue("error");
-      if (error instanceof JsonObject) {
-        description = ((JsonObject) error).getString("message");
-      } else {
-        // attempt to handle the error as a string
-        try {
-          description = json.getString("error_description", json.getString("error"));
-        } catch (RuntimeException e) {
-          description = error.toString();
-        }
-      }
-      callback.handle(Future.failedFuture(description));
-    } else {
-      // for the case there was a http protocol error
-      if (statusCode >= 400) {
-        callback.handle(Future.failedFuture(HttpResponseStatus.valueOf(statusCode).reasonPhrase()));
-        return;
-      }
-      callback.handle(Future.succeededFuture(json));
-    }
   }
 
   public static String stringify(JsonObject json) {
@@ -321,4 +185,24 @@ public class OAuth2API {
 
     return json;
   }
+
+  public static void processNonStandardHeaders(JsonObject json, OAuth2Response reply, String sep) {
+    // inspect the response headers for the non-standard:
+    // X-OAuth-Scopes and X-Accepted-OAuth-Scopes
+    final String xOAuthScopes = reply.getHeader("X-OAuth-Scopes");
+    final String xAcceptedOAuthScopes = reply.getHeader("X-Accepted-OAuth-Scopes");
+
+    if (xOAuthScopes != null) {
+      if (json.containsKey("scope")) {
+        json.put("scope", json.getString("scope") + sep + xOAuthScopes);
+      } else {
+        json.put("scope", xOAuthScopes);
+      }
+    }
+
+    if (xAcceptedOAuthScopes != null) {
+      json.put("acceptedScopes", xAcceptedOAuthScopes);
+    }
+  }
+
 }

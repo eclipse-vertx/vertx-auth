@@ -188,9 +188,7 @@ oauth2.getToken(tokenConfig, { res ->
     // Get the access token object (the authorization code is given from the previous step).
     def token = res.result()
 
-    oauth2.api(HttpMethod.GET, "/users", [
-      access_token:token.principal().access_token
-    ], { res2 ->
+    token.fetch("/users", { res2 ->
       // the user object should be returned here...
     })
   }

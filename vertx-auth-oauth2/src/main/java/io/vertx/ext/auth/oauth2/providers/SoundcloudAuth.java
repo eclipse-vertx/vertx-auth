@@ -38,6 +38,7 @@ public interface SoundcloudAuth {
         .setSite("https://api.soundcloud.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/connect")
+        .setUserInfoPath("/me.json")
         .setClientID(clientId)
         .setClientSecret(clientSecret));
   }

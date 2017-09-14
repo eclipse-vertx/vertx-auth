@@ -18,7 +18,6 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -30,7 +29,7 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class AuthCodeImpl extends CommonFlow implements OAuth2Flow {
+public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
 
   public AuthCodeImpl(OAuth2AuthProviderImpl provider) {
     super(provider);
@@ -70,26 +69,22 @@ public class AuthCodeImpl extends CommonFlow implements OAuth2Flow {
    */
   @Override
   public void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler) {
-    final JsonObject query = params.copy();
-    query.put("grant_type", "authorization_code");
-
-    final JsonObject extraParameters = provider.getConfig().getExtraParameters();
-
-    // if the provider needs extra parameters they are merged here
-    if (extraParameters != null) {
-      query.mergeIn(extraParameters);
-    }
-
-    api(provider, HttpMethod.POST, provider.getConfig().getTokenPath(), query, res -> {
-      if (res.succeeded()) {
-        try {
-          handler.handle(Future.succeededFuture(new AccessTokenImpl(provider, res.result())));
-        } catch (RuntimeException e) {
-          handler.handle(Future.failedFuture(e));
-        }
-      } else {
+    getToken("authorization_code", params, res -> {
+      if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
+        return;
       }
+
+      AccessToken token;
+
+      try {
+        token = new AccessTokenImpl(provider, res.result());
+      } catch (RuntimeException e) {
+        handler.handle(Future.failedFuture(e));
+        return;
+      }
+
+      handler.handle(Future.succeededFuture(token));
     });
   }
 }
