@@ -68,6 +68,7 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param pubSecKeyOptions 
  * @param receiveBufferSize 
  * @param reuseAddress 
+ * @param reusePort 
  * @param revocationPath  Set the Oauth2 revocation resource path. e.g.: /oauth/revoke
  * @param scopeSeparator  Set the provider scope separator
  * @param sendBufferSize 
@@ -75,8 +76,11 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param site  Root URL for the provider
  * @param soLinger 
  * @param ssl 
+ * @param tcpCork 
+ * @param tcpFastOpen 
  * @param tcpKeepAlive 
  * @param tcpNoDelay 
+ * @param tcpQuickAck 
  * @param tokenPath  Get the Oauth2 token resource path. e.g.: /oauth/token
  * @param trafficClass 
  * @param trustAll 
@@ -145,6 +149,7 @@ fun OAuth2ClientOptions(
   pubSecKeyOptions: io.vertx.ext.auth.PubSecKeyOptions? = null,
   receiveBufferSize: Int? = null,
   reuseAddress: Boolean? = null,
+  reusePort: Boolean? = null,
   revocationPath: String? = null,
   scopeSeparator: String? = null,
   sendBufferSize: Int? = null,
@@ -152,8 +157,11 @@ fun OAuth2ClientOptions(
   site: String? = null,
   soLinger: Int? = null,
   ssl: Boolean? = null,
+  tcpCork: Boolean? = null,
+  tcpFastOpen: Boolean? = null,
   tcpKeepAlive: Boolean? = null,
   tcpNoDelay: Boolean? = null,
+  tcpQuickAck: Boolean? = null,
   tokenPath: String? = null,
   trafficClass: Int? = null,
   trustAll: Boolean? = null,
@@ -328,6 +336,9 @@ fun OAuth2ClientOptions(
   if (reuseAddress != null) {
     this.setReuseAddress(reuseAddress)
   }
+  if (reusePort != null) {
+    this.setReusePort(reusePort)
+  }
   if (revocationPath != null) {
     this.setRevocationPath(revocationPath)
   }
@@ -349,11 +360,20 @@ fun OAuth2ClientOptions(
   if (ssl != null) {
     this.setSsl(ssl)
   }
+  if (tcpCork != null) {
+    this.setTcpCork(tcpCork)
+  }
+  if (tcpFastOpen != null) {
+    this.setTcpFastOpen(tcpFastOpen)
+  }
   if (tcpKeepAlive != null) {
     this.setTcpKeepAlive(tcpKeepAlive)
   }
   if (tcpNoDelay != null) {
     this.setTcpNoDelay(tcpNoDelay)
+  }
+  if (tcpQuickAck != null) {
+    this.setTcpQuickAck(tcpQuickAck)
   }
   if (tokenPath != null) {
     this.setTokenPath(tokenPath)
