@@ -155,7 +155,7 @@ public class JWTOptions {
   }
 
   public boolean getNoTimestamp() {
-    return json.getBoolean("noTimestamp");
+    return json.getBoolean("noTimestamp", false);
   }
 
   /**
