@@ -3,6 +3,9 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Options describing how a Cryptographic Key.
  *
@@ -17,6 +20,7 @@ public class PubSecKeyOptions {
   private String type;
   private String publicKey;
   private String secretKey;
+  private List<String> certificates;
 
   /**
    * Default constructor
@@ -34,6 +38,7 @@ public class PubSecKeyOptions {
     type = other.getType();
     publicKey = other.getPublicKey();
     secretKey = other.getSecretKey();
+    certificates = other.getX509Certificates();
   }
 
   private void init() {
@@ -74,6 +79,23 @@ public class PubSecKeyOptions {
 
   public PubSecKeyOptions setSecretKey(String secretKey) {
     this.secretKey = secretKey;
+    return this;
+  }
+
+  public List<String> getX509Certificates() {
+    return certificates;
+  }
+
+  public PubSecKeyOptions setX509Certificates(List<String> certificates) {
+    this.certificates = certificates;
+    return this;
+  }
+
+  public PubSecKeyOptions addX509Certificate(String certificate) {
+    if (certificates == null) {
+      certificates = new ArrayList<>();
+    }
+    certificates.add(certificate);
     return this;
   }
 }

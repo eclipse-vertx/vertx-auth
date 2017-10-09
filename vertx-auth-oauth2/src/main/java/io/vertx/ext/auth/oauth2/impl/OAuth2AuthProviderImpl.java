@@ -43,7 +43,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     this.flowType = flow;
 
     if (config.getPubSecKey() != null) {
-      jwt.addKeyPair(config.getPubSecKey().getType(), config.getPubSecKey().getPublicKey(), config.getPubSecKey().getSecretKey());
+      if (config.getPubSecKey().getPublicKey() != null || config.getPubSecKey().getSecretKey() != null) {
+        jwt.addKeyPair(config.getPubSecKey().getType(), config.getPubSecKey().getPublicKey(), config.getPubSecKey().getSecretKey());
+      }
     }
 
     switch (flow) {

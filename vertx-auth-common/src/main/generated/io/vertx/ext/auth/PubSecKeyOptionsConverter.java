@@ -36,6 +36,12 @@ public class PubSecKeyOptionsConverter {
     if (json.getValue("type") instanceof String) {
       obj.setType((String)json.getValue("type"));
     }
+    if (json.getValue("x509Certificates") instanceof JsonArray) {
+      json.getJsonArray("x509Certificates").forEach(item -> {
+        if (item instanceof String)
+          obj.addX509Certificate((String)item);
+      });
+    }
   }
 
   public static void toJson(PubSecKeyOptions obj, JsonObject json) {
@@ -47,6 +53,11 @@ public class PubSecKeyOptionsConverter {
     }
     if (obj.getType() != null) {
       json.put("type", obj.getType());
+    }
+    if (obj.getX509Certificates() != null) {
+      JsonArray array = new JsonArray();
+      obj.getX509Certificates().forEach(item -> array.add(item));
+      json.put("x509Certificates", array);
     }
   }
 }

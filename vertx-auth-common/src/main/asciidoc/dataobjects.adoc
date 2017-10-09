@@ -46,6 +46,7 @@
 |[[publicKey]]`publicKey`|`String`|-
 |[[secretKey]]`secretKey`|`String`|-
 |[[type]]`type`|`String`|-
+|[[x509Certificates]]`x509Certificates`|`Array of String`|-
 |===
 
 [[SecretOptions]]

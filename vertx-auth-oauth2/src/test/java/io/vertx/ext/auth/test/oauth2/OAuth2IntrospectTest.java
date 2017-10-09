@@ -134,13 +134,10 @@ public class OAuth2IntrospectTest extends VertxTestBase {
         principal.remove("access_token");
 
         final JsonObject assertion = fixtureIntrospect.copy();
-        assertion.remove("exp");
-        assertion.remove("iat");
-        assertion.remove("nbf");
 
         assertEquals(assertion.getMap(), principal.getMap());
 
-        token.isAuthorised("scopeB", res0 -> {
+        token.isAuthorized("scopeB", res0 -> {
           if (res0.failed()) {
             fail(res0.cause().getMessage());
           } else {
@@ -175,7 +172,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
         assertEquals(fixtureGoogle.getMap(), principal.getMap());
 
-        token.isAuthorised("profile", res0 -> {
+        token.isAuthorized("profile", res0 -> {
           if (res0.failed()) {
             fail(res0.cause().getMessage());
           } else {
@@ -217,11 +214,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
         assertNotNull(token);
         JsonObject principal = token.principal();
 
-        // clean time specific value
-        principal.remove("expires_at");
-        principal.remove("access_token");
-
-        assertEquals(new JsonObject().put("active", true).getMap(), principal.getMap());
+        assertTrue(principal.getBoolean("active"));
         testComplete();
       }
     });

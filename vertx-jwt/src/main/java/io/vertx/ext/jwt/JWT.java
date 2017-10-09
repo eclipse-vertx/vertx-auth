@@ -21,9 +21,12 @@ import io.vertx.core.logging.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -133,7 +136,7 @@ public final class JWT {
    * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
    *
    * @param algorithm the JWS algorithm, e.g.: RS256
-   * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
   public JWT addPublicKey(String algorithm, String key) {
@@ -144,8 +147,8 @@ public final class JWT {
    * Adds a key pair for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
    *
-   * @param algorithm the JWS algorithm, e.g.: RS256
-   * @param publicKey the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @param algorithm  the JWS algorithm, e.g.: RS256
+   * @param publicKey  the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @param privateKey the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
@@ -187,7 +190,7 @@ public final class JWT {
       if (cryptoMap.containsKey(algorithm)) {
         log.warn("Replacing existing algorithm: " + algorithm);
       }
-      cryptoMap.put(algorithm, new CryptoKeyPair(ALGORITHM_ALIAS.get(algorithm),  pub, sec));
+      cryptoMap.put(algorithm, new CryptoKeyPair(ALGORITHM_ALIAS.get(algorithm), pub, sec));
 
     } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
       throw new RuntimeException(algorithm + " not supported", e);
@@ -202,7 +205,7 @@ public final class JWT {
    * it is common to see these keys when dealing with 3rd party services such as Google.
    *
    * @param algorithm the JWS algorithm, e.g.: RS256
-   * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
   public JWT addSecretKey(String algorithm, String key) {
@@ -210,11 +213,37 @@ public final class JWT {
   }
 
   /**
+   * Adds a certificate for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
+   * it is common to see these keys when dealing with 3rd party services such as Google.
+   *
+   * @param algorithm the JWS algorithm, e.g.: RS256
+   * @param cert       the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @return self
+   */
+  public JWT addCertificate(String algorithm, String cert) {
+    try {
+      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+      X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cert.getBytes(UTF8)));
+      if (cryptoMap.containsKey(algorithm)) {
+        log.warn("Replacing existing algorithm: " + algorithm);
+      }
+
+      cryptoMap.put(algorithm, new CryptoSignature(ALGORITHM_ALIAS.get(algorithm), certificate, null));
+      unsecure = cryptoMap.size() == 1;
+    } catch (CertificateException e) {
+      throw new RuntimeException(e);
+    }
+
+    return this;
+  }
+
+  /**
    * Adds a secret (password) for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google.
    *
    * @param algorithm the JWS algorithm, e.g.: HS256
-   * @param key the base64 DER format of the key (also known as PEM format, without the header and footer).
+   * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
   public JWT addSecret(String algorithm, String key) {
@@ -344,9 +373,9 @@ public final class JWT {
 
     // header, typ is fixed value.
     JsonObject header = new JsonObject()
-            .mergeIn(options.getJsonObject("header", EMPTY))
-            .put("typ", "JWT")
-            .put("alg", algorithm);
+      .mergeIn(options.getJsonObject("header", EMPTY))
+      .put("typ", "JWT")
+      .put("alg", algorithm);
 
     // NumericDate is a number is seconds since 1st Jan 1970 in UTC
     long timestamp = System.currentTimeMillis() / 1000;

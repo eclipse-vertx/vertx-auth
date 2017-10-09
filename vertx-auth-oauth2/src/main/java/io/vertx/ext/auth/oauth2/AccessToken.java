@@ -38,6 +38,12 @@ public interface AccessToken extends User {
   boolean expired();
 
   /**
+   * The Access Token if present parsed as a JsonObject
+   * @return JSON
+   */
+  JsonObject accessToken();
+
+  /**
    * Refresh the access token
    *
    * @param callback - The callback function returning the results.

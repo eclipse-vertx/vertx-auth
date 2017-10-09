@@ -22,8 +22,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
@@ -43,8 +41,6 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
  */
 public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
-  private static final Logger log = LoggerFactory.getLogger(AccessTokenImpl.class);
-
   private static final JsonObject EMPTY_JSON = new JsonObject();
   private static final JsonArray EMPTY_ARRAY = new JsonArray();
 
@@ -58,15 +54,12 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   /**
    * This json is build from the access_token, if present, assuming it is encoded as JWT
    */
-  private JsonObject content;
+  private JsonObject accessToken;
 
   /**
    * Creates an AccessToken instance.
    */
   public AccessTokenImpl() {
-    // required if the object is serialized, however this is probably not a good idea
-    // because Tokens are supposed to be used in stateless environments
-    log.info("You are probably serializing the OAuth2 User, OAuth2 tokens are supposed to be used in stateless servers!");
   }
 
   /**
@@ -76,29 +69,28 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    */
   public AccessTokenImpl(OAuth2AuthProviderImpl provider, JsonObject token) {
     this.provider = provider;
+    this.token = token;
 
-    init(token);
+    init();
   }
 
-  private void init(JsonObject json) {
-    if (json.containsKey("expires_in")) {
-      json = json.copy();
+  private void init() {
+    if (token.containsKey("expires_in")) {
       Long expiresIn;
       try {
-        expiresIn = json.getLong("expires_in");
+        expiresIn = token.getLong("expires_in");
       } catch (ClassCastException e) {
         // for some reason someone decided to send a number as a String...
-        expiresIn = Long.valueOf(json.getString("expires_in"));
+        expiresIn = Long.valueOf(token.getString("expires_in"));
       }
-      json.put("expires_at", System.currentTimeMillis() + 1000 * expiresIn);
+      token.put("expires_at", System.currentTimeMillis() + 1000 * expiresIn);
     }
 
-    token = json;
-    content = null;
+    accessToken = null;
 
     // try to parse the access_token
-    if (provider.getConfig().isJwtToken() && json.containsKey("access_token")) {
-      content = provider.decode(json.getString("access_token"));
+    if (provider.getConfig().isJwtToken() && token.containsKey("access_token")) {
+      accessToken = provider.decode(token.getString("access_token"));
     }
 
     // the permission cache needs to be clear
@@ -120,7 +112,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
       token.put("expires_at", 1000 * exp);
     }
 
-    // move JWT fields into "content"
+    // move JWT fields into "accessToken"
     moveProperty("exp");
     moveProperty("iat");
     moveProperty("nbf");
@@ -136,11 +128,18 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
   private void moveProperty(String name) {
     if (token.containsKey(name)) {
-      if (content == null) {
-        content = new JsonObject();
+      if (accessToken != null) {
+        accessToken.put(name, token.getValue(name));
       }
-      content.put(name, token.remove(name));
     }
+  }
+
+  @Override
+  public JsonObject accessToken() {
+    if (accessToken != null) {
+      return accessToken.copy();
+    }
+    return null;
   }
 
   /**
@@ -161,23 +160,23 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     // the specified UTC date/time, ignoring leap seconds
     now = System.currentTimeMillis() / 1000;
 
-    if (content != null) {
-      if (content.containsKey("exp")) {
-        if (now >= content.getLong("exp")) {
+    if (accessToken != null) {
+      if (accessToken.containsKey("exp")) {
+        if (now >= accessToken.getLong("exp")) {
           return true;
         }
       }
 
-      if (content.containsKey("iat")) {
-        Long iat = content.getLong("iat");
+      if (accessToken.containsKey("iat")) {
+        Long iat = accessToken.getLong("iat");
         // issue at must be in the past
         if (iat > now) {
           return true;
         }
       }
 
-      if (content.containsKey("nbf")) {
-        Long nbf = content.getLong("nbf");
+      if (accessToken.containsKey("nbf")) {
+        Long nbf = accessToken.getLong("nbf");
         // not before must be after now
         if (nbf > now) {
           return true;
@@ -218,7 +217,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
-    // specify preferred accepted content type
+    // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
@@ -257,7 +256,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
             return;
           }
         } else {
-          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          handler.handle(Future.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type")));
           return;
         }
 
@@ -278,7 +277,8 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
             handler.handle(Future.failedFuture(description));
           } else {
             OAuth2API.processNonStandardHeaders(json, reply, provider.getConfig().getScopeSeparator());
-            init(json);
+            token = json;
+            init();
             handler.handle(Future.succeededFuture());
           }
         } catch (RuntimeException e) {
@@ -319,7 +319,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
       headers.put("Content-Type", "application/x-www-form-urlencoded");
       final Buffer payload = Buffer.buffer(stringify(form));
-      // specify preferred accepted content type
+      // specify preferred accepted accessToken type
       headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
       OAuth2API.fetch(
@@ -344,7 +344,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
           // invalidate ourselves
           token.remove(token_type);
           if ("access_token".equals(token_type)) {
-            content = null;
+            accessToken = null;
           }
 
           handler.handle(Future.succeededFuture());
@@ -397,7 +397,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
         if (res.succeeded()) {
           // invalidate ourselves
           token = null;
-          content = null;
+          accessToken = null;
 
           callback.handle(Future.succeededFuture());
         } else {
@@ -431,7 +431,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
 
-    // specify preferred accepted content type
+    // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
@@ -470,7 +470,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
             return;
           }
         } else {
-          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          handler.handle(Future.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type")));
           return;
         }
 
@@ -517,7 +517,8 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
             try {
               processNonStandardHeaders(json, reply, config.getScopeSeparator());
               // reset the access token
-              init(token.mergeIn(json));
+              token.mergeIn(json);
+              init();
 
               if (expired()) {
                 handler.handle(Future.failedFuture("Expired token"));
@@ -590,7 +591,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
         OAuth2API.processNonStandardHeaders(token, reply, provider.getConfig().getScopeSeparator());
         // re-init to reparse the authorities
-        init(token);
+        init();
         callback.handle(Future.succeededFuture(userInfo));
       });
     return this;
@@ -674,7 +675,11 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * @return `true` if this token has the specified role, otherwise `false`.
    */
   private boolean hasApplicationRole(String appName, String roleName) {
-    JsonObject appRoles = content
+    if (accessToken == null) {
+      return false;
+    }
+
+    JsonObject appRoles = accessToken
       .getJsonObject("resource_access", EMPTY_JSON)
       .getJsonObject(appName);
 
@@ -697,7 +702,11 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * @return `true` if this token has the specified role, otherwise `false`.
    */
   private boolean hasRealmRole(String roleName) {
-    return content
+    if (accessToken == null) {
+      return false;
+    }
+
+    return accessToken
       .getJsonObject("realm_access", EMPTY_JSON)
       .getJsonArray("roles", EMPTY_ARRAY)
       .contains(roleName);
@@ -719,10 +728,6 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     byte[] bytes = token.encode().getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length);
     buff.appendBytes(bytes);
-
-    bytes = content.encode().getBytes(StandardCharsets.UTF_8);
-    buff.appendInt(bytes.length);
-    buff.appendBytes(bytes);
   }
 
   @Override
@@ -733,12 +738,8 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     byte[] bytes = buffer.getBytes(pos, pos + len);
     token = new JsonObject(new String(bytes, StandardCharsets.UTF_8));
     pos += len;
-
-    len = buffer.getInt(pos);
-    pos += 4;
-    bytes = buffer.getBytes(pos, pos + len);
-    content = new JsonObject(new String(bytes, StandardCharsets.UTF_8));
-    pos += len;
+    // force reparse of the token
+    init();
 
     return pos;
   }
