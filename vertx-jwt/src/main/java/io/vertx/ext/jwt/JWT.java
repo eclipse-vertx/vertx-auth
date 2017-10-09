@@ -43,6 +43,8 @@ public final class JWT {
 
   private static final List<String> PUBSEC_ALGS = Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512");
   private static final List<String> MAC_ALGS = Arrays.asList("HS256", "HS384", "HS512");
+  // simple random as its value is just to create entropy
+  private static final Random RND = new Random();
 
   private static final Map<String, String> ALGORITHM_ALIAS = new HashMap<String, String>() {{
     put("HS256", "HMacSHA256");
@@ -64,13 +66,13 @@ public final class JWT {
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
-  private final Map<String, Crypto> cryptoMap = new HashMap<>();
+  private final Map<String, List<Crypto>> cryptoMap = new HashMap<>();
 
   private boolean unsecure = true;
 
   public JWT() {
     // Spec requires "none" to always be available
-    cryptoMap.put("none", new CryptoNone());
+    cryptoMap.put("none", Collections.singletonList(new CryptoNone()));
   }
 
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
@@ -81,7 +83,8 @@ public final class JWT {
       try {
         Mac mac = getMac(keyStore, keyStorePassword, alg);
         if (mac != null) {
-          cryptoMap.put(alg, new CryptoMac(mac));
+          List<Crypto> l = cryptoMap.computeIfAbsent(alg, k -> new ArrayList<>());
+          l.add(new CryptoMac(mac));
         } else {
           log.info(alg + " not available");
         }
@@ -95,7 +98,8 @@ public final class JWT {
         X509Certificate certificate = getCertificate(keyStore, alg);
         PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
         if (certificate != null && privateKey != null) {
-          cryptoMap.put(alg, new CryptoSignature(ALGORITHM_ALIAS.get(alg), certificate, privateKey));
+          List<Crypto> l = cryptoMap.computeIfAbsent(alg, k -> new ArrayList<>());
+          l.add(new CryptoSignature(ALGORITHM_ALIAS.get(alg), certificate, privateKey));
         } else {
           log.info(alg + " not available");
         }
@@ -187,10 +191,8 @@ public final class JWT {
         sec = null;
       }
 
-      if (cryptoMap.containsKey(algorithm)) {
-        log.warn("Replacing existing algorithm: " + algorithm);
-      }
-      cryptoMap.put(algorithm, new CryptoKeyPair(ALGORITHM_ALIAS.get(algorithm), pub, sec));
+      List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
+      l.add(new CryptoKeyPair(ALGORITHM_ALIAS.get(algorithm), pub, sec));
 
     } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
       throw new RuntimeException(algorithm + " not supported", e);
@@ -225,11 +227,8 @@ public final class JWT {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
       X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cert.getBytes(UTF8)));
-      if (cryptoMap.containsKey(algorithm)) {
-        log.warn("Replacing existing algorithm: " + algorithm);
-      }
-
-      cryptoMap.put(algorithm, new CryptoSignature(ALGORITHM_ALIAS.get(algorithm), certificate, null));
+      List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
+      l.add(new CryptoSignature(ALGORITHM_ALIAS.get(algorithm), certificate, null));
       unsecure = cryptoMap.size() == 1;
     } catch (CertificateException e) {
       throw new RuntimeException(e);
@@ -262,10 +261,8 @@ public final class JWT {
       final Mac mac = Mac.getInstance(ALGORITHM_ALIAS.get(algorithm));
       mac.init(new SecretKeySpec(key.getBytes(), ALGORITHM_ALIAS.get(algorithm)));
 
-      if (cryptoMap.containsKey(algorithm)) {
-        log.warn("Replacing existing algorithm: " + algorithm);
-      }
-      cryptoMap.put(algorithm, new CryptoMac(mac));
+      List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
+      l.add(new CryptoMac(mac));
 
     } catch (InvalidKeyException | NoSuchAlgorithmException | RuntimeException e) {
       throw new RuntimeException(algorithm + " not supported", e);
@@ -339,9 +336,9 @@ public final class JWT {
 
     String alg = header.getString("alg");
 
-    Crypto crypto = cryptoMap.get(alg);
+    List<Crypto> cryptos = cryptoMap.get(alg);
 
-    if (crypto == null) {
+    if (cryptos == null || cryptos.size() == 0) {
       throw new RuntimeException("Algorithm not supported");
     }
 
@@ -352,11 +349,16 @@ public final class JWT {
 
     // verify signature. `sign` will return base64 string.
     if (!unsecure) {
-      String signingInput = headerSeg + "." + payloadSeg;
+      byte[] payloadInput = base64urlDecode(signatureSeg);
+      byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
-      if (!crypto.verify(base64urlDecode(signatureSeg), signingInput.getBytes(UTF8))) {
-        throw new RuntimeException("Signature verification failed");
+      for (Crypto c : cryptos) {
+        if (c.verify(payloadInput, signingInput)) {
+          return payload;
+        }
       }
+
+      throw new RuntimeException("Signature verification failed");
     }
 
     return payload;
@@ -365,9 +367,9 @@ public final class JWT {
   public String sign(JsonObject payload, JsonObject options) {
     final String algorithm = options.getString("algorithm", "HS256");
 
-    Crypto crypto = cryptoMap.get(algorithm);
+    List<Crypto> cryptos = cryptoMap.get(algorithm);
 
-    if (crypto == null) {
+    if (cryptos == null || cryptos.size() == 0) {
       throw new RuntimeException("Algorithm not supported");
     }
 
@@ -412,7 +414,7 @@ public final class JWT {
     String headerSegment = base64urlEncode(header.encode());
     String payloadSegment = base64urlEncode(payload.encode());
     String signingInput = headerSegment + "." + payloadSegment;
-    String signSegment = base64urlEncode(crypto.sign(signingInput.getBytes(UTF8)));
+    String signSegment = base64urlEncode(cryptos.get(RND.nextInt(cryptos.size())).sign(signingInput.getBytes(UTF8)));
 
     return headerSegment + "." + payloadSegment + "." + signSegment;
   }
