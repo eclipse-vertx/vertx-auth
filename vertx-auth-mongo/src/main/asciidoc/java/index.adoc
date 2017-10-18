@@ -13,7 +13,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-mongo</artifactId>
-  <version>3.5.0-SNAPSHOT</version>
+  <version>3.5.0</version>
 </dependency>
 ----
 
@@ -21,7 +21,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-mongo:3.5.0-SNAPSHOT'
+compile 'io.vertx:vertx-auth-mongo:3.5.0'
 ----
 
 To create an instance you first need an instance of `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`. To learn how to create one
