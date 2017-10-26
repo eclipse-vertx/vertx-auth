@@ -85,8 +85,8 @@ public interface OAuth2Auth extends AuthProviderInternal {
     }
 
     if (config.containsKey("realm-public-key")) {
-      options.setPubSecKeyOptions(new PubSecKeyOptions()
-        .setType("RS256")
+      options.addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("RS256")
         .setPublicKey(config.getString("realm-public-key")));
     }
 
@@ -129,6 +129,20 @@ public interface OAuth2Auth extends AuthProviderInternal {
    */
   @Deprecated
   void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler);
+
+  /**
+   * Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
+   * implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
+   * by default.
+   *
+   * This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
+   * token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
+   * a token and all grants will be encoded on the token itself so the requester does not need to list the required
+   * grants.
+   *
+   * @return true if openid-connect is used.
+   */
+  boolean hasJWTToken();
 
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
@@ -182,4 +196,12 @@ public interface OAuth2Auth extends AuthProviderInternal {
    * @return the flow type.
    */
   OAuth2FlowType getFlowType();
+
+  /**
+   * Loads a JWK Set from the remote provider.
+   *
+   * When calling this method several times, the loaded JWKs are updated in the underlying JWT object.
+   */
+  @Fluent
+  OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler);
 }

@@ -83,11 +83,13 @@ public interface KeycloakAuth {
       options.setUserInfoPath("/realms/" + realm + "/protocol/openid-connect/userinfo");
       // keycloak follows the RFC7662
       options.setIntrospectionPath("/realms/" + realm + "/protocol/openid-connect/token/introspect");
+      // keycloak follows the RFC7517
+      options.setJwkPath("/realms/" + realm + "/protocol/openid-connect/certs");
     }
 
     if (config.containsKey("realm-public-key")) {
-      options.setPubSecKeyOptions(new PubSecKeyOptions()
-        .setType("RS256")
+      options.addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("RS256")
         .setPublicKey(config.getString("realm-public-key")));
     }
 
