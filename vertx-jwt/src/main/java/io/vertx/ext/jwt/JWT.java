@@ -20,19 +20,12 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * JWT and JWS implementation draft-ietf-oauth-json-web-token-32.
@@ -41,8 +34,6 @@ import java.util.*;
  */
 public final class JWT {
 
-  private static final List<String> PUBSEC_ALGS = Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512");
-  private static final List<String> MAC_ALGS = Arrays.asList("HS256", "HS384", "HS512");
   // simple random as its value is just to create entropy
   private static final Random RND = new Random();
 
@@ -66,7 +57,7 @@ public final class JWT {
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
-  private final Map<String, List<Crypto>> cryptoMap = new HashMap<>();
+  private final Map<String, List<Crypto>> cryptoMap = new ConcurrentHashMap<>();
 
   public JWT() {
     // Spec requires "none" to always be available
@@ -120,17 +111,6 @@ public final class JWT {
     }
   }
 
-  private static KeyFactory getKeyFactoryFor(String algorithm) throws NoSuchAlgorithmException {
-    switch (algorithm.charAt(0)) {
-      case 'R':
-        return KeyFactory.getInstance("RSA");
-      case 'E':
-        return KeyFactory.getInstance("EC");
-      default:
-        throw new RuntimeException("Unknown algorithm factory for: " + algorithm);
-    }
-  }
-
   /**
    * Adds a JSON Web Key (rfc7517) to the crypto map.
    *
@@ -162,131 +142,71 @@ public final class JWT {
    * Adds a public key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
    *
+   * @deprecated Replaced by {@link #addJWK(JWK)}
    * @param algorithm the JWS algorithm, e.g.: RS256
    * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
+  @Deprecated
   public JWT addPublicKey(String algorithm, String key) {
-    return addKeyPair(algorithm, key, null);
+    return addJWK(new JWK(algorithm, key, null));
   }
 
   /**
    * Adds a key pair for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
    *
+   * @deprecated Replaced by {@link #addJWK(JWK)}
    * @param algorithm  the JWS algorithm, e.g.: RS256
    * @param publicKey  the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @param privateKey the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
+  @Deprecated
   public JWT addKeyPair(String algorithm, String publicKey, String privateKey) {
-    if (!PUBSEC_ALGS.contains(algorithm)) {
-      throw new RuntimeException("Unknown algorithm: " + algorithm);
-    }
-
-    if (publicKey == null || privateKey == null) {
-      cryptoMap.remove(algorithm);
-      if (publicKey == null && privateKey == null) {
-        return this;
-      }
-    }
-
-    try {
-      final PublicKey pub;
-      final PrivateKey sec;
-
-      if (publicKey != null) {
-        // factory for public key
-        final KeyFactory pubkf = getKeyFactoryFor(algorithm);
-        final X509EncodedKeySpec pubspec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(publicKey));
-        pub = pubkf.generatePublic(pubspec);
-      } else {
-        pub = null;
-      }
-
-      if (privateKey != null) {
-        // factory for the private key
-        final KeyFactory seckf = getKeyFactoryFor(algorithm);
-        final KeySpec secspec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(privateKey));
-        sec = seckf.generatePrivate(secspec);
-      } else {
-        sec = null;
-      }
-
-      List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
-      l.add(new CryptoKeyPair(ALGORITHM_ALIAS.get(algorithm), pub, sec));
-
-    } catch (InvalidKeySpecException | NoSuchAlgorithmException | RuntimeException e) {
-      throw new RuntimeException(algorithm + " not supported", e);
-    }
-
-    return this;
+    return addJWK(new JWK(algorithm, publicKey, privateKey));
   }
 
   /**
    * Adds a private key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google.
    *
+   * @deprecated Replaced by {@link #addJWK(JWK)}
    * @param algorithm the JWS algorithm, e.g.: RS256
    * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
+  @Deprecated
   public JWT addSecretKey(String algorithm, String key) {
-    return addKeyPair(algorithm, null, key);
+    return addJWK(new JWK(algorithm, null, key));
   }
 
   /**
    * Adds a certificate for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google.
    *
+   * @deprecated Replaced by {@link #addJWK(JWK)}
    * @param algorithm the JWS algorithm, e.g.: RS256
    * @param cert       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
+  @Deprecated
   public JWT addCertificate(String algorithm, String cert) {
-    try {
-      CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
-      X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cert.getBytes(UTF8)));
-      List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
-      l.add(new CryptoSignature(ALGORITHM_ALIAS.get(algorithm), certificate, null));
-    } catch (CertificateException e) {
-      throw new RuntimeException(e);
-    }
-
-    return this;
+    return addJWK(new JWK(algorithm, true, cert, null));
   }
 
   /**
    * Adds a secret (password) for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
    * it is common to see these keys when dealing with 3rd party services such as Google.
    *
+   * @deprecated Replaced by {@link #addJWK(JWK)}
    * @param algorithm the JWS algorithm, e.g.: HS256
    * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
    * @return self
    */
+  @Deprecated
   public JWT addSecret(String algorithm, String key) {
-    if (!MAC_ALGS.contains(algorithm)) {
-      throw new RuntimeException("Unknown algorithm: " + algorithm);
-    }
-
-    if (key == null) {
-      cryptoMap.remove(algorithm);
-      return this;
-    }
-
-    try {
-      final Mac mac = Mac.getInstance(ALGORITHM_ALIAS.get(algorithm));
-      mac.init(new SecretKeySpec(key.getBytes(), ALGORITHM_ALIAS.get(algorithm)));
-
-      List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
-      l.add(new CryptoMac(mac));
-
-    } catch (InvalidKeyException | NoSuchAlgorithmException | RuntimeException e) {
-      throw new RuntimeException(algorithm + " not supported", e);
-    }
-
-    return this;
+    return addJWK(new JWK(algorithm, key));
   }
 
   /**

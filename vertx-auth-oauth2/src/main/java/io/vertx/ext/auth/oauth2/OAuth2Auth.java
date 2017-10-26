@@ -85,8 +85,8 @@ public interface OAuth2Auth extends AuthProviderInternal {
     }
 
     if (config.containsKey("realm-public-key")) {
-      options.setPubSecKeyOptions(new PubSecKeyOptions()
-        .setType("RS256")
+      options.addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("RS256")
         .setPublicKey(config.getString("realm-public-key")));
       options.setJwtToken(true);
     }
@@ -145,7 +145,6 @@ public interface OAuth2Auth extends AuthProviderInternal {
    */
   boolean hasJWTToken();
 
-
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
    *
@@ -198,4 +197,12 @@ public interface OAuth2Auth extends AuthProviderInternal {
    * @return the flow type.
    */
   OAuth2FlowType getFlowType();
+
+  /**
+   * Loads a JWK Set from the remote provider.
+   *
+   * When calling this method several times, the loaded JWKs are updated in the underlying JWT object.
+   */
+  @Fluent
+  OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler);
 }

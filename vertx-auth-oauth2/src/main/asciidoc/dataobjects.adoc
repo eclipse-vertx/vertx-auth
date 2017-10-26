@@ -57,6 +57,7 @@ Set custom headers to be sent with every request to the provider
 Set the provider token introspection resource path
 +++
 |[[jdkSslEngineOptions]]`jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
+|[[jwkPath]]`jwkPath`|`String`|-
 |[[jwtToken]]`jwtToken`|`Boolean`|
 +++
 Signal that this provider tokens are in JWT format
@@ -87,11 +88,10 @@ Set the provider logout path
 |[[pipeliningLimit]]`pipeliningLimit`|`Number (int)`|-
 |[[protocolVersion]]`protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
 |[[proxyOptions]]`proxyOptions`|`link:dataobjects.html#ProxyOptions[ProxyOptions]`|-
-|[[pubSecKey]]`pubSecKey`|`link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|
+|[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|
 +++
 The provider PubSec key options
 +++
-|[[pubSecKeyOptions]]`pubSecKeyOptions`|`link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |[[receiveBufferSize]]`receiveBufferSize`|`Number (int)`|-
 |[[reuseAddress]]`reuseAddress`|`Boolean`|-
 |[[reusePort]]`reusePort`|`Boolean`|-

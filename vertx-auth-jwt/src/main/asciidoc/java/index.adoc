@@ -129,7 +129,7 @@ case all you need to have is a public key im PEM format.
 ----
 JWTAuthOptions config = new JWTAuthOptions()
   .addPubSecKey(new PubSecKeyOptions()
-    .setType("RS256")
+    .setAlgorithm("RS256")
     .setPublicKey("BASE64-ENCODED-PUBLIC_KEY"));
 
 AuthProvider provider = JWTAuth.create(vertx, config);

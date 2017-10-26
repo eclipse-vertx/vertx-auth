@@ -41,6 +41,7 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param initialSettings 
  * @param introspectionPath  Set the provider token introspection resource path
  * @param jdkSslEngineOptions 
+ * @param jwkPath 
  * @param jwtToken  Signal that this provider tokens are in JWT format
  * @param keepAlive 
  * @param keyStoreOptions 
@@ -65,7 +66,7 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param pipeliningLimit 
  * @param protocolVersion 
  * @param proxyOptions 
- * @param pubSecKeyOptions 
+ * @param pubSecKeys  The provider PubSec key options
  * @param receiveBufferSize 
  * @param reuseAddress 
  * @param reusePort 
@@ -122,6 +123,7 @@ fun OAuth2ClientOptions(
   initialSettings: io.vertx.core.http.Http2Settings? = null,
   introspectionPath: String? = null,
   jdkSslEngineOptions: io.vertx.core.net.JdkSSLEngineOptions? = null,
+  jwkPath: String? = null,
   jwtToken: Boolean? = null,
   keepAlive: Boolean? = null,
   keyStoreOptions: io.vertx.core.net.JksOptions? = null,
@@ -146,7 +148,7 @@ fun OAuth2ClientOptions(
   pipeliningLimit: Int? = null,
   protocolVersion: HttpVersion? = null,
   proxyOptions: io.vertx.core.net.ProxyOptions? = null,
-  pubSecKeyOptions: io.vertx.ext.auth.PubSecKeyOptions? = null,
+  pubSecKeys: Iterable<io.vertx.ext.auth.PubSecKeyOptions>? = null,
   receiveBufferSize: Int? = null,
   reuseAddress: Boolean? = null,
   reusePort: Boolean? = null,
@@ -255,6 +257,9 @@ fun OAuth2ClientOptions(
   if (jdkSslEngineOptions != null) {
     this.setJdkSslEngineOptions(jdkSslEngineOptions)
   }
+  if (jwkPath != null) {
+    this.setJwkPath(jwkPath)
+  }
   if (jwtToken != null) {
     this.setJwtToken(jwtToken)
   }
@@ -327,8 +332,8 @@ fun OAuth2ClientOptions(
   if (proxyOptions != null) {
     this.setProxyOptions(proxyOptions)
   }
-  if (pubSecKeyOptions != null) {
-    this.setPubSecKeyOptions(pubSecKeyOptions)
+  if (pubSecKeys != null) {
+    this.setPubSecKeys(pubSecKeys.toList())
   }
   if (receiveBufferSize != null) {
     this.setReceiveBufferSize(receiveBufferSize)

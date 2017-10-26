@@ -145,7 +145,7 @@ var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
 var config = {
   "pubSecKeys" : [
     {
-      "type" : "RS256",
+      "algorithm" : "RS256",
       "publicKey" : "BASE64-ENCODED-PUBLIC_KEY"
     }
   ]

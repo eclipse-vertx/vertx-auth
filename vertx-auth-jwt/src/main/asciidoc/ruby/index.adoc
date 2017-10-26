@@ -145,7 +145,7 @@ require 'vertx-auth-jwt/jwt_auth'
 config = {
   'pubSecKeys' => [
     {
-      'type' => "RS256",
+      'algorithm' => "RS256",
       'publicKey' => "BASE64-ENCODED-PUBLIC_KEY"
     }
   ]
