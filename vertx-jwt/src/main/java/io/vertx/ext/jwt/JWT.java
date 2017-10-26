@@ -68,8 +68,6 @@ public final class JWT {
 
   private final Map<String, List<Crypto>> cryptoMap = new HashMap<>();
 
-  private boolean unsecure = true;
-
   public JWT() {
     // Spec requires "none" to always be available
     cryptoMap.put("none", Collections.singletonList(new CryptoNone()));
@@ -108,8 +106,6 @@ public final class JWT {
         log.warn(alg + " not supported");
       }
     }
-
-    unsecure = cryptoMap.size() == 1;
   }
 
   @Deprecated
@@ -133,6 +129,33 @@ public final class JWT {
       default:
         throw new RuntimeException("Unknown algorithm factory for: " + algorithm);
     }
+  }
+
+  /**
+   * Adds a JSON Web Key (rfc7517) to the crypto map.
+   *
+   * @param jwk a JSON Web Key
+   * @return self
+   */
+  public JWT addJWK(JWK jwk) {
+    List<Crypto> current = cryptoMap.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+
+    boolean replaced = false;
+
+    for (int i = 0; i < current.size(); i++) {
+      if (current.get(i).getId().equals(jwk.getId())) {
+        // replace
+        current.set(i, jwk);
+        replaced = true;
+      }
+    }
+
+    if (!replaced) {
+      // non existent, add it!
+      current.add(jwk);
+    }
+
+    return this;
   }
 
   /**
@@ -164,7 +187,6 @@ public final class JWT {
     if (publicKey == null || privateKey == null) {
       cryptoMap.remove(algorithm);
       if (publicKey == null && privateKey == null) {
-        unsecure = cryptoMap.size() == 1;
         return this;
       }
     }
@@ -198,7 +220,6 @@ public final class JWT {
       throw new RuntimeException(algorithm + " not supported", e);
     }
 
-    unsecure = cryptoMap.size() == 1;
     return this;
   }
 
@@ -229,7 +250,6 @@ public final class JWT {
       X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cert.getBytes(UTF8)));
       List<Crypto> l = cryptoMap.computeIfAbsent(algorithm, k -> new ArrayList<>());
       l.add(new CryptoSignature(ALGORITHM_ALIAS.get(algorithm), certificate, null));
-      unsecure = cryptoMap.size() == 1;
     } catch (CertificateException e) {
       throw new RuntimeException(e);
     }
@@ -252,8 +272,6 @@ public final class JWT {
 
     if (key == null) {
       cryptoMap.remove(algorithm);
-
-      unsecure = cryptoMap.size() == 1;
       return this;
     }
 
@@ -268,7 +286,6 @@ public final class JWT {
       throw new RuntimeException(algorithm + " not supported", e);
     }
 
-    unsecure = cryptoMap.size() == 1;
     return this;
   }
 
@@ -317,14 +334,14 @@ public final class JWT {
 
   public JsonObject decode(final String token) {
     String[] segments = token.split("\\.");
-    if (segments.length != (unsecure ? 2 : 3)) {
+    if (segments.length != (isUnsecure() ? 2 : 3)) {
       throw new RuntimeException("Not enough or too many segments");
     }
 
     // All segment should be base64
     String headerSeg = segments[0];
     String payloadSeg = segments[1];
-    String signatureSeg = unsecure ? null : segments[2];
+    String signatureSeg = isUnsecure() ? null : segments[2];
 
     if ("".equals(signatureSeg)) {
       throw new RuntimeException("Signature is required");
@@ -343,12 +360,12 @@ public final class JWT {
     }
 
     // if we only allow secure alg, then none is not a valid option
-    if (!unsecure && "none".equals(alg)) {
+    if (!isUnsecure() && "none".equals(alg)) {
       throw new RuntimeException("Algorithm \"none\" not allowed");
     }
 
     // verify signature. `sign` will return base64 string.
-    if (!unsecure) {
+    if (!isUnsecure()) {
       byte[] payloadInput = base64urlDecode(signatureSeg);
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
@@ -432,7 +449,7 @@ public final class JWT {
   }
 
   public boolean isUnsecure() {
-    return unsecure;
+    return cryptoMap.size() == 1;
   }
 
   public Collection<String> availableAlgorithms() {

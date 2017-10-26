@@ -52,6 +52,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private JsonObject userInfoParams;
   // introspection RFC7662
   private String introspectionPath;
+  // JWK path RFC7517
+  private String jwkPath;
+  private long keyRefreshInterval;
 
   private String site;
   private String clientID;
