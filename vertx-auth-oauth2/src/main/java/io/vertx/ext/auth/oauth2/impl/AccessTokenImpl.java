@@ -55,6 +55,10 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * This json is build from the access_token, if present, assuming it is encoded as JWT
    */
   private JsonObject accessToken;
+  /**
+   * This json is build from the access_token, if present, assuming it is encoded as JWT
+   */
+  private JsonObject idToken;
 
   /**
    * Creates an AccessToken instance.
@@ -87,10 +91,15 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     }
 
     accessToken = null;
+    idToken = null;
 
     // try to parse the access_token
     if (provider.getConfig().isJwtToken() && token.containsKey("access_token")) {
       accessToken = provider.decode(token.getString("access_token"));
+    }
+    // try to parse the id_token
+    if (token.containsKey("id_token")) {
+      idToken = provider.decode(token.getString("id_token"));
     }
 
     // the permission cache needs to be clear
@@ -121,12 +130,23 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     moveProperty("iss");
     moveProperty("jti");
     // known implementation fields
-    moveProperty("permissions");
-    moveProperty("resource_access");
-    moveProperty("realm_access");
+    moveAccessTokenProperty("permissions");
+    moveAccessTokenProperty("resource_access");
+    moveAccessTokenProperty("realm_access");
   }
 
   private void moveProperty(String name) {
+    if (token.containsKey(name)) {
+      if (accessToken != null) {
+        accessToken.put(name, token.getValue(name));
+      }
+      if (idToken != null) {
+        idToken.put(name, token.getValue(name));
+      }
+    }
+  }
+
+  private void moveAccessTokenProperty(String name) {
     if (token.containsKey(name)) {
       if (accessToken != null) {
         accessToken.put(name, token.getValue(name));
@@ -142,6 +162,13 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     return null;
   }
 
+  @Override
+  public JsonObject idToken() {
+    if (idToken != null) {
+      return idToken.copy();
+    }
+    return null;
+  }
   /**
    * Check if the access token is expired or not.
    */
