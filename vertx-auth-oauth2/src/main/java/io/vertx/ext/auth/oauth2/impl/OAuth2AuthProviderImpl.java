@@ -86,12 +86,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return vertx;
   }
 
-  JsonObject decode(String token) {
-    return jwt.decode(token);
-  }
-
-  public String sign(JsonObject payload) {
-    return jwt.sign(payload, config.getExtraParameters());
+  public JWT getJWT() {
+    return jwt;
   }
 
   @Override
@@ -116,20 +112,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public boolean hasJWTToken() {
-    return config.isJwtToken();
-  }
-
-  @Override
   public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
-    if (!config.isJwtToken()) {
-      handler.handle(Future.failedFuture("Provider does not support JWT tokens"));
-    } else {
-      try {
-        handler.handle(Future.succeededFuture(new AccessTokenImpl(this, new JsonObject().put("access_token", token))));
-      } catch (RuntimeException e) {
-        handler.handle(Future.failedFuture(e));
-      }
+    try {
+      handler.handle(Future.succeededFuture(new OAuth2TokenImpl(this, new JsonObject().put("access_token", token))));
+    } catch (RuntimeException e) {
+      handler.handle(Future.failedFuture(e));
     }
     return this;
   }
@@ -138,7 +125,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
     try {
       // attempt to create a token object from the given string representation
-      final AccessToken accessToken = new AccessTokenImpl(this, new JsonObject().put(tokenType, token));
+      final AccessToken accessToken = new OAuth2TokenImpl(this, new JsonObject().put(tokenType, token));
       // if token is expired avoid going to the server
       if (accessToken.expired()) {
         handler.handle(Future.failedFuture("Expired token"));

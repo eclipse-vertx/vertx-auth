@@ -12,27 +12,8 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[audience]]`audience`|`Array of String`|
-+++
-Set the audience list
-+++
-|[[audiences]]`audiences`|`Array of String`|
-+++
-Set the audience list
-+++
-|[[ignoreExpiration]]`ignoreExpiration`|`Boolean`|
-+++
-Set whether expiration is ignored
-+++
-|[[issuer]]`issuer`|`String`|
-+++
-Set the issuer
-+++
+|[[jwtOptions]]`jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
 |[[keyStore]]`keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
-|[[leeway]]`leeway`|`Number (int)`|
-+++
-Set the leeway in seconds
-+++
 |[[permissionsClaimKey]]`permissionsClaimKey`|`String`|-
 |[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |[[secrets]]`secrets`|`Array of link:dataobjects.html#SecretOptions[SecretOptions]`|-
@@ -72,43 +53,17 @@ Set the leeway in seconds
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[algorithm]]`algorithm`|`String`|
-+++
-The algorithm to use, it should be one of the alias [HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512]
-+++
-|[[audience]]`audience`|`Array of String`|
-+++
-The target audience of this token
-+++
-|[[audiences]]`audiences`|`Array of String`|
-+++
-The target audience of this token
-+++
-|[[expiresInMinutes]]`expiresInMinutes`|`Number (Long)`|
-+++
-The expiration time for the token in minutes
-+++
-|[[expiresInSeconds]]`expiresInSeconds`|`Number (Long)`|
-+++
-The expiration time for the token in seconds
-+++
+|[[algorithm]]`algorithm`|`String`|-
+|[[audience]]`audience`|`Array of String`|-
+|[[audiences]]`audiences`|`Array of String`|-
+|[[expiresInMinutes]]`expiresInMinutes`|`Number (int)`|-
+|[[expiresInSeconds]]`expiresInSeconds`|`Number (int)`|-
 |[[header]]`header`|`Json object`|-
-|[[headers]]`headers`|`String`|-
-|[[issuer]]`issuer`|`String`|
-+++
-The issuer of this token
-+++
-|[[noTimestamp]]`noTimestamp`|`Boolean`|
-+++
-Disable the generation of issued at claim
-+++
-|[[permissions]]`permissions`|`Array of String`|
-+++
-The permissions of this token.
-+++
-|[[subject]]`subject`|`String`|
-+++
-The subject of this token
-+++
+|[[ignoreExpiration]]`ignoreExpiration`|`Boolean`|-
+|[[issuer]]`issuer`|`String`|-
+|[[leeway]]`leeway`|`Number (int)`|-
+|[[noTimestamp]]`noTimestamp`|`Boolean`|-
+|[[permissions]]`permissions`|`Array of String`|-
+|[[subject]]`subject`|`String`|-
 |===
 

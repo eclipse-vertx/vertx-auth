@@ -23,7 +23,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
-import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
+import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
@@ -53,7 +53,7 @@ public class AuthJWTImpl implements OAuth2Flow {
 
     final JsonObject body = new JsonObject()
       .put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-      .put("assertion", provider.sign(params));
+      .put("assertion", provider.getJWT().sign(params, provider.getConfig().getJWTOptions()));
 
     fetch(
       provider,
@@ -93,7 +93,7 @@ public class AuthJWTImpl implements OAuth2Flow {
           return;
         }
 
-        callback.handle(Future.succeededFuture(new AccessTokenImpl(provider, token)));
+        callback.handle(Future.succeededFuture(new OAuth2TokenImpl(provider, token)));
       });
   }
 }

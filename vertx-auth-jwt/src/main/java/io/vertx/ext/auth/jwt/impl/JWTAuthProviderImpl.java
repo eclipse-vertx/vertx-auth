@@ -30,7 +30,7 @@ import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.auth.jwt.JWTOptions;
+import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.ext.jwt.JWT;
 
 import java.io.ByteArrayInputStream;
@@ -53,17 +53,11 @@ public class JWTAuthProviderImpl implements JWTAuth {
   private final JWT jwt;
 
   private final String permissionsClaimKey;
-  private final String issuer;
-  private final List<String> audience;
-  private final boolean ignoreExpiration;
-  private final int leeway;
+  private final JWTOptions jwtOptions;
 
   public JWTAuthProviderImpl(Vertx vertx, JWTAuthOptions config) {
     this.permissionsClaimKey = config.getPermissionsClaimKey();
-    this.issuer = config.getIssuer();
-    this.audience = config.getAudience();
-    this.ignoreExpiration = config.isIgnoreExpiration();
-    this.leeway = config.getLeeway();
+    this.jwtOptions = config.getJWTOptions();
 
     final KeyStoreOptions keyStore = config.getKeyStore();
 
@@ -113,37 +107,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
     try {
       final JsonObject payload = jwt.decode(authInfo.getString("jwt"));
 
-      // All dates in JWT are of type NumericDate
-      // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
-      // the specified UTC date/time, ignoring leap seconds
-      final long now = (System.currentTimeMillis() / 1000);
-
-      if (payload.containsKey("exp") && !ignoreExpiration) {
-        if (now - leeway >= payload.getLong("exp")) {
-          resultHandler.handle(Future.failedFuture("Expired JWT token: exp <= now"));
-          return;
-        }
+      if (jwt.isExpired(payload, jwtOptions)) {
+        resultHandler.handle(Future.failedFuture("Expired JWT token."));
+        return;
       }
 
-      if (payload.containsKey("iat")) {
-        Long iat = payload.getLong("iat");
-        // issue at must be in the past
-        if (iat > now + leeway) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT token: iat > now"));
-          return;
-        }
-      }
-
-      if (payload.containsKey("nbf")) {
-        Long nbf = payload.getLong("nbf");
-        // not before must be after now
-        if (nbf > now + leeway) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT token: nbf > now"));
-          return;
-        }
-      }
-
-      if (audience != null) {
+      if (jwtOptions.getAudience() != null) {
         JsonArray target;
         if (payload.getValue("aud") instanceof String) {
           target = new JsonArray().add(payload.getValue("aud", ""));
@@ -151,14 +120,14 @@ public class JWTAuthProviderImpl implements JWTAuth {
           target = payload.getJsonArray("aud", EMPTY_ARRAY);
         }
 
-        if (Collections.disjoint(audience, target.getList())) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + Json.encode(audience)));
+        if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
+          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + Json.encode(jwtOptions.getAudience())));
           return;
         }
       }
 
-      if (issuer != null) {
-        if (!issuer.equals(payload.getString("iss"))) {
+      if (jwtOptions.getIssuer() != null) {
+        if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
           resultHandler.handle(Future.failedFuture("Invalid JWT issuer"));
           return;
         }
@@ -173,14 +142,13 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   @Override
   public String generateToken(JsonObject claims, final JWTOptions options) {
-    final JsonObject jsonOptions = options.toJson();
     final JsonObject _claims = claims.copy();
 
     // we do some "enhancement" of the claims to support roles and permissions
-    if (jsonOptions.containsKey("permissions") && !_claims.containsKey(permissionsClaimKey)) {
-      _claims.put(permissionsClaimKey, jsonOptions.getJsonArray("permissions"));
+    if (options.getPermissions() != null && !_claims.containsKey(permissionsClaimKey)) {
+      _claims.put(permissionsClaimKey, new JsonArray(options.getPermissions()));
     }
 
-    return jwt.sign(_claims, jsonOptions);
+    return jwt.sign(_claims, options);
   }
 }

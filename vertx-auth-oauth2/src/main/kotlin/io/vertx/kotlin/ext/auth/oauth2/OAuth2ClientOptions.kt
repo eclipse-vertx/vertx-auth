@@ -11,6 +11,7 @@ import io.vertx.core.net.PemTrustOptions
 import io.vertx.core.net.PfxOptions
 import io.vertx.core.net.ProxyOptions
 import io.vertx.ext.auth.PubSecKeyOptions
+import io.vertx.ext.jwt.JWTOptions
 
 /**
  * A function providing a DSL for building [io.vertx.ext.auth.oauth2.OAuth2ClientOptions] objects.
@@ -41,7 +42,7 @@ import io.vertx.ext.auth.PubSecKeyOptions
  * @param initialSettings 
  * @param introspectionPath  Set the provider token introspection resource path
  * @param jdkSslEngineOptions 
- * @param jwtToken  Signal that this provider tokens are in JWT format
+ * @param jwtOptions 
  * @param keepAlive 
  * @param keyStoreOptions 
  * @param localAddress 
@@ -122,7 +123,7 @@ fun OAuth2ClientOptions(
   initialSettings: io.vertx.core.http.Http2Settings? = null,
   introspectionPath: String? = null,
   jdkSslEngineOptions: io.vertx.core.net.JdkSSLEngineOptions? = null,
-  jwtToken: Boolean? = null,
+  jwtOptions: io.vertx.ext.jwt.JWTOptions? = null,
   keepAlive: Boolean? = null,
   keyStoreOptions: io.vertx.core.net.JksOptions? = null,
   localAddress: String? = null,
@@ -255,8 +256,8 @@ fun OAuth2ClientOptions(
   if (jdkSslEngineOptions != null) {
     this.setJdkSslEngineOptions(jdkSslEngineOptions)
   }
-  if (jwtToken != null) {
-    this.setJwtToken(jwtToken)
+  if (jwtOptions != null) {
+    this.setJWTOptions(jwtOptions)
   }
   if (keepAlive != null) {
     this.setKeepAlive(keepAlive)

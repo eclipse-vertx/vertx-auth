@@ -12,16 +12,18 @@ import io.vertx.ext.auth.jwt.JWTOptions
  *
  * Generated JWTs will include an iat claim by default unless noTimestamp is specified.
  *
- * @param algorithm  The algorithm to use, it should be one of the alias [HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512]
- * @param audience  The target audience of this token
- * @param audiences  The target audience of this token
- * @param expiresInMinutes  The expiration time for the token in minutes
- * @param expiresInSeconds  The expiration time for the token in seconds
- * @param headers 
- * @param issuer  The issuer of this token
- * @param noTimestamp  Disable the generation of issued at claim
- * @param permissions  The permissions of this token.
- * @param subject  The subject of this token
+ * @param algorithm 
+ * @param audience 
+ * @param audiences 
+ * @param expiresInMinutes 
+ * @param expiresInSeconds 
+ * @param header 
+ * @param ignoreExpiration 
+ * @param issuer 
+ * @param leeway 
+ * @param noTimestamp 
+ * @param permissions 
+ * @param subject 
  *
  * <p/>
  * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.jwt.JWTOptions original] using Vert.x codegen.
@@ -30,10 +32,12 @@ fun JWTOptions(
   algorithm: String? = null,
   audience: Iterable<String>? = null,
   audiences: Iterable<String>? = null,
-  expiresInMinutes: Long? = null,
-  expiresInSeconds: Long? = null,
-  headers: Map<String, String>? = null,
+  expiresInMinutes: Int? = null,
+  expiresInSeconds: Int? = null,
+  header: io.vertx.core.json.JsonObject? = null,
+  ignoreExpiration: Boolean? = null,
   issuer: String? = null,
+  leeway: Int? = null,
   noTimestamp: Boolean? = null,
   permissions: Iterable<String>? = null,
   subject: String? = null): JWTOptions = io.vertx.ext.auth.jwt.JWTOptions().apply {
@@ -55,13 +59,17 @@ fun JWTOptions(
   if (expiresInSeconds != null) {
     this.setExpiresInSeconds(expiresInSeconds)
   }
-  if (headers != null) {
-    for (item in headers) {
-      this.addHeader(item.key, item.value)
-    }
+  if (header != null) {
+    this.setHeader(header)
+  }
+  if (ignoreExpiration != null) {
+    this.setIgnoreExpiration(ignoreExpiration)
   }
   if (issuer != null) {
     this.setIssuer(issuer)
+  }
+  if (leeway != null) {
+    this.setLeeway(leeway)
   }
   if (noTimestamp != null) {
     this.setNoTimestamp(noTimestamp)

@@ -22,6 +22,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
@@ -29,6 +31,7 @@ import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
@@ -39,12 +42,16 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class AccessTokenImpl extends AbstractUser implements AccessToken {
+public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
+
+  private static final Charset UTF8 = StandardCharsets.UTF_8;
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
 
   private static final JsonObject EMPTY_JSON = new JsonObject();
   private static final JsonArray EMPTY_ARRAY = new JsonArray();
 
   private OAuth2AuthProviderImpl provider;
+  private boolean trustJWT = false;
 
   /**
    * The RAW token
@@ -52,14 +59,15 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
   private JsonObject token;
 
   /**
-   * This json is build from the access_token, if present, assuming it is encoded as JWT
+   * This json's are build from the access_token and id_token, if present, assuming it is encoded as JWT
    */
   private JsonObject accessToken;
+  private JsonObject idToken;
 
   /**
    * Creates an AccessToken instance.
    */
-  public AccessTokenImpl() {
+  public OAuth2TokenImpl() {
   }
 
   /**
@@ -67,11 +75,37 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    *
    * @param token - An object containing the token object returned from the OAuth2 server.
    */
-  public AccessTokenImpl(OAuth2AuthProviderImpl provider, JsonObject token) {
+  public OAuth2TokenImpl(OAuth2AuthProviderImpl provider, JsonObject token) {
     this.provider = provider;
     this.token = token;
 
     init();
+  }
+
+  private JsonObject decodeToken(String opaque) {
+    if (opaque == null) {
+      return null;
+    }
+
+    // if it is trusted we can attempt to parse anyway
+    if (trustJWT) {
+      String[] segments = opaque.split("\\.");
+      if (segments.length == 2 || segments.length == 3) {
+        // All segment should be base64
+        String payloadSeg = segments[1];
+        // base64 decode and parse JSON
+        return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
+      } else {
+        return null;
+      }
+    } else {
+      try {
+        return provider.getJWT().decode(opaque);
+      } catch (RuntimeException e) {
+        LOG.warn("Cannot decode token:", e);
+        return null;
+      }
+    }
   }
 
   private void init() {
@@ -86,12 +120,9 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
       token.put("expires_at", System.currentTimeMillis() + 1000 * expiresIn);
     }
 
-    accessToken = null;
-
-    // try to parse the access_token
-    if (provider.getConfig().isJwtToken() && token.containsKey("access_token")) {
-      accessToken = provider.decode(token.getString("access_token"));
-    }
+    // attempt to decode tokens
+    accessToken = decodeToken(token.getString("access_token"));
+    idToken = decodeToken(token.getString("id_token"));
 
     // the permission cache needs to be clear
     clearCache();
@@ -99,45 +130,50 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     if (token.containsKey("scope")) {
       Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
     }
-
-    // validate expiration
-    if (token.containsKey("exp")) {
-      Long exp;
-      try {
-        exp = token.getLong("exp");
-      } catch (ClassCastException e) {
-        // for some reason someone decided to send a number as a String...
-        exp = Long.valueOf(token.getString("exp"));
-      }
-      token.put("expires_at", 1000 * exp);
-    }
-
-    // move JWT fields into "accessToken"
-    moveProperty("exp");
-    moveProperty("iat");
-    moveProperty("nbf");
-    moveProperty("sub");
-    moveProperty("aud");
-    moveProperty("iss");
-    moveProperty("jti");
-    // known implementation fields
-    moveProperty("permissions");
-    moveProperty("resource_access");
-    moveProperty("realm_access");
   }
 
-  private void moveProperty(String name) {
-    if (token.containsKey(name)) {
-      if (accessToken != null) {
-        accessToken.put(name, token.getValue(name));
-      }
-    }
+  @Override
+  public AccessToken setTrustJWT(boolean trust) {
+    this.trustJWT = trust;
+    // refresh the tokens
+    accessToken = decodeToken(token.getString("access_token"));
+    idToken = decodeToken(token.getString("id_token"));
+
+    return this;
+  }
+
+  @Override
+  public String opaqueAccessToken() {
+    return token.getString("access_token");
+  }
+
+  @Override
+  public String opaqueRefreshToken() {
+    return token.getString("refresh_token");
+  }
+
+  @Override
+  public String opaqueIdToken() {
+    return token.getString("id_token");
+  }
+
+  @Override
+  public String tokenType() {
+    return token.getString("token_type");
   }
 
   @Override
   public JsonObject accessToken() {
     if (accessToken != null) {
       return accessToken.copy();
+    }
+    return null;
+  }
+
+  @Override
+  public JsonObject idToken() {
+    if (idToken != null) {
+      return idToken.copy();
     }
     return null;
   }
@@ -155,36 +191,8 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
       return true;
     }
 
-    // All dates in JWT are of type NumericDate
-    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
-    // the specified UTC date/time, ignoring leap seconds
-    now = System.currentTimeMillis() / 1000;
-
-    if (accessToken != null) {
-      if (accessToken.containsKey("exp")) {
-        if (now >= accessToken.getLong("exp")) {
-          return true;
-        }
-      }
-
-      if (accessToken.containsKey("iat")) {
-        Long iat = accessToken.getLong("iat");
-        // issue at must be in the past
-        if (iat > now) {
-          return true;
-        }
-      }
-
-      if (accessToken.containsKey("nbf")) {
-        Long nbf = accessToken.getLong("nbf");
-        // not before must be after now
-        if (nbf > now) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    // delegate to the JWT lib
+    return provider.getJWT().isExpired(accessToken, provider.getConfig().getJWTOptions());
   }
 
   /**
@@ -193,7 +201,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * @param handler - The callback function returning the results.
    */
   @Override
-  public AccessTokenImpl refresh(Handler<AsyncResult<Void>> handler) {
+  public OAuth2TokenImpl refresh(Handler<AsyncResult<Void>> handler) {
 
     final JsonObject headers = new JsonObject();
 
@@ -207,7 +215,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
 
     form
       .put("grant_type", "refresh_token")
-      .put("refresh_token", token.getString("refresh_token"))
+      .put("refresh_token", opaqueRefreshToken())
       // Salesforce does seem to require them
       .put("client_id", provider.getConfig().getClientID());
 
@@ -296,7 +304,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * @param handler    - The callback function returning the results.
    */
   @Override
-  public AccessTokenImpl revoke(String token_type, Handler<AsyncResult<Void>> handler) {
+  public OAuth2TokenImpl revoke(String token_type, Handler<AsyncResult<Void>> handler) {
 
     final String tokenValue = token.getString(token_type);
 
@@ -362,11 +370,11 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
    * @param callback - The callback function returning the results.
    */
   @Override
-  public AccessTokenImpl logout(Handler<AsyncResult<Void>> callback) {
+  public OAuth2TokenImpl logout(Handler<AsyncResult<Void>> callback) {
 
     final JsonObject headers = new JsonObject();
 
-    headers.put("Authorization", "Bearer " + token.getString("access_token"));
+    headers.put("Authorization", "Bearer " + opaqueAccessToken());
 
     JsonObject tmp = provider.getConfig().getHeaders();
 
@@ -604,7 +612,7 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
     }
 
     // add the access token
-    headers.put("Authorization", "Bearer " + token.getString("access_token"));
+    headers.put("Authorization", "Bearer " + opaqueAccessToken());
 
     OAuth2API.fetch(provider, method, resource, headers, payload, fetch -> {
       if (fetch.failed()) {
@@ -645,23 +653,19 @@ public class AccessTokenImpl extends AbstractUser implements AccessToken {
       return;
     }
 
-    if (provider.getConfig().isJwtToken()) {
-      String[] parts = permission.split(":");
+    String[] parts = permission.split(":");
 
-      if (parts.length == 1) {
-        resultHandler.handle(Future.succeededFuture(hasApplicationRole(provider.getConfig().getClientID(), parts[0])));
-        return;
-      }
-
-      if ("realm".equals(parts[0])) {
-        resultHandler.handle(Future.succeededFuture(hasRealmRole(parts[1])));
-        return;
-      }
-
-      resultHandler.handle(Future.succeededFuture(hasApplicationRole(parts[0], parts[1])));
-    } else {
-      resultHandler.handle(Future.succeededFuture(false));
+    if (parts.length == 1) {
+      resultHandler.handle(Future.succeededFuture(hasApplicationRole(provider.getConfig().getClientID(), parts[0])));
+      return;
     }
+
+    if ("realm".equals(parts[0])) {
+      resultHandler.handle(Future.succeededFuture(hasRealmRole(parts[1])));
+      return;
+    }
+
+    resultHandler.handle(Future.succeededFuture(hasApplicationRole(parts[0], parts[1])));
   }
 
   /**

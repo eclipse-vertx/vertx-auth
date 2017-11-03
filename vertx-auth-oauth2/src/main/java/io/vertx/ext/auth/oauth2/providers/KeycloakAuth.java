@@ -89,7 +89,6 @@ public interface KeycloakAuth {
       options.setPubSecKeyOptions(new PubSecKeyOptions()
         .setType("RS256")
         .setPublicKey(config.getString("realm-public-key")));
-      options.setJwtToken(true);
     }
 
     return OAuth2Auth.create(vertx, flow, options);

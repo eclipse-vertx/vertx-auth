@@ -4,18 +4,15 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions
 import io.vertx.ext.auth.KeyStoreOptions
 import io.vertx.ext.auth.PubSecKeyOptions
 import io.vertx.ext.auth.SecretOptions
+import io.vertx.ext.jwt.JWTOptions
 
 /**
  * A function providing a DSL for building [io.vertx.ext.auth.jwt.JWTAuthOptions] objects.
  *
  * Options describing how an JWT Auth should behave.
  *
- * @param audience  Set the audience list
- * @param audiences  Set the audience list
- * @param ignoreExpiration  Set whether expiration is ignored
- * @param issuer  Set the issuer
+ * @param jwtOptions 
  * @param keyStore 
- * @param leeway  Set the leeway in seconds
  * @param permissionsClaimKey 
  * @param pubSecKeys 
  * @param secrets 
@@ -24,35 +21,17 @@ import io.vertx.ext.auth.SecretOptions
  * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.jwt.JWTAuthOptions original] using Vert.x codegen.
  */
 fun JWTAuthOptions(
-  audience: Iterable<String>? = null,
-  audiences: Iterable<String>? = null,
-  ignoreExpiration: Boolean? = null,
-  issuer: String? = null,
+  jwtOptions: io.vertx.ext.jwt.JWTOptions? = null,
   keyStore: io.vertx.ext.auth.KeyStoreOptions? = null,
-  leeway: Int? = null,
   permissionsClaimKey: String? = null,
   pubSecKeys: Iterable<io.vertx.ext.auth.PubSecKeyOptions>? = null,
   secrets: Iterable<io.vertx.ext.auth.SecretOptions>? = null): JWTAuthOptions = io.vertx.ext.auth.jwt.JWTAuthOptions().apply {
 
-  if (audience != null) {
-    this.setAudience(audience.toList())
-  }
-  if (audiences != null) {
-    for (item in audiences) {
-      this.addAudience(item)
-    }
-  }
-  if (ignoreExpiration != null) {
-    this.setIgnoreExpiration(ignoreExpiration)
-  }
-  if (issuer != null) {
-    this.setIssuer(issuer)
+  if (jwtOptions != null) {
+    this.setJWTOptions(jwtOptions)
   }
   if (keyStore != null) {
     this.setKeyStore(keyStore)
-  }
-  if (leeway != null) {
-    this.setLeeway(leeway)
   }
   if (permissionsClaimKey != null) {
     this.setPermissionsClaimKey(permissionsClaimKey)
