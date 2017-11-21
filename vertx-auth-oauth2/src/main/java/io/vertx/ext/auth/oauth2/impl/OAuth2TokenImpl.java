@@ -99,9 +99,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
           return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
         }
       } else {
-        if (provider != null) {
-          return provider.getJWT().decode(opaque);
-        }
+        return provider.getJWT().decode(opaque);
       }
     } catch (RuntimeException e) {
       LOG.warn("Cannot decode token:", e);
@@ -122,14 +120,14 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     }
 
     // attempt to decode tokens
-    accessToken = decodeToken(token.getString("access_token"));
-    refreshToken = decodeToken(token.getString("refresh_token"));
-    idToken = decodeToken(token.getString("id_token"));
-
-    // the permission cache needs to be clear
-    clearCache();
-    // rebuild cache
     if (provider != null) {
+      accessToken = decodeToken(token.getString("access_token"));
+      refreshToken = decodeToken(token.getString("refresh_token"));
+      idToken = decodeToken(token.getString("id_token"));
+
+      // the permission cache needs to be clear
+      clearCache();
+      // rebuild cache
       if (token.containsKey("scope")) {
         Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
       }
@@ -737,19 +735,15 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
   @Override
   public void setAuthProvider(AuthProvider authProvider) {
     provider = (OAuth2AuthProviderImpl) authProvider;
-
-    if (provider != null) {
-      // re-attempt to decode tokens
-      accessToken = decodeToken(token.getString("access_token"));
-      refreshToken = decodeToken(token.getString("refresh_token"));
-      idToken = decodeToken(token.getString("id_token"));
-
-      // the permission cache needs to be clear
-      clearCache();
-      // rebuild cache
-      if (token.containsKey("scope")) {
-        Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
-      }
+    // re-attempt to decode tokens
+    accessToken = decodeToken(token.getString("access_token"));
+    refreshToken = decodeToken(token.getString("refresh_token"));
+    idToken = decodeToken(token.getString("id_token"));
+    // the permission cache needs to be clear
+    clearCache();
+    // rebuild cache
+    if (token.containsKey("scope")) {
+      Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
     }
   }
 
