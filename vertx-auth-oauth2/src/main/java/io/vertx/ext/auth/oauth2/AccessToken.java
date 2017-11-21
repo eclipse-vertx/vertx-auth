@@ -44,6 +44,12 @@ public interface AccessToken extends User {
   JsonObject accessToken();
 
   /**
+   * The Refresh Token if present parsed as a JsonObject
+   * @return JSON
+   */
+  JsonObject refreshToken();
+
+  /**
    * The Id Token if present parsed as a JsonObject
    * @return JSON
    */

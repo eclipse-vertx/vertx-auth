@@ -62,6 +62,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
    * This json's are build from the access_token and id_token, if present, assuming it is encoded as JWT
    */
   private JsonObject accessToken;
+  private JsonObject refreshToken;
   private JsonObject idToken;
 
   /**
@@ -87,25 +88,25 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       return null;
     }
 
-    // if it is trusted we can attempt to parse anyway
-    if (trustJWT) {
-      String[] segments = opaque.split("\\.");
-      if (segments.length == 2 || segments.length == 3) {
-        // All segment should be base64
-        String payloadSeg = segments[1];
-        // base64 decode and parse JSON
-        return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
+    try {
+      // if it is trusted we can attempt to parse anyway
+      if (trustJWT) {
+        String[] segments = opaque.split("\\.");
+        if (segments.length == 2 || segments.length == 3) {
+          // All segment should be base64
+          String payloadSeg = segments[1];
+          // base64 decode and parse JSON
+          return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
+        }
       } else {
-        return null;
+        if (provider != null) {
+          return provider.getJWT().decode(opaque);
+        }
       }
-    } else {
-      try {
-        return provider.getJWT().decode(opaque);
-      } catch (RuntimeException e) {
-        LOG.warn("Cannot decode token:", e);
-        return null;
-      }
+    } catch (RuntimeException e) {
+      LOG.warn("Cannot decode token:", e);
     }
+    return null;
   }
 
   private void init() {
@@ -122,13 +123,16 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
     // attempt to decode tokens
     accessToken = decodeToken(token.getString("access_token"));
+    refreshToken = decodeToken(token.getString("refresh_token"));
     idToken = decodeToken(token.getString("id_token"));
 
     // the permission cache needs to be clear
     clearCache();
     // rebuild cache
-    if (token.containsKey("scope")) {
-      Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
+    if (provider != null) {
+      if (token.containsKey("scope")) {
+        Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
+      }
     }
   }
 
@@ -137,6 +141,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     this.trustJWT = trust;
     // refresh the tokens
     accessToken = decodeToken(token.getString("access_token"));
+    refreshToken = decodeToken(token.getString("refresh_token"));
     idToken = decodeToken(token.getString("id_token"));
 
     return this;
@@ -166,6 +171,14 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
   public JsonObject accessToken() {
     if (accessToken != null) {
       return accessToken.copy();
+    }
+    return null;
+  }
+
+  @Override
+  public JsonObject refreshToken() {
+    if (refreshToken != null) {
+      return refreshToken.copy();
     }
     return null;
   }
@@ -723,7 +736,21 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
   @Override
   public void setAuthProvider(AuthProvider authProvider) {
-    this.provider = (OAuth2AuthProviderImpl) authProvider;
+    provider = (OAuth2AuthProviderImpl) authProvider;
+
+    if (provider != null) {
+      // re-attempt to decode tokens
+      accessToken = decodeToken(token.getString("access_token"));
+      refreshToken = decodeToken(token.getString("refresh_token"));
+      idToken = decodeToken(token.getString("id_token"));
+
+      // the permission cache needs to be clear
+      clearCache();
+      // rebuild cache
+      if (token.containsKey("scope")) {
+        Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
+      }
+    }
   }
 
   @Override
