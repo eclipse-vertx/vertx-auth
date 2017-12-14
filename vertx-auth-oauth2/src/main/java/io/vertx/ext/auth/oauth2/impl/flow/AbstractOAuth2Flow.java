@@ -59,6 +59,9 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
 
     // Enable the system to send authorization params in the body (for example github does not require to be in the header)
     final JsonObject form = params.copy();
+    if (config.getExtraParameters() != null) {
+      form.mergeIn(config.getExtraParameters());
+    }
 
     form.put("client_id", config.getClientID());
     form.put("grant_type", grantType);

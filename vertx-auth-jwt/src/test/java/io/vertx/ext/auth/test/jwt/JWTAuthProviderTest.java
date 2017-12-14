@@ -21,7 +21,7 @@ import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.auth.jwt.JWTOptions;
+import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -94,7 +94,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
 
-      user.isAuthorised("drop", onSuccess(hasPermission -> {
+      user.isAuthorized("drop", onSuccess(hasPermission -> {
         assertFalse(hasPermission);
         testComplete();
       }));
@@ -141,7 +141,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-      new JWTOptions().setExpiresInMinutes(5L).setNoTimestamp(true));
+      new JWTOptions().setExpiresInMinutes(5).setNoTimestamp(true));
 
     assertNotNull(token);
 
@@ -180,15 +180,18 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-      new JWTOptions().setExpiresInMinutes(-5L).setNoTimestamp(true));
+      new JWTOptions().setExpiresInSeconds(1).setNoTimestamp(true));
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
-    authProvider.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
+    vertx.setTimer(2000L, t -> {
+      JsonObject authInfo = new JsonObject().put("jwt", token);
+      authProvider.authenticate(authInfo, onFailure(thr -> {
+        assertNotNull(thr);
+        testComplete();
+      }));
+    });
+
     await();
   }
 
@@ -215,7 +218,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testBadIssuer() {
 
-    authProvider = JWTAuth.create(vertx, getConfig().setIssuer("https://vertx.io"));
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setIssuer("https://vertx.io")));
 
     JsonObject payload = new JsonObject().put("sub", "Paulo");
 
@@ -257,9 +260,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testBadAudience() {
 
-    authProvider = JWTAuth.create(vertx, getConfig()
-      .addAudience("e")
-      .addAudience("d"));
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addAudience("e")
+        .addAudience("d")));
 
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
@@ -308,8 +312,8 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testGenerateNewTokenWithMacSecret() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addSecret(new SecretOptions()
-      .setType("HS256")
-      .setSecret("notasecret"))
+        .setType("HS256")
+        .setSecret("notasecret"))
     );
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("HS256"));
@@ -432,7 +436,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testLeeway() {
-    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(0));
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(0)));
 
     long now = System.currentTimeMillis() / 1000;
 
@@ -451,7 +455,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testLeeway2() {
-    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(0));
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(0)));
 
     long now = (System.currentTimeMillis() / 1000) + 2;
 
@@ -470,7 +474,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testLeeway3() {
-    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(5));
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(5)));
 
     long now = System.currentTimeMillis() / 1000;
 
@@ -490,7 +494,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testLeeway4() {
-    authProvider = JWTAuth.create(vertx, getConfig().setLeeway(5));
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(5)));
 
     long now = (System.currentTimeMillis() / 1000) + 2;
 

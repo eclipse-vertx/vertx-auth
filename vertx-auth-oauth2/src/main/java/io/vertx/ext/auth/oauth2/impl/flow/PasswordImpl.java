@@ -20,7 +20,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -51,7 +52,7 @@ public class PasswordImpl extends AbstractOAuth2Flow implements OAuth2Flow {
       AccessToken token;
 
       try {
-        token = new AccessTokenImpl(provider, res.result());
+        token = new OAuth2TokenImpl(provider, res.result());
       } catch (RuntimeException e) {
         handler.handle(Future.failedFuture(e));
         return;

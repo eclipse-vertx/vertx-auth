@@ -7,7 +7,6 @@ import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -203,7 +202,6 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
   @Test
   public void introspectAccessTokenKeyCloakWay() {
-    ((OAuth2AuthProviderImpl) oauth2).getConfig().setJwtToken(true);
     config = oauthIntrospect;
     fixture = fixtureKeycloak;
     oauth2.introspectToken(token, res -> {

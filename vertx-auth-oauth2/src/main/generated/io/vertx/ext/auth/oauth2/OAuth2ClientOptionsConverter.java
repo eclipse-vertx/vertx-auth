@@ -48,8 +48,8 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("introspectionPath") instanceof String) {
       obj.setIntrospectionPath((String)json.getValue("introspectionPath"));
     }
-    if (json.getValue("jwtToken") instanceof Boolean) {
-      obj.setJwtToken((Boolean)json.getValue("jwtToken"));
+    if (json.getValue("jwtOptions") instanceof JsonObject) {
+      obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)json.getValue("jwtOptions")));
     }
     if (json.getValue("logoutPath") instanceof String) {
       obj.setLogoutPath((String)json.getValue("logoutPath"));
@@ -105,7 +105,6 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getIntrospectionPath() != null) {
       json.put("introspectionPath", obj.getIntrospectionPath());
     }
-    json.put("jwtToken", obj.isJwtToken());
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
     }

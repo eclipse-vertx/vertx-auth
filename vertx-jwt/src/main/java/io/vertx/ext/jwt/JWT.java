@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.jwt;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -60,7 +61,6 @@ public final class JWT {
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger log = LoggerFactory.getLogger(JWT.class);
-  private static final JsonObject EMPTY = new JsonObject();
 
   // as described in the terminology section: https://tools.ietf.org/html/rfc7515#section-2
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -364,8 +364,44 @@ public final class JWT {
     return payload;
   }
 
-  public String sign(JsonObject payload, JsonObject options) {
-    final String algorithm = options.getString("algorithm", "HS256");
+  public boolean isExpired(JsonObject jwt, JWTOptions options) {
+
+    if (jwt == null) {
+      return false;
+    }
+
+    // All dates in JWT are of type NumericDate
+    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+    // the specified UTC date/time, ignoring leap seconds
+    final long now = (System.currentTimeMillis() / 1000);
+
+    if (jwt.containsKey("exp") && !options.isIgnoreExpiration()) {
+      if (now - options.getLeeway() >= jwt.getLong("exp")) {
+        throw new RuntimeException("Expired JWT token: exp <= now");
+      }
+    }
+
+    if (jwt.containsKey("iat")) {
+      Long iat = jwt.getLong("iat");
+      // issue at must be in the past
+      if (iat > now + options.getLeeway()) {
+        throw new RuntimeException("Invalid JWT token: iat > now");
+      }
+    }
+
+    if (jwt.containsKey("nbf")) {
+      Long nbf = jwt.getLong("nbf");
+      // not before must be after now
+      if (nbf > now + options.getLeeway()) {
+        throw new RuntimeException("Invalid JWT token: nbf > now");
+      }
+    }
+
+    return false;
+  }
+
+  public String sign(JsonObject payload, JWTOptions options) {
+    final String algorithm = options.getAlgorithm();
 
     List<Crypto> cryptos = cryptoMap.get(algorithm);
 
@@ -375,39 +411,35 @@ public final class JWT {
 
     // header, typ is fixed value.
     JsonObject header = new JsonObject()
-      .mergeIn(options.getJsonObject("header", EMPTY))
+      .mergeIn(options.getHeader())
       .put("typ", "JWT")
       .put("alg", algorithm);
 
     // NumericDate is a number is seconds since 1st Jan 1970 in UTC
     long timestamp = System.currentTimeMillis() / 1000;
 
-    if (!options.getBoolean("noTimestamp", false)) {
+    if (!options.isNoTimestamp()) {
       payload.put("iat", payload.getValue("iat", timestamp));
     }
 
-    Long expiresInSeconds;
-
-    if (options.containsKey("expiresInMinutes")) {
-      expiresInSeconds = options.getLong("expiresInMinutes") * 60;
-    } else {
-      expiresInSeconds = options.getLong("expiresInSeconds");
+    if (options.getExpiresInSeconds() > 0) {
+      payload.put("exp", timestamp + options.getExpiresInSeconds());
     }
 
-    if (expiresInSeconds != null) {
-      payload.put("exp", timestamp + expiresInSeconds);
+    if (options.getAudience() != null && options.getAudience().size() >= 1) {
+      if (options.getAudience().size() > 1) {
+        payload.put("aud", new JsonArray(options.getAudience()));
+      } else {
+        payload.put("aud", options.getAudience().get(0));
+      }
     }
 
-    if (options.containsKey("audience")) {
-      payload.put("aud", options.getValue("audience"));
+    if (options.getIssuer() != null) {
+      payload.put("iss", options.getIssuer());
     }
 
-    if (options.containsKey("issuer")) {
-      payload.put("iss", options.getValue("issuer"));
-    }
-
-    if (options.containsKey("subject")) {
-      payload.put("sub", options.getValue("subject"));
+    if (options.getSubject() != null) {
+      payload.put("sub", options.getSubject());
     }
 
     // create segments, all segment should be base64 string

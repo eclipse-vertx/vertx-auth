@@ -21,6 +21,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.jwt.JWTOptions;
 
 /**
  * Options describing how an OAuth2 {@link HttpClient} will make connections.
@@ -36,7 +37,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String REVOKATION_PATH = "/oauth/revoke";
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
-  private static final boolean JWT_TOKEN = false;
+  private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
 
   private String authorizationPath;
@@ -59,7 +60,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String userAgent;
   private JsonObject headers;
   private PubSecKeyOptions pubSecKey;
-  private boolean jwtToken;
+  private JWTOptions jwtOptions;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
 
@@ -106,7 +107,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
     pubSecKey = other.getPubSecKey();
-    jwtToken = other.isJwtToken();
+    // jwt options
+    jwtOptions = other.getJWTOptions();
     logoutPath = other.getLogoutPath();
     // extras
     final JsonObject obj = other.getExtraParameters();
@@ -138,8 +140,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     scopeSeparator = SCOPE_SEPARATOR;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
-    jwtToken = JWT_TOKEN;
-    extraParams = null;
+    jwtOptions = JWT_OPTIONS;
     userInfoParams = null;
     headers = null;
   }
@@ -333,24 +334,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   /**
-   * Flag if this provider returns tokens in JWT format
-   * @return boolean
-   */
-  public boolean isJwtToken() {
-    return jwtToken;
-  }
-
-  /**
-   * Signal that this provider tokens are in JWT format
-   * @param jwtToken true or false
-   * @return self
-   */
-  public OAuth2ClientOptions setJwtToken(boolean jwtToken) {
-    this.jwtToken = jwtToken;
-    return this;
-  }
-
-  /**
    * The provider logout path
    * @return a logout resource path
    */
@@ -455,6 +438,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    */
   public OAuth2ClientOptions setUserInfoParameters(JsonObject userInfoParams) {
     this.userInfoParams = userInfoParams;
+    return this;
+  }
+
+  public JWTOptions getJWTOptions() {
+    return jwtOptions;
+  }
+
+  public OAuth2ClientOptions setJWTOptions(JWTOptions jwtOptions) {
+    this.jwtOptions = jwtOptions;
     return this;
   }
 }

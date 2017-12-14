@@ -8,6 +8,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.jwt.JWTOptions;
 
 /**
  * Simplified factory to create an {@link io.vertx.ext.auth.oauth2.OAuth2Auth} for Google.
@@ -80,10 +81,10 @@ public interface GoogleAuth {
         .setPubSecKeyOptions(new PubSecKeyOptions()
           .setType("RS256")
           .setSecretKey(privateKey.toString()))
-        .setExtraParameters(new JsonObject()
-          .put("algorithm", "RS256")
-          .put("expiresInMinutes", 60)
-          .put("audience", "https://www.googleapis.com/oauth2/v4/token")
-          .put("issuer", serviceAccountJson.getString("client_email"))));
+        .setJWTOptions(new JWTOptions()
+          .setAlgorithm("RS256")
+          .setExpiresInMinutes(60)
+          .addAudience("https://www.googleapis.com/oauth2/v4/token")
+          .setIssuer(serviceAccountJson.getString("client_email"))));
   }
 }
