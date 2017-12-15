@@ -42,11 +42,13 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
+  private static final boolean JWT_TOKEN = false;
 
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
   private String scopeSeparator;
+  private boolean jwtToken;
   // this is an openid-connect extension
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
@@ -138,6 +140,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     }
     // JWK path RFC7517
     jwkPath = other.getJwkPath();
+    jwtToken = other.isJWTToken();
   }
 
   private void init() {
@@ -148,6 +151,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtOptions = JWT_OPTIONS;
+    jwtToken = JWT_TOKEN;
     userInfoParams = null;
     headers = null;
   }
@@ -471,6 +475,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   public OAuth2ClientOptions setJWTOptions(JWTOptions jwtOptions) {
     this.jwtOptions = jwtOptions;
+    return this;
+  }
+
+  public boolean isJWTToken() {
+    return jwtToken;
+  }
+
+  public OAuth2ClientOptions setJWTToken(boolean jwtToken) {
+    this.jwtToken = jwtToken;
     return this;
   }
 }

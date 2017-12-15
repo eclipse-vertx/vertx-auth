@@ -82,6 +82,7 @@ public interface GoogleAuth {
         .addPubSecKey(new PubSecKeyOptions()
           .setAlgorithm("RS256")
           .setSecretKey(privateKey.toString()))
+        .setJWTToken(true)
         .setJWTOptions(new JWTOptions()
           .setAlgorithm("RS256")
           .setExpiresInMinutes(60)

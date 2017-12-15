@@ -64,6 +64,7 @@ public final class JWT {
     cryptoMap.put("none", Collections.singletonList(new CryptoNone()));
   }
 
+  @Deprecated
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
     this();
 

@@ -55,6 +55,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         } else {
           jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.isCertificate(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
         }
+        // as of this moment we can handle JWTs
+        config.setJWTToken(true);
       }
     }
 
@@ -151,6 +153,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
               for (Object key : keys) {
                 jwt.addJWK(new JWK((JsonObject) key));
               }
+              // as of this moment we can handle JWTs
+              config.setJWTToken(true);
+
               handler.handle(Future.succeededFuture());
             }
           } catch (RuntimeException e) {
@@ -193,6 +198,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public void getToken(JsonObject credentials, Handler<AsyncResult<AccessToken>> handler) {
     flow.getToken(credentials, handler);
+  }
+
+  @Override
+  public boolean hasJWTToken() {
+    return config.isJWTToken();
   }
 
   @Override
