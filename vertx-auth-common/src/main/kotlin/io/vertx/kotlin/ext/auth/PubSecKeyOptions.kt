@@ -7,31 +7,36 @@ import io.vertx.ext.auth.PubSecKeyOptions
  *
  * Options describing how a Cryptographic Key.
  *
+ * @param algorithm 
+ * @param certificate 
  * @param publicKey 
  * @param secretKey 
- * @param type 
- * @param x509Certificates 
+ * @param symmetric 
  *
  * <p/>
  * NOTE: This function has been automatically generated from the [io.vertx.ext.auth.PubSecKeyOptions original] using Vert.x codegen.
  */
 fun PubSecKeyOptions(
+  algorithm: String? = null,
+  certificate: Boolean? = null,
   publicKey: String? = null,
   secretKey: String? = null,
-  type: String? = null,
-  x509Certificates: Iterable<String>? = null): PubSecKeyOptions = io.vertx.ext.auth.PubSecKeyOptions().apply {
+  symmetric: Boolean? = null): PubSecKeyOptions = io.vertx.ext.auth.PubSecKeyOptions().apply {
 
+  if (algorithm != null) {
+    this.setAlgorithm(algorithm)
+  }
+  if (certificate != null) {
+    this.setCertificate(certificate)
+  }
   if (publicKey != null) {
     this.setPublicKey(publicKey)
   }
   if (secretKey != null) {
     this.setSecretKey(secretKey)
   }
-  if (type != null) {
-    this.setType(type)
-  }
-  if (x509Certificates != null) {
-    this.setX509Certificates(x509Certificates.toList())
+  if (symmetric != null) {
+    this.setSymmetric(symmetric)
   }
 }
 

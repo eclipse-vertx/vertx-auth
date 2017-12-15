@@ -141,7 +141,7 @@ case all you need to have is a public key im PEM format.
 def config = [
   pubSecKeys:[
     [
-      type:"RS256",
+      algorithm:"RS256",
       publicKey:"BASE64-ENCODED-PUBLIC_KEY"
     ]
   ]
