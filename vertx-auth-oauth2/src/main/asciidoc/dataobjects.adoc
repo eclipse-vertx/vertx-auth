@@ -58,10 +58,8 @@ Set the provider token introspection resource path
 +++
 |[[jdkSslEngineOptions]]`jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
 |[[jwkPath]]`jwkPath`|`String`|-
-|[[jwtToken]]`jwtToken`|`Boolean`|
-+++
-Signal that this provider tokens are in JWT format
-+++
+|[[jwtOptions]]`jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
+|[[jwtToken]]`jwtToken`|`Boolean`|-
 |[[keepAlive]]`keepAlive`|`Boolean`|-
 |[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[localAddress]]`localAddress`|`String`|-
