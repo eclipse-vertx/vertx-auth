@@ -26,6 +26,9 @@ import io.vertx.ext.jwt.JWTOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Options describing how an OAuth2 {@link HttpClient} will make connections.
  *
