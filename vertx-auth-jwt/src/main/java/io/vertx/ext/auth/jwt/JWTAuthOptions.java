@@ -110,8 +110,9 @@ public class JWTAuthOptions {
     return secrets;
   }
 
-  public void setSecrets(List<SecretOptions> secrets) {
+  public JWTAuthOptions setSecrets(List<SecretOptions> secrets) {
     this.secrets = secrets;
+    return this;
   }
 
   public JWTAuthOptions addSecret(SecretOptions secret) {

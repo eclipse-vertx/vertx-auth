@@ -46,8 +46,9 @@ public class HtpasswdAuthOptions implements AuthOptions {
     return htpasswdFile;
   }
 
-  public void setHtpasswdFile(String htpasswdFile) {
+  public HtpasswdAuthOptions setHtpasswdFile(String htpasswdFile) {
     this.htpasswdFile = htpasswdFile;
+    return this;
   }
 
   public boolean isEnabledPlainTextPwd() {
