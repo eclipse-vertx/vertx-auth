@@ -79,6 +79,12 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES rol
 
 ----
 
+The current password hashing strategy is based on the SHA-512 algorithm. OWASP as of 2018-01-08 recommends
+the usage of stronger algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
+
+WARNING: If you already have a running application switching the strategies will make break your existing
+passwords, so you will need to migrate the passwords from one algorithm to the second.
+
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
 `link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html#setHashStrategy-io.vertx.ext.auth.jdbc.JDBCHashStrategy-[setHashStrategy]`.
 

@@ -20,7 +20,6 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -28,11 +27,6 @@ import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -49,7 +43,8 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   public JDBCAuthImpl(Vertx vertx, JDBCClient client) {
     this.client = client;
-    strategy = new DefaultHashStrategy(vertx);
+    // default strategy
+    strategy = JDBCHashStrategy.createSHA512(vertx);
   }
 
   @Override
@@ -90,7 +85,7 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
             }
           }
           String hashedPassword = strategy.computeHash(password, salt, version);
-          if (hashedStoredPwd.equals(hashedPassword)) {
+          if (JDBCHashStrategy.isEqual(hashedStoredPwd, hashedPassword)) {
             resultHandler.handle(Future.succeededFuture(new JDBCUser(username, this, rolePrefix)));
           } else {
             resultHandler.handle(Future.failedFuture("Invalid username/password"));
@@ -170,7 +165,7 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   @Override
   public JDBCAuth setNonces(JsonArray nonces) {
-    strategy.setNonces(nonces.getList());
+    strategy.setNonces(nonces);
     return this;
   }
 
@@ -181,80 +176,4 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   String getPermissionsQuery() {
     return permissionsQuery;
   }
-
-  private class DefaultHashStrategy implements JDBCHashStrategy {
-
-    private final PRNG random;
-
-    private List<String> nonces;
-
-    DefaultHashStrategy(Vertx vertx) {
-      random = new PRNG(vertx);
-    }
-
-    @Override
-    public String generateSalt() {
-      byte[] salt = new byte[32];
-      random.nextBytes(salt);
-
-      return bytesToHex(salt);
-    }
-
-    @Override
-    public String computeHash(String password, String salt, int version) {
-      try {
-        String concat =
-          (salt == null ? "" : salt) +
-          password;
-
-        if (version >= 0) {
-          if (nonces == null) {
-            // the nonce version is not a number
-            throw new VertxException("nonces are not available");
-          }
-          if (version < nonces.size()) {
-            concat += nonces.get(version);
-          }
-        }
-
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        byte[] bHash = md.digest(concat.getBytes(StandardCharsets.UTF_8));
-        if (version >= 0) {
-          return bytesToHex(bHash) + '$' + version;
-        } else {
-          return bytesToHex(bHash);
-        }
-      } catch (NoSuchAlgorithmException e) {
-        throw new VertxException(e);
-      }
-    }
-
-    @Override
-    public String getHashedStoredPwd(JsonArray row) {
-      return row.getString(0);
-    }
-
-    @Override
-    public String getSalt(JsonArray row) {
-      return row.getString(1);
-    }
-
-    @Override
-    public void setNonces(List<String> nonces) {
-      this.nonces = Collections.unmodifiableList(nonces);
-    }
-
-    private final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
-
-    private String bytesToHex(byte[] bytes) {
-      char[] chars = new char[bytes.length * 2];
-      for (int i = 0; i < bytes.length; i++) {
-        int x = 0xFF & bytes[i];
-        chars[i * 2] = HEX_CHARS[x >>> 4];
-        chars[1 + i * 2] = HEX_CHARS[0x0F & x];
-      }
-      return new String(chars);
-    }
-  }
-
 }
