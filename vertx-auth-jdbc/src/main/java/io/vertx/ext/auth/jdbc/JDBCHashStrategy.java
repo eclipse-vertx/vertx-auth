@@ -16,9 +16,11 @@
 
 package io.vertx.ext.auth.jdbc;
 
+import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
-
-import java.util.List;
+import io.vertx.ext.auth.jdbc.impl.PBKDF2Strategy;
+import io.vertx.ext.auth.jdbc.impl.SHA512Strategy;
 
 /**
  * Determines how the hashing is computed in the implementation
@@ -27,7 +29,33 @@ import java.util.List;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@VertxGen
 public interface JDBCHashStrategy {
+
+  /**
+   * This is the current backwards compatible hashing implementation, new applications should prefer the
+   * PBKDF2 implementation, unless the tradeoff between security and CPU usage is an option.
+   *
+   * @param vertx the vert.x instance
+   * @return the implementation.
+   */
+  static JDBCHashStrategy createSHA512(Vertx vertx) {
+    return new SHA512Strategy(vertx);
+  }
+
+  /**
+   * Implements a Hashing Strategy as per https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet (2018-01-17).
+   *
+   * New deployments should use this strategy instead of the default one (which was the previous OWASP recommendation).
+   *
+   * The work factor can be updated by using the nonces json array.
+   *
+   * @param vertx the vert.x instance
+   * @return the implementation.
+   */
+  static JDBCHashStrategy createPBKDF2(Vertx vertx) {
+    return new PBKDF2Strategy(vertx);
+  }
 
   /**
    * Compute a random salt.
@@ -68,7 +96,26 @@ public interface JDBCHashStrategy {
    * or precomputed hashes harder. Leaving the attacker only with the brute force
    * approach.
    *
-   * @param nonces a List of non null Strings.
+   * Nonces are dependent on the implementation. E.g.: for the SHA512 they are extra salt
+   * used during the hashing, for the PBKDF2 they map the number of iterations the algorithm
+   * should take
+   *
+   * @param nonces a json array.
    */
-  void setNonces(List<String> nonces);
+  void setNonces(JsonArray nonces);
+
+  /**
+   * Time constant string comparision to avoid timming attacks.
+   *
+   * @param hasha hash a to compare
+   * @param hashb hash b to compare
+   * @return true if equal
+   */
+  static boolean isEqual(final String hasha, final String hashb) {
+    int diff = hasha.length() ^ hashb.length();
+    for(int i = 0; i < hasha.length() && i < hashb.length(); i++) {
+      diff |= hasha.charAt(i) ^ hashb.charAt(i);
+    }
+    return diff == 0;
+  }
 }
