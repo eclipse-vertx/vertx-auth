@@ -19,7 +19,7 @@ public class PBKDF2Strategy extends AbstractHashingStrategy implements JDBCHashS
     super(vertx);
 
     try {
-      skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+      skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
     } catch (NoSuchAlgorithmException nsae) {
       throw new RuntimeException("PBKDF2 is not available", nsae);
     }
