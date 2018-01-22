@@ -79,7 +79,7 @@ public class DefaultHashStrategy implements HashStrategy {
   private synchronized void initKeyFactory() {
     try {
       if (skf == null) {
-        skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
       }
     } catch (NoSuchAlgorithmException nsae) {
       throw new RuntimeException("PBKDF2 is not available", nsae);
