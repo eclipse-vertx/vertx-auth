@@ -43,10 +43,11 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+|[[algorithm]]`algorithm`|`String`|-
+|[[certificate]]`certificate`|`Boolean`|-
 |[[publicKey]]`publicKey`|`String`|-
 |[[secretKey]]`secretKey`|`String`|-
-|[[type]]`type`|`String`|-
-|[[x509Certificates]]`x509Certificates`|`Array of String`|-
+|[[symmetric]]`symmetric`|`Boolean`|-
 |===
 
 [[SecretOptions]]

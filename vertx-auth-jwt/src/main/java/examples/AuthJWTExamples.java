@@ -63,7 +63,7 @@ public class AuthJWTExamples {
 
     JWTAuthOptions config = new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
-        .setType("RS256")
+        .setAlgorithm("RS256")
         .setPublicKey("BASE64-ENCODED-PUBLIC_KEY"));
 
     AuthProvider provider = JWTAuth.create(vertx, config);

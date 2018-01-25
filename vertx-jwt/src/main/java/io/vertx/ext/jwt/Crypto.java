@@ -103,28 +103,6 @@ class CryptoMac implements Crypto {
  *
  * @author Paulo Lopes
  */
-class CryptoPublicKey extends CryptoKeyPair {
-  CryptoPublicKey(final String algorithm, final PublicKey publicKey) {
-    super(algorithm, publicKey, null);
-  }
-}
-
-/**
- * Public Key based Crypto implementation
- *
- * @author Paulo Lopes
- */
-class CryptoPrivateKey extends CryptoKeyPair {
-  CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
-    super(algorithm, null, privateKey);
-  }
-}
-
-/**
- * Public Key based Crypto implementation
- *
- * @author Paulo Lopes
- */
 class CryptoKeyPair implements Crypto {
 
   private final String id = UUID.randomUUID().toString();

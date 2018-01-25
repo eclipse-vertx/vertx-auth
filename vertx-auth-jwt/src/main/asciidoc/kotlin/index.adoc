@@ -136,7 +136,7 @@ case all you need to have is a public key im PEM format.
 
 var config = JWTAuthOptions(
   pubSecKeys = listOf(PubSecKeyOptions(
-    type = "RS256",
+    algorithm = "RS256",
     publicKey = "BASE64-ENCODED-PUBLIC_KEY")))
 
 var provider = JWTAuth.create(vertx, config)
