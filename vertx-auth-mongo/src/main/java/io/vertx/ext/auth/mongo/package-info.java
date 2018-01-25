@@ -96,6 +96,15 @@
  * The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
  * salt and password are stored inside the same place!
  *
+ * WARNING: As of 2018 OWASP recommends the usage of stronger encryption algorithms to hash user passwords for
+ * this case you can change from the default (preserved for backwards-compatibility) to PBKDF2. For new projects
+ * this should be the standard.
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.AuthMongoExamples#example5(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
+ * ----
+ *
  * == Authentication
  *
  * When authenticating using this implementation, it assumes `username` and `password` fields are present in the
