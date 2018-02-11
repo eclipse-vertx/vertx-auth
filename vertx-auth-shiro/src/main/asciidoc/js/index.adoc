@@ -12,7 +12,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-shiro</artifactId>
-  <version>3.5.1-SNAPSHOT</version>
+  <version>3.5.1</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-shiro:3.5.1-SNAPSHOT'
+compile 'io.vertx:vertx-auth-shiro:3.5.1'
 ----
 
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
@@ -34,15 +34,7 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-var ShiroAuth = require("vertx-auth-shiro-js/shiro_auth");
-
-var config = {
-  "properties_path" : "classpath:test-auth.properties"
-};
-
-var provider = ShiroAuth.create(vertx, 'PROPERTIES', config);
-
-
+`example3`
 ----
 
 == Authentication
@@ -52,20 +44,7 @@ authentication info:
 
 [source,java]
 ----
-
-var authInfo = {
-  "username" : "tim",
-  "password" : "sausages"
-};
-
-authProvider.authenticate(authInfo, function (res, res_err) {
-  if (res_err == null) {
-    var user = res;
-  } else {
-    // Failed!
-  }
-});
-
+`example4`
 ----
 
 == Authorisation - Permission-Role Model
@@ -79,31 +58,13 @@ If validating if a user has a particular permission simply pass the permission i
 
 [source,java]
 ----
-
-user.isAuthorised("newsletter:edit:13", function (res, res_err) {
-  if (res_err == null) {
-    var hasPermission = res;
-  } else {
-    // Failed to
-  }
-});
-
-
+`example5`
 ----
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
 [source,java]
 ----
-
-user.isAuthorised("role:manager", function (res, res_err) {
-  if (res_err == null) {
-    var hasRole = res;
-  } else {
-    // Failed to
-  }
-});
-
-
+`example6`
 ----
 
 The default role prefix is `role:`. You can change this with `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
@@ -179,11 +140,7 @@ This is done as follows:
 
 [source,java]
 ----
-var ShiroAuth = require("vertx-auth-shiro-js/shiro_auth");
-
-var provider = ShiroAuth.create(vertx, realm);
-
-
+`example8`
 ----
 
 The implementation currently assumes that user/password based authentication is used.

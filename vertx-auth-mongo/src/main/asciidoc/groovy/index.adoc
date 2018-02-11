@@ -13,7 +13,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-mongo</artifactId>
-  <version>3.5.1-SNAPSHOT</version>
+  <version>3.5.1</version>
 </dependency>
 ----
 
@@ -21,7 +21,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-mongo:3.5.1-SNAPSHOT'
+compile 'io.vertx:vertx-auth-mongo:3.5.1'
 ----
 
 To create an instance you first need an instance of `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`. To learn how to create one
@@ -82,6 +82,19 @@ WARNING: It is strongly advised to use the `link:../../apidocs/io/vertx/ext/auth
 The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
 salt and password are stored inside the same place!
 
+WARNING: As of 2018 OWASP recommends the usage of stronger encryption algorithms to hash user passwords for
+this case you can change from the default (preserved for backwards-compatibility) to PBKDF2. For new projects
+this should be the standard.
+
+[source,groovy]
+----
+def client = MongoClient.createShared(vertx, mongoClientConfig)
+def authProperties = [:]
+def authProvider = MongoAuth.create(client, authProperties)
+authProvider.setHashAlgorithm(HashAlgorithm.PBKDF2)
+
+----
+
 == Authentication
 
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
@@ -118,7 +131,7 @@ If validating if a user has a particular permission simply pass the permission i
 [source,groovy]
 ----
 
-user.isAuthorised("commit_code", { res ->
+user.isAuthorized("commit_code", { res ->
   if (res.succeeded()) {
     def hasPermission = res.result()
   } else {
@@ -134,7 +147,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 [source,groovy]
 ----
 
-user.isAuthorised("${MongoAuth.ROLE_PREFIX}manager", { res ->
+user.isAuthorized("${MongoAuth.ROLE_PREFIX}manager", { res ->
   if (res.succeeded()) {
     def hasRole = res.result()
   } else {

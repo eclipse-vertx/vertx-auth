@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Red Hat, Inc.
+ * Copyright (c) 2014 Red Hat, Inc. and others
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -37,16 +37,20 @@ public class JWTAuthOptionsConverter {
       obj.setPermissionsClaimKey((String)json.getValue("permissionsClaimKey"));
     }
     if (json.getValue("pubSecKeys") instanceof JsonArray) {
-      json.getJsonArray("pubSecKeys").forEach(item -> {
+      java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list = new java.util.ArrayList<>();
+      json.getJsonArray("pubSecKeys").forEach( item -> {
         if (item instanceof JsonObject)
-          obj.addPubSecKey(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+          list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
       });
+      obj.setPubSecKeys(list);
     }
     if (json.getValue("secrets") instanceof JsonArray) {
-      json.getJsonArray("secrets").forEach(item -> {
+      java.util.ArrayList<io.vertx.ext.auth.SecretOptions> list = new java.util.ArrayList<>();
+      json.getJsonArray("secrets").forEach( item -> {
         if (item instanceof JsonObject)
-          obj.addSecret(new io.vertx.ext.auth.SecretOptions((JsonObject)item));
+          list.add(new io.vertx.ext.auth.SecretOptions((JsonObject)item));
       });
+      obj.setSecrets(list);
     }
   }
 

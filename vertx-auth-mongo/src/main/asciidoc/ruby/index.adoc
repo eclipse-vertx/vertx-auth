@@ -13,7 +13,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-mongo</artifactId>
-  <version>3.5.1-SNAPSHOT</version>
+  <version>3.5.1</version>
 </dependency>
 ----
 
@@ -21,7 +21,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-mongo:3.5.1-SNAPSHOT'
+compile 'io.vertx:vertx-auth-mongo:3.5.1'
 ----
 
 To create an instance you first need an instance of `link:../../yardoc/VertxMongo/MongoClient.html[MongoClient]`. To learn how to create one
@@ -85,6 +85,22 @@ WARNING: It is strongly advised to use the `link:todo[EXTERNAL]` option.
 The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
 salt and password are stored inside the same place!
 
+WARNING: As of 2018 OWASP recommends the usage of stronger encryption algorithms to hash user passwords for
+this case you can change from the default (preserved for backwards-compatibility) to PBKDF2. For new projects
+this should be the standard.
+
+[source,ruby]
+----
+require 'vertx-mongo/mongo_client'
+require 'vertx-auth-mongo/mongo_auth'
+client = VertxMongo::MongoClient.create_shared(vertx, mongoClientConfig)
+authProperties = {
+}
+authProvider = VertxAuthMongo::MongoAuth.create(client, authProperties)
+authProvider.set_hash_algorithm(:PBKDF2)
+
+----
+
 == Authentication
 
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
@@ -121,7 +137,7 @@ If validating if a user has a particular permission simply pass the permission i
 [source,ruby]
 ----
 
-user.is_authorised("commit_code") { |res_err,res|
+user.is_authorized("commit_code") { |res_err,res|
   if (res_err == nil)
     hasPermission = res
   else
@@ -138,7 +154,7 @@ If validating that a user has a particular _role_ then you should prefix the arg
 ----
 require 'vertx-auth-mongo/mongo_auth'
 
-user.is_authorised("#{VertxAuthMongo::MongoAuth::ROLE_PREFIX}manager") { |res_err,res|
+user.is_authorized("#{VertxAuthMongo::MongoAuth::ROLE_PREFIX}manager") { |res_err,res|
   if (res_err == nil)
     hasRole = res
   else
