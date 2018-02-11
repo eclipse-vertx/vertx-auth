@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Red Hat, Inc.
+ * Copyright (c) 2014 Red Hat, Inc. and others
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -61,10 +61,12 @@ public class OAuth2ClientOptionsConverter {
       obj.setLogoutPath((String)json.getValue("logoutPath"));
     }
     if (json.getValue("pubSecKeys") instanceof JsonArray) {
-      json.getJsonArray("pubSecKeys").forEach(item -> {
+      java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list = new java.util.ArrayList<>();
+      json.getJsonArray("pubSecKeys").forEach( item -> {
         if (item instanceof JsonObject)
-          obj.addPubSecKey(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+          list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
       });
+      obj.setPubSecKeys(list);
     }
     if (json.getValue("revocationPath") instanceof String) {
       obj.setRevocationPath((String)json.getValue("revocationPath"));
