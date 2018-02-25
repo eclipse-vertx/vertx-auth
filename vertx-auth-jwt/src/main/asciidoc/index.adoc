@@ -1,8 +1,6 @@
 == The JWT auth provider
 
-This component contains an out of the box a JWT implementation.
-
-To use this project, add the following
+This component contains an out of the box a JWT implementation. To use this project, add the following
 dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -10,9 +8,15 @@ dependency to the _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< Updated upstream:vertx-auth-jwt/src/main/asciidoc/java/index.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jwt</artifactId>
   <version>3.6.0-SNAPSHOT</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Stashed changes:vertx-auth-jwt/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -20,7 +24,11 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< Updated upstream:vertx-auth-jwt/src/main/asciidoc/java/index.adoc
 compile 'io.vertx:vertx-auth-jwt:3.6.0-SNAPSHOT'
+=======
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Stashed changes:vertx-auth-jwt/src/main/asciidoc/index.adoc
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
@@ -43,24 +51,14 @@ Its main advantages are:
 * It has a json body to contain any variable amount of data you want.
 * It's completely stateless.
 
-To create an instance of the provider you use `link:../../jsdoc/module-vertx-auth-jwt-js_jwt_auth-JWTAuth.html[JWTAuth]`. You specify the configuration
+To create an instance of the provider you use {@link io.vertx.ext.auth.jwt.JWTAuth}. You specify the configuration
 in a JSON object.
 
 Here's an example of creating a JWT auth provider:
 
 [source,java]
 ----
-var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
-
-var config = {
-  "keyStore" : {
-    "path" : "keystore.jceks",
-    "password" : "secret"
-  }
-};
-
-var provider = JWTAuth.create(vertx, config);
-
+{@link examples.AuthJWTExamples#example6}
 ----
 
 A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point
@@ -69,27 +67,7 @@ do:
 
 [source,java]
 ----
-var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
-
-var config = {
-  "keyStore" : {
-    "path" : "keystore.jceks",
-    "password" : "secret"
-  }
-};
-
-var provider = JWTAuth.create(vertx, config);
-
-// on the verify endpoint once you verify the identity of the user by its username/password
-if ("paulo" == username && "super_secret" == password) {
-  var token = provider.generateToken({
-    "sub" : "paulo"
-  }, {
-  });
-  // now for any request to protected resources you should pass this string in the HTTP header Authorization as:
-  // Authorization: Bearer <token>
-}
-
+{@link examples.AuthJWTExamples#example7}
 ----
 
 === The JWT keystore file
@@ -138,21 +116,9 @@ keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret 
 If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that
 case all you need to have is a public key im PEM format.
 
-[source,js]
+[source,$lang]
 ----
-var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
-
-var config = {
-  "pubSecKeys" : [
-    {
-      "algorithm" : "RS256",
-      "publicKey" : "BASE64-ENCODED-PUBLIC_KEY"
-    }
-  ]
-};
-
-var provider = JWTAuth.create(vertx, config);
-
+{@link examples.AuthJWTExamples#example8}
 ----
 
 == AuthN/AuthZ with JWT
@@ -171,20 +137,9 @@ For this provider a user is authenticated if the token passes the signature chec
 For this reason it is imperative that private keys are kept private and not copy pasted across project since it would
 be a security hole.
 
-[source,js]
+[source,$lang]
 ----
-// This string is what you see after the string "Bearer" in the
-// HTTP Authorization header
-jwtAuth.authenticate({
-  "jwt" : "BASE64-ENCODED-STRING"
-}, function (res, res_err) {
-  if (res_err == null) {
-    var theUser = res;
-  } else {
-    // Failed!
-  }
-});
-
+{@link examples.AuthJWTExamples#example9}
 ----
 
 In a nutshell the provider is checking for several things:
@@ -196,76 +151,23 @@ If all these are valid then the token is considered good and a user object is re
 
 While the fields `exp`, `iat` and `nbf` are simple timestamp checks only `exp` can be configured to be ignored:
 
-[source,js]
+[source,$lang]
 ----
-
-// This string is what you see after the string "Bearer" in the
-// HTTP Authorization header
-
-// In this case we are forcing the provider to ignore the `exp` field
-jwtAuth.authenticate({
-  "jwt" : "BASE64-ENCODED-STRING",
-  "options" : {
-    "ignoreExpiration" : true
-  }
-}, function (res, res_err) {
-  if (res_err == null) {
-    var theUser = res;
-  } else {
-    // Failed!
-  }
-});
-
+{@link examples.AuthJWTExamples#example10}
 ----
 
 In order to verify the `aud` field one needs to pass the options like before:
 
-[source,js]
+[source,$lang]
 ----
-
-// This string is what you see after the string "Bearer" in the
-// HTTP Authorization header
-
-// In this case we are forcing the provider to ignore the `exp` field
-jwtAuth.authenticate({
-  "jwt" : "BASE64-ENCODED-STRING",
-  "options" : {
-    "audience" : [
-      "paulo@server.com"
-    ]
-  }
-}, function (res, res_err) {
-  if (res_err == null) {
-    var theUser = res;
-  } else {
-    // Failed!
-  }
-});
-
+{@link examples.AuthJWTExamples#example11}
 ----
 
 And the same for the issuer:
 
-[source,js]
+[source,$lang]
 ----
-
-// This string is what you see after the string "Bearer" in the
-// HTTP Authorization header
-
-// In this case we are forcing the provider to ignore the `exp` field
-jwtAuth.authenticate({
-  "jwt" : "BASE64-ENCODED-STRING",
-  "options" : {
-    "issuer" : "mycorp.com"
-  }
-}, function (res, res_err) {
-  if (res_err == null) {
-    var theUser = res;
-  } else {
-    // Failed!
-  }
-});
-
+{@link examples.AuthJWTExamples#example12}
 ----
 
 === Authorizing (AuthZ)
@@ -273,14 +175,9 @@ jwtAuth.authenticate({
 Once a token is parsed and is valid we can use it to perform authorization tasks. The most simple is to verify if a
 user has a specific authority. In this case one needs to to:
 
-[source,js]
+[source,$lang]
 ----
-user.isAuthorised("create-report", function (res, res_err) {
-  if (res_err == null && res) {
-    // Yes the user can create reports
-  }
-});
-
+{@link examples.AuthJWTExamples#example13}
 ----
 
 By default the provider will lookup under the key `permissions` but like the other providers one can extend the
@@ -289,19 +186,15 @@ concept to authorities to roles by using the `:` as a splitter, so `role:authori
 Since JWT are quite free form and there is no standard on where to lookup for the claims the location can be
 configured to use something else than `permissions`, for example one can even lookup under a path like this:
 
-[source,js]
+[source,$lang]
 ----
-var JWTAuth = require("vertx-auth-jwt-js/jwt_auth");
-
-var config = {
-  "public-key" : "BASE64-ENCODED-PUBLIC_KEY",
-  "permissionsClaimKey" : "realm_access/roles"
-};
-
-var provider = JWTAuth.create(vertx, config);
-
+{@link examples.AuthJWTExamples#example14}
 ----
 
 So in this example we configure the JWT to work with Keycloak token format. In this case the claims will be checked
 under the path `realm_access/roles` rather than `permissions`.
-<a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a><a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
+
+
+@author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+@author <a href="http://tfox.org">Tim Fox</a>
+@author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>

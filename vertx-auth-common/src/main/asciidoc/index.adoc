@@ -12,9 +12,15 @@ To use this project, add the following dependency to the _dependencies_ section 
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< Updated upstream:vertx-auth-common/src/main/asciidoc/ruby/index.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-common</artifactId>
   <version>3.6.0-SNAPSHOT</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Stashed changes:vertx-auth-common/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -22,7 +28,11 @@ To use this project, add the following dependency to the _dependencies_ section 
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< Updated upstream:vertx-auth-common/src/main/asciidoc/ruby/index.adoc
 compile 'io.vertx:vertx-auth-common:3.6.0-SNAPSHOT'
+=======
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Stashed changes:vertx-auth-common/src/main/asciidoc/index.adoc
 ----
 
 == Basic concepts
@@ -43,7 +53,7 @@ To find out what a particular auth provider expects, consult the documentation f
 
 == Authentication
 
-To authenticate a user you use `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html#authenticate-io.vertx.core.json.JsonObject-io.vertx.core.Handler-[authenticate]`.
+To authenticate a user you use {@link io.vertx.ext.auth.AuthProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
 
 The first argument is a JSON object which contains authentication information. What this actually contains depends
 on the specific implementation; for a simple username/password based authentication it might contain something like:
@@ -58,62 +68,29 @@ on the specific implementation; for a simple username/password based authenticat
 For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
 
 Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
-the call. The async result contains an instance of `link:../../apidocs/io/vertx/ext/auth/User.html[User]` which represents the authenticated
+the call. The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated
 user and contains operations which allow the user to be authorised.
 
 Here's an example of authenticating a user using a simple username/password implementation:
 
-[source,groovy]
+[source,$lang]
 ----
-
-def authInfo = [
-  username:"tim",
-  password:"mypassword"
-]
-
-authProvider.authenticate(authInfo, { res ->
-  if (res.succeeded()) {
-
-    def user = res.result()
-
-    println("User ${user.principal()} is now authenticated")
-
-  } else {
-    res.cause().printStackTrace()
-  }
-})
-
+{@link examples.AuthCommonExamples#example1}
 ----
 
 == Authorisation
 
-Once you have an `link:../../apidocs/io/vertx/ext/auth/User.html[User]` instance you can call methods on it to authorise it.
+Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
 
-to check if a user has a specific authority you use `link:../../apidocs/io/vertx/ext/auth/User.html#isAuthorised-java.lang.String-io.vertx.core.Handler-[isAuthorised]`.
+to check if a user has a specific authority you use {@link io.vertx.ext.auth.User#isAuthorised}.
 
 The results of all the above are provided asynchronously in the handler.
 
 Here's an example of authorising a user:
 
-[source,groovy]
+[source,$lang]
 ----
-
-user.isAuthorised("printers:printer1234", { res ->
-  if (res.succeeded()) {
-
-    def hasAuthority = res.result()
-
-    if (hasAuthority) {
-      println("User has the authority")
-    } else {
-      println("User does not have the authority")
-    }
-
-  } else {
-    res.cause().printStackTrace()
-  }
-})
-
+{@link examples.AuthCommonExamples#example2}
 ----
 
 And another example of authorising in a roles based model which uses `role:` as a prefix.
@@ -126,22 +103,22 @@ implementation and Vert.x makes no assumptions here.
 The user object will cache any authorities so subsequently calls to check if it has the same authorities will result
 in the underlying provider being called.
 
-In order to clear the internal cache you can use `link:../../apidocs/io/vertx/ext/auth/User.html#clearCache--[clearCache]`.
+In order to clear the internal cache you can use {@link io.vertx.ext.auth.User#clearCache()}.
 
 === The User Principal
 
-You can get the Principal corresponding to the authenticated user with `link:../../apidocs/io/vertx/ext/auth/User.html#principal--[principal]`.
+You can get the Principal corresponding to the authenticated user with {@link io.vertx.ext.auth.User#principal()}.
 
 What this returns depends on the underlying implementation.
 
 == Creating your own auth implementation
 
-If you wish to create your own auth provider you should implement the `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]` interface.
+If you wish to create your own auth provider you should implement the {@link io.vertx.ext.auth.AuthProvider} interface.
 
-We provide an abstract implementation of user called `link:../../apidocs/io/vertx/ext/auth/AbstractUser.html[AbstractUser]` which you can subclass
+We provide an abstract implementation of user called {@link io.vertx.ext.auth.AbstractUser} which you can subclass
 to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
 
-If you wish your user objects to be clusterable you should make sure they implement `link:../../apidocs/io/vertx/core/shareddata/impl/ClusterSerializable.html[ClusterSerializable]`.
+If you wish your user objects to be clusterable you should make sure they implement {@link io.vertx.core.shareddata.impl.ClusterSerializable}.
 
 == Pseudo Random Number Generator
 
@@ -162,17 +139,15 @@ being affected by the PRNG algorithm.
 
 Since the Pseudo Random Number Generator objects are expensive in resources, they consume system entropy which is a
 scarce resource it can be wise to share the PRNG's across all your handlers. In order to do this and to make this
-available to all languages supported by Vert.x you should look into the `link:../../apidocs/io/vertx/ext/auth/VertxContextPRNG.html[VertxContextPRNG]`.
+available to all languages supported by Vert.x you should look into the {@link io.vertx.ext.auth.VertxContextPRNG}.
 
 This interface relaxes the lifecycle management of PRNG's for the end user and ensures it can be reused across all
 your application, for example:
 
-[source,groovy]
+[source,$lang]
 ----
-// Generate a secure token of 32 bytes as a base64 string
-def token = VertxContextPRNG.current(vertx).nextString(32)
-// Generate a secure random integer
-def randomInt = VertxContextPRNG.current(vertx).nextInt()
+{@link examples.AuthCommonExamples#example4}
+----
 
-----
-<a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a>
+@author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+@author <a href="http://tfox.org">Tim Fox</a>

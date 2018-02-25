@@ -1,9 +1,7 @@
 == .htdigest Auth Provider implementation
 
-We provide an implementation of `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]` which uses the .digest file format
-to perform authentication.
-
-The provider will not watch for updates to the file after loading. If you need dynamic
+We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the .digest file format
+to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
 user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
 
 To use this project, add the following
@@ -14,9 +12,15 @@ dependency to the _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< Updated upstream:vertx-auth-htdigest/src/main/asciidoc/groovy/index.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-htdigest</artifactId>
   <version>3.6.0-SNAPSHOT</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Stashed changes:vertx-auth-htdigest/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -24,19 +28,23 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< Updated upstream:vertx-auth-htdigest/src/main/asciidoc/groovy/index.adoc
 compile 'io.vertx:vertx-auth-htdigest:3.6.0-SNAPSHOT'
+=======
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Stashed changes:vertx-auth-htdigest/src/main/asciidoc/index.adoc
 ----
 
 To create an instance you first need an .htdigest file. This file is created using the apache htdigest tool.
 
-Once you've got one of these you can create a `link:../../apidocs/io/vertx/ext/auth/htdigest/HtdigestAuth.html[HtdigestAuth]` instance as follows:
+Once you've got one of these you can create a {@link io.vertx.ext.auth.htdigest.HtdigestAuth} instance as follows:
 
-[source,java]
+[source,$lang]
 ----
-HtdigestAuth authProvider = HtdigestAuth.create(vertx, ".htdigest");
+{@link examples.AuthHtdigestExamples#example1(io.vertx.core.Vertx)}
 ----
 
-Once you've got your instance you can authenticate with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate with it just like any {@link io.vertx.ext.auth.AuthProvider}.
 
 The out of the box config assumes the usage of the file .htdigest in the root of the project.
 
@@ -45,23 +53,9 @@ The out of the box config assumes the usage of the file .htdigest in the root of
 When authenticating using this implementation, it assumes that the digest authorization header is parsed as a JSON
 object which we refer from now on as authentication info:
 
-[source,java]
+[source,$lang]
 ----
-JsonObject authInfo = new JsonObject()
-  .put("username", "Mufasa")
-  .put("realm", "testrealm@host.com")
-  .put("nonce", "dcd98b7102dd2f0e8b11d0f600bfb0c093")
-  .put("method", "GET")
-  .put("uri", "/dir/index.html")
-  .put("response", "6629fae49393a05397450978507c4ef1");
-
-authProvider.authenticate(authInfo, res -> {
-  if (res.succeeded()) {
-    User user = res.result();
-  } else {
-    // Failed!
-  }
-});
+{@link examples.AuthHtdigestExamples#example2(HtdigestAuth)}
 ----
 
 == Provider internal behavior

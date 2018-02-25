@@ -1,8 +1,6 @@
 == The Apache Shiro Auth provider implementation
 
-This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].
-
-To use this
+This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].  To use this
 project, add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -10,9 +8,9 @@ project, add the following dependency to the _dependencies_ section of your buil
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-auth-shiro</artifactId>
-  <version>3.6.0-SNAPSHOT</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -20,21 +18,21 @@ project, add the following dependency to the _dependencies_ section of your buil
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-shiro:3.6.0-SNAPSHOT'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
 other Shiro Realm which expects username and password for credentials.
 
-To create an instance of the provider you use `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html[ShiroAuth]`. You specify the type of
-Shiro auth provider that you want with `link:../enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`, and you specify the
+To create an instance of the provider you use {@link io.vertx.ext.auth.shiro.ShiroAuth}. You specify the type of
+Shiro auth provider that you want with {@link io.vertx.ext.auth.shiro.ShiroAuthRealmType}, and you specify the
 configuration in a JSON object.
 
 Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-`example3`
+{@link examples.AuthShiroExamples#example3}
 ----
 
 == Authentication
@@ -44,7 +42,7 @@ authentication info:
 
 [source,java]
 ----
-`example4`
+{@link examples.AuthShiroExamples#example4}
 ----
 
 == Authorisation - Permission-Role Model
@@ -54,20 +52,20 @@ implementation uses a familiar user/role/permission model, where a user can have
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../jsdoc/module-vertx-auth-common-js_user-User.html#isAuthorised[isAuthorised]` as follows:
+{@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
 
 [source,java]
 ----
-`example5`
+{@link examples.AuthShiroExamples#example5}
 ----
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
 [source,java]
 ----
-`example6`
+{@link examples.AuthShiroExamples#example6}
 ----
 
-The default role prefix is `role:`. You can change this with `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
+The default role prefix is `role:`. You can change this with {@link io.vertx.ext.auth.shiro.ShiroAuth#setRolePrefix(java.lang.String)}.
 
 === The Shiro properties auth provider
 
@@ -75,7 +73,7 @@ This auth provider implementation uses Apache Shiro to get user/role/permission 
 
 Note that roles are not available directly on the API due to the fact that vertx-auth tries to be as portable as
 possible. However one can run assertions on role by using the prefix `role:` or by specifying the prefered prefix
-with `link:../../jsdoc/module-vertx-auth-shiro-js_shiro_auth-ShiroAuth.html#setRolePrefix[setRolePrefix]`.
+with {@link io.vertx.ext.auth.shiro.ShiroAuth#setRolePrefix(java.lang.String)}.
 
 The implementation will, by default, look for a file called `vertx-users.properties` on the classpath.
 
@@ -140,8 +138,7 @@ This is done as follows:
 
 [source,java]
 ----
-`example8`
+{@link examples.AuthShiroExamples#example8}
 ----
 
 The implementation currently assumes that user/password based authentication is used.
-<a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a>

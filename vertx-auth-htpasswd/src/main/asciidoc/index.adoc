@@ -1,7 +1,6 @@
 == htpasswd Auth Provider implementation
-
 <p>
-We provide an implementation of `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]` which uses the Apache htpasswd file format
+We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the Apache htpasswd file format
 to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
 user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
 <p>
@@ -13,9 +12,15 @@ dependency to the _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< Updated upstream:vertx-auth-htpasswd/src/main/asciidoc/java/index.adoc
 <groupId>io.vertx</groupId>
 <artifactId>vertx-auth-htpasswd</artifactId>
 <version>3.6.0-SNAPSHOT</version>
+=======
+<groupId>${maven.groupId}</groupId>
+<artifactId>${maven.artifactId}</artifactId>
+<version>${maven.version}</version>
+>>>>>>> Stashed changes:vertx-auth-htpasswd/src/main/asciidoc/index.adoc
 </dependency>
 ----
 <p>
@@ -23,19 +28,23 @@ dependency to the _dependencies_ section of your build descriptor:
 <p>
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< Updated upstream:vertx-auth-htpasswd/src/main/asciidoc/java/index.adoc
 compile 'io.vertx:vertx-auth-htpasswd:3.6.0-SNAPSHOT'
+=======
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Stashed changes:vertx-auth-htpasswd/src/main/asciidoc/index.adoc
 ----
 <p>
 To create an instance you first need an htpasswd file. This file is created using the apache htpasswd tool.
 <p>
-Once you've got one of these you can create a `link:../../apidocs/io/vertx/ext/auth/htpasswd/HtpasswdAuth.html[HtpasswdAuth]` instance as follows:
+Once you've got one of these you can create a {@link io.vertx.ext.auth.htpasswd.HtpasswdAuth} instance as follows:
 <p>
-[source,java]
+[source,$lang]
 ----
-HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions());
+{@link examples.AuthHtpasswdExamples#example1(io.vertx.core.Vertx)}
 ----
 <p>
-Once you've got your instance you can authenticate with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate with it just like any {@link io.vertx.ext.auth.AuthProvider}.
 <p>
 The out of the box config assumes the usage of the file htpasswd in the root of the project.
 <p>
@@ -51,19 +60,9 @@ The implementation does not have any other state than the htpasswd file itself.
 When authenticating using this implementation, it assumes that the username and password are parsed as a JSON
 object which we refer from now on as authentication info:
 <p>
-[source,java]
+[source,$lang]
 ----
-JsonObject authInfo = new JsonObject()
-  .put("username", "someUser")
-  .put("password", "somePassword");
-
-authProvider.authenticate(authInfo, res -> {
-  if (res.succeeded()) {
-    User user = res.result();
-  } else {
-    // Failed!
-  }
-});
+{@link examples.AuthHtpasswdExamples#example2(HtpasswdAuth)}
 ----
 <p>
 == Autorization
@@ -73,21 +72,14 @@ default authorization response for all users and for all authorities. It can eth
 <p>
 * Configuration example:
 <p>
-[source,java]
+[source,$lang]
 ----
-HtpasswdAuth authProviderUsersAuthorizedForNothing = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(false));
-HtpasswdAuth authProviderUsersAuthorizedForEverything = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(true));
+{@link examples.AuthHtpasswdExamples#example3(io.vertx.core.Vertx)}
 ----
 <p>
 * Authorization checking:
 <p>
-[source,java]
+[source,$lang]
 ----
-user.isAuthorised("anyAuthority", res -> {
-  if (res.succeeded()) {
-    boolean hasRole = res.result();
-  } else {
-    // Failed
-  }
-});
+{@link examples.AuthHtpasswdExamples#example4}
 ----

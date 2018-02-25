@@ -1,9 +1,7 @@
 == JDBC Auth Provider implementation
 
-We provide an implementation of `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]` which uses the Vert.x `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]`
-to perform authentication and authorisation against any JDBC compliant database.
-
-To use this project,
+We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}
+to perform authentication and authorisation against any JDBC compliant database. To use this project,
 add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -11,9 +9,15 @@ add the following dependency to the _dependencies_ section of your build descrip
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< Updated upstream:vertx-auth-jdbc/src/main/asciidoc/ruby/index.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-jdbc</artifactId>
   <version>3.6.0-SNAPSHOT</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Stashed changes:vertx-auth-jdbc/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -21,27 +25,29 @@ add the following dependency to the _dependencies_ section of your build descrip
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< Updated upstream:vertx-auth-jdbc/src/main/asciidoc/ruby/index.adoc
 compile 'io.vertx:vertx-auth-jdbc:3.6.0-SNAPSHOT'
+=======
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Stashed changes:vertx-auth-jdbc/src/main/asciidoc/index.adoc
 ----
 
-To create an instance you first need an instance of `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]`. To learn how to create one
+To create an instance you first need an instance of {@link io.vertx.ext.jdbc.JDBCClient}. To learn how to create one
 of those please consult the documentation for the JDBC client.
 
-Once you've got one of those you can create a `link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html[JDBCAuth]` instance as follows:
+Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuth} instance as follows:
 
-[source,java]
+[source,$lang]
 ----
-JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
-
-JDBCAuth authProvider = JDBCAuth.create(vertx, jdbcClient);
+{@link examples.AuthJDBCExamples#example5}
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any `link:../../apidocs/io/vertx/ext/auth/AuthProvider.html[AuthProvider]`.
+Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
-with the operations `link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html#setAuthenticationQuery-java.lang.String-[setAuthenticationQuery]`,
-`link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html#setPermissionsQuery-java.lang.String-[setPermissionsQuery]` and
-`link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html#setRolesQuery-java.lang.String-[setRolesQuery]`, if you want to use them with a different
+with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuth#setAuthenticationQuery(String)},
+{@link io.vertx.ext.auth.jdbc.JDBCAuth#setPermissionsQuery(String)} and
+{@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolesQuery(String)}, if you want to use them with a different
 database schema.
 
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
@@ -86,7 +92,7 @@ WARNING: If you already have a running application switching the strategies will
 passwords, so you will need to migrate the passwords from one algorithm to the second.
 
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
-`link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html#setHashStrategy-io.vertx.ext.auth.jdbc.JDBCHashStrategy-[setHashStrategy]`.
+{@link io.vertx.ext.auth.jdbc.JDBCAuth#setHashStrategy(JDBCHashStrategy)}.
 
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
@@ -102,16 +108,9 @@ to hash new password before storing it to the database. Doing it is a 3 step tas
 2. Hash the password given the salt string
 3. Store it to the database
 
-[source,java]
+[source,$lang]
 ----
-String salt = auth.generateSalt();
-String hash = auth.computeHash("sausages", salt);
-// save to the database
-conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
-  if (res.succeeded()) {
-    // success!
-  }
-});
+{@link examples.AuthJDBCExamples#example9}
 ----
 
 WARNING: Hashing user password with salt can be not enough, this approach his good enough for avoiding rainbow tables
@@ -123,9 +122,9 @@ to be used in the computation. This list should not be stored in the database si
 computation that is unknown, making the brute force attack as potentially the only way to crack the hash. You might
 want to refresh the nonces now and then so you should add and never remove entries to the list, for example:
 
-[source,java]
+[source,$lang]
 ----
-auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+{@link examples.AuthJDBCExamples#example10}
 ----
 
 In order to decode there is no change required to the code, however to generate a new user you must specify which
@@ -135,19 +134,9 @@ nonce (by it's index) you want to use. If you look at the previous example, the 
 2. Hash the password given the salt string and choosen nonce
 3. Store it to the database
 
-[source,java]
+[source,$lang]
 ----
-auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
-
-String salt = auth.generateSalt();
-// we will pick the second nonce
-String hash = auth.computeHash("sausages", salt, 1);
-// save to the database
-conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
-  if (res.succeeded()) {
-    // success!
-  }
-});
+{@link examples.AuthJDBCExamples#example11}
 ----
 
 == Authentication
@@ -155,17 +144,9 @@ conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
 authentication info:
 
-[source,java]
+[source,$lang]
 ----
-JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
-
-authProvider.authenticate(authInfo, res -> {
-  if (res.succeeded()) {
-    User user = res.result();
-  } else {
-    // Failed!
-  }
-});
+{@link examples.AuthJDBCExamples#example6}
 ----
 
 == Authorisation - Permission-Role Model
@@ -175,31 +156,21 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-`link:../../apidocs/io/vertx/ext/auth/User.html#isAuthorised-java.lang.String-io.vertx.core.Handler-[isAuthorised]` as follows:
+{@link io.vertx.ext.auth.User#isAuthorised(java.lang.String, io.vertx.core.Handler)} as follows:
 
-[source,java]
+[source,$lang]
 ----
-user.isAuthorised("commit_code", res -> {
-  if (res.succeeded()) {
-    boolean hasPermission = res.result();
-  } else {
-    // Failed to
-  }
-});
+{@link examples.AuthJDBCExamples#example7}
 ----
 
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
-[source,java]
+[source,$lang]
 ----
-user.isAuthorised("role:manager", res -> {
-  if (res.succeeded()) {
-    boolean hasRole = res.result();
-  } else {
-    // Failed to
-  }
-});
+{@link examples.AuthJDBCExamples#example8}
 ----
 
-The default role prefix is `role:`. You can change this with `link:../../apidocs/io/vertx/ext/auth/jdbc/JDBCAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
-<a href="mailto:julien@julienviet.com">Julien Viet</a><a href="http://tfox.org">Tim Fox</a>
+The default role prefix is `role:`. You can change this with {@link io.vertx.ext.auth.jdbc.JDBCAuth#setRolePrefix(java.lang.String)}.
+
+@author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+@author <a href="http://tfox.org">Tim Fox</a>
