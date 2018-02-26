@@ -8,15 +8,9 @@ dependency to the _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-<<<<<<< Updated upstream:vertx-auth-jwt/src/main/asciidoc/java/index.adoc
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-auth-jwt</artifactId>
-  <version>3.6.0-SNAPSHOT</version>
-=======
   <groupId>${maven.groupId}</groupId>
   <artifactId>${maven.artifactId}</artifactId>
   <version>${maven.version}</version>
->>>>>>> Stashed changes:vertx-auth-jwt/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -24,11 +18,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-<<<<<<< Updated upstream:vertx-auth-jwt/src/main/asciidoc/java/index.adoc
-compile 'io.vertx:vertx-auth-jwt:3.6.0-SNAPSHOT'
-=======
 compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
->>>>>>> Stashed changes:vertx-auth-jwt/src/main/asciidoc/index.adoc
 ----
 
 JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
