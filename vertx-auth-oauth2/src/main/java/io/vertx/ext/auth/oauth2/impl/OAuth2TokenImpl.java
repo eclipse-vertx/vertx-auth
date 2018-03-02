@@ -132,8 +132,10 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       // the permission cache needs to be clear
       clearCache();
       // rebuild cache
-      if (token.containsKey("scope")) {
-        Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
+      String scope = token.getString("scope");
+      // avoid the case when scope is the literal "null" value.
+      if (scope != null) {
+        Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getScopeSeparator())));
       }
     }
   }
@@ -746,8 +748,9 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     // the permission cache needs to be clear
     clearCache();
     // rebuild cache
-    if (token.containsKey("scope")) {
-      Collections.addAll(cachedPermissions, token.getString("scope", "").split(Pattern.quote(provider.getScopeSeparator())));
+    String scope = token.getString("scope");
+    if (scope != null) {
+      Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getScopeSeparator())));
     }
   }
 
