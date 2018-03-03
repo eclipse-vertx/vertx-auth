@@ -110,4 +110,12 @@ public class PRNG implements VertxContextPRNG {
     dirty = true;
     return rand;
   }
+
+  @Override
+  public int nextInt(final int bound) {
+    final int rand = random.nextInt(bound);
+    dirty = true;
+    return rand;
+  }
+
 }

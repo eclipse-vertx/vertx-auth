@@ -138,4 +138,13 @@ public interface VertxContextPRNG {
    * @return random int.
    */
   int nextInt();
+
+  /**
+   * Returns a secure random int, between 0 (inclusive) and the specified bound (exclusive).
+   *
+   * @param bound the upper bound (exclusive), which must be positive.
+   * @return random int.
+   */
+  int nextInt(int bound);
+
 }
