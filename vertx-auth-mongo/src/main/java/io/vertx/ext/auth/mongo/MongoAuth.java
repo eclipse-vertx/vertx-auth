@@ -332,7 +332,7 @@ public interface MongoAuth extends AuthProvider {
    * @param username
    *          the username to be set
    * @param password
-   *          the passsword in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
+   *          the password in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
    * @param roles
    *          a list of roles to be set
    * @param permissions
@@ -343,4 +343,23 @@ public interface MongoAuth extends AuthProvider {
   void insertUser(String username, String password, List<String> roles, List<String> permissions,
       Handler<AsyncResult<String>> resultHandler);
 
+  /**
+   * Inserts a new user into mongo. The inserted json object will be a composition of the {@code principal} and
+   * all other specified information.
+   *
+   * @param principal
+   *          the base object for the new user
+   * @param username
+   *          the username, or {@code null} if this is already set in {@code principal}
+   * @param password
+   *          the password in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
+   * @param roles
+   *          a list of roles to be set, or {@code null} if this is already set in {@code principal}
+   * @param permissions
+   *          a list of permissions to be set, or {@code null} if this is already set in {@code principal}
+   * @param resultHandler
+   *          the ResultHandler will be provided with the id of the generated record
+   */
+  void insertUser(JsonObject principal, String username, String password, List<String> roles, List<String> permissions,
+                  Handler<AsyncResult<String>> resultHandler);
 }
