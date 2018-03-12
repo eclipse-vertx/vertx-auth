@@ -44,7 +44,6 @@
 
   <properties>
     <stack.version>3.6.0-SNAPSHOT</stack.version>
-    <codegen.rxjava.deprecated>true</codegen.rxjava.deprecated>
     <doc.skip>true</doc.skip>
   </properties>
 
