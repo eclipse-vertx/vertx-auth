@@ -9,8 +9,8 @@ add the following dependency to the _dependencies_ section of your build descrip
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>${maven.groupId}</groupId>
-  <artifactId>${maven.artifactId}</artifactId>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-jdbc</artifactId>
   <version>${maven.version}</version>
 </dependency>
 ----
@@ -19,7 +19,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 
 [source,groovy,subs="+attributes"]
 ----
-compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+compile 'io.vertx:vertx-auth-jdbc:${maven.version}'
 ----
 
 To create an instance you first need an instance of {@link io.vertx.ext.jdbc.JDBCClient}. To learn how to create one

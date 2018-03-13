@@ -8,8 +8,8 @@ dependency to the _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>${maven.groupId}</groupId>
-  <artifactId>${maven.artifactId}</artifactId>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-oauth2</artifactId>
   <version>${maven.version}</version>
 </dependency>
 ----
@@ -18,7 +18,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+compile 'io.vertx:vertx-auth-oauth2:${maven.version}'
 ----
 
 OAuth2 lets users grant the access to the desired resources to third party applications, giving them the possibility

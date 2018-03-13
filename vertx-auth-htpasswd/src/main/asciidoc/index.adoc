@@ -12,8 +12,8 @@ dependency to the _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-<groupId>${maven.groupId}</groupId>
-<artifactId>${maven.artifactId}</artifactId>
+<groupId>io.vertx</groupId>
+<artifactId>vertx-auth-htpasswd</artifactId>
 <version>${maven.version}</version>
 </dependency>
 ----
@@ -22,7 +22,7 @@ dependency to the _dependencies_ section of your build descriptor:
 <p>
 [source,groovy,subs="+attributes"]
 ----
-compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+compile 'io.vertx:vertx-auth-htpasswd:${maven.version}'
 ----
 <p>
 To create an instance you first need an htpasswd file. This file is created using the apache htpasswd tool.

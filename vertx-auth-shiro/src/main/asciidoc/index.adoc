@@ -8,8 +8,8 @@ project, add the following dependency to the _dependencies_ section of your buil
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>${maven.groupId}</groupId>
-  <artifactId>${maven.artifactId}</artifactId>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-shiro</artifactId>
   <version>${maven.version}</version>
 </dependency>
 ----
@@ -18,7 +18,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 
 [source,groovy,subs="+attributes"]
 ----
-compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+compile 'io.vertx:vertx-auth-shiro:${maven.version}'
 ----
 
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
@@ -129,10 +129,10 @@ but can be overridden to use custom LDAP factories.
 `ldap_pooling_enabled`:: Sets whether or not connection pooling should be used when possible and appropriate.
 `ldap_referral`:: Sets the LDAP referral behavior when creating a connection.  Defaults to {@code follow}.  See the Sun/Oracle LDAP
 referral documentation for more: http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html
-`ldap_system_username`:: Sets the system username that will be used when creating an LDAP connection used for authorization 
+`ldap_system_username`:: Sets the system username that will be used when creating an LDAP connection used for authorization
 queries. The user must have the ability to query for authorization data for any application user.
 Note that setting this property is not required if the calling LDAP Realm does not perform authorization checks.
-`ldap_system_password`:: Sets the password of the {@link #setSystemUsername(String) systemUsername} that will be used when 
+`ldap_system_password`:: Sets the password of the {@link #setSystemUsername(String) systemUsername} that will be used when
 creating an LDAP connection used for authorization queries.
 Note that setting this property is not required if the calling LDAP Realm does not perform authorization checks.
 
