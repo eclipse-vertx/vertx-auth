@@ -411,6 +411,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
+    // specify preferred accepted accessToken type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
       provider,
@@ -455,7 +457,6 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
-
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
@@ -570,6 +571,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
   @Override
   public AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback) {
+    final JsonObject headers = new JsonObject();
     final JsonObject extraParams = provider.getConfig().getUserInfoParameters();
     String path = provider.getConfig().getUserInfoPath();
 
@@ -577,11 +579,15 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       path += "?" + OAuth2API.stringify(extraParams);
     }
 
+    headers.put("Authorization", "Bearer " + token.getString("access_token"));
+    // specify preferred accepted accessToken type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
     OAuth2API.fetch(
       provider,
       HttpMethod.GET,
       path,
-      new JsonObject().put("Authorization", "Bearer " + token.getString("access_token")),
+      headers,
       null,
       fetch -> {
         if (fetch.failed()) {
