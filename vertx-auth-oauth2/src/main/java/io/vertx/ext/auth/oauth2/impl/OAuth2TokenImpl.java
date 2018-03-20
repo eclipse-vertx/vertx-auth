@@ -781,4 +781,13 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
     return pos;
   }
+
+  /**
+   * Get the RAW token
+   *
+   * @return the RAW token
+   */
+  public JsonObject getToken() {
+    return token;
+  }
 }
