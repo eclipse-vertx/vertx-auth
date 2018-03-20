@@ -60,7 +60,176 @@ do:
 {@link examples.AuthJWTExamples#example7}
 ----
 
-=== The JWT keystore file
+=== Loading Keys
+
+Loading keys can be performed in 3 different ways:
+
+* Using secrets (symmetric keys)
+* Using OpenSSL `pem` formatted files (pub/sec keys)
+* Using Java Keystore files (both symmetric and pub/sec keys)
+
+It is recommended to avoid java keystores, as java keystores are complex to generate and make many assumptions in order
+to choose the right key for the authenticator.
+
+==== Using Symmetric Keys
+
+The default signature method for JWT's is known as `HS256`. `HS` stands in this case for `HMAC Signature using SHA256`.
+
+This is the simplest key to load. All you need is a secret that is shared between you and the 3rd party, for example
+assume that the secret is: `keyboard cat` then you can configure your Auth as:
+
+[source,java]
+----
+{@link examples.AuthJWTExamples#example16}
+----
+
+In this case the secret is configured as a public key, as it is a token that is known to both parties and you configure
+your PubSec key as being symmetric.
+
+
+==== Using RSA keys
+
+This section is by no means a manual on OpenSSL and a read on OpenSSL command line usage is advised. We will cover
+how to generate the most common keys and how to use them with JWT auth.
+
+Imagine that you would like to protect your application using the very common `RS256` JWT algorithm. Contrary to some
+belief, 256 is not the key length but the hashing algorithm signature length. Any RSA key can be used with this JWT
+algorithm. Here is an information table:
+
+[width="80%",cols="e,>s",options="header"]
+|=========================================================
+|"alg" Param Value |Digital Signature Algorithm
+
+|RS256 |RSASSA-PKCS1-v1_5 using SHA-256
+
+|RS384 |RSASSA-PKCS1-v1_5 using SHA-384
+
+|RS512 |RSASSA-PKCS1-v1_5 using SHA-512
+
+|=========================================================
+
+If you would like to generate a 2048bit RSA key pair, then you would do (please remember **not** to add a passphrase
+otherwise you will not be able to read the private key in the JWT auth):
+
+----
+openssl genrsa -out private.pem 2048
+----
+
+You can observe that the key is correct as the file content is similar to this:
+
+----
+-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAxPSbCQY5mBKFDIn1kggvWb4ChjrctqD4nFnJOJk4mpuZ/u3h
+...
+e4k0yN3F1J1DVlqYWJxaIMzxavQsi9Hz4p2JgyaZMDGB6kGixkMo
+-----END RSA PRIVATE KEY-----
+----
+
+The standard JDK cannot read this file as is, so we **must** convert it to PKCS8 format first:
+
+----
+openssl pkcs8 -topk8 -inform PEM -in private.pem -out private_key.pem -nocrypt
+----
+
+Now the new file `private_key.pem` which resembles the original one contains:
+
+----
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDE9JsJBjmYEoUM
+...
+0fPinYmDJpkwMYHqQaLGQyg=
+-----END PRIVATE KEY-----
+----
+
+If we are verifying tokens only (you will only need the private_key.pem file) however at some point you will need to
+issue tokens too, so you will a public key. In this case you need to extract the public key from the private key file:
+
+----
+openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+----
+
+And you should see that the content of the file is similar to this:
+
+----
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPSbCQY5mBKFDIn1kggv
+...
+qwIDAQAB
+-----END PUBLIC KEY-----
+----
+
+Now you can use this to issue or validate tokens:
+
+[source,java]
+----
+{@link examples.AuthJWTExamples#example15}
+----
+
+Do note that all the lines `-----BEGIN ...` and `-----END...` should be stripped from the string to be passed to the
+configuration.
+
+==== Using EC keys
+
+Elliptic Curse keys are also supported, however the default JDK has some limitations on the features that can be used.
+
+The usage is very similar to RSA, first you create a private key:
+
+----
+openssl ecparam -name secp256r1 -genkey -out private.pem
+----
+
+So you will get something similar to this:
+
+----
+-----BEGIN EC PARAMETERS-----
+BggqhkjOPQMBBw==
+-----END EC PARAMETERS-----
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIMZGaqZDTHL+IzFYEWLIYITXpGzOJuiQxR2VNGheq7ShoAoGCCqGSM49
+AwEHoUQDQgAEG1O9LCrP6hg3Y9q68+LF0q48UcOkwVKE1ax0b56wjVusf3qnuFO2
+/+XHKKhtzEavvFMeXRQ+ZVEqM0yGNb04qw==
+-----END EC PRIVATE KEY-----
+----
+
+However the JDK prefers PKCS8 format so we must convert:
+
+----
+openssl pkcs8 -topk8 -nocrypt -in private.pem -out private_key.pem
+----
+
+Which will give you a key similar to this:
+
+----
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgxkZqpkNMcv4jMVgR
+YshghNekbM4m6JDFHZU0aF6rtKGhRANCAAQbU70sKs/qGDdj2rrz4sXSrjxRw6TB
+UoTVrHRvnrCNW6x/eqe4U7b/5ccoqG3MRq+8Ux5dFD5lUSozTIY1vTir
+-----END PRIVATE KEY-----
+----
+
+Using the private key you can already generate tokens:
+
+[source,java]
+-----
+{@link examples.AuthJWTExamples#example17}
+-----
+
+So in order to validate the tokens you will need a public key:
+
+----
+openssl ec -in private.pem -pubout -out public.pem
+----
+
+So you can do all operations with it:
+
+[source,java]
+----
+{@link examples.AuthJWTExamples#example18}
+----
+
+==== The JWT keystore file
+
+If you prefer to use Java Keystores, then you can do it either.
 
 This auth provider requires a keystore in the classpath or in the filesystem with either a
 `https://docs.oracle.com/javase/8/docs/api/javax/crypto/Mac.html[javax.crypto.Mac]`
@@ -84,7 +253,7 @@ a good practice `HS256` should be present:
 When no keystore is provided the implementation falls back in unsecure mode and signatures will not be verified, this
 is useful for the cases where the payload if signed and or encrypted by external means.
 
-=== Generate a new Keystore file
+===== Generate a new Keystore file
 
 The only required tool to generate a keystore file is `keytool`, you can now specify which algorithms you need by
 running:
@@ -184,6 +353,40 @@ configured to use something else than `permissions`, for example one can even lo
 So in this example we configure the JWT to work with Keycloak token format. In this case the claims will be checked
 under the path `realm_access/roles` rather than `permissions`.
 
+=== Validating Tokens
+
+When the method `authenticate` is invoked, the token is validated against the `JWTOptions` provided during the
+initialization. The validation performs the following steps:
+
+1. if `ignoreExpiration` (default is false) is false then the token is checked for expiration, this will check the
+   fields: `exp`, `iat` and `nbf`. Since sometimes clocks are not reliable, it is possible to configure some `leeway`
+   to be applied to the dates so we allow some grace period if the dates are outside the required limits.
+2. if `audience` is provided, then the token `aud` is checked against the configured one and all configured audiences
+   must be in the token.
+3. if `issuer` is configured, then the tokens `iss` is checked against the configured one.
+
+Once these validations complete a JWTUser object is then returned, the object is configured with a reference to the
+permission claims key provided in the configuration. This value is used later when doing authorization. The value
+corresponds to the json path where authorities should be checked.
+
+=== Customizing Token Generation
+
+In the same way tokens are validated, the generation is initially configured during the initialization.
+
+When generating a token an optional extra parameter can be supplied to control the token generation, this is a
+`JWTOptions` object. The token signature algorithm (default HS256) can be configured using the property `algorithm`.
+In this case a lookup for a key that corresponds to the algorithm is performed and used to sign.
+
+Token headers can be added by specifying any extra headers to be merged with the default ones using the options `headers`
+property.
+
+Sometimes it might be useful to issue tokens without a timestamp (test, development time for example) in this case the
+property `noTimestamp` should be set to true (default false). This means that there is no `iat` field in the token.
+
+Token expiration is controlled by the property `expiresInSeconds`, by default there is no expiration. Other control
+fields `audience`, `issuer` and `subject` are then picked from the config is available and added to the token metadata.
+
+Finally the token is signed and encoded in the correct format.
 
 @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
 @author <a href="http://tfox.org">Tim Fox</a>
