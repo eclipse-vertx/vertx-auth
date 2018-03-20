@@ -96,15 +96,17 @@ Imagine that you would like to protect your application using the very common `R
 belief, 256 is not the key length but the hashing algorithm signature length. Any RSA key can be used with this JWT
 algorithm. Here is an information table:
 
-----
-  +-------------------+---------------------------------+
-  | "alg" Param Value | Digital Signature Algorithm     |
-  +-------------------+---------------------------------+
-  | RS256             | RSASSA-PKCS1-v1_5 using SHA-256 |
-  | RS384             | RSASSA-PKCS1-v1_5 using SHA-384 |
-  | RS512             | RSASSA-PKCS1-v1_5 using SHA-512 |
-  +-------------------+---------------------------------+
-----
+[width="80%",cols="e,>s",options="header"]
+|=========================================================
+|"alg" Param Value |Digital Signature Algorithm
+
+|RS256 |RSASSA-PKCS1-v1_5 using SHA-256
+
+|RS384 |RSASSA-PKCS1-v1_5 using SHA-384
+
+|RS512 |RSASSA-PKCS1-v1_5 using SHA-512
+
+|=========================================================
 
 If you would like to generate a 2048bit RSA key pair, then you would do (please remember **not** to add a passphrase
 otherwise you will not be able to read the private key in the JWT auth):
