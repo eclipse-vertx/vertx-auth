@@ -75,10 +75,10 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
       AuthenticationToken token = new UsernamePasswordToken(username, password);
       try {
         subject.login(token);
+        fut.complete(new ShiroUser(vertx, securityManager, subject, rolePrefix));
       } catch (AuthenticationException e) {
-        throw new VertxException(e);
+        fut.fail(e);
       }
-      fut.complete(new ShiroUser(vertx, securityManager, subject, rolePrefix));
     }, resultHandler);
   }
 
