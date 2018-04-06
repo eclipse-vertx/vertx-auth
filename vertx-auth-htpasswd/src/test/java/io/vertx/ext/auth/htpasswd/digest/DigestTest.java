@@ -12,15 +12,24 @@ public class DigestTest {
 
   @Test()
   public void testIsBcryptHashed() {
+    assertTrue(isBcryptHashed("$2a$06$.rCVZVOThsIa97pEDOxvGuRRgzG64bvtJ0938xuqzv18d3ZpQhstC"));
     assertTrue(isBcryptHashed("$2y$05$QwbS8vp1A/yQ1AlQ8ySDOuzONdR3U6A.xATjBHno/.nvp8O55eVaG"));
     assertFalse(isBcryptHashed("something"));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void testBcryptCheck() {
+  @Test()
+  public void testBcrypt2aCheck() {
+    assertTrue(bcryptCheck("abcdefghijklmnopqrstuvwxyz", "$2a$06$.rCVZVOThsIa97pEDOxvGuRRgzG64bvtJ0938xuqzv18d3ZpQhstC"));
+    assertFalse(bcryptCheck("abcdefghijklmnopqrstuvwxyz", "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s."));
+  }
+
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBcrypt2yCheck() {
     assertTrue(bcryptCheck("myPassword", "$2y$05$QwbS8vp1A/yQ1AlQ8ySDOuzONdR3U6A.xATjBHno/.nvp8O55eVaG"));
     assertFalse(bcryptCheck("myPassword", "$2y$10$rzA1p/MV49PSfigoPaRP.OE3TkamFV0v.eV9dH72SP9lN1wksd.WS"));
   }
+
 
   @Test
   public void testIsMd5Hashed() {
