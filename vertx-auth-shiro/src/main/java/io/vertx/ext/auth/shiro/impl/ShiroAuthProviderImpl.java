@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -68,6 +69,9 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
     vertx.executeBlocking(fut -> {
+      // before doing any shiro operations set the context
+      SecurityUtils.setSecurityManager(securityManager);
+      // proceed
       SubjectContext subjectContext = new DefaultSubjectContext();
       Subject subject = securityManager.createSubject(subjectContext);
       String username = authInfo.getString("username");
