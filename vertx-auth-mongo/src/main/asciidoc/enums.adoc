@@ -1,5 +1,25 @@
 = Enums
 
+[[HashAlgorithm]]
+== HashAlgorithm
+
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[SHA512]]`SHA512`|
++++
+The default algorithm for backward compatible systems.
+
+ Should not be used for new projects as OWASP recommends stronger hashing algorithms.
++++
+|[[PBKDF2]]`PBKDF2`|
++++
+Stronger hashing algorithm, recommended by OWASP as of 2018.
++++
+|===
+
 [[HashSaltStyle]]
 == HashSaltStyle
 

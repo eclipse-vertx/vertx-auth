@@ -27,39 +27,34 @@ import io.vertx.core.json.JsonArray;
 public class PubSecKeyOptionsConverter {
 
   public static void fromJson(JsonObject json, PubSecKeyOptions obj) {
+    if (json.getValue("algorithm") instanceof String) {
+      obj.setAlgorithm((String)json.getValue("algorithm"));
+    }
+    if (json.getValue("certificate") instanceof Boolean) {
+      obj.setCertificate((Boolean)json.getValue("certificate"));
+    }
     if (json.getValue("publicKey") instanceof String) {
       obj.setPublicKey((String)json.getValue("publicKey"));
     }
     if (json.getValue("secretKey") instanceof String) {
       obj.setSecretKey((String)json.getValue("secretKey"));
     }
-    if (json.getValue("type") instanceof String) {
-      obj.setType((String)json.getValue("type"));
-    }
-    if (json.getValue("x509Certificates") instanceof JsonArray) {
-      java.util.ArrayList<java.lang.String> list = new java.util.ArrayList<>();
-      json.getJsonArray("x509Certificates").forEach( item -> {
-        if (item instanceof String)
-          list.add((String)item);
-      });
-      obj.setX509Certificates(list);
+    if (json.getValue("symmetric") instanceof Boolean) {
+      obj.setSymmetric((Boolean)json.getValue("symmetric"));
     }
   }
 
   public static void toJson(PubSecKeyOptions obj, JsonObject json) {
+    if (obj.getAlgorithm() != null) {
+      json.put("algorithm", obj.getAlgorithm());
+    }
+    json.put("certificate", obj.isCertificate());
     if (obj.getPublicKey() != null) {
       json.put("publicKey", obj.getPublicKey());
     }
     if (obj.getSecretKey() != null) {
       json.put("secretKey", obj.getSecretKey());
     }
-    if (obj.getType() != null) {
-      json.put("type", obj.getType());
-    }
-    if (obj.getX509Certificates() != null) {
-      JsonArray array = new JsonArray();
-      obj.getX509Certificates().forEach(item -> array.add(item));
-      json.put("x509Certificates", array);
-    }
+    json.put("symmetric", obj.isSymmetric());
   }
 }

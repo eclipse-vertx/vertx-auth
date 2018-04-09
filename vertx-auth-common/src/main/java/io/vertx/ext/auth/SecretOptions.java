@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="mailto:marco@viafoura.com">Marco Monaco</a>
  */
+@Deprecated
 @DataObject(generateConverter = true)
 public class SecretOptions {
   // Defaults

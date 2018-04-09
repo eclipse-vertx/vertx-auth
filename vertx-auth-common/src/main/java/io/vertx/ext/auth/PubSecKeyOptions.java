@@ -3,9 +3,6 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Options describing how a Cryptographic Key.
  *
@@ -14,19 +11,16 @@ import java.util.List;
 @DataObject(generateConverter = true)
 public class PubSecKeyOptions {
 
-  // Defaults
-  private static final String TYPE = "RSA";
-
-  private String type;
+  private String algorithm;
+  private boolean certificate;
+  private boolean symmetric;
   private String publicKey;
   private String secretKey;
-  private List<String> certificates;
 
   /**
    * Default constructor
    */
   public PubSecKeyOptions() {
-    init();
   }
 
   /**
@@ -35,14 +29,11 @@ public class PubSecKeyOptions {
    * @param other the options to copy
    */
   public PubSecKeyOptions(PubSecKeyOptions other) {
-    type = other.getType();
+    algorithm = other.getAlgorithm();
     publicKey = other.getPublicKey();
     secretKey = other.getSecretKey();
-    certificates = other.getX509Certificates();
-  }
-
-  private void init() {
-    type = TYPE;
+    symmetric = other.isSymmetric();
+    certificate = other.isCertificate();
   }
 
   /**
@@ -51,16 +42,15 @@ public class PubSecKeyOptions {
    * @param json the JSON
    */
   public PubSecKeyOptions(JsonObject json) {
-    init();
     PubSecKeyOptionsConverter.fromJson(json, this);
   }
 
-  public String getType() {
-    return type;
+  public String getAlgorithm() {
+    return algorithm;
   }
 
-  public PubSecKeyOptions setType(String type) {
-    this.type = type;
+  public PubSecKeyOptions setAlgorithm(String algorithm) {
+    this.algorithm = algorithm;
     return this;
   }
 
@@ -82,20 +72,21 @@ public class PubSecKeyOptions {
     return this;
   }
 
-  public List<String> getX509Certificates() {
-    return certificates;
+  public boolean isSymmetric() {
+    return symmetric;
   }
 
-  public PubSecKeyOptions setX509Certificates(List<String> certificates) {
-    this.certificates = certificates;
+  public PubSecKeyOptions setSymmetric(boolean symmetric) {
+    this.symmetric = symmetric;
     return this;
   }
 
-  public PubSecKeyOptions addX509Certificate(String certificate) {
-    if (certificates == null) {
-      certificates = new ArrayList<>();
-    }
-    certificates.add(certificate);
+  public boolean isCertificate() {
+    return certificate;
+  }
+
+  public PubSecKeyOptions setCertificate(boolean certificate) {
+    this.certificate = certificate;
     return this;
   }
 }

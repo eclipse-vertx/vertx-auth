@@ -23,6 +23,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.jwt.JWTOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Options describing how an OAuth2 {@link HttpClient} will make connections.
  *
@@ -39,11 +42,13 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
+  private static final boolean JWT_TOKEN = false;
 
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
   private String scopeSeparator;
+  private boolean jwtToken;
   // this is an openid-connect extension
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
@@ -53,13 +58,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private JsonObject userInfoParams;
   // introspection RFC7662
   private String introspectionPath;
+  // JWK path RFC7517
+  private String jwkPath;
 
   private String site;
   private String clientID;
   private String clientSecret;
   private String userAgent;
   private JsonObject headers;
-  private PubSecKeyOptions pubSecKey;
+  private List<PubSecKeyOptions> pubSecKeys;
   private JWTOptions jwtOptions;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
@@ -106,7 +113,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     site = other.getSite();
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
-    pubSecKey = other.getPubSecKey();
+    pubSecKeys = other.getPubSecKeys();
     // jwt options
     jwtOptions = other.getJWTOptions();
     logoutPath = other.getLogoutPath();
@@ -131,6 +138,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     } else {
       headers = null;
     }
+    // JWK path RFC7517
+    jwkPath = other.getJwkPath();
+    jwtToken = other.isJWTToken();
   }
 
   private void init() {
@@ -141,6 +151,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtOptions = JWT_OPTIONS;
+    jwtToken = JWT_TOKEN;
     userInfoParams = null;
     headers = null;
   }
@@ -324,12 +335,20 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * The provider PubSec key options
    * @return the pub sec key options
    */
-  public PubSecKeyOptions getPubSecKey() {
-    return pubSecKey;
+  public List<PubSecKeyOptions> getPubSecKeys() {
+    return pubSecKeys;
   }
 
-  public OAuth2ClientOptions setPubSecKeyOptions(PubSecKeyOptions pubSecKey) {
-    this.pubSecKey = pubSecKey;
+  public OAuth2ClientOptions setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
+    this.pubSecKeys = pubSecKeys;
+    return this;
+  }
+
+  public OAuth2ClientOptions addPubSecKey(PubSecKeyOptions pubSecKey) {
+    if (pubSecKeys == null) {
+      pubSecKeys = new ArrayList<>();
+    }
+    pubSecKeys.add(pubSecKey);
     return this;
   }
 
@@ -441,12 +460,30 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     return this;
   }
 
+  public String getJwkPath() {
+    return jwkPath;
+  }
+
+  public OAuth2ClientOptions setJwkPath(String jwkPath) {
+    this.jwkPath = jwkPath;
+    return this;
+  }
+
   public JWTOptions getJWTOptions() {
     return jwtOptions;
   }
 
   public OAuth2ClientOptions setJWTOptions(JWTOptions jwtOptions) {
     this.jwtOptions = jwtOptions;
+    return this;
+  }
+
+  public boolean isJWTToken() {
+    return jwtToken;
+  }
+
+  public OAuth2ClientOptions setJWTToken(boolean jwtToken) {
+    this.jwtToken = jwtToken;
     return this;
   }
 }

@@ -20,6 +20,7 @@ import io.vertx.ext.jwt.impl.SignatureHelper;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.UUID;
 
 import javax.crypto.Mac;
 
@@ -36,6 +37,8 @@ public interface Crypto {
     "SHA384withECDSA",
     "SHA512withECDSA"
   };
+
+  String getId();
 
   byte[] sign(byte[] payload);
 
@@ -71,10 +74,17 @@ public interface Crypto {
  * @author Paulo Lopes
  */
 class CryptoMac implements Crypto {
+
+  private final String id = UUID.randomUUID().toString();
   private final Mac mac;
 
   CryptoMac(final Mac mac) {
     this.mac = mac;
+  }
+
+  @Override
+  public String getId() {
+    return id;
   }
 
   @Override
@@ -93,29 +103,10 @@ class CryptoMac implements Crypto {
  *
  * @author Paulo Lopes
  */
-class CryptoPublicKey extends CryptoKeyPair {
-  CryptoPublicKey(final String algorithm, final PublicKey publicKey) {
-    super(algorithm, publicKey, null);
-  }
-}
-
-/**
- * Public Key based Crypto implementation
- *
- * @author Paulo Lopes
- */
-class CryptoPrivateKey extends CryptoKeyPair {
-  CryptoPrivateKey(final String algorithm, final PrivateKey privateKey) {
-    super(algorithm, null, privateKey);
-  }
-}
-
-/**
- * Public Key based Crypto implementation
- *
- * @author Paulo Lopes
- */
 class CryptoKeyPair implements Crypto {
+
+  private final String id = UUID.randomUUID().toString();
+
   private final Signature sig;
   private final PublicKey publicKey;
   private final PrivateKey privateKey;
@@ -138,6 +129,11 @@ class CryptoKeyPair implements Crypto {
     }
 
     this.sig = signature;
+  }
+
+  @Override
+  public String getId() {
+    return id;
   }
 
   @Override
@@ -229,6 +225,11 @@ class CryptoSignature extends CryptoKeyPair {
 
 final class CryptoNone implements Crypto {
   private static final byte[] NOOP = new byte[0];
+
+  @Override
+  public String getId() {
+    return "none";
+  }
 
   @Override
   public byte[] sign(byte[] payload) {

@@ -1,0 +1,20 @@
+= Cheatsheets
+
+[[HtpasswdAuthOptions]]
+== HtpasswdAuthOptions
+
+++++
+ Options configuring htpasswd authentication.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[enabledCryptPwd]]`enabledCryptPwd`|`Boolean`|-
+|[[enabledPlainTextPwd]]`enabledPlainTextPwd`|`Boolean`|-
+|[[htpasswdFile]]`htpasswdFile`|`String`|-
+|[[usersAuthorizedForEverything]]`usersAuthorizedForEverything`|`Boolean`|-
+|===
+

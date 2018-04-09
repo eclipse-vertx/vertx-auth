@@ -23,6 +23,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -58,9 +59,20 @@ public class ShiroUser extends AbstractUser {
   @Override
   protected void doIsPermitted(String permissionOrRole, Handler<AsyncResult<Boolean>> resultHandler) {
     if (permissionOrRole.startsWith(rolePrefix)) {
-      vertx.executeBlocking(fut -> fut.complete(subject.hasRole(permissionOrRole.substring(rolePrefix.length()))), resultHandler);
+      vertx.executeBlocking(fut -> {
+        final String role = permissionOrRole.substring(rolePrefix.length());
+        // before doing any shiro operations set the context
+        SecurityUtils.setSecurityManager(securityManager);
+        // proceed
+        fut.complete(subject.hasRole(role));
+      }, resultHandler);
     } else {
-      vertx.executeBlocking(fut -> fut.complete(subject.isPermitted(permissionOrRole)), resultHandler);
+      vertx.executeBlocking(fut -> {
+        // before doing any shiro operations set the context
+        SecurityUtils.setSecurityManager(securityManager);
+        // proceed
+        fut.complete(subject.isPermitted(permissionOrRole));
+      }, resultHandler);
     }
   }
 
@@ -107,7 +119,8 @@ public class ShiroUser extends AbstractUser {
       ShiroAuthProviderImpl shiroAuthProvider = (ShiroAuthProviderImpl)authProvider;
       this.vertx = shiroAuthProvider.getVertx();
       this.securityManager = shiroAuthProvider.getSecurityManager();
-
+      // before doing any shiro operations set the context
+      SecurityUtils.setSecurityManager(securityManager);
       // generate the subject back from the provider
       SubjectContext subjectContext = new DefaultSubjectContext();
       PrincipalCollection coll = new SimplePrincipalCollection(username, shiroAuthProvider.getRealmName());
