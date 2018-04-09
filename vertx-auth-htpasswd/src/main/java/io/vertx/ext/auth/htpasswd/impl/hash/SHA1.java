@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.impl.hash;
+package io.vertx.ext.auth.htpasswd.impl.hash;
 
 import io.vertx.ext.auth.HashString;
 import io.vertx.ext.auth.HashingAlgorithm;
@@ -6,29 +6,31 @@ import io.vertx.ext.auth.HashingAlgorithm;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
-public class SHA512 implements HashingAlgorithm {
+public class SHA1 implements HashingAlgorithm {
 
   private final MessageDigest md;
 
-  public SHA512() {
+  public SHA1() {
     try {
-      md = MessageDigest.getInstance("SHA-512");
+      md = MessageDigest.getInstance("SHA1");
     } catch (NoSuchAlgorithmException nsae) {
-      throw new RuntimeException("SHA-512 is not available", nsae);
+      throw new RuntimeException("SHA1 is not available", nsae);
     }
   }
 
   @Override
   public String id() {
-    return "sha512";
+    return "{SHA}";
   }
 
   @Override
   public String hash(HashString hashString, String password) {
     return B64ENC.encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  @Override
+  public boolean needsSeparator() {
+    return false;
   }
 }

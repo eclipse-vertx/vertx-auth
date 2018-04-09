@@ -11,35 +11,26 @@ import io.vertx.ext.auth.AuthProvider;
  */
 public class HtpasswdAuthOptions implements AuthOptions {
 
-  private boolean usersAuthorizedForEverything;
   private String htpasswdFile;
-  private boolean enabledPlainTextPwd;
+  private boolean enabledPlainText;
 
   public HtpasswdAuthOptions() {
-
-    htpasswdFile = "htpasswd";
-
-    String os = System.getProperty("os.name").toLowerCase();
-    enabledPlainTextPwd = os.startsWith("windows") || os.startsWith("netware");
-
-    usersAuthorizedForEverything = false;
-
+    htpasswdFile = ".htpasswd";
+    enabledPlainText = false;
   }
 
   public HtpasswdAuthOptions(HtpasswdAuthOptions that) {
     this.htpasswdFile = that.htpasswdFile;
-    this.enabledPlainTextPwd = that.enabledPlainTextPwd;
+    this.enabledPlainText = that.enabledPlainText;
   }
 
-  public HtpasswdAuthOptions enablePlainTextAndDisableCryptPwd() {
-    enabledPlainTextPwd = true;
+  public HtpasswdAuthOptions setEnablePlainText(boolean enabledPlainText) {
+    this.enabledPlainText = enabledPlainText;
     return this;
-
   }
 
-  public HtpasswdAuthOptions enableCryptAndDisablePlainTextPwd() {
-    enabledPlainTextPwd = false;
-    return this;
+  public boolean isEnablePlainText() {
+    return enabledPlainText;
   }
 
   public String getHtpasswdFile() {
@@ -51,14 +42,6 @@ public class HtpasswdAuthOptions implements AuthOptions {
     return this;
   }
 
-  public boolean isEnabledPlainTextPwd() {
-    return enabledPlainTextPwd;
-  }
-
-  public boolean isEnabledCryptPwd() {
-    return !enabledPlainTextPwd;
-  }
-
   @Override
   public AuthOptions clone() {
     return new HtpasswdAuthOptions(this);
@@ -67,14 +50,5 @@ public class HtpasswdAuthOptions implements AuthOptions {
   @Override
   public AuthProvider createProvider(Vertx vertx) {
     return HtpasswdAuth.create(vertx, this);
-  }
-
-  public boolean areUsersAuthorizedForEverything() {
-    return usersAuthorizedForEverything;
-  }
-
-  public HtpasswdAuthOptions setUsersAuthorizedForEverything(boolean usersAuthorizedForEverything) {
-    this.usersAuthorizedForEverything = usersAuthorizedForEverything;
-    return this;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Red Hat, Inc.
+ * Copyright (c) 2014 Red Hat, Inc. and others
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -37,10 +37,12 @@ public class PubSecKeyOptionsConverter {
       obj.setType((String)json.getValue("type"));
     }
     if (json.getValue("x509Certificates") instanceof JsonArray) {
-      json.getJsonArray("x509Certificates").forEach(item -> {
+      java.util.ArrayList<java.lang.String> list = new java.util.ArrayList<>();
+      json.getJsonArray("x509Certificates").forEach( item -> {
         if (item instanceof String)
-          obj.addX509Certificate((String)item);
+          list.add((String)item);
       });
+      obj.setX509Certificates(list);
     }
   }
 

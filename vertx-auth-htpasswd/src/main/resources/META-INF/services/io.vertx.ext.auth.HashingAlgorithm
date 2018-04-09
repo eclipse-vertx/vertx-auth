@@ -1,0 +1,3 @@
+io.vertx.ext.auth.htpasswd.impl.hash.APR1
+io.vertx.ext.auth.htpasswd.impl.hash.SHA1
+io.vertx.ext.auth.htpasswd.impl.hash.Crypt

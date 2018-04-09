@@ -5,17 +5,17 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
+import io.vertx.ext.auth.htpasswd.impl.hash.Plaintext;
 
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static io.vertx.ext.auth.htpasswd.digest.Digest.*;
 
 /**
  * An implementation of {@link HtpasswdAuth}
@@ -24,13 +24,15 @@ import static io.vertx.ext.auth.htpasswd.digest.Digest.*;
  */
 public class HtpasswdAuthImpl implements HtpasswdAuth {
 
+  private final HashingStrategy strategy = HashingStrategy.load();
+
   private final Map<String, String> htUsers = new HashMap<>();
-  private HtpasswdAuthOptions htpasswdAuthOptions;
+  private HtpasswdAuthOptions options;
 
-  public HtpasswdAuthImpl(Vertx vertx, HtpasswdAuthOptions htpasswdAuthOptions) {
-    this.htpasswdAuthOptions = htpasswdAuthOptions;
+  public HtpasswdAuthImpl(Vertx vertx, HtpasswdAuthOptions options) {
+    this.options = options;
 
-    for (String line : vertx.fileSystem().readFileBlocking(htpasswdAuthOptions.getHtpasswdFile()).toString().split("\\r?\\n")) {
+    for (String line : vertx.fileSystem().readFileBlocking(options.getHtpasswdFile()).toString().split("\\r?\\n")) {
       line = line.trim();
 
       if (line.isEmpty() || line.startsWith("#")) continue;
@@ -42,6 +44,11 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
       }
     }
 
+    // handle the plain text vs crypt
+    if (options.isEnablePlainText()) {
+      // this will show a warning in the log
+      strategy.put("", new Plaintext());
+    }
   }
 
   @Override
@@ -60,48 +67,10 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
       return;
     }
 
-    String storedPwd = htUsers.get(username);
-
-    boolean authenticated = false;
-
-    // BCrypt
-    if (isBcryptHashed(storedPwd)) {
-      if (bcryptCheck(password, storedPwd)) {
-        authenticated = true;
-      }
-    }
-    // test MD5 variant encrypted password
-    else if (isMd5Hashed(storedPwd)) {
-      if (md5Check(password, storedPwd)) {
-        authenticated = true;
-      }
-    }
-    // test unsalted SHA password
-    else if (isShaHashed(storedPwd)) {
-      if (shaCheck(password, storedPwd)) {
-        authenticated = true;
-      }
-    }
-    // test libc crypt() encoded password
-    else if (htpasswdAuthOptions.isEnabledCryptPwd()) {
-      if (cryptCheck(password, storedPwd)) {
-        authenticated = true;
-      }
-    }
-    // test clear text
-    else if (htpasswdAuthOptions.isEnabledPlainTextPwd()) {
-      if (storedPwd.equals(password)) {
-        authenticated = true;
-      }
-    }
-
-    if (authenticated) {
-      resultHandler.handle(Future.succeededFuture(new HtpasswdUser(username, htpasswdAuthOptions.areUsersAuthorizedForEverything())));
+    if (strategy.verify(htUsers.get(username), password)) {
+      resultHandler.handle(Future.succeededFuture(new HtpasswdUser(username)));
     } else {
       resultHandler.handle(Future.failedFuture("Bad response"));
     }
-
   }
-
-
 }

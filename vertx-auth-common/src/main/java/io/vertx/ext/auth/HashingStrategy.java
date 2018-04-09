@@ -18,7 +18,11 @@ public interface HashingStrategy {
     return strategy;
   }
 
-  String hash(String id, Map<String, String> params, byte[] salt, String password);
+  String hash(String id, Map<String, String> params, String salt, String password);
 
   boolean verify(String hash, String password);
+
+  HashingAlgorithm get(String id);
+
+  HashingStrategy put(String id, HashingAlgorithm algorithm);
 }

@@ -1,6 +1,6 @@
 package io.vertx.ext.auth.impl.hash;
 
-import io.vertx.core.VertxException;
+import io.vertx.ext.auth.HashString;
 import io.vertx.ext.auth.HashingAlgorithm;
 
 import javax.crypto.SecretKeyFactory;
@@ -8,7 +8,6 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class PBKDF2 implements HashingAlgorithm {
@@ -40,19 +39,25 @@ public class PBKDF2 implements HashingAlgorithm {
   }
 
   @Override
-  public byte[] hash(Map<String, String> params, String password, byte[] salt) {
+  public String hash(HashString hashString, String password) {
 
     int iterations;
 
     try {
-      if (params != null) {
-        iterations = Integer.getInteger(params.get("it"));
+      if (hashString.params() != null) {
+        iterations = Integer.getInteger(hashString.params().get("it"));
       } else {
         iterations = DEFAULT_ITERATIONS;
       }
     } catch (RuntimeException e) {
       iterations = DEFAULT_ITERATIONS;
     }
+
+    if (hashString.salt() == null) {
+      throw new RuntimeException("hashString salt is null");
+    }
+
+    byte[] salt = B64DEC.decode(hashString.salt());
 
     PBEKeySpec spec = new PBEKeySpec(
       password.toCharArray(),
@@ -61,7 +66,7 @@ public class PBKDF2 implements HashingAlgorithm {
       64 * 8);
 
     try {
-      return skf.generateSecret(spec).getEncoded();
+      return B64ENC.encodeToString(skf.generateSecret(spec).getEncoded());
     } catch (InvalidKeySpecException ikse) {
       throw new RuntimeException(ikse);
     }

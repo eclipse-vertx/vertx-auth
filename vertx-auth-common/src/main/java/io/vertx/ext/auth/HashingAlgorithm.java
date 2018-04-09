@@ -1,10 +1,14 @@
 package io.vertx.ext.auth;
 
+import java.util.Base64;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 public interface HashingAlgorithm {
+
+  Base64.Decoder B64DEC = Base64.getDecoder();
+  Base64.Encoder B64ENC = Base64.getEncoder();
+
 
   /**
    * return the symbolic name for the algorithm
@@ -18,24 +22,22 @@ public interface HashingAlgorithm {
    *
    * @return set of param names.
    */
-  Set<String> params();
+  default Set<String> params()  {
+    return Collections.emptySet();
+  }
 
   /**
    * Algorithm specific implementation.
    *
-   * @param params the algorithm parameters.
-   * @param password the password to hash.
    * @return the hashed digest.
    */
-  byte[] hash(Map<String, String> params, String password, byte[] salt);
+  String hash(HashString hashString, String password);
 
   /**
-   * Algorithm specific implementation.
-   *
-   * @param password the password to hash.
-   * @return the hashed digest.
+   * Should the encoded string use the default separator to split fields.
+   * @return true by default.
    */
-  default byte[] hash(String password, byte[] salt) {
-    return hash(Collections.emptyMap(), password, salt);
+  default boolean needsSeparator() {
+    return true;
   }
 }

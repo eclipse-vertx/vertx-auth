@@ -1,27 +1,34 @@
-package io.vertx.ext.auth.impl.hash;
+package io.vertx.ext.auth;
 
-import io.vertx.ext.auth.HashingAlgorithm;
-
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class HashString {
-
-  private static final Base64.Decoder B64DEC = Base64.getDecoder();
-  private static final Base64.Encoder B64ENC = Base64.getEncoder();
 
   private String id;
   private Map<String, String> params;
   private String salt;
   private String hash;
 
+  public HashString(String id, Map<String, String> params, String salt) {
+    this.id = id;
+    this.params = params;
+    this.salt = salt;
+  }
+
   public HashString(String encoded) {
+    String[] parts;
+
     if (encoded.charAt(0) != '$') {
-      throw new RuntimeException("Invalid hash format.");
+      // this is not a hash encoded in the common format, attempt to normalize
+      encoded = encoded.replaceAll("\\{", "\\$\\{");
+      encoded = encoded.replaceAll("\\}", "\\}\\$");
+      if (encoded.charAt(0) != '$') {
+        encoded = "$$" + encoded;
+      }
     }
 
-    String[] parts = encoded.split("\\$");
+    parts = encoded.split("\\$");
 
     switch (parts.length) {
       case 2:
@@ -66,28 +73,27 @@ public final class HashString {
     return params;
   }
 
-  public byte[] salt() {
-    if (salt != null) {
-      return B64DEC.decode(salt);
-    }
-    return null;
+  public String salt() {
+    return salt;
   }
 
-  public byte[] hash() {
-    if (hash != null) {
-      return B64DEC.decode(hash);
-    }
-    return null;
+  public String hash() {
+    return hash;
   }
 
-  public static String encode(HashingAlgorithm algorithm, Map<String, String> params, byte[] salt, byte[] hash) {
+  public static String encode(HashingAlgorithm algorithm, Map<String, String> params, String salt, String hash) {
     StringBuilder sb = new StringBuilder();
 
-    sb.append('$');
+    if (algorithm.needsSeparator()) {
+      sb.append('$');
+    }
+
     sb.append(algorithm.id());
 
     if (params != null) {
-      sb.append('$');
+      if (algorithm.needsSeparator()) {
+        sb.append('$');
+      }
       boolean notEmpty = false;
       for (String key : algorithm.params()) {
         String value = params.get(key);
@@ -103,12 +109,16 @@ public final class HashString {
       }
     }
     if (salt != null) {
-      sb.append('$');
-      sb.append(B64ENC.encodeToString(salt));
+      if (algorithm.needsSeparator()) {
+        sb.append('$');
+      }
+      sb.append(salt);
     }
     if (hash != null) {
-      sb.append('$');
-      sb.append(B64ENC.encodeToString(hash));
+      if (algorithm.needsSeparator()) {
+        sb.append('$');
+      }
+      sb.append(hash);
     }
 
     return sb.toString();
@@ -116,6 +126,6 @@ public final class HashString {
 
   @Override
   public String toString() {
-    return "id=" + id() + ",params=" + params() + ",salt=" + salt() + ",hash="+hash();
+    return "id=" + id() + ",params=" + params() + ",salt=" + salt() + ",hash=" + hash();
   }
 }
