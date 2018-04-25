@@ -38,7 +38,7 @@
   </parent>
 
   <artifactId>vertx-auth</artifactId>
-  <version>3.5.1</version>
+  <version>3.5.2-SNAPSHOT</version>
 
   <name>Vert.x Auth</name>
 
