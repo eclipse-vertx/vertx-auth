@@ -48,6 +48,7 @@ Set custom headers to be sent with every request to the provider
 +++
 |[[http2ClearTextUpgrade]]`http2ClearTextUpgrade`|`Boolean`|-
 |[[http2ConnectionWindowSize]]`http2ConnectionWindowSize`|`Number (int)`|-
+|[[http2KeepAliveTimeout]]`http2KeepAliveTimeout`|`Number (int)`|-
 |[[http2MaxPoolSize]]`http2MaxPoolSize`|`Number (int)`|-
 |[[http2MultiplexingLimit]]`http2MultiplexingLimit`|`Number (int)`|-
 |[[idleTimeout]]`idleTimeout`|`Number (int)`|-
@@ -61,6 +62,7 @@ Set the provider token introspection resource path
 |[[jwtOptions]]`jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
 |[[jwtToken]]`jwtToken`|`Boolean`|-
 |[[keepAlive]]`keepAlive`|`Boolean`|-
+|[[keepAliveTimeout]]`keepAliveTimeout`|`Number (int)`|-
 |[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[localAddress]]`localAddress`|`String`|-
 |[[logActivity]]`logActivity`|`Boolean`|-
@@ -84,6 +86,7 @@ Set the provider logout path
 |[[pfxTrustOptions]]`pfxTrustOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
 |[[pipelining]]`pipelining`|`Boolean`|-
 |[[pipeliningLimit]]`pipeliningLimit`|`Number (int)`|-
+|[[poolCleanerPeriod]]`poolCleanerPeriod`|`Number (int)`|-
 |[[protocolVersion]]`protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
 |[[proxyOptions]]`proxyOptions`|`link:dataobjects.html#ProxyOptions[ProxyOptions]`|-
 |[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|
