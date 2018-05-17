@@ -1,0 +1,57 @@
+== jCasbin Auth Provider implementation
+<p>
+We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses jCasbin
+to perform authorization. The provider does not provide authentication: it assumes all
+usernames and passwords are valid. You should provide your own authentication here.
+<p>
+To use this project, add the following
+dependency to the _dependencies_ section of your build descriptor:
+<p>
+* Maven (in your `pom.xml`):
+<p>
+[source,xml,subs="+attributes"]
+----
+<dependency>
+<groupId>io.vertx</groupId>
+<artifactId>vertx-auth-jcasbin</artifactId>
+<version>${maven.version}</version>
+</dependency>
+----
+<p>
+* Gradle (in your `build.gradle` file):
+<p>
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-jcasbin:${maven.version}'
+----
+<p>
+The provider contains a static jCasbin enforcer. The enforcer can be initialized as the way you like. By default, the
+provider checks the tuple: (username, permission). The username is the authenticated user name. The permission is a
+string you defined to represent a permission, like "read_file" or "write_log".
+<p>
+Besides files, the jCasbin authorization provider can also read permissions from database, please refer to jCasbin's
+documentation for details.
+<p>
+== Authentication
+<p>
+The implementation doesn't provide authentication: it assumes all usernames and passwords are valid. You should
+provide your own authentication here.
+<p>
+== Autorization
+<p>
+Apache htpasswd file is a pure authentication mechanism and not authorization but still it is possible to configure
+default authorization response for all users and for all authorities. It can ether allow or deny all.
+<p>
+* Configuration example:
+<p>
+[source,$lang]
+----
+{@link examples.AuthHtpasswdExamples#example3(io.vertx.core.Vertx)}
+----
+<p>
+* Authorization checking:
+<p>
+[source,$lang]
+----
+{@link examples.AuthHtpasswdExamples#example4}
+----

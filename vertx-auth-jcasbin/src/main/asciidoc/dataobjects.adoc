@@ -1,0 +1,17 @@
+= Cheatsheets
+
+[[JCasbinAuthOptions]]
+== JCasbinAuthOptions
+
+++++
+ Options configuring jCasbin authorization.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[enforcer]]`enforcer`|`Enforcer`|the jCasbin enforcer. Please refer to jCasbin's documentation for details
+|===
+
