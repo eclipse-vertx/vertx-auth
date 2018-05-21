@@ -14,7 +14,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-common</artifactId>
-  <version>3.5.2.CR1</version>
+  <version>3.5.2.CR2</version>
 </dependency>
 ----
 
@@ -22,7 +22,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-common:3.5.2.CR1'
+compile 'io.vertx:vertx-auth-common:3.5.2.CR2'
 ----
 
 == Basic concepts
