@@ -57,19 +57,4 @@ object which we refer from now on as authentication info:
 <p>
 == Autorization
 <p>
-Apache htpasswd file is a pure authentication mechanism and not authorization but still it is possible to configure
-default authorization response for all users and for all authorities. It can ether allow or deny all.
-<p>
-* Configuration example:
-<p>
-[source,$lang]
-----
-{@link examples.AuthHtpasswdExamples#example3(io.vertx.core.Vertx)}
-----
-<p>
-* Authorization checking:
-<p>
-[source,$lang]
-----
-{@link examples.AuthHtpasswdExamples#example4}
-----
+Apache htpasswd file is a pure authentication mechanism and not authorization. This means that permission checks will always be `false`.

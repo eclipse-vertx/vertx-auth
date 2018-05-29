@@ -16,7 +16,6 @@
 package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthOptions;
@@ -45,7 +44,6 @@ public class HtpasswdAuthOptions implements AuthOptions {
 
   public HtpasswdAuthOptions(HtpasswdAuthOptions that) {
     this();
-    this.usersAuthorizedForEverything = that.usersAuthorizedForEverything;
     this.htpasswdFile = that.htpasswdFile;
     this.plainTextEnabled = that.plainTextEnabled;
   }
