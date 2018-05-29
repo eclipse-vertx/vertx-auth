@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2014 Red Hat, Inc. and others
- *
- * Red Hat licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-
 package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonObject;
@@ -21,64 +5,95 @@ import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.jwt.JWTOptions}.
- *
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.jwt.JWTOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link "io.vertx.ext.jwt.JWTOptions} original class using Vert.x codegen.
  */
 public class JWTOptionsConverter {
 
-  public static void fromJson(JsonObject json, JWTOptions obj) {
-    if (json.getValue("algorithm") instanceof String) {
-      obj.setAlgorithm((String)json.getValue("algorithm"));
-    }
-    if (json.getValue("audience") instanceof JsonArray) {
-      java.util.ArrayList<java.lang.String> list = new java.util.ArrayList<>();
-      json.getJsonArray("audience").forEach( item -> {
-        if (item instanceof String)
-          list.add((String)item);
-      });
-      obj.setAudience(list);
-    }
-    if (json.getValue("audiences") instanceof JsonArray) {
-      json.getJsonArray("audiences").forEach(item -> {
-        if (item instanceof String)
-          obj.addAudience((String)item);
-      });
-    }
-    if (json.getValue("expiresInMinutes") instanceof Number) {
-      obj.setExpiresInMinutes(((Number)json.getValue("expiresInMinutes")).intValue());
-    }
-    if (json.getValue("expiresInSeconds") instanceof Number) {
-      obj.setExpiresInSeconds(((Number)json.getValue("expiresInSeconds")).intValue());
-    }
-    if (json.getValue("header") instanceof JsonObject) {
-      obj.setHeader(((JsonObject)json.getValue("header")).copy());
-    }
-    if (json.getValue("ignoreExpiration") instanceof Boolean) {
-      obj.setIgnoreExpiration((Boolean)json.getValue("ignoreExpiration"));
-    }
-    if (json.getValue("issuer") instanceof String) {
-      obj.setIssuer((String)json.getValue("issuer"));
-    }
-    if (json.getValue("leeway") instanceof Number) {
-      obj.setLeeway(((Number)json.getValue("leeway")).intValue());
-    }
-    if (json.getValue("noTimestamp") instanceof Boolean) {
-      obj.setNoTimestamp((Boolean)json.getValue("noTimestamp"));
-    }
-    if (json.getValue("permissions") instanceof JsonArray) {
-      java.util.ArrayList<java.lang.String> list = new java.util.ArrayList<>();
-      json.getJsonArray("permissions").forEach( item -> {
-        if (item instanceof String)
-          list.add((String)item);
-      });
-      obj.setPermissions(list);
-    }
-    if (json.getValue("subject") instanceof String) {
-      obj.setSubject((String)json.getValue("subject"));
+  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTOptions obj) {
+    for (java.util.Map.Entry<String, Object> member : json) {
+      switch (member.getKey()) {
+        case "algorithm":
+          if (member.getValue() instanceof String) {
+            obj.setAlgorithm((String)member.getValue());
+          }
+          break;
+        case "audience":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setAudience(list);
+          }
+          break;
+        case "audiences":
+          if (member.getValue() instanceof JsonArray) {
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                obj.addAudience((String)item);
+            });
+          }
+          break;
+        case "expiresInMinutes":
+          if (member.getValue() instanceof Number) {
+            obj.setExpiresInMinutes(((Number)member.getValue()).intValue());
+          }
+          break;
+        case "expiresInSeconds":
+          if (member.getValue() instanceof Number) {
+            obj.setExpiresInSeconds(((Number)member.getValue()).intValue());
+          }
+          break;
+        case "header":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setHeader(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "ignoreExpiration":
+          if (member.getValue() instanceof Boolean) {
+            obj.setIgnoreExpiration((Boolean)member.getValue());
+          }
+          break;
+        case "issuer":
+          if (member.getValue() instanceof String) {
+            obj.setIssuer((String)member.getValue());
+          }
+          break;
+        case "leeway":
+          if (member.getValue() instanceof Number) {
+            obj.setLeeway(((Number)member.getValue()).intValue());
+          }
+          break;
+        case "noTimestamp":
+          if (member.getValue() instanceof Boolean) {
+            obj.setNoTimestamp((Boolean)member.getValue());
+          }
+          break;
+        case "permissions":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setPermissions(list);
+          }
+          break;
+        case "subject":
+          if (member.getValue() instanceof String) {
+            obj.setSubject((String)member.getValue());
+          }
+          break;
+      }
     }
   }
 
   public static void toJson(JWTOptions obj, JsonObject json) {
+    toJson(obj, json.getMap());
+  }
+
+  public static void toJson(JWTOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAlgorithm() != null) {
       json.put("algorithm", obj.getAlgorithm());
     }

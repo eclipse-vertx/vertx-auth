@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2014 Red Hat, Inc. and others
- *
- * Red Hat licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.core.json.JsonObject;
@@ -21,80 +5,127 @@ import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
- *
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link "io.vertx.ext.auth.oauth2.OAuth2ClientOptions} original class using Vert.x codegen.
  */
 public class OAuth2ClientOptionsConverter {
 
-  public static void fromJson(JsonObject json, OAuth2ClientOptions obj) {
-    if (json.getValue("authorizationPath") instanceof String) {
-      obj.setAuthorizationPath((String)json.getValue("authorizationPath"));
-    }
-    if (json.getValue("clientID") instanceof String) {
-      obj.setClientID((String)json.getValue("clientID"));
-    }
-    if (json.getValue("clientSecret") instanceof String) {
-      obj.setClientSecret((String)json.getValue("clientSecret"));
-    }
-    if (json.getValue("clientSecretParameterName") instanceof String) {
-      obj.setClientSecretParameterName((String)json.getValue("clientSecretParameterName"));
-    }
-    if (json.getValue("extraParameters") instanceof JsonObject) {
-      obj.setExtraParameters(((JsonObject)json.getValue("extraParameters")).copy());
-    }
-    if (json.getValue("headers") instanceof JsonObject) {
-      obj.setHeaders(((JsonObject)json.getValue("headers")).copy());
-    }
-    if (json.getValue("introspectionPath") instanceof String) {
-      obj.setIntrospectionPath((String)json.getValue("introspectionPath"));
-    }
-    if (json.getValue("jwkPath") instanceof String) {
-      obj.setJwkPath((String)json.getValue("jwkPath"));
-    }
-    if (json.getValue("jwtOptions") instanceof JsonObject) {
-      obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)json.getValue("jwtOptions")));
-    }
-    if (json.getValue("jwtToken") instanceof Boolean) {
-      obj.setJWTToken((Boolean)json.getValue("jwtToken"));
-    }
-    if (json.getValue("logoutPath") instanceof String) {
-      obj.setLogoutPath((String)json.getValue("logoutPath"));
-    }
-    if (json.getValue("pubSecKeys") instanceof JsonArray) {
-      java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list = new java.util.ArrayList<>();
-      json.getJsonArray("pubSecKeys").forEach( item -> {
-        if (item instanceof JsonObject)
-          list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
-      });
-      obj.setPubSecKeys(list);
-    }
-    if (json.getValue("revocationPath") instanceof String) {
-      obj.setRevocationPath((String)json.getValue("revocationPath"));
-    }
-    if (json.getValue("scopeSeparator") instanceof String) {
-      obj.setScopeSeparator((String)json.getValue("scopeSeparator"));
-    }
-    if (json.getValue("site") instanceof String) {
-      obj.setSite((String)json.getValue("site"));
-    }
-    if (json.getValue("tokenPath") instanceof String) {
-      obj.setTokenPath((String)json.getValue("tokenPath"));
-    }
-    if (json.getValue("useBasicAuthorizationHeader") instanceof Boolean) {
-      obj.setUseBasicAuthorizationHeader((Boolean)json.getValue("useBasicAuthorizationHeader"));
-    }
-    if (json.getValue("userAgent") instanceof String) {
-      obj.setUserAgent((String)json.getValue("userAgent"));
-    }
-    if (json.getValue("userInfoParameters") instanceof JsonObject) {
-      obj.setUserInfoParameters(((JsonObject)json.getValue("userInfoParameters")).copy());
-    }
-    if (json.getValue("userInfoPath") instanceof String) {
-      obj.setUserInfoPath((String)json.getValue("userInfoPath"));
+  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2ClientOptions obj) {
+    for (java.util.Map.Entry<String, Object> member : json) {
+      switch (member.getKey()) {
+        case "authorizationPath":
+          if (member.getValue() instanceof String) {
+            obj.setAuthorizationPath((String)member.getValue());
+          }
+          break;
+        case "clientID":
+          if (member.getValue() instanceof String) {
+            obj.setClientID((String)member.getValue());
+          }
+          break;
+        case "clientSecret":
+          if (member.getValue() instanceof String) {
+            obj.setClientSecret((String)member.getValue());
+          }
+          break;
+        case "clientSecretParameterName":
+          if (member.getValue() instanceof String) {
+            obj.setClientSecretParameterName((String)member.getValue());
+          }
+          break;
+        case "extraParameters":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setExtraParameters(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "headers":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setHeaders(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "introspectionPath":
+          if (member.getValue() instanceof String) {
+            obj.setIntrospectionPath((String)member.getValue());
+          }
+          break;
+        case "jwkPath":
+          if (member.getValue() instanceof String) {
+            obj.setJwkPath((String)member.getValue());
+          }
+          break;
+        case "jwtOptions":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)member.getValue()));
+          }
+          break;
+        case "jwtToken":
+          if (member.getValue() instanceof Boolean) {
+            obj.setJWTToken((Boolean)member.getValue());
+          }
+          break;
+        case "logoutPath":
+          if (member.getValue() instanceof String) {
+            obj.setLogoutPath((String)member.getValue());
+          }
+          break;
+        case "pubSecKeys":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof JsonObject)
+                list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+            });
+            obj.setPubSecKeys(list);
+          }
+          break;
+        case "revocationPath":
+          if (member.getValue() instanceof String) {
+            obj.setRevocationPath((String)member.getValue());
+          }
+          break;
+        case "scopeSeparator":
+          if (member.getValue() instanceof String) {
+            obj.setScopeSeparator((String)member.getValue());
+          }
+          break;
+        case "site":
+          if (member.getValue() instanceof String) {
+            obj.setSite((String)member.getValue());
+          }
+          break;
+        case "tokenPath":
+          if (member.getValue() instanceof String) {
+            obj.setTokenPath((String)member.getValue());
+          }
+          break;
+        case "useBasicAuthorizationHeader":
+          if (member.getValue() instanceof Boolean) {
+            obj.setUseBasicAuthorizationHeader((Boolean)member.getValue());
+          }
+          break;
+        case "userAgent":
+          if (member.getValue() instanceof String) {
+            obj.setUserAgent((String)member.getValue());
+          }
+          break;
+        case "userInfoParameters":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setUserInfoParameters(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "userInfoPath":
+          if (member.getValue() instanceof String) {
+            obj.setUserInfoPath((String)member.getValue());
+          }
+          break;
+      }
     }
   }
 
   public static void toJson(OAuth2ClientOptions obj, JsonObject json) {
+    toJson(obj, json.getMap());
+  }
+
+  public static void toJson(OAuth2ClientOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAuthorizationPath() != null) {
       json.put("authorizationPath", obj.getAuthorizationPath());
     }

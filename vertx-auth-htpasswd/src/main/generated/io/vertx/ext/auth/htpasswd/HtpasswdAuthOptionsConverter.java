@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2014 Red Hat, Inc. and others
- *
- * Red Hat licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-
 package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.core.json.JsonObject;
@@ -21,21 +5,36 @@ import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions}.
- *
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link "io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions} original class using Vert.x codegen.
  */
 public class HtpasswdAuthOptionsConverter {
 
-  public static void fromJson(JsonObject json, HtpasswdAuthOptions obj) {
-    if (json.getValue("htpasswdFile") instanceof String) {
-      obj.setHtpasswdFile((String)json.getValue("htpasswdFile"));
-    }
-    if (json.getValue("usersAuthorizedForEverything") instanceof Boolean) {
-      obj.setUsersAuthorizedForEverything((Boolean)json.getValue("usersAuthorizedForEverything"));
+  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HtpasswdAuthOptions obj) {
+    for (java.util.Map.Entry<String, Object> member : json) {
+      switch (member.getKey()) {
+        case "enabledCryptPwd":
+          break;
+        case "enabledPlainTextPwd":
+          break;
+        case "htpasswdFile":
+          if (member.getValue() instanceof String) {
+            obj.setHtpasswdFile((String)member.getValue());
+          }
+          break;
+        case "usersAuthorizedForEverything":
+          if (member.getValue() instanceof Boolean) {
+            obj.setUsersAuthorizedForEverything((Boolean)member.getValue());
+          }
+          break;
+      }
     }
   }
 
   public static void toJson(HtpasswdAuthOptions obj, JsonObject json) {
+    toJson(obj, json.getMap());
+  }
+
+  public static void toJson(HtpasswdAuthOptions obj, java.util.Map<String, Object> json) {
     json.put("enabledCryptPwd", obj.isEnabledCryptPwd());
     json.put("enabledPlainTextPwd", obj.isEnabledPlainTextPwd());
     if (obj.getHtpasswdFile() != null) {
