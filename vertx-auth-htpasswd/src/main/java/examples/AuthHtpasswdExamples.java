@@ -44,20 +44,4 @@ public class AuthHtpasswdExamples {
       }
     });
   }
-
-  public void example3(Vertx vertx) {
-    HtpasswdAuth authProviderUsersAuthorizedForNothing = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(false));
-    HtpasswdAuth authProviderUsersAuthorizedForEverything = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(true));
-  }
-
-  public void example4(User user) {
-    user.isAuthorised("anyAuthority", res -> {
-      if (res.succeeded()) {
-        boolean hasRole = res.result();
-      } else {
-        // Failed
-      }
-    });
-  }
-
 }
