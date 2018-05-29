@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
 package io.vertx.ext.auth.impl.hash;
 
 import io.vertx.ext.auth.HashString;
@@ -7,16 +22,23 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implementation of the PBKDF2 Hashing algorithm
+ *
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ */
 public class PBKDF2 implements HashingAlgorithm {
 
   private static final int DEFAULT_ITERATIONS = 10000;
+  private static final Base64.Decoder B64DEC = Base64.getDecoder();
+  private static final Base64.Encoder B64ENC = Base64.getEncoder();
 
-  private static final Set<String> DEFAULT_CONFIG = new HashSet<String>() {{
-    add("it");
-  }};
+  private static final Set<String> DEFAULT_CONFIG = Collections.singleton("it");
 
   private final SecretKeyFactory skf;
 

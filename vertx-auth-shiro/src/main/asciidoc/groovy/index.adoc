@@ -34,14 +34,7 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-
-def config = [
-  properties_path:"classpath:test-auth.properties"
-]
-
-def provider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, config)
-
-
+`link:../../apidocs/examples/AuthShiroExamples.html#example3-io.vertx.core.Vertx-[example3]`
 ----
 
 == Authentication
@@ -51,20 +44,7 @@ authentication info:
 
 [source,java]
 ----
-
-def authInfo = [
-  username:"tim",
-  password:"sausages"
-]
-
-authProvider.authenticate(authInfo, { res ->
-  if (res.succeeded()) {
-    def user = res.result()
-  } else {
-    // Failed!
-  }
-})
-
+`link:../../apidocs/examples/AuthShiroExamples.html#example4-io.vertx.ext.auth.AuthProvider-[example4]`
 ----
 
 == Authorisation - Permission-Role Model
@@ -78,31 +58,13 @@ If validating if a user has a particular permission simply pass the permission i
 
 [source,java]
 ----
-
-user.isAuthorised("newsletter:edit:13", { res ->
-  if (res.succeeded()) {
-    def hasPermission = res.result()
-  } else {
-    // Failed to
-  }
-})
-
-
+`link:../../apidocs/examples/AuthShiroExamples.html#example5-io.vertx.ext.auth.User-[example5]`
 ----
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
 [source,java]
 ----
-
-user.isAuthorised("role:manager", { res ->
-  if (res.succeeded()) {
-    def hasRole = res.result()
-  } else {
-    // Failed to
-  }
-})
-
-
+`link:../../apidocs/examples/AuthShiroExamples.html#example6-io.vertx.ext.auth.User-[example6]`
 ----
 
 The default role prefix is `role:`. You can change this with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
@@ -178,10 +140,7 @@ This is done as follows:
 
 [source,java]
 ----
-
-def provider = ShiroAuth.create(vertx, realm)
-
-
+`link:../../apidocs/examples/AuthShiroExamples.html#example8-io.vertx.core.Vertx-org.apache.shiro.realm.Realm-[example8]`
 ----
 
 The implementation currently assumes that user/password based authentication is used.

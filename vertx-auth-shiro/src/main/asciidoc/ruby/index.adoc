@@ -34,15 +34,7 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-require 'vertx-auth-shiro/shiro_auth'
-
-config = {
-  'properties_path' => "classpath:test-auth.properties"
-}
-
-provider = VertxAuthShiro::ShiroAuth.create(vertx, :PROPERTIES, config)
-
-
+`link:unavailable#example3-instance_method[example3]`
 ----
 
 == Authentication
@@ -52,20 +44,7 @@ authentication info:
 
 [source,java]
 ----
-
-authInfo = {
-  'username' => "tim",
-  'password' => "sausages"
-}
-
-authProvider.authenticate(authInfo) { |res_err,res|
-  if (res_err == nil)
-    user = res
-  else
-    # Failed!
-  end
-}
-
+`link:unavailable#example4-instance_method[example4]`
 ----
 
 == Authorisation - Permission-Role Model
@@ -79,31 +58,13 @@ If validating if a user has a particular permission simply pass the permission i
 
 [source,java]
 ----
-
-user.is_authorised("newsletter:edit:13") { |res_err,res|
-  if (res_err == nil)
-    hasPermission = res
-  else
-    # Failed to
-  end
-}
-
-
+`link:unavailable#example5-instance_method[example5]`
 ----
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
 [source,java]
 ----
-
-user.is_authorised("role:manager") { |res_err,res|
-  if (res_err == nil)
-    hasRole = res
-  else
-    # Failed to
-  end
-}
-
-
+`link:unavailable#example6-instance_method[example6]`
 ----
 
 The default role prefix is `role:`. You can change this with `link:../../yardoc/VertxAuthShiro/ShiroAuth.html#set_role_prefix-instance_method[setRolePrefix]`.
@@ -179,11 +140,7 @@ This is done as follows:
 
 [source,java]
 ----
-require 'vertx-auth-shiro/shiro_auth'
-
-provider = VertxAuthShiro::ShiroAuth.create(vertx, realm)
-
-
+`link:unavailable#example8-instance_method[example8]`
 ----
 
 The implementation currently assumes that user/password based authentication is used.

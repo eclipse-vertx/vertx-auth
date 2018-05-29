@@ -1,8 +1,28 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
 package io.vertx.ext.auth;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Utility class to encode/decore hashed strings to be stored on a persistent storage.
+ *
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ */
 public final class HashString {
 
   private String id;
@@ -19,16 +39,20 @@ public final class HashString {
   public HashString(String encoded) {
     String[] parts;
 
-    if (encoded.charAt(0) != '$') {
+    if (encoded.length() > 1 && encoded.charAt(0) != '$') {
       // this is not a hash encoded in the common format, attempt to normalize
       encoded = encoded.replaceAll("\\{", "\\$\\{");
       encoded = encoded.replaceAll("\\}", "\\}\\$");
-      if (encoded.charAt(0) != '$') {
+      if (encoded.length() > 1 && encoded.charAt(0) != '$') {
         encoded = "$$" + encoded;
       }
     }
 
     parts = encoded.split("\\$");
+
+    if (parts.length < 2) {
+      throw new IllegalStateException("Not enough segments: " + encoded);
+    }
 
     switch (parts.length) {
       case 2:
@@ -43,6 +67,8 @@ public final class HashString {
         hash = parts[3];
         break;
       case 5:
+      // fallback if there are more segments (just ignore)
+      default:
         id = parts[1];
         params = new HashMap<>();
         for (String kv : parts[2].split(",")) {

@@ -18,7 +18,7 @@ public class HtpasswdAuthTest extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     authProviderCrypt = HtpasswdAuth.create(vertx);
-    authProviderPlainText = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setEnablePlainText(true));
+    authProviderPlainText = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setPlainTextEnabled(true));
     authProviderUsersAreAuthorizedForNothing = HtpasswdAuth.create(vertx);
   }
 

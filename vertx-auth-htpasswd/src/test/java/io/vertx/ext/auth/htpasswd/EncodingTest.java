@@ -12,11 +12,13 @@ public class EncodingTest {
   @Test
   public void testSHA1() {
     assertTrue(strategy.verify("{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=", "password"));
+    assertFalse(strategy.verify("{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj8g=", "password"));
   }
 
   @Test
   public void testCrypt() {
     assertTrue(strategy.verify("b5R8K8YXZaSq2", "password"));
+    assertFalse(strategy.verify("b5R8K8YXZaSq3", "password"));
   }
 
   @Test
@@ -28,5 +30,6 @@ public class EncodingTest {
   @Test
   public void testAPR1() {
     assertTrue(strategy.verify("$apr1$vm2xls13$Rk6E1Pqoep3Ze9fvQMDBU/", "password"));
+    assertFalse(strategy.verify("$apr1$vm2xls13$Rk6E1Pqoep3Ze0fvQMDBU/", "password"));
   }
 }

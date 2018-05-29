@@ -68,26 +68,4 @@ authProvider.authenticate(authInfo, res -> {
 <p>
 == Autorization
 <p>
-Apache htpasswd file is a pure authentication mechanism and not authorization but still it is possible to configure
-default authorization response for all users and for all authorities. It can ether allow or deny all.
-<p>
-* Configuration example:
-<p>
-[source,java]
-----
-HtpasswdAuth authProviderUsersAuthorizedForNothing = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(false));
-HtpasswdAuth authProviderUsersAuthorizedForEverything = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setUsersAuthorizedForEverything(true));
-----
-<p>
-* Authorization checking:
-<p>
-[source,java]
-----
-user.isAuthorised("anyAuthority", res -> {
-  if (res.succeeded()) {
-    boolean hasRole = res.result();
-  } else {
-    // Failed
-  }
-});
-----
+Apache htpasswd file is a pure authentication mechanism and not authorization.

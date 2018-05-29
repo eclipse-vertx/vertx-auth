@@ -219,9 +219,7 @@ fun OAuth2ClientOptions(
     }
   }
   if (enabledSecureTransportProtocols != null) {
-    for (item in enabledSecureTransportProtocols) {
-      this.addEnabledSecureTransportProtocol(item)
-    }
+    this.setEnabledSecureTransportProtocols(enabledSecureTransportProtocols.toSet())
   }
   if (extraParameters != null) {
     this.setExtraParameters(extraParameters)
