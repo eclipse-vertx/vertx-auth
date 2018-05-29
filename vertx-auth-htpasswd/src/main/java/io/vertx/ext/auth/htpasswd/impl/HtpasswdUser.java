@@ -13,20 +13,14 @@ import io.vertx.ext.auth.AuthProvider;
 public class HtpasswdUser extends AbstractUser {
 
   private final String username;
-  private boolean userAuthorizedForEverything;
 
-  HtpasswdUser(String username, boolean userAuthorizedForEverything) {
+  HtpasswdUser(String username) {
     this.username = username;
-    this.userAuthorizedForEverything = userAuthorizedForEverything;
   }
 
   @Override
   protected void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-    if (userAuthorizedForEverything) {
-      resultHandler.handle(Future.succeededFuture(true));
-    } else {
-      resultHandler.handle(Future.succeededFuture(false));
-    }
+    resultHandler.handle(Future.succeededFuture(false));
   }
 
   @Override
