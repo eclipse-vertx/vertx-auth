@@ -45,7 +45,6 @@ public class Oauth2TokenTest extends VertxTestBase {
       "}"
   );
 
-
   private OAuth2Auth oauth2;
 
   @Test
@@ -61,5 +60,27 @@ public class Oauth2TokenTest extends VertxTestBase {
     // trust it
     token.setTrustJWT(true);
     assertNotNull(token.accessToken());
+  }
+
+  @Test
+  public void testNullScope() throws Exception {
+    super.setUp();
+    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, keycloakConfig);
+
+    JsonObject json = new JsonObject(
+      "{\n" +
+        "    \"access_token\":\"xyz\",\n" +
+        "    \"expires_in\":60,\n" +
+        "    \"token_type\":\"bearer\",\n" +
+        "    \"not-before-policy\":0,\n" +
+        "    \"scope\":null\n" +
+        "}"
+    );
+
+    try {
+      OAuth2TokenImpl token = new OAuth2TokenImpl((OAuth2AuthProviderImpl) oauth2, json);
+    } catch (RuntimeException e) {
+      fail();
+    }
   }
 }

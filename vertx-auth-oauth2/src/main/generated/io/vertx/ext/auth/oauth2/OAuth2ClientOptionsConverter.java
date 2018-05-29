@@ -48,14 +48,25 @@ public class OAuth2ClientOptionsConverter {
     if (json.getValue("introspectionPath") instanceof String) {
       obj.setIntrospectionPath((String)json.getValue("introspectionPath"));
     }
+    if (json.getValue("jwkPath") instanceof String) {
+      obj.setJwkPath((String)json.getValue("jwkPath"));
+    }
     if (json.getValue("jwtOptions") instanceof JsonObject) {
       obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)json.getValue("jwtOptions")));
+    }
+    if (json.getValue("jwtToken") instanceof Boolean) {
+      obj.setJWTToken((Boolean)json.getValue("jwtToken"));
     }
     if (json.getValue("logoutPath") instanceof String) {
       obj.setLogoutPath((String)json.getValue("logoutPath"));
     }
-    if (json.getValue("pubSecKeyOptions") instanceof JsonObject) {
-      obj.setPubSecKeyOptions(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)json.getValue("pubSecKeyOptions")));
+    if (json.getValue("pubSecKeys") instanceof JsonArray) {
+      java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list = new java.util.ArrayList<>();
+      json.getJsonArray("pubSecKeys").forEach( item -> {
+        if (item instanceof JsonObject)
+          list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+      });
+      obj.setPubSecKeys(list);
     }
     if (json.getValue("revocationPath") instanceof String) {
       obj.setRevocationPath((String)json.getValue("revocationPath"));
@@ -105,6 +116,10 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getIntrospectionPath() != null) {
       json.put("introspectionPath", obj.getIntrospectionPath());
     }
+    if (obj.getJwkPath() != null) {
+      json.put("jwkPath", obj.getJwkPath());
+    }
+    json.put("jwtToken", obj.isJWTToken());
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
     }
