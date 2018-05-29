@@ -21,6 +21,8 @@ import java.util.Map;
 /**
  * Utility class to encode/decore hashed strings to be stored on a persistent storage.
  *
+ * This follows as close as possible the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a>.
+ *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 public final class HashString {
