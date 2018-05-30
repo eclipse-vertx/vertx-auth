@@ -35,7 +35,6 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   private static final JsonObject oauthConfig = new JsonObject()
       .put("code", "code")
       .put("redirect_uri", "http://callback.com")
-      .put("client_secret", "client-secret")
       .put("grant_type", "authorization_code")
       .put("client_id", "client-id");
 

@@ -66,7 +66,7 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
     form.put("client_id", config.getClientID());
     form.put("grant_type", grantType);
 
-    if (config.getClientSecretParameterName() != null) {
+    if (config.getClientSecretParameterName() != null && !config.isUseBasicAuthorizationHeader()) {
       form.put(config.getClientSecretParameterName(), config.getClientSecret());
     }
 
