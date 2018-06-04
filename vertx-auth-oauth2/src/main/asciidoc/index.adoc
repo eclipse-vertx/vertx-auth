@@ -112,6 +112,32 @@ This flow is suitable when client is requesting access to the protected resource
 {@link examples.AuthOAuth2Examples#example4}
 ----
 
+=== OpenID Connect Discovery
+
+There is limited support for OpenID Discovery servers. Using OIDC Discovery will simplify the configuration of your
+auth module into a single line of code, for example, consider setting up your auth using Google:
+
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example25}
+----
+
+Behind the scenes a couple of actions are performed:
+
+1. HTTP get request to the `.well-known/openid-configuration` resource
+2. Validation of the response `issuer` field as mandated by the spec (the issuer value must match the request one)
+3. If the JWK uri is present, keys are loaded from the server and added to the auth keychain
+4. the auth module is configure and returned to the user.
+
+A couple of well known OpenID Connect Discovery providers are:
+
+* Keycloak: `http://keycloakhost:keycloakport/auth/realms/{realm}`
+* Google: `https://accounts.google.com`
+* SalesForce: `https://login.salesforce.com`
+* Microsoft: `https://login.windows.net/common`
+
+This and the given `client id` is enough to configure your auth provider object.
+
 === AccessToken object
 
 When a token expires we need to refresh it. OAuth2 offers the AccessToken class that add a couple of useful methods
@@ -149,23 +175,6 @@ For convenience there are several helpers to assist your with your configuration
 * Soundcloud {@link io.vertx.ext.auth.oauth2.providers.SoundcloudAuth}
 * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
 * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
-
-=== OpenID Connect Discovery
-
-There is limited support for OpenID Discovery servers. Using OIDC Discovery will simplify the configuration of your
-auth module into a single line of code, for example, consider setting up your auth using Google:
-
-[source,$lang]
-----
-{@link examples.AuthOAuth2Examples#example25}
-----
-
-Behind the scenes a couple of actions are performed:
-
-1. HTTP get request to the `.well-known/openid-configuration` resource
-2. Validation of the response `issuer` field as mandated by the spec (the issuer value must match the request one)
-3. If the JWK uri is present, keys are loaded from the server and added to the auth keychain
-4. the auth module is configure and returned to the user.
 
 ==== JBoss Keycloak
 
