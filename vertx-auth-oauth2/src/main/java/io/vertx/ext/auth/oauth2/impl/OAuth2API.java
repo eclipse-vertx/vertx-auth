@@ -18,6 +18,7 @@ package io.vertx.ext.auth.oauth2.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
@@ -46,7 +47,7 @@ public class OAuth2API {
     }
 
     // create a request
-    final HttpClientRequest request = makeRequest(provider, method, url, callback);
+    final HttpClientRequest request = makeRequest(provider.getVertx(), provider.getConfig(), method, url, callback);
 
     // apply the provider required headers
     JsonObject tmp = provider.getConfig().getHeaders();
@@ -78,7 +79,7 @@ public class OAuth2API {
     request.end();
   }
 
-  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
+  public static HttpClientRequest makeRequest(Vertx vertx, HttpClientOptions options, HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
     HttpClient client;
 
     try {
@@ -95,7 +96,7 @@ public class OAuth2API {
         }
       }
 
-      client = provider.getVertx().createHttpClient(new HttpClientOptions(provider.getConfig())
+      client = vertx.createHttpClient(new HttpClientOptions(options)
         .setSsl(isSecure)
         .setDefaultHost(host)
         .setDefaultPort(port));

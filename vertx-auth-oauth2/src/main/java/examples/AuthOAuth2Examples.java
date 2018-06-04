@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
+import io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -325,6 +326,32 @@ public class AuthOAuth2Examples {
         // the token failed the introspection. You should proceed
         // to logout the user since this means that this token is
         // not valid anymore.
+      }
+    });
+  }
+
+  public void example25(Vertx vertx) {
+
+    OpenIDConnectAuth.create(vertx,"clientId", "https://accounts.google.com", res -> {
+      if (res.succeeded()) {
+        // the setup call succeeded.
+        // at this moment your auth is ready to use and
+        // google signature keys are loaded so tokens can be decoded and verified.
+      } else {
+        // the setup failed.
+      }
+    });
+  }
+
+  public void example26(Vertx vertx) {
+
+    OpenIDConnectAuth.create(vertx,"clientId", "http://server:port/auth/realms/your_realm", res -> {
+      if (res.succeeded()) {
+        // the setup call succeeded.
+        // at this moment your auth is ready to use and
+        // google signature keys are loaded so tokens can be decoded and verified.
+      } else {
+        // the setup failed.
       }
     });
   }
