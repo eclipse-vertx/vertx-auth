@@ -63,9 +63,7 @@ public class OAuth2ResponseImpl implements OAuth2Response {
           header = header.substring(0, sep).trim();
         }
 
-        if (contentType.equals(header)) {
-          return true;
-        }
+        return contentType.equalsIgnoreCase(header);
       }
     }
     return false;

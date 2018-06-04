@@ -1,6 +1,6 @@
 == The OAuth2 auth provider
 
-This component contains an out of the box OAuth2 Relay Party implementation. To use this project, add the following
+This component contains an out of the box OAuth2 (and to some extent OpenID Connect) relying party implementation. To use this project, add the following
 dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -29,6 +29,10 @@ Vert.x OAuth2 supports the following flows.
 * Authorization Code Flow (for apps with servers that can store persistent information).
 * Password Credentials Flow (when previous flow can't be used or during development).
 * Client Credentials Flow (the client can request an access token using only its client credentials)
+
+The same code will work with OpenID Connect https://openid.net/connect/ servers and supports the Discovery protocol
+as specified in http://openid.net/specs/openid-connect-discovery-1_0.html .
+
 
 === Authorization Code Flow
 
@@ -146,6 +150,23 @@ For convenience there are several helpers to assist your with your configuration
 * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
 * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
 
+=== OpenID Connect Discovery
+
+There is limited support for OpenID Discovery servers. Using OIDC Discovery will simplify the configuration of your
+auth module into a single line of code, for example, consider setting up your auth using Google:
+
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example25}
+----
+
+Behind the scenes a couple of actions are performed:
+
+1. HTTP get request to the `.well-known/openid-configuration` resource
+2. Validation of the response `issuer` field as mandated by the spec (the issuer value must match the request one)
+3. If the JWK uri is present, keys are loaded from the server and added to the auth keychain
+4. the auth module is configure and returned to the user.
+
 ==== JBoss Keycloak
 
 When using this Keycloak the provider has knowledge on how to parse access tokens and extract grants from inside.
@@ -164,6 +185,16 @@ data (e.g. `preferred_username`) from the Keycloak principal. For example:
 {@link examples.AuthOAuth2Examples#example14}
 ----
 
+Please remember that Keycloak **does** implement OpenID Connect, so you can configure it just by using it's discovery url:
+
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example26}
+----
+
+Since you can deploy your Keycloak server anywhere, just replace `server:port` with the correct value and the `your_realm`
+value with your application realm.
+
 ==== Google Server to Server
 
 The provider also supports Server to Server or the RFC7523 extension. This is a feature present on Google with their
@@ -171,7 +202,7 @@ service account.
 
 === Token Introspection
 
-Tokens can be introspected in order to assert that they are still valid. Although there is RFC7660 for this purpose
+Tokens can be introspected in order to assert that they are still valid. Although there is RFC7662 for this purpose
 not many providers implement it. Instead there are variations also known as `TokenInfo` end points. The OAuth2
 provider will accept both end points as a configuration. Currently we are known to work with `Google` and `Keycloak`.
 
