@@ -67,6 +67,11 @@ public class OAuth2ClientOptionsConverter {
             obj.setLogoutPath((String)member.getValue());
           }
           break;
+        case "openIdConnect":
+          if (member.getValue() instanceof Boolean) {
+            obj.setOpenIdConnect((Boolean)member.getValue());
+          }
+          break;
         case "pubSecKeys":
           if (member.getValue() instanceof JsonArray) {
             java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
@@ -154,6 +159,7 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
     }
+    json.put("openIdConnect", obj.isOpenIdConnect());
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());
     }

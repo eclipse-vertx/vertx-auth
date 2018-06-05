@@ -80,77 +80,72 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler) {
-    if (config.getJwkPath() == null) {
-      handler.handle(Future.succeededFuture());
-    } else {
+    final JsonObject headers = new JsonObject();
+    // specify preferred accepted content type
+    headers.put("Accept", "application/json");
 
-      final JsonObject headers = new JsonObject();
-      // specify preferred accepted content type
-      headers.put("Accept", "application/json");
+    fetch(
+      this,
+      HttpMethod.GET,
+      config.getJwkPath(),
+      headers,
+      null,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
 
-      fetch(
-        this,
-        HttpMethod.GET,
-        config.getJwkPath(),
-        headers,
-        null,
-        res -> {
-          if (res.failed()) {
-            handler.handle(Future.failedFuture(res.cause()));
-            return;
-          }
+        final OAuth2Response reply = res.result();
 
-          final OAuth2Response reply = res.result();
+        if (reply.body() == null || reply.body().length() == 0) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
 
-          if (reply.body() == null || reply.body().length() == 0) {
-            handler.handle(Future.failedFuture("No Body"));
-            return;
-          }
+        JsonObject json;
 
-          JsonObject json;
-
-          if (reply.is("application/json")) {
-            try {
-              json = reply.jsonObject();
-            } catch (RuntimeException e) {
-              handler.handle(Future.failedFuture(e));
-              return;
-            }
-          } else {
-            handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
-            return;
-          }
-
+        if (reply.is("application/json")) {
           try {
-            if (json.containsKey("error")) {
-              String description;
-              Object error = json.getValue("error");
-              if (error instanceof JsonObject) {
-                description = ((JsonObject) error).getString("message");
-              } else {
-                // attempt to handle the error as a string
-                try {
-                  description = json.getString("error_description", json.getString("error"));
-                } catch (RuntimeException e) {
-                  description = error.toString();
-                }
-              }
-              handler.handle(Future.failedFuture(description));
-            } else {
-              JsonArray keys = json.getJsonArray("keys");
-              for (Object key : keys) {
-                jwt.addJWK(new JWK((JsonObject) key));
-              }
-              // as of this moment we can handle JWTs
-              config.setJWTToken(true);
-
-              handler.handle(Future.succeededFuture());
-            }
+            json = reply.jsonObject();
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
+            return;
           }
-        });
-    }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          return;
+        }
+
+        try {
+          if (json.containsKey("error")) {
+            String description;
+            Object error = json.getValue("error");
+            if (error instanceof JsonObject) {
+              description = ((JsonObject) error).getString("message");
+            } else {
+              // attempt to handle the error as a string
+              try {
+                description = json.getString("error_description", json.getString("error"));
+              } catch (RuntimeException e) {
+                description = error.toString();
+              }
+            }
+            handler.handle(Future.failedFuture(description));
+          } else {
+            JsonArray keys = json.getJsonArray("keys");
+            for (Object key : keys) {
+              jwt.addJWK(new JWK((JsonObject) key));
+            }
+            // as of this moment we can handle JWTs
+            config.setJWTToken(true);
+
+            handler.handle(Future.succeededFuture());
+          }
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+      });
 
     return this;
   }
@@ -195,6 +190,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
+    // we must have a secure JWT instance otherwise any token can be assumed "wrongly" that is trusted:
+    if (jwt.isUnsecure() || !config.isOpenIdConnect()) {
+      handler.handle(Future.failedFuture("This provider cannot decode JWT tokens"));
+      return this;
+    }
+
     try {
       handler.handle(Future.succeededFuture(new OAuth2TokenImpl(this, new JsonObject().put("access_token", jwt.decode(token)))));
     } catch (RuntimeException e) {

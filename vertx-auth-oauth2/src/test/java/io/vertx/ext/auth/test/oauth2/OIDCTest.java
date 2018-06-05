@@ -60,4 +60,26 @@ public class OIDCTest extends VertxTestBase {
     });
     await();
   }
+
+  @Ignore
+  @Test
+  public void testDecode() {
+    OpenIDConnectAuth.create(vertx,"vertx", "http://localhost:8080/auth/realms/master", res -> {
+      if (res.failed()) {
+        fail(res.cause());
+        return;
+      }
+
+      final OAuth2Auth oidc = res.result();
+
+      oidc.decodeToken("borked", res1 -> {
+        if (res1.failed()) {
+          testComplete();
+          return;
+        }
+        fail("Should not reach this!");
+      });
+    });
+    await();
+  }
 }
