@@ -40,6 +40,12 @@ public class OAuth2API {
   public static void fetch(OAuth2AuthProviderImpl provider, HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
     final String url;
 
+    if (path == null) {
+      // and this can happen as it is a config option that is dependent on the provider
+      callback.handle(Future.failedFuture(new UnsupportedOperationException()));
+      return;
+    }
+
     if (path.startsWith("http://") || path.startsWith("https://")) {
       url = path;
     } else {

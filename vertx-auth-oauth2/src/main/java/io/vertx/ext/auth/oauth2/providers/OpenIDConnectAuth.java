@@ -100,6 +100,7 @@ public interface OpenIDConnectAuth {
       config.setRevocationPath(json.getString("revocation_endpoint"));
       config.setUserInfoPath(json.getString("userinfo_endpoint"));
       config.setJwkPath(json.getString("jwks_uri"));
+      config.setOpenIdConnect(true);
 
       final OAuth2Auth oidc = OAuth2Auth.create(vertx, flow, config);
 
