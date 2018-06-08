@@ -18,6 +18,7 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.docgen.Source;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
@@ -27,6 +28,7 @@ import org.apache.shiro.realm.Realm;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Source
 public class AuthShiroExamples {
 
 
