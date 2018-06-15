@@ -83,15 +83,23 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     init();
   }
 
-  private JsonObject decodeToken(String opaque) {
+  private JsonObject decodeToken(JsonObject token, String tokenType) {
+
+    final Object opaque = token.getValue(tokenType);
+
     if (opaque == null) {
       return null;
+    }
+
+    if (opaque instanceof JsonObject) {
+      // already decoded
+      return (JsonObject) opaque;
     }
 
     try {
       // if it is trusted we can attempt to parse anyway
       if (trustJWT) {
-        String[] segments = opaque.split("\\.");
+        String[] segments = ((String) opaque).split("\\.");
         if (segments.length == 2 || segments.length == 3) {
           // All segment should be base64
           String payloadSeg = segments[1];
@@ -99,7 +107,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
           return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
         }
       } else {
-        return provider.getJWT().decode(opaque);
+        return provider.getJWT().decode(((String) opaque));
       }
     } catch (RuntimeException e) {
       // explicity catch and log as debug. exception here is a valid case
@@ -125,9 +133,9 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
     // attempt to decode tokens
     if (provider != null) {
-      accessToken = decodeToken(token.getString("access_token"));
-      refreshToken = decodeToken(token.getString("refresh_token"));
-      idToken = decodeToken(token.getString("id_token"));
+      accessToken = decodeToken(token, "access_token");
+      refreshToken = decodeToken(token, "refresh_token");
+      idToken = decodeToken(token, "id_token");
 
       // the permission cache needs to be clear
       clearCache();
@@ -142,9 +150,9 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
   public AccessToken setTrustJWT(boolean trust) {
     this.trustJWT = trust;
     // refresh the tokens
-    accessToken = decodeToken(token.getString("access_token"));
-    refreshToken = decodeToken(token.getString("refresh_token"));
-    idToken = decodeToken(token.getString("id_token"));
+    accessToken = decodeToken(token, "access_token");
+    refreshToken = decodeToken(token, "refresh_token");
+    idToken = decodeToken(token, "id_token");
 
     return this;
   }
@@ -746,9 +754,9 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
   public void setAuthProvider(AuthProvider authProvider) {
     provider = (OAuth2AuthProviderImpl) authProvider;
     // re-attempt to decode tokens
-    accessToken = decodeToken(token.getString("access_token"));
-    refreshToken = decodeToken(token.getString("refresh_token"));
-    idToken = decodeToken(token.getString("id_token"));
+    accessToken = decodeToken(token, "access_token");
+    refreshToken = decodeToken(token, "refresh_token");
+    idToken = decodeToken(token, "id_token");
     // the permission cache needs to be clear
     clearCache();
     // rebuild cache
