@@ -62,15 +62,27 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
     switch (flow) {
       case AUTH_CODE:
+        if (config.getClientID() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
+        if (config.getClientID() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new ClientImpl(this);
         break;
       case PASSWORD:
+        if (config.getClientID() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
+        }
         this.flow = new PasswordImpl(this);
         break;
       case AUTH_JWT:
+        if (config.getPubSecKeys() == null) {
+          throw new IllegalArgumentException("Configuration missing. You need to specify the private key, the key type and the oauth2 server");
+        }
         this.flow = new AuthJWTImpl(this);
         break;
       default:
@@ -197,7 +209,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
 
     try {
-      handler.handle(Future.succeededFuture(new OAuth2TokenImpl(this, new JsonObject().put("access_token", token))));
+      handler.handle(Future.succeededFuture(new OAuth2TokenImpl(this, new JsonObject().put("access_token", jwt.decode(token)))));
     } catch (RuntimeException e) {
       handler.handle(Future.failedFuture(e));
     }

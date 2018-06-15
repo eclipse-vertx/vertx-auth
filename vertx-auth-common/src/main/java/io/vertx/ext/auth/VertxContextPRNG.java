@@ -77,8 +77,6 @@ public interface VertxContextPRNG {
           final PRNG rand = random;
           // save to the context
           context.put(contextKey, rand);
-          // add a close hook to shutdown the PRNG
-          context.addCloseHook(v -> rand.close());
         }
       }
     }
@@ -101,11 +99,7 @@ public interface VertxContextPRNG {
     }
 
     // we are not running on a vert.x context, fallback to create a new instance
-    final PRNG random = new PRNG(vertx);
-    // add a close hook to shutdown the PRNG
-    vertx.getOrCreateContext().addCloseHook(v -> random.close());
-
-    return random;
+    return new PRNG(vertx);
   }
 
   /**

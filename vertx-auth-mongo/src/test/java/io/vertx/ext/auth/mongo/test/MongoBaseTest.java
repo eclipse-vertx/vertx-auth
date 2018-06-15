@@ -49,7 +49,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Get the connection String for the mongo db
-   * 
+   *
    * @return
    */
   protected static String getConnectionString() {
@@ -58,7 +58,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Get the name of the database to be used
-   * 
+   *
    * @return
    */
   protected static String getDatabaseName() {
@@ -67,7 +67,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Get a property with the given key
-   * 
+   *
    * @param name
    *          the key of the property to be fetched
    * @return a valid value or null
@@ -85,11 +85,19 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   @BeforeClass
   public static void startMongo() throws Exception {
-    if (getConnectionString() == null) {
-      IMongodConfig config = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
-          .net(new Net(27018, Network.localhostIsIPv6())).build();
+    String uri = getConnectionString();
+    if (uri == null ) {
+      Version.Main version = Version.Main.V3_4;
+      int port = 27018;
+      System.out.println("Starting Mongo " + version + " on port " + port);
+      IMongodConfig config = new MongodConfigBuilder().
+        version(version).
+        net(new Net(port, Network.localhostIsIPv6())).
+        build();
       exe = MongodStarter.getDefaultInstance().prepare(config);
       exe.start();
+    } else {
+      System.out.println("Using existing Mongo " + uri);
     }
   }
 
@@ -102,7 +110,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * If instance of MongoService is null, initialization is performed
-   * 
+   *
    * @return the current instance of {@link MongoClient}
    * @throws Exception
    *           any Exception by submethods
@@ -124,7 +132,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Initialize the demo data needed for the tests
-   * 
+   *
    * @throws Exception
    *           any Exception by submethods
    */
@@ -133,7 +141,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
   /**
    * Create a name of a collection by adding a certain suffix. All Collections with this suffix will be cleared by start
    * of the test class
-   * 
+   *
    * @param name
    *          the pure name of the collection
    * @return the name of the collection extended by the defined {@link #TABLE_PREFIX}
@@ -144,7 +152,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Creates a config file for a mongo db
-   * 
+   *
    * @return the prepared config file with the connection string and the database name to be used
    */
   protected static JsonObject getConfig() {
@@ -164,7 +172,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Extracts only those collections, which are starting with the prefix {@link #TABLE_PREFIX}
-   * 
+   *
    * @param colls
    *          a list of collection names
    * @return a list of collections, which start with {@link #TABLE_PREFIX}
@@ -181,7 +189,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   /**
    * Method drops all collections which are starting with the prefix {@link #TABLE_PREFIX}
-   * 
+   *
    * @param latch
    *          the latch to be used
    */

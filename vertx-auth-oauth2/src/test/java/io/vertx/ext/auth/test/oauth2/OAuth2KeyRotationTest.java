@@ -31,11 +31,10 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
 
 
   @Test
-  @Ignore
   public void testLoadJWK2() {
     JsonObject config = new JsonObject("{\n" +
       "  \"realm\": \"master\",\n" +
-      "  \"auth-server-url\": \"http://localhost:8080/auth\",\n" +
+      "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
       "  \"ssl-required\": \"external\",\n" +
       "  \"resource\": \"test\",\n" +
       "  \"credentials\": {\n" +
