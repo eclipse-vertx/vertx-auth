@@ -1,3 +1,9 @@
 # Vert.x OAuth2 Auth
 
 Please see the documentation for more information.
+
+## Running test
+
+```
+docker run -d --rm --name keycloak -p 8888:8080 -e KEYCLOAK_USER=user -e KEYCLOAK_PASSWORD=password -e DB_VENDOR=H2 jboss/keycloak
+```
