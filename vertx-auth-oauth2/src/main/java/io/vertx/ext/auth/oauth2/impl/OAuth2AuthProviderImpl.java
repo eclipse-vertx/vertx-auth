@@ -190,12 +190,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
-    // we must have a secure JWT instance otherwise any token can be assumed "wrongly" that is trusted:
-    if (jwt.isUnsecure() || !config.isOpenIdConnect()) {
-      handler.handle(Future.failedFuture("This provider cannot decode JWT tokens"));
-      return this;
-    }
-
     try {
       handler.handle(Future.succeededFuture(new OAuth2TokenImpl(this, new JsonObject().put("access_token", jwt.decode(token)))));
     } catch (RuntimeException e) {
