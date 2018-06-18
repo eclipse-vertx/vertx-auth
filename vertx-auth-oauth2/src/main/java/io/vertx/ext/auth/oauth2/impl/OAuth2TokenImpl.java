@@ -413,7 +413,9 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       form.put(provider.getConfig().getClientSecretParameterName(), provider.getConfig().getClientSecret());
     }
 
-    form.put("refresh_token", token.getString("refresh_token"));
+    if (token.getString("refresh_token") != null) {
+      form.put("refresh_token", token.getString("refresh_token"));
+    }
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
