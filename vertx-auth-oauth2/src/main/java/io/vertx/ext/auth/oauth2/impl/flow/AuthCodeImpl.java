@@ -57,7 +57,13 @@ public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
     query.put("response_type", "code");
     query.put("client_id", config.getClientID());
 
-    return config.getSite() + config.getAuthorizationPath() + '?' + stringify(query);
+    final String path = config.getAuthorizationPath();
+
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path + '?' + stringify(query);
+    } else {
+      return config.getSite() + path + '?' + stringify(query);
+    }
   }
 
   /**
