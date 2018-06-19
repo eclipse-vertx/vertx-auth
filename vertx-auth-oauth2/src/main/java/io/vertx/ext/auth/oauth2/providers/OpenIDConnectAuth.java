@@ -93,6 +93,7 @@ public interface OpenIDConnectAuth {
         return;
       }
 
+      config.setSite(issuer);
       config.setAuthorizationPath(json.getString("authorization_endpoint"));
       config.setTokenPath(json.getString("token_endpoint"));
       config.setIntrospectionPath(json.getString("token_introspection_endpoint"));
