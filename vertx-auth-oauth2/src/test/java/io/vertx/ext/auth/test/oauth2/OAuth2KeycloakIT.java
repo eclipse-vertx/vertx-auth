@@ -2,6 +2,7 @@ package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
 import org.junit.Test;
