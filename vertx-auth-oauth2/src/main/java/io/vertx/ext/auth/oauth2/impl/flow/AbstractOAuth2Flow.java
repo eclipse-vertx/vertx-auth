@@ -18,12 +18,12 @@ package io.vertx.ext.auth.oauth2.impl.flow;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
-import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -35,12 +35,18 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
  */
 abstract class AbstractOAuth2Flow implements OAuth2Flow {
 
-  protected final OAuth2AuthProviderImpl provider;
+  protected final Vertx vertx;
   protected final OAuth2ClientOptions config;
 
-  AbstractOAuth2Flow(OAuth2AuthProviderImpl provider) {
-    this.provider = provider;
-    this.config = provider.getConfig();
+  AbstractOAuth2Flow(Vertx vertx, OAuth2ClientOptions config) {
+    this.vertx = vertx;
+    this.config = config;
+  }
+
+  static void throwIfNull(String key, Object value) throws IllegalArgumentException {
+    if (value == null) {
+      throw new IllegalArgumentException("Configuration missing. You need to specify [" + key + "]");
+    }
   }
 
   void getToken(String grantType, JsonObject params, Handler<AsyncResult<JsonObject>> handler) {
@@ -77,7 +83,8 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     fetch(
-      provider,
+      vertx,
+      config,
       HttpMethod.POST,
       config.getTokenPath(),
       headers,

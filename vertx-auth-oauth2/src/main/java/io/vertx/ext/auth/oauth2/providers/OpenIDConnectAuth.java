@@ -5,13 +5,11 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
@@ -25,54 +23,34 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 public interface OpenIDConnectAuth {
 
   /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery.
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
+   * configuration options and attempt to load the well known descriptor.
    *
-   */
-  static void create(Vertx vertx, String clientId, String baseUrl, Handler<AsyncResult<OAuth2Auth>> handler) {
-    create(vertx, OAuth2FlowType.AUTH_CODE, clientId, null, baseUrl, new HttpClientOptions(), handler);
-  }
-
-  /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery.
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
    *
+   * @param vertx the vertx instance
+   * @param config the initial config, it should contain a site url
+   * @param handler the instantiated Oauth2 provider instance handler
    */
-  static void createWithFlow(Vertx vertx, OAuth2FlowType flow, String clientId, String baseUrl, Handler<AsyncResult<OAuth2Auth>> handler) {
-    create(vertx, flow, clientId, null, baseUrl, new HttpClientOptions(), handler);
-  }
-
-  /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery.
-   *
-   */
-  static void create(Vertx vertx, String clientId, String clientSecret, String baseUrl, Handler<AsyncResult<OAuth2Auth>> handler) {
-    create(vertx, OAuth2FlowType.AUTH_CODE, clientId, clientSecret, baseUrl, new HttpClientOptions(), handler);
-  }
-
-  /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery.
-   *
-   */
-  static void createWithFlow(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret, String baseUrl, Handler<AsyncResult<OAuth2Auth>> handler) {
-    create(vertx, flow, clientId, clientSecret, baseUrl, new HttpClientOptions(), handler);
-  }
-
-  /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery.
-   *
-   */
-  static void create(Vertx vertx, OAuth2FlowType flow, String clientId, String clientSecret, String issuer, HttpClientOptions options, Handler<AsyncResult<OAuth2Auth>> handler) {
-    if (issuer == null) {
+  static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+    if (config.getSite() == null) {
       handler.handle(Future.failedFuture("issuer cannot be null"));
       return;
     }
 
-    final HttpClientRequest request = makeRequest(vertx, options, HttpMethod.GET, issuer + "/.well-known/openid-configuration", res -> {
+    final HttpClientRequest request = makeRequest(vertx, config, HttpMethod.GET, config.getSite() + "/.well-known/openid-configuration", res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
         return;
       }
 
       final OAuth2Response response = res.result();
+
+      if (response.statusCode() !=  200) {
+        handler.handle(Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body()));
+        return;
+      }
 
       if (!response.is("application/json")) {
         handler.handle(Future.failedFuture("Cannot handle Content-Type: " + response.headers().get("Content-Type")));
@@ -81,19 +59,15 @@ public interface OpenIDConnectAuth {
 
       final JsonObject json = response.jsonObject();
 
-      final OAuth2ClientOptions config = new OAuth2ClientOptions(options);
-
-      config.setClientID(clientId);
-      config.setClientSecret(clientSecret);
-
       // issuer validation
-      final String issuerEndpoint = json.getString("issuer");
-      if (issuerEndpoint != null && !issuer.equals(issuerEndpoint)) {
-        handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
-        return;
+      if (config.isValidateIssuer()) {
+        final String issuerEndpoint = json.getString("issuer");
+        if (issuerEndpoint != null && !config.getSite().equals(issuerEndpoint)) {
+          handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
+          return;
+        }
       }
 
-      config.setSite(issuer);
       config.setAuthorizationPath(json.getString("authorization_endpoint"));
       config.setTokenPath(json.getString("token_endpoint"));
       config.setIntrospectionPath(json.getString("token_introspection_endpoint"));
@@ -102,7 +76,7 @@ public interface OpenIDConnectAuth {
       config.setUserInfoPath(json.getString("userinfo_endpoint"));
       config.setJwkPath(json.getString("jwks_uri"));
 
-      final OAuth2Auth oidc = OAuth2Auth.create(vertx, flow, config);
+      final OAuth2Auth oidc = OAuth2Auth.create(vertx, config);
 
       if (config.getJwkPath() != null) {
         oidc.loadJWK(v -> {

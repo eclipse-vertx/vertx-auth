@@ -37,6 +37,11 @@ public class OAuth2ClientOptionsConverter {
             obj.setExtraParameters(((JsonObject)member.getValue()).copy());
           }
           break;
+        case "flow":
+          if (member.getValue() instanceof String) {
+            obj.setFlow(io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf((String)member.getValue()));
+          }
+          break;
         case "headers":
           if (member.getValue() instanceof JsonObject) {
             obj.setHeaders(((JsonObject)member.getValue()).copy());
@@ -55,11 +60,6 @@ public class OAuth2ClientOptionsConverter {
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
             obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)member.getValue()));
-          }
-          break;
-        case "jwtToken":
-          if (member.getValue() instanceof Boolean) {
-            obj.setJWTToken((Boolean)member.getValue());
           }
           break;
         case "logoutPath":
@@ -117,6 +117,11 @@ public class OAuth2ClientOptionsConverter {
             obj.setUserInfoPath((String)member.getValue());
           }
           break;
+        case "validateIssuer":
+          if (member.getValue() instanceof Boolean) {
+            obj.setValidateIssuer((Boolean)member.getValue());
+          }
+          break;
       }
     }
   }
@@ -141,6 +146,9 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getExtraParameters() != null) {
       json.put("extraParameters", obj.getExtraParameters());
     }
+    if (obj.getFlow() != null) {
+      json.put("flow", obj.getFlow().name());
+    }
     if (obj.getHeaders() != null) {
       json.put("headers", obj.getHeaders());
     }
@@ -150,7 +158,6 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getJwkPath() != null) {
       json.put("jwkPath", obj.getJwkPath());
     }
-    json.put("jwtToken", obj.isJWTToken());
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
     }
@@ -176,5 +183,6 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getUserInfoPath() != null) {
       json.put("userInfoPath", obj.getUserInfoPath());
     }
+    json.put("validateIssuer", obj.isValidateIssuer());
   }
 }

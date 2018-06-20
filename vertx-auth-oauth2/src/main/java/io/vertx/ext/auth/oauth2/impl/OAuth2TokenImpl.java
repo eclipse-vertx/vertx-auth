@@ -240,7 +240,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       provider.getConfig().getTokenPath(),
       headers,
@@ -342,7 +343,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
       OAuth2API.fetch(
-        provider,
+        provider.getVertx(),
+        provider.getConfig(),
         HttpMethod.POST,
         provider.getConfig().getRevocationPath(),
         headers,
@@ -411,7 +413,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       provider.getConfig().getLogoutPath(),
       headers,
@@ -457,7 +460,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       config.getIntrospectionPath(),
       headers,
@@ -580,7 +584,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.GET,
       path,
       headers,
@@ -633,14 +638,21 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     // add the access token
     headers.put("Authorization", "Bearer " + opaqueAccessToken());
 
-    OAuth2API.fetch(provider, method, resource, headers, payload, fetch -> {
-      if (fetch.failed()) {
-        callback.handle(Future.failedFuture(fetch.cause()));
-        return;
-      }
+    OAuth2API.fetch(
+      provider.getVertx(),
+      provider.getConfig(),
+      method,
+      resource,
+      headers,
+      payload,
+      fetch -> {
+        if (fetch.failed()) {
+          callback.handle(Future.failedFuture(fetch.cause()));
+          return;
+        }
 
-      callback.handle(Future.succeededFuture(fetch.result()));
-    });
+        callback.handle(Future.succeededFuture(fetch.result()));
+      });
     return this;
   }
 
