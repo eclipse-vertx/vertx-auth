@@ -29,8 +29,11 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
  */
 public class PasswordImpl extends AbstractOAuth2Flow implements OAuth2Flow {
 
+  private final OAuth2AuthProviderImpl provider;
+
   public PasswordImpl(OAuth2AuthProviderImpl provider) {
-    super(provider);
+    super(provider.getVertx(), provider.getConfig());
+    this.provider = provider;
   }
 
   /**

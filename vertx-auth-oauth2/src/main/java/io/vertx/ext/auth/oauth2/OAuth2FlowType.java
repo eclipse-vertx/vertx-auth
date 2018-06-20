@@ -15,11 +15,14 @@
  */
 package io.vertx.ext.auth.oauth2;
 
+import io.vertx.codegen.annotations.VertxGen;
+
 /**
  * OAuth2 Flows
  *
  * @author Paulo Lopes
  */
+@VertxGen
 public enum OAuth2FlowType {
   AUTH_CODE,
   CLIENT,

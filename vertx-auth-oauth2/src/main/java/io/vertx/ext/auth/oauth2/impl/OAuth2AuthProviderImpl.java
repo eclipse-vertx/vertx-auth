@@ -37,16 +37,14 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.fetch;
 public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private final Vertx vertx;
-  private final OAuth2FlowType flowType;
   private final OAuth2ClientOptions config;
   private final JWT jwt = new JWT();
 
   private final OAuth2Flow flow;
 
-  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
+  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
-    this.flowType = flow;
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
@@ -55,38 +53,24 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         } else {
           jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.isCertificate(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
         }
-        // as of this moment we can handle JWTs
-        config.setJWTToken(true);
       }
     }
 
-    switch (flow) {
+    switch (config.getFlow()) {
       case AUTH_CODE:
-        if (config.getClientID() == null) {
-          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
-        }
-        this.flow = new AuthCodeImpl(this);
+        flow = new AuthCodeImpl(this);
         break;
       case CLIENT:
-        if (config.getClientID() == null) {
-          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
-        }
-        this.flow = new ClientImpl(this);
+        flow = new ClientImpl(this);
         break;
       case PASSWORD:
-        if (config.getClientID() == null) {
-          throw new IllegalArgumentException("Configuration missing. You need to specify the client id, the client secret and the oauth2 server");
-        }
-        this.flow = new PasswordImpl(this);
+        flow = new PasswordImpl(this);
         break;
       case AUTH_JWT:
-        if (config.getPubSecKeys() == null) {
-          throw new IllegalArgumentException("Configuration missing. You need to specify the private key, the key type and the oauth2 server");
-        }
-        this.flow = new AuthJWTImpl(this);
+        flow = new AuthJWTImpl(this);
         break;
       default:
-        throw new IllegalArgumentException("Invalid oauth2 flow type: " + flow);
+        throw new IllegalArgumentException("Invalid oauth2 flow type: " + config.getFlow());
     }
   }
 
@@ -97,7 +81,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     headers.put("Accept", "application/json");
 
     fetch(
-      this,
+      vertx,
+      config,
       HttpMethod.GET,
       config.getJwkPath(),
       headers,
@@ -149,8 +134,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             for (Object key : keys) {
               jwt.addJWK(new JWK((JsonObject) key));
             }
-            // as of this moment we can handle JWTs
-            config.setJWTToken(true);
 
             handler.handle(Future.succeededFuture());
           }
@@ -193,11 +176,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public void getToken(JsonObject credentials, Handler<AsyncResult<AccessToken>> handler) {
     flow.getToken(credentials, handler);
-  }
-
-  @Override
-  public boolean hasJWTToken() {
-    return config.isJWTToken();
   }
 
   @Override
@@ -248,7 +226,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2FlowType getFlowType() {
-    return flowType;
+    return config.getFlow();
   }
 
   public OAuth2Flow getFlow() {

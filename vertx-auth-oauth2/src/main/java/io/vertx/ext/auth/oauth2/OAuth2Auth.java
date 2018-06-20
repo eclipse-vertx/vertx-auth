@@ -21,7 +21,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.PubSecKeyOptions;
@@ -90,7 +89,44 @@ public interface OAuth2Auth extends AuthProviderInternal {
         .setPublicKey(config.getString("realm-public-key")));
     }
 
-    return new OAuth2AuthProviderImpl(vertx, flow, options);
+    return new OAuth2AuthProviderImpl(vertx, options.setFlow(flow));
+  }
+
+  /**
+   * Create a OAuth2 auth provider
+   *
+   * @deprecated the flow configuration should be passed in the config object
+   *
+   * @param vertx the Vertx instance
+   * @param config  the config
+   * @return the auth provider
+   */
+  @Deprecated
+  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
+    return new OAuth2AuthProviderImpl(vertx, config.setFlow(flow));
+  }
+
+  /**
+   * Create a OAuth2 auth provider
+   *
+   * @deprecated the flow configuration should be passed in the config object
+   *
+   * @param vertx the Vertx instance
+   * @return the auth provider
+   */
+  @Deprecated
+  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow) {
+    return new OAuth2AuthProviderImpl(vertx, new OAuth2ClientOptions().setFlow(flow));
+  }
+
+  /**
+   * Create a OAuth2 auth provider
+   *
+   * @param vertx the Vertx instance
+   * @return the auth provider
+   */
+  static OAuth2Auth create(Vertx vertx) {
+    return create(vertx, new OAuth2ClientOptions());
   }
 
   /**
@@ -100,18 +136,8 @@ public interface OAuth2Auth extends AuthProviderInternal {
    * @param config  the config
    * @return the auth provider
    */
-  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, OAuth2ClientOptions config) {
-    return new OAuth2AuthProviderImpl(vertx, flow, config);
-  }
-
-  /**
-   * Create a OAuth2 auth provider
-   *
-   * @param vertx the Vertx instance
-   * @return the auth provider
-   */
-  static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow) {
-    return new OAuth2AuthProviderImpl(vertx, flow, new OAuth2ClientOptions());
+  static OAuth2Auth create(Vertx vertx, OAuth2ClientOptions config) {
+    return new OAuth2AuthProviderImpl(vertx, config);
   }
 
   /**
@@ -129,20 +155,6 @@ public interface OAuth2Auth extends AuthProviderInternal {
    */
   @Deprecated
   void getToken(JsonObject params, Handler<AsyncResult<AccessToken>> handler);
-
-  /**
-   * Returns true if this provider supports JWT tokens as the access_token. This is typically true if the provider
-   * implements the `openid-connect` protocol. This is a plain return from the config option jwtToken, which is false
-   * by default.
-   *
-   * This information is important to validate grants. Since pure OAuth2 should be used for authorization and when a
-   * token is requested all grants should be declared, in case of openid-connect this is not true. OpenId will issue
-   * a token and all grants will be encoded on the token itself so the requester does not need to list the required
-   * grants.
-   *
-   * @return true if openid-connect is used.
-   */
-  boolean hasJWTToken();
 
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
