@@ -14,3 +14,6 @@ before_install:
 - docker pull jboss/keycloak
 - docker run -d -p 8888:8080 -e KEYCLOAK_USER=user -e KEYCLOAK_PASSWORD=password -e DB_VENDOR=H2 jboss/keycloak
 - docker ps -a
+
+script:
+- mvn verify -B -V
