@@ -10,8 +10,6 @@ jdk:
 services:
   - docker
 
-docker run -d --rm --name keycloak
-
 before_install:
 - docker pull jboss/keycloak
 - docker run -d -p 8888:8080 -e KEYCLOAK_USER=user -e KEYCLOAK_PASSWORD=password -e DB_VENDOR=H2 jboss/keycloak
