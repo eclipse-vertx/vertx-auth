@@ -6,7 +6,7 @@ import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class OAuth2KeycloakTest extends VertxTestBase {
+public class OAuth2KeycloakIT extends VertxTestBase {
 
   private OAuth2Auth oauth2;
 
@@ -33,7 +33,8 @@ public class OAuth2KeycloakTest extends VertxTestBase {
   @Test
   @Ignore
   public void testFullCycle() {
-    oauth2.authenticate(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
+
+    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
@@ -70,7 +71,8 @@ public class OAuth2KeycloakTest extends VertxTestBase {
   @Test
   @Ignore
   public void testLogout() {
-    oauth2.authenticate(new JsonObject().put("username", "pmlopes").put("password", "password"), res -> {
+
+    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
@@ -96,4 +98,73 @@ public class OAuth2KeycloakTest extends VertxTestBase {
     });
     await();
   }
+
+  @Test
+  public void testDecodeShouldFail() throws Exception {
+
+    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
+    oauth2.decodeToken("borked", res1 -> {
+      if (res1.failed()) {
+        testComplete();
+        return;
+      }
+      fail("Should not reach this!");
+    });
+
+    await();
+  }
+
+  @Test
+  public void testDecodeShouldPass() throws Exception {
+
+    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, credentials);
+
+    oauth2.loadJWK(v -> {
+      if (v.failed()) {
+        fail(v.cause().getMessage());
+      } else {
+        oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
+          if (res.failed()) {
+            fail(res.cause().getMessage());
+          } else {
+            AccessToken token = (AccessToken) res.result();
+            assertNotNull(token);
+            assertNotNull(token.principal());
+
+            oauth2.decodeToken(token.opaqueAccessToken(), res1 -> {
+              if (res1.succeeded()) {
+                testComplete();
+                return;
+              }
+              fail("Should not reach this!");
+            });
+          }
+        });
+      }
+    });
+
+    await();
+  }
+
+  @Test
+  public void testLoadJWK2() {
+    JsonObject config = new JsonObject("{\n" +
+      "  \"realm\": \"master\",\n" +
+      "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
+      "  \"ssl-required\": \"external\",\n" +
+      "  \"resource\": \"test\",\n" +
+      "  \"credentials\": {\n" +
+      "    \"secret\": \"b0568625-a482-45d8-af8b-27beba502ed3\"\n" +
+      "  }\n" +
+      "}");
+
+    OAuth2Auth oauth2 = KeycloakAuth.create(vertx, config);
+
+    oauth2.loadJWK(load -> {
+      assertFalse(load.failed());
+      testComplete();
+    });
+    await();
+  }
+
 }

@@ -1,13 +1,8 @@
 package io.vertx.ext.auth.test.oauth2;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
-import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class OAuth2KeyRotationTest extends VertxTestBase {
@@ -31,7 +26,6 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
 
 
   @Test
-  @Ignore
   public void testLoadJWK2() {
     JsonObject config = new JsonObject("{\n" +
       "  \"realm\": \"master\",\n" +
