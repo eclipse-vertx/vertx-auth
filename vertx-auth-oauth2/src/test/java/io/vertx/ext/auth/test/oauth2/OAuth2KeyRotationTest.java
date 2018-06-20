@@ -23,27 +23,4 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
     });
     await();
   }
-
-
-  @Test
-  public void testLoadJWK2() {
-    JsonObject config = new JsonObject("{\n" +
-      "  \"realm\": \"master\",\n" +
-      "  \"auth-server-url\": \"http://localhost:8080/auth\",\n" +
-      "  \"ssl-required\": \"external\",\n" +
-      "  \"resource\": \"test\",\n" +
-      "  \"credentials\": {\n" +
-      "    \"secret\": \"b0568625-a482-45d8-af8b-27beba502ed3\"\n" +
-      "  }\n" +
-      "}");
-
-    OAuth2Auth oauth2 = KeycloakAuth.create(vertx, config);
-
-    oauth2.loadJWK(load -> {
-      assertFalse(load.failed());
-      testComplete();
-    });
-    await();
-
-  }
 }

@@ -4,7 +4,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class OAuth2KeycloakIT extends VertxTestBase {
@@ -13,16 +12,14 @@ public class OAuth2KeycloakIT extends VertxTestBase {
 
   // Set the client credentials and the OAuth2 server
   final JsonObject credentials = new JsonObject(
-      "{\n" +
-          "  \"realm\": \"master\",\n" +
-          "  \"realm-public-key\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGQkaBkiZWpUjFOuaabgfXgjzZzfJd0wozrS1czX5qHNKG3P79P/UtZeR3wGN8r15jVYiH42GMINMs7R7iP5Mbm1iImge5p/7/dPmXirKOKOBhjA3hNTiV5BlPDTQyiuuTAUEms5dY4+moswXo5zM4q9DFu6B7979o+v3kX6ZB+k3kNhP08wH82I4eJKoenN/0iCT7ALoG3ysEJf18+HEysSnniLMJr8R1pYF2QRFlqaDv3Mqyp7ipxYkt4ebMCgE7aDzT6OrfpyPowObpdjSMTUXpcwIcH8mIZCWFmyfF675zEeE0e+dHKkL1rPeCI7rr7Bqc5+1DS5YM54fk8xQwIDAQAB\",\n" +
-          "  \"auth-server-url\": \"http://localhost:9000/auth\",\n" +
-          "  \"ssl-required\": \"external\",\n" +
-          "  \"resource\": \"frontend\",\n" +
-          "  \"credentials\": {\n" +
-          "    \"secret\": \"2fbf5e18-b923-4a83-9657-b4ebd5317f60\"\n" +
-          "  }\n" +
-          "}"
+    "{\n" +
+      "  \"realm\": \"master\",\n" +
+      "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
+      "  \"ssl-required\": \"external\",\n" +
+      "  \"resource\": \"admin-cli\",\n" +
+      "  \"public-client\": true,\n" +
+      "  \"confidential-port\": 0\n" +
+      "}"
   );
 
   @Override
@@ -32,7 +29,6 @@ public class OAuth2KeycloakIT extends VertxTestBase {
   }
 
   @Test
-  @Ignore
   public void testFullCycle() {
 
     oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
@@ -43,7 +39,9 @@ public class OAuth2KeycloakIT extends VertxTestBase {
         assertNotNull(token);
         assertNotNull(token.principal());
 
-        token.isAuthorised("account:manage-account", r -> {
+        token.setTrustJWT(true);
+
+        token.isAuthorized("email", r -> {
           assertTrue(r.result());
 
           token.refresh(res2 -> {
@@ -70,7 +68,6 @@ public class OAuth2KeycloakIT extends VertxTestBase {
   }
 
   @Test
-  @Ignore
   public void testLogout() {
 
     oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
@@ -97,21 +94,6 @@ public class OAuth2KeycloakIT extends VertxTestBase {
         });
       }
     });
-    await();
-  }
-
-  @Test
-  public void testDecodeShouldFail() throws Exception {
-
-    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
-    oauth2.decodeToken("borked", res1 -> {
-      if (res1.failed()) {
-        testComplete();
-        return;
-      }
-      fail("Should not reach this!");
-    });
-
     await();
   }
 
