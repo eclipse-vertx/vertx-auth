@@ -96,24 +96,6 @@
       <version>3.1.1</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.stormpath.shiro</groupId>
-      <artifactId>stormpath-shiro-core</artifactId>
-      <version>0.6.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.stormpath.sdk</groupId>
-      <artifactId>stormpath-sdk-api</artifactId>
-      <version>1.0.RC9.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.stormpath.sdk</groupId>
-      <artifactId>stormpath-sdk-httpclient</artifactId>
-      <version>1.0.RC9.2</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
