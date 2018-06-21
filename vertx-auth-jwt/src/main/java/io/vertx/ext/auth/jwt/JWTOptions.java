@@ -16,10 +16,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
-import java.util.List;
 
 /**
  * Options related to creation of new tokens.

@@ -14,7 +14,7 @@ public class JWTUserTest extends VertxTestBase{
                         .put("roles", new JsonArray(Arrays.asList("role1", "role2")));
 
         JWTUser jwtUser = new JWTUser(token, "roles");
-        jwtUser.isAuthorised("role1", r -> {
+        jwtUser.isAuthorized("role1", r -> {
             assertTrue("should have role", r.result());
             testComplete();
         });
@@ -28,7 +28,7 @@ public class JWTUserTest extends VertxTestBase{
                 .put("roles", new JsonArray(Arrays.asList("role1", "role2")));
 
         JWTUser jwtUser = new JWTUser(token, "roles");
-        jwtUser.isAuthorised("role3", r -> {
+        jwtUser.isAuthorized("role3", r -> {
             assertFalse("should not have role", r.result());
             testComplete();
         });
@@ -43,7 +43,7 @@ public class JWTUserTest extends VertxTestBase{
                         .put("roles", new JsonArray(Arrays.asList("role1", "role2"))));
 
         JWTUser jwtUser = new JWTUser(token, "realm/roles");
-        jwtUser.isAuthorised("role1", r -> {
+        jwtUser.isAuthorized("role1", r -> {
             assertTrue("should have role", r.result());
             testComplete();
         });
@@ -58,7 +58,7 @@ public class JWTUserTest extends VertxTestBase{
                         .put("roles", new JsonArray(Arrays.asList("role1", "role2"))));
 
         JWTUser jwtUser = new JWTUser(token, "realm/roles");
-        jwtUser.isAuthorised("role3", r -> {
+        jwtUser.isAuthorized("role3", r -> {
             assertFalse("should not have role", r.result());
             testComplete();
         });
@@ -74,7 +74,7 @@ public class JWTUserTest extends VertxTestBase{
                         .put("roles", new JsonArray(Arrays.asList("role1", "role2")))));
 
         JWTUser jwtUser = new JWTUser(token, "realm/access/roles");
-        jwtUser.isAuthorised("role1", r -> {
+        jwtUser.isAuthorized("role1", r -> {
             assertTrue("should have role", r.result());
             testComplete();
         });
@@ -90,7 +90,7 @@ public class JWTUserTest extends VertxTestBase{
                                 .put("roles", new JsonArray(Arrays.asList("role1", "role2")))));
 
         JWTUser jwtUser = new JWTUser(token, "realm/wrong/roles");
-        jwtUser.isAuthorised("role1", r -> {
+        jwtUser.isAuthorized("role1", r -> {
             assertFalse("should not have role", r.result());
             testComplete();
         });

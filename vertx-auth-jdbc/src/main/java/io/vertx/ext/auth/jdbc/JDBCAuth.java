@@ -25,8 +25,6 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
-import java.util.List;
-
 /**
  * Factory interface for creating {@link io.vertx.ext.auth.AuthProvider} instances that use the Vert.x JDBC client.
  *

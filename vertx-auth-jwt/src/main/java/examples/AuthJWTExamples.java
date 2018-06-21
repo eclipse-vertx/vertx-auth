@@ -25,7 +25,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.auth.jwt.JWTOptions;
+import io.vertx.ext.jwt.JWTOptions;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -136,7 +136,7 @@ public class AuthJWTExamples {
   }
 
   public void example13(User user) {
-    user.isAuthorised("create-report", res -> {
+    user.isAuthorized("create-report", res -> {
       if (res.succeeded() && res.result()) {
         // Yes the user can create reports
       }
@@ -151,7 +151,7 @@ public class AuthJWTExamples {
       // since we're consuming keycloak JWTs we need to locate the permission claims in the token
       .put("permissionsClaimKey", "realm_access/roles");
 
-    AuthProvider provider = JWTAuth.create(vertx, config);
+    AuthProvider provider = JWTAuth.create(vertx, new JWTAuthOptions(config));
   }
 
   public void example15(Vertx vertx) {

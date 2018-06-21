@@ -172,9 +172,7 @@ public class AuthOAuth2Examples {
       // Session ended. But the refresh_token is still valid.
 
       // Revoke the refresh_token
-      token.revoke("refresh_token", res1 -> {
-        System.out.println("token revoked.");
-      });
+      token.revoke("refresh_token", res1 -> System.out.println("token revoked."));
     });
   }
 
@@ -200,7 +198,7 @@ public class AuthOAuth2Examples {
         AccessToken token = (AccessToken) res.result();
 
         // now check for permissions
-        token.isAuthorised("account:manage-account", r -> {
+        token.isAuthorized("account:manage-account", r -> {
           if (r.result()) {
             // this user is authorized to manage its account
           }
@@ -248,7 +246,7 @@ public class AuthOAuth2Examples {
 
 
   public void example17(AccessToken user) {
-    user.isAuthorised("print", res ->{
+    user.isAuthorized("print", res ->{
       // in this case it is assumed that the role is the current application
       if (res.succeeded() && res.result()) {
         // Yes the user can print
@@ -257,7 +255,7 @@ public class AuthOAuth2Examples {
   }
 
   public void example18(AccessToken user) {
-    user.isAuthorised("realm:add-user", res ->{
+    user.isAuthorized("realm:add-user", res ->{
       // the role is "realm"
       // the authority is "add-user"
       if (res.succeeded() && res.result()) {
@@ -267,7 +265,7 @@ public class AuthOAuth2Examples {
   }
 
   public void example19(AccessToken user) {
-    user.isAuthorised("finance:year-report", res ->{
+    user.isAuthorized("finance:year-report", res ->{
       // the role is "finance"
       // the authority is "year-report"
       if (res.succeeded() && res.result()) {

@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.apache.shiro.realm.Realm;
 
@@ -34,7 +35,7 @@ public class AuthShiroExamples {
 
     JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties");
 
-    AuthProvider provider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, config);
+    AuthProvider provider = ShiroAuth.create(vertx, new ShiroAuthOptions().setType(ShiroAuthRealmType.PROPERTIES).setConfig(config));
 
   }
 
@@ -55,7 +56,7 @@ public class AuthShiroExamples {
 
   public void example5(User user) {
 
-    user.isAuthorised("newsletter:edit:13", res -> {
+    user.isAuthorized("newsletter:edit:13", res -> {
       if (res.succeeded()) {
         boolean hasPermission = res.result();
       } else {
@@ -67,7 +68,7 @@ public class AuthShiroExamples {
 
   public void example6(User user) {
 
-    user.isAuthorised("role:manager", res -> {
+    user.isAuthorized("role:manager", res -> {
       if (res.succeeded()) {
         boolean hasRole = res.result();
       } else {

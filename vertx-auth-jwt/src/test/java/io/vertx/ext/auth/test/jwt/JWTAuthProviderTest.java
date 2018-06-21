@@ -80,7 +80,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
 
-      user.isAuthorised("write", onSuccess(res -> {
+      user.isAuthorized("write", onSuccess(res -> {
         assertNotNull(res);
         testComplete();
       }));

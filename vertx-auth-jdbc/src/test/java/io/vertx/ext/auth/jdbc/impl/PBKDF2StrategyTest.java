@@ -5,8 +5,6 @@ import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class PBKDF2StrategyTest extends VertxTestBase {
 
   @Test

@@ -15,7 +15,6 @@
  */
 package io.vertx.ext.auth.impl;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.ext.auth.AuthProvider;
 
 /**

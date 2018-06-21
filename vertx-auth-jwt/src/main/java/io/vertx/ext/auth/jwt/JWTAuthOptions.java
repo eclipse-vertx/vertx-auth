@@ -106,15 +106,18 @@ public class JWTAuthOptions {
     return this;
   }
 
+  @Deprecated
   public List<SecretOptions> getSecrets() {
     return secrets;
   }
 
+  @Deprecated
   public JWTAuthOptions setSecrets(List<SecretOptions> secrets) {
     this.secrets = secrets;
     return this;
   }
 
+  @Deprecated
   public JWTAuthOptions addSecret(SecretOptions secret) {
     if (this.secrets == null) {
       this.secrets = new ArrayList<>();

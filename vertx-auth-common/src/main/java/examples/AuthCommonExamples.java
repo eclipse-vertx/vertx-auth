@@ -16,7 +16,6 @@
 
 package examples;
 
-import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
@@ -47,7 +46,7 @@ public class AuthCommonExamples {
 
   public void example2(User user) {
 
-    user.isAuthorised("printers:printer1234", res -> {
+    user.isAuthorized("printers:printer1234", res -> {
       if (res.succeeded()) {
 
         boolean hasAuthority = res.result();
@@ -66,7 +65,7 @@ public class AuthCommonExamples {
 
   public void example3(User user) {
 
-    user.isAuthorised("role:admin", res -> {
+    user.isAuthorized("role:admin", res -> {
       if (res.succeeded()) {
 
         boolean hasAuthority = res.result();

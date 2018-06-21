@@ -19,6 +19,7 @@ package io.vertx.ext.auth.test.shiro;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.shiro.PropertiesProviderConstants;
 import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.junit.Test;
 
@@ -32,7 +33,7 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, getConfig());
+    authProvider = ShiroAuth.create(vertx, new ShiroAuthOptions().setType(ShiroAuthRealmType.PROPERTIES).setConfig(getConfig()));
   }
 
   protected JsonObject getConfig() {
@@ -47,7 +48,7 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       // paulo can do anything...
-      user.isAuthorised("do_actual_work", onSuccess(res -> {
+      user.isAuthorized("do_actual_work", onSuccess(res -> {
         assertTrue(res);
         testComplete();
       }));
@@ -61,7 +62,7 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       // editor can edit any newsletter item...
-      user.isAuthorised("newsletter:edit:13", onSuccess(res -> {
+      user.isAuthorized("newsletter:edit:13", onSuccess(res -> {
         assertTrue(res);
         testComplete();
       }));
@@ -75,8 +76,11 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     File res = new File(loader.getResource("test-auth.properties").toURI());
     try {
       ShiroAuth.create(vertx,
-          ShiroAuthRealmType.PROPERTIES,
-          new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, res.getName()));
+        new ShiroAuthOptions().setType(
+          ShiroAuthRealmType.PROPERTIES
+        ).setConfig(
+          new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, res.getName())
+        ));
       fail();
     } catch (Exception ignore) {
     }
@@ -91,8 +95,12 @@ public class PropertiesShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     try {
       System.setProperty("vertx.cwd", cwd.getAbsolutePath());
       ShiroAuth.create(vertx,
-          ShiroAuthRealmType.PROPERTIES,
-          new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, path));
+        new ShiroAuthOptions().setType(
+          ShiroAuthRealmType.PROPERTIES
+        ).setConfig(
+          new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, path)
+        )
+      );
     } finally {
       System.clearProperty("vertx.cwd");
     }

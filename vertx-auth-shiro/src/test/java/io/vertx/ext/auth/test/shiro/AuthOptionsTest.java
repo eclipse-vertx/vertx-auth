@@ -1,7 +1,6 @@
 package io.vertx.ext.auth.test.shiro;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.junit.Test;

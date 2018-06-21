@@ -25,7 +25,7 @@ public class OAuth2KeycloakIT extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    oauth2 = OAuth2Auth.createKeycloak(vertx, OAuth2FlowType.PASSWORD, credentials);
+    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, credentials);
   }
 
   @Test

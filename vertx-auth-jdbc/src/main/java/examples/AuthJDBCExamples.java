@@ -53,7 +53,7 @@ public class AuthJDBCExamples {
 
   public void example7(User user) {
 
-    user.isAuthorised("commit_code", res -> {
+    user.isAuthorized("commit_code", res -> {
       if (res.succeeded()) {
         boolean hasPermission = res.result();
       } else {
@@ -65,7 +65,7 @@ public class AuthJDBCExamples {
 
   public void example8(User user) {
 
-    user.isAuthorised("role:manager", res -> {
+    user.isAuthorized("role:manager", res -> {
       if (res.succeeded()) {
         boolean hasRole = res.result();
       } else {

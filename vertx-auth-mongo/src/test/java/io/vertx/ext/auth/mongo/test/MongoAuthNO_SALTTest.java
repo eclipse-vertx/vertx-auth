@@ -19,7 +19,6 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.mongo.AuthenticationException;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
@@ -33,7 +32,7 @@ import org.junit.runners.model.InitializationError;
 
 /**
  * Testing MongoAuth with no encryption for the user password
- * 
+ *
  * @author mremme
  */
 
@@ -94,7 +93,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorised("role:developer", onSuccess(has -> {
+      user.isAuthorized("role:developer", onSuccess(has -> {
         assertTrue(has);
         testComplete();
       }));
@@ -108,7 +107,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorised("role:manager", onSuccess(has -> {
+      user.isAuthorized("role:manager", onSuccess(has -> {
         assertFalse(has);
         testComplete();
       }));
@@ -122,7 +121,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorised("commit_code", onSuccess(has -> {
+      user.isAuthorized("commit_code", onSuccess(has -> {
         assertTrue(has);
         testComplete();
       }));
@@ -136,7 +135,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorised("eat_sandwich", onSuccess(has -> {
+      user.isAuthorized("eat_sandwich", onSuccess(has -> {
         assertFalse(has);
         testComplete();
       }));
@@ -149,7 +148,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
    * ##################################################
    */
   protected List<InternalUser> createUserList() {
-    List<InternalUser> users = new ArrayList<InternalUser>();
+    List<InternalUser> users = new ArrayList<>();
     users.add(new InternalUser("Michael", "ps1", null, null));
     users.add(new InternalUser("Doublette", "ps1", null, null));
     users.add(new InternalUser("Doublette", "ps2", null, null));
@@ -214,7 +213,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   /**
    * Creates a user inside mongo. Returns true, if user was successfully added
-   * 
+   *
    * @param user
    * @param latch
    * @return
@@ -241,7 +240,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   /**
    * Creates JsonObject for login in the convenient way
-   * 
+   *
    * @param username
    *          the username to be used
    * @param password

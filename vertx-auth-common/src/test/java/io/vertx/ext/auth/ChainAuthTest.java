@@ -81,9 +81,7 @@ public class ChainAuthTest extends VertxTestBase {
       res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
 
-    auth.append((authInfo, res) -> {
-      fail("should not be called");
-    });
+    auth.append((authInfo, res) -> fail("should not be called"));
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {

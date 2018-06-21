@@ -16,14 +16,13 @@
 
 package io.vertx.ext.auth.mongo.test;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.auth.mongo.MongoAuthOptions;
 
 /**
  * Testing MongoAuth setting the salt to a column in the user
- * 
+ *
  * @author mremme
  */
 

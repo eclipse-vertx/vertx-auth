@@ -22,6 +22,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.shiro.LDAPProviderConstants;
 import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -49,7 +50,7 @@ public class LDAPShiroAuthProviderTest extends ShiroAuthProviderTestBase {
     ldapServer = new EmbeddedADS(ldapWorkingDirectory.newFolder());
     ldapServer.startServer();
     insertTestUsers();
-    authProvider = ShiroAuth.create(vertx, ShiroAuthRealmType.LDAP, getConfig());
+    authProvider = ShiroAuth.create(vertx, new ShiroAuthOptions().setType(ShiroAuthRealmType.LDAP).setConfig(getConfig()));
   }
 
   protected JsonObject getConfig() {

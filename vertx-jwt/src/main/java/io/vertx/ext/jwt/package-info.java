@@ -17,4 +17,3 @@
 package io.vertx.ext.jwt;
 
 import io.vertx.codegen.annotations.ModuleGen;
-import io.vertx.docgen.Document;

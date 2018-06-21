@@ -1,7 +1,6 @@
 package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
