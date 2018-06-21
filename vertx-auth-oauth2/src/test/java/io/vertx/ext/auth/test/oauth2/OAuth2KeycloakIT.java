@@ -12,7 +12,7 @@ public class OAuth2KeycloakIT extends VertxTestBase {
 
   // Set the client credentials and the OAuth2 server
   final JsonObject credentials = new JsonObject(
-    "{\n" +
+      "{\n" +
       "  \"realm\": \"master\",\n" +
       "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
       "  \"ssl-required\": \"external\",\n" +
@@ -94,6 +94,21 @@ public class OAuth2KeycloakIT extends VertxTestBase {
         });
       }
     });
+    await();
+  }
+
+  @Test
+  public void testDecodeShouldFail() throws Exception {
+
+    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
+    oauth2.decodeToken("borked", res1 -> {
+      if (res1.failed()) {
+        testComplete();
+        return;
+      }
+      fail("Should not reach this!");
+    });
+
     await();
   }
 
