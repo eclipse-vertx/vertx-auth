@@ -42,6 +42,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private final OAuth2Flow flow;
 
+  private RBACHandler rbac;
+
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
@@ -70,7 +72,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         flow = new AuthJWTImpl(this);
         break;
       default:
-        throw new IllegalArgumentException("Invalid oauth2 flow type: " + config.getFlow());
+        throw new IllegalArgumentException("Unsupported oauth2 flow type: " + config.getFlow());
     }
   }
 
@@ -143,6 +145,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       });
 
     return this;
+  }
+
+  @Override
+  public OAuth2Auth setRBACHandler(RBACHandler rbac) {
+    if (this.rbac != null) {
+      throw new IllegalStateException("There is already a RBAC handler registered");
+    }
+
+    this.rbac = rbac;
+    return this;
+  }
+
+  RBACHandler getRBACHandler() {
+    return rbac;
   }
 
   public OAuth2ClientOptions getConfig() {

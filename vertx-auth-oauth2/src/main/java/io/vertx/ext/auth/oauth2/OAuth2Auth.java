@@ -216,4 +216,7 @@ public interface OAuth2Auth extends AuthProviderInternal {
    */
   @Fluent
   OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler);
+
+  @Fluent
+  OAuth2Auth setRBACHandler(RBACHandler rbac);
 }
