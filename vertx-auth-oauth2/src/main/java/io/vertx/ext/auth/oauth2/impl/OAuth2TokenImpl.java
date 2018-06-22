@@ -22,6 +22,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
@@ -43,6 +45,7 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
 
   private static final JsonObject EMPTY_JSON = new JsonObject();
   private static final JsonArray EMPTY_ARRAY = new JsonArray();
@@ -88,22 +91,32 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       return null;
     }
 
-    // if it is trusted we can attempt to parse anyway
-    if (trustJWT) {
-      String[] segments = opaque.split("\\.");
-      if (segments.length == 2 || segments.length == 3) {
-        // All segment should be base64
-        String payloadSeg = segments[1];
-        // base64 decode and parse JSON
-        return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
-      }
-    } else {
-      if (!provider.getJWT().isUnsecure()) {
-        return provider.getJWT().decode(opaque);
-      }
+    if (opaque instanceof JsonObject) {
+      // already decoded
+      return (JsonObject) opaque;
     }
 
-    throw new RuntimeException("Cannot decode: " + opaque);
+    try {
+      // if it is trusted we can attempt to parse anyway
+      if (trustJWT) {
+        String[] segments = ((String) opaque).split("\\.");
+        if (segments.length == 2 || segments.length == 3) {
+          // All segment should be base64
+          String payloadSeg = segments[1];
+          // base64 decode and parse JSON
+          return new JsonObject(new String(Base64.getUrlDecoder().decode(payloadSeg), UTF8));
+        }
+      } else {
+        return provider.getJWT().decode(((String) opaque));
+      }
+    } catch (RuntimeException e) {
+      // explicity catch and log as debug. exception here is a valid case
+      // the reason is that it can be for several factors, such as bad token
+      // or invalid JWT key setup, in that case we fall back to opaque token
+      // which is the default operational mode for OAuth2.
+      LOG.debug("Cannot decode token:", e);
+    }
+    return null;
   }
 
   private void init() {
@@ -123,14 +136,15 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       accessToken = decodeToken(token, "access_token");
       refreshToken = decodeToken(token, "refresh_token");
       idToken = decodeToken(token, "id_token");
-    }
-    // the permission cache needs to be clear
-    clearCache();
-    // rebuild cache
-    String scope = token.getString("scope");
-    // avoid the case when scope is the literal "null" value.
-    if (scope != null) {
-      Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getScopeSeparator())));
+
+      // the permission cache needs to be clear
+      clearCache();
+      // rebuild cache
+      String scope = token.getString("scope");
+      // avoid the case when scope is the literal "null" value.
+      if (scope != null) {
+        Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getScopeSeparator())));
+      }
     }
   }
 
@@ -403,9 +417,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       form.put(provider.getConfig().getClientSecretParameterName(), provider.getConfig().getClientSecret());
     }
 
-    if (token.getString("refresh_token") != null) {
-      form.put("refresh_token", token.getString("refresh_token"));
-    }
+    form.put("refresh_token", token.getString("refresh_token"));
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
