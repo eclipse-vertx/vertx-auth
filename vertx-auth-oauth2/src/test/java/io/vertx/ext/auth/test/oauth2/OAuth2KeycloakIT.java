@@ -165,4 +165,44 @@ public class OAuth2KeycloakIT extends VertxTestBase {
     await();
   }
 
+  @Test
+  public void testLoginWithAccessTokenOnly() {
+
+    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
+      if (res.failed()) {
+        fail(res.cause().getMessage());
+      } else {
+        AccessToken token = (AccessToken) res.result();
+        assertNotNull(token);
+        assertNotNull(token.principal());
+
+        oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, new JsonObject(
+          "{\n" +
+            "  \"realm\": \"master\",\n" +
+            "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
+            "  \"ssl-required\": \"external\",\n" +
+            "  \"resource\": \"account\",\n" +
+            "  \"credentials\": {\n" +
+            "    \"secret\": \"9bc7401f-cecc-447a-ad7f-894280749caa\"\n" +
+            "  },\n" +
+            "  \"use-resource-role-mappings\": true,\n" +
+            "  \"confidential-port\": 0\n" +
+            "}"
+        ));
+
+        oauth2.authenticate(new JsonObject().put("access_token", token.opaqueAccessToken()).put("token_type", "Bearer"), res2 -> {
+          if (res2.failed()) {
+            fail(res2.cause().getMessage());
+          } else {
+            AccessToken token2 = (AccessToken) res2.result();
+            assertNotNull(token2);
+            assertNotNull(token2.principal());
+
+            testComplete();
+          }
+        });
+      }
+    });
+    await();
+  }
 }

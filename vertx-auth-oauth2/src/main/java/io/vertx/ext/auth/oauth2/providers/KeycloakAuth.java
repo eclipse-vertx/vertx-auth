@@ -1,6 +1,8 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
@@ -8,6 +10,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.rbac.KeycloakRBAC;
 
 /**
  * Simplified factory to create an {@link OAuth2Auth} for Keycloak.
@@ -56,6 +59,8 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, JsonObject config, HttpClientOptions httpClientOptions) {
     final OAuth2ClientOptions options = new OAuth2ClientOptions(httpClientOptions);
 
+    options.setFlow(flow);
+
     // keycloak conversion to oauth2 options
     if (config.containsKey("auth-server-url")) {
       options.setSite(config.getString("auth-server-url"));
@@ -93,6 +98,31 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
         .setPublicKey(config.getString("realm-public-key")));
     }
 
-    return OAuth2Auth.create(vertx, options.setFlow(flow));
+    return OAuth2Auth
+      .create(vertx, options)
+      .setRBACHandler(KeycloakRBAC.create(options));
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the default site in the
+   * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
+   * running on a custom instance) that site will be used to do the lookup.
+   * <p>
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @param vertx   the vertx instance
+   * @param config  the initial config
+   * @param handler the instantiated Oauth2 provider instance handler
+   */
+  static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+    final OAuth2ClientOptions options = new OAuth2ClientOptions(config);
+    OpenIDConnectAuth.discover(vertx, options, discover -> {
+      // apply the Keycloak RBAC
+      if (discover.succeeded()) {
+        discover.result().setRBACHandler(KeycloakRBAC.create(options));
+      }
+      handler.handle(discover);
+    });
   }
 }

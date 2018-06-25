@@ -133,6 +133,12 @@ public class OAuth2IntrospectTest extends VertxTestBase {
         principal.remove("access_token");
 
         final JsonObject assertion = fixtureIntrospect.copy();
+        // remove control fields
+        assertion.remove("active");
+        assertion.remove("exp");
+        assertion.remove("iat");
+        assertion.remove("nbf");
+        principal.remove("expires_in");
 
         assertEquals(assertion.getMap(), principal.getMap());
 
@@ -168,8 +174,12 @@ public class OAuth2IntrospectTest extends VertxTestBase {
         // clean time specific value
         principal.remove("expires_at");
         principal.remove("access_token");
+        // clean up control
+        final JsonObject assertion = fixtureGoogle.copy();
+        assertion.remove("audience");
+        assertion.remove("user_id");
 
-        assertEquals(fixtureGoogle.getMap(), principal.getMap());
+        assertEquals(assertion.getMap(), principal.getMap());
 
         token.isAuthorized("profile", res0 -> {
           if (res0.failed()) {
@@ -206,13 +216,11 @@ public class OAuth2IntrospectTest extends VertxTestBase {
     fixture = fixtureKeycloak;
     oauth2.introspectToken(token, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        fail(res.cause());
       } else {
         AccessToken token = res.result();
         assertNotNull(token);
-        JsonObject principal = token.principal();
-
-        assertTrue(principal.getBoolean("active"));
+        assertNotNull(token.principal());
         testComplete();
       }
     });

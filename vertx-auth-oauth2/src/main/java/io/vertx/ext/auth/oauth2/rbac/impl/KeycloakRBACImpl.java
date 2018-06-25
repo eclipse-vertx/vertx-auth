@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
 package io.vertx.ext.auth.oauth2.rbac.impl;
 
 import io.vertx.core.AsyncResult;
@@ -5,14 +20,13 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2User;
-import io.vertx.ext.auth.oauth2.rbac.KeycloakRBAC;
+import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 
 import java.util.Collections;
-import java.util.Objects;
 
-public class KeycloakRBACImpl implements KeycloakRBAC {
+public class KeycloakRBACImpl implements OAuth2RBAC {
 
   private static final JsonObject EMPTY_JSON = new JsonObject(Collections.EMPTY_MAP);
   private static final JsonArray EMPTY_ARRAY = new JsonArray(Collections.EMPTY_LIST);
@@ -47,7 +61,7 @@ public class KeycloakRBACImpl implements KeycloakRBAC {
    * @param handler `true` if this token has the specified role, otherwise `false`.
    */
   @Override
-  public void isAuthorized(OAuth2User user, String authority, Handler<AsyncResult<Boolean>> handler) {
+  public void isAuthorized(AccessToken user, String authority, Handler<AsyncResult<Boolean>> handler) {
 
     JsonObject accessToken = user.accessToken();
 
