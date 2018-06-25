@@ -262,7 +262,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
 
     form.put("client_id", config.getClientID());
 
-    if (config.getClientSecretParameterName() != null) {
+    if (config.getClientSecretParameterName() != null && config.getClientSecret() != null) {
       form.put(config.getClientSecretParameterName(), config.getClientSecret());
     }
 
