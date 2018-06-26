@@ -2,232 +2,234 @@ package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.*;
-import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class OAuth2KeycloakIT extends VertxTestBase {
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-  private OAuth2Auth oauth2;
+@RunWith(VertxUnitRunner.class)
+public class OAuth2KeycloakIT {
 
-  // Set the client credentials and the OAuth2 server
-  final JsonObject credentials = new JsonObject(
-      "{\n" +
-      "  \"realm\": \"master\",\n" +
-      "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
-      "  \"ssl-required\": \"external\",\n" +
-      "  \"resource\": \"admin-cli\",\n" +
-      "  \"public-client\": true,\n" +
-      "  \"confidential-port\": 0\n" +
-      "}"
-  );
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, credentials);
+  private OAuth2Auth keycloak;
+
+  @Before
+  public void setUp(TestContext should) {
+    final Async test = should.async();
+
+    KeycloakAuth.discover(
+      rule.vertx(),
+      new OAuth2ClientOptions()
+        .setFlow(OAuth2FlowType.PASSWORD)
+        .setSite("http://127.0.0.1:8888/auth/realms/vertx-test")
+        .setClientID("public-client"),
+      discover -> {
+        should.assertTrue(discover.succeeded());
+        keycloak = discover.result();
+        test.complete();
+      });
   }
 
   @Test
-  public void testFullCycle() {
+  public void shouldLoginWithUsernamePassword(TestContext should) {
+    final Async test = should.async();
 
-    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
-      if (res.failed()) {
-        fail(res.cause().getMessage());
-      } else {
-        AccessToken token = (AccessToken) res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
+      test.complete();
+    });
+  }
 
-        token.setTrustJWT(true);
+  @Test
+  public void shouldLoginWithAccessToken(TestContext should) {
+    final Async test = should.async();
 
-        token.isAuthorized("email", r -> {
-          assertTrue(r.result());
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
 
-          token.refresh(res2 -> {
-            if(res2.failed()) {
-              fail(res2.cause().getMessage());
-            } else {
-              assertNotNull(token.principal());
+      // generate a access token from the user
+      AccessToken token = (AccessToken) authn.result();
 
-              // logout
-              token.logout(res3 -> {
-                if(res3.failed()) {
-                  fail(res3.cause().getMessage());
-                } else {
-                  System.out.println(res3.result());
-                  testComplete();
-                }
-              });
-            }
+      keycloak.authenticate(new JsonObject().put("access_token", token.opaqueAccessToken()).put("token_type", "Bearer"), authn2 -> {
+        should.assertTrue(authn2.succeeded());
+        should.assertNotNull(authn2.result());
+        test.complete();
+      });
+    });
+  }
+
+  @Test
+  public void shouldFailLoginWithInvalidToken(TestContext should) {
+    final Async test = should.async();
+
+    keycloak.authenticate(new JsonObject().put("access_token", "aaaaaaaaaaaaaaaaaa").put("token_type", "Bearer"), authn2 -> {
+      should.assertTrue(authn2.failed());
+      should.assertNotNull(authn2.cause());
+      test.complete();
+    });
+  }
+
+  @Test
+  public void shouldIntrospectAccessToken(TestContext should) {
+    final Async test = should.async();
+
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
+
+      // generate a access token from the user
+      AccessToken token = (AccessToken) authn.result();
+
+      // get a auth handler for the confidential client
+      KeycloakAuth.discover(
+        rule.vertx(),
+        new OAuth2ClientOptions()
+          .setFlow(OAuth2FlowType.PASSWORD)
+          .setSite("http://127.0.0.1:8888/auth/realms/vertx-test")
+          .setClientID("confidential-client")
+          .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e"),
+        discover -> {
+          should.assertTrue(discover.succeeded());
+          OAuth2Auth confidential = discover.result();
+
+          confidential.introspectToken(token.opaqueAccessToken(), introspect -> {
+            should.assertTrue(introspect.succeeded());
+            test.complete();
           });
         });
-      }
     });
-    await();
   }
 
   @Test
-  public void testLogout() {
+  public void shouldGetPermissionsFromToken(TestContext should) {
+    final Async test = should.async();
 
-    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
-      if (res.failed()) {
-        fail(res.cause().getMessage());
-      } else {
-        AccessToken token = (AccessToken) res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
 
-        // go to keycloak web interface, there should be 1 session
+      // generate a access token from the user
+      AccessToken token = (AccessToken) authn.result();
 
-        vertx.setTimer(10000, v -> {
-          // logout
-          token.logout(res3 -> {
-            if(res3.failed()) {
-              fail(res3.cause().getMessage());
-            } else {
+      // assert that the user has the following roles:
+      final List<String> roles = Arrays.asList(
+        // scopes
+        "profile", "email",
+        // top level roles (resource)
+        "realm:offline_access", "realm:user",
+        // application level roles
+        "confidential-client:test",
+        "account:manage-account",
+        "account:manage-account-links",
+        "account:view-profile"
+      );
 
-              // go to keycloak web interface, there should be no session
-              testComplete();
-            }
-          });
-        });
-      }
-    });
-    await();
-  }
+      final AtomicInteger cnt = new AtomicInteger(roles.size());
 
-  @Test
-  public void testDecodeShouldFail() throws Exception {
-
-    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
-    oauth2.decodeToken("borked", res1 -> {
-      if (res1.failed()) {
-        testComplete();
-        return;
-      }
-      fail("Should not reach this!");
-    });
-
-    await();
-  }
-
-  @Test
-  public void testDecodeShouldPass() throws Exception {
-
-    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, credentials);
-
-    oauth2.loadJWK(v -> {
-      if (v.failed()) {
-        fail(v.cause().getMessage());
-      } else {
-        oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
-          if (res.failed()) {
-            fail(res.cause().getMessage());
-          } else {
-            AccessToken token = (AccessToken) res.result();
-            assertNotNull(token);
-            assertNotNull(token.principal());
-
-            oauth2.decodeToken(token.opaqueAccessToken(), res1 -> {
-              if (res1.succeeded()) {
-                testComplete();
-                return;
-              }
-              fail("Should not reach this!");
-            });
+      for (String role : roles) {
+        token.isAuthorized(role, authz -> {
+          should.assertTrue(authz.succeeded());
+          should.assertTrue(authz.result());
+          if (cnt.decrementAndGet() == 0) {
+            test.complete();
           }
         });
       }
     });
-
-    await();
   }
 
   @Test
-  public void testLoadJWK2() {
-    JsonObject config = new JsonObject("{\n" +
-      "  \"realm\": \"master\",\n" +
-      "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
-      "  \"ssl-required\": \"external\",\n" +
-      "  \"resource\": \"test\",\n" +
-      "  \"credentials\": {\n" +
-      "    \"secret\": \"b0568625-a482-45d8-af8b-27beba502ed3\"\n" +
-      "  }\n" +
-      "}");
+  public void shouldGetPermissionsFromTokenButPermissionIsNotAllowed(TestContext should) {
+    final Async test = should.async();
 
-    OAuth2Auth oauth2 = KeycloakAuth.create(vertx, config);
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
 
-    oauth2.loadJWK(load -> {
-      assertFalse(load.failed());
-      testComplete();
+      // generate a access token from the user
+      AccessToken token = (AccessToken) authn.result();
+
+      token.isAuthorized("sudo", authz -> {
+        should.assertTrue(authz.succeeded());
+        should.assertFalse(authz.result());
+        test.complete();
+      });
     });
-    await();
   }
 
   @Test
-  public void testLoginWithAccessTokenOnly() {
+  public void shouldLoadTheUserInfo(TestContext should) {
+    final Async test = should.async();
 
-    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
-      if (res.failed()) {
-        fail(res.cause().getMessage());
-      } else {
-        AccessToken token = (AccessToken) res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
 
-        OAuth2Auth auth = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, new JsonObject(
-          "{\n" +
-            "  \"realm\": \"master\",\n" +
-            "  \"auth-server-url\": \"http://localhost:8888/auth\",\n" +
-            "  \"ssl-required\": \"external\",\n" +
-            "  \"resource\": \"account\",\n" +
-            "  \"credentials\": {\n" +
-            "    \"secret\": \"9bc7401f-cecc-447a-ad7f-894280749caa\"\n" +
-            "  },\n" +
-            "  \"use-resource-role-mappings\": true,\n" +
-            "  \"confidential-port\": 0\n" +
-            "}"
-        ));
+      // generate a access token from the user
+      AccessToken token = (AccessToken) authn.result();
 
-        auth.authenticate(new JsonObject().put("access_token", token.opaqueAccessToken()).put("token_type", "Bearer"), res2 -> {
-          if (res2.failed()) {
-            fail(res2.cause().getMessage());
-          } else {
-            AccessToken token2 = (AccessToken) res2.result();
-            assertNotNull(token2);
-            assertNotNull(token2.principal());
+      token.userInfo(userinfo -> {
+        should.assertTrue(userinfo.succeeded());
+        should.assertNotNull(userinfo.result());
 
-            testComplete();
-          }
-        });
-      }
+        should.assertEquals("test-user", userinfo.result().getString("preferred_username"));
+        test.complete();
+      });
     });
-    await();
   }
 
   @Test
-  public void testLogoutWithAccessTokenOnly() {
+  public void shouldRefreshAToken(TestContext should) {
+    final Async test = should.async();
 
-    oauth2.authenticate(new JsonObject().put("username", "user").put("password", "password"), res -> {
-      if (res.failed()) {
-        fail(res.cause().getMessage());
-      } else {
-        AccessToken token = (AccessToken) res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
 
-        AccessToken generated = new OAuth2TokenImpl(oauth2, new JsonObject()
-          .put("access_token", token.opaqueAccessToken())
-          .put("refresh_token", token.opaqueRefreshToken()));
+      // generate a access token from the user
+      AccessToken token = (AccessToken) authn.result();
 
-        generated.logout(logout -> {
-          assertTrue(logout.succeeded());
-          testComplete();
-        });
-      }
+      final String origToken = token.opaqueAccessToken();
+
+      token.refresh(refresh -> {
+        should.assertTrue(refresh.succeeded());
+
+        should.assertNotEquals(origToken, token.opaqueAccessToken());
+        test.complete();
+      });
     });
-    await();
+  }
+
+  @Test
+  public void shouldReloadJWK(TestContext should) {
+    final Async test = should.async();
+
+    keycloak.loadJWK(load -> {
+      should.assertTrue(load.succeeded());
+
+      keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+        should.assertTrue(authn.succeeded());
+        should.assertNotNull(authn.result());
+
+        // generate a access token from the user
+        AccessToken token = (AccessToken) authn.result();
+
+        should.assertNotNull(token.accessToken());
+        test.complete();
+      });
+    });
   }
 }

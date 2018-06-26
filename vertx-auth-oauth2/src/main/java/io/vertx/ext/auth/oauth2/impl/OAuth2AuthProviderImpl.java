@@ -193,20 +193,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       final AccessToken oauth2Token = new OAuth2TokenImpl(this, authInfo);
 
-      if (!jwt.isUnsecure()) {
-        // a valid JWT token should have the access token value decoded
-        if (oauth2Token.accessToken() == null) {
-          // this token is not a JWT
-          resultHandler.handle(Future.failedFuture("Invalid token, expected JWT"));
-        } else {
-          // the token might be valid, but expired
-          if (oauth2Token.expired()) {
-            resultHandler.handle(Future.failedFuture("Expired Token"));
-          } else {
-            resultHandler.handle(Future.succeededFuture(oauth2Token));
-          }
-        }
-      } else {
+      // the token is not a JWT or there are no loaded keys to validate
+      if (oauth2Token.accessToken() == null || jwt.isUnsecure()) {
         // the token is not in JWT format or this auth provider is not configured for secure JWTs
         // in this case we must rely on token introspection in order to know more about its state
         // attempt to create a token object from the given string representation
@@ -225,9 +213,19 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           // return self
           resultHandler.handle(Future.succeededFuture(oauth2Token));
         });
+      } else {
+        // a valid JWT token should have the access token value decoded
+        // the token might be valid, but expired
+        if (oauth2Token.expired()) {
+          resultHandler.handle(Future.failedFuture("Expired Token"));
+        } else {
+          resultHandler.handle(Future.succeededFuture(oauth2Token));
+        }
       }
 
     } else {
+      // the authInfo object does not contain a token, so rely on the
+      // configured flow to retrieve a token for the user
       flow.getToken(authInfo, getToken -> {
         if (getToken.failed()) {
           resultHandler.handle(Future.failedFuture(getToken.cause()));
