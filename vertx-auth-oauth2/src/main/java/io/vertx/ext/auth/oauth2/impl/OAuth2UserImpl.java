@@ -14,7 +14,6 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 
 import java.util.Base64;
-import java.util.Collections;
 import java.util.regex.Pattern;
 
 public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken {
@@ -74,7 +73,9 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
         String scope = principal.getString("scope");
         // avoid the case when scope is the literal "null" value.
         if (scope != null) {
-          Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getConfig().getScopeSeparator())));
+          for (String authority : scope.split(Pattern.quote(provider.getConfig().getScopeSeparator()))) {
+            cachePermission(authority);
+          }
         }
       }
     }
@@ -104,7 +105,11 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
       return;
     }
 
-    rbac.isAuthorized(this, permission, resultHandler);
+    if (rbac == null) {
+      resultHandler.handle(Future.failedFuture("No RBAC Handler available"));
+    } else {
+      rbac.isAuthorized(this, permission, resultHandler);
+    }
   }
 
   @Override

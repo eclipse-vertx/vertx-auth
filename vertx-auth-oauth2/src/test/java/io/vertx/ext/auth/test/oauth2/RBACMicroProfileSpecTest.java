@@ -49,7 +49,7 @@ public class RBACMicroProfileSpecTest {
                 "uQIDAQAB")
           )
       )
-      .setRBACHandler(MicroProfileRBAC.create());
+      .rbacHandler(MicroProfileRBAC.create());
 
     should.assertNotNull(oauth);
 

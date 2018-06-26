@@ -19,6 +19,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
@@ -26,6 +27,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
 
 public class SalesforceRBACImpl implements OAuth2RBAC {
 
@@ -69,6 +71,15 @@ public class SalesforceRBACImpl implements OAuth2RBAC {
           System.out.println(json);
 
           // TODO: do the real work here...
+
+          // Avoid many requests
+          if (user instanceof AbstractUser) {
+            AbstractUser abstractUser = (AbstractUser) user;
+            // TODO: the empty list should be the collected permissions
+            for (String permission : Collections.<String>emptyList()) {
+              abstractUser.cachePermission(permission);
+            }
+          }
 
           // TODO: it should return true in user has role...
           handler.handle(Future.succeededFuture(false));

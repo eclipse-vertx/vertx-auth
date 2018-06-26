@@ -148,7 +148,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth setRBACHandler(OAuth2RBAC rbac) {
+  public OAuth2Auth rbacHandler(OAuth2RBAC rbac) {
     if (this.rbac != null) {
       throw new IllegalStateException("There is already a RBAC handler registered");
     }

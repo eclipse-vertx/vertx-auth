@@ -100,7 +100,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
 
     return OAuth2Auth
       .create(vertx, options)
-      .setRBACHandler(KeycloakRBAC.create(options));
+      .rbacHandler(KeycloakRBAC.create(options));
   }
 
   /**
@@ -120,7 +120,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
     OpenIDConnectAuth.discover(vertx, options, discover -> {
       // apply the Keycloak RBAC
       if (discover.succeeded()) {
-        discover.result().setRBACHandler(KeycloakRBAC.create(options));
+        discover.result().rbacHandler(KeycloakRBAC.create(options));
       }
       handler.handle(discover);
     });
