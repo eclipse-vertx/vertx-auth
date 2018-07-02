@@ -21,6 +21,7 @@ import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -509,5 +510,18 @@ public class JWTAuthProviderTest extends VertxTestBase {
     // pass because iat is > now (clock drifted 2 sec) and we have a leeway of 5sec
     authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
     await();
+  }
+
+  @Test
+  public void testJWKShouldNotCrash() {
+
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions().addJwk(
+      new JsonObject()
+      .put("kty", "RSA")
+      .put("n", "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw")
+      .put("e", "AQAB")
+      .put("alg", "RS256")
+      .put("kid", "2011-04-29")));
+
   }
 }

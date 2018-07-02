@@ -101,6 +101,14 @@ public class JWTAuthProviderImpl implements JWTAuth {
             this.jwt.addSecret(secret.getType(), secret.getSecret());
           }
         }
+
+        final List<JsonObject> jwks = config.getJwks();
+
+        if (jwks != null) {
+          for (JsonObject jwk : jwks) {
+            this.jwt.addJWK(new JWK(jwk));
+          }
+        }
       }
 
     } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException e) {
