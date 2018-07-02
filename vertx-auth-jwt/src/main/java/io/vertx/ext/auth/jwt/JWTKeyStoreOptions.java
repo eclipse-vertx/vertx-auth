@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * Options describing how an JWT KeyStore should behave.
  *
+ * @deprecated Keystores are very opinionated and do not properly represent a correct key, please use PEM files or JWKs
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @Deprecated
