@@ -42,6 +42,7 @@ public class JWTAuthOptions {
   private List<PubSecKeyOptions> pubSecKeys;
   private List<SecretOptions> secrets;
   private JWTOptions jwtOptions;
+  private List<JsonObject> jwks;
 
   /**
    * Default constructor
@@ -61,6 +62,7 @@ public class JWTAuthOptions {
     pubSecKeys = other.getPubSecKeys();
     secrets = other.getSecrets();
     jwtOptions = other.getJWTOptions();
+    jwks = other.getJwks();
   }
 
   private void init() {
@@ -140,6 +142,24 @@ public class JWTAuthOptions {
 
   public JWTAuthOptions setJWTOptions(JWTOptions jwtOptions) {
     this.jwtOptions = jwtOptions;
+    return this;
+  }
+
+  public List<JsonObject> getJwks() {
+    return jwks;
+  }
+
+  public JWTAuthOptions setJwks(List<JsonObject> jwks) {
+    this.jwks = jwks;
+    return this;
+  }
+
+  public JWTAuthOptions addJwk(JsonObject jwk) {
+    if (this.jwks == null) {
+      this.jwks = new ArrayList<>();
+    }
+
+    this.jwks.add(jwk);
     return this;
   }
 }

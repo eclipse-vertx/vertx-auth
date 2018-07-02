@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.auth.jwt.JWTKeyStoreOptions}.
- * NOTE: This class has been automatically generated from the {@link "io.vertx.ext.auth.jwt.JWTKeyStoreOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTKeyStoreOptions} original class using Vert.x codegen.
  */
 public class JWTKeyStoreOptionsConverter {
 
