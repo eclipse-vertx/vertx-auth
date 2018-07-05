@@ -12,7 +12,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-auth-shiro</artifactId>
-  <version>3.5.2</version>
+  <version>3.5.3.CR1</version>
 </dependency>
 ----
 
@@ -20,7 +20,7 @@ project, add the following dependency to the _dependencies_ section of your buil
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-shiro:3.5.2'
+compile 'io.vertx:vertx-auth-shiro:3.5.3.CR1'
 ----
 
 We provide out of the box support for properties and LDAP based auth using Shiro, and you can also plugin in any
@@ -34,7 +34,14 @@ Here's an example of creating a Shiro auth provider by specifying the type:
 
 [source,java]
 ----
-`link:../../apidocs/examples/AuthShiroExamples.html#example3-io.vertx.core.Vertx-[example3]`
+
+var config = json {
+  obj("properties_path" to "classpath:test-auth.properties")
+}
+
+var provider = ShiroAuth.create(vertx, ShiroAuthRealmType.PROPERTIES, config)
+
+
 ----
 
 == Authentication
@@ -44,7 +51,22 @@ authentication info:
 
 [source,java]
 ----
-`link:../../apidocs/examples/AuthShiroExamples.html#example4-io.vertx.ext.auth.AuthProvider-[example4]`
+
+var authInfo = json {
+  obj(
+    "username" to "tim",
+    "password" to "sausages"
+  )
+}
+
+authProvider.authenticate(authInfo, { res ->
+  if (res.succeeded()) {
+    var user = res.result()
+  } else {
+    // Failed!
+  }
+})
+
 ----
 
 == Authorisation - Permission-Role Model
@@ -58,13 +80,31 @@ If validating if a user has a particular permission simply pass the permission i
 
 [source,java]
 ----
-`link:../../apidocs/examples/AuthShiroExamples.html#example5-io.vertx.ext.auth.User-[example5]`
+
+user.isAuthorised("newsletter:edit:13", { res ->
+  if (res.succeeded()) {
+    var hasPermission = res.result()
+  } else {
+    // Failed to
+  }
+})
+
+
 ----
 If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
 
 [source,java]
 ----
-`link:../../apidocs/examples/AuthShiroExamples.html#example6-io.vertx.ext.auth.User-[example6]`
+
+user.isAuthorised("role:manager", { res ->
+  if (res.succeeded()) {
+    var hasRole = res.result()
+  } else {
+    // Failed to
+  }
+})
+
+
 ----
 
 The default role prefix is `role:`. You can change this with `link:../../apidocs/io/vertx/ext/auth/shiro/ShiroAuth.html#setRolePrefix-java.lang.String-[setRolePrefix]`.
@@ -140,7 +180,10 @@ This is done as follows:
 
 [source,java]
 ----
-`link:../../apidocs/examples/AuthShiroExamples.html#example8-io.vertx.core.Vertx-org.apache.shiro.realm.Realm-[example8]`
+
+var provider = ShiroAuth.create(vertx, realm)
+
+
 ----
 
 The implementation currently assumes that user/password based authentication is used.
