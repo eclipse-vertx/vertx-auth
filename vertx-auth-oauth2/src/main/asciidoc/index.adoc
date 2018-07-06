@@ -1,6 +1,6 @@
 == The OAuth2 auth provider
 
-This component contains an out of the box OAuth2 Relay Party implementation. To use this project, add the following
+This component contains an out of the box OAuth2 Relying Party implementation. To use this project, add the following
 dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -197,7 +197,7 @@ this specific case one needs to use the token introspection if the provider supp
 {@link examples.AuthOAuth2Examples#example16}
 ----
 
-Until now we covered mostly authentication, although the implementation is relay party (that means that the real
+Until now we covered mostly authentication, although the implementation is relying party (that means that the real
 authentication happens somewhere else), there is more you can do with the handler. For example you can also do
 authorization if the provider is known to support JSON web tokens. This is a common feature if your provider is a
 OpenId Connect provider or if the provider does support `access_token`s as JWTs.
