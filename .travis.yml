@@ -12,7 +12,8 @@ services:
 
 before_install:
 - docker pull jboss/keycloak
-- docker run -d -p 8888:8080 -e KEYCLOAK_USER=user -e KEYCLOAK_PASSWORD=password -e DB_VENDOR=H2 jboss/keycloak
+- docker build -t vertx-test-keycloak vertx-auth-oauth2/src/test/fixtures
+- docker run -d -p 8888:8080 vertx-test-keycloak
 - docker ps -a
 
 script:
