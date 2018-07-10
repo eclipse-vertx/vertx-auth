@@ -20,7 +20,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
@@ -31,8 +30,13 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
  */
 public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
 
+  private final OAuth2AuthProviderImpl provider;
+
   public AuthCodeImpl(OAuth2AuthProviderImpl provider) {
-    super(provider);
+    super(provider.getVertx(), provider.getConfig());
+    this.provider = provider;
+    // validation
+    throwIfNull("clientId", config.getClientID());
   }
 
   /**
@@ -46,7 +50,6 @@ public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
   @Override
   public String authorizeURL(JsonObject params) {
     final JsonObject query = params.copy();
-    final OAuth2ClientOptions config = provider.getConfig();
 
     if (query.containsKey("scopes")) {
       // scopes have been passed as a list so the provider must generate the correct string for it
@@ -57,7 +60,10 @@ public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
     query.put("response_type", "code");
     query.put("client_id", config.getClientID());
 
-    return config.getSite() + config.getAuthorizationPath() + '?' + stringify(query);
+    final String path = config.getAuthorizationPath();
+    final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
+
+    return url + '?' + stringify(query);
   }
 
   /**

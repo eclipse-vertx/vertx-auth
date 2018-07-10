@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
+import io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -31,20 +32,20 @@ public class AuthOAuth2Examples {
   public void example1(Vertx vertx) {
 
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
-            .setClientID("YOUR_CLIENT_ID")
-            .setClientSecret("YOUR_CLIENT_SECRET")
-            .setSite("https://github.com/login")
-            .setTokenPath("/oauth/access_token")
-            .setAuthorizationPath("/oauth/authorize")
+      .setClientID("YOUR_CLIENT_ID")
+      .setClientSecret("YOUR_CLIENT_SECRET")
+      .setSite("https://github.com/login")
+      .setTokenPath("/oauth/access_token")
+      .setAuthorizationPath("/oauth/authorize")
     );
 
     // when there is a need to access a protected resource or call a protected method,
     // call the authZ url for a challenge
 
     String authorization_uri = oauth2.authorizeURL(new JsonObject()
-        .put("redirect_uri", "http://localhost:8080/callback")
-        .put("scope", "notifications")
-        .put("state", "3(#0/!~"));
+      .put("redirect_uri", "http://localhost:8080/callback")
+      .put("scope", "notifications")
+      .put("state", "3(#0/!~"));
 
     // when working with web application use the above string as a redirect url
 
@@ -66,9 +67,9 @@ public class AuthOAuth2Examples {
 
     // Set the client credentials and the OAuth2 server
     OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-        .setClientID("<client-id>")
-        .setClientSecret("<client-secret>")
-        .setSite("https://api.oauth.com");
+      .setClientID("<client-id>")
+      .setClientSecret("<client-secret>")
+      .setSite("https://api.oauth.com");
 
 
     // Initialize the OAuth2 Library
@@ -76,18 +77,18 @@ public class AuthOAuth2Examples {
 
     // Authorization oauth2 URI
     String authorization_uri = oauth2.authorizeURL(new JsonObject()
-        .put("redirect_uri", "http://localhost:8080/callback")
-        .put("scope", "<scope>")
-        .put("state", "<state>"));
+      .put("redirect_uri", "http://localhost:8080/callback")
+      .put("scope", "<scope>")
+      .put("state", "<state>"));
 
     // Redirect example using Vert.x
     response.putHeader("Location", authorization_uri)
-        .setStatusCode(302)
-        .end();
+      .setStatusCode(302)
+      .end();
 
     JsonObject tokenConfig = new JsonObject()
-        .put("code", "<code>")
-        .put("redirect_uri", "http://localhost:3000/callback");
+      .put("code", "<code>")
+      .put("redirect_uri", "http://localhost:3000/callback");
 
     // Callbacks
     // Save the access token
@@ -107,8 +108,8 @@ public class AuthOAuth2Examples {
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD);
 
     JsonObject tokenConfig = new JsonObject()
-        .put("username", "username")
-        .put("password", "password");
+      .put("username", "username")
+      .put("password", "password");
 
     // Callbacks
     // Save the access token
@@ -130,9 +131,9 @@ public class AuthOAuth2Examples {
 
     // Set the client credentials and the OAuth2 server
     OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-        .setClientID("<client-id>")
-        .setClientSecret("<client-secret>")
-        .setSite("https://api.oauth.com");
+      .setClientID("<client-id>")
+      .setClientSecret("<client-secret>")
+      .setSite("https://api.oauth.com");
 
 
     // Initialize the OAuth2 Library
@@ -179,13 +180,13 @@ public class AuthOAuth2Examples {
   public void example13(Vertx vertx) {
     // you would get this config from the keycloak admin console
     JsonObject keycloakJson = new JsonObject()
-        .put("realm", "master")
-        .put("realm-public-key", "MIIBIjANBgkqhk...wIDAQAB")
-        .put("auth-server-url", "http://localhost:9000/auth")
-        .put("ssl-required", "external")
-        .put("resource", "frontend")
-        .put("credentials", new JsonObject()
-            .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
+      .put("realm", "master")
+      .put("realm-public-key", "MIIBIjANBgkqhk...wIDAQAB")
+      .put("auth-server-url", "http://localhost:9000/auth")
+      .put("ssl-required", "external")
+      .put("resource", "frontend")
+      .put("credentials", new JsonObject()
+        .put("secret", "2fbf5e18-b923-4a83-9657-b4ebd5317f60"));
 
     // Initialize the OAuth2 Library
     OAuth2Auth oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.PASSWORD, keycloakJson);
@@ -246,7 +247,7 @@ public class AuthOAuth2Examples {
 
 
   public void example17(AccessToken user) {
-    user.isAuthorized("print", res ->{
+    user.isAuthorized("print", res -> {
       // in this case it is assumed that the role is the current application
       if (res.succeeded() && res.result()) {
         // Yes the user can print
@@ -255,7 +256,7 @@ public class AuthOAuth2Examples {
   }
 
   public void example18(AccessToken user) {
-    user.isAuthorized("realm:add-user", res ->{
+    user.isAuthorized("realm:add-user", res -> {
       // the role is "realm"
       // the authority is "add-user"
       if (res.succeeded() && res.result()) {
@@ -265,7 +266,7 @@ public class AuthOAuth2Examples {
   }
 
   public void example19(AccessToken user) {
-    user.isAuthorized("finance:year-report", res ->{
+    user.isAuthorized("finance:year-report", res -> {
       // the role is "finance"
       // the authority is "year-report"
       if (res.succeeded() && res.result()) {
@@ -327,5 +328,41 @@ public class AuthOAuth2Examples {
         // not valid anymore.
       }
     });
+  }
+
+  public void example25(Vertx vertx) {
+
+    OpenIDConnectAuth.discover(
+      vertx,
+      new OAuth2ClientOptions()
+        .setSite("https://accounts.google.com")
+        .setClientID("clientId"),
+      res -> {
+        if (res.succeeded()) {
+          // the setup call succeeded.
+          // at this moment your auth is ready to use and
+          // google signature keys are loaded so tokens can be decoded and verified.
+        } else {
+          // the setup failed.
+        }
+      });
+  }
+
+  public void example26(Vertx vertx) {
+
+    OpenIDConnectAuth.discover(
+      vertx,
+      new OAuth2ClientOptions()
+        .setSite("http://server:port/auth/realms/your_realm")
+        .setClientID("clientId"),
+      res -> {
+        if (res.succeeded()) {
+          // the setup call succeeded.
+          // at this moment your auth is ready to use and
+          // google signature keys are loaded so tokens can be decoded and verified.
+        } else {
+          // the setup failed.
+        }
+      });
   }
 }

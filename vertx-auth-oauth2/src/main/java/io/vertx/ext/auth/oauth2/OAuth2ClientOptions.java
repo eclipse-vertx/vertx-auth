@@ -35,6 +35,7 @@ import java.util.List;
 public class OAuth2ClientOptions extends HttpClientOptions {
 
   // Defaults
+  private static final OAuth2FlowType FLOW = OAuth2FlowType.AUTH_CODE;
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOKATION_PATH = "/oauth/revoke";
@@ -42,14 +43,15 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
-  private static final boolean JWT_TOKEN = false;
+  private static final boolean VALIDATE_ISSUER = true;
 
+  private OAuth2FlowType flow;
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
   private String scopeSeparator;
-  private boolean jwtToken;
   // this is an openid-connect extension
+  private boolean validateIssuer;
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
@@ -101,6 +103,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   public OAuth2ClientOptions(OAuth2ClientOptions other) {
     super(other);
     // defaults
+    validateIssuer = other.isValidateIssuer();
+    flow = other.getFlow();
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
     revocationPath = other.getRevocationPath();
@@ -140,10 +144,11 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     }
     // JWK path RFC7517
     jwkPath = other.getJwkPath();
-    jwtToken = other.isJWTToken();
   }
 
   private void init() {
+    flow = FLOW;
+    validateIssuer = VALIDATE_ISSUER;
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
     revocationPath = REVOKATION_PATH;
@@ -151,7 +156,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtOptions = JWT_OPTIONS;
-    jwtToken = JWT_TOKEN;
     userInfoParams = null;
     headers = null;
   }
@@ -478,12 +482,21 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     return this;
   }
 
-  public boolean isJWTToken() {
-    return jwtToken;
+  public OAuth2FlowType getFlow() {
+    return flow;
   }
 
-  public OAuth2ClientOptions setJWTToken(boolean jwtToken) {
-    this.jwtToken = jwtToken;
+  public OAuth2ClientOptions setFlow(OAuth2FlowType flow) {
+    this.flow = flow;
+    return this;
+  }
+
+  public boolean isValidateIssuer() {
+    return validateIssuer;
+  }
+
+  public OAuth2ClientOptions setValidateIssuer(boolean validateIssuer) {
+    this.validateIssuer = validateIssuer;
     return this;
   }
 }

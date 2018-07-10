@@ -34,12 +34,19 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 /**
  * @author Paulo Lopes
  */
-public class AuthJWTImpl implements OAuth2Flow {
+public class AuthJWTImpl extends AbstractOAuth2Flow implements OAuth2Flow {
 
   private final OAuth2AuthProviderImpl provider;
 
   public AuthJWTImpl(OAuth2AuthProviderImpl provider) {
+    super(provider.getVertx(), provider.getConfig());
     this.provider = provider;
+    // validation
+    throwIfNull("clientId", config.getClientID());
+    throwIfNull("pubSecKeys", config.getPubSecKeys());
+    if (config.getPubSecKeys().size() == 0) {
+      throwIfNull("pubSecKey", null);
+    }
   }
 
   /**
@@ -56,7 +63,8 @@ public class AuthJWTImpl implements OAuth2Flow {
       .put("assertion", provider.getJWT().sign(params, provider.getConfig().getJWTOptions()));
 
     fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       provider.getConfig().getTokenPath(),
       new JsonObject().put("Content-Type", "application/x-www-form-urlencoded"),

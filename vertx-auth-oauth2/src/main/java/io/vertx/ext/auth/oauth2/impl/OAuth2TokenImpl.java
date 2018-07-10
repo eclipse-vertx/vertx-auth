@@ -254,7 +254,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       provider.getConfig().getTokenPath(),
       headers,
@@ -356,7 +357,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
       OAuth2API.fetch(
-        provider,
+        provider.getVertx(),
+        provider.getConfig(),
         HttpMethod.POST,
         provider.getConfig().getRevocationPath(),
         headers,
@@ -415,9 +417,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       form.put(provider.getConfig().getClientSecretParameterName(), provider.getConfig().getClientSecret());
     }
 
-    if (token.getString("refresh_token") != null) {
-      form.put("refresh_token", token.getString("refresh_token"));
-    }
+    form.put("refresh_token", token.getString("refresh_token"));
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = Buffer.buffer(stringify(form));
@@ -425,7 +425,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       provider.getConfig().getLogoutPath(),
       headers,
@@ -471,7 +472,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.POST,
       config.getIntrospectionPath(),
       headers,
@@ -594,7 +596,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
     OAuth2API.fetch(
-      provider,
+      provider.getVertx(),
+      provider.getConfig(),
       HttpMethod.GET,
       path,
       headers,
@@ -647,14 +650,21 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     // add the access token
     headers.put("Authorization", "Bearer " + opaqueAccessToken());
 
-    OAuth2API.fetch(provider, method, resource, headers, payload, fetch -> {
-      if (fetch.failed()) {
-        callback.handle(Future.failedFuture(fetch.cause()));
-        return;
-      }
+    OAuth2API.fetch(
+      provider.getVertx(),
+      provider.getConfig(),
+      method,
+      resource,
+      headers,
+      payload,
+      fetch -> {
+        if (fetch.failed()) {
+          callback.handle(Future.failedFuture(fetch.cause()));
+          return;
+        }
 
-      callback.handle(Future.succeededFuture(fetch.result()));
-    });
+        callback.handle(Future.succeededFuture(fetch.result()));
+      });
     return this;
   }
 
@@ -758,16 +768,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
   public void setAuthProvider(AuthProvider authProvider) {
     provider = (OAuth2AuthProviderImpl) authProvider;
     // re-attempt to decode tokens
-    accessToken = decodeToken(token, "access_token");
-    refreshToken = decodeToken(token, "refresh_token");
-    idToken = decodeToken(token, "id_token");
-    // the permission cache needs to be clear
-    clearCache();
-    // rebuild cache
-    String scope = token.getString("scope");
-    if (scope != null) {
-      Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getScopeSeparator())));
-    }
+    init();
   }
 
   @Override
@@ -787,7 +788,9 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     token = new JsonObject(new String(bytes, StandardCharsets.UTF_8));
     pos += len;
     // force reparse of the token
-    init();
+    if (provider != null) {
+      init();
+    }
 
     return pos;
   }

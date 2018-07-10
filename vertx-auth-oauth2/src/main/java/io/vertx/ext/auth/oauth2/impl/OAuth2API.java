@@ -18,10 +18,12 @@ package io.vertx.ext.auth.oauth2.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
@@ -36,20 +38,21 @@ import java.util.Map;
  */
 public class OAuth2API {
 
-  public static void fetch(OAuth2AuthProviderImpl provider, HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
-    final String url;
+  public static void fetch(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
 
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      url = path;
-    } else {
-      url = provider.getConfig().getSite() + path;
+    if (path == null || path.length() == 0) {
+      // and this can happen as it is a config option that is dependent on the provider
+      callback.handle(Future.failedFuture("Invalid path"));
+      return;
     }
 
+    final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
+
     // create a request
-    final HttpClientRequest request = makeRequest(provider, method, url, callback);
+    final HttpClientRequest request = makeRequest(vertx, config, method, url, callback);
 
     // apply the provider required headers
-    JsonObject tmp = provider.getConfig().getHeaders();
+    JsonObject tmp = config.getHeaders();
     if (tmp != null) {
       for (Map.Entry<String, Object> kv : tmp) {
         request.putHeader(kv.getKey(), (String) kv.getValue());
@@ -63,8 +66,8 @@ public class OAuth2API {
     }
 
     // specific UA
-    if (provider.getConfig().getUserAgent() != null) {
-      request.putHeader("User-Agent", provider.getConfig().getUserAgent());
+    if (config.getUserAgent() != null) {
+      request.putHeader("User-Agent", config.getUserAgent());
     }
 
     if (payload != null) {
@@ -78,7 +81,7 @@ public class OAuth2API {
     request.end();
   }
 
-  private static HttpClientRequest makeRequest(OAuth2AuthProviderImpl provider, HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
+  public static HttpClientRequest makeRequest(Vertx vertx, HttpClientOptions options, HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
     HttpClient client;
 
     try {
@@ -95,7 +98,7 @@ public class OAuth2API {
         }
       }
 
-      client = provider.getVertx().createHttpClient(new HttpClientOptions(provider.getConfig())
+      client = vertx.createHttpClient(new HttpClientOptions(options)
         .setSsl(isSecure)
         .setDefaultHost(host)
         .setDefaultPort(port));

@@ -15,7 +15,7 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface KeycloakAuth {
+public interface KeycloakAuth extends OpenIDConnectAuth {
 
   /**
    * Create a OAuth2Auth provider for Keycloak
@@ -91,10 +91,8 @@ public interface KeycloakAuth {
       options.addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("RS256")
         .setPublicKey(config.getString("realm-public-key")));
-      // we could load keys
-      options.setJWTToken(true);
     }
 
-    return OAuth2Auth.create(vertx, flow, options);
+    return OAuth2Auth.create(vertx, options.setFlow(flow));
   }
 }
