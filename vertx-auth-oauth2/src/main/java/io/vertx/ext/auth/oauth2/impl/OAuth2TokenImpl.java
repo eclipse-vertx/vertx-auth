@@ -143,6 +143,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
       String scope = token.getString("scope");
       // avoid the case when scope is the literal "null" value.
       if (scope != null) {
+        LOG.debug("New scope from token: " + scope +".");
         Collections.addAll(cachedPermissions, scope.split(Pattern.quote(provider.getScopeSeparator())));
       }
     }
@@ -228,6 +229,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
   @Override
   public OAuth2TokenImpl refresh(Handler<AsyncResult<Void>> handler) {
 
+    LOG.info("Refreshing AccessToken");
+
     final JsonObject headers = new JsonObject();
 
     JsonObject tmp = provider.getConfig().getHeaders();
@@ -252,6 +255,8 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     final Buffer payload = Buffer.buffer(stringify(form));
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    LOG.debug("Refreshing AccessToken with payload: " + payload.toJsonObject().encodePrettily());
 
     OAuth2API.fetch(
       provider.getVertx(),
@@ -312,6 +317,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
           } else {
             OAuth2API.processNonStandardHeaders(json, reply, provider.getConfig().getScopeSeparator());
             token = json;
+            LOG.debug("Got new AccessToken: " + json.encodePrettily());
             init();
             handler.handle(Future.succeededFuture());
           }

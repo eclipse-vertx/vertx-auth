@@ -23,6 +23,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
@@ -38,6 +40,8 @@ import java.util.Map;
  */
 public class OAuth2API {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2API.class);
+
   public static void fetch(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
 
     if (path == null || path.length() == 0) {
@@ -47,6 +51,7 @@ public class OAuth2API {
     }
 
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
+    LOG.info("Fetching URL: " + url);
 
     // create a request
     final HttpClientRequest request = makeRequest(vertx, config, method, url, callback);
@@ -196,6 +201,7 @@ public class OAuth2API {
     final String xAcceptedOAuthScopes = reply.getHeader("X-Accepted-OAuth-Scopes");
 
     if (xOAuthScopes != null) {
+      LOG.debug("Received non-standard X-OAuth-Scopes: "+ xOAuthScopes);
       if (json.containsKey("scope")) {
         json.put("scope", json.getString("scope") + sep + xOAuthScopes);
       } else {
@@ -204,6 +210,7 @@ public class OAuth2API {
     }
 
     if (xAcceptedOAuthScopes != null) {
+      LOG.debug("Received non-standard X-Accepted-OAuth-Scopes: "+ xAcceptedOAuthScopes);
       json.put("acceptedScopes", xAcceptedOAuthScopes);
     }
   }

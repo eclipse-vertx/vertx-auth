@@ -4,16 +4,32 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 public class OAuth2ResponseImpl implements OAuth2Response {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2ResponseImpl.class);
   private final int statusCode;
   private final MultiMap headers;
   private final Buffer body;
 
 
   public OAuth2ResponseImpl(int statusCode, MultiMap headers, Buffer body) {
+    LOG.info("New response: statusCode: "+ statusCode );
+    if (LOG.isDebugEnabled()) {
+      final JsonObject json = new JsonObject();
+      final JsonObject jsonHeaders = new JsonObject();
+      if (null != headers) {
+        headers.forEach((entry) -> jsonHeaders.put(entry.getKey(), entry.getValue()));
+      }
+      json.put("headers", jsonHeaders);
+      if (null != body) {
+        json.put("body", body.toJsonObject());
+      }
+      LOG.debug("New response: : " + json.encodePrettily() );
+    }
     this.headers = headers;
     this.body = body;
     this.statusCode = statusCode;
