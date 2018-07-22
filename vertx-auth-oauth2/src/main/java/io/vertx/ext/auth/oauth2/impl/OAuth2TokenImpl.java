@@ -256,7 +256,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    LOG.debug("Refreshing AccessToken with payload: " + payload.toJsonObject().encodePrettily());
+    LOG.debug("Refreshing AccessToken with payload: " + stringify(form));
 
     OAuth2API.fetch(
       provider.getVertx(),
@@ -317,7 +317,7 @@ public class OAuth2TokenImpl extends AbstractUser implements AccessToken {
           } else {
             OAuth2API.processNonStandardHeaders(json, reply, provider.getConfig().getScopeSeparator());
             token = json;
-            LOG.debug("Got new AccessToken: " + json.encodePrettily());
+            LOG.debug("Got new AccessToken: " + json);
             init();
             handler.handle(Future.succeededFuture());
           }
