@@ -234,7 +234,7 @@ public final class JWK implements Crypto {
 
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-      certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(x5c.getString(0).getBytes(UTF8)));
+      certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
     }
 
     switch (json.getString("use", "sig")) {
@@ -250,6 +250,10 @@ public final class JWK implements Crypto {
       case "enc":
         cipher = Cipher.getInstance("RSA");
     }
+  }
+
+  private String addBoundaries(final String certificate){
+    return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----";
   }
 
   private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException {
