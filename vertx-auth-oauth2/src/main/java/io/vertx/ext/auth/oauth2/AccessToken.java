@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.oauth2;
 
+import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
@@ -23,6 +24,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
+import io.vertx.ext.auth.oauth2.impl.OAuth2UserImpl;
 
 /**
  * AccessToken extension to the User interface
@@ -41,22 +44,39 @@ public interface AccessToken extends User {
    * The Access Token if present parsed as a JsonObject
    * @return JSON
    */
+  @CacheReturn
   JsonObject accessToken();
 
   /**
    * The Refresh Token if present parsed as a JsonObject
    * @return JSON
    */
+  @CacheReturn
   JsonObject refreshToken();
 
   /**
    * The Id Token if present parsed as a JsonObject
    * @return JSON
    */
+  @CacheReturn
   JsonObject idToken();
 
+  /**
+   * The RAW String if available for the Access Token
+   * @return String
+   */
   String opaqueAccessToken();
+
+  /**
+   * The RAW String if available for the Refresh Token
+   * @return String
+   */
   String opaqueRefreshToken();
+
+  /**
+   * The RAW String if available for the Id Token
+   * @return String
+   */
   String opaqueIdToken();
 
   String tokenType();

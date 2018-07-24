@@ -17,7 +17,7 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 public interface GithubAuth {
 
   /**
-   * Create a OAuth2Auth provider for Gtihub
+   * Create a OAuth2Auth provider for Github
    *
    * @param clientId the client id given to you by Github
    * @param clientSecret the client secret given to you by Github
@@ -27,7 +27,7 @@ public interface GithubAuth {
   }
 
   /**
-   * Create a OAuth2Auth provider for Gtihub
+   * Create a OAuth2Auth provider for Github
    *
    * @param clientId the client id given to you by Github
    * @param clientSecret the client secret given to you by Github
@@ -35,7 +35,8 @@ public interface GithubAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setSite("https://github.com/login")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
