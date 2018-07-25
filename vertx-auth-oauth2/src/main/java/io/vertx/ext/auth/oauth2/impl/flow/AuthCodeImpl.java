@@ -40,7 +40,7 @@ public class AuthCodeImpl extends AbstractOAuth2Flow implements OAuth2Flow {
   }
 
   /**
-   * Construct the URL to bu used to redirect the user to the authorization page
+   * Construct the URL to be used to redirect the user to the authorization page of the OAuth "Authorization Server"
    *
    * @param params - redirectURI: A String that represents the registered application URI where the user is redirected after authorization.
    *               scope:       A String that represents the application privileges. Set to "openid" for OpenID Connect.
