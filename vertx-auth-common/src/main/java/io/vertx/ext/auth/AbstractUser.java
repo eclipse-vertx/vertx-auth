@@ -37,7 +37,7 @@ import java.util.Set;
  */
 public abstract class AbstractUser implements User, ClusterSerializable {
 
-  protected final Set<String> cachedPermissions = new HashSet<>();
+  private final Set<String> cachedPermissions = new HashSet<>();
 
   @Override
   public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
@@ -71,6 +71,10 @@ public abstract class AbstractUser implements User, ClusterSerializable {
   public int readFromBuffer(int pos, Buffer buffer) {
     pos = readStringSet(buffer, cachedPermissions, pos);
     return pos;
+  }
+
+  public boolean cachePermission(String authority) {
+    return cachedPermissions.add(authority);
   }
 
   protected abstract void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler);

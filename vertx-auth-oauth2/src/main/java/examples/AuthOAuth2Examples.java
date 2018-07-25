@@ -23,6 +23,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth;
+import io.vertx.ext.auth.oauth2.rbac.MicroProfileRBAC;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -364,5 +365,11 @@ public class AuthOAuth2Examples {
           // the setup failed.
         }
       });
+  }
+
+  public void example27(OAuth2Auth oauth2Auth) {
+    // use the MP-JWT 1.1 spec handler to
+    // handle Role-Based Access Control (AuthZ)
+    oauth2Auth.rbacHandler(MicroProfileRBAC.create());
   }
 }

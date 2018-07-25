@@ -159,11 +159,14 @@ public interface OAuth2Auth extends AuthProviderInternal {
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
    *
+   * @deprecated use {@link AuthProvider#authenticate(JsonObject, Handler)} instead.
+   *
    * @param token the access token (base64 string)
    * @param handler A handler to receive the event
    * @return self
    */
   @Fluent
+  @Deprecated
   OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler);
 
   /**
@@ -200,6 +203,7 @@ public interface OAuth2Auth extends AuthProviderInternal {
    * @return what value was used in the configuration of the object, falling back to the default value
    * which is a space.
    */
+  @Deprecated
   String getScopeSeparator();
 
   /**
@@ -216,4 +220,7 @@ public interface OAuth2Auth extends AuthProviderInternal {
    */
   @Fluent
   OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler);
+
+  @Fluent
+  OAuth2Auth rbacHandler(OAuth2RBAC rbac);
 }

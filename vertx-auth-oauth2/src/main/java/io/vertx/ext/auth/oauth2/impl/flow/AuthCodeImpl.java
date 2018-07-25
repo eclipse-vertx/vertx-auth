@@ -20,8 +20,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
+import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
