@@ -21,6 +21,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -36,6 +38,8 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
  */
 public class OAuth2TokenImpl extends OAuth2UserImpl {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
+  
   /**
    * Creates an AccessToken instance.
    */
