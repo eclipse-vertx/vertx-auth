@@ -27,7 +27,7 @@ be trusted. JWT are well suited for scenarios as:
 
 * In a Single Sign-On scenario where you want a separate authentication server that can then send user
 information in a trusted way.
-* Stateless API servers, very well suited for simple page applications.
+* Stateless API servers, very well suited for single page applications.
 * etc...
 
 Before deciding on using JWT, it's important to note that JWT does not encrypt the payload, it only signs it. You
