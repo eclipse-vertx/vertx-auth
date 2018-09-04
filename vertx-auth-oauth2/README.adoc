@@ -4,6 +4,21 @@ Please see the documentation for more information.
 
 ## Running test
 
+There is a Keycloak Docker image available, that you can load with the provided configuration `src/test/fixtures/vertx-test-realm.json`
+
 ```
 docker run -d --rm --name keycloak -p 8888:8080 -e KEYCLOAK_USER=user -e KEYCLOAK_PASSWORD=password -e DB_VENDOR=H2 jboss/keycloak
 ```
+
+But you can simply run `mvn test`, since the Keycloak responses are mocked with a Web Server started in the test setup.
+
+
+### IntelliJ IDE
+
+In IntelliJ IDE, you have to uncheck `argLine` in Preferences -> Build,Execution,Deployment -> Build Tools -> Maven -> Running Tests ...
+
+to avoid `IntelliJ Error when running unit test: Could not find or load main class ${surefireArgLine}`
+
+- https://github.com/vert-x3/vertx-ext-parent/issues/7
+- https://stackoverflow.com/questions/24115142/intellij-error-when-running-unit-test-could-not-find-or-load-main-class-suref 
+
