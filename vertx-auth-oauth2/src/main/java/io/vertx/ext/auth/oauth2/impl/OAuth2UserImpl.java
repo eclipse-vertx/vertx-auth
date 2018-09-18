@@ -12,6 +12,8 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
+import io.vertx.ext.jwt.JWT;
+import io.vertx.ext.jwt.JWTOptions;
 
 import java.util.Base64;
 import java.util.regex.Pattern;
@@ -230,7 +232,13 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
 
     if (accessToken != null) {
       // delegate to the JWT lib
-      if (provider.getJWT().isExpired(accessToken, provider.getConfig().getJWTOptions())) {
+      final JWT jwt = provider.getJWT();
+      final JWTOptions options = provider.getConfig().getJWTOptions();
+      try {
+        jwt.isExpired(accessToken, options);
+      } catch (RuntimeException e) {
+        // explicit catch and log as debug.
+        LOG.debug("Expired token:", e);
         return true;
       }
     }
