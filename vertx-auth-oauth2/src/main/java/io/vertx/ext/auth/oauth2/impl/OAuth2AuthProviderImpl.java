@@ -208,7 +208,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
     try {
-      handler.handle(Future.succeededFuture(new OAuth2TokenImpl(this, new JsonObject().put("access_token", jwt.decode(token)))));
+      // attempt to create a token object from the given string representation
+      final AccessToken accessToken = new OAuth2TokenImpl(this, new JsonObject().put("access_token", jwt.decode(token)));
+      // if token is expired handle as decode error
+      if (accessToken.expired()) {
+        handler.handle(Future.failedFuture("Expired token"));
+        return this;
+      }
+      handler.handle(Future.succeededFuture(accessToken));
     } catch (RuntimeException e) {
       handler.handle(Future.failedFuture(e));
     }
