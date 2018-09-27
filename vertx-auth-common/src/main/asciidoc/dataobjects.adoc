@@ -8,7 +8,7 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
@@ -22,13 +22,13 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[password]]`password`|`String`|-
-|[[path]]`path`|`String`|-
-|[[type]]`type`|`String`|-
+|[[password]]`@password`|`String`|-
+|[[path]]`@path`|`String`|-
+|[[type]]`@type`|`String`|-
 |===
 
 [[PubSecKeyOptions]]
@@ -39,15 +39,15 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[algorithm]]`algorithm`|`String`|-
-|[[certificate]]`certificate`|`Boolean`|-
-|[[publicKey]]`publicKey`|`String`|-
-|[[secretKey]]`secretKey`|`String`|-
-|[[symmetric]]`symmetric`|`Boolean`|-
+|[[algorithm]]`@algorithm`|`String`|-
+|[[certificate]]`@certificate`|`Boolean`|-
+|[[publicKey]]`@publicKey`|`String`|-
+|[[secretKey]]`@secretKey`|`String`|-
+|[[symmetric]]`@symmetric`|`Boolean`|-
 |===
 
 [[SecretOptions]]
@@ -58,11 +58,11 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[secret]]`secret`|`String`|-
-|[[type]]`type`|`String`|-
+|[[secret]]`@secret`|`String`|-
+|[[type]]`@type`|`String`|-
 |===
 

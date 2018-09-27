@@ -2,10 +2,12 @@ package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Converter for {@link io.vertx.ext.jwt.JWTOptions}.
- * NOTE: This class has been automatically generated from the {@link "io.vertx.ext.jwt.JWTOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.jwt.JWTOptions} original class using Vert.x codegen.
  */
 public class JWTOptionsConverter {
 

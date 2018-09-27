@@ -8,138 +8,131 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[alpnVersions]]`alpnVersions`|`Array of link:enums.html#HttpVersion[HttpVersion]`|-
-|[[authorizationPath]]`authorizationPath`|`String`|
-+++
+|[[alpnVersions]]`@alpnVersions`|`Array of link:enums.html#HttpVersion[HttpVersion]`|-
+|[[authorizationPath]]`@authorizationPath`|`String`|+++
 Get the Oauth2 authorization resource path. e.g.: /oauth/authorize
 +++
-|[[clientID]]`clientID`|`String`|
-+++
+|[[clientID]]`@clientID`|`String`|+++
 Set the provider client id
 +++
-|[[clientSecret]]`clientSecret`|`String`|
-+++
+|[[clientSecret]]`@clientSecret`|`String`|+++
 Set the provider client secret
 +++
-|[[clientSecretParameterName]]`clientSecretParameterName`|`String`|
-+++
+|[[clientSecretParameterName]]`@clientSecretParameterName`|`String`|+++
 Override the HTTP form field name for client secret
 +++
-|[[connectTimeout]]`connectTimeout`|`Number (int)`|-
-|[[crlPaths]]`crlPaths`|`Array of String`|-
-|[[crlValues]]`crlValues`|`Array of Buffer`|-
-|[[decoderInitialBufferSize]]`decoderInitialBufferSize`|`Number (int)`|-
-|[[defaultHost]]`defaultHost`|`String`|-
-|[[defaultPort]]`defaultPort`|`Number (int)`|-
-|[[enabledCipherSuites]]`enabledCipherSuites`|`Array of String`|-
-|[[enabledSecureTransportProtocols]]`enabledSecureTransportProtocols`|`Array of String`|-
-|[[extraParameters]]`extraParameters`|`Json object`|
-+++
+|[[connectTimeout]]`@connectTimeout`|`Number (int)`|-
+|[[crlPaths]]`@crlPaths`|`Array of String`|-
+|[[crlValues]]`@crlValues`|`Array of Buffer`|-
+|[[decoderInitialBufferSize]]`@decoderInitialBufferSize`|`Number (int)`|-
+|[[defaultHost]]`@defaultHost`|`String`|-
+|[[defaultPort]]`@defaultPort`|`Number (int)`|-
+|[[enabledCipherSuites]]`@enabledCipherSuites`|`Array of String`|-
+|[[enabledSecureTransportProtocols]]`@enabledSecureTransportProtocols`|`Array of String`|-
+|[[extraParameters]]`@extraParameters`|`Json object`|+++
 Set extra parameters to be sent to the provider on each request
 +++
-|[[forceSni]]`forceSni`|`Boolean`|-
-|[[headers]]`headers`|`Json object`|
-+++
+|[[flow]]`@flow`|`link:enums.html#OAuth2FlowType[OAuth2FlowType]`|-
+|[[forceSni]]`@forceSni`|`Boolean`|-
+|[[headers]]`@headers`|`Json object`|+++
 Set custom headers to be sent with every request to the provider
 +++
-|[[http2ClearTextUpgrade]]`http2ClearTextUpgrade`|`Boolean`|-
-|[[http2ConnectionWindowSize]]`http2ConnectionWindowSize`|`Number (int)`|-
-|[[http2MaxPoolSize]]`http2MaxPoolSize`|`Number (int)`|-
-|[[http2MultiplexingLimit]]`http2MultiplexingLimit`|`Number (int)`|-
-|[[idleTimeout]]`idleTimeout`|`Number (int)`|-
-|[[initialSettings]]`initialSettings`|`link:dataobjects.html#Http2Settings[Http2Settings]`|-
-|[[introspectionPath]]`introspectionPath`|`String`|
-+++
+|[[http2ClearTextUpgrade]]`@http2ClearTextUpgrade`|`Boolean`|-
+|[[http2ConnectionWindowSize]]`@http2ConnectionWindowSize`|`Number (int)`|-
+|[[http2KeepAliveTimeout]]`@http2KeepAliveTimeout`|`Number (int)`|-
+|[[http2MaxPoolSize]]`@http2MaxPoolSize`|`Number (int)`|-
+|[[http2MultiplexingLimit]]`@http2MultiplexingLimit`|`Number (int)`|-
+|[[idleTimeout]]`@idleTimeout`|`Number (int)`|-
+|[[idleTimeoutUnit]]`@idleTimeoutUnit`|`link:enums.html#TimeUnit[TimeUnit]`|-
+|[[initialSettings]]`@initialSettings`|`link:dataobjects.html#Http2Settings[Http2Settings]`|-
+|[[introspectionPath]]`@introspectionPath`|`String`|+++
 Set the provider token introspection resource path
 +++
-|[[jdkSslEngineOptions]]`jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
-|[[jwkPath]]`jwkPath`|`String`|-
-|[[jwtOptions]]`jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
-|[[jwtToken]]`jwtToken`|`Boolean`|-
-|[[keepAlive]]`keepAlive`|`Boolean`|-
-|[[keyStoreOptions]]`keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
-|[[localAddress]]`localAddress`|`String`|-
-|[[logActivity]]`logActivity`|`Boolean`|-
-|[[logoutPath]]`logoutPath`|`String`|
-+++
+|[[jdkSslEngineOptions]]`@jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
+|[[jwkPath]]`@jwkPath`|`String`|-
+|[[jwtOptions]]`@jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
+|[[keepAlive]]`@keepAlive`|`Boolean`|-
+|[[keepAliveTimeout]]`@keepAliveTimeout`|`Number (int)`|-
+|[[keyStoreOptions]]`@keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
+|[[localAddress]]`@localAddress`|`String`|-
+|[[logActivity]]`@logActivity`|`Boolean`|-
+|[[logoutPath]]`@logoutPath`|`String`|+++
 Set the provider logout path
 +++
-|[[maxChunkSize]]`maxChunkSize`|`Number (int)`|-
-|[[maxHeaderSize]]`maxHeaderSize`|`Number (int)`|-
-|[[maxInitialLineLength]]`maxInitialLineLength`|`Number (int)`|-
-|[[maxPoolSize]]`maxPoolSize`|`Number (int)`|-
-|[[maxRedirects]]`maxRedirects`|`Number (int)`|-
-|[[maxWaitQueueSize]]`maxWaitQueueSize`|`Number (int)`|-
-|[[maxWebsocketFrameSize]]`maxWebsocketFrameSize`|`Number (int)`|-
-|[[maxWebsocketMessageSize]]`maxWebsocketMessageSize`|`Number (int)`|-
-|[[metricsName]]`metricsName`|`String`|-
-|[[openSslEngineOptions]]`openSslEngineOptions`|`link:dataobjects.html#OpenSSLEngineOptions[OpenSSLEngineOptions]`|-
-|[[pemKeyCertOptions]]`pemKeyCertOptions`|`link:dataobjects.html#PemKeyCertOptions[PemKeyCertOptions]`|-
-|[[pemTrustOptions]]`pemTrustOptions`|`link:dataobjects.html#PemTrustOptions[PemTrustOptions]`|-
-|[[pfxKeyCertOptions]]`pfxKeyCertOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
-|[[pfxTrustOptions]]`pfxTrustOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
-|[[pipelining]]`pipelining`|`Boolean`|-
-|[[pipeliningLimit]]`pipeliningLimit`|`Number (int)`|-
-|[[protocolVersion]]`protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
-|[[proxyOptions]]`proxyOptions`|`link:dataobjects.html#ProxyOptions[ProxyOptions]`|-
-|[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|
-+++
+|[[maxChunkSize]]`@maxChunkSize`|`Number (int)`|-
+|[[maxHeaderSize]]`@maxHeaderSize`|`Number (int)`|-
+|[[maxInitialLineLength]]`@maxInitialLineLength`|`Number (int)`|-
+|[[maxPoolSize]]`@maxPoolSize`|`Number (int)`|-
+|[[maxRedirects]]`@maxRedirects`|`Number (int)`|-
+|[[maxWaitQueueSize]]`@maxWaitQueueSize`|`Number (int)`|-
+|[[maxWebsocketFrameSize]]`@maxWebsocketFrameSize`|`Number (int)`|-
+|[[maxWebsocketMessageSize]]`@maxWebsocketMessageSize`|`Number (int)`|-
+|[[metricsName]]`@metricsName`|`String`|-
+|[[openSslEngineOptions]]`@openSslEngineOptions`|`link:dataobjects.html#OpenSSLEngineOptions[OpenSSLEngineOptions]`|-
+|[[pemKeyCertOptions]]`@pemKeyCertOptions`|`link:dataobjects.html#PemKeyCertOptions[PemKeyCertOptions]`|-
+|[[pemTrustOptions]]`@pemTrustOptions`|`link:dataobjects.html#PemTrustOptions[PemTrustOptions]`|-
+|[[pfxKeyCertOptions]]`@pfxKeyCertOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
+|[[pfxTrustOptions]]`@pfxTrustOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
+|[[pipelining]]`@pipelining`|`Boolean`|-
+|[[pipeliningLimit]]`@pipeliningLimit`|`Number (int)`|-
+|[[poolCleanerPeriod]]`@poolCleanerPeriod`|`Number (int)`|-
+|[[protocolVersion]]`@protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
+|[[proxyOptions]]`@proxyOptions`|`link:dataobjects.html#ProxyOptions[ProxyOptions]`|-
+|[[pubSecKeys]]`@pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|+++
 The provider PubSec key options
 +++
-|[[receiveBufferSize]]`receiveBufferSize`|`Number (int)`|-
-|[[reuseAddress]]`reuseAddress`|`Boolean`|-
-|[[reusePort]]`reusePort`|`Boolean`|-
-|[[revocationPath]]`revocationPath`|`String`|
-+++
+|[[receiveBufferSize]]`@receiveBufferSize`|`Number (int)`|-
+|[[reuseAddress]]`@reuseAddress`|`Boolean`|-
+|[[reusePort]]`@reusePort`|`Boolean`|-
+|[[revocationPath]]`@revocationPath`|`String`|+++
 Set the Oauth2 revocation resource path. e.g.: /oauth/revoke
 +++
-|[[scopeSeparator]]`scopeSeparator`|`String`|
-+++
+|[[scopeSeparator]]`@scopeSeparator`|`String`|+++
 Set the provider scope separator
 +++
-|[[sendBufferSize]]`sendBufferSize`|`Number (int)`|-
-|[[sendUnmaskedFrames]]`sendUnmaskedFrames`|`Boolean`|-
-|[[site]]`site`|`String`|
-+++
+|[[sendBufferSize]]`@sendBufferSize`|`Number (int)`|-
+|[[sendUnmaskedFrames]]`@sendUnmaskedFrames`|`Boolean`|-
+|[[site]]`@site`|`String`|+++
 Root URL for the provider
 +++
-|[[soLinger]]`soLinger`|`Number (int)`|-
-|[[ssl]]`ssl`|`Boolean`|-
-|[[tcpCork]]`tcpCork`|`Boolean`|-
-|[[tcpFastOpen]]`tcpFastOpen`|`Boolean`|-
-|[[tcpKeepAlive]]`tcpKeepAlive`|`Boolean`|-
-|[[tcpNoDelay]]`tcpNoDelay`|`Boolean`|-
-|[[tcpQuickAck]]`tcpQuickAck`|`Boolean`|-
-|[[tokenPath]]`tokenPath`|`String`|
-+++
+|[[soLinger]]`@soLinger`|`Number (int)`|-
+|[[ssl]]`@ssl`|`Boolean`|-
+|[[tcpCork]]`@tcpCork`|`Boolean`|-
+|[[tcpFastOpen]]`@tcpFastOpen`|`Boolean`|-
+|[[tcpKeepAlive]]`@tcpKeepAlive`|`Boolean`|-
+|[[tcpNoDelay]]`@tcpNoDelay`|`Boolean`|-
+|[[tcpQuickAck]]`@tcpQuickAck`|`Boolean`|-
+|[[tokenPath]]`@tokenPath`|`String`|+++
 Get the Oauth2 token resource path. e.g.: /oauth/token
 +++
-|[[trafficClass]]`trafficClass`|`Number (int)`|-
-|[[trustAll]]`trustAll`|`Boolean`|-
-|[[trustStoreOptions]]`trustStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
-|[[tryUseCompression]]`tryUseCompression`|`Boolean`|-
-|[[useAlpn]]`useAlpn`|`Boolean`|-
-|[[useBasicAuthorizationHeader]]`useBasicAuthorizationHeader`|`Boolean`|
-+++
+|[[trafficClass]]`@trafficClass`|`Number (int)`|-
+|[[trustAll]]`@trustAll`|`Boolean`|-
+|[[trustStoreOptions]]`@trustStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
+|[[tryUseCompression]]`@tryUseCompression`|`Boolean`|-
+|[[tryUsePerFrameWebsocketCompression]]`@tryUsePerFrameWebsocketCompression`|`Boolean`|-
+|[[tryUsePerMessageWebsocketCompression]]`@tryUsePerMessageWebsocketCompression`|`Boolean`|-
+|[[useAlpn]]`@useAlpn`|`Boolean`|-
+|[[useBasicAuthorizationHeader]]`@useBasicAuthorizationHeader`|`Boolean`|+++
 Flag to use HTTP basic auth header with client id, client secret.
 +++
-|[[usePooledBuffers]]`usePooledBuffers`|`Boolean`|-
-|[[userAgent]]`userAgent`|`String`|
-+++
+|[[usePooledBuffers]]`@usePooledBuffers`|`Boolean`|-
+|[[userAgent]]`@userAgent`|`String`|+++
 Set a custom user agent to use when communicating to a provider
 +++
-|[[userInfoParameters]]`userInfoParameters`|`Json object`|
-+++
+|[[userInfoParameters]]`@userInfoParameters`|`Json object`|+++
 Set custom parameters to be sent during the userInfo resource request
 +++
-|[[userInfoPath]]`userInfoPath`|`String`|
-+++
+|[[userInfoPath]]`@userInfoPath`|`String`|+++
 Set the provider userInfo resource path
 +++
-|[[verifyHost]]`verifyHost`|`Boolean`|-
+|[[validateIssuer]]`@validateIssuer`|`Boolean`|-
+|[[verifyHost]]`@verifyHost`|`Boolean`|-
+|[[websocketCompressionAllowClientNoContext]]`@websocketCompressionAllowClientNoContext`|`Boolean`|-
+|[[websocketCompressionLevel]]`@websocketCompressionLevel`|`Number (int)`|-
+|[[websocketCompressionRequestServerNoContext]]`@websocketCompressionRequestServerNoContext`|`Boolean`|-
 |===
 

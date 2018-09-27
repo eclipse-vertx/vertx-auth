@@ -4,24 +4,23 @@
 == JWTOptions
 
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[algorithm]]`algorithm`|`String`|-
-|[[audience]]`audience`|`Array of String`|-
-|[[audiences]]`audiences`|`Array of String`|-
-|[[expiresInMinutes]]`expiresInMinutes`|`Number (int)`|-
-|[[expiresInSeconds]]`expiresInSeconds`|`Number (int)`|-
-|[[header]]`header`|`Json object`|-
-|[[ignoreExpiration]]`ignoreExpiration`|`Boolean`|-
-|[[issuer]]`issuer`|`String`|-
-|[[leeway]]`leeway`|`Number (int)`|-
-|[[noTimestamp]]`noTimestamp`|`Boolean`|-
-|[[permissions]]`permissions`|`Array of String`|
-+++
+|[[algorithm]]`@algorithm`|`String`|-
+|[[audience]]`@audience`|`Array of String`|-
+|[[audiences]]`@audiences`|`Array of String`|-
+|[[expiresInMinutes]]`@expiresInMinutes`|`Number (int)`|-
+|[[expiresInSeconds]]`@expiresInSeconds`|`Number (int)`|-
+|[[header]]`@header`|`Json object`|-
+|[[ignoreExpiration]]`@ignoreExpiration`|`Boolean`|-
+|[[issuer]]`@issuer`|`String`|-
+|[[leeway]]`@leeway`|`Number (int)`|-
+|[[noTimestamp]]`@noTimestamp`|`Boolean`|-
+|[[permissions]]`@permissions`|`Array of String`|+++
 The permissions of this token.
 +++
-|[[subject]]`subject`|`String`|-
+|[[subject]]`@subject`|`String`|-
 |===
 

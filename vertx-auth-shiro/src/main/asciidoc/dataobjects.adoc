@@ -8,16 +8,14 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[config]]`config`|`Json object`|
-+++
+|[[config]]`@config`|`Json object`|+++
 Set the Shiro auth config.
 +++
-|[[type]]`type`|`link:enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`|
-+++
+|[[type]]`@type`|`link:enums.html#ShiroAuthRealmType[ShiroAuthRealmType]`|+++
 Set the Shiro auth options type.
 +++
 |===

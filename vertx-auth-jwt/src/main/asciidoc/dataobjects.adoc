@@ -8,15 +8,16 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[jwtOptions]]`jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
-|[[keyStore]]`keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
-|[[permissionsClaimKey]]`permissionsClaimKey`|`String`|-
-|[[pubSecKeys]]`pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
-|[[secrets]]`secrets`|`Array of link:dataobjects.html#SecretOptions[SecretOptions]`|-
+|[[jwks]]`@jwks`|`Array of Json object`|-
+|[[jwtOptions]]`@jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
+|[[keyStore]]`@keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
+|[[permissionsClaimKey]]`@permissionsClaimKey`|`String`|-
+|[[pubSecKeys]]`@pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
+|[[secrets]]`@secrets`|`Array of link:dataobjects.html#SecretOptions[SecretOptions]`|-
 |===
 
 [[JWTKeyStoreOptions]]
@@ -27,13 +28,13 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[password]]`password`|`String`|-
-|[[path]]`path`|`String`|-
-|[[type]]`type`|`String`|-
+|[[password]]`@password`|`String`|-
+|[[path]]`@path`|`String`|-
+|[[type]]`@type`|`String`|-
 |===
 
 [[JWTOptions]]
@@ -49,21 +50,21 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[algorithm]]`algorithm`|`String`|-
-|[[audience]]`audience`|`Array of String`|-
-|[[audiences]]`audiences`|`Array of String`|-
-|[[expiresInMinutes]]`expiresInMinutes`|`Number (int)`|-
-|[[expiresInSeconds]]`expiresInSeconds`|`Number (int)`|-
-|[[header]]`header`|`Json object`|-
-|[[ignoreExpiration]]`ignoreExpiration`|`Boolean`|-
-|[[issuer]]`issuer`|`String`|-
-|[[leeway]]`leeway`|`Number (int)`|-
-|[[noTimestamp]]`noTimestamp`|`Boolean`|-
-|[[permissions]]`permissions`|`Array of String`|-
-|[[subject]]`subject`|`String`|-
+|[[algorithm]]`@algorithm`|`String`|-
+|[[audience]]`@audience`|`Array of String`|-
+|[[audiences]]`@audiences`|`Array of String`|-
+|[[expiresInMinutes]]`@expiresInMinutes`|`Number (int)`|-
+|[[expiresInSeconds]]`@expiresInSeconds`|`Number (int)`|-
+|[[header]]`@header`|`Json object`|-
+|[[ignoreExpiration]]`@ignoreExpiration`|`Boolean`|-
+|[[issuer]]`@issuer`|`String`|-
+|[[leeway]]`@leeway`|`Number (int)`|-
+|[[noTimestamp]]`@noTimestamp`|`Boolean`|-
+|[[permissions]]`@permissions`|`Array of String`|-
+|[[subject]]`@subject`|`String`|-
 |===
 

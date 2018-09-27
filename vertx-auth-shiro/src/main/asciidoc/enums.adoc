@@ -12,12 +12,10 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[PROPERTIES]]`PROPERTIES`|
-+++
+|[[PROPERTIES]]`PROPERTIES`|+++
 The realm is a Shiro properties auth provider
 +++
-|[[LDAP]]`LDAP`|
-+++
+|[[LDAP]]`LDAP`|+++
 The realm is a Shiro LDAP auth provider
 +++
 |===

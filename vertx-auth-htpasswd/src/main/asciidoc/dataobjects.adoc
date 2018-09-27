@@ -8,13 +8,11 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,25%,50%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[enabledCryptPwd]]`enabledCryptPwd`|`Boolean`|-
-|[[enabledPlainTextPwd]]`enabledPlainTextPwd`|`Boolean`|-
-|[[htpasswdFile]]`htpasswdFile`|`String`|-
-|[[usersAuthorizedForEverything]]`usersAuthorizedForEverything`|`Boolean`|-
+|[[htpasswdFile]]`@htpasswdFile`|`String`|-
+|[[plainTextEnabled]]`@plainTextEnabled`|`Boolean`|-
 |===
 

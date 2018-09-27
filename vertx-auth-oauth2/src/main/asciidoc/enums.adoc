@@ -1,0 +1,22 @@
+= Enums
+
+[[OAuth2FlowType]]
+== OAuth2FlowType
+
+++++
+ OAuth2 Flows
+++++
+'''
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[AUTH_CODE]]`AUTH_CODE`|-
+|[[CLIENT]]`CLIENT`|-
+|[[PASSWORD]]`PASSWORD`|-
+|[[AUTH_JWT]]`AUTH_JWT`|+++
+RFC7523
++++
+|===
+
