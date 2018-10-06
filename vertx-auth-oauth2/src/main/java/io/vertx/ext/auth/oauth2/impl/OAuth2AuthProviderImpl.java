@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.AuthProviderInternal;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.auth.oauth2.*;
@@ -34,7 +35,7 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.fetch;
 /**
  * @author Paulo Lopes
  */
-public class OAuth2AuthProviderImpl implements OAuth2Auth {
+public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal {
 
   private final Vertx vertx;
   private final OAuth2ClientOptions config;
@@ -73,6 +74,13 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         break;
       default:
         throw new IllegalArgumentException("Unsupported oauth2 flow type: " + config.getFlow());
+    }
+  }
+
+  @Override
+  public void verifyIsUsingPassword() {
+    if (getFlowType() != OAuth2FlowType.PASSWORD) {
+      throw new IllegalArgumentException("OAuth2Auth + Basic Auth requires OAuth2 PASSWORD flow");
     }
   }
 

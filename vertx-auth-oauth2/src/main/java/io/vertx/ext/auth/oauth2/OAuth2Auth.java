@@ -24,7 +24,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.impl.AuthProviderInternal;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -33,14 +32,7 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface OAuth2Auth extends AuthProviderInternal {
-
-  @Override
-  default void verifyIsUsingPassword() {
-    if (getFlowType() != OAuth2FlowType.PASSWORD) {
-      throw new IllegalArgumentException("OAuth2Auth + Basic Auth requires OAuth2 PASSWORD flow");
-    }
-  }
+public interface OAuth2Auth extends AuthProvider {
 
   /**
    * @deprecated You should use the provider helper {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth} instead.
