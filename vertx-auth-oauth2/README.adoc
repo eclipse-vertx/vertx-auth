@@ -4,14 +4,24 @@ Please see the documentation for more information.
 
 ## Running test
 
-There is a Keycloak Docker image available, that you can load with the provided configuration `src/test/fixtures/vertx-test-realm.json`
+Standard unit tests are run against a mock of some providers, `Google`, `Keycloak` to run
+against a real provider (`Keycloak`) the `IT` profile must be enabled, which you can do by:
 
 ```
-docker run -d --rm --name keycloak -p 8888:8080 -e KEYCLOAK_USER=user -e KEYCLOAK_PASSWORD=password -e DB_VENDOR=H2 jboss/keycloak
+mvn -PIT ...
 ```
 
-But you can simply run `mvn test`, since the Keycloak responses are mocked with a Web Server started in the test setup.
+Or by having the environment variable `TRAVIS` set to `true`. When running the integration
+tests you must have a local keycloak installed with the configuration file `src/test/fixtures/vertx-test-realm.json`.
 
+And the container can be run locally as:
+
+```
+# build the image if not present
+docker build -t vertx-test-keycloak src/test/fixtures
+# run once there is a image
+docker run -d -p 8888:8080 vertx-test-keycloak
+```
 
 ### IntelliJ IDE
 
