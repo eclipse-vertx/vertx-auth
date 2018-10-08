@@ -6,34 +6,50 @@ import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.unit.junit.VertxUnitRunnerWithParametersFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@RunWith(VertxUnitRunner.class)
+@RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(VertxUnitRunnerWithParametersFactory.class)
 public class OAuth2KeycloakIT {
+
+  @Parameterized.Parameters
+  public static List<String> sites() {
+    return Arrays.asList("http://localhost:8888", "https://localhost:9443");
+  }
 
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
 
   private OAuth2Auth keycloak;
+  private final String site;
+
+  public OAuth2KeycloakIT(String site) {
+    this.site = site;
+  }
 
   @Before
   public void setUp(TestContext should) {
     final Async test = should.async();
 
+    OAuth2ClientOptions options = new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.PASSWORD)
+      .setSite(site + "/auth/realms/vertx-test")
+      .setClientID("public-client");
+
+    options.setTrustAll(true);
+
     KeycloakAuth.discover(
       rule.vertx(),
-      new OAuth2ClientOptions()
-        .setFlow(OAuth2FlowType.PASSWORD)
-        .setSite("http://127.0.0.1:8888/auth/realms/vertx-test")
-        .setClientID("public-client"),
+      options,
       discover -> {
         should.assertTrue(discover.succeeded());
         keycloak = discover.result();
@@ -93,14 +109,18 @@ public class OAuth2KeycloakIT {
       // generate a access token from the user
       AccessToken token = (AccessToken) authn.result();
 
-      // get a auth handler for the confidential client
+      OAuth2ClientOptions options = new OAuth2ClientOptions()
+        .setFlow(OAuth2FlowType.PASSWORD)
+        .setSite(site + "/auth/realms/vertx-test")
+        .setClientID("confidential-client")
+        .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e");
+
+      options.setTrustAll(true);
+
+        // get a auth handler for the confidential client
       KeycloakAuth.discover(
         rule.vertx(),
-        new OAuth2ClientOptions()
-          .setFlow(OAuth2FlowType.PASSWORD)
-          .setSite("http://127.0.0.1:8888/auth/realms/vertx-test")
-          .setClientID("confidential-client")
-          .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e"),
+        options,
         discover -> {
           should.assertTrue(discover.succeeded());
           OAuth2Auth confidential = discover.result();
