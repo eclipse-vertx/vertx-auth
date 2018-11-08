@@ -195,7 +195,7 @@ public class AuthJWTExamples {
             "0fPinYmDJpkwMYHqQaLGQyg=")
       ));
 
-    String token = provider.generateToken(new JsonObject(), new io.vertx.ext.jwt.JWTOptions().setAlgorithm("RS256"));
+    String token = provider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("RS256"));
   }
 
   public void example16(Vertx vertx) {
@@ -218,7 +218,7 @@ public class AuthJWTExamples {
             "SPCXyz5KfQZQuSj4f3l+xNERDUDaygIUdLjBXf/bc15ur2iZjcq4r0Mr")
       ));
 
-    String token = provider.generateToken(new JsonObject(), new io.vertx.ext.jwt.JWTOptions().setAlgorithm("ES256"));
+    String token = provider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("ES256"));
   }
 
   public void example18(Vertx vertx) {
@@ -234,6 +234,6 @@ public class AuthJWTExamples {
             "SPCXyz5KfQZQuSj4f3l+xNERDUDaygIUdLjBXf/bc15ur2iZjcq4r0Mr")
       ));
 
-    String token = provider.generateToken(new JsonObject(), new io.vertx.ext.jwt.JWTOptions().setAlgorithm("ES256"));
+    String token = provider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("ES256"));
   }
 }
