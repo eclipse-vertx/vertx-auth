@@ -127,7 +127,7 @@ An example is `ldap://myldapserver.mycompany.com:10389`
 `ldap_context_factory_class_name`:: The name of the ContextFactory class to use. This defaults to the SUN LDAP JNDI implementation
 but can be overridden to use custom LDAP factories.
 `ldap_pooling_enabled`:: Sets whether or not connection pooling should be used when possible and appropriate.
-`ldap_referral`:: Sets the LDAP referral behavior when creating a connection.  Defaults to {@code follow}.  See the Sun/Oracle LDAP
+`ldap_referral`:: Sets the LDAP referral behavior when creating a connection.  Defaults to `follow`.  See the Sun/Oracle LDAP
 referral documentation for more: http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html
 `ldap_system_username`:: Sets the system username that will be used when creating an LDAP connection used for authorization
 queries. The user must have the ability to query for authorization data for any application user.
