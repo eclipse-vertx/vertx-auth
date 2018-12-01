@@ -112,24 +112,29 @@ public class OAuth2API {
       throw new RuntimeException(e);
     }
 
-    final HttpClientRequest request = client.requestAbs(method, uri, resp -> {
-      resp.exceptionHandler(t -> {
-        callback.handle(Future.failedFuture(t));
-        client.close();
-      });
-
-      resp.bodyHandler(body -> {
-        if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
-          if (body == null || body.length() == 0) {
-            callback.handle(Future.failedFuture(resp.statusMessage()));
+    final HttpClientRequest request = client.requestAbs(method, uri, ar -> {
+      if (ar.succeeded()) {
+        HttpClientResponse resp = ar.result();
+        resp.exceptionHandler(t -> {
+          callback.handle(Future.failedFuture(t));
+          client.close();
+        });
+        resp.bodyHandler(body -> {
+          if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
+            if (body == null || body.length() == 0) {
+              callback.handle(Future.failedFuture(resp.statusMessage()));
+            } else {
+              callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
+            }
           } else {
-            callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
+            callback.handle(Future.succeededFuture(new OAuth2ResponseImpl(resp.statusCode(), resp.headers(), body)));
           }
-        } else {
-          callback.handle(Future.succeededFuture(new OAuth2ResponseImpl(resp.statusCode(), resp.headers(), body)));
-        }
+          client.close();
+        });
+      } else {
+        callback.handle(Future.failedFuture(ar.cause()));
         client.close();
-      });
+      }
     });
 
     request.exceptionHandler(t -> {
