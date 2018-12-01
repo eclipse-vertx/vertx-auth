@@ -1,5 +1,6 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
@@ -7,10 +8,12 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.test.core.VertxTestBase;
+import io.vertx.test.fakedns.FakeDNSServer;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
@@ -33,9 +36,12 @@ public class OAuth2FailureTest extends VertxTestBase {
   private HttpServer server;
   private JsonObject config;
   private int code;
+  private FakeDNSServer dns; // A dns server that resolves nothing, used in for testing unknown host
 
   @Override
   public void setUp() throws Exception {
+    dns = new FakeDNSServer().store(question -> Collections.emptySet());
+    dns.start();
     super.setUp();
     oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
         .setClientID("client-id")
@@ -71,7 +77,16 @@ public class OAuth2FailureTest extends VertxTestBase {
   @Override
   public void tearDown() throws Exception {
     server.close();
+    dns.stop();
     super.tearDown();
+  }
+
+  @Override
+  protected VertxOptions getOptions() {
+    VertxOptions options = super.getOptions();
+    options.getAddressResolverOptions().addServer(dns.localAddress().getAddress().getHostAddress() + ":" + dns.localAddress().getPort());
+    options.getAddressResolverOptions().setOptResourceEnabled(false);
+    return options;
   }
 
   @Test
