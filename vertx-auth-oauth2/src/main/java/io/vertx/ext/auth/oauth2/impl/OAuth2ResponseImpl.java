@@ -17,7 +17,7 @@ public class OAuth2ResponseImpl implements OAuth2Response {
 
 
   public OAuth2ResponseImpl(int statusCode, MultiMap headers, Buffer body) {
-    LOG.info("New response: statusCode: "+ statusCode );
+    LOG.debug("New response: statusCode: "+ statusCode );
     this.headers = headers;
     this.body = body;
     this.statusCode = statusCode;
