@@ -65,7 +65,7 @@
           Import-Package: \
             io.vertx.codegen.annotations;resolution:=optional,\
             *
-          -exportcontents: !*impl, !examples, *
+          -exportcontents: !examples, *
         ]]></bnd>
       </configuration>
     </plugin>
