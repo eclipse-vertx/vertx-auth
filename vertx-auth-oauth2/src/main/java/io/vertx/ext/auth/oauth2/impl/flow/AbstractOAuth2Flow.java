@@ -24,6 +24,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
+import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -37,10 +38,12 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
 
   protected final Vertx vertx;
   protected final OAuth2ClientOptions config;
+  protected final OAuth2API api;
 
   AbstractOAuth2Flow(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
+    this.api = new OAuth2API(vertx, config);
   }
 
   static void throwIfNull(String key, Object value) throws IllegalArgumentException {
@@ -82,9 +85,7 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
     // specify preferred accepted content type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    fetch(
-      vertx,
-      config,
+    api.fetch(
       HttpMethod.POST,
       config.getTokenPath(),
       headers,

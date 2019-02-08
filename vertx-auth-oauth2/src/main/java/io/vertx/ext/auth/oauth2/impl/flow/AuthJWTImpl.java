@@ -62,9 +62,7 @@ public class AuthJWTImpl extends AbstractOAuth2Flow implements OAuth2Flow {
       .put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
       .put("assertion", provider.getJWT().sign(params, provider.getConfig().getJWTOptions()));
 
-    fetch(
-      provider.getVertx(),
-      provider.getConfig(),
+    api.fetch(
       HttpMethod.POST,
       provider.getConfig().getTokenPath(),
       new JsonObject().put("Content-Type", "application/x-www-form-urlencoded"),
