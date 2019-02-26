@@ -104,7 +104,7 @@ public class AuthJWTExamples {
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
 
-    // In this case we are forcing the provider to ignore the `exp` field
+    // In this case we are forcing the provider to verify the aud field
     jwtAuth.authenticate(new JsonObject()
       .put("jwt", "BASE64-ENCODED-STRING")
       .put("options", new JsonObject()
@@ -122,7 +122,7 @@ public class AuthJWTExamples {
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
 
-    // In this case we are forcing the provider to ignore the `exp` field
+    // In this case we are forcing the provider to verify the issuer
     jwtAuth.authenticate(new JsonObject()
       .put("jwt", "BASE64-ENCODED-STRING")
       .put("options", new JsonObject()
