@@ -42,7 +42,15 @@ public class OAuth2API {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2API.class);
 
-  public static void fetch(Vertx vertx, OAuth2ClientOptions config, HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
+  private final HttpClient client;
+  private final OAuth2ClientOptions config;
+
+  public OAuth2API(Vertx vertx, OAuth2ClientOptions config) {
+    this.config = config;
+    this.client = vertx.createHttpClient(config);
+  }
+
+  public void fetch(HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
 
     if (path == null || path.length() == 0) {
       // and this can happen as it is a config option that is dependent on the provider
@@ -54,7 +62,7 @@ public class OAuth2API {
     LOG.info("Fetching URL: " + url);
 
     // create a request
-    final HttpClientRequest request = makeRequest(vertx, config, method, url, callback);
+    final HttpClientRequest request = makeRequest(method, url, callback);
 
     // apply the provider required headers
     JsonObject tmp = config.getHeaders();
@@ -86,32 +94,7 @@ public class OAuth2API {
     request.end();
   }
 
-  public static HttpClientRequest makeRequest(Vertx vertx, HttpClientOptions options, HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
-    HttpClient client;
-
-    try {
-      URL url = new URL(uri);
-      boolean isSecure = "https".equalsIgnoreCase(url.getProtocol());
-      String host = url.getHost();
-      int port = url.getPort();
-
-      if (port == -1) {
-        if (isSecure) {
-          port = 443;
-        } else {
-          port = 80;
-        }
-      }
-
-      client = vertx.createHttpClient(new HttpClientOptions(options)
-        .setSsl(isSecure)
-        .setDefaultHost(host)
-        .setDefaultPort(port));
-
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }
-
+  public HttpClientRequest makeRequest(HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
     final HttpClientRequest request = client.requestAbs(method, uri, ar -> {
       if (ar.succeeded()) {
         HttpClientResponse resp = ar.result();
@@ -129,17 +112,14 @@ public class OAuth2API {
           } else {
             callback.handle(Future.succeededFuture(new OAuth2ResponseImpl(resp.statusCode(), resp.headers(), body)));
           }
-          client.close();
         });
       } else {
         callback.handle(Future.failedFuture(ar.cause()));
-        client.close();
       }
     });
 
     request.exceptionHandler(t -> {
       callback.handle(Future.failedFuture(t));
-      client.close();
     });
 
     return request;

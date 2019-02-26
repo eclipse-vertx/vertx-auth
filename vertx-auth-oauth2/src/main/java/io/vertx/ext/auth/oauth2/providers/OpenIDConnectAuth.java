@@ -11,8 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
-
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
+import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 
 /**
  * Simplified factory to create an {@link io.vertx.ext.auth.oauth2.OAuth2Auth} for OpenID Connect.
@@ -39,7 +38,8 @@ public interface OpenIDConnectAuth {
       return;
     }
 
-    final HttpClientRequest request = makeRequest(vertx, config, HttpMethod.GET, config.getSite() + "/.well-known/openid-configuration", res -> {
+    final OAuth2API api = new OAuth2API(vertx, config);
+    final HttpClientRequest request = api.makeRequest(HttpMethod.GET, config.getSite() + "/.well-known/openid-configuration", res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
         return;

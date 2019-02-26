@@ -30,8 +30,6 @@ import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.impl.flow.*;
 
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.fetch;
-
 /**
  * @author Paulo Lopes
  */
@@ -42,12 +40,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   private final JWT jwt = new JWT();
 
   private final OAuth2Flow flow;
+  private final OAuth2API api;
 
   private OAuth2RBAC rbac;
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
+    this.api = new OAuth2API(vertx, config);
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
@@ -90,9 +90,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
     // specify preferred accepted content type
     headers.put("Accept", "application/json");
 
-    fetch(
-      vertx,
-      config,
+    api.fetch(
       HttpMethod.GET,
       config.getJwkPath(),
       headers,

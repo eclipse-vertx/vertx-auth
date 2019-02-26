@@ -1,5 +1,6 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
@@ -46,6 +47,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   protected OAuth2Auth oauth2;
   private HttpServer server;
   private JsonObject config;
+  private int connectionCounter;
 
   @Override
   public void setUp() throws Exception {
@@ -57,27 +59,31 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
 
     final CountDownLatch latch = new CountDownLatch(1);
 
-    server = vertx.createHttpServer().requestHandler(req -> {
-      if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
-        req.setExpectMultipart(true).bodyHandler(buffer -> {
-          try {
-            assertEquals(config, queryToJSON(buffer.toString()));
-          } catch (UnsupportedEncodingException e) {
-            fail(e);
-          }
-          req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
-        });
-      } else {
-        req.response().setStatusCode(400).end();
-      }
-    }).listen(8080, ready -> {
-      if (ready.failed()) {
-        throw new RuntimeException(ready.cause());
-      }
-      // ready
-      latch.countDown();
-    });
+    server = vertx.createHttpServer()
+      .connectionHandler(c -> connectionCounter++)
+      .requestHandler(req -> {
+        if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
+          req.setExpectMultipart(true).bodyHandler(buffer -> {
+            try {
+              assertEquals(config, queryToJSON(buffer.toString()));
+            } catch (UnsupportedEncodingException e) {
+              fail(e);
+            }
+            req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
+          });
+        } else {
+          req.response().setStatusCode(400).end();
+        }
+      })
+      .listen(8080, ready -> {
+        if (ready.failed()) {
+          throw new RuntimeException(ready.cause());
+        }
+        // ready
+        latch.countDown();
+      });
 
+    connectionCounter = 0;
     latch.await();
   }
 
@@ -107,5 +113,29 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
       }
     });
     await();
+  }
+
+  @Test
+  public void testConnectionReuse() {
+    auth()
+      .compose(x -> auth())
+      .compose(x -> auth())
+      .compose(x -> auth())
+      .setHandler(r -> {
+        if(r.failed()) {
+          fail(r.cause());
+        } else {
+          assertEquals(1, connectionCounter);
+          testComplete();
+        }
+      });
+    await();
+  }
+
+  Future<Void> auth() {
+    config = oauthConfig;
+    Future<User> fut = Future.future();
+    oauth2.authenticate(tokenConfig, fut);
+    return fut.mapEmpty();
   }
 }

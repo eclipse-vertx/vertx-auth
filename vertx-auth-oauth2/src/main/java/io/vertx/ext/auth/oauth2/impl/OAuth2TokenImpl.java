@@ -39,6 +39,8 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 public class OAuth2TokenImpl extends OAuth2UserImpl {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
+
+  private OAuth2API api;
   
   /**
    * Creates an AccessToken instance.
@@ -107,9 +109,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    OAuth2API.fetch(
-      provider.getVertx(),
-      config,
+    getApi().fetch(
       HttpMethod.POST,
       config.getTokenPath(),
       headers,
@@ -212,9 +212,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
       // specify preferred accepted accessToken type
       headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-      OAuth2API.fetch(
-        provider.getVertx(),
-        config,
+      getApi().fetch(
         HttpMethod.POST,
         config.getRevocationPath(),
         headers,
@@ -283,9 +281,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    OAuth2API.fetch(
-      provider.getVertx(),
-      config,
+    getApi().fetch(
       HttpMethod.POST,
       config.getLogoutPath(),
       headers,
@@ -329,9 +325,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    OAuth2API.fetch(
-      provider.getVertx(),
-      config,
+    getApi().fetch(
       HttpMethod.POST,
       config.getIntrospectionPath(),
       headers,
@@ -506,9 +500,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    OAuth2API.fetch(
-      provider.getVertx(),
-      config,
+    getApi().fetch(
       HttpMethod.GET,
       path,
       headers,
@@ -564,9 +556,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // add the access token
     headers.put("Authorization", "Bearer " + opaqueAccessToken());
 
-    OAuth2API.fetch(
-      provider.getVertx(),
-      config,
+    getApi().fetch(
       method,
       resource,
       headers,
@@ -580,5 +570,13 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
         callback.handle(Future.succeededFuture(fetch.result()));
       });
     return this;
+  }
+
+  private OAuth2API getApi() {
+    if (api == null) {
+      OAuth2AuthProviderImpl p = getProvider();
+      api = new OAuth2API(p.getVertx(), p.getConfig());
+    }
+    return api;
   }
 }
