@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.impl;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.HashingAlgorithm;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.HashString;

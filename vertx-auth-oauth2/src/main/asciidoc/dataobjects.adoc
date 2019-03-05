@@ -115,11 +115,11 @@ Get the Oauth2 token resource path. e.g.: /oauth/token
 |[[tryUseCompression]]`@tryUseCompression`|`Boolean`|-
 |[[tryUsePerFrameWebsocketCompression]]`@tryUsePerFrameWebsocketCompression`|`Boolean`|-
 |[[tryUsePerMessageWebsocketCompression]]`@tryUsePerMessageWebsocketCompression`|`Boolean`|-
+|[[tryWebsocketDeflateFrameCompression]]`@tryWebsocketDeflateFrameCompression`|`Boolean`|-
 |[[useAlpn]]`@useAlpn`|`Boolean`|-
 |[[useBasicAuthorizationHeader]]`@useBasicAuthorizationHeader`|`Boolean`|+++
 Flag to use HTTP basic auth header with client id, client secret.
 +++
-|[[usePooledBuffers]]`@usePooledBuffers`|`Boolean`|-
 |[[userAgent]]`@userAgent`|`String`|+++
 Set a custom user agent to use when communicating to a provider
 +++
