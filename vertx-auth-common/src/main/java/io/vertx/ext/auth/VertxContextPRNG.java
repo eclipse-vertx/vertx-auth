@@ -22,6 +22,8 @@ import io.vertx.core.Vertx;
 
 import java.util.Base64;
 
+import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
+
 /**
  * A secure non blocking random number generator isolated to the current context. The PRNG is bound to the vert.x
  * context and setup to close when the context shuts down.
@@ -107,7 +109,7 @@ public interface VertxContextPRNG {
    *
    * @param bytes a byte array.
    */
-  @GenIgnore
+  @GenIgnore(PERMITTED_TYPE)
   void nextBytes(byte[] bytes);
 
   /**
