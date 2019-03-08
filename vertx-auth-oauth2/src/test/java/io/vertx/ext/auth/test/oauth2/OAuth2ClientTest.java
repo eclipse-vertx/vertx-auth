@@ -29,8 +29,7 @@ public class OAuth2ClientTest extends VertxTestBase {
 
   private static final JsonObject oauthConfig = new JsonObject()
       .put("grant_type", "client_credentials")
-      .put("client_id", "client-id")
-      .put("client_secret", "client-secret");
+      .put("client_id", "client-id");
 
   protected OAuth2Auth oauth2;
   private HttpServer server;
