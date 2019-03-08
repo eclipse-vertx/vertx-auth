@@ -76,19 +76,24 @@ public interface OpenIDConnectAuth {
       config.setUserInfoPath(json.getString("userinfo_endpoint"));
       config.setJwkPath(json.getString("jwks_uri"));
 
-      final OAuth2Auth oidc = OAuth2Auth.create(vertx, config);
+      try {
+        // the constructor might fail if the configuration is incomplete
+        final OAuth2Auth oidc = OAuth2Auth.create(vertx, config);
 
-      if (config.getJwkPath() != null) {
-        oidc.loadJWK(v -> {
-          if (v.failed()) {
-            handler.handle(Future.failedFuture(v.cause()));
-            return;
-          }
+        if (config.getJwkPath() != null) {
+          oidc.loadJWK(v -> {
+            if (v.failed()) {
+              handler.handle(Future.failedFuture(v.cause()));
+              return;
+            }
 
+            handler.handle(Future.succeededFuture(oidc));
+          });
+        } else {
           handler.handle(Future.succeededFuture(oidc));
-        });
-      } else {
-        handler.handle(Future.succeededFuture(oidc));
+        }
+      } catch (IllegalArgumentException e) {
+        handler.handle(Future.failedFuture(e));
       }
     });
     // handle errors
