@@ -1,0 +1,14 @@
+= Cheatsheets
+
+[[WebAuthNOptions]]
+== WebAuthNOptions
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[realm]]`@realm`|`String`|-
+|[[transports]]`@transports`|`Array of String`|-
+|===
+
