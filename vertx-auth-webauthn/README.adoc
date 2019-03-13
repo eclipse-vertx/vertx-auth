@@ -1,0 +1,3 @@
+# Vert.x WebAuthN Auth
+
+This module contains contains a Vert.x auth implementation which uses WebAuthN
