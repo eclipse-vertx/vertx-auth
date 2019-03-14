@@ -120,7 +120,7 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
     if (principal != null) {
       Buffer buffer = principal.toBuffer();
       buff.appendInt(buffer.length());
-      buff.appendBuffer(buff);
+      buff.appendBuffer(buffer);
     } else {
       buff.appendInt(0);
     }
