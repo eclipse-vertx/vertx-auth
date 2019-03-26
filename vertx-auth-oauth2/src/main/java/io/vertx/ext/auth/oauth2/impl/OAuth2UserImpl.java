@@ -69,7 +69,7 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
             principal.put("expires_at", exp * 1000);
           }
         }
-        refreshToken = decodeToken("refresh_token");
+        refreshToken = decodeToken("refresh_token", true);
         idToken = decodeToken("id_token");
         // rebuild cache
         String scope = principal.getString("scope");
