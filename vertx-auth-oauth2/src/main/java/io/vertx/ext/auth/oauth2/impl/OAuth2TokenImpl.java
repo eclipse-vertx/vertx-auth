@@ -61,7 +61,6 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   public AccessToken setTrustJWT(boolean trust) {
     // refresh the tokens
     accessToken = decodeToken("access_token", trust);
-    refreshToken = decodeToken("refresh_token", trust);
     idToken = decodeToken("id_token", trust);
 
     return this;

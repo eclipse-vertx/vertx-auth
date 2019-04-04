@@ -45,7 +45,7 @@ public class OIDCTest extends VertxTestBase {
           assertNotNull(token.principal());
 
           assertNotNull(token.accessToken());
-          assertNotNull(token.refreshToken());
+          assertNotNull(token.opaqueRefreshToken());
 
           token.userInfo(res2 -> {
             if (res2.failed()) {
