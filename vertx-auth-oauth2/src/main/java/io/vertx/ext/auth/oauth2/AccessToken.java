@@ -24,8 +24,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
-import io.vertx.ext.auth.oauth2.impl.OAuth2UserImpl;
 
 /**
  * AccessToken extension to the User interface
@@ -46,18 +44,6 @@ public interface AccessToken extends User {
    */
   @CacheReturn
   JsonObject accessToken();
-
-  /**
-   * The Refresh Token if present parsed as a JsonObject
-   * @return JSON
-   *
-   * @deprecated refresh tokens are specific to the provider and should not be
-   *             handled by the consumer. Tokens are still available as an
-   *             opaque string.
-   */
-  @Deprecated
-  @CacheReturn
-  JsonObject refreshToken();
 
   /**
    * The Id Token if present parsed as a JsonObject

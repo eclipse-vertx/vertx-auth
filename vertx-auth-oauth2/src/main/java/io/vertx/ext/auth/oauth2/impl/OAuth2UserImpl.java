@@ -29,7 +29,6 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
   private transient OAuth2RBAC rbac;
   // decoded state
   protected transient JsonObject accessToken;
-  protected transient JsonObject refreshToken;
   protected transient JsonObject idToken;
 
   public OAuth2UserImpl() {
@@ -69,7 +68,6 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
             principal.put("expires_at", exp * 1000);
           }
         }
-        refreshToken = decodeToken("refresh_token");
         idToken = decodeToken("id_token");
         // rebuild cache
         String scope = principal.getString("scope");
@@ -201,15 +199,6 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
   public JsonObject accessToken() {
     if (accessToken != null) {
       return accessToken.copy();
-    }
-    return null;
-  }
-
-  @Override
-  @Deprecated
-  public JsonObject refreshToken() {
-    if (refreshToken != null) {
-      return refreshToken.copy();
     }
     return null;
   }
