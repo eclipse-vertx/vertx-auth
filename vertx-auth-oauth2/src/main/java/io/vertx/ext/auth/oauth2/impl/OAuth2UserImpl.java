@@ -206,6 +206,7 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
   }
 
   @Override
+  @Deprecated
   public JsonObject refreshToken() {
     if (refreshToken != null) {
       return refreshToken.copy();
