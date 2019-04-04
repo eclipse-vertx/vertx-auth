@@ -50,7 +50,12 @@ public interface AccessToken extends User {
   /**
    * The Refresh Token if present parsed as a JsonObject
    * @return JSON
+   *
+   * @deprecated refresh tokens are specific to the provider and should not be
+   *             handled by the consumer. Tokens are still available as an
+   *             opaque string.
    */
+  @Deprecated
   @CacheReturn
   JsonObject refreshToken();
 
