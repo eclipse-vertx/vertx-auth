@@ -22,6 +22,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.AuthProviderInternal;
@@ -36,6 +38,8 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.fetch;
  * @author Paulo Lopes
  */
 public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
   private final Vertx vertx;
   private final OAuth2ClientOptions config;
@@ -142,7 +146,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
           } else {
             JsonArray keys = json.getJsonArray("keys");
             for (Object key : keys) {
-              jwt.addJWK(new JWK((JsonObject) key));
+              try {
+                jwt.addJWK(new JWK((JsonObject) key));
+              } catch (RuntimeException e) {
+                LOG.warn("Skipped unsupported JWK: " + e.getMessage());
+              }
             }
 
             handler.handle(Future.succeededFuture());
