@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
@@ -133,8 +134,8 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
 
   Future<Void> auth() {
     config = oauthConfig;
-    Future<User> fut = Future.future();
-    oauth2.authenticate(tokenConfig, fut);
-    return fut.mapEmpty();
+    Promise<User> promise = Promise.promise();
+    oauth2.authenticate(tokenConfig, promise);
+    return promise.future().mapEmpty();
   }
 }
