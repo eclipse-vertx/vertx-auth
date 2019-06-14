@@ -4,12 +4,21 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
+ * Converter and Codec for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions} original class using Vert.x codegen.
  */
-public class OAuth2ClientOptionsConverter {
+public class OAuth2ClientOptionsConverter implements JsonCodec<OAuth2ClientOptions, JsonObject> {
+
+  public static final OAuth2ClientOptionsConverter INSTANCE = new OAuth2ClientOptionsConverter();
+
+  @Override public JsonObject encode(OAuth2ClientOptions value) { return (value != null) ? value.toJson() : null; }
+
+  @Override public OAuth2ClientOptions decode(JsonObject value) { return (value != null) ? new OAuth2ClientOptions(value) : null; }
+
+  @Override public Class<OAuth2ClientOptions> getTargetClass() { return OAuth2ClientOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2ClientOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
@@ -61,7 +70,7 @@ public class OAuth2ClientOptionsConverter {
           break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)member.getValue()));
+            obj.setJWTOptions(io.vertx.ext.jwt.JWTOptionsConverter.INSTANCE.decode((JsonObject)member.getValue()));
           }
           break;
         case "logoutPath":
@@ -74,7 +83,7 @@ public class OAuth2ClientOptionsConverter {
             java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+                list.add(io.vertx.ext.auth.PubSecKeyOptionsConverter.INSTANCE.decode((JsonObject)item));
             });
             obj.setPubSecKeys(list);
           }
@@ -160,8 +169,16 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getJwkPath() != null) {
       json.put("jwkPath", obj.getJwkPath());
     }
+    if (obj.getJWTOptions() != null) {
+      json.put("jwtOptions", io.vertx.ext.jwt.JWTOptionsConverter.INSTANCE.encode(obj.getJWTOptions()));
+    }
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
+    }
+    if (obj.getPubSecKeys() != null) {
+      JsonArray array = new JsonArray();
+      obj.getPubSecKeys().forEach(item -> array.add(io.vertx.ext.auth.PubSecKeyOptionsConverter.INSTANCE.encode(item)));
+      json.put("pubSecKeys", array);
     }
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());

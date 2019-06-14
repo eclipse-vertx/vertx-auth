@@ -41,7 +41,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
 
   private OAuth2API api;
-  
+
   /**
    * Creates an AccessToken instance.
    */
@@ -79,7 +79,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   @Override
   public OAuth2TokenImpl refresh(Handler<AsyncResult<Void>> handler) {
 
-    LOG.info("Refreshing AccessToken");
+    LOG.debug("Refreshing AccessToken");
 
     final JsonObject headers = new JsonObject();
     final OAuth2AuthProviderImpl provider = getProvider();

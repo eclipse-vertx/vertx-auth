@@ -4,12 +4,27 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.ext.auth.KeyStoreOptions}.
+ * Converter and Codec for {@link io.vertx.ext.auth.KeyStoreOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.KeyStoreOptions} original class using Vert.x codegen.
  */
-public class KeyStoreOptionsConverter {
+public class KeyStoreOptionsConverter implements JsonCodec<KeyStoreOptions, JsonObject> {
+
+  public static final KeyStoreOptionsConverter INSTANCE = new KeyStoreOptionsConverter();
+
+  @Override
+  public JsonObject encode(KeyStoreOptions value) {
+    if (value == null) return null;
+    JsonObject json = new JsonObject();
+    toJson(value, json);
+    return json;
+  }
+
+  @Override public KeyStoreOptions decode(JsonObject value) { return (value != null) ? new KeyStoreOptions(value) : null; }
+
+  @Override public Class<KeyStoreOptions> getTargetClass() { return KeyStoreOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, KeyStoreOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

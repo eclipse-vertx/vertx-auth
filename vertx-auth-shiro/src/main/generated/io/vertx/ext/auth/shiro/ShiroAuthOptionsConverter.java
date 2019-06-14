@@ -4,12 +4,27 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.ext.auth.shiro.ShiroAuthOptions}.
+ * Converter and Codec for {@link io.vertx.ext.auth.shiro.ShiroAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuthOptions} original class using Vert.x codegen.
  */
-public class ShiroAuthOptionsConverter {
+public class ShiroAuthOptionsConverter implements JsonCodec<ShiroAuthOptions, JsonObject> {
+
+  public static final ShiroAuthOptionsConverter INSTANCE = new ShiroAuthOptionsConverter();
+
+  @Override
+  public JsonObject encode(ShiroAuthOptions value) {
+    if (value == null) return null;
+    JsonObject json = new JsonObject();
+    toJson(value, json);
+    return json;
+  }
+
+  @Override public ShiroAuthOptions decode(JsonObject value) { return (value != null) ? new ShiroAuthOptions(value) : null; }
+
+  @Override public Class<ShiroAuthOptions> getTargetClass() { return ShiroAuthOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ShiroAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
