@@ -4,12 +4,27 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.ext.jwt.JWTOptions}.
+ * Converter and Codec for {@link io.vertx.ext.jwt.JWTOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.jwt.JWTOptions} original class using Vert.x codegen.
  */
-public class JWTOptionsConverter {
+public class JWTOptionsConverter implements JsonCodec<JWTOptions, JsonObject> {
+
+  public static final JWTOptionsConverter INSTANCE = new JWTOptionsConverter();
+
+  @Override
+  public JsonObject encode(JWTOptions value) {
+    if (value == null) return null;
+    JsonObject json = new JsonObject();
+    toJson(value, json);
+    return json;
+  }
+
+  @Override public JWTOptions decode(JsonObject value) { return (value != null) ? new JWTOptions(value) : null; }
+
+  @Override public Class<JWTOptions> getTargetClass() { return JWTOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
