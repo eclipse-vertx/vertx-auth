@@ -31,7 +31,7 @@ public class JWTOptions {
     JWTOptionsConverter.fromJson(json, this);
   }
 
-  public JsonObject toJSON() {
+  public JsonObject toJson() {
     final JsonObject json = new JsonObject();
     JWTOptionsConverter.toJson(this, json);
     return json;

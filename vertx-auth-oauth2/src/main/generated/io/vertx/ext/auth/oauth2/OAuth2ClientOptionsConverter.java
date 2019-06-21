@@ -70,7 +70,7 @@ public class OAuth2ClientOptionsConverter implements JsonCodec<OAuth2ClientOptio
           break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(io.vertx.ext.jwt.JWTOptionsConverter.INSTANCE.decode((JsonObject)member.getValue()));
+            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)member.getValue()));
           }
           break;
         case "logoutPath":
@@ -83,7 +83,7 @@ public class OAuth2ClientOptionsConverter implements JsonCodec<OAuth2ClientOptio
             java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                list.add(io.vertx.ext.auth.PubSecKeyOptionsConverter.INSTANCE.decode((JsonObject)item));
+                list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
             });
             obj.setPubSecKeys(list);
           }
@@ -170,15 +170,10 @@ public class OAuth2ClientOptionsConverter implements JsonCodec<OAuth2ClientOptio
       json.put("jwkPath", obj.getJwkPath());
     }
     if (obj.getJWTOptions() != null) {
-      json.put("jwtOptions", io.vertx.ext.jwt.JWTOptionsConverter.INSTANCE.encode(obj.getJWTOptions()));
+      json.put("jwtOptions", obj.getJWTOptions().toJson());
     }
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
-    }
-    if (obj.getPubSecKeys() != null) {
-      JsonArray array = new JsonArray();
-      obj.getPubSecKeys().forEach(item -> array.add(io.vertx.ext.auth.PubSecKeyOptionsConverter.INSTANCE.encode(item)));
-      json.put("pubSecKeys", array);
     }
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());

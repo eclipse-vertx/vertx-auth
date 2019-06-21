@@ -14,13 +14,7 @@ public class JWTOptionsConverter implements JsonCodec<JWTOptions, JsonObject> {
 
   public static final JWTOptionsConverter INSTANCE = new JWTOptionsConverter();
 
-  @Override
-  public JsonObject encode(JWTOptions value) {
-    if (value == null) return null;
-    JsonObject json = new JsonObject();
-    toJson(value, json);
-    return json;
-  }
+  @Override public JsonObject encode(JWTOptions value) { return (value != null) ? value.toJson() : null; }
 
   @Override public JWTOptions decode(JsonObject value) { return (value != null) ? new JWTOptions(value) : null; }
 
