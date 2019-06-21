@@ -4,23 +4,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonCodec;
+import io.vertx.core.spi.json.JsonDecoder;
 
 /**
  * Converter and Codec for {@link io.vertx.ext.auth.SecretOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.SecretOptions} original class using Vert.x codegen.
  */
-public class SecretOptionsConverter implements JsonCodec<SecretOptions, JsonObject> {
+public class SecretOptionsConverter implements JsonDecoder<SecretOptions, JsonObject> {
 
   public static final SecretOptionsConverter INSTANCE = new SecretOptionsConverter();
-
-  @Override
-  public JsonObject encode(SecretOptions value) {
-    if (value == null) return null;
-    JsonObject json = new JsonObject();
-    toJson(value, json);
-    return json;
-  }
 
   @Override public SecretOptions decode(JsonObject value) { return (value != null) ? new SecretOptions(value) : null; }
 
