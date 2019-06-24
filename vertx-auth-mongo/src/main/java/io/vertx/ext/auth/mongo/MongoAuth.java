@@ -19,7 +19,9 @@ package io.vertx.ext.auth.mongo;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
@@ -128,7 +130,7 @@ public interface MongoAuth extends AuthProvider {
   String DEFAULT_SALT_FIELD = "salt";
 
   /**
-   * The prefix which is used by the method {@link User#isAuthorised(String, Handler)} when checking for role access
+   * The prefix which is used by the method {@link User#isAuthorized(String, Handler)} when checking for role access
    */
   String ROLE_PREFIX = "role:";
 
@@ -343,4 +345,23 @@ public interface MongoAuth extends AuthProvider {
   void insertUser(String username, String password, List<String> roles, List<String> permissions,
       Handler<AsyncResult<String>> resultHandler);
 
+  /**
+   * Insert a new user into mongo in the convenient way
+   *
+   * @param username
+   *          the username to be set
+   * @param password
+   *          the passsword in clear text, will be adapted following the definitions of the defined {@link HashStrategy}
+   * @param roles
+   *          a list of roles to be set
+   * @param permissions
+   *          a list of permissions to be set
+   * @return
+   *          the result future  will be provided with the id of the generated record
+   */
+  default Future<String> insertUser(String username, String password, List<String> roles, List<String> permissions) {
+    Promise<String> promise = Promise.promise();
+    insertUser(username, password, roles, permissions, promise);
+    return promise.future();
+  }
 }

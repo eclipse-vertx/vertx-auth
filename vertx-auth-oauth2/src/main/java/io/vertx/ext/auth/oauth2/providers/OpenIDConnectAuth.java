@@ -1,10 +1,7 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -102,5 +99,22 @@ public interface OpenIDConnectAuth {
     request.putHeader("Accept", "application/json");
     // trigger
     request.end();
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
+   * configuration options and attempt to load the well known descriptor.
+   *
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @param vertx the vertx instance
+   * @param config the initial config, it should contain a site url
+   * @return future with the instantiated Oauth2 provider instance handler
+   */
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+    Promise<OAuth2Auth> promise = Promise.promise();
+    discover(vertx, config, promise);
+    return promise.future();
   }
 }

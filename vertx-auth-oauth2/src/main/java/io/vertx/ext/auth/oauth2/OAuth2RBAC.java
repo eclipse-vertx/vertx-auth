@@ -17,7 +17,9 @@ package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 
 /**
  * Functional interface that allows users to implement custom RBAC verifiers for OAuth2/OpenId Connect.
@@ -45,4 +47,20 @@ public interface OAuth2RBAC {
    * @param handler the result handler.
    */
   void isAuthorized(AccessToken user, String authority, Handler<AsyncResult<Boolean>> handler);
+
+  /**
+   * This method should verify if the user has the given authority and return either a boolean value or an error.
+   *
+   * Note that false and errors are not the same. A user might not have a given authority but that doesn't mean that
+   * there was an error during the call.
+   *
+   * @param user the given user to assert on
+   * @param authority the authority to lookup
+   * @return future with the result.
+   */
+  default Future<Boolean> isAuthorized(AccessToken user, String authority) {
+    Promise<Boolean> promise = Promise.promise();
+    isAuthorized(user, authority, promise);
+    return promise.future();
+  }
 }

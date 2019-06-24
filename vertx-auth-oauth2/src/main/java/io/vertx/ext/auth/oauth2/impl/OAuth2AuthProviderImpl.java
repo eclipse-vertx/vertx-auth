@@ -22,8 +22,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.AuthProviderInternal;
@@ -256,13 +256,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   }
 
   @Override
-  @Deprecated
-  public void getToken(JsonObject credentials, Handler<AsyncResult<AccessToken>> handler) {
-    flow.getToken(credentials, handler);
-  }
-
-  @Override
-  @Deprecated
   public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
     authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), auth -> {
       if (auth.succeeded()) {
@@ -302,13 +295,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
       handler.handle(Future.failedFuture(e));
     }
     return this;
-  }
-
-  @Override
-  @Deprecated
-  public String getScopeSeparator() {
-    final String sep = config.getScopeSeparator();
-    return sep == null ? " " : sep;
   }
 
   @Override

@@ -19,7 +19,9 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -46,12 +48,18 @@ public interface User {
   User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
-   * @deprecated See {@link #isAuthorized(String, Handler)}
+   * Is the user authorised to
+   *
+   * @param authority  the authority - what this really means is determined by the specific implementation. It might
+   *                   represent a permission to access a resource e.g. `printers:printer34` or it might represent
+   *                   authority to a role in a roles based model, e.g. `role:admin`.
+   * @return Future handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
+   *    *                       `true` if the they has the authority or `false` otherwise.
    */
-  @Deprecated
-  @Fluent
-  default User isAuthorised(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-    return isAuthorized(authority, resultHandler);
+  default Future<Boolean> isAuthorized(String authority) {
+    Promise<Boolean> promise = Promise.promise();
+    isAuthorized(authority, promise);
+    return promise.future();
   }
 
   /**

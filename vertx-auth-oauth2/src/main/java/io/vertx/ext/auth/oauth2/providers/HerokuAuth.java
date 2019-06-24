@@ -34,7 +34,8 @@ public interface HerokuAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setSite("https://id.heroku.com")
         .setTokenPath("/oauth/token")
         .setAuthorizationPath("/oauth/authorize")

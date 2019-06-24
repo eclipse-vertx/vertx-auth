@@ -34,7 +34,8 @@ public interface BoxAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setSite("https://account.box.com")
         .setTokenPath("/api/oauth2/token")
         .setAuthorizationPath("/api/oauth2/authorize")

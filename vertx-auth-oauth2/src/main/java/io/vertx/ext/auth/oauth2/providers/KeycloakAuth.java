@@ -1,9 +1,7 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
@@ -124,5 +122,23 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
       }
       handler.handle(discover);
     });
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the default site in the
+   * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
+   * running on a custom instance) that site will be used to do the lookup.
+   * <p>
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @param vertx   the vertx instance
+   * @param config  the initial config
+   * @return promise with the instantiated Oauth2 provider instance handler
+   */
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+    Promise<OAuth2Auth> promise = Promise.promise();
+    discover(vertx, config, promise);
+    return promise.future();
   }
 }

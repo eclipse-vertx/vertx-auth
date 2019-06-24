@@ -22,14 +22,14 @@ import static org.hamcrest.CoreMatchers.*;
 public class OAuth2FailureTest extends VertxTestBase {
 
   private static final JsonObject tokenConfig = new JsonObject()
-      .put("code", "code")
-      .put("redirect_uri", "http://callback.com");
+    .put("code", "code")
+    .put("redirect_uri", "http://callback.com");
 
   private static final JsonObject oauthConfig = new JsonObject()
-      .put("code", "code")
-      .put("redirect_uri", "http://callback.com")
-      .put("grant_type", "authorization_code")
-      .put("client_id", "client-id");
+    .put("code", "code")
+    .put("redirect_uri", "http://callback.com")
+    .put("grant_type", "authorization_code")
+    .put("client_id", "client-id");
 
   protected OAuth2Auth oauth2;
   private HttpServer server;
@@ -42,10 +42,11 @@ public class OAuth2FailureTest extends VertxTestBase {
     dns = new FakeDNSServer().store(question -> Collections.emptySet());
     dns.start();
     super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
-        .setClientID("client-id")
-        .setClientSecret("client-secret")
-        .setSite("http://localhost:8080"));
+    oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.AUTH_CODE)
+      .setClientID("client-id")
+      .setClientSecret("client-secret")
+      .setSite("http://localhost:8080"));
 
     final CountDownLatch latch = new CountDownLatch(1);
 
@@ -120,7 +121,8 @@ public class OAuth2FailureTest extends VertxTestBase {
 
   @Test
   public void unknownHost() {
-    OAuth2Auth auth = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
+    OAuth2Auth auth = OAuth2Auth.create(vertx, new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("client-id")
       .setClientSecret("client-secret")
       .setSite("http://zlouklfoux.net.com.info.pimpo.molo"));
