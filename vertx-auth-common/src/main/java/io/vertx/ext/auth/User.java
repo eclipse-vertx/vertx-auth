@@ -50,6 +50,7 @@ public interface User {
   /**
    * Is the user authorised to
    *
+   * @see User#isAuthorized(String, Handler)
    * @param authority  the authority - what this really means is determined by the specific implementation. It might
    *                   represent a permission to access a resource e.g. `printers:printer34` or it might represent
    *                   authority to a role in a roles based model, e.g. `role:admin`.

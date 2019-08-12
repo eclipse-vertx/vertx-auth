@@ -88,6 +88,7 @@ public interface AccessToken extends User {
   /**
    * Refresh the access token
    *
+   * @see AccessToken#refresh(Handler)
    * @return future returning the results.
    */
   default Future<Void> refresh() {
@@ -108,6 +109,7 @@ public interface AccessToken extends User {
   /**
    * Revoke access or refresh token
    *
+   * @see AccessToken#revoke(String, Handler)
    * @param token_type - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
    * @return future returning the results.
    */
@@ -130,6 +132,7 @@ public interface AccessToken extends User {
    * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
    * available on all providers.
    *
+   * @see AccessToken#logout(Handler)
    * @return future returning the results.
    */
   default Future<Void> logout() {
@@ -149,6 +152,7 @@ public interface AccessToken extends User {
   /**
    * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
    *
+   * @see AccessToken#introspect(Handler)
    * @return future returning the results.
    */
   default Future<Void> introspect() {
@@ -169,6 +173,7 @@ public interface AccessToken extends User {
   /**
    * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
    *
+   * @see AccessToken#introspect(String, Handler)
    * @param tokenType - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
    * @return future returning the results.
    */
@@ -189,6 +194,7 @@ public interface AccessToken extends User {
   /**
    * Load the user info as per OIDC spec.
    *
+   * @see AccessToken#userInfo(Handler)
    * @return future returning the results.
    */
   default Future<JsonObject> userInfo() {
@@ -211,6 +217,7 @@ public interface AccessToken extends User {
   /**
    * Fetches a JSON resource using this Access Token.
    *
+   * @see AccessToken#fetch(String, Handler)
    * @param resource - the resource to fetch.
    * @return future returning the results.
    */
@@ -235,6 +242,7 @@ public interface AccessToken extends User {
   /**
    * Fetches a JSON resource using this Access Token.
    *
+   * @see AccessToken#fetch(HttpMethod, String, JsonObject, Buffer, Handler)
    * @param method - the HTTP method to user.
    * @param resource - the resource to fetch.
    * @param headers - extra headers to pass to the request.

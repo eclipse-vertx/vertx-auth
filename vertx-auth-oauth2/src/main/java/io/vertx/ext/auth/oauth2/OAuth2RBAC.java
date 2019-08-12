@@ -54,6 +54,7 @@ public interface OAuth2RBAC {
    * Note that false and errors are not the same. A user might not have a given authority but that doesn't mean that
    * there was an error during the call.
    *
+   * @see OAuth2RBAC#isAuthorized(AccessToken, String, Handler)
    * @param user the given user to assert on
    * @param authority the authority to lookup
    * @return future with the result.

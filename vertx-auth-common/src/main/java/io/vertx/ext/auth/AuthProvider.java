@@ -71,6 +71,7 @@ public interface AuthProvider {
    * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link io.vertx.core.AsyncResult}.
    * The user object can then be used for authorisation.
    *
+   * @see AuthProvider#authenticate(JsonObject, Handler)
    * @param authInfo  The auth information
    * @return The result future
    */

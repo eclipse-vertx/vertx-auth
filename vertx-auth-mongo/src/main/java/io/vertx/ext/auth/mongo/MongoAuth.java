@@ -348,6 +348,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * Insert a new user into mongo in the convenient way
    *
+   * @see MongoAuth#insertUser(String, String, List, List, Handler)
    * @param username
    *          the username to be set
    * @param password

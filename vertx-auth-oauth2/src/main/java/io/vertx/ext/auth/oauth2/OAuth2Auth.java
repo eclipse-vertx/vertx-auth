@@ -70,6 +70,7 @@ public interface OAuth2Auth extends AuthProvider {
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
    *
+   * @see OAuth2Auth#decodeToken(String, Handler)
    * @param token the access token (base64 string)
    * @return future result
    */
@@ -96,6 +97,7 @@ public interface OAuth2Auth extends AuthProvider {
    * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
    * meta-information about this token.
    *
+   * @see OAuth2Auth#introspectToken(String, Handler)
    * @param token the access token (base64 string)
    * @return future result
    */
@@ -121,6 +123,7 @@ public interface OAuth2Auth extends AuthProvider {
    * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
    * meta-information about this token.
    *
+   * @see OAuth2Auth#introspectToken(String, String, Handler)
    * @param token the access token (base64 string)
    * @param tokenType hint to the token type e.g.: `access_token`
    * @return future result
@@ -150,6 +153,7 @@ public interface OAuth2Auth extends AuthProvider {
    * Loads a JWK Set from the remote provider.
    *
    * When calling this method several times, the loaded JWKs are updated in the underlying JWT object.
+   * @see OAuth2Auth#loadJWK(Handler)
    */
   default Future<Void> loadJWK() {
     Promise<Void> promise = Promise.promise();
