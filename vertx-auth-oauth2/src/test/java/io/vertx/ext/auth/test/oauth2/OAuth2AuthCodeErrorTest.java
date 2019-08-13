@@ -17,25 +17,25 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 public class OAuth2AuthCodeErrorTest extends VertxTestBase {
 
   private static final JsonObject fixture = new JsonObject(
-      "{" +
-          "  \"error\": \"bad_verification_code\"," +
-          "  \"error_description\": \"bad verification code\"" +
-          "}");
+    "{" +
+      "  \"error\": \"bad_verification_code\"," +
+      "  \"error_description\": \"bad verification code\"" +
+      "}");
 
   private static final JsonObject tokenConfig = new JsonObject()
-      .put("code", "code")
-      .put("redirect_uri", "http://callback.com");
+    .put("code", "code")
+    .put("redirect_uri", "http://callback.com");
 
   private static final JsonObject oauthConfig = new JsonObject()
-      .put("code", "code")
-      .put("redirect_uri", "http://callback.com")
-      .put("grant_type", "authorization_code")
-      .put("client_id", "client-id");
+    .put("code", "code")
+    .put("redirect_uri", "http://callback.com")
+    .put("grant_type", "authorization_code")
+    .put("client_id", "client-id");
 
   private static final JsonObject authorizeConfig = new JsonObject()
-      .put("redirect_uri", "http://localhost:3000/callback")
-      .put("scope", "user")
-      .put("state", "02afe928b");
+    .put("redirect_uri", "http://localhost:3000/callback")
+    .put("scope", "user")
+    .put("state", "02afe928b");
 
 
   protected OAuth2Auth oauth2;
@@ -45,10 +45,11 @@ public class OAuth2AuthCodeErrorTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
-        .setClientID("client-id")
-        .setClientSecret("client-secret")
-        .setSite("http://localhost:8080"));
+    oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.AUTH_CODE)
+      .setClientID("client-id")
+      .setClientSecret("client-secret")
+      .setSite("http://localhost:8080"));
 
     final CountDownLatch latch = new CountDownLatch(1);
 

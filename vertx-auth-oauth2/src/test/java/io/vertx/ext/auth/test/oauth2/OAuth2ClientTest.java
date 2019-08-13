@@ -18,18 +18,18 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 public class OAuth2ClientTest extends VertxTestBase {
 
   private static final JsonObject fixture = new JsonObject(
-      "{" +
-          "  \"access_token\": \"4adc339e0\"," +
-          "  \"refresh_token\": \"ec1a59d298\"," +
-          "  \"token_type\": \"bearer\"," +
-          "  \"expires_in\": 7200" +
-          "}");
+    "{" +
+      "  \"access_token\": \"4adc339e0\"," +
+      "  \"refresh_token\": \"ec1a59d298\"," +
+      "  \"token_type\": \"bearer\"," +
+      "  \"expires_in\": 7200" +
+      "}");
 
   private static final JsonObject tokenConfig = new JsonObject();
 
   private static final JsonObject oauthConfig = new JsonObject()
-      .put("grant_type", "client_credentials")
-      .put("client_id", "client-id");
+    .put("grant_type", "client_credentials")
+    .put("client_id", "client-id");
 
   protected OAuth2Auth oauth2;
   private HttpServer server;
@@ -38,10 +38,11 @@ public class OAuth2ClientTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, new OAuth2ClientOptions()
-        .setClientID("client-id")
-        .setClientSecret("client-secret")
-        .setSite("http://localhost:8080"));
+    oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.CLIENT)
+      .setClientID("client-id")
+      .setClientSecret("client-secret")
+      .setSite("http://localhost:8080"));
 
     final CountDownLatch latch = new CountDownLatch(1);
 

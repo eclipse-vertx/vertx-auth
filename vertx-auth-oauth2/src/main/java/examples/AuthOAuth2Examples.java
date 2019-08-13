@@ -32,7 +32,8 @@ public class AuthOAuth2Examples {
 
   public void example1(Vertx vertx) {
 
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions()
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("YOUR_CLIENT_ID")
       .setClientSecret("YOUR_CLIENT_SECRET")
       .setSite("https://github.com/login")
@@ -68,13 +69,14 @@ public class AuthOAuth2Examples {
 
     // Set the client credentials and the OAuth2 server
     OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
 
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
 
     // Authorization oauth2 URI
     String authorization_uri = oauth2.authorizeURL(new JsonObject()
@@ -106,7 +108,7 @@ public class AuthOAuth2Examples {
   public void example3(Vertx vertx) {
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.PASSWORD);
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions().setFlow(OAuth2FlowType.PASSWORD));
 
     JsonObject tokenConfig = new JsonObject()
       .put("username", "username")
@@ -132,13 +134,14 @@ public class AuthOAuth2Examples {
 
     // Set the client credentials and the OAuth2 server
     OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+      .setFlow(OAuth2FlowType.CLIENT)
       .setClientID("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
 
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.CLIENT, credentials);
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
 
     JsonObject tokenConfig = new JsonObject();
 
