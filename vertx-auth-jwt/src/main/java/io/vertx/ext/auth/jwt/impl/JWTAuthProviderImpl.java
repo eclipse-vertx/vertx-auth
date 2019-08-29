@@ -21,9 +21,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.spi.json.JsonCodec;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.SecretOptions;
@@ -135,7 +135,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
 
         if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + Json.encode(jwtOptions.getAudience())));
+          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + JsonCodec.INSTANCE.toString(jwtOptions.getAudience())));
           return;
         }
       }
