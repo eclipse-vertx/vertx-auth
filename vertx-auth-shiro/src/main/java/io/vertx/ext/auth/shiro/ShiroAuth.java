@@ -40,20 +40,6 @@ public interface ShiroAuth extends AuthProvider {
   /**
    * Create a Shiro auth provider
    * @param vertx  the Vert.x instance
-   * @param realmType  the Shiro realm type
-   * @param config  the config
-   * @return  the auth provider
-   *
-   * @deprecated see {@link ShiroAuth#create(Vertx, ShiroAuthOptions)}
-   */
-  @Deprecated
-  static ShiroAuth create(Vertx vertx, ShiroAuthRealmType realmType, JsonObject config) {
-    return ShiroAuthProviderImpl.create(vertx, new ShiroAuthOptions().setType(realmType).setConfig(config));
-  }
-
-  /**
-   * Create a Shiro auth provider
-   * @param vertx  the Vert.x instance
    * @param realm  the Shiro realm
    * @return  the auth provider
    */

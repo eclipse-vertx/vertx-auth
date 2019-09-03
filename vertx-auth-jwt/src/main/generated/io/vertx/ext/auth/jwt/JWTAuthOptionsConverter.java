@@ -56,16 +56,6 @@ public class JWTAuthOptionsConverter implements JsonDecoder<JWTAuthOptions, Json
             obj.setPubSecKeys(list);
           }
           break;
-        case "secrets":
-          if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.ext.auth.SecretOptions> list =  new java.util.ArrayList<>();
-            ((Iterable<Object>)member.getValue()).forEach( item -> {
-              if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.SecretOptions((JsonObject)item));
-            });
-            obj.setSecrets(list);
-          }
-          break;
       }
     }
   }

@@ -29,8 +29,6 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
 
 import java.io.UnsupportedEncodingException;
 
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
-
 /**
  * @author Paulo Lopes
  */

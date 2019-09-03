@@ -19,6 +19,7 @@ package io.vertx.ext.auth.oauth2;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.json.JsonObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
@@ -126,7 +127,7 @@ public interface KeycloakHelper {
       throw new IllegalArgumentException("Parsing error");
     }
     try {
-      String decoded = new String(Base64.getDecoder().decode(parts[1]), "UTF-8");
+      String decoded = new String(Base64.getDecoder().decode(parts[1]), StandardCharsets.UTF_8);
       return new JsonObject(decoded); // get "payload" part
     } catch (Exception e) {
       e.printStackTrace();

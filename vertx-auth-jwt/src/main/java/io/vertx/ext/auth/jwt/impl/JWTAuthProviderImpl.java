@@ -26,7 +26,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -85,20 +84,25 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         if (keys != null) {
           for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-            if (pubSecKey.isSymmetric()) {
-              jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
-            } else {
-              jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.isCertificate(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
+            switch (pubSecKey.getKeyType()) {
+              case SYMMETRIC:
+                jwt.addJWK(JWK.symmetricKey(pubSecKey.getAlgorithm(), pubSecKey.getSecretKey()));
+                break;
+              case PUBLIC:
+                jwt.addJWK(JWK.pubKey(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
+                break;
+              case SECRET:
+                jwt.addJWK(JWK.secKey(pubSecKey.getAlgorithm(), pubSecKey.getSecretKey()));
+                break;
+              case PUBSEC:
+                jwt.addJWK(JWK.pubSecKey(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
+                break;
+              case CERTIFICATE:
+                jwt.addJWK(JWK.certificate(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
+                break;
+              default:
+                throw new RuntimeException("Unsupported KeyType: " + pubSecKey.getKeyType());
             }
-          }
-        }
-
-        // TODO: remove once the deprecation ends!
-        final List<SecretOptions> secrets = config.getSecrets();
-
-        if (secrets != null) {
-          for (SecretOptions secret: secrets) {
-            this.jwt.addSecret(secret.getType(), secret.getSecret());
           }
         }
 

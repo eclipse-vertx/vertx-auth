@@ -19,7 +19,6 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.jwt.JWTOptions;
 
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class JWTAuthOptions {
   private String permissionsClaimKey;
   private KeyStoreOptions keyStore;
   private List<PubSecKeyOptions> pubSecKeys;
-  private List<SecretOptions> secrets;
   private JWTOptions jwtOptions;
   private List<JsonObject> jwks;
 
@@ -60,7 +58,6 @@ public class JWTAuthOptions {
     permissionsClaimKey = other.getPermissionsClaimKey();
     keyStore = other.getKeyStore();
     pubSecKeys = other.getPubSecKeys();
-    secrets = other.getSecrets();
     jwtOptions = other.getJWTOptions();
     jwks = other.getJwks();
   }
@@ -105,26 +102,6 @@ public class JWTAuthOptions {
 
   public JWTAuthOptions setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
     this.pubSecKeys = pubSecKeys;
-    return this;
-  }
-
-  @Deprecated
-  public List<SecretOptions> getSecrets() {
-    return secrets;
-  }
-
-  @Deprecated
-  public JWTAuthOptions setSecrets(List<SecretOptions> secrets) {
-    this.secrets = secrets;
-    return this;
-  }
-
-  @Deprecated
-  public JWTAuthOptions addSecret(SecretOptions secret) {
-    if (this.secrets == null) {
-      this.secrets = new ArrayList<>();
-    }
-    this.secrets.add(secret);
     return this;
   }
 

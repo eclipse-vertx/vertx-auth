@@ -100,18 +100,6 @@ public final class JWT {
     }
   }
 
-  @Deprecated
-  public JWT(String key, boolean keyPrivate) {
-    // make sure the none is present
-    this();
-
-    if (keyPrivate) {
-      addSecretKey("RS256", key);
-    } else {
-      addPublicKey("RS256", key);
-    }
-  }
-
   /**
    * Adds a JSON Web Key (rfc7517) to the crypto map.
    *
@@ -137,77 +125,6 @@ public final class JWT {
     }
 
     return this;
-  }
-
-  /**
-   * Adds a public key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
-   * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
-   *
-   * @deprecated Replaced by {@link #addJWK(JWK)}
-   * @param algorithm the JWS algorithm, e.g.: RS256
-   * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
-   * @return self
-   */
-  @Deprecated
-  public JWT addPublicKey(String algorithm, String key) {
-    return addJWK(new JWK(algorithm, key, null));
-  }
-
-  /**
-   * Adds a key pair for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
-   * it is common to see these keys when dealing with 3rd party services such as Google or Keycloak.
-   *
-   * @deprecated Replaced by {@link #addJWK(JWK)}
-   * @param algorithm  the JWS algorithm, e.g.: RS256
-   * @param publicKey  the base64 DER format of the key (also known as PEM format, without the header and footer).
-   * @param privateKey the base64 DER format of the key (also known as PEM format, without the header and footer).
-   * @return self
-   */
-  @Deprecated
-  public JWT addKeyPair(String algorithm, String publicKey, String privateKey) {
-    return addJWK(new JWK(algorithm, publicKey, privateKey));
-  }
-
-  /**
-   * Adds a private key for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
-   * it is common to see these keys when dealing with 3rd party services such as Google.
-   *
-   * @deprecated Replaced by {@link #addJWK(JWK)}
-   * @param algorithm the JWS algorithm, e.g.: RS256
-   * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
-   * @return self
-   */
-  @Deprecated
-  public JWT addSecretKey(String algorithm, String key) {
-    return addJWK(new JWK(algorithm, null, key));
-  }
-
-  /**
-   * Adds a certificate for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
-   * it is common to see these keys when dealing with 3rd party services such as Google.
-   *
-   * @deprecated Replaced by {@link #addJWK(JWK)}
-   * @param algorithm the JWS algorithm, e.g.: RS256
-   * @param cert       the base64 DER format of the key (also known as PEM format, without the header and footer).
-   * @return self
-   */
-  @Deprecated
-  public JWT addCertificate(String algorithm, String cert) {
-    return addJWK(new JWK(algorithm, true, cert, null));
-  }
-
-  /**
-   * Adds a secret (password) for a given JWS algorithm to the crypto map. This is an alternative to using keystores since
-   * it is common to see these keys when dealing with 3rd party services such as Google.
-   *
-   * @deprecated Replaced by {@link #addJWK(JWK)}
-   * @param algorithm the JWS algorithm, e.g.: HS256
-   * @param key       the base64 DER format of the key (also known as PEM format, without the header and footer).
-   * @return self
-   */
-  @Deprecated
-  public JWT addSecret(String algorithm, String key) {
-    return addJWK(new JWK(algorithm, key));
   }
 
   /**

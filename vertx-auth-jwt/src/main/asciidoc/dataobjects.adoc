@@ -17,54 +17,5 @@
 |[[keyStore]]`@keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
 |[[permissionsClaimKey]]`@permissionsClaimKey`|`String`|-
 |[[pubSecKeys]]`@pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
-|[[secrets]]`@secrets`|`Array of link:dataobjects.html#SecretOptions[SecretOptions]`|-
-|===
-
-[[JWTKeyStoreOptions]]
-== JWTKeyStoreOptions
-
-++++
- Options describing how an JWT KeyStore should behave.
-++++
-'''
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[password]]`@password`|`String`|-
-|[[path]]`@path`|`String`|-
-|[[type]]`@type`|`String`|-
-|===
-
-[[JWTOptions]]
-== JWTOptions
-
-++++
- Options related to creation of new tokens.
-
- If any expiresInMinutes, audience, subject, issuer are not provided, there is no default.
- The jwt generated won't include those properties in the payload.
-
- Generated JWTs will include an iat claim by default unless noTimestamp is specified.
-++++
-'''
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[algorithm]]`@algorithm`|`String`|-
-|[[audience]]`@audience`|`Array of String`|-
-|[[audiences]]`@audiences`|`Array of String`|-
-|[[expiresInMinutes]]`@expiresInMinutes`|`Number (int)`|-
-|[[expiresInSeconds]]`@expiresInSeconds`|`Number (int)`|-
-|[[header]]`@header`|`Json object`|-
-|[[ignoreExpiration]]`@ignoreExpiration`|`Boolean`|-
-|[[issuer]]`@issuer`|`String`|-
-|[[leeway]]`@leeway`|`Number (int)`|-
-|[[noTimestamp]]`@noTimestamp`|`Boolean`|-
-|[[permissions]]`@permissions`|`Array of String`|-
-|[[subject]]`@subject`|`String`|-
 |===
 
