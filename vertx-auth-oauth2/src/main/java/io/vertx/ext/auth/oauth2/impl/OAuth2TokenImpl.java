@@ -195,6 +195,11 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
 
       final JsonObject headers = new JsonObject();
 
+      if (config.isUseBasicAuthorizationHeader()) {
+        String basic = config.getClientID() + ":" + (config.getClientSecret() == null ? "" : config.getClientSecret());
+        headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+      }
+
       JsonObject tmp = config.getHeaders();
 
       if (tmp != null) {
