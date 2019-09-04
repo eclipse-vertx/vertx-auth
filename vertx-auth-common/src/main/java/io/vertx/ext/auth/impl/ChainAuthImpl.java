@@ -29,6 +29,11 @@ import java.util.List;
 public class ChainAuthImpl implements ChainAuth {
 
   private final List<AuthProvider> providers = new ArrayList<>();
+  private final boolean all;
+
+  public ChainAuthImpl(boolean all) {
+    this.all = all;
+  }
 
   @Override
   public ChainAuth append(AuthProvider other) {
@@ -48,24 +53,45 @@ public class ChainAuthImpl implements ChainAuth {
 
   @Override
   public void authenticate(final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler) {
-    iterate(0, authInfo, resultHandler);
+    if (providers.size() == 0) {
+      resultHandler.handle(Future.failedFuture("No providers in the auth chain."));
+    } else {
+      iterate(0, authInfo, resultHandler, null);
+    }
   }
 
-  private void iterate(final int idx, final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler) {
+  private void iterate(final int idx, final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler, final User previousUser) {
     // stop condition
     if (idx >= providers.size()) {
-      // no more providers, means that we failed to find a provider capable of performing this operation
-      resultHandler.handle(Future.failedFuture("No more providers in the auth chain."));
+      if (!all) {
+        // no more providers, means that we failed to find a provider capable of performing this operation
+        resultHandler.handle(Future.failedFuture("No more providers in the auth chain."));
+      } else {
+        // if ALL then a success completes
+        resultHandler.handle(Future.succeededFuture(previousUser));
+      }
       return;
     }
 
     // attempt to perform operation
     providers.get(idx).authenticate(authInfo, res -> {
       if (res.succeeded()) {
-        resultHandler.handle(res);
+        if (!all) {
+          // if ANY then a success completes
+          resultHandler.handle(res);
+        } else {
+          // if ALL then a success check the next one
+          iterate(idx + 1, authInfo, resultHandler, res.result());
+        }
       } else {
-        // try again with next provider
-        iterate(idx + 1, authInfo, resultHandler);
+        if (!all) {
+          // try again with next provider
+          iterate(idx + 1, authInfo, resultHandler, null);
+        } else {
+          // short circuit when ALL is used a failure is enough to terminate
+          // no more providers, means that we failed to find a provider capable of performing this operation
+          resultHandler.handle(res);
+        }
       }
     });
   }

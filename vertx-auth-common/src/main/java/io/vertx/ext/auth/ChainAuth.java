@@ -29,12 +29,31 @@ public interface ChainAuth extends AuthProvider {
   /**
    * Create a Chainable Auth Provider auth provider
    *
+   * @deprecated  see {{@link #any()}}
    * @return the auth provider
    */
+  @Deprecated
   static ChainAuth create() {
-    return new ChainAuthImpl();
+    return any();
   }
 
+  /**
+   * Create a Chainable Auth Provider auth provider that will resolve if all auth providers are successful.
+   *
+   * @return the auth provider
+   */
+  static ChainAuth all() {
+    return new ChainAuthImpl(true);
+  }
+
+  /**
+   * Create a Chainable Auth Provider auth provider that will resolve on the first success.
+   *
+   * @return the auth provider
+   */
+  static ChainAuth any() {
+    return new ChainAuthImpl(false);
+  }
 
   /**
    * Appends a auth provider to the chain.

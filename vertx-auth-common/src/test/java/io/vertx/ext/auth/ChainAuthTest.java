@@ -10,8 +10,8 @@ import org.junit.Test;
 public class ChainAuthTest extends VertxTestBase {
 
   @Test
-  public void emptyTest() {
-    ChainAuth auth = ChainAuth.create();
+  public void emptyTestAny() {
+    ChainAuth auth = ChainAuth.any();
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
@@ -24,8 +24,22 @@ public class ChainAuthTest extends VertxTestBase {
   }
 
   @Test
-  public void singleTest() {
-    ChainAuth auth = ChainAuth.create();
+  public void emptyTestAll() {
+    ChainAuth auth = ChainAuth.all();
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        fail();
+      } else {
+        testComplete();
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void singleTestAny() {
+    ChainAuth auth = ChainAuth.any();
 
     auth.append((authInfo, res) -> {
       // always OK
@@ -43,8 +57,27 @@ public class ChainAuthTest extends VertxTestBase {
   }
 
   @Test
-  public void multipleTest() {
-    ChainAuth auth = ChainAuth.create();
+  public void singleTestAll() {
+    ChainAuth auth = ChainAuth.all();
+
+    auth.append((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(null)));
+    });
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        testComplete();
+      } else {
+        fail();
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void multipleTestAny() {
+    ChainAuth auth = ChainAuth.any();
 
     auth.append((authInfo, res) -> {
       // always Fail
@@ -68,8 +101,32 @@ public class ChainAuthTest extends VertxTestBase {
   }
 
   @Test
+  public void multipleTestAll() {
+    ChainAuth auth = ChainAuth.all();
+
+    auth.append((authInfo, res) -> {
+      // always Fail
+      res.handle(Future.failedFuture("some error/bad auth"));
+    });
+
+    auth.append((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+    });
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        fail();
+      } else {
+        testComplete();
+      }
+    });
+    await();
+  }
+
+  @Test
   public void stopOnMatchTest() {
-    ChainAuth auth = ChainAuth.create();
+    ChainAuth auth = ChainAuth.any();
 
     auth.append((authInfo, res) -> {
       // always Fail
@@ -82,6 +139,31 @@ public class ChainAuthTest extends VertxTestBase {
     });
 
     auth.append((authInfo, res) -> fail("should not be called"));
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        testComplete();
+      } else {
+        fail();
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void matchAllTest() {
+    ChainAuth auth = ChainAuth.all();
+
+    auth.append((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 1))));
+    });
+
+    auth.append((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+    });
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
