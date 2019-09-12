@@ -180,7 +180,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public OAuth2ClientOptions setAuthorizationPath(String authorizationPath) {
-    this.authorizationPath = authorizationPath;
+    this.authorizationPath = replacePath(authorizationPath);
     return this;
   }
 
@@ -193,7 +193,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public OAuth2ClientOptions setTokenPath(String tokenPath) {
-    this.tokenPath = tokenPath;
+    this.tokenPath = replacePath(tokenPath);
     return this;
   }
 
@@ -210,7 +210,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setRevocationPath(String revocationPath) {
-    this.revocationPath = revocationPath;
+    this.revocationPath = replacePath(revocationPath);
     return this;
   }
 
@@ -259,7 +259,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setSite(String site) {
-    this.site = site;
+    this.site = replacePath(site);
     return this;
   }
 
@@ -370,7 +370,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setLogoutPath(String logoutPath) {
-    this.logoutPath = logoutPath;
+    this.logoutPath = replacePath(logoutPath);
     return this;
   }
 
@@ -388,7 +388,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setUserInfoPath(String userInfoPath) {
-    this.userInfoPath = userInfoPath;
+    this.userInfoPath = replacePath(userInfoPath);
     return this;
   }
 
@@ -442,7 +442,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setIntrospectionPath(String introspectionPath) {
-    this.introspectionPath = introspectionPath;
+    this.introspectionPath = replacePath(introspectionPath);
     return this;
   }
 
@@ -469,7 +469,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public OAuth2ClientOptions setJwkPath(String jwkPath) {
-    this.jwkPath = jwkPath;
+    this.jwkPath = replacePath(jwkPath);
     return this;
   }
 
@@ -498,5 +498,16 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   public OAuth2ClientOptions setValidateIssuer(boolean validateIssuer) {
     this.validateIssuer = validateIssuer;
     return this;
+  }
+
+  private String replacePath(String path) {
+    if (path != null && path.contains("{tenant}")) {
+      if (getClientID() == null) {
+        throw new IllegalStateException("Paths with placeholders require that TenantID is prior set");
+      }
+      return path.replace("{tenant}", getClientID());
+    }
+
+    return path;
   }
 }
