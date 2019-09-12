@@ -39,12 +39,12 @@ public interface AzureADAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://login.windows.net/" + guid)
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setScopeSeparator(",")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret)
         .setExtraParameters(
           new JsonObject().put("resource", guid)));
   }

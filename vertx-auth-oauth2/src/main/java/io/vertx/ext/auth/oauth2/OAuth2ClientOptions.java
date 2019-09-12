@@ -102,6 +102,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    */
   public OAuth2ClientOptions(OAuth2ClientOptions other) {
     super(other);
+    clientID = other.getClientID();
+    clientSecret = other.getClientSecret();
     // defaults
     validateIssuer = other.isValidateIssuer();
     flow = other.getFlow();
@@ -115,8 +117,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientSecretParameterName = other.getClientSecretParameterName();
     // specialization
     site = other.getSite();
-    clientID = other.getClientID();
-    clientSecret = other.getClientSecret();
     pubSecKeys = other.getPubSecKeys();
     // jwt options
     jwtOptions = other.getJWTOptions();

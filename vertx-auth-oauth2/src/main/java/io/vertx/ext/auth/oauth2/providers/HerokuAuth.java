@@ -36,11 +36,11 @@ public interface HerokuAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://id.heroku.com")
         .setTokenPath("/oauth/token")
         .setAuthorizationPath("/oauth/authorize")
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 }
