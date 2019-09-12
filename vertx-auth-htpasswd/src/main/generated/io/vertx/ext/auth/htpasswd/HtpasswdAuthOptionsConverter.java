@@ -4,19 +4,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonCodec;
+import io.vertx.core.spi.json.JsonMapper;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions} original class using Vert.x codegen.
  */
-public class HtpasswdAuthOptionsConverter implements JsonCodec<HtpasswdAuthOptions, JsonObject> {
+public class HtpasswdAuthOptionsConverter implements JsonMapper<HtpasswdAuthOptions, JsonObject> {
 
   public static final HtpasswdAuthOptionsConverter INSTANCE = new HtpasswdAuthOptionsConverter();
 
-  @Override public JsonObject encode(HtpasswdAuthOptions value) { return (value != null) ? value.toJson() : null; }
+  @Override public JsonObject serialize(HtpasswdAuthOptions value) { return (value != null) ? value.toJson() : null; }
 
-  @Override public HtpasswdAuthOptions decode(JsonObject value) { return (value != null) ? new HtpasswdAuthOptions(value) : null; }
+  @Override public HtpasswdAuthOptions deserialize(JsonObject value) { return (value != null) ? new HtpasswdAuthOptions(value) : null; }
 
   @Override public Class<HtpasswdAuthOptions> getTargetClass() { return HtpasswdAuthOptions.class; }
 

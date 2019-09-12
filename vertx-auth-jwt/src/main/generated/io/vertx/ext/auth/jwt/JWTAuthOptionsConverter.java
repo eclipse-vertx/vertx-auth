@@ -4,17 +4,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDecoder;
+import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.auth.jwt.JWTAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.jwt.JWTAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTAuthOptions} original class using Vert.x codegen.
  */
-public class JWTAuthOptionsConverter implements JsonDecoder<JWTAuthOptions, JsonObject> {
+public class JWTAuthOptionsConverter implements JsonDeserializer<JWTAuthOptions, JsonObject> {
 
   public static final JWTAuthOptionsConverter INSTANCE = new JWTAuthOptionsConverter();
 
-  @Override public JWTAuthOptions decode(JsonObject value) { return (value != null) ? new JWTAuthOptions(value) : null; }
+  @Override public JWTAuthOptions deserialize(JsonObject value) { return (value != null) ? new JWTAuthOptions(value) : null; }
 
   @Override public Class<JWTAuthOptions> getTargetClass() { return JWTAuthOptions.class; }
 
@@ -54,16 +54,6 @@ public class JWTAuthOptionsConverter implements JsonDecoder<JWTAuthOptions, Json
                 list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
             });
             obj.setPubSecKeys(list);
-          }
-          break;
-        case "secrets":
-          if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.ext.auth.SecretOptions> list =  new java.util.ArrayList<>();
-            ((Iterable<Object>)member.getValue()).forEach( item -> {
-              if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.SecretOptions((JsonObject)item));
-            });
-            obj.setSecrets(list);
           }
           break;
       }

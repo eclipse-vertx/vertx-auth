@@ -18,10 +18,10 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.SecretOptions;
+import io.vertx.ext.auth.KeyType;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -312,9 +312,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGenerateNewTokenWithMacSecret() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addSecret(new SecretOptions()
-        .setType("HS256")
-        .setSecret("notasecret"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setKeyType(KeyType.SYMMETRIC)
+        .setAlgorithm("HS256")
+        .setSecretKey("notasecret"))
     );
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("HS256"));
@@ -333,9 +334,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testValidateTokenWithInvalidMacSecret() {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addSecret(new SecretOptions()
-        .setType("HS256")
-        .setSecret("a bad secret"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setKeyType(KeyType.SYMMETRIC)
+        .setAlgorithm("HS256")
+        .setSecretKey("a bad secret"))
     );
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onFailure(res -> {
@@ -349,9 +351,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testValidateTokenWithValidMacSecret() {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addSecret(new SecretOptions()
-        .setType("HS256")
-        .setSecret("notasecret"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setKeyType(KeyType.SYMMETRIC)
+        .setAlgorithm("HS256")
+        .setSecretKey("notasecret"))
     );
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
