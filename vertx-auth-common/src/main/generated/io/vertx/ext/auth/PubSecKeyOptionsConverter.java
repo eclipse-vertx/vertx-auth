@@ -4,17 +4,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDecoder;
+import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.auth.PubSecKeyOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.PubSecKeyOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.PubSecKeyOptions} original class using Vert.x codegen.
  */
-public class PubSecKeyOptionsConverter implements JsonDecoder<PubSecKeyOptions, JsonObject> {
+public class PubSecKeyOptionsConverter implements JsonDeserializer<PubSecKeyOptions, JsonObject> {
 
   public static final PubSecKeyOptionsConverter INSTANCE = new PubSecKeyOptionsConverter();
 
-  @Override public PubSecKeyOptions decode(JsonObject value) { return (value != null) ? new PubSecKeyOptions(value) : null; }
+  @Override public PubSecKeyOptions deserialize(JsonObject value) { return (value != null) ? new PubSecKeyOptions(value) : null; }
 
   @Override public Class<PubSecKeyOptions> getTargetClass() { return PubSecKeyOptions.class; }
 

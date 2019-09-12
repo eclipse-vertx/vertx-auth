@@ -4,17 +4,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDecoder;
+import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.auth.mongo.MongoAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.mongo.MongoAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.mongo.MongoAuthOptions} original class using Vert.x codegen.
  */
-public class MongoAuthOptionsConverter implements JsonDecoder<MongoAuthOptions, JsonObject> {
+public class MongoAuthOptionsConverter implements JsonDeserializer<MongoAuthOptions, JsonObject> {
 
   public static final MongoAuthOptionsConverter INSTANCE = new MongoAuthOptionsConverter();
 
-  @Override public MongoAuthOptions decode(JsonObject value) { return (value != null) ? new MongoAuthOptions(value) : null; }
+  @Override public MongoAuthOptions deserialize(JsonObject value) { return (value != null) ? new MongoAuthOptions(value) : null; }
 
   @Override public Class<MongoAuthOptions> getTargetClass() { return MongoAuthOptions.class; }
 

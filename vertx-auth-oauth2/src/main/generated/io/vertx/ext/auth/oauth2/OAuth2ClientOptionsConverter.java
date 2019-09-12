@@ -4,19 +4,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonCodec;
+import io.vertx.core.spi.json.JsonMapper;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions} original class using Vert.x codegen.
  */
-public class OAuth2ClientOptionsConverter implements JsonCodec<OAuth2ClientOptions, JsonObject> {
+public class OAuth2ClientOptionsConverter implements JsonMapper<OAuth2ClientOptions, JsonObject> {
 
   public static final OAuth2ClientOptionsConverter INSTANCE = new OAuth2ClientOptionsConverter();
 
-  @Override public JsonObject encode(OAuth2ClientOptions value) { return (value != null) ? value.toJson() : null; }
+  @Override public JsonObject serialize(OAuth2ClientOptions value) { return (value != null) ? value.toJson() : null; }
 
-  @Override public OAuth2ClientOptions decode(JsonObject value) { return (value != null) ? new OAuth2ClientOptions(value) : null; }
+  @Override public OAuth2ClientOptions deserialize(JsonObject value) { return (value != null) ? new OAuth2ClientOptions(value) : null; }
 
   @Override public Class<OAuth2ClientOptions> getTargetClass() { return OAuth2ClientOptions.class; }
 

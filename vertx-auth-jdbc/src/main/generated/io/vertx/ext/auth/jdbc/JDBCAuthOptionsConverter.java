@@ -4,17 +4,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDecoder;
+import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.auth.jdbc.JDBCAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.jdbc.JDBCAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jdbc.JDBCAuthOptions} original class using Vert.x codegen.
  */
-public class JDBCAuthOptionsConverter implements JsonDecoder<JDBCAuthOptions, JsonObject> {
+public class JDBCAuthOptionsConverter implements JsonDeserializer<JDBCAuthOptions, JsonObject> {
 
   public static final JDBCAuthOptionsConverter INSTANCE = new JDBCAuthOptionsConverter();
 
-  @Override public JDBCAuthOptions decode(JsonObject value) { return (value != null) ? new JDBCAuthOptions(value) : null; }
+  @Override public JDBCAuthOptions deserialize(JsonObject value) { return (value != null) ? new JDBCAuthOptions(value) : null; }
 
   @Override public Class<JDBCAuthOptions> getTargetClass() { return JDBCAuthOptions.class; }
 
