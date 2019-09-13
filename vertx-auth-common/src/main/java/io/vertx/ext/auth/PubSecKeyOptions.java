@@ -11,7 +11,6 @@ import io.vertx.core.json.JsonObject;
 @DataObject(generateConverter = true)
 public class PubSecKeyOptions {
 
-  private KeyType keyType;
   private String algorithm;
   private boolean certificate;
   private boolean symmetric;
@@ -30,7 +29,6 @@ public class PubSecKeyOptions {
    * @param other the options to copy
    */
   public PubSecKeyOptions(PubSecKeyOptions other) {
-    keyType = other.getKeyType();
     algorithm = other.getAlgorithm();
     publicKey = other.getPublicKey();
     secretKey = other.getSecretKey();
@@ -45,15 +43,6 @@ public class PubSecKeyOptions {
    */
   public PubSecKeyOptions(JsonObject json) {
     PubSecKeyOptionsConverter.fromJson(json, this);
-  }
-
-  public KeyType getKeyType() {
-    return keyType;
-  }
-
-  public PubSecKeyOptions setKeyType(KeyType keyType) {
-    this.keyType = keyType;
-    return this;
   }
 
   public String getAlgorithm() {
@@ -91,19 +80,15 @@ public class PubSecKeyOptions {
   @Deprecated
   public PubSecKeyOptions setSymmetric(boolean symmetric) {
     this.symmetric = symmetric;
-    this.keyType = KeyType.SYMMETRIC;
     return this;
   }
 
-  @Deprecated
   public boolean isCertificate() {
     return certificate;
   }
 
-  @Deprecated
   public PubSecKeyOptions setCertificate(boolean certificate) {
     this.certificate = certificate;
-    this.keyType = KeyType.CERTIFICATE;
     return this;
   }
 }

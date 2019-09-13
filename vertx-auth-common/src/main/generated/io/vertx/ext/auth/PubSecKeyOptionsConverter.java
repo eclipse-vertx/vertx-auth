@@ -31,11 +31,6 @@ public class PubSecKeyOptionsConverter implements JsonDeserializer<PubSecKeyOpti
             obj.setCertificate((Boolean)member.getValue());
           }
           break;
-        case "keyType":
-          if (member.getValue() instanceof String) {
-            obj.setKeyType(io.vertx.ext.auth.KeyType.valueOf((String)member.getValue()));
-          }
-          break;
         case "publicKey":
           if (member.getValue() instanceof String) {
             obj.setPublicKey((String)member.getValue());
@@ -64,9 +59,6 @@ public class PubSecKeyOptionsConverter implements JsonDeserializer<PubSecKeyOpti
       json.put("algorithm", obj.getAlgorithm());
     }
     json.put("certificate", obj.isCertificate());
-    if (obj.getKeyType() != null) {
-      json.put("keyType", obj.getKeyType().name());
-    }
     if (obj.getPublicKey() != null) {
       json.put("publicKey", obj.getPublicKey());
     }

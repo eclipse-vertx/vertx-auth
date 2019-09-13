@@ -84,25 +84,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         if (keys != null) {
           for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-            switch (pubSecKey.getKeyType()) {
-              case SYMMETRIC:
-                jwt.addJWK(JWK.symmetricKey(pubSecKey.getAlgorithm(), pubSecKey.getSecretKey()));
-                break;
-              case PUBLIC:
-                jwt.addJWK(JWK.pubKey(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
-                break;
-              case SECRET:
-                jwt.addJWK(JWK.secKey(pubSecKey.getAlgorithm(), pubSecKey.getSecretKey()));
-                break;
-              case PUBSEC:
-                jwt.addJWK(JWK.pubSecKey(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
-                break;
-              case CERTIFICATE:
-                jwt.addJWK(JWK.certificate(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
-                break;
-              default:
-                throw new RuntimeException("Unsupported KeyType: " + pubSecKey.getKeyType());
-            }
+            jwt.addJWK(JWK.from(pubSecKey));
           }
         }
 

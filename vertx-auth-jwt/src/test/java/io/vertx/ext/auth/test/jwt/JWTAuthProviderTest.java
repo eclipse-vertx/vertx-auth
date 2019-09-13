@@ -18,7 +18,6 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.KeyType;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -313,7 +312,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testGenerateNewTokenWithMacSecret() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
-        .setKeyType(KeyType.SYMMETRIC)
         .setAlgorithm("HS256")
         .setSecretKey("notasecret"))
     );
@@ -335,7 +333,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
-        .setKeyType(KeyType.SYMMETRIC)
         .setAlgorithm("HS256")
         .setSecretKey("a bad secret"))
     );
@@ -352,7 +349,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
-        .setKeyType(KeyType.SYMMETRIC)
         .setAlgorithm("HS256")
         .setSecretKey("notasecret"))
     );

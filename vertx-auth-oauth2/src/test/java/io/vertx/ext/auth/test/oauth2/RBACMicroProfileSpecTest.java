@@ -1,7 +1,6 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.KeyType;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
@@ -39,7 +38,6 @@ public class RBACMicroProfileSpecTest {
         new OAuth2ClientOptions()
           .setClientID("dummy-client")
           .addPubSecKey(new PubSecKeyOptions()
-            .setKeyType(KeyType.PUBLIC)
             .setAlgorithm("RS256")
             .setPublicKey(
               "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmuIC9Qvwoe/3tUpHkcUp\n" +

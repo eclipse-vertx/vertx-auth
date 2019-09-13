@@ -4,7 +4,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.KeyType;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -129,7 +128,6 @@ public interface GoogleAuth extends OpenIDConnectAuth {
         .setSite("https://accounts.google.com")
         .setTokenPath(serviceAccountJson.getString("token_uri"))
         .addPubSecKey(new PubSecKeyOptions()
-          .setKeyType(KeyType.SECRET)
           .setAlgorithm("RS256")
           .setSecretKey(privateKey.toString()))
         .setJWTOptions(new JWTOptions()

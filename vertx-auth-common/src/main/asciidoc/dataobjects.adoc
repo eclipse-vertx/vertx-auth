@@ -45,7 +45,6 @@
 ^|Name | Type ^| Description
 |[[algorithm]]`@algorithm`|`String`|-
 |[[certificate]]`@certificate`|`Boolean`|-
-|[[keyType]]`@keyType`|`link:enums.html#KeyType[KeyType]`|-
 |[[publicKey]]`@publicKey`|`String`|-
 |[[secretKey]]`@secretKey`|`String`|-
 |[[symmetric]]`@symmetric`|`Boolean`|-

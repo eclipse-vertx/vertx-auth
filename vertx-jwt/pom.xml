@@ -31,6 +31,14 @@
     <doc.skip>true</doc.skip>
   </properties>
 
+  <dependencies>
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-auth-common</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>

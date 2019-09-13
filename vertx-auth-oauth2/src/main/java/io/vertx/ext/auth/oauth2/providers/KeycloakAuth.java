@@ -4,7 +4,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.KeyType;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -93,7 +92,6 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
 
     if (config.containsKey("realm-public-key")) {
       options.addPubSecKey(new PubSecKeyOptions()
-        .setKeyType(KeyType.PUBLIC)
         .setAlgorithm("RS256")
         .setPublicKey(config.getString("realm-public-key")));
     }

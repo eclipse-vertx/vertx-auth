@@ -2,6 +2,7 @@ package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.jwt.impl.SignatureHelper;
 
 import javax.crypto.*;
@@ -104,6 +105,36 @@ public final class JWK implements Crypto {
    */
   public static JWK certificate(String algorithm, String pemString) {
     return new JWK(algorithm, true, pemString, null);
+  }
+
+  public static JWK from(PubSecKeyOptions options) {
+    String alg = options.getAlgorithm();
+    if (alg.startsWith("HS")) {
+      // HMAC SHA
+      return symmetricKey(alg, options.getSecretKey());
+    }
+
+    String pub = options.getPublicKey();
+    String sec = options.getSecretKey();
+
+    // Pub Sec key
+    if (pub != null && sec != null) {
+      return pubSecKey(alg, pub, sec);
+    }
+
+    if (pub != null) {
+      if (options.isCertificate()) {
+        return certificate(alg, pub);
+      } else {
+        return pubKey(alg, pub);
+      }
+    }
+
+    if (sec != null) {
+      return secKey(alg, sec);
+    }
+
+    throw new IllegalArgumentException("Missing PUB/SEC keys");
   }
 
   /**
