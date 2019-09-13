@@ -103,6 +103,11 @@ public class OAuth2ClientOptionsConverter implements JsonMapper<OAuth2ClientOpti
             obj.setSite((String)member.getValue());
           }
           break;
+        case "tenant":
+          if (member.getValue() instanceof String) {
+            obj.setTenant((String)member.getValue());
+          }
+          break;
         case "tokenPath":
           if (member.getValue() instanceof String) {
             obj.setTokenPath((String)member.getValue());
@@ -183,6 +188,9 @@ public class OAuth2ClientOptionsConverter implements JsonMapper<OAuth2ClientOpti
     }
     if (obj.getSite() != null) {
       json.put("site", obj.getSite());
+    }
+    if (obj.getTenant() != null) {
+      json.put("tenant", obj.getTenant());
     }
     if (obj.getTokenPath() != null) {
       json.put("tokenPath", obj.getTokenPath());

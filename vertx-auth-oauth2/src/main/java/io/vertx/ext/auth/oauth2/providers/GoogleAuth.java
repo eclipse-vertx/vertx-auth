@@ -38,8 +38,10 @@ public interface GoogleAuth extends OpenIDConnectAuth {
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
-        .setSite("https://accounts.google.com")
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
+        .setSite("https://accounts.google.com")
         .setTokenPath("https://www.googleapis.com/oauth2/v3/token")
         .setAuthorizationPath("/o/oauth2/auth")
         .setIntrospectionPath("https://www.googleapis.com/oauth2/v3/tokeninfo")
@@ -47,9 +49,7 @@ public interface GoogleAuth extends OpenIDConnectAuth {
         .setJwkPath("https://www.googleapis.com/oauth2/v3/certs")
         .setUserInfoParameters(new JsonObject()
           .put("alt", "json"))
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 
   /**

@@ -38,12 +38,12 @@ public interface ShopifyAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://" + shop + ".myshopify.com")
         .setTokenPath("/admin/oauth/access_token")
         .setAuthorizationPath("/admin/oauth/authorize")
         .setUserInfoPath("/admin/shop.json")
-        .setScopeSeparator(",")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(","));
   }
 }

@@ -36,12 +36,12 @@ public interface BoxAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://account.box.com")
         .setTokenPath("/api/oauth2/token")
         .setAuthorizationPath("/api/oauth2/authorize")
         .setUserInfoPath("/users/me")
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 }

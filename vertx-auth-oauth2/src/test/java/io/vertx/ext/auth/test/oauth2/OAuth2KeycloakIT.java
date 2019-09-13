@@ -42,8 +42,9 @@ public class OAuth2KeycloakIT {
 
     OAuth2ClientOptions options = new OAuth2ClientOptions()
       .setFlow(OAuth2FlowType.PASSWORD)
-      .setSite(site + "/auth/realms/vertx-test")
-      .setClientID("public-client");
+      .setClientID("public-client")
+      .setTenant("vertx-test")
+      .setSite(site + "/auth/realms/{tenant}");
 
     options.setTrustAll(true);
 
@@ -111,8 +112,9 @@ public class OAuth2KeycloakIT {
 
       OAuth2ClientOptions options = new OAuth2ClientOptions()
         .setFlow(OAuth2FlowType.PASSWORD)
-        .setSite(site + "/auth/realms/vertx-test")
         .setClientID("confidential-client")
+        .setTenant("vertx-test")
+        .setSite(site + "/auth/realms/{realm}")
         .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e");
 
       options.setTrustAll(true);

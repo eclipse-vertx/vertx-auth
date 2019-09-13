@@ -36,11 +36,11 @@ public interface LiveAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://login.live.com")
         .setTokenPath("/oauth20_token.srf")
         .setAuthorizationPath("/oauth20_authorize.srf")
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 }

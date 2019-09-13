@@ -36,12 +36,12 @@ public interface StripeAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://connect.stripe.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setUserInfoPath("/v1/account")
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 }

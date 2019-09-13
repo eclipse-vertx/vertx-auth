@@ -59,13 +59,13 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
 
     options.setFlow(flow);
 
+    if (config.containsKey("resource")) {
+      options.setClientID(config.getString("resource"));
+    }
+
     // keycloak conversion to oauth2 options
     if (config.containsKey("auth-server-url")) {
       options.setSite(config.getString("auth-server-url"));
-    }
-
-    if (config.containsKey("resource")) {
-      options.setClientID(config.getString("resource"));
     }
 
     if (config.containsKey("credentials") && config.getJsonObject("credentials").containsKey("secret")) {
