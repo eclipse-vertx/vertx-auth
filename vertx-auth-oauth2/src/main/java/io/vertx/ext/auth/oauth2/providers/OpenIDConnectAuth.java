@@ -35,6 +35,10 @@ public interface OpenIDConnectAuth {
       return;
     }
 
+    // compute paths with variables, at this moment it is only relevant that
+    // the paths and site are properly computed
+    config.replaceVariables(false);
+
     final OAuth2API api = new OAuth2API(vertx, config);
     final HttpClientRequest request = api.makeRequest(HttpMethod.GET, config.getSite() + "/.well-known/openid-configuration", res -> {
       if (res.failed()) {

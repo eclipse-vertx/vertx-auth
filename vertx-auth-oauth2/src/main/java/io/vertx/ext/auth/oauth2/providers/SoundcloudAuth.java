@@ -36,11 +36,11 @@ public interface SoundcloudAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://api.soundcloud.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/connect")
-        .setUserInfoPath("/me.json")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setUserInfoPath("/me.json"));
   }
 }

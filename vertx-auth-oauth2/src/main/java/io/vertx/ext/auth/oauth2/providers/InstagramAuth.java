@@ -36,12 +36,12 @@ public interface InstagramAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://api.instagram.com")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
         .setUserInfoPath("/v1/users/self")
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 }

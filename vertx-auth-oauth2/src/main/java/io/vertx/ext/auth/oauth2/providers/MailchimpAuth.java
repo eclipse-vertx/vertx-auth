@@ -36,11 +36,11 @@ public interface MailchimpAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://login.mailchimp.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
-        .setUserInfoPath("/oauth2/metadata")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setUserInfoPath("/oauth2/metadata"));
   }
 }

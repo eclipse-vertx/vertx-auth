@@ -36,12 +36,12 @@ public interface LinkedInAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://www.linkedin.com")
         .setTokenPath("/uas/oauth2/accessToken")
         .setAuthorizationPath("/uas/oauth2/authorization")
         .setUserInfoPath("/people/~")
-        .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator(" "));
   }
 }

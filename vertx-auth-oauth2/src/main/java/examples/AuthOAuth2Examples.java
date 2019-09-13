@@ -339,8 +339,8 @@ public class AuthOAuth2Examples {
     OpenIDConnectAuth.discover(
       vertx,
       new OAuth2ClientOptions()
-        .setSite("https://accounts.google.com")
-        .setClientID("clientId"),
+        .setClientID("clientId")
+        .setSite("https://accounts.google.com"),
       res -> {
         if (res.succeeded()) {
           // the setup call succeeded.
@@ -357,8 +357,9 @@ public class AuthOAuth2Examples {
     OpenIDConnectAuth.discover(
       vertx,
       new OAuth2ClientOptions()
-        .setSite("http://server:port/auth/realms/your_realm")
-        .setClientID("clientId"),
+        .setClientID("clientId")
+        .setTenant("your_realm")
+        .setSite("http://server:port/auth/realms/{tenant}"),
       res -> {
         if (res.succeeded()) {
           // the setup call succeeded.

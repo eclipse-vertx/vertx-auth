@@ -19,12 +19,16 @@ package io.vertx.ext.auth.oauth2;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientOptionsConverter;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.jwt.JWTOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Options describing how an OAuth2 {@link HttpClient} will make connections.
@@ -62,6 +66,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String introspectionPath;
   // JWK path RFC7517
   private String jwkPath;
+  // OpenID non standard
+  private String tenant;
 
   private String site;
   private String clientID;
@@ -102,6 +108,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    */
   public OAuth2ClientOptions(OAuth2ClientOptions other) {
     super(other);
+    tenant = other.getTenant();
+    clientID = other.getClientID();
+    clientSecret = other.getClientSecret();
     // defaults
     validateIssuer = other.isValidateIssuer();
     flow = other.getFlow();
@@ -115,8 +124,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     clientSecretParameterName = other.getClientSecretParameterName();
     // specialization
     site = other.getSite();
-    clientID = other.getClientID();
-    clientSecret = other.getClientSecret();
     pubSecKeys = other.getPubSecKeys();
     // jwt options
     jwtOptions = other.getJWTOptions();
@@ -144,6 +151,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     }
     // JWK path RFC7517
     jwkPath = other.getJwkPath();
+    // compute paths with variables, at this moment it is only relevant that
+    // the paths and site are properly computed
+    replaceVariables(false);
   }
 
   private void init() {
@@ -169,6 +179,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     super(json);
     init();
     OAuth2ClientOptionsConverter.fromJson(json, this);
+    // compute paths with variables, at this moment it is only relevant that
+    // the paths and site are properly computed
+    replaceVariables(false);
   }
 
   /**
@@ -498,5 +511,80 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   public OAuth2ClientOptions setValidateIssuer(boolean validateIssuer) {
     this.validateIssuer = validateIssuer;
     return this;
+  }
+
+  public String getTenant() {
+    return tenant;
+  }
+
+  /**
+   * Sets an optional tenant. Tenants are used in some OpenID servers as placeholders for the URLs.
+   * The tenant should be set prior to any URL as it affects the way the URLs will be stored.
+   *
+   * Some provders may name this differently, for example: `realm`.
+   *
+   * @param tenant the tenant/realm for this config.
+   * @return self
+   */
+  public OAuth2ClientOptions setTenant(String tenant) {
+    this.tenant = tenant;
+    return this;
+  }
+
+  public void replaceVariables(boolean strict) {
+    site = replaceVariables(site);
+
+    authorizationPath = replaceVariables(authorizationPath);
+    tokenPath = replaceVariables(tokenPath);
+    revocationPath = replaceVariables(revocationPath);
+    logoutPath = replaceVariables(logoutPath);
+    userInfoPath = replaceVariables(userInfoPath);
+    introspectionPath = replaceVariables(introspectionPath);
+    jwkPath = replaceVariables(jwkPath);
+
+    if (extraParams != null) {
+      for (Map.Entry<String, Object> kv : extraParams) {
+        Object v = kv.getValue();
+        if (v instanceof String) {
+          try {
+            kv.setValue(replaceVariables((String) v));
+          } catch (IllegalStateException e) {
+            // if we're strict the we assert that even the optional extra parameters must
+            // be updated with the variable value
+            if (strict) {
+              throw e;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private static final Pattern TENANT_PATTER = Pattern.compile("\\{(tenant|realm)}");
+
+  private String replaceVariables(String path) {
+    if (path != null) {
+      final Matcher matcher = TENANT_PATTER.matcher(path);
+      if (matcher.find()) {
+        if (tenant == null) {
+          throw new IllegalStateException("Configuration with placeholders require that \"tenant\" is prior set");
+        }
+
+        return matcher.replaceAll(tenant);
+      }
+    }
+
+    return path;
+  }
+
+  public JsonObject toJson() {
+    JsonObject json = super.toJson();
+    OAuth2ClientOptionsConverter.toJson(this, json);
+    return json;
+  }
+
+  @Override
+  public String toString() {
+    return toJson().encode();
   }
 }
