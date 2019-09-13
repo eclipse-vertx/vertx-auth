@@ -51,6 +51,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
+    // compute paths with variables, at this moment it is only relevant that
+    // all variables are properly computed
+    this.config.replaceVariables(true);
+
     this.api = new OAuth2API(vertx, config);
 
     if (config.getPubSecKeys() != null) {

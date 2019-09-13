@@ -19,12 +19,16 @@ package io.vertx.ext.auth.oauth2;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientOptionsConverter;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.jwt.JWTOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Options describing how an OAuth2 {@link HttpClient} will make connections.
@@ -62,6 +66,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private String introspectionPath;
   // JWK path RFC7517
   private String jwkPath;
+  // OpenID non standard
+  private String tenant;
 
   private String site;
   private String clientID;
@@ -102,6 +108,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    */
   public OAuth2ClientOptions(OAuth2ClientOptions other) {
     super(other);
+    tenant = other.getTenant();
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
     // defaults
@@ -144,6 +151,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     }
     // JWK path RFC7517
     jwkPath = other.getJwkPath();
+    // compute paths with variables, at this moment it is only relevant that
+    // the paths and site are properly computed
+    replaceVariables(false);
   }
 
   private void init() {
@@ -169,6 +179,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     super(json);
     init();
     OAuth2ClientOptionsConverter.fromJson(json, this);
+    // compute paths with variables, at this moment it is only relevant that
+    // the paths and site are properly computed
+    replaceVariables(false);
   }
 
   /**
@@ -180,7 +193,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public OAuth2ClientOptions setAuthorizationPath(String authorizationPath) {
-    this.authorizationPath = replacePath(authorizationPath);
+    this.authorizationPath = authorizationPath;
     return this;
   }
 
@@ -193,7 +206,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public OAuth2ClientOptions setTokenPath(String tokenPath) {
-    this.tokenPath = replacePath(tokenPath);
+    this.tokenPath = tokenPath;
     return this;
   }
 
@@ -210,7 +223,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setRevocationPath(String revocationPath) {
-    this.revocationPath = replacePath(revocationPath);
+    this.revocationPath = revocationPath;
     return this;
   }
 
@@ -259,7 +272,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setSite(String site) {
-    this.site = replacePath(site);
+    this.site = site;
     return this;
   }
 
@@ -370,7 +383,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setLogoutPath(String logoutPath) {
-    this.logoutPath = replacePath(logoutPath);
+    this.logoutPath = logoutPath;
     return this;
   }
 
@@ -388,7 +401,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setUserInfoPath(String userInfoPath) {
-    this.userInfoPath = replacePath(userInfoPath);
+    this.userInfoPath = userInfoPath;
     return this;
   }
 
@@ -442,7 +455,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @return self
    */
   public OAuth2ClientOptions setIntrospectionPath(String introspectionPath) {
-    this.introspectionPath = replacePath(introspectionPath);
+    this.introspectionPath = introspectionPath;
     return this;
   }
 
@@ -469,7 +482,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public OAuth2ClientOptions setJwkPath(String jwkPath) {
-    this.jwkPath = replacePath(jwkPath);
+    this.jwkPath = jwkPath;
     return this;
   }
 
@@ -500,14 +513,78 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     return this;
   }
 
-  private String replacePath(String path) {
-    if (path != null && path.contains("{tenant}")) {
-      if (getClientID() == null) {
-        throw new IllegalStateException("Paths with placeholders require that TenantID is prior set");
+  public String getTenant() {
+    return tenant;
+  }
+
+  /**
+   * Sets an optional tenant. Tenants are used in some OpenID servers as placeholders for the URLs.
+   * The tenant should be set prior to any URL as it affects the way the URLs will be stored.
+   *
+   * Some provders may name this differently, for example: `realm`.
+   *
+   * @param tenant the tenant/realm for this config.
+   * @return self
+   */
+  public OAuth2ClientOptions setTenant(String tenant) {
+    this.tenant = tenant;
+    return this;
+  }
+
+  public void replaceVariables(boolean strict) {
+    site = replaceVariables(site);
+
+    authorizationPath = replaceVariables(authorizationPath);
+    tokenPath = replaceVariables(tokenPath);
+    revocationPath = replaceVariables(revocationPath);
+    logoutPath = replaceVariables(logoutPath);
+    userInfoPath = replaceVariables(userInfoPath);
+    introspectionPath = replaceVariables(introspectionPath);
+    jwkPath = replaceVariables(jwkPath);
+
+    if (extraParams != null) {
+      for (Map.Entry<String, Object> kv : extraParams) {
+        Object v = kv.getValue();
+        if (v instanceof String) {
+          try {
+            kv.setValue(replaceVariables((String) v));
+          } catch (IllegalStateException e) {
+            // if we're strict the we assert that even the optional extra parameters must
+            // be updated with the variable value
+            if (strict) {
+              throw e;
+            }
+          }
+        }
       }
-      return path.replace("{tenant}", getClientID());
+    }
+  }
+
+  private static final Pattern TENANT_PATTER = Pattern.compile("\\{(tenant|realm)}");
+
+  private String replaceVariables(String path) {
+    if (path != null) {
+      final Matcher matcher = TENANT_PATTER.matcher(path);
+      if (matcher.find()) {
+        if (tenant == null) {
+          throw new IllegalStateException("Configuration with placeholders require that \"tenant\" is prior set");
+        }
+
+        return matcher.replaceAll(tenant);
+      }
     }
 
     return path;
+  }
+
+  public JsonObject toJson() {
+    JsonObject json = super.toJson();
+    OAuth2ClientOptionsConverter.toJson(this, json);
+    return json;
+  }
+
+  @Override
+  public String toString() {
+    return toJson().encode();
   }
 }

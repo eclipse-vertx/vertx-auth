@@ -358,7 +358,8 @@ public class AuthOAuth2Examples {
       vertx,
       new OAuth2ClientOptions()
         .setClientID("clientId")
-        .setSite("http://server:port/auth/realms/your_realm"),
+        .setTenant("your_realm")
+        .setSite("http://server:port/auth/realms/{tenant}"),
       res -> {
         if (res.succeeded()) {
           // the setup call succeeded.

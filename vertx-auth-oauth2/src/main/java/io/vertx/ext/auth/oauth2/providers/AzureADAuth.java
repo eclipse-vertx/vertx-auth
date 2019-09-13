@@ -41,12 +41,13 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientID(clientId)
         .setClientSecret(clientSecret)
-        .setSite("https://login.windows.net/" + guid)
+        .setTenant(guid)
+        .setSite("https://login.windows.net/{tenant}")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setScopeSeparator(",")
         .setExtraParameters(
-          new JsonObject().put("resource", guid)));
+          new JsonObject().put("resource", "{tenant}")));
   }
 
   /**
@@ -71,7 +72,9 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
-        .setScopeSeparator(","),
+        .setScopeSeparator(",")
+        .setExtraParameters(
+          new JsonObject().put("resource", "{tenant}")),
       handler);
   }
 
