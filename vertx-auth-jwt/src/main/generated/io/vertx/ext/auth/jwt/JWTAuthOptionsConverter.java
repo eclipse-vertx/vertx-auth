@@ -4,19 +4,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.jwt.JWTAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTAuthOptions} original class using Vert.x codegen.
  */
-public class JWTAuthOptionsConverter implements JsonDeserializer<JWTAuthOptions, JsonObject> {
+public class JWTAuthOptionsConverter {
 
-  public static final JWTAuthOptionsConverter INSTANCE = new JWTAuthOptionsConverter();
-
-  @Override public JWTAuthOptions deserialize(JsonObject value) { return (value != null) ? new JWTAuthOptions(value) : null; }
-
-  @Override public Class<JWTAuthOptions> getTargetClass() { return JWTAuthOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

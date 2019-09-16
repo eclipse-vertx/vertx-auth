@@ -120,21 +120,6 @@ public interface OAuth2Auth extends AuthProvider {
   OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler);
 
   /**
-   * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
-   * meta-information about this token.
-   *
-   * @see OAuth2Auth#introspectToken(String, String, Handler)
-   * @param token the access token (base64 string)
-   * @param tokenType hint to the token type e.g.: `access_token`
-   * @return future result
-   */
-  default Future<AccessToken> introspectToken(String token, String tokenType) {
-    Promise<AccessToken> promise = Promise.promise();
-    introspectToken(token, tokenType, promise);
-    return promise.future();
-  }
-
-  /**
    * Returns the configured flow type for the Oauth2 provider.
    *
    * @return the flow type.

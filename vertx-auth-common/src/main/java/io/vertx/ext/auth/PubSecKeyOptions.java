@@ -13,7 +13,7 @@ public class PubSecKeyOptions {
 
   private String algorithm;
   private boolean certificate;
-  private boolean symmetric;
+  private Boolean symmetric;
   private String publicKey;
   private String secretKey;
 
@@ -72,12 +72,14 @@ public class PubSecKeyOptions {
     return this;
   }
 
-  @Deprecated
   public boolean isSymmetric() {
+    if (symmetric == null) {
+      // attempt to derive the kind of key
+      return algorithm.startsWith("HS") && publicKey == null && secretKey != null;
+    }
     return symmetric;
   }
 
-  @Deprecated
   public PubSecKeyOptions setSymmetric(boolean symmetric) {
     this.symmetric = symmetric;
     return this;

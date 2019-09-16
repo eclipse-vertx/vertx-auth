@@ -4,19 +4,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.KeyStoreOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.KeyStoreOptions} original class using Vert.x codegen.
  */
-public class KeyStoreOptionsConverter implements JsonDeserializer<KeyStoreOptions, JsonObject> {
+public class KeyStoreOptionsConverter {
 
-  public static final KeyStoreOptionsConverter INSTANCE = new KeyStoreOptionsConverter();
-
-  @Override public KeyStoreOptions deserialize(JsonObject value) { return (value != null) ? new KeyStoreOptions(value) : null; }
-
-  @Override public Class<KeyStoreOptions> getTargetClass() { return KeyStoreOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, KeyStoreOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

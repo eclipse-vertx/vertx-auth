@@ -4,19 +4,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonDeserializer;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.shiro.ShiroAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuthOptions} original class using Vert.x codegen.
  */
-public class ShiroAuthOptionsConverter implements JsonDeserializer<ShiroAuthOptions, JsonObject> {
+public class ShiroAuthOptionsConverter {
 
-  public static final ShiroAuthOptionsConverter INSTANCE = new ShiroAuthOptionsConverter();
-
-  @Override public ShiroAuthOptions deserialize(JsonObject value) { return (value != null) ? new ShiroAuthOptions(value) : null; }
-
-  @Override public Class<ShiroAuthOptions> getTargetClass() { return ShiroAuthOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ShiroAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

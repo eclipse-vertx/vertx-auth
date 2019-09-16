@@ -62,7 +62,7 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
 
     OpenIDConnectAuth.discover(vertx,
       new OAuth2ClientOptions(config)
-        .setSite("https://login.salesforce.com")
+        .setSite(site)
         .setScopeSeparator("+"),
       handler);
   }
