@@ -24,6 +24,30 @@ public class HashingStrategyTest {
   }
 
   @Test
+  public void testHashSHA1() {
+    HashingStrategy strategy = HashingStrategy.load();
+    assertNotNull(strategy.get("sha1"));
+    // should encode
+    String hash = strategy.hash("sha1", null, salt, "SuperSecret$!");
+    // should be valid
+    assertTrue(strategy.verify(hash, "SuperSecret$!"));
+    // should be wrong
+    assertFalse(strategy.verify(hash, "superSecret$!"));
+  }
+
+  @Test
+  public void testHashSHA256() {
+    HashingStrategy strategy = HashingStrategy.load();
+    assertNotNull(strategy.get("sha256"));
+    // should encode
+    String hash = strategy.hash("sha256", null, salt, "SuperSecret$!");
+    // should be valid
+    assertTrue(strategy.verify(hash, "SuperSecret$!"));
+    // should be wrong
+    assertFalse(strategy.verify(hash, "superSecret$!"));
+  }
+
+  @Test
   public void testHashStronger() {
     HashingStrategy strategy = HashingStrategy.load();
     // should encode
