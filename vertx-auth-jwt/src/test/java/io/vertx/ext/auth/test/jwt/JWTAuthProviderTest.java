@@ -523,4 +523,34 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("kid", "2011-04-29")));
 
   }
+
+  @Test
+  public void testValidateTokenWithIgnoreExpired() throws InterruptedException {
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("HS256")
+        .setSecretKey("notasecret"))
+      .setJWTOptions(new JWTOptions()
+        .setIgnoreExpiration(true))
+    );
+
+    String token = authProvider
+      .generateToken(
+        new JsonObject(),
+        new JWTOptions()
+          .setExpiresInSeconds(1)
+          .setSubject("subject")
+          .setAlgorithm("HS256"));
+
+    // force a sleep to invalidate the token
+    Thread.sleep(1001);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
 }
