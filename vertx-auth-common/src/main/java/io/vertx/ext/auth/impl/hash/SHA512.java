@@ -15,31 +15,15 @@
  */
 package io.vertx.ext.auth.impl.hash;
 
-import io.vertx.ext.auth.HashString;
-import io.vertx.ext.auth.HashingAlgorithm;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-
 /**
  * Implementation of the SHA512 Hashing algorithm
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-public class SHA512 implements HashingAlgorithm {
-
-  private static final Base64.Encoder B64ENC = Base64.getEncoder();
-
-  private final MessageDigest md;
+public class SHA512 extends AbstractMDHash {
 
   public SHA512() {
-    try {
-      md = MessageDigest.getInstance("SHA-512");
-    } catch (NoSuchAlgorithmException nsae) {
-      throw new RuntimeException("SHA-512 is not available", nsae);
-    }
+    super("SHA-512");
   }
 
   @Override
@@ -47,8 +31,4 @@ public class SHA512 implements HashingAlgorithm {
     return "sha512";
   }
 
-  @Override
-  public String hash(HashString hashString, String password) {
-    return B64ENC.encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));
-  }
 }
