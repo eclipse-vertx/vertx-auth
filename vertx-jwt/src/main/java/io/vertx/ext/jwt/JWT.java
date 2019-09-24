@@ -170,6 +170,31 @@ public final class JWT {
     }
   }
 
+  public static String issuer(final String token) {
+    // we don't fail on null as this is a verification step
+    if (token == null) {
+      return null;
+    }
+
+    String[] segments = token.split("\\.");
+    if (segments.length < 2) {
+      // we can't say anything about security as we don't know the
+      // issuer
+      return null;
+    }
+
+    // All segment should be base64
+    String payloadSeg = segments[1];
+    // base64 decode and parse JSON
+    JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
+
+    if (payload.containsKey("iss")) {
+      return payload.getString("iss");
+    }
+    // no issue data present
+    return null;
+  }
+
   public JsonObject decode(final String token) {
     String[] segments = token.split("\\.");
     if (segments.length != (isUnsecure() ? 2 : 3)) {
