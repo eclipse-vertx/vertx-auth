@@ -553,4 +553,37 @@ public class JWTAuthProviderTest extends VertxTestBase {
     }));
     await();
   }
+
+
+  @Test
+  public void testReload() {
+
+    authProvider = JWTAuth.create(vertx, getConfig());
+
+    String token0 = authProvider.generateToken(new JsonObject());
+    assertNotNull(token0);
+    // update the config
+    JWTAuthOptions newConfig = getConfig();
+    // we force an audience for the token
+    newConfig.setJWTOptions(new JWTOptions().addAudience("https://vertx.io").setIssuer("vertx-tests"));
+    // reload
+    authProvider.update(newConfig);
+    // regenerate
+    String token1 = authProvider.generateToken(new JsonObject());
+    assertNotNull(token1);
+    // tokens must not be the same
+    assertNotEquals(token0, token1);
+
+    // the old token can't be decoded as it doesn't comply with the expected audience of the new config
+    authProvider.authenticate(new JsonObject().put("jwt", token0), onFailure(t -> {
+      // the new token must contain iss,aud claims
+      authProvider.authenticate(new JsonObject().put("jwt", token1), onSuccess(t2 -> {
+        assertNotNull(t2.principal().getValue("iss"));
+        assertNotNull(t2.principal().getValue("aud"));
+        testComplete();
+      }));
+    }));
+
+    await();
+  }
 }
