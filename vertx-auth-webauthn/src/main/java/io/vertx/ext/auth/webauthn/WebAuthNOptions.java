@@ -11,7 +11,18 @@ import java.util.List;
 public class WebAuthNOptions {
 
   private String realm;
-  private List<String> transports = Arrays.asList("usb", "nfc", "ble");
+  private String origin;
+  private List<String> transports = Arrays.asList("usb", "nfc", "ble", "internal");
+
+  public int getChallengeLength() {
+    return challengeLength;
+  }
+
+  public void setChallengeLength(int challengeLength) {
+    this.challengeLength = challengeLength;
+  }
+
+  private int challengeLength = 32;
 
   public String getRealm() {
     return realm;
@@ -19,6 +30,15 @@ public class WebAuthNOptions {
 
   public WebAuthNOptions setRealm(String realm) {
     this.realm = realm;
+    return this;
+  }
+
+  public String getOrigin() {
+    return origin;
+  }
+
+  public WebAuthNOptions setOrigin(String origin) {
+    this.origin = origin;
     return this;
   }
 

@@ -16,13 +16,11 @@
 
 package io.vertx.ext.auth.webauthn;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.webauthn.impl.WebAuthNImpl;
 
 import java.util.List;
@@ -45,27 +43,34 @@ public interface WebAuthN extends AuthProvider {
     return new WebAuthNImpl(vertx, options);
   }
 
-  @Fluent
-  WebAuthN webAuthNStore(WebAuthNStore store);
+  /**
+   * Generates makeCredentials request
+   *
+   * @param username    - username
+   * @param displayName - user's personal display name
+   * @param id          - user's base64url encoded id
+   * @return server encoded make credentials request
+   */
+  default JsonObject generateServerCredentialsChallenge(String username, String displayName, String id) {
+    return generateServerCredentialsChallenge(username, displayName, id, null);
+  }
 
   /**
    * Generates makeCredentials request
    *
    * @param username    - username
    * @param displayName - user's personal display name
-   * @param handler a callback  with server encoded make credentials request
-   * @return fluent self
+   * @param id          - user's base64url encoded id
+   * @param type        - optional Credentials Challenge Type
+   * @return server encoded make credentials request
    */
-  @Fluent
-  WebAuthN generateServerMakeCredRequest(String username, String displayName, Handler<AsyncResult<JsonObject>> handler);
+  JsonObject generateServerCredentialsChallenge(String username, String displayName, String id, CredentialsChallengeType type);
 
   /**
    * Generates getAssertion request
    *
-   * @param username the username to challenge
-   * @param handler the callback with server encoded get assertion request
-   * @return fluent self
+   * @param authenticators list of registered authenticators credential Ids
+   * @return server encoded get assertion request
    */
-  @Fluent
-  WebAuthN generateServerGetAssertion(String username, Handler<AsyncResult<JsonObject>> handler);
+  JsonObject generateServerGetAssertion(List<String> authenticators);
 }

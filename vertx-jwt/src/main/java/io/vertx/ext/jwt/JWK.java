@@ -503,7 +503,7 @@ public final class JWK implements Crypto {
 
   private static boolean jsonHasProperties(JsonObject json, String... properties) {
     for (String property : properties) {
-      if (!json.containsKey(property)) {
+      if (!json.containsKey(property) || json.getValue(property) == null) {
         return false;
       }
     }

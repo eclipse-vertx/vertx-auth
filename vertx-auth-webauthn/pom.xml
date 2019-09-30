@@ -36,11 +36,20 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-jwt</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-cbor</artifactId>
-      <version>2.9.8</version>
+      <version>2.9.9</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
     </dependency>
   </dependencies>
 </project>

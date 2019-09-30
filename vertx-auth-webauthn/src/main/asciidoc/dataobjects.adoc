@@ -8,6 +8,8 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+|[[challengeLength]]`@challengeLength`|`Number (int)`|-
+|[[origin]]`@origin`|`String`|-
 |[[realm]]`@realm`|`String`|-
 |[[transports]]`@transports`|`Array of String`|-
 |===
