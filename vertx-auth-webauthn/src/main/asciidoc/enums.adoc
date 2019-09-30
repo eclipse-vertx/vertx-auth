@@ -1,0 +1,14 @@
+= Enums
+
+[[CredentialsChallengeType]]
+== CredentialsChallengeType
+
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[CROSS_PLATFORM]]`CROSS_PLATFORM`|-
+|[[PLATFORM]]`PLATFORM`|-
+|===
+
