@@ -1,5 +1,18 @@
 = Cheatsheets
 
+[[WebAuthNInfo]]
+== WebAuthNInfo
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[authenticators]]`@authenticators`|`Json array`|-
+|[[challenge]]`@challenge`|`String`|-
+|[[webauthn]]`@webauthn`|`Json object`|-
+|===
+
 [[WebAuthNOptions]]
 == WebAuthNOptions
 
@@ -8,6 +21,8 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+|[[challengeLength]]`@challengeLength`|`Number (int)`|-
+|[[origin]]`@origin`|`String`|-
 |[[realm]]`@realm`|`String`|-
 |[[transports]]`@transports`|`Array of String`|-
 |===

@@ -10,10 +10,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.webauthn.Attestation;
-import io.vertx.ext.auth.webauthn.CredentialsChallengeType;
-import io.vertx.ext.auth.webauthn.WebAuthN;
-import io.vertx.ext.auth.webauthn.WebAuthNOptions;
+import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.jwt.JWK;
 
 import java.io.IOException;
@@ -115,10 +112,24 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-    JsonObject webauthnResp = Objects.requireNonNull(authInfo.getJsonObject("webauthn"));
+  public void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler) {
+    JsonObject webauthnResp = Objects.requireNonNull(authInfo.getWebauthn());
 
     final JsonObject response = webauthnResp.getJsonObject("response", EMPTY);
+
+    JsonObject clientData = new JsonObject(Buffer.buffer(b64dec.decode(response.getString("clientDataJSON"))));
+
+    // STEP 8 Verify challenge is match with cookie
+    if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
+      handler.handle(Future.failedFuture("Challenges don't match!"));
+      return;
+    }
+
+    // STEP 9 Verify challenge is match with cookie
+    if (!clientData.getString("origin").equals(options.getOrigin())) {
+      handler.handle(Future.failedFuture("Origins don't match!"));
+      return;
+    }
 
     try {
       if (response.containsKey("attestationObject")) {
@@ -127,7 +138,7 @@ public class WebAuthNImpl implements WebAuthN {
           Future.succeededFuture(
             new WebAuthNUser(verifyAuthenticatorAttestationResponse(webauthnResp))));
       } else if (response.containsKey("authenticatorData")) {
-        JsonArray authenticators = Objects.requireNonNull(authInfo.getJsonArray("authenticators"));
+        JsonArray authenticators = Objects.requireNonNull(authInfo.getAuthenticators());
 
         handler.handle(
           Future.succeededFuture(

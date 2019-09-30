@@ -16,14 +16,18 @@
 
 package io.vertx.ext.auth.webauthn;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.webauthn.impl.WebAuthNImpl;
 
 import java.util.List;
+
+import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**
  * Factory interface for creating WebAuthN based {@link io.vertx.ext.auth.AuthProvider} instances.
@@ -73,4 +77,19 @@ public interface WebAuthN extends AuthProvider {
    * @return server encoded get assertion request
    */
   JsonObject generateServerGetAssertion(List<String> authenticators);
+
+  @GenIgnore(PERMITTED_TYPE)
+  void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler);
+
+  @GenIgnore(PERMITTED_TYPE)
+  default Future<User> authenticate(WebAuthNInfo authInfo) {
+    Promise<User> promise = Promise.promise();
+    authenticate(authInfo, promise);
+    return promise.future();
+  }
+
+  @Override
+  default void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    authenticate(new WebAuthNInfo(authInfo), handler);
+  }
 }
