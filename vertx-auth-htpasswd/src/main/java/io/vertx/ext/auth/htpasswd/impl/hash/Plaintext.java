@@ -31,6 +31,11 @@ public class Plaintext implements HashingAlgorithm {
   }
 
   @Override
+  public String algorithm() {
+    return null;
+  }
+
+  @Override
   public String hash(HashString hashString, String password) {
     return password;
   }

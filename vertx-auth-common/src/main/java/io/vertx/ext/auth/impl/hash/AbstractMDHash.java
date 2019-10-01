@@ -33,10 +33,12 @@ public abstract class AbstractMDHash implements HashingAlgorithm {
 
   private static final Base64.Encoder B64ENC = Base64.getEncoder();
 
+  private final String alg;
   private final MessageDigest md;
 
   AbstractMDHash(final String algorithm) {
     try {
+      alg = algorithm;
       md = MessageDigest.getInstance(algorithm);
     } catch (NoSuchAlgorithmException nsae) {
       throw new RuntimeException(algorithm + " is not available", nsae);
@@ -44,8 +46,17 @@ public abstract class AbstractMDHash implements HashingAlgorithm {
   }
 
   @Override
+  public String algorithm() {
+    return alg;
+  }
+
+  @Override
   public String hash(HashString hashString, String password) {
     return B64ENC.encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));
   }
 
+  @Override
+  public byte[] hash(byte[] rawValue) {
+    return md.digest(rawValue);
+  }
 }

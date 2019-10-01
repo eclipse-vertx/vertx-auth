@@ -8,13 +8,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthStore;
+import io.vertx.ext.auth.HashingAlgorithm;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.webauthn.*;
+import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.jwt.JWK;
 
 import java.io.IOException;
-import java.security.*;
 import java.util.*;
 
 public class WebAuthNImpl implements WebAuthN {
@@ -27,24 +29,19 @@ public class WebAuthNImpl implements WebAuthN {
 
   private final PRNG random;
   private final WebAuthNOptions options;
-  private final MessageDigest sha256;
+  private final AuthStore store;
 
   private final Map<String, Attestation> attestations = new HashMap<>();
 
-  public WebAuthNImpl(Vertx vertx, WebAuthNOptions options) {
+  public WebAuthNImpl(Vertx vertx, WebAuthNOptions options, AuthStore store) {
     random = new PRNG(vertx);
-    this.options = options;
+    this.options = Objects.requireNonNull(options);
+    this.store = Objects.requireNonNull(store);
 
-    ServiceLoader<Attestation> serviceLoader = ServiceLoader.load(Attestation.class);
+    ServiceLoader<Attestation> attestationServiceLoader = ServiceLoader.load(Attestation.class);
 
-    for (Attestation att : serviceLoader) {
+    for (Attestation att : attestationServiceLoader) {
       attestations.put(att.fmt(), att);
-    }
-
-    try {
-      sha256 = MessageDigest.getInstance("SHA-256");
-    } catch (NoSuchAlgorithmException nsae) {
-      throw new RuntimeException("SHA-256 is not available", nsae);
     }
   }
 
@@ -55,99 +52,176 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public JsonObject generateServerCredentialsChallenge(String username, String displayName, String id, CredentialsChallengeType type) {
-    // STEP 2 Generate Credential Challenge
-    JsonObject authenticatorSelection;
+  public WebAuthN generateServerCredentialsChallenge(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler) {
 
-    switch (type) {
-      case CROSS_PLATFORM:
-        // STEP 3.1 add this for security key
-        authenticatorSelection = new JsonObject()
-          .put("authenticatorAttachment", "cross-platform")
-          .put("requireResidentKey", false);
-        break;
-      case PLATFORM:
-        // STEP 3.2 Add this for finger print
-        authenticatorSelection = new JsonObject()
-          .put("authenticatorAttachment", "platform")
-          .put("requireResidentKey", false)
-          .put("userVerification", "required");
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported Authenticator Attachment type: " + type);
-    }
+    store.getUserCredentials(user.getString("username"), getUserCredentials -> {
+      if (getUserCredentials.failed()) {
+        handler.handle(Future.failedFuture(getUserCredentials.cause()));
+        return;
+      }
 
-    return new JsonObject()
-      .put("challenge", randomBase64URLBuffer(32))
-      .put("rp", new JsonObject()
-        .put("name", options.getRealm()))
-      .put("user", new JsonObject()
-        .put("id", id)
-        .put("name", username)
-        .put("displayName", displayName))
-      .put("authenticatorSelection", authenticatorSelection)
-      .put("attestation", "direct")
-      .put("pubKeyCredParams", new JsonArray()
-        .add(new JsonObject()
-          .put("type", "public-key")
-          .put("alg", -7)));
+      List<JsonObject> credentials = getUserCredentials.result();
+
+      if (credentials == null || credentials.size() == 0 || (credentials.size() == 1 && credentials.get(0).getBoolean("registered", false))) {
+
+        final String id = randomBase64URLBuffer(32);
+
+        // STEP 2 Generate Credential Challenge
+        JsonObject authenticatorSelection;
+
+        switch (type) {
+          case CROSS_PLATFORM:
+            // STEP 3.1 add this for security key
+            authenticatorSelection = new JsonObject()
+              .put("authenticatorAttachment", "cross-platform")
+              .put("requireResidentKey", false);
+            break;
+          case PLATFORM:
+            // STEP 3.2 Add this for finger print
+            authenticatorSelection = new JsonObject()
+              .put("authenticatorAttachment", "platform")
+              .put("requireResidentKey", false)
+              .put("userVerification", "required");
+            break;
+          default:
+            handler.handle(Future.failedFuture("Unsupported Authenticator Attachment type: " + type));
+            return;
+        }
+
+        handler.handle(Future.succeededFuture(
+          new JsonObject()
+            .put("challenge", randomBase64URLBuffer(32))
+            .put("rp", new JsonObject()
+              .put("name", options.getRealm()))
+            .put("user", user.copy().put("id", id))
+              .put("authenticatorSelection", authenticatorSelection)
+              .put("attestation", "direct")
+              .put("pubKeyCredParams", new JsonArray()
+                .add(new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -7)))));
+      }
+    });
+
+    return this;
   }
 
   @Override
-  public JsonObject generateServerGetAssertion(List<String> authenticatorIds) {
-    JsonArray allowCredentials = new JsonArray();
+  public WebAuthN generateServerGetAssertion(String username, Handler<AsyncResult<JsonObject>> handler) {
 
-    // STEP 19 Return allow credential ID
-    for (String id : authenticatorIds) {
-      allowCredentials
-        .add(new JsonObject()
-          .put("type", "public-key")
-          .put("id", id)
-          .put("transports", new JsonArray(options.getTransports())));
-    }
+    store.getUserCredentials(username, getUserCredentials -> {
+      if (getUserCredentials.failed()) {
+        handler.handle(Future.failedFuture(getUserCredentials.cause()));
+        return;
+      }
 
-    return new JsonObject()
-      .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
-      .put("allowCredentials", allowCredentials);
+      List<JsonObject> credentials = getUserCredentials.result();
+
+      if (credentials == null) {
+        handler.handle(Future.failedFuture("Invalid username/account disabled."));
+        return;
+      }
+
+      JsonArray allowCredentials = new JsonArray();
+
+      // STEP 19 Return allow credential ID
+      for (JsonObject cred : credentials) {
+        String credId = cred.getString("credID");
+        if (credId != null) {
+          allowCredentials
+            .add(new JsonObject()
+              .put("type", "public-key")
+              .put("id", credId)
+              .put("transports", new JsonArray(options.getTransports())));
+        }
+      }
+
+      handler.handle(Future.succeededFuture(
+        new JsonObject()
+          .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
+          .put("allowCredentials", allowCredentials)
+      ));
+    });
+
+    return this;
   }
 
   @Override
   public void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler) {
-    JsonObject webauthnResp = Objects.requireNonNull(authInfo.getWebauthn());
+    final String username = Objects.requireNonNull(authInfo.getUsername());
+    final JsonObject webauthnResp = Objects.requireNonNull(authInfo.getWebauthn());
 
     final JsonObject response = webauthnResp.getJsonObject("response", EMPTY);
 
     JsonObject clientData = new JsonObject(Buffer.buffer(b64dec.decode(response.getString("clientDataJSON"))));
 
-    // STEP 8 Verify challenge is match with cookie
+    // Verify challenge is match with session
     if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
       handler.handle(Future.failedFuture("Challenges don't match!"));
       return;
     }
 
-    // STEP 9 Verify challenge is match with cookie
+    // STEP 9 Verify origin is match with session
     if (!clientData.getString("origin").equals(options.getOrigin())) {
       handler.handle(Future.failedFuture("Origins don't match!"));
       return;
     }
 
-    try {
-      if (response.containsKey("attestationObject")) {
-        // STEP 10 Verify attestation
-        handler.handle(
-          Future.succeededFuture(
-            new WebAuthNUser(verifyAuthenticatorAttestationResponse(webauthnResp))));
-      } else if (response.containsKey("authenticatorData")) {
-        JsonArray authenticators = Objects.requireNonNull(authInfo.getAuthenticators());
+    switch (clientData.getString("type")) {
+      case "webauthn.create":
+        try {
+          final JsonObject result = verifyWebAuthNCreate(webauthnResp);
+          // STEP 16 Save data to database
+          if (result.getBoolean("verified", false)) {
+            JsonObject authrInfo = result.getJsonObject("authrInfo");
 
-        handler.handle(
-          Future.succeededFuture(
-            new WebAuthNUser(verifyAuthenticatorAssertionResponse(webauthnResp, authenticators))));
-      } else {
+            store.updateUserCredential(
+              username,
+              new JsonObject()
+                .put("credID", authrInfo.getString("credID"))
+                .put("registered", true)
+                .put("public-key", authrInfo.getString("public-key"))
+                .put("counter", authrInfo.getLong("counter")),
+              updateUserCredential -> {
+                if (updateUserCredential.failed()) {
+                  handler.handle(Future.failedFuture(updateUserCredential.cause()));
+                } else {
+                  handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
+                }
+              });
+          } else {
+            handler.handle(Future.failedFuture("Can not authenticate signature!"));
+          }
+        } catch (RuntimeException | IOException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+        return;
+      case "webauthn.get":
+        store.getUserCredentials(username, getUserCredentials -> {
+          if (getUserCredentials.failed()) {
+            handler.handle(Future.failedFuture(getUserCredentials.cause()));
+          } else {
+            List<JsonObject> authenticators = getUserCredentials.result();
+            if (authenticators == null) {
+              authenticators = Collections.emptyList();
+            }
+
+            try {
+              final JsonObject result = verifyWebAuthNGet(webauthnResp, authenticators);
+
+              if (result.getBoolean("verified", false)) {
+                handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
+              } else {
+                handler.handle(Future.failedFuture("Can not authenticate signature!"));
+              }
+            } catch (RuntimeException | IOException e) {
+              handler.handle(Future.failedFuture(e));
+            }
+          }
+        });
+        return;
+      default:
         handler.handle(Future.failedFuture("Can not determine type of response!"));
-      }
-    } catch (IOException e) {
-      handler.handle(Future.failedFuture(e));
     }
   }
 
@@ -156,7 +230,7 @@ public class WebAuthNImpl implements WebAuthN {
    *
    * @param webAuthnResponse - Data from navigator.credentials.create
    */
-  private JsonObject verifyAuthenticatorAttestationResponse(JsonObject webAuthnResponse) throws IOException {
+  private JsonObject verifyWebAuthNCreate(JsonObject webAuthnResponse) throws IOException {
 
     JsonObject response = webAuthnResponse.getJsonObject("response", EMPTY);
     // STEP 11 Extract attestation Object
@@ -197,29 +271,35 @@ public class WebAuthNImpl implements WebAuthN {
    * @param webAuthnResponse - Data from navigator.credentials.get
    * @param authenticators   - Credential from Database
    */
-  private JsonObject verifyAuthenticatorAssertionResponse(JsonObject webAuthnResponse, JsonArray authenticators) throws IOException {
+  private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, List<JsonObject> authenticators) throws IOException {
+
     // STEP 24 Query public key base on user ID
     JsonObject authr = findAuthr(webAuthnResponse.getString("id"), authenticators);
 
     JsonObject response = webAuthnResponse.getJsonObject("response", EMPTY);
+
+    byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
+
+    JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
+
     // STEP 25 parse auth data
     byte[] authenticatorData = b64dec.decode(response.getString("authenticatorData"));
     AuthenticatorData authrDataStruct = new AuthenticatorData(authenticatorData);
 
-    if ((authrDataStruct.getFlags() & AuthenticatorData.USER_PRESENT) == 0) {
+    if (!authrDataStruct.is(AuthenticatorData.USER_PRESENT)) {
       throw new RuntimeException("User was NOT present durring authentication!");
     }
     // STEP 26 hash clientDataJSON with sha256
-    byte[] clientDataHash = hash(b64dec.decode(response.getString("clientDataJSON")));
+    byte[] clientDataHash = hash(clientData.getString("hashAlgorithm"), clientDataJSON);
     // STEP 27 create signature base by concat authenticatorData and clientDataHash
     Buffer signatureBase = Buffer.buffer()
       .appendBytes(authenticatorData)
       .appendBytes(clientDataHash);
 
     // STEP 28 format public key
-    try (JsonParser parser = CBOR.cborParser(authr.getString("publicKey"))) {
+    try (JsonParser parser = CBOR.cborParser(authr.getString("public-key"))) {
       // the decoded credential primary as a JWK
-      JWK publicKey = AuthenticatorData.parseJWK(new JsonObject(CBOR.<Map>parse(parser)));
+      JWK publicKey = COSE.toJWK(CBOR.parse(parser));
 
       // STEP 29 convert signature to buffer
       byte[] signature = b64dec.decode(response.getString("signature"));
@@ -243,33 +323,24 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   /**
-   * Returns SHA-256 digest of the given data.
-   *
-   * @param data - data to hash
-   * @return the hash
-   */
-  private byte[] hash(byte[] data) {
-    synchronized (sha256) {
-      sha256.update(data);
-      return sha256.digest();
-    }
-  }
-
-  /**
    * Takes an array of registered authenticators and find one specified by credID
    *
    * @param credID         - base64url encoded credential
    * @param authenticators - list of authenticators
    * @return found authenticator
    */
-  private JsonObject findAuthr(String credID, JsonArray authenticators) {
-    for (Object el : authenticators) {
-      JsonObject authr = (JsonObject) el;
+  private JsonObject findAuthr(String credID, List<JsonObject> authenticators) {
+    for (JsonObject authr : authenticators) {
       if (credID.equals(authr.getValue("credID"))) {
         return authr;
       }
     }
 
     throw new RuntimeException("Unknown authenticator with credID: " + credID);
+  }
+
+  private byte[] hash(String alg, byte[] data) {
+    // TODO error handling
+    return HashingAlgorithm.getByAlgorithm(alg).hash(data);
   }
 }

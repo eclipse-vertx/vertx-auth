@@ -49,7 +49,9 @@
 
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-web</artifactId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
     </dependency>
+
   </dependencies>
 </project>

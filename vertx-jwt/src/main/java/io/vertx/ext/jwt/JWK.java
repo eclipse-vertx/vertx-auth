@@ -263,6 +263,8 @@ public final class JWK implements Crypto {
       put("RS256", "SHA256withRSA");
       put("RS384", "SHA384withRSA");
       put("RS512", "SHA512withRSA");
+      // COSE required
+      put("RS1", "SHA1withRSA");
     }};
 
     // get the alias for the algorithm
@@ -336,7 +338,9 @@ public final class JWK implements Crypto {
 
     // get the alias for the algorithm
     alg = json.getString("alg", "ES256");
-    ecdsa = true;
+    // are the signatures expected to be in ASN.1/DER format?
+    // JWK spec states yes, however COSE not really
+    ecdsa = json.getBoolean("asn1", true);
 
     // abort if the specified algorithm is not known
     if (!alias.containsKey(alg)) {

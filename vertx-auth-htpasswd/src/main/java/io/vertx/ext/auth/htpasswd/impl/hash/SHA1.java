@@ -48,6 +48,11 @@ public class SHA1 implements HashingAlgorithm {
   }
 
   @Override
+  public String algorithm() {
+    return "SHA1";
+  }
+
+  @Override
   public String hash(HashString hashString, String password) {
     return B64ENC.encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));
   }

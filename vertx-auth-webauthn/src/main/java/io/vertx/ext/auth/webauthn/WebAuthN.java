@@ -16,16 +16,15 @@
 
 package io.vertx.ext.auth.webauthn;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.AuthStore;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.webauthn.impl.WebAuthNImpl;
-
-import java.util.List;
 
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
@@ -40,43 +39,64 @@ public interface WebAuthN extends AuthProvider {
   /**
    * Create a WebAuthN auth provider
    *
-   * @param vertx the Vertx instance
-   * @return the auth provider
+   * @param vertx the Vertx instance.
+   * @param store the user store used to load credentials.
+   * @return the auth provider.
    */
-  static WebAuthN create(Vertx vertx, WebAuthNOptions options) {
-    return new WebAuthNImpl(vertx, options);
+  static WebAuthN create(Vertx vertx, AuthStore store) {
+    return create(vertx, new WebAuthNOptions(), store);
+  }
+
+  /**
+   * Create a WebAuthN auth provider
+   *
+   * @param vertx the Vertx instance.
+   * @param options the custom options to the provider.
+   * @param store the user store used to load credentials.
+   * @return the auth provider.
+   */
+  static WebAuthN create(Vertx vertx, WebAuthNOptions options, AuthStore store) {
+    return new WebAuthNImpl(vertx, options, store);
   }
 
   /**
    * Generates makeCredentials request
    *
-   * @param username    - username
-   * @param displayName - user's personal display name
-   * @param id          - user's base64url encoded id
-   * @return server encoded make credentials request
-   */
-  default JsonObject generateServerCredentialsChallenge(String username, String displayName, String id) {
-    return generateServerCredentialsChallenge(username, displayName, id, null);
-  }
-
-  /**
-   * Generates makeCredentials request
-   *
-   * @param username    - username
-   * @param displayName - user's personal display name
-   * @param id          - user's base64url encoded id
+   * @param user    - the user object with username, displayName
    * @param type        - optional Credentials Challenge Type
-   * @return server encoded make credentials request
+   * @param handler server encoded make credentials request
+   * @return fluent self
    */
-  JsonObject generateServerCredentialsChallenge(String username, String displayName, String id, CredentialsChallengeType type);
+  @Fluent
+  WebAuthN generateServerCredentialsChallenge(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler);
+
+  /**
+   * Same as {@link #generateServerCredentialsChallenge(JsonObject, CredentialsChallengeType, Handler)} but returning a Future.
+   */
+  default Future<JsonObject> generateServerCredentialsChallenge(JsonObject user, CredentialsChallengeType type) {
+    Promise<JsonObject> promise = Promise.promise();
+    generateServerCredentialsChallenge(user, type, promise);
+    return promise.future();
+  }
 
   /**
    * Generates getAssertion request
    *
-   * @param authenticators list of registered authenticators credential Ids
-   * @return server encoded get assertion request
+   * @param username the unique user identified
+   * @param handler server encoded get assertion request
+   * @return fluent self.
    */
-  JsonObject generateServerGetAssertion(List<String> authenticators);
+  @Fluent
+  WebAuthN generateServerGetAssertion(String username, Handler<AsyncResult<JsonObject>> handler);
+
+  /**
+   * Same as {@link #generateServerGetAssertion(String, Handler)} but returning a Future.
+   */
+  default Future<JsonObject> generateServerGetAssertion(String username) {
+    Promise<JsonObject> promise = Promise.promise();
+    generateServerGetAssertion(username, promise);
+    return promise.future();
+  }
 
   @GenIgnore(PERMITTED_TYPE)
   void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler);

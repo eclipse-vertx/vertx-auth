@@ -33,6 +33,11 @@ public class Crypt implements HashingAlgorithm {
   }
 
   @Override
+  public String algorithm() {
+    return "unix";
+  }
+
+  @Override
   public String hash(HashString hashString, String password) {
     // htpasswd uses the first 2 bytes as salt
     final String cryptSalt = hashString.hash().substring(0, 2);

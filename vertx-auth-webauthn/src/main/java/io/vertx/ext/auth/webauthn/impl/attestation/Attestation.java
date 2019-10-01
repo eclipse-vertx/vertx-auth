@@ -1,7 +1,6 @@
-package io.vertx.ext.auth.webauthn;
+package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.impl.AttestationException;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 
 public interface Attestation {

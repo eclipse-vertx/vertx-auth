@@ -21,10 +21,10 @@ public class EncodingTest {
     assertFalse(strategy.verify("b5R8K8YXZaSq3", "password"));
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testBrypt() {
     // this test should fail as there is no known open source project that can generate $2y$ hashes
-    assertFalse(strategy.verify("$2y$10$wBza2CzSTNeOjMdrwq.UquoCj4cPpdOzcF0/.JPqLJQ2qQDpT4ehG", "password"));
+    strategy.verify("$2y$10$wBza2CzSTNeOjMdrwq.UquoCj4cPpdOzcF0/.JPqLJQ2qQDpT4ehG", "password");
   }
 
   @Test

@@ -40,10 +40,11 @@ public class PBKDF2 implements HashingAlgorithm {
   private static final Set<String> DEFAULT_CONFIG = Collections.singleton("it");
 
   private final SecretKeyFactory skf;
+  private final String alg = "PBKDF2WithHmacSHA512";
 
   public PBKDF2() {
     try {
-      skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+      skf = SecretKeyFactory.getInstance(alg);
     } catch (NoSuchAlgorithmException nsae) {
       throw new RuntimeException("PBKDF2 is not available", nsae);
     }
@@ -52,6 +53,11 @@ public class PBKDF2 implements HashingAlgorithm {
   @Override
   public String id() {
     return "pbkdf2";
+  }
+
+  @Override
+  public String algorithm() {
+    return alg;
   }
 
   @Override

@@ -37,7 +37,9 @@ public final class CBOR {
 
   public static <T> T parse(JsonParser parser) throws DecodeException {
     try {
-      parser.nextToken();
+      if (parser.currentToken() == null) {
+        parser.nextToken();
+      }
       return (T) parseAny(parser);
     } catch (IOException e) {
       throw new DecodeException(e.getMessage(), e);

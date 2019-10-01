@@ -8,8 +8,8 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[authenticators]]`@authenticators`|`Json array`|-
 |[[challenge]]`@challenge`|`String`|-
+|[[username]]`@username`|`String`|-
 |[[webauthn]]`@webauthn`|`Json object`|-
 |===
 

@@ -3,11 +3,11 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 
-public class AndroidKeyAttestation implements Attestation {
+public class NoneAttestation implements Attestation {
 
   @Override
   public String fmt() {
-    return "android-key";
+    return "none";
   }
 
   @Override

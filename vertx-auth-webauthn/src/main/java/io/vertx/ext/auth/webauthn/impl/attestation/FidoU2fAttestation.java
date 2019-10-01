@@ -6,8 +6,6 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.Attestation;
-import io.vertx.ext.auth.webauthn.impl.AttestationException;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
 

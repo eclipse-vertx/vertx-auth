@@ -22,10 +22,6 @@ public class AuthenticatorData {
   public static final int ATTESTATION_DATA = 0x40;
   public static final int EXTENSION_DATA = 0x80;
 
-  private static final String COSE_KTY = "1";
-  private static final String COSE_KID = "2";
-  private static final String COSE_ALG = "3";
-
   private final static char[] HEX = "0123456789abcdef".toCharArray();
 
   private static String bytesToHex(byte[] bytes) {
@@ -84,6 +80,7 @@ public class AuthenticatorData {
   public AuthenticatorData(String base64) {
     this(B64DEC.decode(base64));
   }
+
   public AuthenticatorData(Buffer buffer) {
     // 37 sum of all required field lengths
     if (buffer.length() < 37) {
@@ -123,7 +120,7 @@ public class AuthenticatorData {
 
       try (JsonParser parser = CBOR.cborParser(bytes)) {
         // the decoded credential primary as a JWK
-        this.credentialJWK = parseJWK(new JsonObject(CBOR.<Map>parse(parser)));
+        this.credentialJWK = COSE.toJWK(CBOR.parse(parser));
         int credentialPublicKeyLen = (int) parser.getCurrentLocation().getByteOffset();
         this.credentialPublicKey = buffer.getBytes(pos, pos + credentialPublicKeyLen);
         pos += credentialPublicKeyLen;
@@ -152,94 +149,8 @@ public class AuthenticatorData {
     }
   }
 
-  public static JWK parseJWK(JsonObject cose) {
-    // parse kty
-    switch (cose.getInteger(COSE_KTY, -1)) {
-      case 1:
-        return parseOKP(cose);
-      case 2:
-        return parseEC2(cose);
-      case 3:
-        return parseRSA(cose);
-      default:
-        throw new IllegalArgumentException("Invalid key type in COSE: " + cose.getInteger(COSE_KTY));
-    }
-  }
-
-  private static JWK parseOKP(JsonObject cose) {
-    final JsonObject json = new JsonObject().put("kty", "oct");
-    throw new UnsupportedOperationException();
-  }
-
-  private static JWK parseEC2(JsonObject cose) {
-    final JsonObject json = new JsonObject().put("kty", "EC");
-    if (cose.containsKey(COSE_KID)) {
-      json.put("kid", cose.getValue(COSE_KID));
-    }
-    // parse the algorithm
-    switch (cose.getInteger(COSE_ALG, Integer.MAX_VALUE)) {
-      case -7:
-        json.put("alg", "ES256");
-        break;
-      case -35:
-        json.put("alg", "ES384");
-        break;
-      case -36:
-        json.put("alg", "ES512");
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported alg: " + cose.getInteger(COSE_ALG));
-    }
-    // parse the curve
-    switch (cose.getInteger("-1", -1)) {
-      case 1:
-        json.put("crv", "P-256");
-        break;
-      case 2:
-        json.put("crv", "P-384");
-        break;
-      case 3:
-        json.put("cvr", "P-521");
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported crv: " + cose.getInteger("-1"));
-    }
-    // parse the params
-    json.put("x", cose.getValue("-2"));
-    json.put("y", cose.getValue("-3"));
-
-    return new JWK(json);
-  }
-
-  private static JWK parseRSA(JsonObject cose) {
-    final JsonObject json = new JsonObject().put("kty", "RSA");
-    if (cose.containsKey(COSE_KID)) {
-      json.put("kid", cose.getValue(COSE_KID));
-    }
-    switch (cose.getInteger(COSE_ALG, Integer.MAX_VALUE)) {
-      case -257:
-        json.put("alg", "RS256");
-        break;
-      case -258:
-        json.put("alg", "RS384");
-        break;
-      case -259:
-        json.put("alg", "RS512");
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported alg: " + cose.getInteger(COSE_ALG));
-    }
-    // parse the params
-    json.put("n", cose.getValue("-1"));
-    json.put("e", cose.getValue("-2"));
-    json.put("d", cose.getValue("-3"));
-    json.put("p", cose.getValue("-4"));
-    json.put("q", cose.getValue("-5"));
-    json.put("dp", cose.getValue("-6"));
-    json.put("dq", cose.getValue("-7"));
-    json.put("qi", cose.getValue("-8"));
-
-    return new JWK(json);
+  public boolean is(int flag) {
+    return (flags & flag) != 0;
   }
 
   public byte[] getRpIdHash() {

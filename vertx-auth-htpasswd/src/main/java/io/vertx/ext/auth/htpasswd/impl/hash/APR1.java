@@ -32,6 +32,11 @@ public class APR1 implements HashingAlgorithm {
   }
 
   @Override
+  public String algorithm() {
+    return "md5crypt";
+  }
+
+  @Override
   public String hash(HashString hashString, String password) {
     final String apr1Salt = "$apr1$" + hashString.salt();
     String res = Md5Crypt.apr1Crypt(password, apr1Salt);

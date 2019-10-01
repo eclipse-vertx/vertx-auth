@@ -15,13 +15,9 @@ public class HashingStrategyImpl implements HashingStrategy {
 
   private final Map<String, HashingAlgorithm> algorithms = new HashMap<>();
 
-  public void add(HashingAlgorithm algorithm) {
-    algorithms.put(algorithm.id(), algorithm);
-  }
-
   @Override
   public String hash(String id, Map<String, String> params, String salt, String password) {
-    HashingAlgorithm algorithm = algorithms.get(id);
+    HashingAlgorithm algorithm = get(id);
 
     if (algorithm == null) {
       throw new RuntimeException(id +  " algorithm is not available.");
@@ -41,7 +37,7 @@ public class HashingStrategyImpl implements HashingStrategy {
 
     final HashString hashString = new HashString(hash);
 
-    HashingAlgorithm algorithm = algorithms.get(hashString.id());
+    HashingAlgorithm algorithm = get(hashString.id());
 
     if (algorithm == null) {
       if (LOG.isDebugEnabled()) {
@@ -67,13 +63,16 @@ public class HashingStrategyImpl implements HashingStrategy {
 
   @Override
   public HashingAlgorithm get(String id) {
-    return algorithms.get(id);
+    if (algorithms.containsKey(id)) {
+      return algorithms.get(id);
+    }
+    return HashingAlgorithm.getById(id);
   }
 
   @Override
   public HashingStrategy put(String id, HashingAlgorithm algorithm) {
 
-    if (algorithms.containsKey(id)) {
+    if (algorithms.containsKey(id) || HashingAlgorithmHolder.containsId(id)) {
       LOG.warn("Existing algorithm: " + id + " will be replaced!");
     }
 

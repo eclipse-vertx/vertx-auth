@@ -1,20 +1,28 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 @DataObject(generateConverter = true)
 public class WebAuthNInfo {
 
+  private String username;
   private String challenge;
   private JsonObject webauthn;
-  private JsonArray authenticators;
 
   public WebAuthNInfo() {}
 
   public WebAuthNInfo(JsonObject json) {
     WebAuthNInfoConverter.fromJson(json, this);
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public WebAuthNInfo setUsername(String username) {
+    this.username = username;
+    return this;
   }
 
   public String getChallenge() {
@@ -35,19 +43,9 @@ public class WebAuthNInfo {
     return this;
   }
 
-  public JsonArray getAuthenticators() {
-    return authenticators;
-  }
-
-  public WebAuthNInfo setAuthenticators(JsonArray authenticators) {
-    this.authenticators = authenticators;
-    return this;
-  }
-
   public JsonObject toJson() {
     final JsonObject json = new JsonObject();
     WebAuthNInfoConverter.toJson(this, json);
-    // TODO: convert
     return json;
   }
 }
