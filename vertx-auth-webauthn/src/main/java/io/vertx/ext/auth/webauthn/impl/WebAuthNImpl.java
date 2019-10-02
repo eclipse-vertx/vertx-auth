@@ -11,7 +11,6 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthStore;
-import io.vertx.ext.auth.HashingAlgorithm;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.webauthn.*;
@@ -98,6 +97,58 @@ public class WebAuthNImpl implements WebAuthN {
             return;
         }
 
+        final JsonArray pubKeyCredParams = new JsonArray();
+
+        for (String pubKeyCredParam : options.getPubKeyCredParams()) {
+          switch (pubKeyCredParam) {
+            case "ES256":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -7));
+                break;
+            case "EdDSA":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -8));
+              break;
+            case "ES384":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -35));
+              break;
+            case "ES512":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -36));
+              break;
+            case "RS256":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -257));
+            case "RS384":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -258));
+            case "RS512":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -259));
+            case "RS1":
+              pubKeyCredParams.add(
+                new JsonObject()
+                  .put("type", "public-key")
+                  .put("alg", -65535));
+              break;
+          }
+        }
+
         handler.handle(Future.succeededFuture(
           new JsonObject()
             .put("challenge", randomBase64URLBuffer(32))
@@ -111,12 +162,8 @@ public class WebAuthNImpl implements WebAuthN {
               .put("displayName", user.getString("displayName"))
               .put("icon", user.getString("icon")))
             .put("authenticatorSelection", authenticatorSelection)
-            // TODO: this should be configurable
-            .put("attestation", "direct")
-            .put("pubKeyCredParams", new JsonArray()
-              .add(new JsonObject()
-                .put("type", "public-key")
-                .put("alg", -7)))));
+            .put("attestation", options.getAttestation())
+            .put("pubKeyCredParams", pubKeyCredParams)));
       }
     });
 
@@ -379,7 +426,8 @@ public class WebAuthNImpl implements WebAuthN {
 
   private byte[] hash(byte[] data) {
     synchronized (sha256) {
-      return sha256.digest(data);
+      sha256.update(data);
+      return sha256.digest();
     }
   }
 }

@@ -34,6 +34,8 @@ public class AuthenticatorData {
     return new String(hexChars);
   }
 
+  private final byte[] raw;
+
   /**
    * the hash of the rpId which is basically the effective domain or host.
    * For example: “https://example.com” effective domain is “example.com”
@@ -73,15 +75,15 @@ public class AuthenticatorData {
   private byte[] extensions;
   private JsonObject extensionsData;
 
-  public AuthenticatorData(byte[] buffer) {
-    this(Buffer.buffer(buffer));
-  }
-
   public AuthenticatorData(String base64) {
     this(B64DEC.decode(base64));
   }
 
-  public AuthenticatorData(Buffer buffer) {
+  public AuthenticatorData(byte[] data) {
+    this.raw = data;
+
+    Buffer buffer = Buffer.buffer(data);
+
     // 37 sum of all required field lengths
     if (buffer.length() < 37) {
       throw new IllegalArgumentException("Authenticator Data must be at least 37 bytes long!");
@@ -151,6 +153,10 @@ public class AuthenticatorData {
 
   public boolean is(int flag) {
     return (flags & flag) != 0;
+  }
+
+  public byte[] getRaw() {
+    return raw;
   }
 
   public byte[] getRpIdHash() {

@@ -13,6 +13,8 @@ public class WebAuthNOptions {
   private String realm;
   private String realmDisplayName;
   private String realmIcon;
+  private String attestation;
+  private List<String> pubKeyCredParams = Arrays.asList("EC256", "RS256");
   private String origin;
   private List<String> transports = Arrays.asList("usb", "nfc", "ble", "internal");
 
@@ -27,7 +29,9 @@ public class WebAuthNOptions {
   private int challengeLength = 32;
 
   public WebAuthNOptions() {}
+
   public WebAuthNOptions(JsonObject json) {
+    WebAuthNOptionsConverter.fromJson(json, this);
   }
 
   public String getRealm() {
@@ -82,5 +86,42 @@ public class WebAuthNOptions {
 
     this.transports.add(transport);
     return this;
+  }
+
+  public JsonObject toJson() {
+    final JsonObject json = new JsonObject();
+    WebAuthNOptionsConverter.toJson(this, json);
+    return json;
+  }
+
+  public String getAttestation() {
+    return attestation;
+  }
+
+  public WebAuthNOptions setAttestation(String attestation) {
+    this.attestation = attestation;
+    return this;
+  }
+
+  public List<String> getPubKeyCredParams() {
+    return pubKeyCredParams;
+  }
+
+  public WebAuthNOptions addPubKeyCredParams(String pubKeyCredParam) {
+    if (this.pubKeyCredParams == null) {
+      this.pubKeyCredParams = new ArrayList<>();
+    }
+    this.pubKeyCredParams.add(pubKeyCredParam);
+    return this;
+  }
+
+  public WebAuthNOptions setPubKeyCredParams(List<String> pubKeyCredParams) {
+    this.pubKeyCredParams = pubKeyCredParams;
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return toJson().encodePrettily();
   }
 }

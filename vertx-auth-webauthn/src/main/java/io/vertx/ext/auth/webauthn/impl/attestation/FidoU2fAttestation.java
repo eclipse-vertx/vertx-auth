@@ -18,6 +18,8 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
 
+import static io.vertx.ext.auth.webauthn.impl.AuthenticatorData.USER_PRESENT;
+
 public class FidoU2fAttestation implements Attestation {
 
   private static final Logger LOG = LoggerFactory.getLogger(FidoU2fAttestation.class);
@@ -47,7 +49,7 @@ public class FidoU2fAttestation implements Attestation {
   @Override
   public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) {
     try {
-      if ((authr.getFlags() & AuthenticatorData.USER_PRESENT) == 0) {
+      if (!authr.is(USER_PRESENT)) {
         throw new AttestationException("User was NOT present during authentication!");
       }
 
@@ -87,7 +89,6 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) {
-
     try {
       synchronized (sig) {
         sig.initVerify(certificate);
