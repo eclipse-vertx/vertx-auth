@@ -19,8 +19,8 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @DataObject(generateConverter = true)
 public class WebAuthNOptions {
@@ -29,9 +29,9 @@ public class WebAuthNOptions {
   private String realmDisplayName;
   private String realmIcon;
   private String attestation;
-  private List<String> pubKeyCredParams;
+  private Set<String> pubKeyCredParams;
   private String origin;
-  private List<String> transports;
+  private Set<String> transports;
 
   public int getChallengeLength() {
     return challengeLength;
@@ -55,7 +55,7 @@ public class WebAuthNOptions {
   // sensible defaults
   private void init() {
     setAttestation("none");
-    addPubKeyCredParam("EC256");
+    addPubKeyCredParam("ES256");
     addPubKeyCredParam("RS256");
     addTransport("usb");
     addTransport("nfc");
@@ -99,18 +99,18 @@ public class WebAuthNOptions {
     return this;
   }
 
-  public List<String> getTransports() {
+  public Set<String> getTransports() {
     return transports;
   }
 
-  public WebAuthNOptions setTransports(List<String> transports) {
+  public WebAuthNOptions setTransports(Set<String> transports) {
     this.transports = transports;
     return this;
   }
 
   public WebAuthNOptions addTransport(String transport) {
     if (transports == null) {
-      transports = new ArrayList<>();
+      transports = new HashSet<>();
     }
 
     this.transports.add(transport);
@@ -132,19 +132,19 @@ public class WebAuthNOptions {
     return this;
   }
 
-  public List<String> getPubKeyCredParams() {
+  public Set<String> getPubKeyCredParams() {
     return pubKeyCredParams;
   }
 
   public WebAuthNOptions addPubKeyCredParam(String pubKeyCredParam) {
     if (this.pubKeyCredParams == null) {
-      this.pubKeyCredParams = new ArrayList<>();
+      this.pubKeyCredParams = new HashSet<>();
     }
     this.pubKeyCredParams.add(pubKeyCredParam);
     return this;
   }
 
-  public WebAuthNOptions setPubKeyCredParams(List<String> pubKeyCredParams) {
+  public WebAuthNOptions setPubKeyCredParams(Set<String> pubKeyCredParams) {
     this.pubKeyCredParams = pubKeyCredParams;
     return this;
   }

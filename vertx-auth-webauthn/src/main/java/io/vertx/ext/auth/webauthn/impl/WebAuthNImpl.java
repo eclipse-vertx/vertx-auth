@@ -146,16 +146,19 @@ public class WebAuthNImpl implements WebAuthN {
                 new JsonObject()
                   .put("type", "public-key")
                   .put("alg", -257));
+              break;
             case "RS384":
               pubKeyCredParams.add(
                 new JsonObject()
                   .put("type", "public-key")
                   .put("alg", -258));
+              break;
             case "RS512":
               pubKeyCredParams.add(
                 new JsonObject()
                   .put("type", "public-key")
                   .put("alg", -259));
+              break;
             case "RS1":
               pubKeyCredParams.add(
                 new JsonObject()
@@ -204,6 +207,12 @@ public class WebAuthNImpl implements WebAuthN {
 
       JsonArray allowCredentials = new JsonArray();
 
+      JsonArray transports = new JsonArray();
+
+      for (String transport : options.getTransports()) {
+        transports.add(transport);
+      }
+
       // STEP 19 Return allow credential ID
       for (JsonObject cred : credentials) {
         String credId = cred.getString("credID");
@@ -212,7 +221,7 @@ public class WebAuthNImpl implements WebAuthN {
             .add(new JsonObject()
               .put("type", "public-key")
               .put("id", credId)
-              .put("transports", new JsonArray(options.getTransports())));
+              .put("transports", transports));
         }
       }
 

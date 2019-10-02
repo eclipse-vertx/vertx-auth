@@ -32,11 +32,11 @@ public class NoneAttestation implements Attestation {
       throw new AttestationException("User was NOT present during authentication!");
     }
 
-    if (!"00000000–0000–0000–0000–000000000000".equals(authr.getAaguidString())) {
-      throw new AttestationException("AAGUID is not 00000000–0000–0000–0000–000000000000!");
+    if (!"00000000-0000-0000-0000-000000000000".equals(authr.getAaguidString())) {
+      throw new AttestationException("AAGUID is not 00000000-0000-0000-0000-000000000000!");
     }
 
-    if (ctapMakeCredResp.containsKey("attStmt")) {
+    if (ctapMakeCredResp.containsKey("attStmt") && ctapMakeCredResp.getJsonObject("attStmt").size() > 0) {
       throw new AttestationException("attStmt is present!");
     }
 

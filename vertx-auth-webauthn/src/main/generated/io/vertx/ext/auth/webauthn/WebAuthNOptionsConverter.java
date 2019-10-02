@@ -32,7 +32,7 @@ public class WebAuthNOptionsConverter {
           break;
         case "pubKeyCredParams":
           if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            java.util.LinkedHashSet<java.lang.String> list =  new java.util.LinkedHashSet<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof String)
                 list.add((String)item);
@@ -57,7 +57,7 @@ public class WebAuthNOptionsConverter {
           break;
         case "transports":
           if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            java.util.LinkedHashSet<java.lang.String> list =  new java.util.LinkedHashSet<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof String)
                 list.add((String)item);
