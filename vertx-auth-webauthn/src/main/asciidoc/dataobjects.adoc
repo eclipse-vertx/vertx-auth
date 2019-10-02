@@ -24,6 +24,8 @@
 |[[challengeLength]]`@challengeLength`|`Number (int)`|-
 |[[origin]]`@origin`|`String`|-
 |[[realm]]`@realm`|`String`|-
+|[[realmDisplayName]]`@realmDisplayName`|`String`|-
+|[[realmIcon]]`@realmIcon`|`String`|-
 |[[transports]]`@transports`|`Array of String`|-
 |===
 

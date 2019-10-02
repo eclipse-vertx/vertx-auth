@@ -52,7 +52,7 @@ public class WebAuthNUser extends AbstractUser {
 
   @Override
   public void setAuthProvider(AuthProvider authProvider) {
-    // NOOP - JWT tokens are self contained :)
+    // NOOP - WebAuthN principals are self contained :)
   }
 
   @Override

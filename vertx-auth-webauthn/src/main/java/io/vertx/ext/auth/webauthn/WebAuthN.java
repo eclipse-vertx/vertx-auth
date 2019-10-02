@@ -68,14 +68,14 @@ public interface WebAuthN extends AuthProvider {
    * @return fluent self
    */
   @Fluent
-  WebAuthN generateServerCredentialsChallenge(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthN createCredentialsOptions(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler);
 
   /**
-   * Same as {@link #generateServerCredentialsChallenge(JsonObject, CredentialsChallengeType, Handler)} but returning a Future.
+   * Same as {@link #createCredentialsOptions(JsonObject, CredentialsChallengeType, Handler)} but returning a Future.
    */
-  default Future<JsonObject> generateServerCredentialsChallenge(JsonObject user, CredentialsChallengeType type) {
+  default Future<JsonObject> createCredentialsOptions(JsonObject user, CredentialsChallengeType type) {
     Promise<JsonObject> promise = Promise.promise();
-    generateServerCredentialsChallenge(user, type, promise);
+    createCredentialsOptions(user, type, promise);
     return promise.future();
   }
 
@@ -87,14 +87,14 @@ public interface WebAuthN extends AuthProvider {
    * @return fluent self.
    */
   @Fluent
-  WebAuthN generateServerGetAssertion(String username, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthN getCredentialsOptions(String username, Handler<AsyncResult<JsonObject>> handler);
 
   /**
-   * Same as {@link #generateServerGetAssertion(String, Handler)} but returning a Future.
+   * Same as {@link #getCredentialsOptions(String, Handler)} but returning a Future.
    */
-  default Future<JsonObject> generateServerGetAssertion(String username) {
+  default Future<JsonObject> getCredentialsOptions(String username) {
     Promise<JsonObject> promise = Promise.promise();
-    generateServerGetAssertion(username, promise);
+    getCredentialsOptions(username, promise);
     return promise.future();
   }
 

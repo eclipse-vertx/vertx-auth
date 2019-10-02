@@ -52,9 +52,9 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public WebAuthN generateServerCredentialsChallenge(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler) {
+  public WebAuthN createCredentialsOptions(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler) {
 
-    store.getUserCredentials(user.getString("username"), getUserCredentials -> {
+    store.getUserCredentials(user.getString("name"), getUserCredentials -> {
       if (getUserCredentials.failed()) {
         handler.handle(Future.failedFuture(getUserCredentials.cause()));
         return;
@@ -92,14 +92,20 @@ public class WebAuthNImpl implements WebAuthN {
           new JsonObject()
             .put("challenge", randomBase64URLBuffer(32))
             .put("rp", new JsonObject()
-              .put("name", options.getRealm()))
-            .put("user", user.copy().put("id", id))
-              .put("authenticatorSelection", authenticatorSelection)
-              .put("attestation", "direct")
-              .put("pubKeyCredParams", new JsonArray()
-                .add(new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -7)))));
+              .put("name", options.getRealm())
+              .put("displayName", options.getRealmDisplayName())
+              .put("icon", options.getRealmIcon()))
+            .put("user", new JsonObject()
+              .put("id", id)
+              .put("name", user.getString("name"))
+              .put("displayName", user.getString("displayName"))
+              .put("icon", user.getString("icon")))
+            .put("authenticatorSelection", authenticatorSelection)
+            .put("attestation", "direct")
+            .put("pubKeyCredParams", new JsonArray()
+              .add(new JsonObject()
+                .put("type", "public-key")
+                .put("alg", -7)))));
       }
     });
 
@@ -107,7 +113,7 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public WebAuthN generateServerGetAssertion(String username, Handler<AsyncResult<JsonObject>> handler) {
+  public WebAuthN getCredentialsOptions(String username, Handler<AsyncResult<JsonObject>> handler) {
 
     store.getUserCredentials(username, getUserCredentials -> {
       if (getUserCredentials.failed()) {
@@ -174,19 +180,18 @@ public class WebAuthNImpl implements WebAuthN {
           // STEP 16 Save data to database
           if (result.getBoolean("verified", false)) {
             JsonObject authrInfo = result.getJsonObject("authrInfo");
+            // the principal for vertx-auth
+            JsonObject principal = new JsonObject()
+              .put("credID", authrInfo.getString("credID"))
+              .put("registered", true)
+              .put("publicKey", authrInfo.getString("publicKey"))
+              .put("counter", authrInfo.getLong("counter"));
 
-            store.updateUserCredential(
-              username,
-              new JsonObject()
-                .put("credID", authrInfo.getString("credID"))
-                .put("registered", true)
-                .put("public-key", authrInfo.getString("public-key"))
-                .put("counter", authrInfo.getLong("counter")),
-              updateUserCredential -> {
+            store.updateUserCredential(username, principal, updateUserCredential -> {
                 if (updateUserCredential.failed()) {
                   handler.handle(Future.failedFuture(updateUserCredential.cause()));
                 } else {
-                  handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
+                  handler.handle(Future.succeededFuture(new WebAuthNUser(principal)));
                 }
               });
           } else {
@@ -297,7 +302,7 @@ public class WebAuthNImpl implements WebAuthN {
       .appendBytes(clientDataHash);
 
     // STEP 28 format public key
-    try (JsonParser parser = CBOR.cborParser(authr.getString("public-key"))) {
+    try (JsonParser parser = CBOR.cborParser(authr.getString("publicKey"))) {
       // the decoded credential primary as a JWK
       JWK publicKey = COSE.toJWK(CBOR.parse(parser));
 

@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@DataObject
+@DataObject(generateConverter = true)
 public class WebAuthNOptions {
 
   private String realm;
+  private String realmDisplayName;
+  private String realmIcon;
   private String origin;
   private List<String> transports = Arrays.asList("usb", "nfc", "ble", "internal");
 
@@ -23,6 +25,10 @@ public class WebAuthNOptions {
   }
 
   private int challengeLength = 32;
+
+  public WebAuthNOptions() {}
+  public WebAuthNOptions(JsonObject json) {
+  }
 
   public String getRealm() {
     return realm;
@@ -42,8 +48,23 @@ public class WebAuthNOptions {
     return this;
   }
 
-  public WebAuthNOptions() {}
-  public WebAuthNOptions(JsonObject json) {}
+  public String getRealmDisplayName() {
+    return realmDisplayName;
+  }
+
+  public WebAuthNOptions setRealmDisplayName(String realmDisplayName) {
+    this.realmDisplayName = realmDisplayName;
+    return this;
+  }
+
+  public String getRealmIcon() {
+    return realmIcon;
+  }
+
+  public WebAuthNOptions setRealmIcon(String realmIcon) {
+    this.realmIcon = realmIcon;
+    return this;
+  }
 
   public List<String> getTransports() {
     return transports;
