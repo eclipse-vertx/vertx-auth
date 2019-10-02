@@ -17,7 +17,6 @@ package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.HashingAlgorithmHolder;
 
 import java.util.Collections;
 import java.util.Set;
@@ -30,29 +29,12 @@ import java.util.Set;
 @VertxGen
 public interface HashingAlgorithm {
 
-
-  static HashingAlgorithm getById(String id) {
-    return HashingAlgorithmHolder.getById(id);
-  }
-
-  static HashingAlgorithm getByAlgorithm(String algorithm) {
-    return HashingAlgorithmHolder.getByAlgorithm(algorithm);
-  }
-
   /**
    * return the symbolic name for the algorithm
    *
    * @return short id e.g.: sha512.
    */
   String id();
-
-
-  /**
-   * return the official algorithm name
-   *
-   * @return short id e.g.: SHA-512.
-   */
-  String algorithm();
 
   /**
    * return the list of param names required for this algorithm.
@@ -70,16 +52,6 @@ public interface HashingAlgorithm {
    */
   @GenIgnore
   String hash(HashString hashString, String password);
-
-  /**
-   * Algorithm specific implementation.
-   *
-   * @return the hashed digest.
-   */
-  @GenIgnore
-  default byte[] hash(byte[] rawValue) {
-    throw new UnsupportedOperationException();
-  }
 
   /**
    * Should the encoded string use the default separator to split fields.

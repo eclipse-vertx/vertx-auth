@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.impl.HashingStrategyImpl;
 
 import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * Hashing Strategy manager.
@@ -37,7 +38,14 @@ public interface HashingStrategy {
    * @return a Hashing Strategy capable of hashing using the available algorithms
    */
   static HashingStrategy load() {
-    return new HashingStrategyImpl();
+    final HashingStrategyImpl strategy = new HashingStrategyImpl();
+    ServiceLoader<HashingAlgorithm> serviceLoader = ServiceLoader.load(HashingAlgorithm.class);
+
+    for (HashingAlgorithm algorithm : serviceLoader) {
+      strategy.add(algorithm);
+    }
+
+    return strategy;
   }
 
   /**
