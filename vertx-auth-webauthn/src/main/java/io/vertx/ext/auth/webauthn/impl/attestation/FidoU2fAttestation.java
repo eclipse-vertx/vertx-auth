@@ -16,12 +16,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Map;
 
 public class FidoU2fAttestation implements Attestation {
 
-  private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
   private static final Logger LOG = LoggerFactory.getLogger(FidoU2fAttestation.class);
 
   // codecs
@@ -47,15 +45,13 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public boolean verify(JsonObject webAuthnResponse, JsonObject ctapMakeCredResp, AuthenticatorData authr) {
+  public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) {
     try {
-      JsonObject response = webAuthnResponse.getJsonObject("response", EMPTY);
-
       if ((authr.getFlags() & AuthenticatorData.USER_PRESENT) == 0) {
         throw new AttestationException("User was NOT present during authentication!");
       }
 
-      byte[] clientDataHash = hash(b64dec.decode(response.getString("clientDataJSON")));
+      byte[] clientDataHash = hash(clientDataJSON);
 
       byte[] publicKey = COSEECDHAtoPKCS(authr.getCredentialPublicKey());
       Buffer signatureBase = Buffer.buffer()

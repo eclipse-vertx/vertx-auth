@@ -7,5 +7,5 @@ public interface Attestation {
 
   String fmt();
 
-  boolean verify(JsonObject webAuthnResponse, JsonObject ctapMakeCredResp, AuthenticatorData authr) throws AttestationException;
+  boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) throws AttestationException;
 }

@@ -6,6 +6,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthStore;
@@ -17,16 +19,19 @@ import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.jwt.JWK;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class WebAuthNImpl implements WebAuthN {
 
-  private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
+  private static final Logger LOG = LoggerFactory.getLogger(WebAuthNImpl.class);
 
   // codecs
   private final Base64.Encoder b64enc = Base64.getUrlEncoder().withoutPadding();
   private final Base64.Decoder b64dec = Base64.getUrlDecoder();
 
+  private final MessageDigest sha256;
   private final PRNG random;
   private final WebAuthNOptions options;
   private final AuthStore store;
@@ -42,6 +47,11 @@ public class WebAuthNImpl implements WebAuthN {
 
     for (Attestation att : attestationServiceLoader) {
       attestations.put(att.fmt(), att);
+    }
+    try {
+      sha256 = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException nsae) {
+      throw new IllegalStateException("SHA-256 is not available", nsae);
     }
   }
 
@@ -101,6 +111,7 @@ public class WebAuthNImpl implements WebAuthN {
               .put("displayName", user.getString("displayName"))
               .put("icon", user.getString("icon")))
             .put("authenticatorSelection", authenticatorSelection)
+            // TODO: this should be configurable
             .put("attestation", "direct")
             .put("pubKeyCredParams", new JsonArray()
               .add(new JsonObject()
@@ -154,12 +165,25 @@ public class WebAuthNImpl implements WebAuthN {
 
   @Override
   public void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler) {
-    final String username = Objects.requireNonNull(authInfo.getUsername());
+    //    {
+    //      "rawId": "base64url",
+    //      "id": "base64url",
+    //      "response": {
+    //        "attestationObject": "base64url",
+    //        "clientDataJSON": "base64url"
+    //      },
+    //      "getClientExtensionResults": {},
+    //      "type": "public-key"
+    //    }
     final JsonObject webauthnResp = Objects.requireNonNull(authInfo.getWebauthn());
+    // TODO: if username is null maybe use authInfo.id ?
+    final String username = Objects.requireNonNull(authInfo.getUsername());
 
-    final JsonObject response = webauthnResp.getJsonObject("response", EMPTY);
+    // response can't be null
+    final JsonObject response = Objects.requireNonNull(webauthnResp.getJsonObject("response"));
 
-    JsonObject clientData = new JsonObject(Buffer.buffer(b64dec.decode(response.getString("clientDataJSON"))));
+    byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
+    JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
 
     // Verify challenge is match with session
     if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
@@ -176,7 +200,7 @@ public class WebAuthNImpl implements WebAuthN {
     switch (clientData.getString("type")) {
       case "webauthn.create":
         try {
-          final JsonObject result = verifyWebAuthNCreate(webauthnResp);
+          final JsonObject result = verifyWebAuthNCreate(webauthnResp, clientDataJSON, clientData);
           // STEP 16 Save data to database
           if (result.getBoolean("verified", false)) {
             JsonObject authrInfo = result.getJsonObject("authrInfo");
@@ -212,9 +236,10 @@ public class WebAuthNImpl implements WebAuthN {
             }
 
             try {
-              final JsonObject result = verifyWebAuthNGet(webauthnResp, authenticators);
+              final JsonObject result = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, authenticators);
 
               if (result.getBoolean("verified", false)) {
+                // TODO: update counter
                 handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
               } else {
                 handler.handle(Future.failedFuture("Can not authenticate signature!"));
@@ -235,11 +260,20 @@ public class WebAuthNImpl implements WebAuthN {
    *
    * @param webAuthnResponse - Data from navigator.credentials.create
    */
-  private JsonObject verifyWebAuthNCreate(JsonObject webAuthnResponse) throws IOException {
-
-    JsonObject response = webAuthnResponse.getJsonObject("response", EMPTY);
+  private JsonObject verifyWebAuthNCreate(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData) throws IOException {
+    JsonObject response = webAuthnResponse.getJsonObject("response");
     // STEP 11 Extract attestation Object
     try (JsonParser parser = CBOR.cborParser(response.getString("attestationObject"))) {
+      //      {
+      //        "fmt": "fido-u2f",
+      //        "authData": "cbor",
+      //        "attStmt": {
+      //          "sig": "cbor",
+      //          "x5c": [
+      //            "cbor"
+      //          ]
+      //        }
+      //      }
       JsonObject ctapMakeCredResp = new JsonObject(CBOR.<Map>parse(parser));
       // STEP 12 Extract auth data
       AuthenticatorData authrDataStruct = new AuthenticatorData(ctapMakeCredResp.getString("authData"));
@@ -254,9 +288,11 @@ public class WebAuthNImpl implements WebAuthN {
       // STEP 14 Verify attestation based on type of device
       final Attestation attestation = attestations.get(fmt);
 
-      if (attestation != null) {
+      if (attestation == null) {
+        LOG.error("Unknown attestation fmt: " + fmt);
+      } else {
         response
-          .put("verified", attestation.verify(webAuthnResponse, ctapMakeCredResp, authrDataStruct));
+          .put("verified", attestation.verify(webAuthnResponse, clientDataJSON, ctapMakeCredResp, authrDataStruct));
       }
 
       if (response.getBoolean("verified")) {
@@ -276,16 +312,11 @@ public class WebAuthNImpl implements WebAuthN {
    * @param webAuthnResponse - Data from navigator.credentials.get
    * @param authenticators   - Credential from Database
    */
-  private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, List<JsonObject> authenticators) throws IOException {
+  private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, List<JsonObject> authenticators) throws IOException {
 
     // STEP 24 Query public key base on user ID
     JsonObject authr = findAuthr(webAuthnResponse.getString("id"), authenticators);
-
-    JsonObject response = webAuthnResponse.getJsonObject("response", EMPTY);
-
-    byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
-
-    JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
+    JsonObject response = webAuthnResponse.getJsonObject("response");
 
     // STEP 25 parse auth data
     byte[] authenticatorData = b64dec.decode(response.getString("authenticatorData"));
@@ -294,8 +325,10 @@ public class WebAuthNImpl implements WebAuthN {
     if (!authrDataStruct.is(AuthenticatorData.USER_PRESENT)) {
       throw new RuntimeException("User was NOT present durring authentication!");
     }
+
+    // TODO: assert the algorithm to be SHA-256 clientData.getString("hashAlgorithm")
     // STEP 26 hash clientDataJSON with sha256
-    byte[] clientDataHash = hash(clientData.getString("hashAlgorithm"), clientDataJSON);
+    byte[] clientDataHash = hash(clientDataJSON);
     // STEP 27 create signature base by concat authenticatorData and clientDataHash
     Buffer signatureBase = Buffer.buffer()
       .appendBytes(authenticatorData)
@@ -344,8 +377,9 @@ public class WebAuthNImpl implements WebAuthN {
     throw new RuntimeException("Unknown authenticator with credID: " + credID);
   }
 
-  private byte[] hash(String alg, byte[] data) {
-    // TODO error handling
-    return HashingAlgorithm.getByAlgorithm(alg).hash(data);
+  private byte[] hash(byte[] data) {
+    synchronized (sha256) {
+      return sha256.digest(data);
+    }
   }
 }
