@@ -15,6 +15,11 @@ public class WebAuthNOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthNOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
+        case "attestation":
+          if (member.getValue() instanceof String) {
+            obj.setAttestation((String)member.getValue());
+          }
+          break;
         case "challengeLength":
           if (member.getValue() instanceof Number) {
             obj.setChallengeLength(((Number)member.getValue()).intValue());
@@ -23,6 +28,16 @@ public class WebAuthNOptionsConverter {
         case "origin":
           if (member.getValue() instanceof String) {
             obj.setOrigin((String)member.getValue());
+          }
+          break;
+        case "pubKeyCredParams":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setPubKeyCredParams(list);
           }
           break;
         case "realm":
@@ -59,9 +74,17 @@ public class WebAuthNOptionsConverter {
   }
 
   public static void toJson(WebAuthNOptions obj, java.util.Map<String, Object> json) {
+    if (obj.getAttestation() != null) {
+      json.put("attestation", obj.getAttestation());
+    }
     json.put("challengeLength", obj.getChallengeLength());
     if (obj.getOrigin() != null) {
       json.put("origin", obj.getOrigin());
+    }
+    if (obj.getPubKeyCredParams() != null) {
+      JsonArray array = new JsonArray();
+      obj.getPubKeyCredParams().forEach(item -> array.add(item));
+      json.put("pubKeyCredParams", array);
     }
     if (obj.getRealm() != null) {
       json.put("realm", obj.getRealm());

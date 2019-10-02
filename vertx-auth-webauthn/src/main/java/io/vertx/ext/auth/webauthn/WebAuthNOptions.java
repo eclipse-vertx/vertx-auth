@@ -20,7 +20,6 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @DataObject(generateConverter = true)
@@ -30,9 +29,9 @@ public class WebAuthNOptions {
   private String realmDisplayName;
   private String realmIcon;
   private String attestation;
-  private List<String> pubKeyCredParams = Arrays.asList("EC256", "RS256");
+  private List<String> pubKeyCredParams;
   private String origin;
-  private List<String> transports = Arrays.asList("usb", "nfc", "ble", "internal");
+  private List<String> transports;
 
   public int getChallengeLength() {
     return challengeLength;
@@ -44,10 +43,24 @@ public class WebAuthNOptions {
 
   private int challengeLength = 32;
 
-  public WebAuthNOptions() {}
+  public WebAuthNOptions() {
+    init();
+  }
 
   public WebAuthNOptions(JsonObject json) {
+    super();
     WebAuthNOptionsConverter.fromJson(json, this);
+  }
+
+  // sensible defaults
+  private void init() {
+    setAttestation("none");
+    addPubKeyCredParam("EC256");
+    addPubKeyCredParam("RS256");
+    addTransport("usb");
+    addTransport("nfc");
+    addTransport("ble");
+    addTransport("internal");
   }
 
   public String getRealm() {
@@ -123,7 +136,7 @@ public class WebAuthNOptions {
     return pubKeyCredParams;
   }
 
-  public WebAuthNOptions addPubKeyCredParams(String pubKeyCredParam) {
+  public WebAuthNOptions addPubKeyCredParam(String pubKeyCredParam) {
     if (this.pubKeyCredParams == null) {
       this.pubKeyCredParams = new ArrayList<>();
     }

@@ -21,8 +21,10 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+|[[attestation]]`@attestation`|`String`|-
 |[[challengeLength]]`@challengeLength`|`Number (int)`|-
 |[[origin]]`@origin`|`String`|-
+|[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of String`|-
 |[[realm]]`@realm`|`String`|-
 |[[realmDisplayName]]`@realmDisplayName`|`String`|-
 |[[realmIcon]]`@realmIcon`|`String`|-
