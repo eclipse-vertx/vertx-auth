@@ -122,13 +122,13 @@ public class WebAuthNImpl implements WebAuthN {
                 new JsonObject()
                   .put("type", "public-key")
                   .put("alg", -7));
-                break;
-            case "EdDSA":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -8));
               break;
+//            case "EdDSA":
+//              pubKeyCredParams.add(
+//                new JsonObject()
+//                  .put("type", "public-key")
+//                  .put("alg", -8));
+//              break;
             case "ES384":
               pubKeyCredParams.add(
                 new JsonObject()
@@ -165,21 +165,35 @@ public class WebAuthNImpl implements WebAuthN {
                   .put("type", "public-key")
                   .put("alg", -65535));
               break;
+            default:
+              LOG.warn("Unsupported algorithm: " + pubKeyCredParam);
           }
+        }
+
+        // relay party configuration
+        final JsonObject rp = new JsonObject()
+          .put("name", options.getRealm())
+          .put("displayName", options.getRealmDisplayName());
+
+        if (options.getRealmIcon() != null) {
+          rp.put("icon", options.getRealmIcon());
+        }
+
+        // user configuration
+        final JsonObject _user = new JsonObject()
+          .put("id", id)
+          .put("name", user.getString("name"))
+          .put("displayName", user.getString("displayName"));
+
+        if (user.getString("icon") != null) {
+          _user.put("icon", user.getString("icon"));
         }
 
         handler.handle(Future.succeededFuture(
           new JsonObject()
             .put("challenge", randomBase64URLBuffer(32))
-            .put("rp", new JsonObject()
-              .put("name", options.getRealm())
-              .put("displayName", options.getRealmDisplayName())
-              .put("icon", options.getRealmIcon()))
-            .put("user", new JsonObject()
-              .put("id", id)
-              .put("name", user.getString("name"))
-              .put("displayName", user.getString("displayName"))
-              .put("icon", user.getString("icon")))
+            .put("rp", rp)
+            .put("user", _user)
             .put("authenticatorSelection", authenticatorSelection)
             .put("attestation", options.getAttestation())
             .put("pubKeyCredParams", pubKeyCredParams)));
@@ -284,12 +298,12 @@ public class WebAuthNImpl implements WebAuthN {
               .put("counter", authrInfo.getLong("counter"));
 
             store.updateUserCredential(username, principal, updateUserCredential -> {
-                if (updateUserCredential.failed()) {
-                  handler.handle(Future.failedFuture(updateUserCredential.cause()));
-                } else {
-                  handler.handle(Future.succeededFuture(new WebAuthNUser(principal)));
-                }
-              });
+              if (updateUserCredential.failed()) {
+                handler.handle(Future.failedFuture(updateUserCredential.cause()));
+              } else {
+                handler.handle(Future.succeededFuture(new WebAuthNUser(principal)));
+              }
+            });
           } else {
             handler.handle(Future.failedFuture("Can not authenticate signature!"));
           }
