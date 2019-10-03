@@ -25,6 +25,7 @@ import java.util.Set;
 @DataObject(generateConverter = true)
 public class WebAuthNOptions {
 
+  private String realmId;
   private String realm;
   private String realmDisplayName;
   private String realmIcon;
@@ -69,6 +70,15 @@ public class WebAuthNOptions {
 
   public WebAuthNOptions setRealm(String realm) {
     this.realm = realm;
+    return this;
+  }
+
+  public String getRealmId() {
+    return realmId;
+  }
+
+  public WebAuthNOptions setRealmId(String realmId) {
+    this.realmId = realmId;
     return this;
   }
 

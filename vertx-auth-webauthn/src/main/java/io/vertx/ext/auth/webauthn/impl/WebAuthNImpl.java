@@ -178,6 +178,9 @@ public class WebAuthNImpl implements WebAuthN {
         if (options.getRealmIcon() != null) {
           rp.put("icon", options.getRealmIcon());
         }
+        if (options.getRealmId() != null) {
+          rp.put("id", options.getRealmId());
+        }
 
         // user configuration
         final JsonObject _user = new JsonObject()
