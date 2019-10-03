@@ -54,6 +54,14 @@ public interface HtdigestAuth extends AuthProvider {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return HtdigestAuth.class.getName();
+  }
+
+  /**
    * Return the currently used realm
    *
    * @return  the realm

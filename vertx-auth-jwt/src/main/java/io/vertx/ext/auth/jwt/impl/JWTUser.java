@@ -25,6 +25,7 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.jwt.JWTAuth;
 
 import java.nio.charset.StandardCharsets;
 
@@ -42,6 +43,11 @@ public class JWTUser extends AbstractUser {
     // required if the object is serialized, however this is not a good idea
     // because JWT are supposed to be used in stateless environments
     log.info("You are probably serializing the JWT User, JWT are supposed to be used in stateless servers!");
+  }
+
+  @Override
+  public String providerId() {
+    return JWTAuth.class.getName();
   }
 
   public JWTUser(JsonObject jwtToken, String permissionsClaimKey) {

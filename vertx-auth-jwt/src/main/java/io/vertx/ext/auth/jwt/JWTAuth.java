@@ -44,6 +44,14 @@ public interface JWTAuth extends AuthProvider {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return JWTAuth.class.getName();
+  }
+
+  /**
    * Generate a new JWT token.
    *
    * @param claims Json with user defined claims for a list of official claims

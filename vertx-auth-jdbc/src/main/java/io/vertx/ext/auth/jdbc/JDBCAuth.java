@@ -68,6 +68,14 @@ public interface JDBCAuth extends AuthProvider {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return JDBCAuth.class.getName();
+  }
+
+  /**
    * Set the authentication query to use. Use this if you want to override the default authentication query.
    * @param authenticationQuery  the authentication query
    * @return  a reference to this for fluency

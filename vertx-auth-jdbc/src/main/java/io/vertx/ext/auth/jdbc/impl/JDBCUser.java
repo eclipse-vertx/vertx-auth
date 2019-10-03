@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.jdbc.JDBCAuth;
 
 import java.nio.charset.StandardCharsets;
 
@@ -46,6 +47,11 @@ public class JDBCUser extends AbstractUser {
     this.username = username;
     this.authProvider = authProvider;
     this.rolePrefix = rolePrefix;
+  }
+
+  @Override
+  public String providerId() {
+    return JDBCAuth.class.getName();
   }
 
   @Override

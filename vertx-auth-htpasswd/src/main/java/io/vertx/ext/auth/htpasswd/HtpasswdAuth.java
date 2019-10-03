@@ -36,4 +36,11 @@ public interface HtpasswdAuth extends AuthProvider {
     return new HtpasswdAuthImpl(vertx, htpasswdAuthOptions);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return HtpasswdAuth.class.getName();
+  }
 }

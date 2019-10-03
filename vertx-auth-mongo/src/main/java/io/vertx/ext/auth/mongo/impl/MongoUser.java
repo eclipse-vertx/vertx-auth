@@ -49,6 +49,11 @@ public class MongoUser extends AbstractUser {
     this.mongoAuth = mongoAuth;
   }
 
+  @Override
+  public String providerId() {
+    return MongoAuth.class.getName();
+  }
+
   /*
    * (non-Javadoc)
    * 

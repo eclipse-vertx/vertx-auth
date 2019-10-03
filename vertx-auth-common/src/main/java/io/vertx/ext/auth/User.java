@@ -84,6 +84,14 @@ public interface User {
    */
   JsonObject principal();
 
+
+  /**
+   * The configured provider FQCN for this User object. This is useful to match User objects with existing providers.
+   *
+   * @return FQCN.
+   */
+  String providerId();
+
   /**
    * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
    * after it has been deserialized.

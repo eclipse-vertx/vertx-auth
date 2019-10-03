@@ -58,6 +58,11 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   }
 
   @Override
+  public String providerId() {
+    return OAuth2Auth.class.getName();
+  }
+
+  @Override
   public AccessToken setTrustJWT(boolean trust) {
     // refresh the tokens
     accessToken = decodeToken("access_token", trust);

@@ -21,6 +21,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.htdigest.HtdigestAuth;
 
 /**
  * @author Paulo Lopes
@@ -33,6 +34,11 @@ public class HtdigestUser implements User {
   public HtdigestUser(String username, String realm) {
     this.username = username;
     this.realm = realm;
+  }
+
+  @Override
+  public String providerId() {
+    return HtdigestAuth.class.getName();
   }
 
   @Override

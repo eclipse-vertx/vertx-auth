@@ -96,6 +96,12 @@ public class ChainAuthTest extends VertxTestBase {
 
   private User createUser(final JsonObject principal) {
     return new User() {
+
+      @Override
+      public String providerId() {
+        return "dummy";
+      }
+
       @Override
       public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
         return null;

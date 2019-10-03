@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 
 /**
  * @author Neven Radovanović
@@ -21,6 +22,11 @@ public class HtpasswdUser extends AbstractUser {
   @Override
   protected void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(false));
+  }
+
+  @Override
+  public String providerId() {
+    return HtpasswdAuth.class.getName();
   }
 
   @Override

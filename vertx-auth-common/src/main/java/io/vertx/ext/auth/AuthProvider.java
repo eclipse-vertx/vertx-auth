@@ -30,7 +30,16 @@ import io.vertx.core.json.JsonObject;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
+@FunctionalInterface
 public interface AuthProvider {
+
+  /**
+   * The FQCN for this provider. This is needed in order to match serialized user objects to providers.
+   * @return FQCN of the implementation interface.
+   */
+  default String id() {
+    return "<none>";
+  }
 
   /**
    * Authenticate a user.

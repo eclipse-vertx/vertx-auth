@@ -19,7 +19,6 @@ package io.vertx.ext.auth.jdbc.impl;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -32,7 +31,7 @@ import java.util.function.Consumer;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
+public class JDBCAuthImpl implements JDBCAuth {
 
   private JDBCClient client;
   private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;

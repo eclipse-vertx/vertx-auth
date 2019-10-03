@@ -35,6 +35,7 @@ import java.util.List;
  * @author mremme
  */
 public class MongoAuthImpl implements MongoAuth {
+
   private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
   private MongoClient mongoClient;
   private String usernameField = DEFAULT_USERNAME_FIELD;

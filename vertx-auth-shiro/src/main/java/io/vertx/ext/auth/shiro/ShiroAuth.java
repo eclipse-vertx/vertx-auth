@@ -16,10 +16,10 @@
 
 package io.vertx.ext.auth.shiro;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthProviderImpl;
 import org.apache.shiro.realm.Realm;
@@ -59,10 +59,19 @@ public interface ShiroAuth extends AuthProvider {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return ShiroAuth.class.getName();
+  }
+
+  /**
    * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
    * @param rolePrefix a Prefix e.g.: "role:"
    * @return a reference to this for fluency
    */
+  @Fluent
   ShiroAuth setRolePrefix(String rolePrefix);
 
 }

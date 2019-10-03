@@ -154,6 +154,14 @@ public interface MongoAuth extends AuthProvider {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return MongoAuth.class.getName();
+  }
+
+  /**
    * Set the name of the collection to be used. Defaults to {@link #DEFAULT_COLLECTION_NAME}
    *
    * @param collectionName

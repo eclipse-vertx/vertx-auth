@@ -37,6 +37,14 @@ public interface ChainAuth extends AuthProvider {
 
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return ChainAuth.class.getName();
+  }
+
+  /**
    * Appends a auth provider to the chain.
    *
    * @param other auth provider

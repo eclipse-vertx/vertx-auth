@@ -53,6 +53,14 @@ public interface OAuth2Auth extends AuthProvider {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  default String id() {
+    return OAuth2Auth.class.getName();
+  }
+
+  /**
    * Generate a redirect URL to the authN/Z backend. It only applies to auth_code flow.
    */
   String authorizeURL(JsonObject params);
