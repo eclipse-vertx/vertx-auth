@@ -1,6 +1,6 @@
 == The WebAuthN auth provider
 
-This component contains an out of the box a JWT implementation. To use this project, add the following
+This component contains an out of the box a WebAuthN implementation. To use this project, add the following
 dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -20,3 +20,22 @@ dependency to the _dependencies_ section of your build descriptor:
 ----
 compile 'io.vertx:vertx-auth-jwt:${maven.version}'
 ----
+
+WebAuthN is the JavaScript API of the FIDO2 protocol by the FIDO alliance. FIDO2 is a "passwordless" authentication
+mechanism and the JavaScript API is more known as WebAuthN.
+
+WebAuthN allows users to authenticate using a secure device or token and no passwords are exchange between the browser
+and the server (also known as Relay Party).
+
+The current implementation supports both authentication and device attestation.
+
+Device attestation is a verification of the device itself. Currently the following attestations are implemented:
+
+* U2F (FIDO-U2F tokens, e.g.: Yubikey's)
+* Packed
+* Android Key
+
+Still not implemented are:
+
+* Android Safetynet
+* TPM
