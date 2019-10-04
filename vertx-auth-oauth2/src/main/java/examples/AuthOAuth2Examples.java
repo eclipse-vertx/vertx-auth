@@ -185,7 +185,7 @@ public class AuthOAuth2Examples {
     // you would get this config from the keycloak admin console
     JsonObject keycloakJson = new JsonObject()
       .put("realm", "master")
-      .put("realm-public-unwrap", "MIIBIjANBgkqhk...wIDAQAB")
+      .put("realm-public-key", "MIIBIjANBgkqhk...wIDAQAB")
       .put("auth-server-url", "http://localhost:9000/auth")
       .put("ssl-required", "external")
       .put("resource", "frontend")

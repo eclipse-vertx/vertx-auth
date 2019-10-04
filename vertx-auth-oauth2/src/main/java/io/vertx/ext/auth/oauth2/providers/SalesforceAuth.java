@@ -49,7 +49,7 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
    * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
    * running on a custom instance) that site will be used to do the lookup.
    * <p>
-   * If the discovered config includes a json web unwrap url, it will be also fetched and the JWKs will be loaded
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
    * @param vertx   the vertx instance
@@ -72,7 +72,7 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
    * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
    * running on a custom instance) that site will be used to do the lookup.
    * <p>
-   * If the discovered config includes a json web unwrap url, it will be also fetched and the JWKs will be loaded
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
    * @see SalesforceAuth#discover(Vertx, OAuth2ClientOptions, Handler)

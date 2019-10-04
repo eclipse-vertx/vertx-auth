@@ -90,10 +90,10 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
       options.setJwkPath("/realms/" + realm + "/protocol/openid-connect/certs");
     }
 
-    if (config.containsKey("realm-public-unwrap")) {
+    if (config.containsKey("realm-public-key")) {
       options.addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("RS256")
-        .setPublicKey(config.getString("realm-public-unwrap")));
+        .setPublicKey(config.getString("realm-public-key")));
     }
 
     return OAuth2Auth
@@ -106,7 +106,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
    * running on a custom instance) that site will be used to do the lookup.
    * <p>
-   * If the discovered config includes a json web unwrap url, it will be also fetched and the JWKs will be loaded
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
    * @param vertx   the vertx instance
@@ -129,7 +129,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
    * running on a custom instance) that site will be used to do the lookup.
    * <p>
-   * If the discovered config includes a json web unwrap url, it will be also fetched and the JWKs will be loaded
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
    * @see KeycloakAuth#discover(Vertx, OAuth2ClientOptions, Handler)

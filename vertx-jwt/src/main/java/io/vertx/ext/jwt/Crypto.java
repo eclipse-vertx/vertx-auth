@@ -139,7 +139,7 @@ class CryptoKeyPair implements Crypto {
   @Override
   public synchronized byte[] sign(byte[] payload) {
     if (privateKey == null) {
-      throw new RuntimeException("Cannot sign (no private unwrap)");
+      throw new RuntimeException("Cannot sign (no private key)");
     }
 
     try {
@@ -158,7 +158,7 @@ class CryptoKeyPair implements Crypto {
   @Override
   public synchronized boolean verify(byte[] signature, byte[] payload) {
     if (publicKey == null) {
-      throw new RuntimeException("Cannot verify (no public unwrap)");
+      throw new RuntimeException("Cannot verify (no public key)");
     }
 
     try {

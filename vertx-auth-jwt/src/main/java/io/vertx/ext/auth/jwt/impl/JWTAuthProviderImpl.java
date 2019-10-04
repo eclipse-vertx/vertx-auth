@@ -77,7 +77,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         this.jwt = new JWT(ks, keyStore.getPassword().toCharArray());
       } else {
-        // no unwrap file attempt to load pem keys
+        // no key file attempt to load pem keys
         this.jwt = new JWT();
 
         final List<PubSecKeyOptions> keys = config.getPubSecKeys();

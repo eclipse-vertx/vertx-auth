@@ -138,7 +138,7 @@ public final class JWT {
     try {
       final Key secretKey = keyStore.getKey(alias, keyStorePassword);
 
-      // unwrap store does not have the requested algorithm
+      // key store does not have the requested algorithm
       if (secretKey == null) {
         return null;
       }

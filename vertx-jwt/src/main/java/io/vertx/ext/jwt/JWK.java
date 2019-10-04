@@ -60,7 +60,7 @@ public final class JWK implements Crypto {
    * Creates a Symmetric Key (Hash) from pem formatted strings.
    *
    * @param algorithm the algorithm e.g.: HS256
-   * @param secret the private unwrap
+   * @param secret the private key
    */
   public static JWK symmetricKey(String algorithm, String secret) {
     return new JWK(algorithm, secret);
@@ -70,7 +70,7 @@ public final class JWK implements Crypto {
    * Creates a Public Key from a PEM formatted string.
    *
    * @param algorithm the algorithm e.g.: RS256
-   * @param pemString the public unwrap in PEM format
+   * @param pemString the public key in PEM format
    */
   public static JWK pubKey(String algorithm, String pemString) {
     return new JWK(algorithm, false, pemString, null);
@@ -80,7 +80,7 @@ public final class JWK implements Crypto {
    * Creates a Private Key from a PEM formatted string.
    *
    * @param algorithm the algorithm e.g.: RS256
-   * @param pemString the private unwrap in PEM format
+   * @param pemString the private key in PEM format
    */
   public static JWK secKey(String algorithm, String pemString) {
     return new JWK(algorithm, false, null, pemString);
@@ -90,8 +90,8 @@ public final class JWK implements Crypto {
    * Creates a Key pair from a PEM formatted string.
    *
    * @param algorithm the algorithm e.g.: RS256
-   * @param pubPemString the public unwrap in PEM format
-   * @param secPemString the private unwrap in PEM format
+   * @param pubPemString the public key in PEM format
+   * @param secPemString the private key in PEM format
    */
   public static JWK pubSecKey(String algorithm, String pubPemString, String secPemString) {
     return new JWK(algorithm, false, pubPemString, secPemString);
@@ -117,7 +117,7 @@ public final class JWK implements Crypto {
     String pub = options.getPublicKey();
     String sec = options.getSecretKey();
 
-    // Pub Sec unwrap
+    // Pub Sec key
     if (pub != null && sec != null) {
       return pubSecKey(alg, pub, sec);
     }
@@ -142,8 +142,8 @@ public final class JWK implements Crypto {
    *
    * @param algorithm the algorithm e.g.: RS256
    * @param isCertificate when true the public PEM is assumed to be a X509 Certificate
-   * @param pemPub the public unwrap in PEM format
-   * @param pemSec the private unwrap in PEM format
+   * @param pemPub the public key in PEM format
+   * @param pemSec the private key in PEM format
    */
   private JWK(String algorithm, boolean isCertificate, String pemPub, String pemSec) {
 
@@ -207,7 +207,7 @@ public final class JWK implements Crypto {
    * Creates a Symmetric Key from a base64 encoded string.
    *
    * @param algorithm the algorithm e.g.: HS256
-   * @param hmac the symmetric unwrap
+   * @param hmac the symmetric key
    */
   private JWK(String algorithm, String hmac) {
     try {
@@ -228,7 +228,7 @@ public final class JWK implements Crypto {
 
       mac = Mac.getInstance(alias.get(alg));
       mac.init(new SecretKeySpec(hmac.getBytes(UTF8), alias.get(alg)));
-      // this is a symmetric unwrap
+      // this is a symmetric key
       symmetric = true;
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
       throw new RuntimeException(e);
@@ -251,7 +251,7 @@ public final class JWK implements Crypto {
           break;
 
         default:
-          throw new RuntimeException("Unsupported unwrap type: " + json.getString("kty"));
+          throw new RuntimeException("Unsupported key type: " + json.getString("kty"));
       }
     } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException e) {
       throw new RuntimeException(e);
@@ -275,14 +275,14 @@ public final class JWK implements Crypto {
       throw new NoSuchAlgorithmException(alg);
     }
 
-    // public unwrap
+    // public key
     if (jsonHasProperties(json, "n", "e")) {
       final BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("n")));
       final BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("e")));
       publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
     }
 
-    // private unwrap
+    // private key
     if (jsonHasProperties(json, "n", "e", "d", "p", "q", "dp", "dq", "qi")) {
       final BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("n")));
       final BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("e")));
@@ -352,14 +352,14 @@ public final class JWK implements Crypto {
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
     parameters.init(new ECGenParameterSpec(translate(json.getString("crv"))));
 
-    // public unwrap
+    // public key
     if (jsonHasProperties(json, "x", "y")) {
       final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
       publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(new ECPoint(x, y), parameters.getParameterSpec(ECParameterSpec.class)));
     }
 
-    // public unwrap
+    // public key
     if (jsonHasProperties(json, "x", "y", "d")) {
       final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
@@ -400,7 +400,7 @@ public final class JWK implements Crypto {
 
     mac = Mac.getInstance(alias.get(alg));
     mac.init(new SecretKeySpec(json.getString("k").getBytes(UTF8), alias.get(alg)));
-    // this is a symmetric unwrap
+    // this is a symmetric key
     symmetric = true;
   }
 
