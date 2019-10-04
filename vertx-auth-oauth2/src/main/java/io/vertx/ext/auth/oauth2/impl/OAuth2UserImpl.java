@@ -173,7 +173,7 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
     } catch (RuntimeException e) {
       // explicity catch and log as debug. exception here is a valid case
       // the reason is that it can be for several factors, such as bad token
-      // or invalid JWT key setup, in that case we fall back to opaque token
+      // or invalid JWT unwrap setup, in that case we fall back to opaque token
       // which is the default operational mode for OAuth2.
       LOG.debug("Cannot decode token:", e);
     }

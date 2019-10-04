@@ -22,7 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 
 /**
- * Implementation of the Microprofile MP-JWT 1.1 RBAC based on the access token groups key.
+ * Implementation of the Microprofile MP-JWT 1.1 RBAC based on the access token groups unwrap.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>.
  */

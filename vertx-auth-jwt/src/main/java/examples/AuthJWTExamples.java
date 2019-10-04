@@ -147,7 +147,7 @@ public class AuthJWTExamples {
   public void example14(Vertx vertx) {
 
     JsonObject config = new JsonObject()
-      .put("public-key", "BASE64-ENCODED-PUBLIC_KEY")
+      .put("public-unwrap", "BASE64-ENCODED-PUBLIC_KEY")
       // since we're consuming keycloak JWTs we need to locate the permission claims in the token
       .put("permissionsClaimKey", "realm_access/roles");
 

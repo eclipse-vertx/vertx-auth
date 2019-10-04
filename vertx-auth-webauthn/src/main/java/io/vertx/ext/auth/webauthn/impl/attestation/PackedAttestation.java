@@ -17,8 +17,6 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
@@ -26,17 +24,13 @@ import io.vertx.ext.jwt.JWK;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 
 public class PackedAttestation implements Attestation {
-
-  private static final Logger LOG = LoggerFactory.getLogger(FidoU2fAttestation.class);
 
   // codecs
   private static final Base64.Decoder b64dec = Base64.getUrlDecoder();
@@ -80,7 +74,9 @@ public class PackedAttestation implements Attestation {
         JsonArray x5c = attStmt.getJsonArray("x5c");
 
         final X509Certificate x509Certificate = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(0))));
-
+        // check the certificate
+        x509Certificate.checkValidity();
+        // certificate valid lets verify the principal
         String[] values = x509Certificate.getSubjectX500Principal().getName(X500Principal.RFC2253).split(",");
         int count = 0;
 
@@ -144,7 +140,7 @@ public class PackedAttestation implements Attestation {
       }
 
       return true;
-    } catch (CertificateException e) {
+    } catch (CertificateException | InvalidKeyException | SignatureException e) {
       throw new AttestationException(e);
     }
   }
@@ -162,16 +158,11 @@ public class PackedAttestation implements Attestation {
     }
   }
 
-  private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) {
-    try {
-      synchronized (sig) {
-        sig.initVerify(certificate);
-        sig.update(data);
-        return sig.verify(signature);
-      }
-    } catch (Exception e) {
-      LOG.warn("Failed to verify attestation", e);
-      return false;
+  private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) throws InvalidKeyException, SignatureException {
+    synchronized (sig) {
+      sig.initVerify(certificate);
+      sig.update(data);
+      return sig.verify(signature);
     }
   }
 }

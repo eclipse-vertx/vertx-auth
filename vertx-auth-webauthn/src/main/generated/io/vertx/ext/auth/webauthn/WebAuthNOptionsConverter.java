@@ -55,6 +55,11 @@ public class WebAuthNOptionsConverter {
             obj.setRealmIcon((String)member.getValue());
           }
           break;
+        case "realmId":
+          if (member.getValue() instanceof String) {
+            obj.setRealmId((String)member.getValue());
+          }
+          break;
         case "transports":
           if (member.getValue() instanceof JsonArray) {
             java.util.LinkedHashSet<java.lang.String> list =  new java.util.LinkedHashSet<>();
@@ -94,6 +99,9 @@ public class WebAuthNOptionsConverter {
     }
     if (obj.getRealmIcon() != null) {
       json.put("realmIcon", obj.getRealmIcon());
+    }
+    if (obj.getRealmId() != null) {
+      json.put("realmId", obj.getRealmId());
     }
     if (obj.getTransports() != null) {
       JsonArray array = new JsonArray();

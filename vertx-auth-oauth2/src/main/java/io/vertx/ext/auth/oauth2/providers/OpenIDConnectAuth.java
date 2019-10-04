@@ -22,7 +22,7 @@ public interface OpenIDConnectAuth {
    * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
    * configuration options and attempt to load the well known descriptor.
    *
-   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * If the discovered config includes a json web unwrap url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
    * @param vertx the vertx instance
@@ -109,7 +109,7 @@ public interface OpenIDConnectAuth {
    * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
    * configuration options and attempt to load the well known descriptor.
    *
-   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * If the discovered config includes a json web unwrap url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
    * @see OpenIDConnectAuth#discover(Vertx, OAuth2ClientOptions, Handler)

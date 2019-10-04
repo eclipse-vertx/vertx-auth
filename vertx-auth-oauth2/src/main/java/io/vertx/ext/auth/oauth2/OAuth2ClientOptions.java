@@ -349,8 +349,8 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   /**
-   * The provider PubSec key options
-   * @return the pub sec key options
+   * The provider PubSec unwrap options
+   * @return the pub sec unwrap options
    */
   public List<PubSecKeyOptions> getPubSecKeys() {
     return pubSecKeys;

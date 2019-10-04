@@ -18,8 +18,6 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
@@ -37,8 +35,6 @@ import java.util.Map;
 import static io.vertx.ext.auth.webauthn.impl.AuthenticatorData.USER_PRESENT;
 
 public class FidoU2fAttestation implements Attestation {
-
-  private static final Logger LOG = LoggerFactory.getLogger(FidoU2fAttestation.class);
 
   // codecs
   private static final Base64.Decoder b64dec = Base64.getUrlDecoder();
@@ -83,10 +79,13 @@ public class FidoU2fAttestation implements Attestation {
       JsonArray x5c = attStmt.getJsonArray("x5c");
 
       final X509Certificate x509Certificate = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(0))));
+      // check the certificate
+      x509Certificate.checkValidity();
+      // certificate valid lets verify signatures
       byte[] signature = b64dec.decode(attStmt.getString("sig"));
 
       return verifySignature(signature, signatureBase.getBytes(), x509Certificate);
-    } catch (CertificateException | IOException e) {
+    } catch (CertificateException | IOException | InvalidKeyException | SignatureException e) {
       throw new AttestationException(e);
     }
   }
@@ -104,17 +103,12 @@ public class FidoU2fAttestation implements Attestation {
     }
   }
 
-  private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) {
-    try {
+  private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) throws InvalidKeyException, SignatureException {
       synchronized (sig) {
         sig.initVerify(certificate);
         sig.update(data);
         return sig.verify(signature);
       }
-    } catch (Exception e) {
-      LOG.warn("Failed to verify attestation", e);
-      return false;
-    }
   }
 
   /**

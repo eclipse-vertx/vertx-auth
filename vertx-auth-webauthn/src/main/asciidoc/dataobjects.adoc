@@ -28,6 +28,7 @@
 |[[realm]]`@realm`|`String`|-
 |[[realmDisplayName]]`@realmDisplayName`|`String`|-
 |[[realmIcon]]`@realmIcon`|`String`|-
+|[[realmId]]`@realmId`|`String`|-
 |[[transports]]`@transports`|`Array of String`|-
 |===
 

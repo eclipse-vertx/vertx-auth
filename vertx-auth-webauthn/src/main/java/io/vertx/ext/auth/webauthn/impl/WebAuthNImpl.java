@@ -31,6 +31,7 @@ import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
+import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 import io.vertx.ext.jwt.JWK;
 
 import java.io.IOException;
@@ -328,8 +329,16 @@ public class WebAuthNImpl implements WebAuthN {
               final JsonObject result = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, authenticators);
 
               if (result.getBoolean("verified", false)) {
-                // TODO: update counter
-                handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
+                // the verified field is a control field
+                result.remove("verified");
+                // update the credential (the important here is to update the counter)
+                store.updateUserCredential(username, result, updateUserCredential -> {
+                  if (updateUserCredential.failed()) {
+                    handler.handle(Future.failedFuture(updateUserCredential.cause()));
+                    return;
+                  }
+                  handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
+                });
               } else {
                 handler.handle(Future.failedFuture("Can not authenticate signature!"));
               }
@@ -349,7 +358,7 @@ public class WebAuthNImpl implements WebAuthN {
    *
    * @param webAuthnResponse - Data from navigator.credentials.create
    */
-  private JsonObject verifyWebAuthNCreate(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData) throws IOException {
+  private JsonObject verifyWebAuthNCreate(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData) throws AttestationException, IOException {
     JsonObject response = webAuthnResponse.getJsonObject("response");
     // STEP 11 Extract attestation Object
     try (JsonParser parser = CBOR.cborParser(response.getString("attestationObject"))) {
@@ -415,7 +424,7 @@ public class WebAuthNImpl implements WebAuthN {
       throw new RuntimeException("User was NOT present durring authentication!");
     }
 
-    // TODO: assert the algorithm to be SHA-256 clientData.getString("hashAlgorithm")
+    // TODO: assert the algorithm to be SHA-256 clientData.getString("hashAlgorithm") ?
     // STEP 26 hash clientDataJSON with sha256
     byte[] clientDataHash = hash(clientDataJSON);
     // STEP 27 create signature base by concat authenticatorData and clientDataHash
