@@ -299,7 +299,7 @@ public class WebAuthNImpl implements WebAuthN {
               .put("credID", authrInfo.getString("credID"))
               .put("registered", true)
               .put("publicKey", authrInfo.getString("publicKey"))
-              .put("counter", authrInfo.getLong("counter"));
+              .put("counter", authrInfo.getLong("counter", 0L));
 
             store.updateUserCredential(username, principal, updateUserCredential -> {
               if (updateUserCredential.failed()) {
@@ -325,14 +325,22 @@ public class WebAuthNImpl implements WebAuthN {
               authenticators = Collections.emptyList();
             }
 
+            // STEP 24 Query public key base on user ID
+            JsonObject authenticator = findAuthr(webauthnResp.getString("id"), authenticators);
+
+            if (authenticator == null) {
+              handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthnResp.getString("id")));
+              return;
+            }
+
             try {
-              final JsonObject result = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, authenticators);
+              final JsonObject result = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, authenticator);
 
               if (result.getBoolean("verified", false)) {
-                // the verified field is a control field
-                result.remove("verified");
+                // update the counter on the authenticator
+                authenticator.put("counter", result.getLong("counter", 0L));
                 // update the credential (the important here is to update the counter)
-                store.updateUserCredential(username, result, updateUserCredential -> {
+                store.updateUserCredential(username, authenticator, updateUserCredential -> {
                   if (updateUserCredential.failed()) {
                     handler.handle(Future.failedFuture(updateUserCredential.cause()));
                     return;
@@ -408,12 +416,10 @@ public class WebAuthNImpl implements WebAuthN {
 
   /**
    * @param webAuthnResponse - Data from navigator.credentials.get
-   * @param authenticators   - Credential from Database
+   * @param authr   - Credential from Database
    */
-  private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, List<JsonObject> authenticators) throws IOException {
+  private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, JsonObject authr) throws IOException {
 
-    // STEP 24 Query public key base on user ID
-    JsonObject authr = findAuthr(webAuthnResponse.getString("id"), authenticators);
     JsonObject response = webAuthnResponse.getJsonObject("response");
 
     // STEP 25 parse auth data
