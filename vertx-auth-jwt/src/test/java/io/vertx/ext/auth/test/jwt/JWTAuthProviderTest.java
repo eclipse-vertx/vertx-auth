@@ -237,6 +237,12 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testGoodAudience() {
+
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addAudience("b")
+        .addAudience("d")));
+
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
@@ -246,9 +252,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-      .put("jwt", token)
-      .put("options", new JsonObject()
-        .put("audience", new JsonArray().add("b").add("d")));
+      .put("jwt", token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
