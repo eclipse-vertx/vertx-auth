@@ -289,6 +289,14 @@ public final class JWT {
       }
     }
 
+    if(options.getScopes() != null && options.getScopes().size() >= 1) {
+      if(options.hasScopeDelimiter()) {
+        payload.put("scope", String.join(options.getScopeDelimiter(), options.getScopes()));
+      } else {
+        payload.put("scope", new JsonArray(options.getScopes()));
+      }
+    }
+
     if (options.getIssuer() != null) {
       payload.put("iss", options.getIssuer());
     }

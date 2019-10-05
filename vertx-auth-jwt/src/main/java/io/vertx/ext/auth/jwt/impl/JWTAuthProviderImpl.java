@@ -29,9 +29,9 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
+import io.vertx.ext.jwt.JWTOptions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,6 +42,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Paulo Lopes
@@ -129,6 +131,29 @@ public class JWTAuthProviderImpl implements JWTAuth {
       if (jwtOptions.getIssuer() != null) {
         if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
           resultHandler.handle(Future.failedFuture("Invalid JWT issuer"));
+          return;
+        }
+      }
+
+      if(jwtOptions.getScopes() != null) {
+        if(payload.getValue("scope") == null) {
+          resultHandler.handle(Future.failedFuture("Invalid JWT: scope claim is required"));
+          return;
+        }
+
+        JsonArray target;
+        if (payload.getValue("scope") instanceof String) {
+          target = new JsonArray(
+            Stream.of(payload.getString("scope")
+              .split(jwtOptions.getScopeDelimiter()))
+              .collect(Collectors.toList())
+          );
+        } else {
+          target = payload.getJsonArray("scope");
+        }
+
+        if(!target.getList().containsAll(jwtOptions.getScopes())) {
+          resultHandler.handle(Future.failedFuture("Invalid JWT scopes expected: " + Json.encode(jwtOptions.getScopes())));
           return;
         }
       }

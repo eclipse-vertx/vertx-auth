@@ -284,6 +284,137 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   @Test
+  public void testGoodScopes() {
+    //JWT is valid because required scopes "a" & "b" are well included in the access_token.
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addScope("a")
+        .addScope("b")));
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo");
+
+    final String token = authProvider.generateToken(payload,
+      new JWTOptions().addScope("a").addScope("b").addScope("c"));
+
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject()
+      .put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testGoodScopesWithDelimiter() {
+    //JWT is valid because required scopes "a" & "b" are well included in the access_token.
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addScope("a")
+        .addScope("b")
+        .withScopeDelimiter(",")));
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo");
+
+    final String token = authProvider.generateToken(payload,
+      new JWTOptions().addScope("a").addScope("b").addScope("c").withScopeDelimiter(","));
+
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject()
+      .put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testGoodScopesWithDefaultDelimiter() {
+    //JWT is valid because required scopes "a" & "b" are well included in the access_token.
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addScope("a")
+        .addScope("b")));
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo");
+
+    final String token = authProvider.generateToken(payload,
+      new JWTOptions().addScope("a").addScope("b").addScope("c").withScopeDelimiter(" "));
+
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject()
+      .put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testBadScopes() {
+    //JWT is not valid because the required scopes "d" is not included in the access_token.
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addScope("b")
+        .addScope("d")));
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo");
+
+    final String token = authProvider.generateToken(payload,
+      new JWTOptions().addScope("a").addScope("b").addScope("c"));
+
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject()
+      .put("jwt", token);
+
+    authProvider.authenticate(authInfo, onFailure(thr -> {
+      assertNotNull(thr);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testBadScopesFormat() {
+    //JWT is not valid because the authProvider is expecting an array of scope while the JWT has a string scope.
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addScope("a")
+        .addScope("b")));
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo");
+
+    final String token = authProvider.generateToken(payload,
+      new JWTOptions().addScope("a").addScope("b").addScope("c").withScopeDelimiter(","));
+
+    assertNotNull(token);
+
+    JsonObject authInfo = new JsonObject()
+      .put("jwt", token);
+
+    authProvider.authenticate(authInfo, onFailure(thr -> {
+      assertNotNull(thr);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testGenerateNewTokenES256() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()

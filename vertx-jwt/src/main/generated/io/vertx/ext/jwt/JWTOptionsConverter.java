@@ -83,6 +83,16 @@ public class JWTOptionsConverter {
             obj.setPermissions(list);
           }
           break;
+        case "scopes":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setScopes(list);
+          }
+          break;
         case "subject":
           if (member.getValue() instanceof String) {
             obj.setSubject((String)member.getValue());
@@ -119,6 +129,11 @@ public class JWTOptionsConverter {
       JsonArray array = new JsonArray();
       obj.getPermissions().forEach(item -> array.add(item));
       json.put("permissions", array);
+    }
+    if (obj.getScopes() != null) {
+      JsonArray array = new JsonArray();
+      obj.getScopes().forEach(item -> array.add(item));
+      json.put("scopes", array);
     }
     if (obj.getSubject() != null) {
       json.put("subject", obj.getSubject());
