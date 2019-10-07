@@ -17,8 +17,15 @@ public class WebAuthNOptionsConverter {
       switch (member.getKey()) {
         case "attestation":
           if (member.getValue() instanceof String) {
-            obj.setAttestation((String)member.getValue());
+            obj.setAttestation(io.vertx.ext.auth.webauthn.Attestation.valueOf((String)member.getValue()));
           }
+          break;
+        case "authenticatorAttachment":
+          if (member.getValue() instanceof String) {
+            obj.setAuthenticatorAttachment(io.vertx.ext.auth.webauthn.AuthenticatorAttachment.valueOf((String)member.getValue()));
+          }
+          break;
+        case "authenticatorSelection":
           break;
         case "challengeLength":
           if (member.getValue() instanceof Number) {
@@ -40,24 +47,31 @@ public class WebAuthNOptionsConverter {
             obj.setPubKeyCredParams(list);
           }
           break;
-        case "realm":
-          if (member.getValue() instanceof String) {
-            obj.setRealm((String)member.getValue());
+        case "requireResidentKey":
+          if (member.getValue() instanceof Boolean) {
+            obj.setRequireResidentKey((Boolean)member.getValue());
           }
           break;
-        case "realmDisplayName":
+        case "rpIcon":
           if (member.getValue() instanceof String) {
-            obj.setRealmDisplayName((String)member.getValue());
+            obj.setRpIcon((String)member.getValue());
           }
           break;
-        case "realmIcon":
+        case "rpId":
           if (member.getValue() instanceof String) {
-            obj.setRealmIcon((String)member.getValue());
+            obj.setRpId((String)member.getValue());
           }
           break;
-        case "realmId":
+        case "rpName":
           if (member.getValue() instanceof String) {
-            obj.setRealmId((String)member.getValue());
+            obj.setRpName((String)member.getValue());
+          }
+          break;
+        case "rpObject":
+          break;
+        case "timeout":
+          if (member.getValue() instanceof Number) {
+            obj.setTimeout(((Number)member.getValue()).intValue());
           }
           break;
         case "transports":
@@ -70,6 +84,11 @@ public class WebAuthNOptionsConverter {
             obj.setTransports(list);
           }
           break;
+        case "userVerification":
+          if (member.getValue() instanceof String) {
+            obj.setUserVerification(io.vertx.ext.auth.webauthn.UserVerification.valueOf((String)member.getValue()));
+          }
+          break;
       }
     }
   }
@@ -80,7 +99,13 @@ public class WebAuthNOptionsConverter {
 
   public static void toJson(WebAuthNOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAttestation() != null) {
-      json.put("attestation", obj.getAttestation());
+      json.put("attestation", obj.getAttestation().name());
+    }
+    if (obj.getAuthenticatorAttachment() != null) {
+      json.put("authenticatorAttachment", obj.getAuthenticatorAttachment().name());
+    }
+    if (obj.getAuthenticatorSelection() != null) {
+      json.put("authenticatorSelection", obj.getAuthenticatorSelection());
     }
     json.put("challengeLength", obj.getChallengeLength());
     if (obj.getOrigin() != null) {
@@ -91,22 +116,29 @@ public class WebAuthNOptionsConverter {
       obj.getPubKeyCredParams().forEach(item -> array.add(item));
       json.put("pubKeyCredParams", array);
     }
-    if (obj.getRealm() != null) {
-      json.put("realm", obj.getRealm());
+    if (obj.getRequireResidentKey() != null) {
+      json.put("requireResidentKey", obj.getRequireResidentKey());
     }
-    if (obj.getRealmDisplayName() != null) {
-      json.put("realmDisplayName", obj.getRealmDisplayName());
+    if (obj.getRpIcon() != null) {
+      json.put("rpIcon", obj.getRpIcon());
     }
-    if (obj.getRealmIcon() != null) {
-      json.put("realmIcon", obj.getRealmIcon());
+    if (obj.getRpId() != null) {
+      json.put("rpId", obj.getRpId());
     }
-    if (obj.getRealmId() != null) {
-      json.put("realmId", obj.getRealmId());
+    if (obj.getRpName() != null) {
+      json.put("rpName", obj.getRpName());
     }
+    if (obj.getRpObject() != null) {
+      json.put("rpObject", obj.getRpObject());
+    }
+    json.put("timeout", obj.getTimeout());
     if (obj.getTransports() != null) {
       JsonArray array = new JsonArray();
       obj.getTransports().forEach(item -> array.add(item));
       json.put("transports", array);
+    }
+    if (obj.getUserVerification() != null) {
+      json.put("userVerification", obj.getUserVerification().name());
     }
   }
 }

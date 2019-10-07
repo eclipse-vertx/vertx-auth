@@ -25,14 +25,21 @@ import java.util.Set;
 @DataObject(generateConverter = true)
 public class WebAuthNOptions {
 
-  private String realmId;
-  private String realm;
-  private String realmDisplayName;
-  private String realmIcon;
-  private String attestation;
-  private Set<String> pubKeyCredParams;
   private String origin;
   private Set<String> transports;
+
+  private String rpName;
+  private String rpId;
+  private String rpIcon;
+
+  private AuthenticatorAttachment authenticatorAttachment;
+  private Boolean requireResidentKey;
+  private UserVerification userVerification;
+
+  private int timeout;
+  private Attestation attestation;
+
+  private Set<String> pubKeyCredParams;
 
   public int getChallengeLength() {
     return challengeLength;
@@ -55,7 +62,6 @@ public class WebAuthNOptions {
 
   // sensible defaults
   private void init() {
-    setAttestation("none");
     addPubKeyCredParam("ES256");
     addPubKeyCredParam("RS256");
     addTransport("usb");
@@ -64,21 +70,21 @@ public class WebAuthNOptions {
     addTransport("internal");
   }
 
-  public String getRealm() {
-    return realm;
+  public String getRpName() {
+    return rpName;
   }
 
-  public WebAuthNOptions setRealm(String realm) {
-    this.realm = realm;
+  public WebAuthNOptions setRpName(String rpName) {
+    this.rpName = rpName;
     return this;
   }
 
-  public String getRealmId() {
-    return realmId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public WebAuthNOptions setRealmId(String realmId) {
-    this.realmId = realmId;
+  public WebAuthNOptions setRpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
@@ -91,21 +97,12 @@ public class WebAuthNOptions {
     return this;
   }
 
-  public String getRealmDisplayName() {
-    return realmDisplayName;
+  public String getRpIcon() {
+    return rpIcon;
   }
 
-  public WebAuthNOptions setRealmDisplayName(String realmDisplayName) {
-    this.realmDisplayName = realmDisplayName;
-    return this;
-  }
-
-  public String getRealmIcon() {
-    return realmIcon;
-  }
-
-  public WebAuthNOptions setRealmIcon(String realmIcon) {
-    this.realmIcon = realmIcon;
+  public WebAuthNOptions setRpIcon(String rpIcon) {
+    this.rpIcon = rpIcon;
     return this;
   }
 
@@ -127,17 +124,11 @@ public class WebAuthNOptions {
     return this;
   }
 
-  public JsonObject toJson() {
-    final JsonObject json = new JsonObject();
-    WebAuthNOptionsConverter.toJson(this, json);
-    return json;
-  }
-
-  public String getAttestation() {
+  public Attestation getAttestation() {
     return attestation;
   }
 
-  public WebAuthNOptions setAttestation(String attestation) {
+  public WebAuthNOptions setAttestation(Attestation attestation) {
     this.attestation = attestation;
     return this;
   }
@@ -157,6 +148,93 @@ public class WebAuthNOptions {
   public WebAuthNOptions setPubKeyCredParams(Set<String> pubKeyCredParams) {
     this.pubKeyCredParams = pubKeyCredParams;
     return this;
+  }
+
+  public AuthenticatorAttachment getAuthenticatorAttachment() {
+    return authenticatorAttachment;
+  }
+
+  public WebAuthNOptions setAuthenticatorAttachment(AuthenticatorAttachment authenticatorAttachment) {
+    this.authenticatorAttachment = authenticatorAttachment;
+    return this;
+  }
+
+  public Boolean getRequireResidentKey() {
+    return requireResidentKey;
+  }
+
+  public WebAuthNOptions setRequireResidentKey(Boolean requireResidentKey) {
+    this.requireResidentKey = requireResidentKey;
+    return this;
+  }
+
+  public UserVerification getUserVerification() {
+    return userVerification;
+  }
+
+  public WebAuthNOptions setUserVerification(UserVerification userVerification) {
+    this.userVerification = userVerification;
+    return this;
+  }
+
+  public int getTimeout() {
+    return timeout;
+  }
+
+  public WebAuthNOptions setTimeout(int timeout) {
+    this.timeout = timeout;
+    return this;
+  }
+
+  // extras
+
+  public JsonObject getRpObject() {
+    if (rpName == null) {
+      throw new IllegalStateException("rpName is required but not set!");
+    }
+
+    JsonObject rp = new JsonObject()
+      .put("name", rpName);
+
+    if (rpId != null) {
+      rp.put("id", rpId);
+    }
+
+    if (rpIcon != null) {
+      rp.put("icon", rpIcon);
+    }
+
+    return rp;
+  }
+
+  public JsonObject getAuthenticatorSelection() {
+    JsonObject json = null;
+    if (authenticatorAttachment != null) {
+      if (json == null) {
+        json = new JsonObject();
+      }
+      json.put("authenticatorAttachment", authenticatorAttachment.toString());
+    }
+    if (requireResidentKey != null) {
+      if (json == null) {
+        json = new JsonObject();
+      }
+      json.put("requireResidentKey", requireResidentKey);
+    }
+    if (userVerification != null) {
+      if (json == null) {
+        json = new JsonObject();
+      }
+      json.put("userVerification", userVerification.toString());
+    }
+
+    return json;
+  }
+
+  public JsonObject toJson() {
+    final JsonObject json = new JsonObject();
+    WebAuthNOptionsConverter.toJson(this, json);
+    return json;
   }
 
   @Override

@@ -68,14 +68,35 @@ public interface WebAuthN extends AuthProvider {
    * @return fluent self
    */
   @Fluent
-  WebAuthN createCredentialsOptions(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthN createCredentialsOptions(JsonObject user, AuthenticatorAttachment type, Handler<AsyncResult<JsonObject>> handler);
 
   /**
-   * Same as {@link #createCredentialsOptions(JsonObject, CredentialsChallengeType, Handler)} but returning a Future.
+   * Same as {@link #createCredentialsOptions(JsonObject, AuthenticatorAttachment, Handler)} but returning a Future.
    */
-  default Future<JsonObject> createCredentialsOptions(JsonObject user, CredentialsChallengeType type) {
+  default Future<JsonObject> createCredentialsOptions(JsonObject user, AuthenticatorAttachment type) {
     Promise<JsonObject> promise = Promise.promise();
     createCredentialsOptions(user, type, promise);
+    return promise.future();
+  }
+
+  /**
+   * Generates makeCredentials request
+   *
+   * @param user    - the user object with username, displayName
+   * @param handler server encoded make credentials request
+   * @return fluent self
+   */
+  @Fluent
+  default WebAuthN createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
+    return createCredentialsOptions(user, null, handler);
+  }
+
+  /**
+   * Same as {@link #createCredentialsOptions(JsonObject, Handler)} but returning a Future.
+   */
+  default Future<JsonObject> createCredentialsOptions(JsonObject user) {
+    Promise<JsonObject> promise = Promise.promise();
+    createCredentialsOptions(user, promise);
     return promise.future();
   }
 

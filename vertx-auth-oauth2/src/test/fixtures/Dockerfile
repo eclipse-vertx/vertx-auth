@@ -4,10 +4,10 @@ ENV KEYCLOAK_USER=user
 ENV KEYCLOAK_PASSWORD=password
 ENV DB_VENDOR=H2
 
-ADD vertx-test-realm.json /tmp/vertx-test-realm.json
+ADD vertx-test-rpName.json /tmp/vertx-test-rpName.json
 
 EXPOSE 8080
 EXPOSE 8443
 
-CMD ["-b", "0.0.0.0", "-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.file=/tmp/vertx-test-realm.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"]
+CMD ["-b", "0.0.0.0", "-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.file=/tmp/vertx-test-rpName.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"]
 

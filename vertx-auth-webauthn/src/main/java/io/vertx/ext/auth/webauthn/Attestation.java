@@ -19,7 +19,19 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.codegen.annotations.VertxGen;
 
 @VertxGen
-public enum CredentialsChallengeType {
-  CROSS_PLATFORM,
-  PLATFORM
+public enum Attestation {
+  NONE("none"),
+  DIRECT("direct"),
+  INDIRECT("indirect");
+
+  private final String value;
+
+  Attestation(String value) {
+    this.value = value;
+  }
+
+  @Override
+  public String toString() {
+    return value;
+  }
 }

@@ -1,7 +1,20 @@
 = Enums
 
-[[CredentialsChallengeType]]
-== CredentialsChallengeType
+[[Attestation]]
+== Attestation
+
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[NONE]]`NONE`|-
+|[[DIRECT]]`DIRECT`|-
+|[[INDIRECT]]`INDIRECT`|-
+|===
+
+[[AuthenticatorAttachment]]
+== AuthenticatorAttachment
 
 
 [cols=">25%,75%"]
@@ -10,5 +23,18 @@
 ^|Name | Description
 |[[CROSS_PLATFORM]]`CROSS_PLATFORM`|-
 |[[PLATFORM]]`PLATFORM`|-
+|===
+
+[[UserVerification]]
+== UserVerification
+
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[REQUIRED]]`REQUIRED`|-
+|[[PREFERRED]]`PREFERRED`|-
+|[[DISCOURAGED]]`DISCOURAGED`|-
 |===
 

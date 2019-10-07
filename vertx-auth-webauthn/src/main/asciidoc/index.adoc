@@ -18,7 +18,7 @@ dependency to the _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jwt:${maven.version}'
+compile 'io.vertx:vertx-auth-webauthn:${maven.version}'
 ----
 
 WebAuthN is the JavaScript API of the FIDO2 protocol by the FIDO alliance. FIDO2 is a "passwordless" authentication

@@ -28,7 +28,7 @@ public class WebAuthNTest {
   public void testFIDORegister(TestContext should) {
     final Async test = should.async();
 
-    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRealm("FIDO Examples Corporation").setOrigin("http://localhost:3000"), new DummyStore());
+    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"), new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ\",\"response\":{\"attestationObject\":\"o2NmbXRoZmlkby11MmZnYXR0U3RtdKJjc2lnWEcwRQIhAOOPecQ34VN0QW-cmj-Sft9aCahqgTlFQzbQH1LpEgrTAiBWW6KoqlKbLMtGd1Y_VcQML8eugYZcrmSSCS0of2T-M2N4NWOBWQIyMIICLjCCARigAwIBAgIECmML_zALBgkqhkiG9w0BAQswLjEsMCoGA1UEAxMjWXViaWNvIFUyRiBSb290IENBIFNlcmlhbCA0NTcyMDA2MzEwIBcNMTQwODAxMDAwMDAwWhgPMjA1MDA5MDQwMDAwMDBaMCkxJzAlBgNVBAMMHll1YmljbyBVMkYgRUUgU2VyaWFsIDE3NDI2MzI5NTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKQjZF26iyPtbNnl5IuTKs_fRWTHVzHxz1IHRRBrSbqWD60PCqUJPe4zkIRFqBa4NnzdhVcS80nlZuY3ANQm0J-jJjAkMCIGCSsGAQQBgsQKAgQVMS4zLjYuMS40LjEuNDE0ODIuMS4yMAsGCSqGSIb3DQEBCwOCAQEAZTmwMqHPxEjSB64Umwq2tGDKplAcEzrwmg6kgS8KPkJKXKSu9T1H6XBM9-LAE9cN48oUirFFmDIlTbZRXU2Vm2qO9OdrSVFY-qdbF9oti8CKAmPHuJZSW6ii7qNE59dHKUaP4lDYpnhRDqttWSUalh2LPDJQUpO9bsJPkgNZAhBUQMYZXL_MQZLRYkX-ld7llTNOX5u7n_4Y5EMr-lqOyVVC9lQ6JP6xoa9q6Zp9-Y9ZmLCecrrcuH6-pLDgAzPcc8qxhC2OR1B0ZSpI9RBgcT0KqnVE0tq1KEDeokPqF3MgmDRkJ--_a2pV0wAYfPC3tC57BtBdH_UXEB8xZVFhtGhhdXRoRGF0YVjESZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NBAAAAAAAAAAAAAAAAAAAAAAAAAAAAQL6enL6EoL01kshaZ5naZtXcIrkRL7JviqsNCbdGND0H4x7BIShPNiqJqVF6hLeckCEJfWSo-i9fu9NCxmlVDKGlAQIDJiABIVgg0TT3Vc7gnmO4ptAzJ671fahlgW8CrqgiCn_fPWFeEbciWCD9wLIGCTxTxmbe6ahfYQuboizWT7Y8u3BaYKSa6XTtxA\",\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiJQZXlodVVYaVQzeG55V1pqZWNaU1NxaFVTdUttYmZPV0dGREN0OGZDUXYwIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmNyZWF0ZSJ9\"},\"id\":\"vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ\",\"type\":\"public-unwrap\"}");
 
@@ -48,7 +48,7 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthN webAuthN = WebAuthN.create(
       rule.vertx(),
-      new WebAuthNOptions().setRealm("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
+      new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
       new DummyStore(
         new JsonObject()
           .put("paulo",
@@ -77,7 +77,7 @@ public class WebAuthNTest {
   @Ignore("test data contains an expired certificate")
   public void testPAckedFull(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRealm("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
+    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"wsLryOAxXMU54s2fCSWPzWjXHOBKPploN-UHftj4_rpIu6BZxNXppm82f7Y6iX9FEOKKeS5-N2TALeyzLnJfAA\",\n" +
@@ -102,7 +102,7 @@ public class WebAuthNTest {
   @Test(timeout = 1000)
   public void testPAckedSurrogate(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRealm("FIDO Examples Corporation").setOrigin("http://localhost:3000"), new DummyStore());
+    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"), new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"id\": \"H6X2BnnjgOzu_Oj87vpRnwMJeJYVzwM3wtY1lhAfQ14\",\n" +
@@ -139,7 +139,7 @@ public class WebAuthNTest {
   @Test(timeout = 1000)
   public void testAndroidKey(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRealm("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
+    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"AZD7huwZVx7aW1efRa6Uq3JTQNorj3qA9yrLINXEcgvCQYtWiSQa1eOIVrXfCmip6MzP8KaITOvRLjy3TUHO7_c\",\n" +

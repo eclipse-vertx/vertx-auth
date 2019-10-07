@@ -78,7 +78,7 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public WebAuthN createCredentialsOptions(JsonObject user, CredentialsChallengeType type, Handler<AsyncResult<JsonObject>> handler) {
+  public WebAuthN createCredentialsOptions(JsonObject user, AuthenticatorAttachment type, Handler<AsyncResult<JsonObject>> handler) {
 
     store.getUserCredentials(user.getString("name"), getUserCredentials -> {
       if (getUserCredentials.failed()) {
@@ -90,28 +90,30 @@ public class WebAuthNImpl implements WebAuthN {
 
       if (credentials == null || credentials.size() == 0 || (credentials.size() == 1 && credentials.get(0).getBoolean("registered", false))) {
 
-        final String id = randomBase64URLBuffer(32);
+        final String id = randomBase64URLBuffer(options.getChallengeLength());
 
         // STEP 2 Generate Credential Challenge
-        JsonObject authenticatorSelection;
+        JsonObject authenticatorSelection = options.getAuthenticatorSelection();
 
-        switch (type) {
-          case CROSS_PLATFORM:
-            // STEP 3.1 add this for security key
-            authenticatorSelection = new JsonObject()
-              .put("authenticatorAttachment", "cross-platform")
-              .put("requireResidentKey", false);
-            break;
-          case PLATFORM:
-            // STEP 3.2 Add this for finger print
-            authenticatorSelection = new JsonObject()
-              .put("authenticatorAttachment", "platform")
-              .put("requireResidentKey", false)
-              .put("userVerification", "required");
-            break;
-          default:
-            handler.handle(Future.failedFuture("Unsupported Authenticator Attachment type: " + type));
-            return;
+        if (type != null) {
+          switch (type) {
+            case CROSS_PLATFORM:
+              // STEP 3.1 add this for security key
+              authenticatorSelection = new JsonObject()
+                .put("authenticatorAttachment", "cross-platform")
+                .put("requireResidentKey", false);
+              break;
+            case PLATFORM:
+              // STEP 3.2 Add this for finger print
+              authenticatorSelection = new JsonObject()
+                .put("authenticatorAttachment", "platform")
+                .put("requireResidentKey", false)
+                .put("userVerification", "required");
+              break;
+            default:
+              handler.handle(Future.failedFuture("Unsupported Authenticator Attachment type: " + type));
+              return;
+          }
         }
 
         final JsonArray pubKeyCredParams = new JsonArray();
@@ -173,14 +175,13 @@ public class WebAuthNImpl implements WebAuthN {
 
         // relay party configuration
         final JsonObject rp = new JsonObject()
-          .put("name", options.getRealm())
-          .put("displayName", options.getRealmDisplayName());
+          .put("name", options.getRpName());
 
-        if (options.getRealmIcon() != null) {
-          rp.put("icon", options.getRealmIcon());
+        if (options.getRpIcon() != null) {
+          rp.put("icon", options.getRpIcon());
         }
-        if (options.getRealmId() != null) {
-          rp.put("id", options.getRealmId());
+        if (options.getRpId() != null) {
+          rp.put("id", options.getRpId());
         }
 
         // user configuration
@@ -193,14 +194,24 @@ public class WebAuthNImpl implements WebAuthN {
           _user.put("icon", user.getString("icon"));
         }
 
-        handler.handle(Future.succeededFuture(
-          new JsonObject()
-            .put("challenge", randomBase64URLBuffer(32))
-            .put("rp", rp)
-            .put("user", _user)
-            .put("authenticatorSelection", authenticatorSelection)
-            .put("attestation", options.getAttestation())
-            .put("pubKeyCredParams", pubKeyCredParams)));
+        // final assembly
+        final JsonObject publicKey = new JsonObject()
+          .put("challenge", randomBase64URLBuffer(32))
+          .put("rp", rp)
+          .put("user", _user)
+          .put("authenticatorSelection", authenticatorSelection)
+          .put("pubKeyCredParams", pubKeyCredParams);
+
+        if (options.getAttestation() != null) {
+          publicKey.put("attestation", options.getAttestation().toString());
+        }
+        if (options.getTimeout() != -1) {
+          publicKey.put("attestation", options.getTimeout());
+        }
+
+        handler.handle(Future.succeededFuture(publicKey));
+      } else {
+        handler.handle(Future.failedFuture("User exists!"));
       }
     });
 
@@ -416,7 +427,7 @@ public class WebAuthNImpl implements WebAuthN {
 
   /**
    * @param webAuthnResponse - Data from navigator.credentials.get
-   * @param authr   - Credential from Database
+   * @param authr            - Credential from Database
    */
   private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, JsonObject authr) throws IOException {
 
