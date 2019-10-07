@@ -51,7 +51,7 @@ public class WebAuthNTest {
       new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
       new DummyStore(
         new JsonObject()
-          .put("paulo",
+          .put("-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw",
             new JsonArray()
               .add(
                 new JsonObject()
@@ -66,7 +66,6 @@ public class WebAuthNTest {
       new JsonObject()
         .put("webauthn", webauthn)
         .put("challenge", "6ojdo_KKG4kXoZ5JD_Alv6ChrUtOOz7uqeiioFlBszo")
-        .put("username", "paulo")
       , fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();

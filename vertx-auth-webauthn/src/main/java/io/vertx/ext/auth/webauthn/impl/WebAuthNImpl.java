@@ -78,7 +78,7 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public WebAuthN createCredentialsOptions(JsonObject user, AuthenticatorAttachment type, Handler<AsyncResult<JsonObject>> handler) {
+  public WebAuthN createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
 
     store.getUserCredentials(user.getString("name"), getUserCredentials -> {
       if (getUserCredentials.failed()) {
@@ -93,28 +93,28 @@ public class WebAuthNImpl implements WebAuthN {
         final String id = randomBase64URLBuffer(options.getChallengeLength());
 
         // STEP 2 Generate Credential Challenge
-        JsonObject authenticatorSelection = options.getAuthenticatorSelection();
+        final JsonObject authenticatorSelection = options.getAuthenticatorSelection();
 
-        if (type != null) {
-          switch (type) {
-            case CROSS_PLATFORM:
-              // STEP 3.1 add this for security key
-              authenticatorSelection = new JsonObject()
-                .put("authenticatorAttachment", "cross-platform")
-                .put("requireResidentKey", false);
-              break;
-            case PLATFORM:
-              // STEP 3.2 Add this for finger print
-              authenticatorSelection = new JsonObject()
-                .put("authenticatorAttachment", "platform")
-                .put("requireResidentKey", false)
-                .put("userVerification", "required");
-              break;
-            default:
-              handler.handle(Future.failedFuture("Unsupported Authenticator Attachment type: " + type));
-              return;
-          }
-        }
+//        if (type != null) {
+//          switch (type) {
+//            case CROSS_PLATFORM:
+//              // STEP 3.1 add this for security key
+//              authenticatorSelection = new JsonObject()
+//                .put("authenticatorAttachment", "cross-platform")
+//                .put("requireResidentKey", false);
+//              break;
+//            case PLATFORM:
+//              // STEP 3.2 Add this for finger print
+//              authenticatorSelection = new JsonObject()
+//                .put("authenticatorAttachment", "platform")
+//                .put("requireResidentKey", false)
+//                .put("userVerification", "required");
+//              break;
+//            default:
+//              handler.handle(Future.failedFuture("Unsupported Authenticator Attachment type: " + type));
+//              return;
+//          }
+//        }
 
         final JsonArray pubKeyCredParams = new JsonArray();
 
@@ -126,12 +126,6 @@ public class WebAuthNImpl implements WebAuthN {
                   .put("type", "public-key")
                   .put("alg", -7));
               break;
-//            case "EdDSA":
-//              pubKeyCredParams.add(
-//                new JsonObject()
-//                  .put("type", "public-key")
-//                  .put("alg", -8));
-//              break;
             case "ES384":
               pubKeyCredParams.add(
                 new JsonObject()
@@ -196,7 +190,7 @@ public class WebAuthNImpl implements WebAuthN {
 
         // final assembly
         final JsonObject publicKey = new JsonObject()
-          .put("challenge", randomBase64URLBuffer(32))
+          .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
           .put("rp", rp)
           .put("user", _user)
           .put("authenticatorSelection", authenticatorSelection)
@@ -277,8 +271,8 @@ public class WebAuthNImpl implements WebAuthN {
     //      "type": "public-key"
     //    }
     final JsonObject webauthnResp = Objects.requireNonNull(authInfo.getWebauthn());
-    // TODO: if username is null maybe use authInfo.id ?
-    final String username = Objects.requireNonNull(authInfo.getUsername());
+    // TODO: if id is null maybe use authInfo rawId ?
+    final String id = Objects.requireNonNull(webauthnResp.getString("id"));
 
     // response can't be null
     final JsonObject response = Objects.requireNonNull(webauthnResp.getJsonObject("response"));
@@ -312,7 +306,7 @@ public class WebAuthNImpl implements WebAuthN {
               .put("publicKey", authrInfo.getString("publicKey"))
               .put("counter", authrInfo.getLong("counter", 0L));
 
-            store.updateUserCredential(username, principal, updateUserCredential -> {
+            store.updateUserCredential(id, principal, updateUserCredential -> {
               if (updateUserCredential.failed()) {
                 handler.handle(Future.failedFuture(updateUserCredential.cause()));
               } else {
@@ -327,7 +321,7 @@ public class WebAuthNImpl implements WebAuthN {
         }
         return;
       case "webauthn.get":
-        store.getUserCredentials(username, getUserCredentials -> {
+        store.getUserCredentials(id, getUserCredentials -> {
           if (getUserCredentials.failed()) {
             handler.handle(Future.failedFuture(getUserCredentials.cause()));
           } else {
@@ -351,7 +345,7 @@ public class WebAuthNImpl implements WebAuthN {
                 // update the counter on the authenticator
                 authenticator.put("counter", result.getLong("counter", 0L));
                 // update the credential (the important here is to update the counter)
-                store.updateUserCredential(username, authenticator, updateUserCredential -> {
+                store.updateUserCredential(id, authenticator, updateUserCredential -> {
                   if (updateUserCredential.failed()) {
                     handler.handle(Future.failedFuture(updateUserCredential.cause()));
                     return;

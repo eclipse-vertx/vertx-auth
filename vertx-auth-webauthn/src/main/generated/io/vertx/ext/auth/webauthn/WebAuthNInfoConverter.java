@@ -20,11 +20,6 @@ public class WebAuthNInfoConverter {
             obj.setChallenge((String)member.getValue());
           }
           break;
-        case "username":
-          if (member.getValue() instanceof String) {
-            obj.setUsername((String)member.getValue());
-          }
-          break;
         case "webauthn":
           if (member.getValue() instanceof JsonObject) {
             obj.setWebauthn(((JsonObject)member.getValue()).copy());
@@ -41,9 +36,6 @@ public class WebAuthNInfoConverter {
   public static void toJson(WebAuthNInfo obj, java.util.Map<String, Object> json) {
     if (obj.getChallenge() != null) {
       json.put("challenge", obj.getChallenge());
-    }
-    if (obj.getUsername() != null) {
-      json.put("username", obj.getUsername());
     }
     if (obj.getWebauthn() != null) {
       json.put("webauthn", obj.getWebauthn());

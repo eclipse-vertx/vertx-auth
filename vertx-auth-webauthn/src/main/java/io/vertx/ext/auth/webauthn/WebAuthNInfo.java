@@ -22,7 +22,6 @@ import io.vertx.core.json.JsonObject;
 @DataObject(generateConverter = true)
 public class WebAuthNInfo {
 
-  private String username;
   private String challenge;
   private JsonObject webauthn;
 
@@ -30,15 +29,6 @@ public class WebAuthNInfo {
 
   public WebAuthNInfo(JsonObject json) {
     WebAuthNInfoConverter.fromJson(json, this);
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public WebAuthNInfo setUsername(String username) {
-    this.username = username;
-    return this;
   }
 
   public String getChallenge() {
