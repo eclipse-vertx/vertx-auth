@@ -24,6 +24,7 @@ public class WebAuthNInfo {
 
   private String challenge;
   private JsonObject webauthn;
+  private String username;
 
   public WebAuthNInfo() {}
 
@@ -46,6 +47,15 @@ public class WebAuthNInfo {
 
   public WebAuthNInfo setWebauthn(JsonObject webauthn) {
     this.webauthn = webauthn;
+    return this;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public WebAuthNInfo setUsername(String username) {
+    this.username = username;
     return this;
   }
 

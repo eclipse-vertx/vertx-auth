@@ -56,8 +56,12 @@ public class WebAuthNImpl implements WebAuthN {
 
   public WebAuthNImpl(Vertx vertx, WebAuthNOptions options, AuthStore store) {
     random = new PRNG(vertx);
-    this.options = Objects.requireNonNull(options);
-    this.store = Objects.requireNonNull(store);
+    this.options = options;
+    this.store = store;
+
+    if (options == null || store == null) {
+      throw new IllegalArgumentException("options and store cannot be null!");
+    }
 
     ServiceLoader<Attestation> attestationServiceLoader = ServiceLoader.load(Attestation.class);
 
@@ -80,7 +84,7 @@ public class WebAuthNImpl implements WebAuthN {
   @Override
   public WebAuthN createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
 
-    store.getUserCredentials(user.getString("name"), getUserCredentials -> {
+    store.getUserCredentialsByName(user.getString("name"), getUserCredentials -> {
       if (getUserCredentials.failed()) {
         handler.handle(Future.failedFuture(getUserCredentials.cause()));
         return;
@@ -88,33 +92,12 @@ public class WebAuthNImpl implements WebAuthN {
 
       List<JsonObject> credentials = getUserCredentials.result();
 
-      if (credentials == null || credentials.size() == 0 || (credentials.size() == 1 && credentials.get(0).getBoolean("registered", false))) {
-
-        final String id = randomBase64URLBuffer(options.getChallengeLength());
+      if (credentials == null || credentials.size() == 0) {
+        // generate a new ID for this new potential user
+        final String id = store.generateId();
 
         // STEP 2 Generate Credential Challenge
         final JsonObject authenticatorSelection = options.getAuthenticatorSelection();
-
-//        if (type != null) {
-//          switch (type) {
-//            case CROSS_PLATFORM:
-//              // STEP 3.1 add this for security key
-//              authenticatorSelection = new JsonObject()
-//                .put("authenticatorAttachment", "cross-platform")
-//                .put("requireResidentKey", false);
-//              break;
-//            case PLATFORM:
-//              // STEP 3.2 Add this for finger print
-//              authenticatorSelection = new JsonObject()
-//                .put("authenticatorAttachment", "platform")
-//                .put("requireResidentKey", false)
-//                .put("userVerification", "required");
-//              break;
-//            default:
-//              handler.handle(Future.failedFuture("Unsupported Authenticator Attachment type: " + type));
-//              return;
-//          }
-//        }
 
         final JsonArray pubKeyCredParams = new JsonArray();
 
@@ -199,8 +182,8 @@ public class WebAuthNImpl implements WebAuthN {
         if (options.getAttestation() != null) {
           publicKey.put("attestation", options.getAttestation().toString());
         }
-        if (options.getTimeout() != -1) {
-          publicKey.put("attestation", options.getTimeout());
+        if (options.getTimeout() > 0) {
+          publicKey.put("timeout", options.getTimeout());
         }
 
         handler.handle(Future.succeededFuture(publicKey));
@@ -215,7 +198,20 @@ public class WebAuthNImpl implements WebAuthN {
   @Override
   public WebAuthN getCredentialsOptions(String username, Handler<AsyncResult<JsonObject>> handler) {
 
-    store.getUserCredentials(username, getUserCredentials -> {
+    // we allow Resident Credentials or (RK) requests
+    // this means that username is not required
+    if (options.getRequireResidentKey() != null && options.getRequireResidentKey()) {
+      if (username == null) {
+        handler.handle(Future.succeededFuture(
+          new JsonObject()
+            .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))));
+        return this;
+      }
+    }
+
+    // fallback to non RK requests
+
+    store.getUserCredentialsByName(username, getUserCredentials -> {
       if (getUserCredentials.failed()) {
         handler.handle(Future.failedFuture(getUserCredentials.cause()));
         return;
@@ -270,12 +266,20 @@ public class WebAuthNImpl implements WebAuthN {
     //      "getClientExtensionResults": {},
     //      "type": "public-key"
     //    }
-    final JsonObject webauthnResp = Objects.requireNonNull(authInfo.getWebauthn());
-    // TODO: if id is null maybe use authInfo rawId ?
-    final String id = Objects.requireNonNull(webauthnResp.getString("id"));
+    final JsonObject webauthnResp = authInfo.getWebauthn();
+
+    if (webauthnResp == null) {
+      handler.handle(Future.failedFuture("webauthn can't be null!"));
+      return;
+    }
 
     // response can't be null
-    final JsonObject response = Objects.requireNonNull(webauthnResp.getJsonObject("response"));
+    final JsonObject response = webauthnResp.getJsonObject("response");
+
+    if (response == null) {
+      handler.handle(Future.failedFuture("wenauthn response can't be null!"));
+      return;
+    }
 
     byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
     JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
@@ -292,36 +296,44 @@ public class WebAuthNImpl implements WebAuthN {
       return;
     }
 
+    final String username = authInfo.getUsername();
+
     switch (clientData.getString("type")) {
       case "webauthn.create":
-        try {
-          final JsonObject result = verifyWebAuthNCreate(webauthnResp, clientDataJSON, clientData);
-          // STEP 16 Save data to database
-          if (result.getBoolean("verified", false)) {
-            JsonObject authrInfo = result.getJsonObject("authrInfo");
-            // the principal for vertx-auth
-            JsonObject principal = new JsonObject()
-              .put("credID", authrInfo.getString("credID"))
-              .put("registered", true)
-              .put("publicKey", authrInfo.getString("publicKey"))
-              .put("counter", authrInfo.getLong("counter", 0L));
+        // we always need a username to register
+        if (username == null) {
+          handler.handle(Future.failedFuture("username can't be null!"));
+          return;
+        }
 
-            store.updateUserCredential(id, principal, updateUserCredential -> {
-              if (updateUserCredential.failed()) {
-                handler.handle(Future.failedFuture(updateUserCredential.cause()));
-              } else {
-                handler.handle(Future.succeededFuture(new WebAuthNUser(principal)));
-              }
-            });
-          } else {
-            handler.handle(Future.failedFuture("Can not authenticate signature!"));
-          }
+        try {
+          final JsonObject authrInfo = verifyWebAuthNCreate(webauthnResp, clientDataJSON, clientData);
+          // the principal for vertx-auth
+          JsonObject principal = new JsonObject()
+            .put("credID", authrInfo.getString("credID"))
+            .put("publicKey", authrInfo.getString("publicKey"))
+            .put("counter", authrInfo.getLong("counter", 0L));
+
+          // by default the store can upsert if a credential is missing, the user has been verified so it is valid
+          // the store however might dissallow this operation
+          JsonObject storeItem = new JsonObject()
+            .mergeIn(principal)
+            .put("username", username);
+
+          store.updateUserCredential(authrInfo.getString("credID"), storeItem, true, updateUserCredential -> {
+            if (updateUserCredential.failed()) {
+              handler.handle(Future.failedFuture(updateUserCredential.cause()));
+            } else {
+              handler.handle(Future.succeededFuture(new WebAuthNUser(principal)));
+            }
+          });
         } catch (RuntimeException | IOException e) {
           handler.handle(Future.failedFuture(e));
         }
         return;
       case "webauthn.get":
-        store.getUserCredentials(id, getUserCredentials -> {
+
+        final Handler<AsyncResult<List<JsonObject>>> onGetUserCredentialsByAny = getUserCredentials -> {
           if (getUserCredentials.failed()) {
             handler.handle(Future.failedFuture(getUserCredentials.cause()));
           } else {
@@ -331,35 +343,47 @@ public class WebAuthNImpl implements WebAuthN {
             }
 
             // STEP 24 Query public key base on user ID
-            JsonObject authenticator = findAuthr(webauthnResp.getString("id"), authenticators);
+            Optional<JsonObject> authenticator = authenticators.stream()
+              .filter(authr -> webauthnResp.getString("id").equals(authr.getValue("credID")))
+              .findFirst();
 
-            if (authenticator == null) {
-              handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthnResp.getString("id")));
+            if (!authenticator.isPresent()) {
+              handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthnResp.getString("rawId")));
               return;
             }
 
             try {
-              final JsonObject result = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, authenticator);
-
-              if (result.getBoolean("verified", false)) {
-                // update the counter on the authenticator
-                authenticator.put("counter", result.getLong("counter", 0L));
-                // update the credential (the important here is to update the counter)
-                store.updateUserCredential(id, authenticator, updateUserCredential -> {
-                  if (updateUserCredential.failed()) {
-                    handler.handle(Future.failedFuture(updateUserCredential.cause()));
-                    return;
-                  }
-                  handler.handle(Future.succeededFuture(new WebAuthNUser(result)));
-                });
-              } else {
-                handler.handle(Future.failedFuture("Can not authenticate signature!"));
-              }
+              final JsonObject json = authenticator.get();
+              final long counter = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, json);
+              // update the counter on the authenticator
+              json.put("counter", counter);
+              // update the credential (the important here is to update the counter)
+              store.updateUserCredential(webauthnResp.getString("rawId"), json, false, updateUserCredential -> {
+                if (updateUserCredential.failed()) {
+                  handler.handle(Future.failedFuture(updateUserCredential.cause()));
+                  return;
+                }
+                handler.handle(Future.succeededFuture(new WebAuthNUser(json)));
+              });
             } catch (RuntimeException | IOException e) {
               handler.handle(Future.failedFuture(e));
             }
           }
-        });
+        };
+
+        if (options.getRequireResidentKey() != null && options.getRequireResidentKey()) {
+          // username are not provided (RK) we now need to lookup by rawId
+          store.getUserCredentialsById(webauthnResp.getString("rawId"), onGetUserCredentialsByAny);
+
+        } else {
+          // username can't be null
+          if (username == null) {
+            handler.handle(Future.failedFuture("username can't be null!"));
+            return;
+          }
+          store.getUserCredentialsByName(username, onGetUserCredentialsByAny);
+        }
+
         return;
       default:
         handler.handle(Future.failedFuture("Can not determine type of response!"));
@@ -391,31 +415,24 @@ public class WebAuthNImpl implements WebAuthN {
       // STEP 13 Extract public key
       byte[] publicKey = authrDataStruct.getCredentialPublicKey();
 
-      response = new JsonObject()
-        .put("verified", false);
-
       final String fmt = ctapMakeCredResp.getString("fmt");
 
       // STEP 14 Verify attestation based on type of device
       final Attestation attestation = attestations.get(fmt);
 
       if (attestation == null) {
-        LOG.error("Unknown attestation fmt: " + fmt);
+        throw new AttestationException("Unknown attestation fmt: " + fmt);
       } else {
-        response
-          .put("verified", attestation.verify(webAuthnResponse, clientDataJSON, ctapMakeCredResp, authrDataStruct));
+        // perform the verification
+        attestation.verify(webAuthnResponse, clientDataJSON, ctapMakeCredResp, authrDataStruct);
       }
 
-      if (response.getBoolean("verified")) {
-        // STEP 15 Create data for save to database
-        response.put("authrInfo", new JsonObject()
+      // STEP 15 Create data for save to database
+      return new JsonObject()
           .put("fmt", fmt)
           .put("publicKey", b64enc.encodeToString(publicKey))
           .put("counter", authrDataStruct.getSignCounter())
-          .put("credID", b64enc.encodeToString(authrDataStruct.getCredentialId())));
-      }
-
-      return response;
+          .put("credID", b64enc.encodeToString(authrDataStruct.getCredentialId()));
     }
   }
 
@@ -423,7 +440,7 @@ public class WebAuthNImpl implements WebAuthN {
    * @param webAuthnResponse - Data from navigator.credentials.get
    * @param authr            - Credential from Database
    */
-  private JsonObject verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, JsonObject authr) throws IOException {
+  private long verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, JsonObject authr) throws IOException, AttestationException {
 
     JsonObject response = webAuthnResponse.getJsonObject("response");
 
@@ -436,6 +453,7 @@ public class WebAuthNImpl implements WebAuthN {
     }
 
     // TODO: assert the algorithm to be SHA-256 clientData.getString("hashAlgorithm") ?
+
     // STEP 26 hash clientDataJSON with sha256
     byte[] clientDataHash = hash(clientDataJSON);
     // STEP 27 create signature base by concat authenticatorData and clientDataHash
@@ -454,36 +472,17 @@ public class WebAuthNImpl implements WebAuthN {
       // STEP 30 verify signature
       boolean verified = publicKey.verify(signature, signatureBase.getBytes());
 
-      // start building the response
-      response = new JsonObject().put("verified", verified);
-
-      if (verified) {
-        if (authrDataStruct.getSignCounter() <= authr.getLong("counter")) {
-          throw new RuntimeException("Authr counter did not increase!");
-        }
-        // update the counter
-        response.put("counter", authrDataStruct.getSignCounter());
+      if (!verified) {
+        throw new AttestationException("Failed to verify the signature!");
       }
 
-      return response;
-    }
-  }
-
-  /**
-   * Takes an array of registered authenticators and find one specified by credID
-   *
-   * @param credID         - base64url encoded credential
-   * @param authenticators - list of authenticators
-   * @return found authenticator
-   */
-  private JsonObject findAuthr(String credID, List<JsonObject> authenticators) {
-    for (JsonObject authr : authenticators) {
-      if (credID.equals(authr.getValue("credID"))) {
-        return authr;
+      if (authrDataStruct.getSignCounter() <= authr.getLong("counter")) {
+        throw new AttestationException("Authr counter did not increase!");
       }
-    }
 
-    throw new RuntimeException("Unknown authenticator with credID: " + credID);
+      // return the counter so it can be updated on the store
+      return authrDataStruct.getSignCounter();
+    }
   }
 
   private byte[] hash(byte[] data) {

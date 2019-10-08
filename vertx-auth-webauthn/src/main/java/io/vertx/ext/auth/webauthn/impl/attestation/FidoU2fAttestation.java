@@ -59,7 +59,7 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) {
+  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) {
     try {
       if (!authr.is(USER_PRESENT)) {
         throw new AttestationException("User was NOT present during authentication!");
@@ -84,7 +84,9 @@ public class FidoU2fAttestation implements Attestation {
       // certificate valid lets verify signatures
       byte[] signature = b64dec.decode(attStmt.getString("sig"));
 
-      return verifySignature(signature, signatureBase.getBytes(), x509Certificate);
+      if (!verifySignature(signature, signatureBase.getBytes(), x509Certificate)) {
+        throw new AttestationException("Failed to verify signature");
+      }
     } catch (CertificateException | IOException | InvalidKeyException | SignatureException e) {
       throw new AttestationException(e);
     }

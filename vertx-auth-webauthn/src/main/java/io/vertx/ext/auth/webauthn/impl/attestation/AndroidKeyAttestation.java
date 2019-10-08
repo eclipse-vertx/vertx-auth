@@ -64,7 +64,7 @@ public class AndroidKeyAttestation implements Attestation {
   }
 
   @Override
-  public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authDataStruct) throws AttestationException {
+  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authDataStruct) throws AttestationException {
     /*
     {
         "fmt": "android-key",
@@ -172,9 +172,6 @@ public class AndroidKeyAttestation implements Attestation {
           }
         }
       }
-
-      return true;
-
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }

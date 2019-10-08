@@ -18,6 +18,7 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
@@ -79,19 +80,20 @@ public interface WebAuthN extends AuthProvider {
   }
 
   /**
-   * Generates getAssertion request
+   * Generates getAssertion request. If the auth provider is configured with {@code RequireResidentKey} and
+   * the username is null then the generated assertion will be a RK assertion (Usernameless).
    *
    * @param username the unique user identified
    * @param handler server encoded get assertion request
    * @return fluent self.
    */
   @Fluent
-  WebAuthN getCredentialsOptions(String username, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthN getCredentialsOptions(@Nullable String username, Handler<AsyncResult<JsonObject>> handler);
 
   /**
    * Same as {@link #getCredentialsOptions(String, Handler)} but returning a Future.
    */
-  default Future<JsonObject> getCredentialsOptions(String username) {
+  default Future<JsonObject> getCredentialsOptions(@Nullable String username) {
     Promise<JsonObject> promise = Promise.promise();
     getCredentialsOptions(username, promise);
     return promise.future();

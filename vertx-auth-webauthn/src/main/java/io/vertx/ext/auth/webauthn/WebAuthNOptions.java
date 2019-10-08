@@ -62,6 +62,7 @@ public class WebAuthNOptions {
 
   // sensible defaults
   private void init() {
+    timeout = -1;
     addPubKeyCredParam("ES256");
     addPubKeyCredParam("RS256");
     addTransport("usb");

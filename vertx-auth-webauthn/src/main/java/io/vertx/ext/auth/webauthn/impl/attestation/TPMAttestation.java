@@ -27,7 +27,7 @@ public class TPMAttestation implements Attestation {
   }
 
   @Override
-  public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) throws AttestationException {
+  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) throws AttestationException {
     throw new AttestationException("Attestation Not Implemented");
   }
 }

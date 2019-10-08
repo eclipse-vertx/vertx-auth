@@ -55,7 +55,7 @@ public class PackedAttestation implements Attestation {
   }
 
   @Override
-  public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authDataStruct) throws AttestationException {
+  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authDataStruct) throws AttestationException {
     try {
       byte[] clientDataHash = hash(clientDataJSON);
 
@@ -138,8 +138,6 @@ public class PackedAttestation implements Attestation {
       if (!signatureValid) {
         throw new AttestationException("Failed to verify the signature!");
       }
-
-      return true;
     } catch (CertificateException | InvalidKeyException | SignatureException e) {
       throw new AttestationException(e);
     }

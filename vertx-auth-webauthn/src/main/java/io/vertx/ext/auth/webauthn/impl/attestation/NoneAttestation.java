@@ -27,7 +27,7 @@ public class NoneAttestation implements Attestation {
   }
 
   @Override
-  public boolean verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) throws AttestationException {
+  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) throws AttestationException {
     if ((authr.getFlags() & AuthenticatorData.USER_PRESENT) == 0) {
       throw new AttestationException("User was NOT present during authentication!");
     }
@@ -39,7 +39,5 @@ public class NoneAttestation implements Attestation {
     if (ctapMakeCredResp.containsKey("attStmt") && ctapMakeCredResp.getJsonObject("attStmt").size() > 0) {
       throw new AttestationException("attStmt is present!");
     }
-
-    return true;
   }
 }

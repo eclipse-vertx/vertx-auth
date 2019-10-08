@@ -19,6 +19,7 @@
 |===
 ^|Name | Type ^| Description
 |[[challenge]]`@challenge`|`String`|-
+|[[username]]`@username`|`String`|-
 |[[webauthn]]`@webauthn`|`Json object`|-
 |===
 
