@@ -25,8 +25,11 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.Authorization;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Paulo Lopes
@@ -53,6 +56,11 @@ public class JWTUser extends AbstractUser {
       this.permissions = jwtToken.getJsonArray(permissionsClaimKey, null);
     }
 
+  }
+  
+  @Override
+  public Set<Authorization> authorizations() {
+	return Collections.emptySet();
   }
 
   private void getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {

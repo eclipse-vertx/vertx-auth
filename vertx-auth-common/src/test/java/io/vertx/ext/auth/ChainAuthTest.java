@@ -1,11 +1,10 @@
 package io.vertx.ext.auth;
 
-import io.vertx.core.AsyncResult;
+import org.junit.Test;
+
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Test;
 
 public class ChainAuthTest extends VertxTestBase {
 
@@ -29,7 +28,7 @@ public class ChainAuthTest extends VertxTestBase {
 
     auth.append((authInfo, res) -> {
       // always OK
-      res.handle(Future.succeededFuture(createUser(null)));
+      res.handle(Future.succeededFuture(createUser(new JsonObject())));
     });
 
     auth.authenticate(new JsonObject(), res -> {
@@ -95,26 +94,6 @@ public class ChainAuthTest extends VertxTestBase {
   }
 
   private User createUser(final JsonObject principal) {
-    return new User() {
-      @Override
-      public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-        return null;
-      }
-
-      @Override
-      public User clearCache() {
-        return null;
-      }
-
-      @Override
-      public JsonObject principal() {
-        return principal;
-      }
-
-      @Override
-      public void setAuthProvider(AuthProvider authProvider) {
-
-      }
-    };
+    return User.create(principal);
   }
 }

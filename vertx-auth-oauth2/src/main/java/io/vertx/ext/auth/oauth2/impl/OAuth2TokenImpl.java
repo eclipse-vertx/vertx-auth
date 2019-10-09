@@ -23,6 +23,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -30,6 +31,8 @@ import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.Set;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
@@ -55,6 +58,11 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
    */
   public OAuth2TokenImpl(OAuth2Auth provider, JsonObject token) {
     super(provider, token);
+  }
+
+  @Override
+  public Set<Authorization> authorizations() {
+	return Collections.emptySet();
   }
 
   @Override

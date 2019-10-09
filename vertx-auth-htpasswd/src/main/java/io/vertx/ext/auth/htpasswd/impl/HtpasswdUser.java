@@ -1,11 +1,15 @@
 package io.vertx.ext.auth.htpasswd.impl;
 
+import java.util.Collections;
+import java.util.Set;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.Authorization;
 
 /**
  * @author Neven Radovanović
@@ -33,4 +37,10 @@ public class HtpasswdUser extends AbstractUser {
   public void setAuthProvider(AuthProvider authProvider) {
 
   }
+  
+  @Override
+  public Set<Authorization> authorizations() {
+	return Collections.emptySet();
+  }
+  
 }

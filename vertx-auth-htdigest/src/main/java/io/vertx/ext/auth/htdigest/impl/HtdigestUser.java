@@ -15,11 +15,15 @@
  */
 package io.vertx.ext.auth.htdigest.impl;
 
+import java.util.Collections;
+import java.util.Set;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.User;
 
 /**
@@ -55,5 +59,10 @@ public class HtdigestUser implements User {
 
   @Override
   public void setAuthProvider(AuthProvider authProvider) {
+  }
+
+  @Override
+  public Set<Authorization> authorizations() {
+	return Collections.emptySet();
   }
 }
