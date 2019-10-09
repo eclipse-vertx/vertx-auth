@@ -10,8 +10,8 @@ public class UserTest {
 
 	
   private void testReadWriteUser(User user1) {
-    JsonObject jsonUser1 = UserConverter.INSTANCE.encode(user1);
-    User user2 = UserConverter.INSTANCE.decode(jsonUser1);
+    JsonObject jsonUser1 = UserConverter.encode(user1);
+    User user2 = UserConverter.decode(jsonUser1);
     Assert.assertEquals(user1, user2);
   }
   

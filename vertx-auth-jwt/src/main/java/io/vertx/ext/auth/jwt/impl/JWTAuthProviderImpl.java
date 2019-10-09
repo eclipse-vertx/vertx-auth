@@ -26,7 +26,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -85,20 +84,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         if (keys != null) {
           for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-            if (pubSecKey.isSymmetric()) {
-              jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
-            } else {
-              jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.isCertificate(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
-            }
-          }
-        }
-
-        // TODO: remove once the deprecation ends!
-        final List<SecretOptions> secrets = config.getSecrets();
-
-        if (secrets != null) {
-          for (SecretOptions secret: secrets) {
-            this.jwt.addSecret(secret.getType(), secret.getSecret());
+            jwt.addJWK(JWK.from(pubSecKey));
           }
         }
 

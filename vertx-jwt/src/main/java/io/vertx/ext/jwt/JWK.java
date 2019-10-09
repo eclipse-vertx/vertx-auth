@@ -2,6 +2,7 @@ package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.jwt.impl.SignatureHelper;
 
 import javax.crypto.*;
@@ -56,14 +57,84 @@ public final class JWK implements Crypto {
   private int ecdsaLength;
 
   /**
-   * Creates a Key(Pair) from pem formatted strings.
+   * Creates a Symmetric Key (Hash) from pem formatted strings.
+   *
+   * @param algorithm the algorithm e.g.: HS256
+   * @param secret the private key
+   */
+  public static JWK symmetricKey(String algorithm, String secret) {
+    return new JWK(algorithm, secret);
+  }
+
+  /**
+   * Creates a Public Key from a PEM formatted string.
    *
    * @param algorithm the algorithm e.g.: RS256
-   * @param pemPub the public key in PEM format
-   * @param pemSec the private key in PEM format
+   * @param pemString the public key in PEM format
    */
-  public JWK(String algorithm, String pemPub, String pemSec) {
-    this(algorithm, false, pemPub, pemSec);
+  public static JWK pubKey(String algorithm, String pemString) {
+    return new JWK(algorithm, false, pemString, null);
+  }
+
+  /**
+   * Creates a Private Key from a PEM formatted string.
+   *
+   * @param algorithm the algorithm e.g.: RS256
+   * @param pemString the private key in PEM format
+   */
+  public static JWK secKey(String algorithm, String pemString) {
+    return new JWK(algorithm, false, null, pemString);
+  }
+
+  /**
+   * Creates a Key pair from a PEM formatted string.
+   *
+   * @param algorithm the algorithm e.g.: RS256
+   * @param pubPemString the public key in PEM format
+   * @param secPemString the private key in PEM format
+   */
+  public static JWK pubSecKey(String algorithm, String pubPemString, String secPemString) {
+    return new JWK(algorithm, false, pubPemString, secPemString);
+  }
+
+  /**
+   * Creates a Certificate from a PEM formatted string.
+   *
+   * @param algorithm the algorithm e.g.: RS256
+   * @param pemString the X509 certificate in PEM format
+   */
+  public static JWK certificate(String algorithm, String pemString) {
+    return new JWK(algorithm, true, pemString, null);
+  }
+
+  public static JWK from(PubSecKeyOptions options) {
+    String alg = options.getAlgorithm();
+    if (alg.startsWith("HS")) {
+      // HMAC SHA
+      return symmetricKey(alg, options.getSecretKey());
+    }
+
+    String pub = options.getPublicKey();
+    String sec = options.getSecretKey();
+
+    // Pub Sec key
+    if (pub != null && sec != null) {
+      return pubSecKey(alg, pub, sec);
+    }
+
+    if (pub != null) {
+      if (options.isCertificate()) {
+        return certificate(alg, pub);
+      } else {
+        return pubKey(alg, pub);
+      }
+    }
+
+    if (sec != null) {
+      return secKey(alg, sec);
+    }
+
+    throw new IllegalArgumentException("Missing PUB/SEC keys");
   }
 
   /**
@@ -74,7 +145,7 @@ public final class JWK implements Crypto {
    * @param pemPub the public key in PEM format
    * @param pemSec the private key in PEM format
    */
-  public JWK(String algorithm, boolean isCertificate, String pemPub, String pemSec) {
+  private JWK(String algorithm, boolean isCertificate, String pemPub, String pemSec) {
 
     try {
       final Map<String, String> alias = new HashMap<String, String>() {{
@@ -138,7 +209,7 @@ public final class JWK implements Crypto {
    * @param algorithm the algorithm e.g.: HS256
    * @param hmac the symmetric key
    */
-  public JWK(String algorithm, String hmac) {
+  private JWK(String algorithm, String hmac) {
     try {
       final Map<String, String> alias = new HashMap<String, String>() {{
         put("HS256", "HMacSHA256");

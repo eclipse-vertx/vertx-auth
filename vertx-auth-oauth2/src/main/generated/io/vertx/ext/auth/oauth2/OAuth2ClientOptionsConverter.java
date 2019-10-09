@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.oauth2.OAuth2ClientOptions} original class using Vert.x codegen.
  */
 public class OAuth2ClientOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2ClientOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
@@ -94,6 +95,11 @@ public class OAuth2ClientOptionsConverter {
             obj.setSite((String)member.getValue());
           }
           break;
+        case "tenant":
+          if (member.getValue() instanceof String) {
+            obj.setTenant((String)member.getValue());
+          }
+          break;
         case "tokenPath":
           if (member.getValue() instanceof String) {
             obj.setTokenPath((String)member.getValue());
@@ -160,6 +166,9 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getJwkPath() != null) {
       json.put("jwkPath", obj.getJwkPath());
     }
+    if (obj.getJWTOptions() != null) {
+      json.put("jwtOptions", obj.getJWTOptions().toJson());
+    }
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
     }
@@ -171,6 +180,9 @@ public class OAuth2ClientOptionsConverter {
     }
     if (obj.getSite() != null) {
       json.put("site", obj.getSite());
+    }
+    if (obj.getTenant() != null) {
+      json.put("tenant", obj.getTenant());
     }
     if (obj.getTokenPath() != null) {
       json.put("tokenPath", obj.getTokenPath());

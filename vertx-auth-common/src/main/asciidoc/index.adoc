@@ -72,7 +72,7 @@ Here's an example of authenticating a user using a simple username/password impl
 
 Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
 
-to check if a user has a specific authority you use {@link io.vertx.ext.auth.User#isAuthorised}.
+to check if a user has a specific authority you use {@link io.vertx.ext.auth.User#isAuthorized}.
 
 The results of all the above are provided asynchronously in the handler.
 

@@ -53,7 +53,7 @@ public class RBACMicroProfileSpecTest {
 
     should.assertNotNull(oauth);
 
-    jwt = new JWT().addJWK(new JWK("RS256", null,
+    jwt = new JWT().addJWK(JWK.secKey("RS256",
       "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCa4gL1C/Ch7/e1\n" +
         "SkeRxSm9abNCqdm3PccEpvHNz+MFPFQd58kOzzxePDmc1eGXi1eQfMVEBke0OfBf\n" +
         "Tvj/ahw9FJZoGMdhcHvvVp/3VQ+tz19viWHdbVryGZBTqyAqVBXAOdS548OQKbAo\n" +

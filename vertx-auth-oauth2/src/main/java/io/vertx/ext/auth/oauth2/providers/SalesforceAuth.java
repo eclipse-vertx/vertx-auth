@@ -1,9 +1,7 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -38,12 +36,12 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setSite("http://login.salesforce.com")
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
+        .setSite("https://login.salesforce.com")
         .setTokenPath("/services/oauth2/token")
         .setAuthorizationPath("/services/oauth2/authorize")
-        .setScopeSeparator("+")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setScopeSeparator("+"));
   }
 
   /**
@@ -64,8 +62,27 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
 
     OpenIDConnectAuth.discover(vertx,
       new OAuth2ClientOptions(config)
-        .setSite("https://login.salesforce.com")
+        .setSite(site)
         .setScopeSeparator("+"),
       handler);
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the default site in the
+   * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
+   * running on a custom instance) that site will be used to do the lookup.
+   * <p>
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @see SalesforceAuth#discover(Vertx, OAuth2ClientOptions, Handler)
+   * @param vertx   the vertx instance
+   * @param config  the initial config
+   * @return future with the instantiated Oauth2 provider instance handler
+   */
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+    Promise<OAuth2Auth> promise = Promise.promise();
+    discover(vertx, config, promise);
+    return promise.future();
   }
 }

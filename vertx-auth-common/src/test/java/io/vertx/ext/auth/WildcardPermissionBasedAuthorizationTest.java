@@ -5,15 +5,14 @@ import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthorizationContextImpl;
-import io.vertx.ext.auth.impl.WildcardPermissionBasedAuthorizationConverter;
 import io.vertx.test.core.VertxTestBase;
 
 public class WildcardPermissionBasedAuthorizationTest extends VertxTestBase {
 
 	@Test
 	public void testConverter() {
-		TestUtils.testJsonCodec(WildcardPermissionBasedAuthorization.create("wp1"), WildcardPermissionBasedAuthorizationConverter.INSTANCE);
-		TestUtils.testJsonCodec(WildcardPermissionBasedAuthorization.create("wp1").setResource("resource"), WildcardPermissionBasedAuthorizationConverter.INSTANCE);
+		TestUtils.testJsonCodec(WildcardPermissionBasedAuthorization.create("wp1"), WildcardPermissionBasedAuthorizationConverter::encode, WildcardPermissionBasedAuthorizationConverter::decode);
+		TestUtils.testJsonCodec(WildcardPermissionBasedAuthorization.create("wp1").setResource("resource"), WildcardPermissionBasedAuthorizationConverter::encode, WildcardPermissionBasedAuthorizationConverter::decode);
 	}
 
 	@Test

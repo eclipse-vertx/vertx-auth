@@ -1,26 +1,17 @@
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth;
 
 import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.json.JsonCodec;
-import io.vertx.ext.auth.RoleBasedAuthorization;
 
-public class RoleBasedAuthorizationConverter implements JsonCodec<RoleBasedAuthorization, JsonObject> {
-
-	public final static RoleBasedAuthorizationConverter INSTANCE = new RoleBasedAuthorizationConverter();
+public class RoleBasedAuthorizationConverter {
 
 	private final static String FIELD_TYPE = "type";
 	private final static String TYPE_ROLE_BASED_AUTHORIZATION = "role";
 	private final static String FIELD_ROLE = "role";
 	private final static String FIELD_RESOURCE = "resource";
 
-	// private constructor
-	private RoleBasedAuthorizationConverter() {
-	}
-	
-	@Override
-	public JsonObject encode(RoleBasedAuthorization value) throws IllegalArgumentException {
+	public final static JsonObject encode(RoleBasedAuthorization value) throws IllegalArgumentException {
 		Objects.requireNonNull(value);
 		
 		JsonObject result = new JsonObject();
@@ -32,13 +23,7 @@ public class RoleBasedAuthorizationConverter implements JsonCodec<RoleBasedAutho
 		return result;
 	}
 
-	@Override
-	public Class<RoleBasedAuthorization> getTargetClass() {
-		return RoleBasedAuthorization.class;
-	}
-
-	@Override
-	public RoleBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+	public final static RoleBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
 		Objects.requireNonNull(json);
 
 		if (TYPE_ROLE_BASED_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

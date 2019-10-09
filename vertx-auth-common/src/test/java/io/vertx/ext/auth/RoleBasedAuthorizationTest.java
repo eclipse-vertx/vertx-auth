@@ -5,15 +5,14 @@ import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthorizationContextImpl;
-import io.vertx.ext.auth.impl.RoleBasedAuthorizationConverter;
 import io.vertx.test.core.VertxTestBase;
 
 public class RoleBasedAuthorizationTest extends VertxTestBase {
 
 	@Test
 	public void testConverter() {
-		TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1"), RoleBasedAuthorizationConverter.INSTANCE);
-		TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1").setResource("resource"), RoleBasedAuthorizationConverter.INSTANCE);
+		TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1"), RoleBasedAuthorizationConverter::encode, RoleBasedAuthorizationConverter::decode);
+		TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1").setResource("resource"), RoleBasedAuthorizationConverter::encode, RoleBasedAuthorizationConverter::decode);
 	}
 
 	@Test

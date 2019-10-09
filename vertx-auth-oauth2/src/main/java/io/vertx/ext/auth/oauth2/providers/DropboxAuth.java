@@ -34,13 +34,14 @@ public interface DropboxAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://www.dropbox.com")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setRevocationPath("/oauth2/token/revoke")
-        .setUserInfoPath("/account/info")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setUserInfoPath("/account/info"));
   }
 }

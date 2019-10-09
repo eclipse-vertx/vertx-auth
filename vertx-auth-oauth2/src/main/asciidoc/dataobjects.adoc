@@ -101,11 +101,19 @@ Root URL for the provider
 +++
 |[[soLinger]]`@soLinger`|`Number (int)`|-
 |[[ssl]]`@ssl`|`Boolean`|-
+|[[sslHandshakeTimeout]]`@sslHandshakeTimeout`|`Number (long)`|-
+|[[sslHandshakeTimeoutUnit]]`@sslHandshakeTimeoutUnit`|`link:enums.html#TimeUnit[TimeUnit]`|-
 |[[tcpCork]]`@tcpCork`|`Boolean`|-
 |[[tcpFastOpen]]`@tcpFastOpen`|`Boolean`|-
 |[[tcpKeepAlive]]`@tcpKeepAlive`|`Boolean`|-
 |[[tcpNoDelay]]`@tcpNoDelay`|`Boolean`|-
 |[[tcpQuickAck]]`@tcpQuickAck`|`Boolean`|-
+|[[tenant]]`@tenant`|`String`|+++
+Sets an optional tenant. Tenants are used in some OpenID servers as placeholders for the URLs.
+ The tenant should be set prior to any URL as it affects the way the URLs will be stored.
+
+ Some provders may name this differently, for example: `realm`.
++++
 |[[tokenPath]]`@tokenPath`|`String`|+++
 Get the Oauth2 token resource path. e.g.: /oauth/token
 +++

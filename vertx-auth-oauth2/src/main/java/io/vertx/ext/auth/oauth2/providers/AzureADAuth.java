@@ -1,9 +1,7 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -41,14 +39,15 @@ public interface AzureADAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setSite("https://login.windows.net/" + guid)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
+        .setTenant(guid)
+        .setSite("https://login.windows.net/{tenant}")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setScopeSeparator(",")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret)
         .setExtraParameters(
-          new JsonObject().put("resource", guid)));
+          new JsonObject().put("resource", "{tenant}")));
   }
 
   /**
@@ -73,7 +72,28 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
-        .setScopeSeparator(","),
+        .setScopeSeparator(",")
+        .setExtraParameters(
+          new JsonObject().put("resource", "{tenant}")),
       handler);
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the default site in the
+   * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
+   * running on a custom instance) that site will be used to do the lookup.
+   * <p>
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @see AzureADAuth#discover(Vertx, OAuth2ClientOptions, Handler)
+   * @param vertx   the vertx instance
+   * @param config  the initial config
+   * @return future with instantiated Oauth2 provider instance handler
+   */
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+    Promise<OAuth2Auth> promise = Promise.promise();
+    discover(vertx, config, promise);
+    return promise.future();
   }
 }

@@ -22,6 +22,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.AuthProviderInternal;
@@ -35,6 +37,8 @@ import io.vertx.ext.auth.oauth2.impl.flow.*;
  */
 public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
+
   private final Vertx vertx;
   private final OAuth2ClientOptions config;
   private final JWT jwt = new JWT();
@@ -47,15 +51,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
     this.vertx = vertx;
     this.config = config;
+    // compute paths with variables, at this moment it is only relevant that
+    // all variables are properly computed
+    this.config.replaceVariables(true);
+
     this.api = new OAuth2API(vertx, config);
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-        if (pubSecKey.isSymmetric()) {
-          jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.getPublicKey()));
-        } else {
-          jwt.addJWK(new JWK(pubSecKey.getAlgorithm(), pubSecKey.isCertificate(), pubSecKey.getPublicKey(), pubSecKey.getSecretKey()));
-        }
+        jwt.addJWK(JWK.from(pubSecKey));
       }
     }
 
@@ -140,7 +144,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
           } else {
             JsonArray keys = json.getJsonArray("keys");
             for (Object key : keys) {
-              jwt.addJWK(new JWK((JsonObject) key));
+              try {
+                jwt.addJWK(new JWK((JsonObject) key));
+              } catch (RuntimeException e) {
+                LOG.warn("Skipped unsupported JWK: " + e.getMessage());
+              }
             }
 
             handler.handle(Future.succeededFuture());
@@ -248,13 +256,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   }
 
   @Override
-  @Deprecated
-  public void getToken(JsonObject credentials, Handler<AsyncResult<AccessToken>> handler) {
-    flow.getToken(credentials, handler);
-  }
-
-  @Override
-  @Deprecated
   public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
     authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), auth -> {
       if (auth.succeeded()) {
@@ -294,13 +295,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
       handler.handle(Future.failedFuture(e));
     }
     return this;
-  }
-
-  @Override
-  @Deprecated
-  public String getScopeSeparator() {
-    final String sep = config.getScopeSeparator();
-    return sep == null ? " " : sep;
   }
 
   @Override

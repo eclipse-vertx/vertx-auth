@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.mongo.MongoAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.mongo.MongoAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.mongo.MongoAuthOptions} original class using Vert.x codegen.
  */
 public class MongoAuthOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, MongoAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

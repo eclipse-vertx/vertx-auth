@@ -1,26 +1,17 @@
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth;
 
 import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.json.JsonCodec;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
 
-public class PermissionBasedAuthorizationConverter implements JsonCodec<PermissionBasedAuthorization, JsonObject> {
-
-	public final static PermissionBasedAuthorizationConverter INSTANCE = new PermissionBasedAuthorizationConverter();
+public class PermissionBasedAuthorizationConverter {
 
 	private final static String FIELD_TYPE = "type";
 	private final static String TYPE_PERMISSION_BASED_AUTHORIZATION = "permission";
 	private final static String FIELD_PERMISSION = "permission";
 	private final static String FIELD_RESOURCE = "resource";
 
-	// private constructor
-	private PermissionBasedAuthorizationConverter() {
-	}
-	
-	@Override
-	public JsonObject encode(PermissionBasedAuthorization value) throws IllegalArgumentException {
+	public final static JsonObject encode(PermissionBasedAuthorization value) throws IllegalArgumentException {
 		Objects.requireNonNull(value);
 		
 		JsonObject result = new JsonObject();
@@ -32,13 +23,7 @@ public class PermissionBasedAuthorizationConverter implements JsonCodec<Permissi
 		return result;
 	}
 
-	@Override
-	public Class<PermissionBasedAuthorization> getTargetClass() {
-		return PermissionBasedAuthorization.class;
-	}
-
-	@Override
-	public PermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+	public final static PermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
 		Objects.requireNonNull(json);
 
 		if (TYPE_PERMISSION_BASED_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

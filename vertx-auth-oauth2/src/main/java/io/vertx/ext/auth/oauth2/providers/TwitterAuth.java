@@ -34,12 +34,13 @@ public interface TwitterAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://api.twitter.com")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
-        .setUserInfoPath("/1.1/users/show.json")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setUserInfoPath("/1.1/users/show.json"));
   }
 }

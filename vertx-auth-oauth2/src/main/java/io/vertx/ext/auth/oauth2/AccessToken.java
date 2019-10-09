@@ -19,7 +19,9 @@ import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -84,6 +86,18 @@ public interface AccessToken extends User {
   AccessToken refresh(Handler<AsyncResult<Void>> callback);
 
   /**
+   * Refresh the access token
+   *
+   * @see AccessToken#refresh(Handler)
+   * @return future returning the results.
+   */
+  default Future<Void> refresh() {
+    Promise<Void> promise = Promise.promise();
+    refresh(promise);
+    return promise.future();
+  }
+
+  /**
    * Revoke access or refresh token
    *
    * @param token_type - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
@@ -93,6 +107,19 @@ public interface AccessToken extends User {
   AccessToken revoke(String token_type, Handler<AsyncResult<Void>> callback);
 
   /**
+   * Revoke access or refresh token
+   *
+   * @see AccessToken#revoke(String, Handler)
+   * @param token_type - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
+   * @return future returning the results.
+   */
+  default Future<Void> revoke(String token_type) {
+    Promise<Void> promise = Promise.promise();
+    revoke(token_type, promise);
+    return promise.future();
+  }
+
+  /**
    * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
    * available on all providers.
    *
@@ -100,6 +127,19 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken logout(Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Revoke refresh token and calls the logout endpoint. This is a openid-connect extension and might not be
+   * available on all providers.
+   *
+   * @see AccessToken#logout(Handler)
+   * @return future returning the results.
+   */
+  default Future<Void> logout() {
+    Promise<Void> promise = Promise.promise();
+    logout(promise);
+    return promise.future();
+  }
 
   /**
    * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
@@ -112,11 +152,36 @@ public interface AccessToken extends User {
   /**
    * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
    *
+   * @see AccessToken#introspect(Handler)
+   * @return future returning the results.
+   */
+  default Future<Void> introspect() {
+    Promise<Void> promise = Promise.promise();
+    introspect(promise);
+    return promise.future();
+  }
+
+  /**
+   * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+   *
    * @param tokenType - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
    * @param callback - The callback function returning the results.
    */
   @Fluent
   AccessToken introspect(String tokenType, Handler<AsyncResult<Void>> callback);
+
+  /**
+   * Introspect access token. This is an OAuth2 extension that allow to verify if an access token is still valid.
+   *
+   * @see AccessToken#introspect(String, Handler)
+   * @param tokenType - A String containing the type of token to revoke. Should be either "access_token" or "refresh_token".
+   * @return future returning the results.
+   */
+  default Future<Void> introspect(String tokenType) {
+    Promise<Void> promise = Promise.promise();
+    introspect(tokenType, promise);
+    return promise.future();
+  }
 
   /**
    * Load the user info as per OIDC spec.
@@ -125,6 +190,18 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback);
+
+  /**
+   * Load the user info as per OIDC spec.
+   *
+   * @see AccessToken#userInfo(Handler)
+   * @return future returning the results.
+   */
+  default Future<JsonObject> userInfo() {
+    Promise<JsonObject> promise = Promise.promise();
+    userInfo(promise);
+    return promise.future();
+  }
 
   /**
    * Fetches a JSON resource using this Access Token.
@@ -140,6 +217,19 @@ public interface AccessToken extends User {
   /**
    * Fetches a JSON resource using this Access Token.
    *
+   * @see AccessToken#fetch(String, Handler)
+   * @param resource - the resource to fetch.
+   * @return future returning the results.
+   */
+  default Future<OAuth2Response> fetch(String resource) {
+    Promise<OAuth2Response> promise = Promise.promise();
+    fetch(resource, promise);
+    return promise.future();
+  }
+
+  /**
+   * Fetches a JSON resource using this Access Token.
+   *
    * @param method - the HTTP method to user.
    * @param resource - the resource to fetch.
    * @param headers - extra headers to pass to the request.
@@ -148,4 +238,20 @@ public interface AccessToken extends User {
    */
   @Fluent
   AccessToken fetch(HttpMethod method, String resource, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback);
+
+  /**
+   * Fetches a JSON resource using this Access Token.
+   *
+   * @see AccessToken#fetch(HttpMethod, String, JsonObject, Buffer, Handler)
+   * @param method - the HTTP method to user.
+   * @param resource - the resource to fetch.
+   * @param headers - extra headers to pass to the request.
+   * @param payload - payload to send to the server.
+   * @return future returning the results.
+   */
+  default Future<OAuth2Response> fetch(HttpMethod method, String resource, JsonObject headers, Buffer payload) {
+    Promise<OAuth2Response> promise = Promise.promise();
+    fetch(method, resource, headers, payload, promise);
+    return promise.future();
+  }
 }

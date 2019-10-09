@@ -50,19 +50,3 @@
 |[[symmetric]]`@symmetric`|`Boolean`|-
 |===
 
-[[SecretOptions]]
-== SecretOptions
-
-++++
- Options describing a secret.
-++++
-'''
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[secret]]`@secret`|`String`|-
-|[[type]]`@type`|`String`|-
-|===
-

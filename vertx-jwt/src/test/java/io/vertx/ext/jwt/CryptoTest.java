@@ -73,7 +73,7 @@ public class CryptoTest {
   public void ecdsaSignatureComplianceTest() throws Exception {
 
     JWT jwt = new JWT()
-      .addPublicKey("ES512", "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg=");
+      .addJWK(JWK.pubKey("ES512", "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="));
 
     assertFalse(jwt.isUnsecure());
     //Test verification for token created using https://github.com/auth0/node-jsonwebtoken/tree/v7.0.1

@@ -60,6 +60,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   private JsonObject fixture;
 
   private final OAuth2ClientOptions oauthConfig = new OAuth2ClientOptions()
+    .setFlow(OAuth2FlowType.AUTH_CODE)
     .setClientID("client-id")
     .setClientSecret("client-secret")
     .setSite("http://localhost:8080")
@@ -68,7 +69,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, oauthConfig);
+    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
     final CountDownLatch latch = new CountDownLatch(1);
 

@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.PubSecKeyOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.PubSecKeyOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.PubSecKeyOptions} original class using Vert.x codegen.
  */
 public class PubSecKeyOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, PubSecKeyOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

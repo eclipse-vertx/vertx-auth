@@ -98,14 +98,14 @@ public class UserImpl implements User, ClusterSerializable {
 
   @Override
   public void writeToBuffer(Buffer buffer) {
-    UserConverter.INSTANCE.encode(this).writeToBuffer(buffer);
+    UserConverter.encode(this).writeToBuffer(buffer);
   }
 
   @Override
   public int readFromBuffer(int pos, Buffer buffer) {
     JsonObject jsonObject = new JsonObject();
     int read = jsonObject.readFromBuffer(pos, buffer);
-    User readUser = UserConverter.INSTANCE.decode(jsonObject);
+    User readUser = UserConverter.decode(jsonObject);
     this.principal = readUser.principal();
     this.authorizations = readUser.authorizations();
     return read;

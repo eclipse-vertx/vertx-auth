@@ -37,13 +37,13 @@ public interface GithubAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
         .setSite("https://github.com/login")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
         .setUserInfoPath("https://api.github.com/user")
         .setScopeSeparator(" ")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret)
         .setHeaders(new JsonObject()
           .put("User-Agent", "vertx-auth-oauth2")));
   }

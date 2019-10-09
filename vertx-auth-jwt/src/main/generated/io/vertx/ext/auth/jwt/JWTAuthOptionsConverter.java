@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.jwt.JWTAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.jwt.JWTAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTAuthOptions} original class using Vert.x codegen.
  */
 public class JWTAuthOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
@@ -49,16 +50,6 @@ public class JWTAuthOptionsConverter {
             obj.setPubSecKeys(list);
           }
           break;
-        case "secrets":
-          if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.ext.auth.SecretOptions> list =  new java.util.ArrayList<>();
-            ((Iterable<Object>)member.getValue()).forEach( item -> {
-              if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.SecretOptions((JsonObject)item));
-            });
-            obj.setSecrets(list);
-          }
-          break;
       }
     }
   }
@@ -72,6 +63,9 @@ public class JWTAuthOptionsConverter {
       JsonArray array = new JsonArray();
       obj.getJwks().forEach(item -> array.add(item));
       json.put("jwks", array);
+    }
+    if (obj.getJWTOptions() != null) {
+      json.put("jwtOptions", obj.getJWTOptions().toJson());
     }
     if (obj.getPermissionsClaimKey() != null) {
       json.put("permissionsClaimKey", obj.getPermissionsClaimKey());

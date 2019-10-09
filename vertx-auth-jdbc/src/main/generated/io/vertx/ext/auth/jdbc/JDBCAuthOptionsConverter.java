@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.jdbc.JDBCAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.jdbc.JDBCAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jdbc.JDBCAuthOptions} original class using Vert.x codegen.
  */
 public class JDBCAuthOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JDBCAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

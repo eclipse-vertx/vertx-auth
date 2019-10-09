@@ -18,10 +18,9 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.SecretOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -238,6 +237,12 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testGoodAudience() {
+
+    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+      new JWTOptions()
+        .addAudience("b")
+        .addAudience("d")));
+
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
@@ -247,9 +252,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     assertNotNull(token);
 
     JsonObject authInfo = new JsonObject()
-      .put("jwt", token)
-      .put("options", new JsonObject()
-        .put("audience", new JsonArray().add("b").add("d")));
+      .put("jwt", token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -312,9 +315,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGenerateNewTokenWithMacSecret() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addSecret(new SecretOptions()
-        .setType("HS256")
-        .setSecret("notasecret"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("HS256")
+        .setSecretKey("notasecret"))
     );
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("HS256"));
@@ -333,9 +336,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testValidateTokenWithInvalidMacSecret() {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addSecret(new SecretOptions()
-        .setType("HS256")
-        .setSecret("a bad secret"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("HS256")
+        .setSecretKey("a bad secret"))
     );
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onFailure(res -> {
@@ -349,9 +352,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testValidateTokenWithValidMacSecret() {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addSecret(new SecretOptions()
-        .setType("HS256")
-        .setSecret("notasecret"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("HS256")
+        .setSecretKey("notasecret"))
     );
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
@@ -523,5 +526,35 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("alg", "RS256")
       .put("kid", "2011-04-29")));
 
+  }
+
+  @Test
+  public void testValidateTokenWithIgnoreExpired() throws InterruptedException {
+    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("HS256")
+        .setSecretKey("notasecret"))
+      .setJWTOptions(new JWTOptions()
+        .setIgnoreExpiration(true))
+    );
+
+    String token = authProvider
+      .generateToken(
+        new JsonObject(),
+        new JWTOptions()
+          .setExpiresInSeconds(1)
+          .setSubject("subject")
+          .setAlgorithm("HS256"));
+
+    // force a sleep to invalidate the token
+    Thread.sleep(1001);
+
+    JsonObject authInfo = new JsonObject().put("jwt", token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      testComplete();
+    }));
+    await();
   }
 }

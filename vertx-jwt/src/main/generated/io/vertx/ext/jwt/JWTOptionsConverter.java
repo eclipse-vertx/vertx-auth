@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.jwt.JWTOptions}.
+ * Converter and mapper for {@link io.vertx.ext.jwt.JWTOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.jwt.JWTOptions} original class using Vert.x codegen.
  */
 public class JWTOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

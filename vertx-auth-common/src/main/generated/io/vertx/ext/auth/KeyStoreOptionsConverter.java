@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.KeyStoreOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.KeyStoreOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.KeyStoreOptions} original class using Vert.x codegen.
  */
 public class KeyStoreOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, KeyStoreOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

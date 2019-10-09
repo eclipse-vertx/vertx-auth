@@ -5,15 +5,14 @@ import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthorizationContextImpl;
-import io.vertx.ext.auth.impl.PermissionBasedAuthorizationConverter;
 import io.vertx.test.core.VertxTestBase;
 
 public class PermissionBasedAuthorizationTest extends VertxTestBase {
 
 	@Test
 	public void testConverter() {
-		TestUtils.testJsonCodec(PermissionBasedAuthorization.create("p1"), PermissionBasedAuthorizationConverter.INSTANCE);
-		TestUtils.testJsonCodec(PermissionBasedAuthorization.create("p1").setResource("resource"), PermissionBasedAuthorizationConverter.INSTANCE);
+		TestUtils.testJsonCodec(PermissionBasedAuthorization.create("p1"), PermissionBasedAuthorizationConverter::encode, PermissionBasedAuthorizationConverter::decode);
+		TestUtils.testJsonCodec(PermissionBasedAuthorization.create("p1").setResource("resource"), PermissionBasedAuthorizationConverter::encode, PermissionBasedAuthorizationConverter::decode);
 	}
 
 	@Test

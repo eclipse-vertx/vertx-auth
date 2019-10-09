@@ -1,26 +1,17 @@
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth;
 
 import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.json.JsonCodec;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
-public class WildcardPermissionBasedAuthorizationConverter implements JsonCodec<WildcardPermissionBasedAuthorization, JsonObject> {
-
-	public final static WildcardPermissionBasedAuthorizationConverter INSTANCE = new WildcardPermissionBasedAuthorizationConverter();
+public class WildcardPermissionBasedAuthorizationConverter {
 
 	private final static String FIELD_TYPE = "type";
 	private final static String TYPE_WILDCARD_PERMISSION = "wildcard";
 	private final static String FIELD_PERMISSION = "permission";
 	private final static String FIELD_RESOURCE = "resource";
 
-	// private constructor
-	private WildcardPermissionBasedAuthorizationConverter() {
-	}
-	
-	@Override
-	public JsonObject encode(WildcardPermissionBasedAuthorization value) throws IllegalArgumentException {
+	public final static JsonObject encode(WildcardPermissionBasedAuthorization value) throws IllegalArgumentException {
 		Objects.requireNonNull(value);
 		
 		JsonObject result = new JsonObject();
@@ -32,13 +23,7 @@ public class WildcardPermissionBasedAuthorizationConverter implements JsonCodec<
 		return result;
 	}
 
-	@Override
-	public Class<WildcardPermissionBasedAuthorization> getTargetClass() {
-		return WildcardPermissionBasedAuthorization.class;
-	}
-
-	@Override
-	public WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+	public final static WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
 		Objects.requireNonNull(json);
 
 		if (TYPE_WILDCARD_PERMISSION.equals(json.getString(FIELD_TYPE))) {

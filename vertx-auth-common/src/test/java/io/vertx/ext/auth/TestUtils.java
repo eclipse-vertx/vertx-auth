@@ -1,16 +1,17 @@
 package io.vertx.ext.auth;
 
+import java.util.function.Function;
+
 import org.junit.Assert;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.json.JsonCodec;
 
 public class TestUtils {
 
-	public final static <T> void testJsonCodec(T authorization, JsonCodec<T, JsonObject> codec) {
+	public final static <T> void testJsonCodec(T authorization, Function<T, JsonObject> toJsonConverter, Function<JsonObject, T> fromJsonConverter) {
 		Assert.assertNotNull(authorization);
-		JsonObject json = codec.encode(authorization);
-		T otherAuthorization = codec.decode(json);
+		JsonObject json = toJsonConverter.apply(authorization);
+		T otherAuthorization = fromJsonConverter.apply(json);
 		Assert.assertEquals(authorization, otherAuthorization);
 	}
 

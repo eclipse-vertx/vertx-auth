@@ -34,12 +34,13 @@ public interface FoursquareAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
+        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setSite("https://foursquare.com")
         .setTokenPath("/oauth2/access_token")
         .setAuthorizationPath("/oauth2/authenticate")
-        .setUserInfoPath("/users/self")
-        .setClientID(clientId)
-        .setClientSecret(clientSecret));
+        .setUserInfoPath("/users/self"));
   }
 }

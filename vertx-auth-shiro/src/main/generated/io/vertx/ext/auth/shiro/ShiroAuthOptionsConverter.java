@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter for {@link io.vertx.ext.auth.shiro.ShiroAuthOptions}.
+ * Converter and mapper for {@link io.vertx.ext.auth.shiro.ShiroAuthOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.shiro.ShiroAuthOptions} original class using Vert.x codegen.
  */
 public class ShiroAuthOptionsConverter {
+
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ShiroAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

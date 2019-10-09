@@ -29,8 +29,6 @@ import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -59,7 +57,7 @@ public class OAuth2API {
     }
 
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
-    LOG.info("Fetching URL: " + url);
+    LOG.debug("Fetching URL: " + url);
 
     // create a request
     final HttpClientRequest request = makeRequest(method, url, callback);
@@ -118,9 +116,7 @@ public class OAuth2API {
       }
     });
 
-    request.exceptionHandler(t -> {
-      callback.handle(Future.failedFuture(t));
-    });
+    request.exceptionHandler(t -> callback.handle(Future.failedFuture(t)));
 
     return request;
   }
@@ -186,7 +182,7 @@ public class OAuth2API {
     final String xAcceptedOAuthScopes = reply.getHeader("X-Accepted-OAuth-Scopes");
 
     if (xOAuthScopes != null) {
-      LOG.debug("Received non-standard X-OAuth-Scopes: "+ xOAuthScopes);
+      LOG.trace("Received non-standard X-OAuth-Scopes: "+ xOAuthScopes);
       if (json.containsKey("scope")) {
         json.put("scope", json.getString("scope") + sep + xOAuthScopes);
       } else {
@@ -195,7 +191,7 @@ public class OAuth2API {
     }
 
     if (xAcceptedOAuthScopes != null) {
-      LOG.debug("Received non-standard X-Accepted-OAuth-Scopes: "+ xAcceptedOAuthScopes);
+      LOG.trace("Received non-standard X-Accepted-OAuth-Scopes: "+ xAcceptedOAuthScopes);
       json.put("acceptedScopes", xAcceptedOAuthScopes);
     }
   }

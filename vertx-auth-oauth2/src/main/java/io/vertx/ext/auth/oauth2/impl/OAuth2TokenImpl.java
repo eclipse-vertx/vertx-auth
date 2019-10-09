@@ -44,7 +44,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
 
   private OAuth2API api;
-  
+
   /**
    * Creates an AccessToken instance.
    */
@@ -87,7 +87,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   @Override
   public OAuth2TokenImpl refresh(Handler<AsyncResult<Void>> handler) {
 
-    LOG.info("Refreshing AccessToken");
+    LOG.debug("Refreshing AccessToken");
 
     final JsonObject headers = new JsonObject();
     final OAuth2AuthProviderImpl provider = getProvider();
@@ -203,6 +203,11 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
       final JsonObject headers = new JsonObject();
 
       JsonObject tmp = config.getHeaders();
+
+      if (config.isUseBasicAuthorizationHeader()) {
+        String basic = config.getClientID() + ":" + (config.getClientSecret() == null ? "" : config.getClientSecret());
+        headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+      }
 
       if (tmp != null) {
         headers.mergeIn(tmp);
