@@ -14,12 +14,12 @@ import io.vertx.ext.auth.impl.AndAuthorizationImpl;
 @VertxGen
 public interface AndAuthorization extends Authorization {
 
-	static AndAuthorization create() {
-		return new AndAuthorizationImpl();
-	}
-	
-	List<Authorization> getAuthorizations();
+  static AndAuthorization create() {
+    return new AndAuthorizationImpl();
+  }
 
-	AndAuthorization addAuthorization(Authorization authorization);
+  List<Authorization> getAuthorizations();
+
+  AndAuthorization addAuthorization(Authorization authorization);
 
 }

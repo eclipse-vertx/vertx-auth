@@ -12,10 +12,10 @@ import io.vertx.ext.auth.impl.NotAuthorizationImpl;
 @VertxGen
 public interface NotAuthorization extends Authorization {
 
-	static NotAuthorization create(Authorization authorization) {
-		return new NotAuthorizationImpl(authorization);
-	}
-	
-	Authorization getAuthorization();
-	
+  static NotAuthorization create(Authorization authorization) {
+    return new NotAuthorizationImpl(authorization);
+  }
+
+  Authorization getAuthorization();
+
 }

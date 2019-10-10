@@ -2,32 +2,32 @@ package io.vertx.ext.auth.impl;
 
 import java.util.Objects;
 
-import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.MultiMap;
 import io.vertx.ext.auth.AuthorizationContext;
 import io.vertx.ext.auth.User;
 
 public class AuthorizationContextImpl implements AuthorizationContext {
 
-	private User user;
-	private HttpServerRequest request;
+  private User user;
+  private MultiMap variables;
 
-	public AuthorizationContextImpl(User user) {
-		this.user = Objects.requireNonNull(user);
-	}
+  public AuthorizationContextImpl(User user) {
+    this(user, MultiMap.caseInsensitiveMultiMap());
+  }
 
-	public AuthorizationContextImpl(User user, HttpServerRequest request) {
-		this.user = Objects.requireNonNull(user);
-		this.request = Objects.requireNonNull(request);
-	}
-	
-	@Override
-	public User user() {
-		return user;
-	}
+  public AuthorizationContextImpl(User user, MultiMap variables) {
+    this.user = Objects.requireNonNull(user);
+    this.variables = Objects.requireNonNull(variables);
+  }
 
-	@Override
-	public HttpServerRequest request() {
-		return request;
-	}
+  @Override
+  public User user() {
+    return user;
+  }
+
+  @Override
+  public MultiMap variables() {
+    return variables;
+  }
 
 }

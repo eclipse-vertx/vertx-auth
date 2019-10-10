@@ -23,8 +23,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.Authorization;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -33,8 +31,6 @@ import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  *
@@ -58,11 +54,6 @@ public class ShiroUser extends AbstractUser {
   }
 
   public ShiroUser() {
-  }
-
-  @Override
-  public Set<Authorization> authorizations() {
-	return Collections.emptySet();
   }
 
   @Override

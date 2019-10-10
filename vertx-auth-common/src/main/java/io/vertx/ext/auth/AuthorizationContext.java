@@ -1,10 +1,11 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.MultiMap;
 
 /**
- * The AuthorizationContext contains properties that can be used to match an Authorization
+ * The AuthorizationContext contains properties that can be used to match
+ * authorizations.
  * 
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
@@ -12,15 +13,17 @@ import io.vertx.core.http.HttpServerRequest;
 @VertxGen
 public interface AuthorizationContext {
 
-    /**
-    * Get the authenticated user
-    * @return  the user
-    */
-	User user();
+  /**
+   * Get the authenticated user
+   * 
+   * @return the user
+   */
+  User user();
 
-    /**
-     * @return the HTTP request object
-     */
-	HttpServerRequest request();
-	
+  /**
+   * @return a Multimap containing variable names and values that can be resolved
+   *         at runtime by {@link Authorization}Authorizations
+   */
+  MultiMap variables();
+
 }

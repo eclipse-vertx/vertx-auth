@@ -14,12 +14,12 @@ import io.vertx.ext.auth.impl.OrAuthorizationImpl;
 @VertxGen
 public interface OrAuthorization extends Authorization {
 
-	static OrAuthorization create() {
-		return new OrAuthorizationImpl();
-	}
-	
-	List<Authorization> getAuthorizations();
+  static OrAuthorization create() {
+    return new OrAuthorizationImpl();
+  }
 
-	OrAuthorization addAuthorization(Authorization authorization);
+  List<Authorization> getAuthorizations();
+
+  OrAuthorization addAuthorization(Authorization authorization);
 
 }

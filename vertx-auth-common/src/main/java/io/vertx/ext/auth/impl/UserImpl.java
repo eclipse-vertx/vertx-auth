@@ -58,9 +58,7 @@ public class UserImpl implements User, ClusterSerializable {
     if (getClass() != obj.getClass())
       return false;
     UserImpl other = (UserImpl) obj;
-    return 
-    	Objects.equals(authorizations, other.authorizations)
-        && Objects.equals(principal, other.principal);
+    return Objects.equals(authorizations, other.authorizations) && Objects.equals(principal, other.principal);
   }
 
   @Override
@@ -73,18 +71,19 @@ public class UserImpl implements User, ClusterSerializable {
     Objects.requireNonNull(authority);
     Objects.requireNonNull(resultHandler);
 
-    return isAuthorized(authority.startsWith("roles:") ? RoleBasedAuthorization.create(authority.substring(6)) : PermissionBasedAuthorization.create(authority), resultHandler);
+    return isAuthorized(authority.startsWith("roles:") ? RoleBasedAuthorization.create(authority.substring(6))
+        : PermissionBasedAuthorization.create(authority), resultHandler);
   }
-  
-  //TODO: remove this method
-  public User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
-	    Objects.requireNonNull(authorization);
-	    Objects.requireNonNull(resultHandler);
 
-	    AuthorizationContext context = new AuthorizationContextImpl(this);
-	    resultHandler.handle(Future.succeededFuture(authorization.match(context)));
-	    return this;
-	  }
+  // TODO: remove this method
+  public User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
+    Objects.requireNonNull(authorization);
+    Objects.requireNonNull(resultHandler);
+
+    AuthorizationContext context = new AuthorizationContextImpl(this);
+    resultHandler.handle(Future.succeededFuture(authorization.match(context)));
+    return this;
+  }
 
   @Override
   public JsonObject principal() {

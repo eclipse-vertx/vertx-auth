@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth;
 
+import java.util.Collections;
 import java.util.Set;
 
 import io.vertx.codegen.annotations.Fluent;
@@ -46,7 +47,9 @@ public interface User {
    * 
    * @return
    */
-  Set<Authorization> authorizations();
+  default Set<Authorization> authorizations() {
+	return Collections.emptySet();
+  }
 
   /**
    * Is the user authorised to
