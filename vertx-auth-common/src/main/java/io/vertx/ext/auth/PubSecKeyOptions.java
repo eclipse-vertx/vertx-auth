@@ -45,6 +45,12 @@ public class PubSecKeyOptions {
     PubSecKeyOptionsConverter.fromJson(json, this);
   }
 
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+    PubSecKeyOptionsConverter.toJson(this, json);
+    return json;
+  }
+
   public String getAlgorithm() {
     return algorithm;
   }
