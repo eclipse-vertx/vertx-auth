@@ -41,6 +41,11 @@ public interface AccessToken extends User {
   boolean expired();
 
   /**
+   * Check if the access token own the required scopes to access to the resource.
+   */
+  boolean isScopeGranted();
+
+  /**
    * The Access Token if present parsed as a JsonObject
    * @return JSON
    */

@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.jwt;
 
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
@@ -27,6 +28,8 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * JWT and JWS implementation draft-ietf-oauth-json-web-token-32.
@@ -255,6 +258,46 @@ public final class JWT {
     return false;
   }
 
+  /**
+   * Scope claim are used to grant access to a specific resource.
+   * They are included into the JWT when the user consent access to the resource,
+   * or sometimes without user consent (bypass approval).
+   * @param jwt JsonObject decoded json web token value.
+   * @param options JWTOptions coming from the provider.
+   * @return true if required scopes are into the JWT.
+   */
+  public boolean isScopeGranted(JsonObject jwt, JWTOptions options) {
+
+    if(jwt == null) {
+      return false;
+    }
+
+    if(options.getScopes() == null || options.getScopes().isEmpty()) {
+      return true; // no scopes to check
+    }
+
+    if(jwt.getValue("scope") == null) {
+      throw new RuntimeException("Invalid JWT: scope claim is required");
+    }
+
+    JsonArray target;
+    if (jwt.getValue("scope") instanceof String) {
+      target = new JsonArray(
+        Stream.of(jwt.getString("scope")
+          .split(options.getScopeDelimiter()))
+          .collect(Collectors.toList())
+      );
+    } else {
+      target = jwt.getJsonArray("scope");
+    }
+
+    if(!target.getList().containsAll(options.getScopes())) {
+      throw new RuntimeException("Invalid JWT scopes expected: " + Json.encode(options.getScopes()));
+    }
+
+    return true;
+  }
+
   public String sign(JsonObject payload, JWTOptions options) {
     final String algorithm = options.getAlgorithm();
 
@@ -286,6 +329,14 @@ public final class JWT {
         payload.put("aud", new JsonArray(options.getAudience()));
       } else {
         payload.put("aud", options.getAudience().get(0));
+      }
+    }
+
+    if(options.getScopes() != null && options.getScopes().size() >= 1) {
+      if(options.hasScopeDelimiter()) {
+        payload.put("scope", String.join(options.getScopeDelimiter(), options.getScopes()));
+      } else {
+        payload.put("scope", new JsonArray(options.getScopes()));
       }
     }
 
