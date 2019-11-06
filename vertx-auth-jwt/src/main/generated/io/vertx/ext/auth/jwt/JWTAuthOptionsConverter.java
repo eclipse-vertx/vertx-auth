@@ -70,5 +70,10 @@ public class JWTAuthOptionsConverter {
     if (obj.getPermissionsClaimKey() != null) {
       json.put("permissionsClaimKey", obj.getPermissionsClaimKey());
     }
+    if (obj.getPubSecKeys() != null) {
+      JsonArray array = new JsonArray();
+      obj.getPubSecKeys().forEach(item -> array.add(item.toJson()));
+      json.put("pubSecKeys", array);
+    }
   }
 }
