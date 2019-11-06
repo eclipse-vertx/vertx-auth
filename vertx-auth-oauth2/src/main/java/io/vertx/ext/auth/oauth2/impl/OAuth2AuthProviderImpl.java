@@ -224,6 +224,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
             resultHandler.handle(Future.failedFuture("Expired token"));
             return;
           }
+          if (!oauth2Token.isScopeGranted()) {
+            resultHandler.handle(Future.failedFuture("Missing required scopes token"));
+            return;
+          }
           // return self
           resultHandler.handle(Future.succeededFuture(oauth2Token));
         });
@@ -232,6 +236,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
         // the token might be valid, but expired
         if (oauth2Token.expired()) {
           resultHandler.handle(Future.failedFuture("Expired Token"));
+        } else if (!oauth2Token.isScopeGranted()){
+          resultHandler.handle(Future.failedFuture("Missing required scopes token"));
         } else {
           resultHandler.handle(Future.succeededFuture(oauth2Token));
         }

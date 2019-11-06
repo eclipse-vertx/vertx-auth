@@ -11,6 +11,7 @@ import java.util.List;
 public class JWTOptions {
 
   private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
+  private static final String DEFAULT_SCOPE_DELIMITER = " ";
 
   private int leeway = 0;
   private boolean ignoreExpiration;
@@ -22,6 +23,8 @@ public class JWTOptions {
   private String issuer;
   private String subject;
   private List<String> permissions;
+  private List<String> scopes;
+  private String scopeDelimiter;
 
   public JWTOptions() {
 
@@ -158,5 +161,35 @@ public class JWTOptions {
 
   public List<String> getPermissions() {
     return permissions;
+  }
+
+  public JWTOptions setScopes(List<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public JWTOptions addScope(String scope) {
+    if (this.scopes == null) {
+      this.scopes = new ArrayList<>();
+    }
+    this.scopes.add(scope);
+    return this;
+  }
+
+  public List<String> getScopes() {
+    return scopes;
+  }
+
+  public String getScopeDelimiter() {
+    return scopeDelimiter!=null?scopeDelimiter:DEFAULT_SCOPE_DELIMITER;
+  }
+
+  public JWTOptions withScopeDelimiter(String scopeDelimiter) {
+    this.scopeDelimiter = scopeDelimiter;
+    return this;
+  }
+
+  public boolean hasScopeDelimiter() {
+    return this.scopeDelimiter!=null;
   }
 }

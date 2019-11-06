@@ -4,9 +4,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.oauth2.AccessToken;
@@ -16,7 +16,10 @@ import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.jwt.JWTOptions;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken {
 
@@ -240,5 +243,34 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
     }
 
     return false;
+  }
+
+  /**
+   * Check if the access token own the required scopes to access to the resource.
+   */
+  @Override
+  public boolean isScopeGranted() {
+    if (accessToken != null) {
+      // delegate to the JWT lib
+      final JWT jwt = provider.getJWT();
+      final JWTOptions options = provider.getConfig().getJWTOptions();
+      try {
+        return jwt.isScopeGranted(accessToken, options);
+      } catch (RuntimeException e) {
+        // explicit catch and log as debug.
+        LOG.debug("Token: missing required scopes", e);
+        return false;
+      }
+    }
+
+    //scope claim can be set into the principal through the token introspection
+    if (principal.getValue("scope") != null) {
+      final JWTOptions options = provider.getConfig().getJWTOptions();
+      final List<String> tokenScopes = Stream.of(principal.getString("scope").split(options.getScopeDelimiter())).collect(Collectors.toList());
+      //return true if the token scopes contains all the required scopes.
+      return options.getScopes() != null && options.getScopes().size() >=1 && tokenScopes.containsAll(options.getScopes());
+    }
+
+    return true;
   }
 }

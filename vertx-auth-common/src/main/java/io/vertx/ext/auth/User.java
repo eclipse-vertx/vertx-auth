@@ -16,6 +16,9 @@
 
 package io.vertx.ext.auth;
 
+import java.util.Collections;
+import java.util.Set;
+
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
@@ -23,6 +26,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.UserImpl;
 
 /**
  * Represents an authenticates User and contains operations to authorise the user.
@@ -33,6 +37,19 @@ import io.vertx.core.json.JsonObject;
  */
 @VertxGen
 public interface User {
+
+  static User create(JsonObject principal) {
+    return new UserImpl(principal);
+  }
+
+  /**
+   * returns user's authorizations
+   * 
+   * @return
+   */
+  default Set<Authorization> authorizations() {
+	return Collections.emptySet();
+  }
 
   /**
    * Is the user authorised to
@@ -62,7 +79,7 @@ public interface User {
     isAuthorized(authority, promise);
     return promise.future();
   }
-
+ 
   /**
    * The User object will cache any authorities that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.

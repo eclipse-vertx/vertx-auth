@@ -29,9 +29,9 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
+import io.vertx.ext.jwt.JWTOptions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -131,6 +131,11 @@ public class JWTAuthProviderImpl implements JWTAuth {
           resultHandler.handle(Future.failedFuture("Invalid JWT issuer"));
           return;
         }
+      }
+
+      if(!jwt.isScopeGranted(payload, jwtOptions)) {
+        resultHandler.handle(Future.failedFuture("Invalid JWT token: missing required scopes."));
+        return;
       }
 
       resultHandler.handle(Future.succeededFuture(new JWTUser(payload, permissionsClaimKey)));
