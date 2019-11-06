@@ -1,0 +1,49 @@
+= Cheatsheets
+
+[[RelayParty]]
+== RelayParty
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|===
+
+[[WebAuthNInfo]]
+== WebAuthNInfo
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[challenge]]`@challenge`|`String`|-
+|[[username]]`@username`|`String`|-
+|[[webauthn]]`@webauthn`|`Json object`|-
+|===
+
+[[WebAuthNOptions]]
+== WebAuthNOptions
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[attestation]]`@attestation`|`link:enums.html#Attestation[Attestation]`|-
+|[[authenticatorAttachment]]`@authenticatorAttachment`|`link:enums.html#AuthenticatorAttachment[AuthenticatorAttachment]`|-
+|[[authenticatorSelection]]`@authenticatorSelection`|`Json object`|-
+|[[challengeLength]]`@challengeLength`|`Number (int)`|-
+|[[origin]]`@origin`|`String`|-
+|[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of String`|-
+|[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
+|[[rpIcon]]`@rpIcon`|`String`|-
+|[[rpId]]`@rpId`|`String`|-
+|[[rpName]]`@rpName`|`String`|-
+|[[rpObject]]`@rpObject`|`Json object`|-
+|[[timeout]]`@timeout`|`Number (int)`|-
+|[[transports]]`@transports`|`Array of String`|-
+|[[userVerification]]`@userVerification`|`link:enums.html#UserVerification[UserVerification]`|-
+|===
+

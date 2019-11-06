@@ -173,6 +173,32 @@ public final class JWT {
     }
   }
 
+  public static JsonObject parse(final byte[] token) {
+    return parse(new String(token, UTF8));
+  }
+
+  public static JsonObject parse(final String token) {
+    String[] segments = token.split("\\.");
+    if (segments.length < 2 || segments.length > 3) {
+      throw new RuntimeException("Not enough or too many segments");
+    }
+
+    // All segment should be base64
+    String headerSeg = segments[0];
+    String payloadSeg = segments[1];
+    String signatureSeg = segments.length == 2 ? null : segments[2];
+
+    // base64 decode and parse JSON
+    JsonObject header = new JsonObject(new String(base64urlDecode(headerSeg), UTF8));
+    JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
+
+    return new JsonObject()
+      .put("header", header)
+      .put("payload", payload)
+      .put("signatureBase", (headerSeg + "." + payloadSeg))
+      .put("signature", signatureSeg);
+  }
+
   public JsonObject decode(final String token) {
     String[] segments = token.split("\\.");
     if (segments.length != (isUnsecure() ? 2 : 3)) {

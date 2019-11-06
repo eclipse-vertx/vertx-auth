@@ -172,6 +172,11 @@ public class OAuth2ClientOptionsConverter {
     if (obj.getLogoutPath() != null) {
       json.put("logoutPath", obj.getLogoutPath());
     }
+    if (obj.getPubSecKeys() != null) {
+      JsonArray array = new JsonArray();
+      obj.getPubSecKeys().forEach(item -> array.add(item.toJson()));
+      json.put("pubSecKeys", array);
+    }
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());
     }
