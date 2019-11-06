@@ -92,8 +92,8 @@ public class WildcardPermissionBasedAuthorizationTest extends VertxTestBase {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       assertEquals(true, WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(8080, "localhost");
-    vertx().createHttpClient().getNow(8080, "localhost", "/?variable1=r1", res -> {
+    }).listen(9876, "localhost");
+    vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
       if (res.failed()) {
         fail(res.cause());
         return;
@@ -111,8 +111,8 @@ public class WildcardPermissionBasedAuthorizationTest extends VertxTestBase {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       assertEquals(false, WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(8080, "localhost");
-    vertx().createHttpClient().getNow(8080, "localhost", "/?variable1=r2", res -> {
+    }).listen(9876, "localhost");
+    vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
       if (res.failed()) {
         fail(res.cause());
         return;
