@@ -13,22 +13,21 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.http.HttpServer;
-import org.junit.Assert;
-import org.junit.Test;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.impl.RoleBasedAuthorizationConverter;
 import io.vertx.test.core.VertxTestBase;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class RoleBasedAuthorizationTest extends VertxTestBase {
 
   @Test
   public void testConverter() {
     TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1"), RoleBasedAuthorizationConverter::encode,
-        RoleBasedAuthorizationConverter::decode);
+      RoleBasedAuthorizationConverter::decode);
     TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1").setResource("resource"),
-        RoleBasedAuthorizationConverter::encode, RoleBasedAuthorizationConverter::decode);
+      RoleBasedAuthorizationConverter::encode, RoleBasedAuthorizationConverter::decode);
   }
 
   @Test
@@ -39,19 +38,19 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
   @Test
   public void testImplies2() {
     Assert.assertEquals(true, RoleBasedAuthorization.create("p1").setResource("r1")
-        .verify(RoleBasedAuthorization.create("p1").setResource("r1")));
+      .verify(RoleBasedAuthorization.create("p1").setResource("r1")));
   }
 
   @Test
   public void testImplies3() {
     Assert.assertEquals(false,
-        RoleBasedAuthorization.create("p1").setResource("r1").verify(RoleBasedAuthorization.create("p1")));
+      RoleBasedAuthorization.create("p1").setResource("r1").verify(RoleBasedAuthorization.create("p1")));
   }
 
   @Test
   public void testImplies4() {
     Assert.assertEquals(false,
-        RoleBasedAuthorization.create("p1").verify(RoleBasedAuthorization.create("p1").setResource("r1")));
+      RoleBasedAuthorization.create("p1").verify(RoleBasedAuthorization.create("p1").setResource("r1")));
   }
 
   @Test
@@ -68,14 +67,19 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       assertEquals(true, RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost");
-    vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
-      server.close();
-      if (res.failed()) {
-        fail(res.cause());
+    }).listen(9876, "localhost", listen -> {
+      if (listen.failed()) {
+        fail(listen.cause());
         return;
       }
-      testComplete();
+
+      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
+        if (res.failed()) {
+          fail(res.cause());
+          return;
+        }
+        server.close(close -> testComplete());
+      });
     });
     await();
   }
@@ -89,14 +93,19 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       assertEquals(false, RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost");
-    vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
-      server.close();
-      if (res.failed()) {
-        fail(res.cause());
+    }).listen(9876, "localhost", listen -> {
+      if (listen.failed()) {
+        fail(listen.cause());
         return;
       }
-      testComplete();
+
+      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
+        if (res.failed()) {
+          fail(res.cause());
+          return;
+        }
+        server.close(close -> testComplete());
+      });
     });
     await();
   }

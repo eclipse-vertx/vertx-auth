@@ -70,14 +70,20 @@ public class PermissionBasedAuthorizationTest extends VertxTestBase {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       assertEquals(true, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost");
-    vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
-      server.close();
-      if (res.failed()) {
-        fail(res.cause());
+    }).listen(9876, "localhost", listen -> {
+      if (listen.failed()) {
+        fail(listen.cause());
         return;
       }
-      testComplete();
+
+
+      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
+        if (res.failed()) {
+          fail(res.cause());
+          return;
+        }
+        server.close(close -> testComplete());
+      });
     });
     await();
   }
@@ -91,14 +97,19 @@ public class PermissionBasedAuthorizationTest extends VertxTestBase {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       assertEquals(false, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost");
-    vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
-      server.close();
-      if (res.failed()) {
-        fail(res.cause());
+    }).listen(9876, "localhost", listen -> {
+      if (listen.failed()) {
+        fail(listen.cause());
         return;
       }
-      testComplete();
+
+      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
+        if (res.failed()) {
+          fail(res.cause());
+          return;
+        }
+        server.close(close -> testComplete());
+      });
     });
     await();
   }
