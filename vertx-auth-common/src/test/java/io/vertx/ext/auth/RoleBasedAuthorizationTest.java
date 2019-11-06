@@ -12,6 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
+import io.vertx.core.http.HttpServer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -60,7 +61,8 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
 
   @Test
   public void testMatch1() {
-    vertx().createHttpServer().requestHandler(request -> {
+    final HttpServer server = vertx().createHttpServer();
+    server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
       user.authorizations().add(RoleBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
@@ -68,6 +70,7 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
       request.response().end();
     }).listen(9876, "localhost");
     vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
+      server.close();
       if (res.failed()) {
         fail(res.cause());
         return;
@@ -79,7 +82,8 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
 
   @Test
   public void testMatch2() {
-    vertx().createHttpServer().requestHandler(request -> {
+    final HttpServer server = vertx().createHttpServer();
+    server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
       user.authorizations().add(RoleBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
@@ -87,6 +91,7 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
       request.response().end();
     }).listen(9876, "localhost");
     vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
+      server.close();
       if (res.failed()) {
         fail(res.cause());
         return;
