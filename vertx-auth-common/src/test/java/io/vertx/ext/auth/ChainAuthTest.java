@@ -1,29 +1,39 @@
 package io.vertx.ext.auth;
 
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.test.core.VertxTestBase;
+import org.junit.runner.RunWith;
 
-public class ChainAuthTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class ChainAuthTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
-  public void emptyTest() {
+  public void emptyTest(TestContext should) {
+    final Async test = should.async();
     ChainAuth auth = ChainAuth.create();
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        fail();
+        should.fail();
       } else {
-        testComplete();
+        test.complete();
       }
     });
-    await();
   }
 
   @Test
-  public void singleTest() {
+  public void singleTest(TestContext should) {
+    final Async test = should.async();
     ChainAuth auth = ChainAuth.create();
 
     auth.append((authInfo, res) -> {
@@ -33,16 +43,16 @@ public class ChainAuthTest extends VertxTestBase {
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        testComplete();
+        test.complete();
       } else {
-        fail();
+        should.fail();
       }
     });
-    await();
   }
 
   @Test
-  public void multipleTest() {
+  public void multipleTest(TestContext should) {
+    final Async test = should.async();
     ChainAuth auth = ChainAuth.create();
 
     auth.append((authInfo, res) -> {
@@ -57,17 +67,17 @@ public class ChainAuthTest extends VertxTestBase {
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        assertEquals(2, res.result().principal().getInteger("provider").intValue());
-        testComplete();
+        should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        test.complete();
       } else {
-        fail();
+        should.fail();
       }
     });
-    await();
   }
 
   @Test
-  public void stopOnMatchTest() {
+  public void stopOnMatchTest(TestContext should) {
+    final Async test = should.async();
     ChainAuth auth = ChainAuth.create();
 
     auth.append((authInfo, res) -> {
@@ -80,17 +90,16 @@ public class ChainAuthTest extends VertxTestBase {
       res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
 
-    auth.append((authInfo, res) -> fail("should not be called"));
+    auth.append((authInfo, res) -> should.fail("should not be called"));
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        assertEquals(2, res.result().principal().getInteger("provider").intValue());
-        testComplete();
+        should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        test.complete();
       } else {
-        fail();
+        should.fail();
       }
     });
-    await();
   }
 
   private User createUser(final JsonObject principal) {
