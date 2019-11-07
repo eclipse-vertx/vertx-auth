@@ -31,5 +31,12 @@
     <doc.skip>false</doc.skip>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>

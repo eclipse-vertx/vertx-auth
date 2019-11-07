@@ -16,11 +16,21 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.impl.RoleBasedAuthorizationConverter;
-import io.vertx.test.core.VertxTestBase;
-import org.junit.Assert;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class RoleBasedAuthorizationTest extends VertxTestBase {
+import static org.junit.Assert.*;
+
+@RunWith(VertxUnitRunner.class)
+public class RoleBasedAuthorizationTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void testConverter() {
@@ -32,82 +42,82 @@ public class RoleBasedAuthorizationTest extends VertxTestBase {
 
   @Test
   public void testImplies1() {
-    Assert.assertEquals(true, RoleBasedAuthorization.create("role1").verify(RoleBasedAuthorization.create("role1")));
+    assertTrue(RoleBasedAuthorization.create("role1").verify(RoleBasedAuthorization.create("role1")));
   }
 
   @Test
   public void testImplies2() {
-    Assert.assertEquals(true, RoleBasedAuthorization.create("p1").setResource("r1")
+    assertTrue(RoleBasedAuthorization.create("p1").setResource("r1")
       .verify(RoleBasedAuthorization.create("p1").setResource("r1")));
   }
 
   @Test
   public void testImplies3() {
-    Assert.assertEquals(false,
-      RoleBasedAuthorization.create("p1").setResource("r1").verify(RoleBasedAuthorization.create("p1")));
+    assertFalse(RoleBasedAuthorization.create("p1").setResource("r1").verify(RoleBasedAuthorization.create("p1")));
   }
 
   @Test
   public void testImplies4() {
-    Assert.assertEquals(false,
-      RoleBasedAuthorization.create("p1").verify(RoleBasedAuthorization.create("p1").setResource("r1")));
+    assertFalse(RoleBasedAuthorization.create("p1").verify(RoleBasedAuthorization.create("p1").setResource("r1")));
   }
 
   @Test
   public void testImplies5() {
-    Assert.assertEquals(false, RoleBasedAuthorization.create("role1").verify(RoleBasedAuthorization.create("role2")));
+    assertFalse(RoleBasedAuthorization.create("role1").verify(RoleBasedAuthorization.create("role2")));
   }
 
   @Test
-  public void testMatch1() {
-    final HttpServer server = vertx().createHttpServer();
+  public void testMatch1(TestContext should) {
+    final Async test = should.async();
+
+    final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
       user.authorizations().add(RoleBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
-      assertEquals(true, RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
+      should.assertTrue(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost", listen -> {
+    }).listen(0, "localhost", listen -> {
       if (listen.failed()) {
-        fail(listen.cause());
+        should.fail(listen.cause());
         return;
       }
 
-      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
+      rule.vertx().createHttpClient().getNow(listen.result().actualPort(), "localhost", "/?variable1=r1", res -> {
         if (res.failed()) {
-          fail(res.cause());
+          should.fail(res.cause());
           return;
         }
-        server.close(close -> testComplete());
+        server.close(close -> test.complete());
       });
     });
-    await();
   }
 
   @Test
-  public void testMatch2() {
-    final HttpServer server = vertx().createHttpServer();
+  public void testMatch2(TestContext should) {
+    final Async test = should.async();
+
+    final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
       user.authorizations().add(RoleBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
-      assertEquals(false, RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
+      should.assertFalse(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost", listen -> {
+    }).listen(0, "localhost", listen -> {
       if (listen.failed()) {
-        fail(listen.cause());
+        should.fail(listen.cause());
         return;
       }
 
-      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
+      rule.vertx().createHttpClient().getNow(listen.result().actualPort(), "localhost", "/?variable1=r2", res -> {
         if (res.failed()) {
-          fail(res.cause());
+          should.fail(res.cause());
           return;
         }
-        server.close(close -> testComplete());
+        server.close(close -> test.complete());
       });
     });
-    await();
   }
 
 }

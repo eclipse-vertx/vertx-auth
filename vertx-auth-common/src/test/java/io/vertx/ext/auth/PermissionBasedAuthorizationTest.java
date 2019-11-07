@@ -13,15 +13,25 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.http.HttpServer;
-import org.junit.Assert;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.impl.PermissionBasedAuthorizationConverter;
-import io.vertx.test.core.VertxTestBase;
+import org.junit.runner.RunWith;
 
-public class PermissionBasedAuthorizationTest extends VertxTestBase {
+import static org.junit.Assert.*;
+
+@RunWith(VertxUnitRunner.class)
+public class PermissionBasedAuthorizationTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void testConverter() {
@@ -33,85 +43,81 @@ public class PermissionBasedAuthorizationTest extends VertxTestBase {
 
   @Test
   public void testImplies1() {
-    Assert.assertEquals(true,
-        PermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1")));
+    assertTrue(PermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1")));
   }
 
   @Test
   public void testImplies2() {
-    Assert.assertEquals(true, PermissionBasedAuthorization.create("p1").setResource("r1")
-        .verify(PermissionBasedAuthorization.create("p1").setResource("r1")));
+    assertTrue(PermissionBasedAuthorization.create("p1").setResource("r1")
+      .verify(PermissionBasedAuthorization.create("p1").setResource("r1")));
   }
 
   @Test
   public void testImplies3() {
-    Assert.assertEquals(false,
-        PermissionBasedAuthorization.create("p1").setResource("r1").verify(PermissionBasedAuthorization.create("p1")));
+    assertFalse(PermissionBasedAuthorization.create("p1").setResource("r1").verify(PermissionBasedAuthorization.create("p1")));
   }
 
   @Test
   public void testImplies4() {
-    Assert.assertEquals(false,
-        PermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1").setResource("r1")));
+    assertFalse(PermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1").setResource("r1")));
   }
 
   @Test
   public void testImplies5() {
-    Assert.assertEquals(false,
-        PermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p2")));
+    assertFalse(PermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p2")));
   }
 
   @Test
-  public void testMatch1() {
-    final HttpServer server = vertx().createHttpServer();
+  public void testMatch1(TestContext should) {
+    final Async test = should.async();
+
+    final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
       user.authorizations().add(PermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
-      assertEquals(true, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
+      should.assertEquals(true, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost", listen -> {
+    }).listen(0, "localhost", listen -> {
       if (listen.failed()) {
-        fail(listen.cause());
+        should.fail(listen.cause());
         return;
       }
 
-
-      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r1", res -> {
+      rule.vertx().createHttpClient().getNow(listen.result().actualPort(), "localhost", "/?variable1=r1", res -> {
         if (res.failed()) {
-          fail(res.cause());
+          should.fail(res.cause());
           return;
         }
-        server.close(close -> testComplete());
+        server.close(close -> test.complete());
       });
     });
-    await();
   }
 
   @Test
-  public void testMatch2() {
-    final HttpServer server = vertx().createHttpServer();
+  public void testMatch2(TestContext should) {
+    final Async test = should.async();
+
+    final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
       user.authorizations().add(PermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
-      assertEquals(false, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
+      should.assertEquals(false, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(9876, "localhost", listen -> {
+    }).listen(0, "localhost", listen -> {
       if (listen.failed()) {
-        fail(listen.cause());
+        should.fail(listen.cause());
         return;
       }
 
-      vertx().createHttpClient().getNow(9876, "localhost", "/?variable1=r2", res -> {
+      rule.vertx().createHttpClient().getNow(listen.result().actualPort(), "localhost", "/?variable1=r2", res -> {
         if (res.failed()) {
-          fail(res.cause());
+          should.fail(res.cause());
           return;
         }
-        server.close(close -> testComplete());
+        server.close(close -> test.complete());
       });
     });
-    await();
   }
-
 }
