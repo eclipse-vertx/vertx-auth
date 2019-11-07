@@ -155,6 +155,9 @@ public final class JWK implements Crypto {
         put("ES256", "SHA256withECDSA");
         put("ES384", "SHA384withECDSA");
         put("ES512", "SHA512withECDSA");
+        put("PS256", "RSASSA-PSS");
+        put("PS384", "RSASSA-PSS");
+        put("PS512", "RSASSA-PSS");
       }};
 
       final KeyFactory kf;
@@ -163,6 +166,9 @@ public final class JWK implements Crypto {
         case "RS256":
         case "RS384":
         case "RS512":
+        case "PS256":
+        case "PS384":
+        case "PS512":
           kf = KeyFactory.getInstance("RSA");
           break;
         case "ES256":
@@ -197,7 +203,19 @@ public final class JWK implements Crypto {
       // use default
       signature = Signature.getInstance(alias.get(alg));
 
-    } catch (InvalidKeySpecException | CertificateException | NoSuchAlgorithmException e) {
+      // signature extras
+      switch (alg) {
+        case "PS256":
+          signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
+          break;
+        case "PS384":
+          signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
+          break;
+        case "PS512":
+          signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
+          break;
+      }
+    } catch (InvalidKeySpecException | CertificateException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
       // error
       throw new RuntimeException(e);
     }
@@ -241,6 +259,7 @@ public final class JWK implements Crypto {
     try {
       switch (json.getString("kty")) {
         case "RSA":
+        case "RSASSA":
           createRSA(json);
           break;
         case "EC":
@@ -263,6 +282,9 @@ public final class JWK implements Crypto {
       put("RS256", "SHA256withRSA");
       put("RS384", "SHA384withRSA");
       put("RS512", "SHA512withRSA");
+      put("PS256", "RSASSA-PSS");
+      put("PS384", "RSASSA-PSS");
+      put("PS512", "RSASSA-PSS");
       // COSE required
       put("RS1", "SHA1withRSA");
     }};
@@ -315,7 +337,19 @@ public final class JWK implements Crypto {
         try {
           // use default
           signature = Signature.getInstance(alias.get(alg));
-        } catch (NoSuchAlgorithmException e) {
+          // signature extras
+          switch (alg) {
+            case "PS256":
+              signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
+              break;
+            case "PS384":
+              signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
+              break;
+            case "PS512":
+              signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
+              break;
+          }
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
           // error
           throw new RuntimeException(e);
         }

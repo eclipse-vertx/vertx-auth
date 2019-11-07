@@ -223,7 +223,7 @@ public final class JWT {
     List<Crypto> cryptos = cryptoMap.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
-      throw new RuntimeException("Algorithm not supported");
+      throw new RuntimeException("Algorithm not supported [" + alg + "]");
     }
 
     // if we only allow secure alg, then none is not a valid option
