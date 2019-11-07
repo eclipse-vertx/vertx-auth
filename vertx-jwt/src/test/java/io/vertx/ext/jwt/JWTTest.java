@@ -1,6 +1,7 @@
 package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonObject;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -125,6 +126,12 @@ public class JWTTest {
 
   @Test
   public void testPSS() {
+    String version = System.getProperty("java.version");
+    version = version.substring(0, version.indexOf('.'));
+
+    // RSASSA-PSS is only available on >=11
+    Assume.assumeTrue(Integer.parseInt(version) >= 11);
+
     JWT jwt = new JWT()
       .addJWK(JWK.pubKey("PS256",
         "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnzyis1ZjfNB0bBgKFMSv" +
