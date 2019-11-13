@@ -20,16 +20,13 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 
@@ -39,8 +36,6 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
 public class OAuth2TokenImpl extends OAuth2UserImpl {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenImpl.class);
-
-  private OAuth2API api;
 
   /**
    * Creates an AccessToken instance.
@@ -81,93 +76,17 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
 
     LOG.debug("Refreshing AccessToken");
 
-    final JsonObject headers = new JsonObject();
-    final OAuth2AuthProviderImpl provider = getProvider();
-    final OAuth2ClientOptions config = provider.getConfig();
-
-    JsonObject tmp = config.getHeaders();
-
-    if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
-
-    final JsonObject form = new JsonObject();
-
-    form
-      .put("grant_type", "refresh_token")
-      .put("refresh_token", opaqueRefreshToken())
-      // Salesforce does seem to require them
-      .put("client_id", config.getClientID());
-
-    if (config.getClientSecretParameterName() != null) {
-      form.put(config.getClientSecretParameterName(), config.getClientSecret());
-    }
-
-    headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
-    // specify preferred accepted accessToken type
-    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-    getApi().fetch(
-      HttpMethod.POST,
-      config.getTokenPath(),
-      headers,
-      payload,
-      res -> {
-        if (res.failed()) {
-          handler.handle(Future.failedFuture(res.cause()));
-          return;
-        }
-
-        final OAuth2Response reply = res.result();
-
-        if (reply.body() == null || reply.body().length() == 0) {
-          handler.handle(Future.failedFuture("No Body"));
-          return;
-        }
-
-        JsonObject json;
-
-        if (reply.is("application/json")) {
-          try {
-            json = reply.jsonObject();
-          } catch (RuntimeException e) {
-            handler.handle(Future.failedFuture(e));
-            return;
-          }
-        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
-          try {
-            json = queryToJSON(reply.body().toString());
-          } catch (UnsupportedEncodingException | RuntimeException e) {
-            handler.handle(Future.failedFuture(e));
-            return;
-          }
-        } else {
-          handler.handle(Future.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type")));
+    getProvider()
+      .api()
+      .token("refresh_token", new JsonObject().put("refresh_token", opaqueRefreshToken()), token -> {
+        if (token.failed()) {
+          handler.handle(Future.failedFuture(token.cause()));
           return;
         }
 
         try {
-          if (json.containsKey("error")) {
-            String description;
-            Object error = json.getValue("error");
-            if (error instanceof JsonObject) {
-              description = ((JsonObject) error).getString("message");
-            } else {
-              // attempt to handle the error as a string
-              try {
-                description = json.getString("error_description", json.getString("error"));
-              } catch (RuntimeException e) {
-                description = error.toString();
-              }
-            }
-            handler.handle(Future.failedFuture(description));
-          } else {
-            OAuth2API.processNonStandardHeaders(json, reply, config.getScopeSeparator());
-            LOG.debug("Got new AccessToken");
-            init(json);
-            handler.handle(Future.succeededFuture());
-          }
+          init(token.result());
+          handler.handle(Future.succeededFuture());
         } catch (RuntimeException e) {
           handler.handle(Future.failedFuture(e));
         }
@@ -184,65 +103,24 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
    */
   @Override
   public OAuth2TokenImpl revoke(String token_type, Handler<AsyncResult<Void>> handler) {
+    getProvider()
+      .api()
+      .tokenRevocation(token_type, principal().getString(token_type), res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
 
-    final OAuth2AuthProviderImpl provider = getProvider();
-    final OAuth2ClientOptions config = provider.getConfig();
-    final String tokenValue = principal().getString(token_type);
-
-    if (tokenValue != null) {
-
-
-      final JsonObject headers = new JsonObject();
-
-      JsonObject tmp = config.getHeaders();
-
-      if (config.isUseBasicAuthorizationHeader()) {
-        String basic = config.getClientID() + ":" + (config.getClientSecret() == null ? "" : config.getClientSecret());
-        headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
-      }
-
-      if (tmp != null) {
-        headers.mergeIn(tmp);
-      }
-
-      final JsonObject form = new JsonObject();
-
-      form
-        .put("token", tokenValue)
-        .put("token_type_hint", token_type);
-
-      headers.put("Content-Type", "application/x-www-form-urlencoded");
-      final Buffer payload = Buffer.buffer(stringify(form));
-      // specify preferred accepted accessToken type
-      headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-      getApi().fetch(
-        HttpMethod.POST,
-        config.getRevocationPath(),
-        headers,
-        payload,
-        res -> {
-          if (res.failed()) {
-            handler.handle(Future.failedFuture(res.cause()));
-            return;
-          }
-
-          final OAuth2Response reply = res.result();
-
-          if (reply.body() == null) {
-            handler.handle(Future.failedFuture("No Body"));
-            return;
-          }
-
+        try {
           // invalidate ourselves
           principal().remove(token_type);
           init(principal());
 
           handler.handle(Future.succeededFuture());
-        });
-    } else {
-      handler.handle(Future.failedFuture("Invalid token: " + token_type));
-    }
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+      });
 
     return this;
   }
@@ -285,196 +163,123 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
-    getApi().fetch(
-      HttpMethod.POST,
-      config.getLogoutPath(),
-      headers,
-      payload,
-      res -> {
-        if (res.succeeded()) {
-          // invalidate ourselves
-          init(null);
-          callback.handle(Future.succeededFuture());
-        } else {
-          callback.handle(Future.failedFuture(res.cause()));
-        }
-      });
+    getProvider()
+      .api()
+      .fetch(
+        HttpMethod.POST,
+        config.getLogoutPath(),
+        headers,
+        payload,
+        res -> {
+          if (res.succeeded()) {
+            // invalidate ourselves
+            init(null);
+            callback.handle(Future.succeededFuture());
+          } else {
+            callback.handle(Future.failedFuture(res.cause()));
+          }
+        });
 
     return this;
   }
 
   @Override
   public AccessToken introspect(String tokenType, Handler<AsyncResult<Void>> handler) {
-    final JsonObject headers = new JsonObject();
-    final OAuth2AuthProviderImpl provider = getProvider();
-    final OAuth2ClientOptions config = provider.getConfig();
 
-    if (config.isUseBasicAuthorizationHeader()) {
-      String basic = config.getClientID() + ":" + (config.getClientSecret() == null ? "" : config.getClientSecret());
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
-    }
-
-    JsonObject tmp = config.getHeaders();
-    if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
-
-    final JsonObject form = new JsonObject()
-      .put("token", principal().getString(tokenType))
-      // optional param from RFC7662
-      .put("token_type_hint", tokenType);
-
-    headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
-    // specify preferred accepted accessToken type
-    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-    getApi().fetch(
-      HttpMethod.POST,
-      config.getIntrospectionPath(),
-      headers,
-      payload,
-      res -> {
+    getProvider()
+      .api()
+      .tokenIntrospection(tokenType, principal().getString(tokenType), res -> {
         if (res.failed()) {
           handler.handle(Future.failedFuture(res.cause()));
           return;
         }
 
-        final OAuth2Response reply = res.result();
+        final JsonObject json = res.result();
 
-        if (reply.body() == null || reply.body().length() == 0) {
-          handler.handle(Future.failedFuture("No Body"));
+        // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
+        if (json.containsKey("active") && !json.getBoolean("active", false)) {
+          handler.handle(Future.failedFuture("Inactive Token"));
           return;
         }
+        // OPTIONALS
 
-        JsonObject json;
+        if (json.containsKey("scope") && json.getString("scope") != null) {
+          // A JSON string containing a space-separated list of scopes associated with this token
+          principal().put("scope", json.getString("scope"));
+        }
 
-        if (reply.is("application/json")) {
-          try {
-            json = reply.jsonObject();
-          } catch (RuntimeException e) {
-            handler.handle(Future.failedFuture(e));
-            return;
+        // validate client id
+        if (json.containsKey("client_id")) {
+          if (principal().containsKey("client_id")) {
+            if (!json.getString("client_id", "").equals(principal().getString("client_id"))) {
+              // Client identifier for the OAuth 2.0 client that requested this token.
+              handler.handle(Future.failedFuture("Wrong client_id"));
+              return;
+            }
+          } else {
+            principal().put("client_id", json.getString("client_id"));
           }
-        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
-          try {
-            json = queryToJSON(reply.body().toString());
-          } catch (UnsupportedEncodingException | RuntimeException e) {
-            handler.handle(Future.failedFuture(e));
-            return;
+        }
+
+        if (json.containsKey("username")) {
+          // Human-readable identifier for the resource owner who authorized this token.
+          principal().put("username", json.getString("username"));
+        }
+
+        // validate token type
+        if (json.containsKey("token_type")) {
+          if (principal().containsKey("token_type")) {
+            if (!json.getString("token_type", "").equalsIgnoreCase(principal().getString("token_type"))) {
+              // Client identifier for the OAuth 2.0 client that requested this token.
+              handler.handle(Future.failedFuture("Wrong token_type"));
+              return;
+            }
+          } else {
+            principal().put("token_type", json.getString("token_type"));
           }
-        } else {
-          handler.handle(Future.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type")));
-          return;
         }
 
         try {
-          if (json.containsKey("error")) {
-            String description;
-            Object error = json.getValue("error");
-            if (error instanceof JsonObject) {
-              description = ((JsonObject) error).getString("message");
-            } else {
-              // attempt to handle the error as a string
-              try {
-                description = json.getString("error_description", json.getString("error"));
-              } catch (RuntimeException e) {
-                description = error.toString();
-              }
-            }
-            handler.handle(Future.failedFuture(description));
-          } else {
-            // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations do not return this)
-            if (json.containsKey("active") && !json.getBoolean("active", false)) {
-              handler.handle(Future.failedFuture("Inactive Token"));
+          // reset the access token
+          if (json.containsKey("expires_in")) {
+            // reset the expires in value and reset the pre calculated value
+            principal()
+              .put("expires_in", json.getValue("expires_in"))
+              .remove("expires_at");
+          }
+
+          // All dates in JWT are of type NumericDate
+          // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+          // the specified UTC date/time, ignoring leap seconds
+          final long now = (System.currentTimeMillis() / 1000);
+
+          if (json.containsKey("iat")) {
+            Long iat = json.getLong("iat");
+            // issue at must be in the past
+            if (iat > now + getProvider().getConfig().getJWTOptions().getLeeway()) {
+              handler.handle(Future.failedFuture("Invalid token: iat > now"));
               return;
             }
-            // OPTIONALS
-
-            if (json.containsKey("scope") && json.getString("scope") != null) {
-              // A JSON string containing a space-separated list of scopes associated with this token
-              principal().put("scope", json.getString("scope"));
-            }
-
-            // validate client id
-            if (json.containsKey("client_id")) {
-              if (principal().containsKey("client_id")) {
-                if (!json.getString("client_id", "").equals(principal().getString("client_id"))) {
-                  // Client identifier for the OAuth 2.0 client that requested this token.
-                  handler.handle(Future.failedFuture("Wrong client_id"));
-                  return;
-                }
-              } else {
-                principal().put("client_id", json.getString("client_id"));
-
-              }
-            }
-
-            if (json.containsKey("username")) {
-              // Human-readable identifier for the resource owner who authorized this token.
-              principal().put("username", json.getString("username"));
-            }
-
-            // validate token type
-            if (json.containsKey("token_type")) {
-              if (principal().containsKey("token_type")) {
-                if (!json.getString("token_type", "").equalsIgnoreCase(principal().getString("token_type"))) {
-                  // Client identifier for the OAuth 2.0 client that requested this token.
-                  handler.handle(Future.failedFuture("Wrong token_type"));
-                  return;
-                }
-              } else {
-                principal().put("token_type", json.getString("token_type"));
-              }
-            }
-
-            try {
-              processNonStandardHeaders(json, reply, config.getScopeSeparator());
-              // reset the access token
-
-              if (json.containsKey("expires_in")) {
-                // reset the expires in value and reset the pre calculated value
-                principal()
-                  .put("expires_in", json.getValue("expires_in"))
-                  .remove("expires_at");
-              }
-
-              // All dates in JWT are of type NumericDate
-              // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
-              // the specified UTC date/time, ignoring leap seconds
-              final long now = (System.currentTimeMillis() / 1000);
-
-              if (json.containsKey("iat")) {
-                Long iat = json.getLong("iat");
-                // issue at must be in the past
-                if (iat > now + config.getJWTOptions().getLeeway()) {
-                  handler.handle(Future.failedFuture("Invalid token: iat > now"));
-                  return;
-                }
-              }
-
-              if (json.containsKey("exp")) {
-                Long exp = json.getLong("exp");
-
-                if (now - config.getJWTOptions().getLeeway() >= exp) {
-                  handler.handle(Future.failedFuture("Invalid token: exp <= now"));
-                  return;
-                }
-
-                // reset the expires in value and reset the pre calculated value
-                principal()
-                  .put("expires_in", exp - now)
-                  .remove("expires_at");
-              }
-
-              // force a init
-              init(principal());
-
-              handler.handle(Future.succeededFuture());
-            } catch (RuntimeException e) {
-              handler.handle(Future.failedFuture(e));
-            }
           }
+
+          if (json.containsKey("exp")) {
+            Long exp = json.getLong("exp");
+
+            if (now - getProvider().getConfig().getJWTOptions().getLeeway() >= exp) {
+              handler.handle(Future.failedFuture("Invalid token: exp <= now"));
+              return;
+            }
+
+            // reset the expires in value and reset the pre calculated value
+            principal()
+              .put("expires_in", exp - now)
+              .remove("expires_at");
+          }
+
+          // force a init
+          init(principal());
+
+          handler.handle(Future.succeededFuture());
         } catch (RuntimeException e) {
           handler.handle(Future.failedFuture(e));
         }
@@ -490,69 +295,31 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
 
   @Override
   public AccessToken userInfo(Handler<AsyncResult<JsonObject>> callback) {
-    final JsonObject headers = new JsonObject();
-    final OAuth2AuthProviderImpl provider = getProvider();
-    final OAuth2ClientOptions config = provider.getConfig();
-    final JsonObject extraParams = config.getUserInfoParameters();
-    String path = config.getUserInfoPath();
 
-    if (extraParams != null) {
-      path += "?" + OAuth2API.stringify(extraParams);
-    }
-
-    headers.put("Authorization", "Bearer " + opaqueAccessToken());
-    // specify preferred accepted accessToken type
-    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-    getApi().fetch(
-      HttpMethod.GET,
-      path,
-      headers,
-      null,
-      fetch -> {
-        if (fetch.failed()) {
-          callback.handle(Future.failedFuture(fetch.cause()));
+    getProvider()
+      .api()
+      .userInfo(opaqueAccessToken(), res -> {
+        if (res.failed()) {
+          callback.handle(Future.failedFuture(res.cause()));
           return;
         }
 
-        final OAuth2Response reply = fetch.result();
-        // userInfo is expected to be an object
-        JsonObject userInfo;
+        final JsonObject userInfo = res.result();
 
-        if (reply.is("application/json")) {
-          try {
-            // userInfo is expected to be an object
-            userInfo = reply.jsonObject();
-          } catch (RuntimeException e) {
-            callback.handle(Future.failedFuture(e));
-            return;
-          }
-        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
-          try {
-            // attempt to convert url encoded string to json
-            userInfo = OAuth2API.queryToJSON(reply.body().toString());
-          } catch (RuntimeException | UnsupportedEncodingException e) {
-            callback.handle(Future.failedFuture(e));
-            return;
-          }
-        } else {
-          callback.handle(Future.failedFuture("Cannot handle Content-Type: " + reply.headers().get("Content-Type")));
-          return;
+        try {
+          // re-init to reparse the authorities
+          init(principal());
+          callback.handle(Future.succeededFuture(userInfo));
+        } catch (RuntimeException e) {
+          callback.handle(Future.failedFuture(e));
         }
-
-        OAuth2API.processNonStandardHeaders(principal(), reply, config.getScopeSeparator());
-        // re-init to reparse the authorities
-        init(principal());
-        callback.handle(Future.succeededFuture(userInfo));
       });
+
     return this;
   }
 
   @Override
   public AccessToken fetch(HttpMethod method, String resource, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
-    final OAuth2AuthProviderImpl provider = getProvider();
-    final OAuth2ClientOptions config = provider.getConfig();
-
     if (headers == null) {
       headers = new JsonObject();
     }
@@ -560,27 +327,21 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     // add the access token
     headers.put("Authorization", "Bearer " + opaqueAccessToken());
 
-    getApi().fetch(
-      method,
-      resource,
-      headers,
-      payload,
-      fetch -> {
-        if (fetch.failed()) {
-          callback.handle(Future.failedFuture(fetch.cause()));
-          return;
-        }
+    getProvider()
+      .api()
+      .fetch(
+        method,
+        resource,
+        headers,
+        payload,
+        fetch -> {
+          if (fetch.failed()) {
+            callback.handle(Future.failedFuture(fetch.cause()));
+            return;
+          }
 
-        callback.handle(Future.succeededFuture(fetch.result()));
-      });
+          callback.handle(Future.succeededFuture(fetch.result()));
+        });
     return this;
-  }
-
-  private OAuth2API getApi() {
-    if (api == null) {
-      OAuth2AuthProviderImpl p = getProvider();
-      api = new OAuth2API(p.getVertx(), p.getConfig());
-    }
-    return api;
   }
 }

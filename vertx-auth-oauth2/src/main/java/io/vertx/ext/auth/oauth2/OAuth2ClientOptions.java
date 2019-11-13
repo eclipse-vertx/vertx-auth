@@ -19,7 +19,6 @@ package io.vertx.ext.auth.oauth2;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientOptionsConverter;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.jwt.JWTOptions;
@@ -229,18 +228,21 @@ public class OAuth2ClientOptions extends HttpClientOptions {
 
   /**
    * Flag to use HTTP basic auth header with client id, client secret.
-   *
+   * @deprecated Oauth2 spec mandates that BasicAuth MUST be available
    * @return boolean
    */
+  @Deprecated
   public boolean isUseBasicAuthorizationHeader() {
     return useBasicAuthorizationHeader;
   }
 
   /**
    * Flag to use HTTP basic auth header with client id, client secret.
+   * @deprecated Oauth2 spec mandates that BasicAuth MUST be available
    *
    * @return self
    */
+  @Deprecated
   public OAuth2ClientOptions setUseBasicAuthorizationHeader(boolean useBasicAuthorizationHeader) {
     this.useBasicAuthorizationHeader = useBasicAuthorizationHeader;
     return this;
@@ -575,6 +577,31 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     }
 
     return path;
+  }
+
+  public void validate() throws IllegalStateException {
+    if (flow == null) {
+      throw new IllegalStateException("Missing OAuth2 flow [e.g.: AUTH_CODE]");
+    }
+    switch (flow) {
+      case AUTH_CODE:
+        throwIfNull("clientId", clientID);
+        break;
+      case AUTH_JWT:
+        throwIfNull("clientId", clientID);
+        throwIfNull("pubSecKeys", pubSecKeys);
+        // keys can't be empty
+        if (pubSecKeys.size() == 0) {
+          throw new IllegalStateException("Configuration missing. You need to specify [pubSecKeys]");
+        }
+        break;
+    }
+  }
+
+  private static void throwIfNull(String key, Object value) throws IllegalStateException {
+    if (value == null) {
+      throw new IllegalStateException("Configuration missing. You need to specify [" + key + "]");
+    }
   }
 
   public JsonObject toJson() {

@@ -21,6 +21,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -44,23 +45,37 @@ public interface OAuth2Auth extends AuthProvider {
   /**
    * Create a OAuth2 auth provider
    *
-   * @param vertx the Vertx instance
-   * @param config  the config
+   * @param vertx  the Vertx instance
+   * @param config the config
    * @return the auth provider
    */
   static OAuth2Auth create(Vertx vertx, OAuth2ClientOptions config) {
-    return new OAuth2AuthProviderImpl(vertx, config);
+    return new OAuth2AuthProviderImpl(new OAuth2API(vertx, config), config);
+  }
+
+  /**
+   * Generate a redirect URL to the authN/Z backend. It only applies to auth_code flow.
+   *
+   * @param params extra parameters to apply to the url
+   * @return future result
+   * @see OAuth2Auth#decodeToken(String, Handler)
+   */
+  default Future<String> authorizeURL(JsonObject params) {
+    Promise<String> promise = Promise.promise();
+    authorizeURL(params, promise);
+    return promise.future();
   }
 
   /**
    * Generate a redirect URL to the authN/Z backend. It only applies to auth_code flow.
    */
-  String authorizeURL(JsonObject params);
+  @Fluent
+  OAuth2Auth authorizeURL(JsonObject params, Handler<AsyncResult<String>> handler);
 
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
    *
-   * @param token the access token (base64 string)
+   * @param token   the access token (base64 string)
    * @param handler A handler to receive the event
    * @return self
    */
@@ -70,9 +85,9 @@ public interface OAuth2Auth extends AuthProvider {
   /**
    * Decode a token to a {@link AccessToken} object. This is useful to handle bearer JWT tokens.
    *
-   * @see OAuth2Auth#decodeToken(String, Handler)
    * @param token the access token (base64 string)
    * @return future result
+   * @see OAuth2Auth#decodeToken(String, Handler)
    */
   default Future<AccessToken> decodeToken(String token) {
     Promise<AccessToken> promise = Promise.promise();
@@ -84,7 +99,7 @@ public interface OAuth2Auth extends AuthProvider {
    * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
    * meta-information about this token.
    *
-   * @param token the access token (base64 string)
+   * @param token   the access token (base64 string)
    * @param handler A handler to receive the event
    * @return self
    */
@@ -97,9 +112,9 @@ public interface OAuth2Auth extends AuthProvider {
    * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
    * meta-information about this token.
    *
-   * @see OAuth2Auth#introspectToken(String, Handler)
    * @param token the access token (base64 string)
    * @return future result
+   * @see OAuth2Auth#introspectToken(String, Handler)
    */
   default Future<AccessToken> introspectToken(String token) {
     Promise<AccessToken> promise = Promise.promise();
@@ -111,9 +126,9 @@ public interface OAuth2Auth extends AuthProvider {
    * Query an OAuth 2.0 authorization server to determine the active state of an OAuth 2.0 token and to determine
    * meta-information about this token.
    *
-   * @param token the access token (base64 string)
+   * @param token     the access token (base64 string)
    * @param tokenType hint to the token type e.g.: `access_token`
-   * @param handler A handler to receive the event
+   * @param handler   A handler to receive the event
    * @return self
    */
   @Fluent
@@ -128,7 +143,7 @@ public interface OAuth2Auth extends AuthProvider {
 
   /**
    * Loads a JWK Set from the remote provider.
-   *
+   * <p>
    * When calling this method several times, the loaded JWKs are updated in the underlying JWT object.
    */
   @Fluent
@@ -136,8 +151,9 @@ public interface OAuth2Auth extends AuthProvider {
 
   /**
    * Loads a JWK Set from the remote provider.
-   *
+   * <p>
    * When calling this method several times, the loaded JWKs are updated in the underlying JWT object.
+   *
    * @see OAuth2Auth#loadJWK(Handler)
    */
   default Future<Void> loadJWK() {
@@ -145,6 +161,25 @@ public interface OAuth2Auth extends AuthProvider {
     loadJWK(promise);
     return promise.future();
   }
+
+  /**
+   * Generate a redirect URL to the authN/Z backend.
+   *
+   * @param params extra parameters to apply to the url
+   * @return future result
+   * @see OAuth2Auth#decodeToken(String, Handler)
+   */
+  default Future<String> endSessionURL(String idToken, JsonObject params) {
+    Promise<String> promise = Promise.promise();
+    endSessionURL(idToken, params, promise);
+    return promise.future();
+  }
+
+  /**
+   * Generate a redirect URL to the authN/Z backend.
+   */
+  @Fluent
+  OAuth2Auth endSessionURL(String idToken, JsonObject params, Handler<AsyncResult<String>> handler);
 
   @Fluent
   OAuth2Auth rbacHandler(OAuth2RBAC rbac);

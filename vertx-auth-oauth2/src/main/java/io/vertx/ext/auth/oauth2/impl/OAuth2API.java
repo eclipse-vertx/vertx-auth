@@ -26,11 +26,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.Map;
 
 /**
@@ -46,6 +48,462 @@ public class OAuth2API {
   public OAuth2API(Vertx vertx, OAuth2ClientOptions config) {
     this.config = config;
     this.client = vertx.createHttpClient(config);
+  }
+
+  /**
+   * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity of issued ID and access tokens.
+   */
+  public void jwkSet(Handler<AsyncResult<JsonArray>> handler) {
+    final JsonObject headers = new JsonObject();
+    // specify preferred accepted content type
+    headers.put("Accept", "application/json");
+
+    fetch(
+      HttpMethod.GET,
+      config.getJwkPath(),
+      headers,
+      null,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null || reply.body().length() == 0) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        JsonObject json;
+
+        if (reply.is("application/json")) {
+          try {
+            json = reply.jsonObject();
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          return;
+        }
+
+        try {
+          if (json.containsKey("error")) {
+            handler.handle(Future.failedFuture(extractErrorDescription(json)));
+          } else {
+            handler.handle(Future.succeededFuture(json.getJsonArray("keys")));
+          }
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+      });
+  }
+
+  /**
+   * The client sends the end-user's browser to this endpoint to request their authentication and consent. This endpoint is used in the code and implicit OAuth 2.0 flows which require end-user interaction.
+   *
+   * see: https://tools.ietf.org/html/rfc6749
+   */
+  public void authorizeURL(JsonObject params, Handler<AsyncResult<String>> handler) {
+    final JsonObject query = params.copy();
+
+    if (config.getFlow() != OAuth2FlowType.AUTH_CODE) {
+      handler.handle(Future.failedFuture("authorization URL cannot be computed for non AUTH_CODE flow"));
+      return;
+    }
+
+    if (query.containsKey("scopes")) {
+      // scopes have been passed as a list so the provider must generate the correct string for it
+      query.put("scope", String.join(config.getScopeSeparator(), query.getJsonArray("scopes").getList()));
+      query.remove("scopes");
+    }
+
+    query.put("response_type", "code");
+    query.put("client_id", config.getClientID());
+
+    final String path = config.getAuthorizationPath();
+    final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
+
+    handler.handle(Future.succeededFuture(url + '?' + stringify(query)));
+  }
+
+  /**
+   * Post an OAuth 2.0 grant (code, refresh token, resource owner password credentials, client credentials) to obtain an ID and / or access token.
+   *
+   * see: https://tools.ietf.org/html/rfc6749
+   */
+  public void token(String grantType, JsonObject params, Handler<AsyncResult<JsonObject>> handler) {
+    // quick check and abort
+    if (grantType == null) {
+      handler.handle(Future.failedFuture("Token request requires a grantType other than null"));
+      return;
+    }
+
+    final JsonObject headers = new JsonObject();
+
+    final boolean confidentialClient = config.getClientID() != null && config.getClientSecret() != null;
+
+    if (confidentialClient) {
+      String basic = config.getClientID() + ":" + config.getClientSecret();
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+    }
+
+    JsonObject tmp = config.getHeaders();
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    // Enable the system to send authorization params in the body (for example github does not require to be in the header)
+    final JsonObject form = params.copy();
+    if (config.getExtraParameters() != null) {
+      form.mergeIn(config.getExtraParameters());
+    }
+
+    form.put("grant_type", grantType);
+
+    if (!confidentialClient) {
+      form.put("client_id", config.getClientID());
+    }
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+
+    // specify preferred accepted content type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    fetch(
+      HttpMethod.POST,
+      config.getTokenPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null || reply.body().length() == 0) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        JsonObject json;
+
+        if (reply.is("application/json")) {
+          try {
+            json = reply.jsonObject();
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
+          try {
+            json = queryToJSON(reply.body().toString());
+          } catch (UnsupportedEncodingException | RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
+          return;
+        }
+
+        try {
+          if (json.containsKey("error")) {
+            handler.handle(Future.failedFuture(extractErrorDescription(json)));
+          } else {
+            OAuth2API.processNonStandardHeaders(json, reply, config.getScopeSeparator());
+            handler.handle(Future.succeededFuture(json));
+          }
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+      });
+  }
+
+  /**
+   * Validate an access token and retrieve its underlying authorisation (for resource servers).
+   *
+   * see: https://tools.ietf.org/html/rfc7662
+   */
+  public void tokenIntrospection(String tokenType, String token, Handler<AsyncResult<JsonObject>> handler) {
+    final JsonObject headers = new JsonObject();
+
+    final boolean confidentialClient = config.getClientID() != null && config.getClientSecret() != null;
+
+    if (confidentialClient) {
+      String basic = config.getClientID() + ":" + config.getClientSecret();
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+    }
+
+    JsonObject tmp = config.getHeaders();
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    final JsonObject form = new JsonObject()
+      .put("token", token)
+      // optional param from RFC7662
+      .put("token_type_hint", tokenType);
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+    // specify preferred accepted accessToken type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    fetch(
+      HttpMethod.POST,
+      config.getIntrospectionPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null || reply.body().length() == 0) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        JsonObject json;
+
+        if (reply.is("application/json")) {
+          try {
+            json = reply.jsonObject();
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
+          try {
+            json = queryToJSON(reply.body().toString());
+          } catch (UnsupportedEncodingException | RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type")));
+          return;
+        }
+
+        try {
+          if (json.containsKey("error")) {
+            handler.handle(Future.failedFuture(extractErrorDescription(json)));
+          } else {
+            processNonStandardHeaders(json, reply, config.getScopeSeparator());
+            handler.handle(Future.succeededFuture(json));
+          }
+        } catch (RuntimeException e) {
+          handler.handle(Future.failedFuture(e));
+        }
+      });
+  }
+
+  /**
+   * Revoke an obtained access or refresh token.
+   *
+   * see: https://tools.ietf.org/html/rfc7009
+   */
+  public void tokenRevocation(String tokenType, String token, Handler<AsyncResult<Void>> handler) {
+    if (token == null) {
+      handler.handle(Future.failedFuture("Cannot revoke null token"));
+      return;
+    }
+
+    final JsonObject headers = new JsonObject();
+
+    final boolean confidentialClient = config.getClientID() != null && config.getClientSecret() != null;
+
+    if (confidentialClient) {
+      String basic = config.getClientID() + ":" + config.getClientSecret();
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+    }
+
+    final JsonObject tmp = config.getHeaders();
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    final JsonObject form = new JsonObject();
+
+    form
+      .put("token", token)
+      .put("token_type_hint", tokenType);
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+    // specify preferred accepted accessToken type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    fetch(
+      HttpMethod.POST,
+      config.getRevocationPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = res.result();
+
+        if (reply.body() == null) {
+          handler.handle(Future.failedFuture("No Body"));
+          return;
+        }
+
+        handler.handle(Future.succeededFuture());
+      });
+  }
+
+  /**
+   * Retrieve profile information and other attributes for a logged-in end-user.
+   *
+   * see: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
+   */
+  public void userInfo(String accessToken, Handler<AsyncResult<JsonObject>> handler) {
+    final JsonObject headers = new JsonObject();
+    final JsonObject extraParams = config.getUserInfoParameters();
+    String path = config.getUserInfoPath();
+
+    if (extraParams != null) {
+      path += "?" + stringify(extraParams);
+    }
+
+    headers.put("Authorization", "Bearer " + accessToken);
+    // specify preferred accepted accessToken type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    fetch(
+      HttpMethod.GET,
+      path,
+      headers,
+      null,
+      fetch -> {
+        if (fetch.failed()) {
+          handler.handle(Future.failedFuture(fetch.cause()));
+          return;
+        }
+
+        final OAuth2Response reply = fetch.result();
+        // userInfo is expected to be an object
+        JsonObject userInfo;
+
+        if (reply.is("application/json")) {
+          try {
+            // userInfo is expected to be an object
+            userInfo = reply.jsonObject();
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
+          try {
+            // attempt to convert url encoded string to json
+            userInfo = queryToJSON(reply.body().toString());
+          } catch (RuntimeException | UnsupportedEncodingException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else {
+          handler.handle(Future.failedFuture("Cannot handle Content-Type: " + reply.headers().get("Content-Type")));
+          return;
+        }
+
+        processNonStandardHeaders(userInfo, reply, config.getScopeSeparator());
+        handler.handle(Future.succeededFuture(userInfo));
+      });
+  }
+
+  /**
+   * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
+   *
+   * see: https://openid.net/specs/openid-connect-session-1_0.html
+   */
+  public void endSessionURL(String idToken, JsonObject params, Handler<AsyncResult<String>> handler) {
+    final JsonObject query = params.copy();
+
+    if (idToken != null) {
+      query.put("id_token_hint", idToken);
+    }
+
+    final String path = config.getLogoutPath();
+    final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
+
+    handler.handle(Future.succeededFuture(url + '?' + stringify(query)));
+  }
+
+  /**
+   * Sign out an end-user.
+   *
+   * see:
+   */
+  public void logout(String accessToken, String refreshToken, Handler<AsyncResult<Void>> callback) {
+    final JsonObject headers = new JsonObject();
+
+    headers.put("Authorization", "Bearer " + accessToken);
+
+    JsonObject tmp = config.getHeaders();
+
+    if (tmp != null) {
+      headers.mergeIn(tmp);
+    }
+
+    final JsonObject form = new JsonObject();
+
+    form.put("client_id", config.getClientID());
+
+    if (config.getClientSecretParameterName() != null && config.getClientSecret() != null) {
+      form.put(config.getClientSecretParameterName(), config.getClientSecret());
+    }
+
+    if (refreshToken != null) {
+      form.put("refresh_token", refreshToken);
+    }
+
+    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    final Buffer payload = Buffer.buffer(stringify(form));
+    // specify preferred accepted accessToken type
+    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+
+    fetch(
+      HttpMethod.POST,
+      config.getLogoutPath(),
+      headers,
+      payload,
+      res -> {
+        if (res.succeeded()) {
+          callback.handle(Future.succeededFuture());
+        } else {
+          callback.handle(Future.failedFuture(res.cause()));
+        }
+      });
+  }
+
+  private String extractErrorDescription(JsonObject json) {
+    String description;
+    Object error = json.getValue("error");
+    if (error instanceof JsonObject) {
+      description = ((JsonObject) error).getString("message");
+    } else {
+      // attempt to handle the error as a string
+      try {
+        description = json.getString("error_description", json.getString("error"));
+      } catch (RuntimeException e) {
+        description = error.toString();
+      }
+    }
+    return description;
   }
 
   public void fetch(HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {

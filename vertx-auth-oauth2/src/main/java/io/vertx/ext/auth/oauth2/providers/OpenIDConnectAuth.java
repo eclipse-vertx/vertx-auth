@@ -9,6 +9,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Response;
 import io.vertx.ext.auth.oauth2.impl.OAuth2API;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
  * Simplified factory to create an {@link io.vertx.ext.auth.oauth2.OAuth2Auth} for OpenID Connect.
@@ -79,7 +80,7 @@ public interface OpenIDConnectAuth {
 
       try {
         // the constructor might fail if the configuration is incomplete
-        final OAuth2Auth oidc = OAuth2Auth.create(vertx, config);
+        final OAuth2Auth oidc = new OAuth2AuthProviderImpl(api, config);
 
         if (config.getJwkPath() != null) {
           oidc.loadJWK(v -> {

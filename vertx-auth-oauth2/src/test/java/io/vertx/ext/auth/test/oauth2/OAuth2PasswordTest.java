@@ -32,7 +32,6 @@ public class OAuth2PasswordTest extends VertxTestBase {
   private static final JsonObject oauthConfig = new JsonObject()
     .put("password", "secret")
     .put("grant_type", "password")
-    .put("client_id", "client-id")
     .put("username", "alice");
 
   protected OAuth2Auth oauth2;
@@ -52,6 +51,7 @@ public class OAuth2PasswordTest extends VertxTestBase {
 
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
+        assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
             assertEquals(config, queryToJSON(buffer.toString()));
