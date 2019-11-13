@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.UserImpl;
 
@@ -44,11 +46,20 @@ public interface User {
 
   /**
    * returns user's authorizations
-   * 
+   *
    * @return
    */
   default Set<Authorization> authorizations() {
 	return Collections.emptySet();
+  }
+
+
+  /**
+   * Assert that this user object is expired.
+   * @return true if expired
+   */
+  default boolean expired() {
+    return false;
   }
 
   /**
@@ -79,7 +90,7 @@ public interface User {
     isAuthorized(authority, promise);
     return promise.future();
   }
- 
+
   /**
    * The User object will cache any authorities that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.
@@ -108,4 +119,23 @@ public interface User {
    * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
   void setAuthProvider(AuthProvider authProvider);
+
+  /**
+   * Return a HTTP Authorization representation for this User.
+   * @return String conforming: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization
+   */
+  default String httpAuthorization() {
+    final JsonObject principal = principal();
+
+    if (principal.containsKey("username") && principal.containsKey("password")) {
+      Buffer buff = Buffer.buffer()
+        .appendString(principal.getString("username"))
+        .appendString(":")
+        .appendString(principal.getString("password"));
+
+      return new String(Base64.getEncoder().encode(buff.getBytes()));
+    }
+
+    throw new UnsupportedOperationException("This User object doesn't support HTTP Authorization");
+  }
 }
