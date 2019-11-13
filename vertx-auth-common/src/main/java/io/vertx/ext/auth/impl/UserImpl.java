@@ -90,7 +90,7 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   // TODO: remove this method
-  public User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
+  private User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
     Objects.requireNonNull(authorization);
     Objects.requireNonNull(resultHandler);
 
