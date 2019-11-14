@@ -35,6 +35,8 @@ public class JWTUser extends AbstractUser {
 
   private static final Logger log = LoggerFactory.getLogger(JWTUser.class);
 
+  private String credentials;
+
   private JsonObject jwtToken;
   private JsonArray permissions;
 
@@ -44,7 +46,8 @@ public class JWTUser extends AbstractUser {
     log.info("You are probably serializing the JWT User, JWT are supposed to be used in stateless servers!");
   }
 
-  public JWTUser(JsonObject jwtToken, String permissionsClaimKey) {
+  public JWTUser(String credentials, JsonObject jwtToken, String permissionsClaimKey) {
+    this.credentials = credentials;
     this.jwtToken = jwtToken;
 
     if(permissionsClaimKey.contains("/")) {
@@ -101,9 +104,16 @@ public class JWTUser extends AbstractUser {
   @Override
   public void writeToBuffer(Buffer buff) {
     super.writeToBuffer(buff);
-    byte[] bytes = jwtToken.encode().getBytes(StandardCharsets.UTF_8);
+    byte[] bytes;
+
+    bytes = credentials.getBytes(StandardCharsets.UTF_8);
     buff.appendInt(bytes.length);
     buff.appendBytes(bytes);
+
+    bytes = jwtToken.encode().getBytes(StandardCharsets.UTF_8);
+    buff.appendInt(bytes.length);
+    buff.appendBytes(bytes);
+
     if (permissions != null) {
       bytes = permissions.encode().getBytes(StandardCharsets.UTF_8);
       buff.appendInt(bytes.length);
@@ -116,9 +126,18 @@ public class JWTUser extends AbstractUser {
   @Override
   public int readFromBuffer(int pos, Buffer buffer) {
     pos = super.readFromBuffer(pos, buffer);
-    int len = buffer.getInt(pos);
+    int len;
+    byte[] bytes;
+
+    len = buffer.getInt(pos);
     pos += 4;
-    byte[] bytes = buffer.getBytes(pos, pos + len);
+    bytes = buffer.getBytes(pos, pos + len);
+    credentials = new String(bytes, StandardCharsets.UTF_8);
+    pos += len;
+
+    len = buffer.getInt(pos);
+    pos += 4;
+    bytes = buffer.getBytes(pos, pos + len);
     jwtToken = new JsonObject(new String(bytes, StandardCharsets.UTF_8));
     pos += len;
 
@@ -130,5 +149,10 @@ public class JWTUser extends AbstractUser {
       pos += len;
     }
     return pos;
+  }
+
+  @Override
+  public String httpAuthorization() {
+    return "Bearer " + credentials;
   }
 }

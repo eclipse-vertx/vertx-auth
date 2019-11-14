@@ -53,13 +53,29 @@ public interface User {
 	return Collections.emptySet();
   }
 
+  /**
+   * User objects may be created with an implicit expiration time. Such example are token based authentication.
+   * This method will return the time in milliseconds of that event. When a user can't be expired or doesn't
+   * have such information {@code -1} is returned.
+   *
+   * @return the expiration time in "computer time" or {@code -1} if not applicable.
+   */
+  default long expiresAt() {
+    return -1;
+  }
 
   /**
-   * Assert that this user object is expired.
-   * @return true if expired
+   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
+   * the current clock time is post the expiration date.
+   *
+   * Implementations of this interface might relax this rule to account for a leeway to safeguard against
+   * clock drifting.
+   *
+   * @return {@code true} if expired
    */
   default boolean expired() {
-    return false;
+    long expiresAt = expiresAt();
+    return expiresAt > 0 && System.currentTimeMillis() > expiresAt();
   }
 
   /**
@@ -121,7 +137,9 @@ public interface User {
   void setAuthProvider(AuthProvider authProvider);
 
   /**
-   * Return a HTTP Authorization representation for this User.
+   * Return a HTTP Authorization representation for this User. If such representation is not possible,
+   * {@code null} is returned.
+   *
    * @return String conforming: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization
    */
   default String httpAuthorization() {
@@ -133,9 +151,9 @@ public interface User {
         .appendString(":")
         .appendString(principal.getString("password"));
 
-      return new String(Base64.getEncoder().encode(buff.getBytes()));
+      return "Basic " + new String(Base64.getEncoder().encode(buff.getBytes()));
     }
-
-    throw new UnsupportedOperationException("This User object doesn't support HTTP Authorization");
+    // nothing can be inferred from this User
+    return null;
   }
 }
