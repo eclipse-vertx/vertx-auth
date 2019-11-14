@@ -83,7 +83,7 @@ public class UserImpl implements User, ClusterSerializable {
     Objects.requireNonNull(authority);
     Objects.requireNonNull(resultHandler);
 
-    return isAuthorized(authority.startsWith("roles:") ? RoleBasedAuthorization.create(authority.substring(6))
+    return isAuthorized(authority.startsWith("role:") ? RoleBasedAuthorization.create(authority.substring(5))
         : PermissionBasedAuthorization.create(authority), resultHandler);
   }
 
