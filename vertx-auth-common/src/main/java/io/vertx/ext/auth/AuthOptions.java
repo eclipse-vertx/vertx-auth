@@ -21,9 +21,11 @@ import io.vertx.core.Vertx;
 /**
  * A common base object for authentication options.<p>
  *
+ * @deprecated do not use this interface to create a provider, use the provider specific factory.
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject
+@Deprecated
 public interface AuthOptions {
 
   AuthOptions clone();
