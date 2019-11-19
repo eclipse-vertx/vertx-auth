@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth;
 
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Set;
 
@@ -26,7 +25,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.UserImpl;
 
@@ -68,14 +66,26 @@ public interface User {
    * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
    * the current clock time is post the expiration date.
    *
-   * Implementations of this interface might relax this rule to account for a leeway to safeguard against
-   * clock drifting.
-   *
    * @return {@code true} if expired
    */
   default boolean expired() {
+    return expired(0);
+  }
+
+  /**
+   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
+   * the current clock time is post the expiration date.
+   *
+   * Implementations of this interface might relax this rule to account for a leeway to safeguard against
+   * clock drifting.
+   *
+   * @param leeway a greater than zero leeway value.
+   *
+   * @return {@code true} if expired
+   */
+  default boolean expired(int leeway) {
     long expiresAt = expiresAt();
-    return expiresAt > 0 && System.currentTimeMillis() > expiresAt();
+    return expiresAt > 0 && System.currentTimeMillis() - leeway > expiresAt();
   }
 
   /**
@@ -135,25 +145,4 @@ public interface User {
    * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
   void setAuthProvider(AuthProvider authProvider);
-
-  /**
-   * Return a HTTP Authorization representation for this User. If such representation is not possible,
-   * {@code null} is returned.
-   *
-   * @return String conforming: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization
-   */
-  default String httpAuthorization() {
-    final JsonObject principal = principal();
-
-    if (principal.containsKey("username") && principal.containsKey("password")) {
-      Buffer buff = Buffer.buffer()
-        .appendString(principal.getString("username"))
-        .appendString(":")
-        .appendString(principal.getString("password"));
-
-      return "Basic " + new String(Base64.getEncoder().encode(buff.getBytes()));
-    }
-    // nothing can be inferred from this User
-    return null;
-  }
 }

@@ -36,11 +36,6 @@ import io.vertx.ext.auth.User;
 public interface AccessToken extends User {
 
   /**
-   * Check if the access token is expired or not.
-   */
-  boolean expired();
-
-  /**
    * Check if the access token own the required scopes to access to the resource.
    */
   boolean isScopeGranted();

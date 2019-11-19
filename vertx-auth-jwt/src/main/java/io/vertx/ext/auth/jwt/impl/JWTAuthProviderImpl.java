@@ -105,7 +105,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
     try {
-      final String credentials = authInfo.getString("jwt");
       final JsonObject payload = jwt.decode(authInfo.getString("jwt"));
 
       if (jwt.isExpired(payload, jwtOptions)) {
@@ -139,7 +138,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         return;
       }
 
-      resultHandler.handle(Future.succeededFuture(new JWTUser(credentials, payload, permissionsClaimKey)));
+      resultHandler.handle(Future.succeededFuture(new JWTUser(payload, permissionsClaimKey)));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
