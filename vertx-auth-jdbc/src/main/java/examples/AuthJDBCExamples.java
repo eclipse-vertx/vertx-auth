@@ -21,7 +21,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
+import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLConnection;
 
@@ -35,7 +35,7 @@ public class AuthJDBCExamples {
 
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
 
-    JDBCAuthenticationProvider authenticationProvider = JDBCAuthenticationProvider.create(vertx, jdbcClient);
+    JDBCAuthentication authenticationProvider = JDBCAuthentication.create(vertx, jdbcClient);
   }
 
   public void example6(AuthProvider authProvider) {
@@ -75,7 +75,7 @@ public class AuthJDBCExamples {
 
   }
 
-  public void example9(JDBCAuthenticationProvider auth, SQLConnection conn) {
+  public void example9(JDBCAuthentication auth, SQLConnection conn) {
 
     String salt = auth.generateSalt();
     String hash = auth.computeHash("sausages", salt);
@@ -87,11 +87,11 @@ public class AuthJDBCExamples {
     });
   }
 
-  public void example10(JDBCAuthenticationProvider auth) {
+  public void example10(JDBCAuthentication auth) {
     auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
   }
 
-  public void example11(JDBCAuthenticationProvider auth, SQLConnection conn) {
+  public void example11(JDBCAuthentication auth, SQLConnection conn) {
 
     auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
 

@@ -13,12 +13,13 @@ import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider;
+import io.vertx.ext.auth.jdbc.JDBCAuthorization;
+import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
-public class JDBCAuthorizationProviderImpl implements JDBCAuthorizationProvider {
+public class JDBCAuthorizationImpl implements JDBCAuthorization {
   
   /**
    * The default key representing the username in the principal
@@ -40,7 +41,14 @@ public class JDBCAuthorizationProviderImpl implements JDBCAuthorizationProvider 
   private String permissionsQuery;
   private String usernameKey;
   
-  public JDBCAuthorizationProviderImpl(JDBCClient client) {
+  public JDBCAuthorizationImpl(JDBCClient client) {
+    this.client = Objects.requireNonNull(client);
+    this.roleQuery = DEFAULT_ROLES_QUERY;
+    this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
+    this.usernameKey = DEFAULT_USERNAME_KEY;
+  }
+
+  public JDBCAuthorizationImpl(JDBCAuthorizationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.roleQuery = DEFAULT_ROLES_QUERY;
     this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
@@ -130,13 +138,13 @@ public class JDBCAuthorizationProviderImpl implements JDBCAuthorizationProvider 
   }
 
   @Override
-  public JDBCAuthorizationProvider setRolesQuery(String rolesQuery) {
+  public JDBCAuthorization setRolesQuery(String rolesQuery) {
     this.roleQuery = rolesQuery;
     return this;
   }
 
   @Override
-  public JDBCAuthorizationProvider setPermissionsQuery(String permissionsQuery) {
+  public JDBCAuthorization setPermissionsQuery(String permissionsQuery) {
     this.permissionsQuery = permissionsQuery;
     return this;
   }

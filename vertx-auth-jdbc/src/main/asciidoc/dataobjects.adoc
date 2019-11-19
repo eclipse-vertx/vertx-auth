@@ -1,7 +1,7 @@
 = Cheatsheets
 
-[[JDBCAuthOptions]]
-== JDBCAuthOptions
+[[JDBCAuthenticationOptions]]
+== JDBCAuthenticationOptions
 
 ++++
  Options configuring JDBC authentication.
@@ -21,14 +21,33 @@ The configuration of the JDBC client: refer to the Vert.x JDBC Client configurat
 |[[datasourceName]]`@datasourceName`|`String`|+++
 Set the data source name to use, only use in shared mode.
 +++
-|[[permissionsQuery]]`@permissionsQuery`|`String`|+++
-Set the permissions query to use. Use this if you want to override the default permissions query.
+|[[shared]]`@shared`|`Boolean`|+++
+Set whether the JDBC client is shared or non shared.
 +++
-|[[rolesPrefix]]`@rolesPrefix`|`String`|+++
-Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+|===
+
+[[JDBCAuthorizationOptions]]
+== JDBCAuthorizationOptions
+
+++++
+ Options configuring JDBC authorization
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[datasourceName]]`@datasourceName`|`String`|+++
+Set the data source name to use, only use in shared mode.
++++
+|[[permissionsQuery]]`@permissionsQuery`|`String`|+++
+Set the permissions query to use. Use this if you want to override the
+ default permissions query.
 +++
 |[[rolesQuery]]`@rolesQuery`|`String`|+++
-Set the roles query to use. Use this if you want to override the default roles query.
+Set the roles query to use. Use this if you want to override the default
+ roles query.
 +++
 |[[shared]]`@shared`|`Boolean`|+++
 Set whether the JDBC client is shared or non shared.

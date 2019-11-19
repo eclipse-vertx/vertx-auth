@@ -19,7 +19,7 @@ package io.vertx.ext.auth.jdbc;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.AuthorizationProvider;
-import io.vertx.ext.auth.jdbc.impl.JDBCAuthorizationProviderImpl;
+import io.vertx.ext.auth.jdbc.impl.JDBCAuthorizationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
@@ -28,16 +28,26 @@ import io.vertx.ext.jdbc.JDBCClient;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 @VertxGen
-public interface JDBCAuthorizationProvider extends AuthorizationProvider {
+public interface JDBCAuthorization extends AuthorizationProvider {
 
   /**
    * Create a JDBC authorization provider implementation
    *
-   * @param client  the JDBC client instance
+   * @param client the JDBC client instance
    * @return  the auth provider
    */
-  static JDBCAuthorizationProvider create(JDBCClient client) {
-    return new JDBCAuthorizationProviderImpl(client);
+  static JDBCAuthorization create(JDBCClient client) {
+    return new JDBCAuthorizationImpl(client);
+  }
+
+  /**
+   * Create a JDBC authorization provider implementation
+   *
+   * @param options JDBCAuthorizationOptions
+   * @return  the auth provider
+   */
+  static JDBCAuthorization create(JDBCAuthorizationOptions options) {
+    return new JDBCAuthorizationImpl(options);
   }
 
   /**
@@ -46,7 +56,7 @@ public interface JDBCAuthorizationProvider extends AuthorizationProvider {
    * @return  a reference to this for fluency
    */
   @Fluent
-  JDBCAuthorizationProvider setRolesQuery(String rolesQuery);
+  JDBCAuthorization setRolesQuery(String rolesQuery);
 
   /**
    * Set the permissions query to use. Use this if you want to override the default permissions query.
@@ -54,6 +64,6 @@ public interface JDBCAuthorizationProvider extends AuthorizationProvider {
    * @return  a reference to this for fluency
    */
   @Fluent
-  JDBCAuthorizationProvider setPermissionsQuery(String permissionsQuery);
+  JDBCAuthorization setPermissionsQuery(String permissionsQuery);
 
 }

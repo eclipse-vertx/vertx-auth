@@ -38,8 +38,8 @@ import java.util.List;
  * @author mremme
  */
 public class MongoAuthImpl implements MongoAuth {
-  final static String PROPERTY_FIELD_SALT = "__field.salt__";
-  final static String PROPERTY_FIELD_PASSWORD = "__field.password__";
+  final static String PROPERTY_FIELD_SALT = "__field-salt__";
+  final static String PROPERTY_FIELD_PASSWORD = "__field-password__";
   private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
   private MongoClient mongoClient;
   private String usernameField = DEFAULT_USERNAME_FIELD;

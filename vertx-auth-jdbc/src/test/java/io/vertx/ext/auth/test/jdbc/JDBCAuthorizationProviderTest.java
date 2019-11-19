@@ -29,7 +29,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider;
+import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -61,7 +61,7 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     SQL.add("insert into roles_perms2 values ('admin', 'merge_pr');");
   }
 
-  private JDBCAuthorizationProvider authorizationProvider;
+  private JDBCAuthorization authorizationProvider;
 
   @Override
   public void setUp() throws Exception {
@@ -77,9 +77,9 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     }
   }
 
-  protected JDBCAuthorizationProvider getAuthorizationProvider() {
+  protected JDBCAuthorization getAuthorizationProvider() {
     if (authorizationProvider == null) {
-      authorizationProvider = JDBCAuthorizationProvider.create(getJDBCCLient());
+      authorizationProvider = JDBCAuthorization.create(getJDBCCLient());
     }
     return authorizationProvider;
   }

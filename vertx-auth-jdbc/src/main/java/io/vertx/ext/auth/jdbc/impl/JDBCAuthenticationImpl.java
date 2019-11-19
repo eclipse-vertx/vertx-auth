@@ -24,7 +24,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
+import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
@@ -33,7 +33,7 @@ import io.vertx.ext.sql.SQLConnection;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvider {
+public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
   /**
    * The default query to be used for authentication
@@ -44,7 +44,7 @@ public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvide
   private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
   private JDBCHashStrategy strategy;
 
-  public JDBCAuthenticationProviderImpl(Vertx vertx, JDBCClient client) {
+  public JDBCAuthenticationImpl(Vertx vertx, JDBCClient client) {
     this.client = client;
     // default strategy
     strategy = JDBCHashStrategy.createSHA512(vertx);
@@ -112,13 +112,13 @@ public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvide
   }
 
   @Override
-  public JDBCAuthenticationProvider setAuthenticationQuery(String authenticationQuery) {
+  public JDBCAuthentication setAuthenticationQuery(String authenticationQuery) {
     this.authenticateQuery = authenticationQuery;
     return this;
   }
 
   @Override
-  public JDBCAuthenticationProvider setHashStrategy(JDBCHashStrategy strategy) {
+  public JDBCAuthentication setHashStrategy(JDBCHashStrategy strategy) {
     this.strategy = strategy;
     return this;
   }
@@ -149,7 +149,7 @@ public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvide
   }
 
   @Override
-  public JDBCAuthenticationProvider setNonces(JsonArray nonces) {
+  public JDBCAuthentication setNonces(JsonArray nonces) {
     strategy.setNonces(nonces);
     return this;
   }
