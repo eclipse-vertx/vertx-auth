@@ -20,7 +20,7 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationProviderImpl;
+import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
@@ -33,7 +33,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
-public interface JDBCAuthenticationProvider extends AuthProvider {
+public interface JDBCAuthentication extends AuthProvider {
 
   /**
    * Create a JDBC auth provider implementation
@@ -41,11 +41,39 @@ public interface JDBCAuthenticationProvider extends AuthProvider {
    * @param client  the JDBC client instance
    * @return  the auth provider
    */
+<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/JDBCAuthenticationProvider.java
   static JDBCAuthenticationProvider create(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
     return new JDBCAuthenticationProviderImpl(client, hashStrategy, options);
   }
 
   /**
+=======
+  static JDBCAuthentication create(Vertx vertx, JDBCClient client) {
+    return new JDBCAuthenticationImpl(vertx, client);
+  }
+
+  /**
+   * Set the authentication query to use. Use this if you want to override the default authentication query.
+   * @deprecated replaced by {@link JDBCAuthenticationOptions}
+   * @param authenticationQuery  the authentication query
+   * @return  a reference to this for fluency
+   */
+  @Fluent
+  @Deprecated
+  JDBCAuthentication setAuthenticationQuery(String authenticationQuery);
+
+  /**
+   * Set the hash strategy to use. Use this if you want override the default hash strategy
+   * @deprecated replaced by {@link JDBCAuthenticationOptions}
+   * @param strategy  the strategy
+   * @return a reference to this for fluency
+   */
+  @GenIgnore
+  @Deprecated
+  JDBCAuthentication setHashStrategy(JDBCHashStrategy strategy);
+
+  /**
+>>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/JDBCAuthentication.java
    * Compute the hashed password given the unhashed password and the salt without nonce
    *
    * The implementation relays to the JDBCHashStrategy provided.
@@ -91,9 +119,11 @@ public interface JDBCAuthenticationProvider extends AuthProvider {
    *
    * The implementation relays to the JDBCHashStrategy provided.
    *
+   * @deprecated replaced by {@link JDBCAuthenticationOptions}
    * @param nonces a List of non null Strings.
    * @return a reference to this for fluency
    */
   @Fluent
-  JDBCAuthenticationProvider setNonces(JsonArray nonces);
+  @Deprecated
+  JDBCAuthentication setNonces(JsonArray nonces);
 }

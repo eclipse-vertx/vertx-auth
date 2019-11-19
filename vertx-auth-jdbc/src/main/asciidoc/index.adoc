@@ -26,7 +26,7 @@ compile 'io.vertx:vertx-auth-jdbc:${maven.version}'
 To create an instance you first need an instance of {@link io.vertx.ext.jdbc.JDBCClient}. To learn how to create one
 of those please consult the documentation for the JDBC client.
 
-Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider} instance as follows:
+Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuthentication} instance as follows:
 
 [source,$lang]
 ----
@@ -35,10 +35,17 @@ Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBC
 
 Once you've got your instance you can authenticate and authorize with it just like any {@link io.vertx.ext.auth.AuthProvider}.
 
+<<<<<<< HEAD
 The out of the box config assumes certain queries for authentication and authorization, these can easily be changed
 with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setAuthenticationQuery(String)},
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setPermissionsQuery(String)} and
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different
+=======
+The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
+with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#setAuthenticationQuery(String)},
+{@link io.vertx.ext.auth.jdbc.JDBCAuthorization#setPermissionsQuery(String)} and
+{@link io.vertx.ext.auth.jdbc.JDBCAuthorization#setRolesQuery(String)}, if you want to use them with a different
+>>>>>>> updated code based on comments from Paulo:
 database schema.
 
 The {@link io.vertx.ext.auth.jdbc.JDBCHashStrategy} is a required parameter to build the {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider}
@@ -82,6 +89,11 @@ the usage of stronger algorithms, for this case you can use the PBKDF2 strategy 
 WARNING: If you already have a running application switching the strategies will make break your existing
 passwords, so you will need to migrate the passwords from one algorithm to the second.
 
+<<<<<<< HEAD
+=======
+If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
+{@link io.vertx.ext.auth.jdbc.JDBCAuthentication#setHashStrategy(JDBCHashStrategy)}.
+>>>>>>> updated code based on comments from Paulo:
 
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised

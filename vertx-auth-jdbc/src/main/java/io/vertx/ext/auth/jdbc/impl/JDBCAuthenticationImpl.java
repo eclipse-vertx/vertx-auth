@@ -26,8 +26,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
+<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationProviderImpl.java
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
+=======
+import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+>>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationImpl.java
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
@@ -36,16 +40,23 @@ import io.vertx.ext.sql.SQLConnection;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvider {
+public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
   private JDBCClient client;
   private JDBCHashStrategy strategy;
   private JDBCAuthenticationOptions options;
 
+<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationProviderImpl.java
   public JDBCAuthenticationProviderImpl(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.strategy = Objects.requireNonNull(hashStrategy);
     this.options = Objects.requireNonNull(options);
+=======
+  public JDBCAuthenticationImpl(Vertx vertx, JDBCClient client) {
+    this.client = client;
+    // default strategy
+    strategy = JDBCHashStrategy.createSHA512(vertx);
+>>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationImpl.java
   }
 
   @Override
@@ -109,6 +120,21 @@ public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvide
     });
   }
 
+<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationProviderImpl.java
+=======
+  @Override
+  public JDBCAuthentication setAuthenticationQuery(String authenticationQuery) {
+    this.authenticateQuery = authenticationQuery;
+    return this;
+  }
+
+  @Override
+  public JDBCAuthentication setHashStrategy(JDBCHashStrategy strategy) {
+    this.strategy = strategy;
+    return this;
+  }
+
+>>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationImpl.java
   void executeQuery(String query, JsonArray params, Handler<AsyncResult<ResultSet>> resultHandler) {
     client.getConnection(res -> {
       if (res.succeeded()) {
@@ -135,7 +161,7 @@ public class JDBCAuthenticationProviderImpl implements JDBCAuthenticationProvide
   }
 
   @Override
-  public JDBCAuthenticationProvider setNonces(JsonArray nonces) {
+  public JDBCAuthentication setNonces(JsonArray nonces) {
     strategy.setNonces(nonces);
     return this;
   }

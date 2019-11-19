@@ -26,9 +26,13 @@ import org.junit.Test;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+<<<<<<< HEAD
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
+=======
+import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+>>>>>>> updated code based on comments from Paulo:
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.test.core.VertxTestBase;
 
@@ -93,8 +97,12 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
         "org.hsqldb.jdbcDriver");
   }
 
+<<<<<<< HEAD
   private JDBCAuthenticationProvider authenticationProvider;
   private JDBCAuthenticationOptions authenticationOptions;
+=======
+  private JDBCAuthentication authenticationProvider;
+>>>>>>> updated code based on comments from Paulo:
   private JDBCClient jdbcClient;
 
   @Override
@@ -116,9 +124,13 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
     return jdbcClient;
   }
 
-  protected JDBCAuthenticationProvider getAuthenticationProvider() {
+  protected JDBCAuthentication getAuthenticationProvider() {
     if (authenticationProvider == null) {
+<<<<<<< HEAD
       authenticationProvider = JDBCAuthenticationProvider.create(getJDBCCLient(), JDBCHashStrategy.createSHA512(vertx), new JDBCAuthenticationOptions())
+=======
+      authenticationProvider = JDBCAuthentication.create(vertx, getJDBCCLient())
+>>>>>>> updated code based on comments from Paulo:
           .setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
     }
     return authenticationProvider;

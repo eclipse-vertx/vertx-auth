@@ -15,13 +15,29 @@
 |[[authenticationQuery]]`@authenticationQuery`|`String`|+++
 Set the authentication query to use. Use this if you want to override the default authentication query.
 +++
+<<<<<<< HEAD
+=======
+|[[config]]`@config`|`Json object`|+++
+The configuration of the JDBC client: refer to the Vert.x JDBC Client configuration.
++++
+|[[datasourceName]]`@datasourceName`|`String`|+++
+Set the data source name to use, only use in shared mode.
++++
+|[[shared]]`@shared`|`Boolean`|+++
+Set whether the JDBC client is shared or non shared.
++++
+>>>>>>> updated code based on comments from Paulo:
 |===
 
 [[JDBCAuthorizationOptions]]
 == JDBCAuthorizationOptions
 
 ++++
+<<<<<<< HEAD
  Options configuring JDBC authentication.
+=======
+ Options configuring JDBC authorization
+>>>>>>> updated code based on comments from Paulo:
 ++++
 '''
 
@@ -29,11 +45,22 @@ Set the authentication query to use. Use this if you want to override the defaul
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+<<<<<<< HEAD
 |[[permissionsQuery]]`@permissionsQuery`|`String`|+++
 Set the permissions query to use. Use this if you want to override the default permissions query.
 +++
+=======
+|[[datasourceName]]`@datasourceName`|`String`|+++
+Set the data source name to use, only use in shared mode.
++++
+|[[permissionsQuery]]`@permissionsQuery`|`String`|+++
+Set the permissions query to use. Use this if you want to override the
+ default permissions query.
++++
+>>>>>>> updated code based on comments from Paulo:
 |[[rolesQuery]]`@rolesQuery`|`String`|+++
-Set the roles query to use. Use this if you want to override the default roles query.
+Set the roles query to use. Use this if you want to override the default
+ roles query.
 +++
 |===
 

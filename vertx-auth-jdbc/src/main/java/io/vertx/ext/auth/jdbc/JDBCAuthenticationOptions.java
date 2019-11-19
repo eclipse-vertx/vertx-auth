@@ -18,6 +18,10 @@ package io.vertx.ext.auth.jdbc;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+<<<<<<< HEAD
+=======
+import io.vertx.ext.auth.AuthOptions;
+>>>>>>> updated code based on comments from Paulo:
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
@@ -26,6 +30,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
+<<<<<<< HEAD
 public class JDBCAuthenticationOptions {
 
   /**
@@ -37,6 +42,24 @@ public class JDBCAuthenticationOptions {
 
   public JDBCAuthenticationOptions() {
     this.authenticationQuery = DEFAULT_AUTHENTICATE_QUERY;
+=======
+public class JDBCAuthenticationOptions implements AuthOptions {
+
+  private boolean shared;
+  private String datasourceName;
+  private String authenticationQuery;
+  private JsonObject config;
+
+  public JDBCAuthenticationOptions() {
+    this.shared = true;
+    this.config = null;
+  }
+
+  public JDBCAuthenticationOptions(JDBCAuthenticationOptions that) {
+    shared = that.shared;
+    datasourceName = that.datasourceName;
+    config = that.config != null ? that.config.copy() : null;
+>>>>>>> updated code based on comments from Paulo:
   }
 
   public JDBCAuthenticationOptions(JsonObject json) {
@@ -44,6 +67,78 @@ public class JDBCAuthenticationOptions {
     JDBCAuthenticationOptionsConverter.fromJson(json, this);
   }
 
+<<<<<<< HEAD
+=======
+  @Override
+  public JDBCAuthenticationOptions clone() {
+    return new JDBCAuthenticationOptions(this);
+  }
+
+  @Override
+  public JDBCAuthentication createProvider(Vertx vertx) {
+    JDBCClient client;
+    if (shared) {
+      if (datasourceName != null) {
+        client = JDBCClient.createShared(vertx, config, datasourceName);
+      } else {
+        client = JDBCClient.createShared(vertx, config);
+      }
+    } else {
+      client = JDBCClient.createNonShared(vertx, config);
+    }
+    JDBCAuthentication auth = JDBCAuthentication.create(vertx, client);
+    if (authenticationQuery != null) {
+      auth.setAuthenticationQuery(authenticationQuery);
+    }
+    return auth;
+  }
+
+  public boolean isShared() {
+    return shared;
+  }
+
+  /**
+   * Set whether the JDBC client is shared or non shared.
+   *
+   * @param shared the sharing mode
+   * @return a reference to this, so the API can be used fluently
+   */
+  public JDBCAuthenticationOptions setShared(boolean shared) {
+    this.shared = shared;
+    return this;
+  }
+
+  public String getDatasourceName() {
+    return datasourceName;
+  }
+
+  /**
+   * Set the data source name to use, only use in shared mode.
+   *
+   * @param datasourceName the data source name
+   * @return a reference to this, so the API can be used fluently
+   */
+  public JDBCAuthenticationOptions setDatasourceName(String datasourceName) {
+    this.datasourceName = datasourceName;
+    return this;
+  }
+
+  public JsonObject getConfig() {
+    return config;
+  }
+
+  /**
+   * The configuration of the JDBC client: refer to the Vert.x JDBC Client configuration.
+   *
+   * @param config
+   * @return a reference to this, so the API can be used fluently
+   */
+  public JDBCAuthenticationOptions setConfig(JsonObject config) {
+    this.config = config;
+    return this;
+  }
+
+>>>>>>> updated code based on comments from Paulo:
   public String getAuthenticationQuery() {
     return authenticationQuery;
   }
@@ -58,5 +153,9 @@ public class JDBCAuthenticationOptions {
     this.authenticationQuery = authenticationQuery;
     return this;
   }
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> updated code based on comments from Paulo:
 }

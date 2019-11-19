@@ -27,8 +27,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+<<<<<<< HEAD
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider;
+=======
+import io.vertx.ext.auth.jdbc.JDBCAuthorization;
+>>>>>>> updated code based on comments from Paulo:
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -60,8 +64,12 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     SQL.add("insert into roles_perms2 values ('admin', 'merge_pr');");
   }
 
+<<<<<<< HEAD
   private JDBCAuthorizationProvider authorizationProvider;
   private JDBCAuthorizationOptions authorizationOptions;
+=======
+  private JDBCAuthorization authorizationProvider;
+>>>>>>> updated code based on comments from Paulo:
 
   @Override
   public void setUp() throws Exception {
@@ -77,6 +85,7 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     }
   }
 
+<<<<<<< HEAD
   protected JDBCAuthorizationOptions getAuthorizationOptions() {
     if (authorizationOptions==null) {
       authorizationOptions = new JDBCAuthorizationOptions();
@@ -87,6 +96,11 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   protected JDBCAuthorizationProvider getAuthorizationProvider() {
     if (authorizationProvider == null) {
       authorizationProvider = JDBCAuthorizationProvider.create("jdbc", getJDBCCLient(), getAuthorizationOptions());
+=======
+  protected JDBCAuthorization getAuthorizationProvider() {
+    if (authorizationProvider == null) {
+      authorizationProvider = JDBCAuthorization.create(getJDBCCLient());
+>>>>>>> updated code based on comments from Paulo:
     }
     return authorizationProvider;
   }

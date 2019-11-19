@@ -20,6 +20,24 @@ public class JDBCAuthenticationOptionsConverter {
             obj.setAuthenticationQuery((String)member.getValue());
           }
           break;
+<<<<<<< HEAD
+=======
+        case "config":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setConfig(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "datasourceName":
+          if (member.getValue() instanceof String) {
+            obj.setDatasourceName((String)member.getValue());
+          }
+          break;
+        case "shared":
+          if (member.getValue() instanceof Boolean) {
+            obj.setShared((Boolean)member.getValue());
+          }
+          break;
+>>>>>>> updated code based on comments from Paulo:
       }
     }
   }
@@ -32,5 +50,15 @@ public class JDBCAuthenticationOptionsConverter {
     if (obj.getAuthenticationQuery() != null) {
       json.put("authenticationQuery", obj.getAuthenticationQuery());
     }
+<<<<<<< HEAD
+=======
+    if (obj.getConfig() != null) {
+      json.put("config", obj.getConfig());
+    }
+    if (obj.getDatasourceName() != null) {
+      json.put("datasourceName", obj.getDatasourceName());
+    }
+    json.put("shared", obj.isShared());
+>>>>>>> updated code based on comments from Paulo:
   }
 }
