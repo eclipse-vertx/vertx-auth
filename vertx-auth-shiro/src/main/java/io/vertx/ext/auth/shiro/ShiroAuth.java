@@ -16,13 +16,13 @@
 
 package io.vertx.ext.auth.shiro;
 
+import org.apache.shiro.realm.Realm;
+
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthProviderImpl;
-import org.apache.shiro.realm.Realm;
 
 /**
  * Factory interface for creating Apache Shiro based {@link io.vertx.ext.auth.AuthProvider} instances.
@@ -31,11 +31,6 @@ import org.apache.shiro.realm.Realm;
  */
 @VertxGen
 public interface ShiroAuth extends AuthProvider {
-
-  /**
-   * The default role prefix
-   */
-  String DEFAULT_ROLE_PREFIX = "role:";
 
   /**
    * Create a Shiro auth provider
@@ -57,12 +52,5 @@ public interface ShiroAuth extends AuthProvider {
   static ShiroAuth create(Vertx vertx, ShiroAuthOptions options) {
     return ShiroAuthProviderImpl.create(vertx, options);
   }
-
-  /**
-   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
-   * @param rolePrefix a Prefix e.g.: "role:"
-   * @return a reference to this for fluency
-   */
-  ShiroAuth setRolePrefix(String rolePrefix);
 
 }
