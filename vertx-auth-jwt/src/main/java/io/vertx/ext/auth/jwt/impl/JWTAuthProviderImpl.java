@@ -15,6 +15,16 @@
  */
 package io.vertx.ext.auth.jwt.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.List;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -25,6 +35,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -32,16 +43,6 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.jwt.JWTOptions;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Paulo Lopes
@@ -138,7 +139,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         return;
       }
 
-      resultHandler.handle(Future.succeededFuture(new JWTUser(payload, permissionsClaimKey)));
+      resultHandler.handle(Future.succeededFuture(createUser(payload, permissionsClaimKey)));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
@@ -156,4 +157,45 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
     return jwt.sign(_claims, options);
   }
+
+  private final static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
+    if (permissionsClaimKey.contains("/")) {
+      return getNestedJsonValue(jwtToken, permissionsClaimKey);
+    }
+    return jwtToken.getJsonArray(permissionsClaimKey, null);
+  }
+
+  private User createUser(JsonObject jwtToken, String permissionsClaimKey) {
+    User result = User.create(jwtToken);
+    JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
+    if (jsonPermissions != null) {
+      for (Object item : jsonPermissions) {
+        if (item instanceof String) {
+          String permission = (String) item;
+          result.authorizations().add(PermissionBasedAuthorization.create(permission));
+        }
+      }
+    }
+    return result;
+  }
+
+  private final static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
+    String[] keys = permissionsClaimKey.split("/");
+    JsonObject obj = null;
+    for (int i = 0; i < keys.length; i++) {
+      if (i == 0) {
+        obj = jwtToken.getJsonObject(keys[i]);
+      } else if (i == keys.length - 1) {
+        if (obj != null) {
+          return obj.getJsonArray(keys[i]);
+        }
+      } else {
+        if (obj != null) {
+          obj = obj.getJsonObject(keys[i]);
+        }
+      }
+    }
+    return null;
+  }
+
 }
