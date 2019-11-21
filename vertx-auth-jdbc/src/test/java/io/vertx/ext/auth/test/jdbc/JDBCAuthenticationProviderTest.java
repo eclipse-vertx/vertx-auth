@@ -27,6 +27,8 @@ import org.junit.Test;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.test.core.VertxTestBase;
 
@@ -91,7 +93,9 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
         "org.hsqldb.jdbcDriver");
   }
 
+  private JDBCHashStrategy jdbcHashStrategy;
   private JDBCAuthentication authenticationProvider;
+  private JDBCAuthenticationOptions authenticationOptions;
   private JDBCClient jdbcClient;
 
   @Override
@@ -105,13 +109,27 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
     }
     return jdbcClient;
   }
-
+  
+  protected JDBCHashStrategy getHashStrategy() {
+    if (jdbcHashStrategy==null) {
+      jdbcHashStrategy = JDBCHashStrategy.createSHA512(vertx);
+      jdbcHashStrategy.setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
+    }
+    return jdbcHashStrategy;
+  }
+  
   protected JDBCAuthentication getAuthenticationProvider() {
     if (authenticationProvider == null) {
-      authenticationProvider = JDBCAuthentication.create(vertx, getJDBCCLient())
-          .setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
+      authenticationProvider = JDBCAuthentication.create(getJDBCCLient(), getHashStrategy(), new JDBCAuthenticationOptions());
     }
     return authenticationProvider;
+  }
+
+  protected JDBCAuthenticationOptions getAuthenticationOptions() {
+    if (authenticationOptions == null) {
+      authenticationOptions = new JDBCAuthenticationOptions();
+    }
+    return authenticationOptions;
   }
 
   @Override

@@ -25,33 +25,14 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
    * The default key representing the username in the principal
    */
   private final static String DEFAULT_USERNAME_KEY = "username";
-  
-  /**
-   * The default query to retrieve all roles for the user
-   */
-  private final static String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
-
-  /**
-   * The default query to retrieve all permissions for the role
-   */
-  private final static String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
-  
+    
   private JDBCClient client;
-  private String roleQuery;
-  private String permissionsQuery;
   private String usernameKey;
+  private JDBCAuthorizationOptions options;
   
-  public JDBCAuthorizationImpl(JDBCClient client) {
+  public JDBCAuthorizationImpl(JDBCClient client, JDBCAuthorizationOptions options) {
     this.client = Objects.requireNonNull(client);
-    this.roleQuery = DEFAULT_ROLES_QUERY;
-    this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
-    this.usernameKey = DEFAULT_USERNAME_KEY;
-  }
-
-  public JDBCAuthorizationImpl(JDBCAuthorizationOptions options) {
-    this.client = Objects.requireNonNull(client);
-    this.roleQuery = DEFAULT_ROLES_QUERY;
-    this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
+    this.options = Objects.requireNonNull(options);
     this.usernameKey = DEFAULT_USERNAME_KEY;
   }
 
@@ -62,8 +43,8 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
 
   private void getRoles(SQLConnection sqlConnection, JsonArray params,
       Handler<AsyncResult<Set<Authorization>>> resultHandler) {
-    if (roleQuery != null) {
-      sqlConnection.queryWithParams(roleQuery, params, queryResponse -> {
+    if (options.getRolesQuery() != null) {
+      sqlConnection.queryWithParams(options.getRolesQuery(), params, queryResponse -> {
         if (queryResponse.succeeded()) {
           Set<Authorization> authorizations = new HashSet<>();
           ResultSet resultSet = queryResponse.result();
@@ -83,8 +64,8 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
 
   private void getPermissions(SQLConnection sqlConnection, JsonArray params,
       Handler<AsyncResult<Set<Authorization>>> resultHandler) {
-    if (permissionsQuery != null) {
-      sqlConnection.queryWithParams(permissionsQuery, params, queryResponse -> {
+    if (options.getPermissionsQuery() != null) {
+      sqlConnection.queryWithParams(options.getPermissionsQuery(), params, queryResponse -> {
         if (queryResponse.succeeded()) {
           Set<Authorization> authorizations = new HashSet<>();
           ResultSet resultSet = queryResponse.result();
@@ -135,18 +116,6 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
         resultHandler.handle(Future.failedFuture(connectionResponse.cause()));
       }
     });
-  }
-
-  @Override
-  public JDBCAuthorization setRolesQuery(String rolesQuery) {
-    this.roleQuery = rolesQuery;
-    return this;
-  }
-
-  @Override
-  public JDBCAuthorization setPermissionsQuery(String permissionsQuery) {
-    this.permissionsQuery = permissionsQuery;
-    return this;
   }
   
 }

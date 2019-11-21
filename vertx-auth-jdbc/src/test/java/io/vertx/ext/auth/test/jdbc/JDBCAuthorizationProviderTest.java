@@ -18,8 +18,6 @@ package io.vertx.ext.auth.test.jdbc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +28,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
+import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -62,12 +61,13 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   }
 
   private JDBCAuthorization authorizationProvider;
+  private JDBCAuthorizationOptions authorizationOptions;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
   }
-  
+
   @BeforeClass
   public static void createDb() throws Exception {
     Connection conn = DriverManager.getConnection(config().getString("url"));
@@ -77,9 +77,16 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     }
   }
 
+  protected JDBCAuthorizationOptions getAuthorizationOptions() {
+    if (authorizationOptions == null) {
+      authorizationOptions = new JDBCAuthorizationOptions();
+    }
+    return authorizationOptions;
+  }
+
   protected JDBCAuthorization getAuthorizationProvider() {
     if (authorizationProvider == null) {
-      authorizationProvider = JDBCAuthorization.create(getJDBCCLient());
+      authorizationProvider = JDBCAuthorization.create(getJDBCCLient(), new JDBCAuthorizationOptions());
     }
     return authorizationProvider;
   }

@@ -36,9 +36,9 @@ Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBC
 Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
 
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
-with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#setAuthenticationQuery(String)},
-{@link io.vertx.ext.auth.jdbc.JDBCAuthorization#setPermissionsQuery(String)} and
-{@link io.vertx.ext.auth.jdbc.JDBCAuthorization#setRolesQuery(String)}, if you want to use them with a different
+with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setAuthenticationQuery(String)},
+{@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setPermissionsQuery(String)} and
+{@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different
 database schema.
 
 The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
@@ -75,14 +75,14 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFEREN
 ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES roles_perms(role);
 ----
 
-The current password hashing strategy is based on the SHA-512 algorithm. OWASP as of 2018-01-08 recommends
+== Hashing Strategy
+
+THe hashing strategy is now required to instantiate JDBCAuthentication {@link {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)} 
+You have the choice between SHA-512 or PBKDF2. Note that as of 2018-01-08 OWASP recommends
 the usage of stronger algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
 
 WARNING: If you already have a running application switching the strategies will make break your existing
 passwords, so you will need to migrate the passwords from one algorithm to the second.
-
-If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
-{@link io.vertx.ext.auth.jdbc.JDBCAuthentication#setHashStrategy(JDBCHashStrategy)}.
 
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised

@@ -15,11 +15,6 @@ public class JDBCAuthorizationOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JDBCAuthorizationOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "datasourceName":
-          if (member.getValue() instanceof String) {
-            obj.setDatasourceName((String)member.getValue());
-          }
-          break;
         case "permissionsQuery":
           if (member.getValue() instanceof String) {
             obj.setPermissionsQuery((String)member.getValue());
@@ -28,11 +23,6 @@ public class JDBCAuthorizationOptionsConverter {
         case "rolesQuery":
           if (member.getValue() instanceof String) {
             obj.setRolesQuery((String)member.getValue());
-          }
-          break;
-        case "shared":
-          if (member.getValue() instanceof Boolean) {
-            obj.setShared((Boolean)member.getValue());
           }
           break;
       }
@@ -44,15 +34,11 @@ public class JDBCAuthorizationOptionsConverter {
   }
 
   public static void toJson(JDBCAuthorizationOptions obj, java.util.Map<String, Object> json) {
-    if (obj.getDatasourceName() != null) {
-      json.put("datasourceName", obj.getDatasourceName());
-    }
     if (obj.getPermissionsQuery() != null) {
       json.put("permissionsQuery", obj.getPermissionsQuery());
     }
     if (obj.getRolesQuery() != null) {
       json.put("rolesQuery", obj.getRolesQuery());
     }
-    json.put("shared", obj.isShared());
   }
 }

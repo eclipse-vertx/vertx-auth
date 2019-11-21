@@ -28,7 +28,7 @@ public class OverrideSQLTest extends JDBCAuthorizationProviderTest {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    getAuthenticationProvider().setAuthenticationQuery(AUTHENTICATION_QUERY_OVERRIDE);
-    getAuthorizationProvider().setRolesQuery(ROLES_QUERY_OVERRIDE).setPermissionsQuery(PERMISSIONS_QUERY_OVERRIDE);
+    getAuthenticationOptions().setAuthenticationQuery(AUTHENTICATION_QUERY_OVERRIDE);
+    getAuthorizationOptions().setRolesQuery(ROLES_QUERY_OVERRIDE).setPermissionsQuery(PERMISSIONS_QUERY_OVERRIDE);
   }
 }

@@ -16,15 +16,17 @@
 
 package io.vertx.ext.auth.jdbc.impl;
 
+import java.util.Objects;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
@@ -35,19 +37,14 @@ import io.vertx.ext.sql.SQLConnection;
  */
 public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
-  /**
-   * The default query to be used for authentication
-   */
-  private final static String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD, PASSWORD_SALT FROM USER WHERE USERNAME = ?";
-
   private JDBCClient client;
-  private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
+  private JDBCAuthenticationOptions options;
   private JDBCHashStrategy strategy;
 
-  public JDBCAuthenticationImpl(Vertx vertx, JDBCClient client) {
-    this.client = client;
-    // default strategy
-    strategy = JDBCHashStrategy.createSHA512(vertx);
+  public JDBCAuthenticationImpl(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
+    this.client = Objects.requireNonNull(client);
+    this.options = Objects.requireNonNull(options);
+    this.strategy = Objects.requireNonNull(hashStrategy);
   }
 
   @Override
@@ -63,7 +60,7 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
       resultHandler.handle(Future.failedFuture("authInfo must contain password in 'password' field"));
       return;
     }
-    executeQuery(authenticateQuery, new JsonArray().add(username), queryResponse -> {
+    executeQuery(options.getAuthenticationQuery(), new JsonArray().add(username), queryResponse -> {
       if (queryResponse.succeeded()) {
         ResultSet rs = queryResponse.result();
         switch (rs.getNumRows()) {
@@ -111,18 +108,6 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
     });
   }
 
-  @Override
-  public JDBCAuthentication setAuthenticationQuery(String authenticationQuery) {
-    this.authenticateQuery = authenticationQuery;
-    return this;
-  }
-
-  @Override
-  public JDBCAuthentication setHashStrategy(JDBCHashStrategy strategy) {
-    this.strategy = strategy;
-    return this;
-  }
-
   void executeQuery(String query, JsonArray params, Handler<AsyncResult<ResultSet>> resultHandler) {
     client.getConnection(res -> {
       if (res.succeeded()) {
@@ -136,22 +121,6 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
         resultHandler.handle(Future.failedFuture(res.cause()));
       }
     });
-  }
-
-  @Override
-  public String computeHash(String password, String salt, int version) {
-    return strategy.computeHash(password, salt, version);
-  }
-
-  @Override
-  public String generateSalt() {
-    return strategy.generateSalt();
-  }
-
-  @Override
-  public JDBCAuthentication setNonces(JsonArray nonces) {
-    strategy.setNonces(nonces);
-    return this;
   }
 
 }
