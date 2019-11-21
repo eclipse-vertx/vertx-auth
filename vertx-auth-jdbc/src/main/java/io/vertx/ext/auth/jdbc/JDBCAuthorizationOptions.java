@@ -34,7 +34,17 @@ import io.vertx.core.json.JsonObject;
  */
 @DataObject(generateConverter = true)
 public class JDBCAuthorizationOptions {
+  /**
+   * The default query to retrieve all roles for the user
+   */
+  private final static String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
 
+  /**
+   * The default query to retrieve all permissions for the role
+   */
+  private final static String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
+
+<<<<<<< HEAD
 <<<<<<< HEAD
   /**
    * The default query to retrieve all roles for the user
@@ -50,16 +60,23 @@ public class JDBCAuthorizationOptions {
   private boolean shared;
   private String datasourceName;
 >>>>>>> updated code based on comments from Paulo:
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   private String rolesQuery;
   private String permissionsQuery;
 
   public JDBCAuthorizationOptions() {
+<<<<<<< HEAD
 <<<<<<< HEAD
     this.rolesQuery = DEFAULT_ROLES_QUERY;
     this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
 =======
     this.shared = true;
 >>>>>>> updated code based on comments from Paulo:
+=======
+    this.rolesQuery = DEFAULT_ROLES_QUERY;
+    this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   }
 
   public JDBCAuthorizationOptions(JsonObject json) {
@@ -67,6 +84,7 @@ public class JDBCAuthorizationOptions {
     JDBCAuthorizationOptionsConverter.fromJson(json, this);
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
   public boolean isShared() {
@@ -100,6 +118,8 @@ public class JDBCAuthorizationOptions {
   }
 
 >>>>>>> updated code based on comments from Paulo:
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   public String getRolesQuery() {
     return rolesQuery;
   }

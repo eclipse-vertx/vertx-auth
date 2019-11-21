@@ -32,7 +32,12 @@ import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 =======
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+<<<<<<< HEAD
 >>>>>>> updated code based on comments from Paulo:
+=======
+import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.test.core.VertxTestBase;
 
@@ -98,11 +103,17 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   private JDBCAuthenticationProvider authenticationProvider;
   private JDBCAuthenticationOptions authenticationOptions;
 =======
   private JDBCAuthentication authenticationProvider;
 >>>>>>> updated code based on comments from Paulo:
+=======
+  private JDBCHashStrategy jdbcHashStrategy;
+  private JDBCAuthentication authenticationProvider;
+  private JDBCAuthenticationOptions authenticationOptions;
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   private JDBCClient jdbcClient;
 
   @Override
@@ -123,17 +134,36 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
     }
     return jdbcClient;
   }
-
+  
+  protected JDBCHashStrategy getHashStrategy() {
+    if (jdbcHashStrategy==null) {
+      jdbcHashStrategy = JDBCHashStrategy.createSHA512(vertx);
+      jdbcHashStrategy.setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
+    }
+    return jdbcHashStrategy;
+  }
+  
   protected JDBCAuthentication getAuthenticationProvider() {
     if (authenticationProvider == null) {
+<<<<<<< HEAD
 <<<<<<< HEAD
       authenticationProvider = JDBCAuthenticationProvider.create(getJDBCCLient(), JDBCHashStrategy.createSHA512(vertx), new JDBCAuthenticationOptions())
 =======
       authenticationProvider = JDBCAuthentication.create(vertx, getJDBCCLient())
 >>>>>>> updated code based on comments from Paulo:
           .setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
+=======
+      authenticationProvider = JDBCAuthentication.create(getJDBCCLient(), getHashStrategy(), new JDBCAuthenticationOptions());
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
     }
     return authenticationProvider;
+  }
+
+  protected JDBCAuthenticationOptions getAuthenticationOptions() {
+    if (authenticationOptions == null) {
+      authenticationOptions = new JDBCAuthenticationOptions();
+    }
+    return authenticationOptions;
   }
 
   @Override

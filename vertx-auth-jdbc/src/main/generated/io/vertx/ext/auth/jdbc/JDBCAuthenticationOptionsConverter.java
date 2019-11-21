@@ -21,6 +21,7 @@ public class JDBCAuthenticationOptionsConverter {
           }
           break;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         case "config":
           if (member.getValue() instanceof JsonObject) {
@@ -38,6 +39,8 @@ public class JDBCAuthenticationOptionsConverter {
           }
           break;
 >>>>>>> updated code based on comments from Paulo:
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
       }
     }
   }
@@ -51,6 +54,7 @@ public class JDBCAuthenticationOptionsConverter {
       json.put("authenticationQuery", obj.getAuthenticationQuery());
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     if (obj.getConfig() != null) {
       json.put("config", obj.getConfig());
@@ -60,5 +64,7 @@ public class JDBCAuthenticationOptionsConverter {
     }
     json.put("shared", obj.isShared());
 >>>>>>> updated code based on comments from Paulo:
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   }
 }

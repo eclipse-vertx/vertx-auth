@@ -32,7 +32,11 @@ import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider;
 =======
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
+<<<<<<< HEAD
 >>>>>>> updated code based on comments from Paulo:
+=======
+import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -69,13 +73,17 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   private JDBCAuthorizationOptions authorizationOptions;
 =======
   private JDBCAuthorization authorizationProvider;
+<<<<<<< HEAD
 >>>>>>> updated code based on comments from Paulo:
+=======
+  private JDBCAuthorizationOptions authorizationOptions;
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
   }
-  
+
   @BeforeClass
   public static void createDb() throws Exception {
     Connection conn = DriverManager.getConnection(config().getString("url"));
@@ -86,12 +94,18 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   protected JDBCAuthorizationOptions getAuthorizationOptions() {
     if (authorizationOptions==null) {
+=======
+  protected JDBCAuthorizationOptions getAuthorizationOptions() {
+    if (authorizationOptions == null) {
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
       authorizationOptions = new JDBCAuthorizationOptions();
     }
     return authorizationOptions;
   }
+<<<<<<< HEAD
   
   protected JDBCAuthorizationProvider getAuthorizationProvider() {
     if (authorizationProvider == null) {
@@ -101,6 +115,12 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     if (authorizationProvider == null) {
       authorizationProvider = JDBCAuthorization.create(getJDBCCLient());
 >>>>>>> updated code based on comments from Paulo:
+=======
+
+  protected JDBCAuthorization getAuthorizationProvider() {
+    if (authorizationProvider == null) {
+      authorizationProvider = JDBCAuthorization.create(getJDBCCLient(), new JDBCAuthorizationOptions());
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
     }
     return authorizationProvider;
   }

@@ -16,15 +16,13 @@
 
 package io.vertx.ext.auth.jdbc;
 
-<<<<<<< HEAD
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
-=======
-import io.vertx.codegen.annotations.VertxGen;
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationImpl;
+import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
@@ -35,52 +33,82 @@ import io.vertx.ext.jdbc.JDBCClient;
  * as it is the current OWASP recommendation for password storage.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @deprecated This class has been replaced by the class {@link JDBCAuthentication} for authentication and {@link JDBCAuthorization} for authorization
  */
 @VertxGen
-public interface JDBCAuthentication extends AuthProvider {
+public interface JDBCAuth extends AuthProvider {
+
+  /**
+   * The default query to be used for authentication
+   */
+  String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD, PASSWORD_SALT FROM USER WHERE USERNAME = ?";
+
+  /**
+   * The default query to retrieve all roles for the user
+   */
+  String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
+
+  /**
+   * The default query to retrieve all permissions for the role
+   */
+  String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
+
+  /**
+   * The default role prefix
+   */
+  String DEFAULT_ROLE_PREFIX = "role:";
 
   /**
    * Create a JDBC auth provider implementation
    *
    * @param client  the JDBC client instance
-   * @param options authentication options
-   * @param hashStrategy
    * @return  the auth provider
    */
-<<<<<<< HEAD
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/JDBCAuthenticationProvider.java
-  static JDBCAuthenticationProvider create(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
-    return new JDBCAuthenticationProviderImpl(client, hashStrategy, options);
-  }
-
-  /**
-=======
-  static JDBCAuthentication create(Vertx vertx, JDBCClient client) {
-    return new JDBCAuthenticationImpl(vertx, client);
+  static JDBCAuth create(Vertx vertx, JDBCClient client) {
+    return new JDBCAuthImpl(vertx, client);
   }
 
   /**
    * Set the authentication query to use. Use this if you want to override the default authentication query.
-   * @deprecated replaced by {@link JDBCAuthenticationOptions}
    * @param authenticationQuery  the authentication query
    * @return  a reference to this for fluency
    */
   @Fluent
-  @Deprecated
-  JDBCAuthentication setAuthenticationQuery(String authenticationQuery);
+  JDBCAuth setAuthenticationQuery(String authenticationQuery);
+
+  /**
+   * Set the roles query to use. Use this if you want to override the default roles query.
+   * @param rolesQuery  the roles query
+   * @return  a reference to this for fluency
+   */
+  @Fluent
+  JDBCAuth setRolesQuery(String rolesQuery);
+
+  /**
+   * Set the permissions query to use. Use this if you want to override the default permissions query.
+   * @param permissionsQuery  the permissions query
+   * @return  a reference to this for fluency
+   */
+  @Fluent
+  JDBCAuth setPermissionsQuery(String permissionsQuery);
+
+  /**
+   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
+   * @param rolePrefix a Prefix e.g.: "role:"
+   * @return a reference to this for fluency
+   */
+  @Fluent
+  JDBCAuth setRolePrefix(String rolePrefix);
 
   /**
    * Set the hash strategy to use. Use this if you want override the default hash strategy
-   * @deprecated replaced by {@link JDBCAuthenticationOptions}
    * @param strategy  the strategy
    * @return a reference to this for fluency
    */
   @GenIgnore
-  @Deprecated
-  JDBCAuthentication setHashStrategy(JDBCHashStrategy strategy);
+  JDBCAuth setHashStrategy(JDBCHashStrategy strategy);
 
   /**
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/JDBCAuthentication.java
    * Compute the hashed password given the unhashed password and the salt without nonce
    *
    * The implementation relays to the JDBCHashStrategy provided.
@@ -126,17 +154,9 @@ public interface JDBCAuthentication extends AuthProvider {
    *
    * The implementation relays to the JDBCHashStrategy provided.
    *
-   * @deprecated replaced by {@link JDBCAuthenticationOptions}
    * @param nonces a List of non null Strings.
    * @return a reference to this for fluency
    */
   @Fluent
-  @Deprecated
-  JDBCAuthentication setNonces(JsonArray nonces);
-=======
-  static JDBCAuthentication create(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
-    return new JDBCAuthenticationImpl(client, hashStrategy, options);
-  }
-
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
+  JDBCAuth setNonces(JsonArray nonces);
 }

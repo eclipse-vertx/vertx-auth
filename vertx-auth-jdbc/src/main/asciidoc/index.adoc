@@ -42,10 +42,16 @@ with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setA
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different
 =======
 The out of the box config assumes certain queries for authentication and authorisation, these can easily be changed
+<<<<<<< HEAD
 with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#setAuthenticationQuery(String)},
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorization#setPermissionsQuery(String)} and
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorization#setRolesQuery(String)}, if you want to use them with a different
 >>>>>>> updated code based on comments from Paulo:
+=======
+with the operations {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setAuthenticationQuery(String)},
+{@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setPermissionsQuery(String)} and
+{@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 database schema.
 
 The {@link io.vertx.ext.auth.jdbc.JDBCHashStrategy} is a required parameter to build the {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider}
@@ -83,18 +89,28 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFEREN
 ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES roles_perms(role);
 ----
 
+<<<<<<< HEAD
 Note that as of 2018-01-08 OWASP recommends
+=======
+== Hashing Strategy
+
+THe hashing strategy is now required to instantiate JDBCAuthentication {@link {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)} 
+You have the choice between SHA-512 or PBKDF2. Note that as of 2018-01-08 OWASP recommends
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 the usage of stronger algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
 
 WARNING: If you already have a running application switching the strategies will make break your existing
 passwords, so you will need to migrate the passwords from one algorithm to the second.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
 {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#setHashStrategy(JDBCHashStrategy)}.
 >>>>>>> updated code based on comments from Paulo:
 
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.

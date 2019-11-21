@@ -16,13 +16,16 @@
 package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.core.json.JsonObject;
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 import io.vertx.ext.auth.AuthOptions;
 >>>>>>> updated code based on comments from Paulo:
 import io.vertx.ext.jdbc.JDBCClient;
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 
 /**
  * Options configuring JDBC authentication.
@@ -30,6 +33,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
+<<<<<<< HEAD
 <<<<<<< HEAD
 public class JDBCAuthenticationOptions {
 
@@ -44,13 +48,19 @@ public class JDBCAuthenticationOptions {
     this.authenticationQuery = DEFAULT_AUTHENTICATE_QUERY;
 =======
 public class JDBCAuthenticationOptions implements AuthOptions {
+=======
+public class JDBCAuthenticationOptions {
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 
-  private boolean shared;
-  private String datasourceName;
+  /**
+   * The default query to be used for authentication
+   */
+  private final static String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD, PASSWORD_SALT FROM USER WHERE USERNAME = ?";
+  
   private String authenticationQuery;
-  private JsonObject config;
-
+  
   public JDBCAuthenticationOptions() {
+<<<<<<< HEAD
     this.shared = true;
     this.config = null;
   }
@@ -60,6 +70,9 @@ public class JDBCAuthenticationOptions implements AuthOptions {
     datasourceName = that.datasourceName;
     config = that.config != null ? that.config.copy() : null;
 >>>>>>> updated code based on comments from Paulo:
+=======
+    this.authenticationQuery = DEFAULT_AUTHENTICATE_QUERY;
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   }
 
   public JDBCAuthenticationOptions(JsonObject json) {
@@ -67,6 +80,7 @@ public class JDBCAuthenticationOptions implements AuthOptions {
     JDBCAuthenticationOptionsConverter.fromJson(json, this);
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
   @Override
@@ -139,16 +153,20 @@ public class JDBCAuthenticationOptions implements AuthOptions {
   }
 
 >>>>>>> updated code based on comments from Paulo:
+=======
+>>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   public String getAuthenticationQuery() {
     return authenticationQuery;
   }
 
   /**
-   * Set the authentication query to use. Use this if you want to override the default authentication query.
+   * Set the authentication query to use. Use this if you want to override the
+   * default authentication query.
    *
    * @param authenticationQuery the authentication query
    * @return a reference to this, so the API can be used fluently
    */
+  @Fluent
   public JDBCAuthenticationOptions setAuthenticationQuery(String authenticationQuery) {
     this.authenticationQuery = authenticationQuery;
     return this;
