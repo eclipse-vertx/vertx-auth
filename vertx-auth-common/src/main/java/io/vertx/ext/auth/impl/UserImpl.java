@@ -23,7 +23,10 @@ import io.vertx.core.shareddata.impl.ClusterSerializable;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
+<<<<<<< HEAD
 import io.vertx.ext.auth.Authorizations;
+=======
+>>>>>>> fixed an issue where PermissionBaseAuthorization.verify(Authorization) should be able to verify a WildcardBasedPermission and vice-versa
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
