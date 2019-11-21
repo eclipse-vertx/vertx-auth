@@ -25,9 +25,9 @@ import io.vertx.core.shareddata.impl.ClusterSerializable;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
 /**
  * Default implementation of a User
@@ -84,7 +84,7 @@ public class UserImpl implements User, ClusterSerializable {
     Objects.requireNonNull(resultHandler);
 
     return isAuthorized(authority.startsWith("role:") ? RoleBasedAuthorization.create(authority.substring(5))
-        : PermissionBasedAuthorization.create(authority), resultHandler);
+        : WildcardPermissionBasedAuthorization.create(authority), resultHandler);
   }
 
   // TODO: remove this method
