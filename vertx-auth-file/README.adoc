@@ -1,0 +1,3 @@
+# Vert.x Auth File
+
+This module contains contains a Vert.x auth implementation where users, roles and permisions are read from a text file
