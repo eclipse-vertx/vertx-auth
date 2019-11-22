@@ -1,0 +1,5 @@
+# Vert.x Ldap Auth
+
+This module contains contains a Vert.x auth implementation which uses LDAP
+
+Please see the http://vertx.io/docs/#authentication_and_authorisation[documentation] for more information.

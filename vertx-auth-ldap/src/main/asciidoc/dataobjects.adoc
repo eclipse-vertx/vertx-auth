@@ -1,0 +1,22 @@
+= Cheatsheets
+
+[[LdapAuthenticationOptions]]
+== LdapAuthenticationOptions
+
+++++
+ Ldap auth configuration options
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[authenticationMechanism]]`@authenticationMechanism`|`String`|+++
+sets the authentication mecanism
++++
+|[[authenticationQuery]]`@authenticationQuery`|`String`|-
+|[[referral]]`@referral`|`String`|-
+|[[url]]`@url`|`String`|-
+|===
+
