@@ -91,6 +91,12 @@ public class WildcardPermissionBasedAuthorizationTest {
     assertFalse(WildcardPermissionBasedAuthorization.create("*:read")
       .verify(WildcardPermissionBasedAuthorization.create("printer:edit")));
   }
+  
+  @Test
+  public void testVerifyPermisionAuthorization() {
+    assertTrue(WildcardPermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1")));
+    assertTrue(WildcardPermissionBasedAuthorization.create("p1.*").verify(PermissionBasedAuthorization.create("p1.*")));
+  }
 
   @Test
   public void testMatch1(TestContext should) {

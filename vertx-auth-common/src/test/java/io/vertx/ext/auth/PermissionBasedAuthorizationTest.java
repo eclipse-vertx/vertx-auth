@@ -68,6 +68,12 @@ public class PermissionBasedAuthorizationTest {
   }
 
   @Test
+  public void testVerifyWildcard() {
+    assertTrue(PermissionBasedAuthorization.create("p1").verify(WildcardPermissionBasedAuthorization.create("p1")));
+    assertTrue(PermissionBasedAuthorization.create("p1.*").verify(WildcardPermissionBasedAuthorization.create("p1.*")));
+  }
+  
+  @Test
   public void testMatch1(TestContext should) {
     final Async test = should.async();
 
