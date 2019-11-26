@@ -18,6 +18,7 @@ import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
 import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
 public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthorization {
 
@@ -83,6 +84,15 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
         }
         return getResource().equals(otherPermissionBasedAuthorization.getResource());
       }
+    }
+    else if (otherAuthorization instanceof WildcardPermissionBasedAuthorization) {
+      WildcardPermissionBasedAuthorization otherWildcardPermissionBasedAuthorization = (WildcardPermissionBasedAuthorization) otherAuthorization;
+      if (permission.equals(otherWildcardPermissionBasedAuthorization.getPermission())) {
+        if (getResource() == null) {
+          return otherWildcardPermissionBasedAuthorization.getResource() == null;
+        }
+        return getResource().equals(otherWildcardPermissionBasedAuthorization.getResource());
+      }      
     }
     return false;
   }

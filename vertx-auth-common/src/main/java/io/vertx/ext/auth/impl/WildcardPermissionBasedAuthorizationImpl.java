@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
+import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
@@ -69,12 +70,21 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
   @Override
   public boolean verify(Authorization otherAuthorization) {
     if (otherAuthorization instanceof WildcardPermissionBasedAuthorizationImpl) {
-      WildcardPermissionBasedAuthorizationImpl otherWildcardAuthrization = (WildcardPermissionBasedAuthorizationImpl) otherAuthorization;
-      if (wildcardPermission.implies((otherWildcardAuthrization).wildcardPermission)) {
+      WildcardPermissionBasedAuthorizationImpl otherWildcardPermission = (WildcardPermissionBasedAuthorizationImpl) otherAuthorization;
+      if (wildcardPermission.implies((otherWildcardPermission).wildcardPermission)) {
         if (getResource() == null) {
           return true;
         }
-        return getResource().equals(otherWildcardAuthrization.getResource());
+        return getResource().equals(otherWildcardPermission.getResource());
+      }
+    }
+    else if (otherAuthorization instanceof PermissionBasedAuthorization) {
+      PermissionBasedAuthorization otherPermission = (PermissionBasedAuthorization) otherAuthorization;
+      if (this.permission.equals(otherPermission.getPermission())) {
+        if (getResource() == null) {
+          return true;
+        }
+        return getResource().equals(otherPermission.getResource());
       }
     }
     return false;
