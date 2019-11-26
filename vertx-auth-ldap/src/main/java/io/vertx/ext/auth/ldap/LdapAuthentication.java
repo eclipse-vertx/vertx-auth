@@ -19,7 +19,7 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.ldap.impl.LdapAuthenticationImpl;
 
 /**
- * Factory interface for creating property file based {@link io.vertx.ext.auth.AuthProvider} instances.
+ * Factory interface for creating a LDAP {@link io.vertx.ext.auth.AuthProvider}.
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */

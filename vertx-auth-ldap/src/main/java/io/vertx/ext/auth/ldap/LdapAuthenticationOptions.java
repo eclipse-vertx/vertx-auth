@@ -53,28 +53,50 @@ public class LdapAuthenticationOptions {
   }
 
   /**
-   * sets the authentication mecanism 
+   * sets the authentication mechanism. default to 'simple' if not set
    * 
    * @param authenticationMechanism
-   * @return
+   * @return a reference to this, so the API can be used fluently
    */
   public LdapAuthenticationOptions setAuthenticationMechanism(String authenticationMechanism) {
     this.authenticationMechanism = authenticationMechanism;
     return this;
   }
 
+  /**
+   * Set the referral property. Default to 'follow' if not set
+   * 
+   * @param referral the referral
+   * @return a reference to this, so the API can be used fluently
+   */
   public LdapAuthenticationOptions setReferral(String referral) {
     this.referral = referral;
     return this;
   }
 
+  /**
+   * Set the url to the LDAP server. The url must start with `ldap://` and a port
+   * must be specified.
+   * 
+   * @param url the url to the server
+   * @return a reference to this, so the API can be used fluently
+   */
   public LdapAuthenticationOptions setUrl(String url) {
     this.url = url;
     return this;
   }
 
-  public LdapAuthenticationOptions setAuthenticationQuery(String userDnTemplate) {
-    this.authenticationQuery = userDnTemplate;
+  /**
+   * Set the query to use to authenticate a user. This is used to determine the
+   * actual lookup to use when looking up a user with a particular id. An example
+   * is `uid={0},ou=users,dc=foo,dc=com` - Note that the element `{0}` is
+   * substituted with the user id to create the actual lookup.
+   * 
+   * @param authenticationQuery
+   * @return a reference to this, so the API can be used fluently
+   */
+  public LdapAuthenticationOptions setAuthenticationQuery(String authenticationQuery) {
+    this.authenticationQuery = authenticationQuery;
     return this;
   }
 

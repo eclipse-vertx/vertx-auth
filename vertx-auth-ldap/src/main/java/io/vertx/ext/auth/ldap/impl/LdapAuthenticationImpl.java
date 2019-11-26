@@ -33,6 +33,9 @@ import io.vertx.ext.auth.ldap.LdapAuthenticationOptions;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 public class LdapAuthenticationImpl implements LdapAuthentication {
+  private static final String SIMPLE_AUTHENTICATION_MECHANISM = "simple";
+  private static final String FOLLOW_REFERRAL = "follow";
+
   private Vertx vertx;
   private LdapAuthenticationOptions authenticationOptions;
 
@@ -50,13 +53,12 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
       if (contextResponse.succeeded()) {
         User user = User.create(new JsonObject().put("username", principal));
         resultHandler.handle(Future.succeededFuture(user));
-      }
-      else {
+      } else {
         resultHandler.handle(Future.failedFuture(contextResponse.cause()));
       }
     });
   }
-  
+
   private void createLdapContext(String principal, String credential, Handler<AsyncResult<LdapContext>> resultHandler) {
     Hashtable<String, Object> environment = new Hashtable<String, Object>();
     // set the initial cntext factory
@@ -71,8 +73,11 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
       environment.put(Context.SECURITY_CREDENTIALS, credential);
     }
     if (authenticationOptions.getAuthenticationMechanism() == null && (principal != null || credential != null)) {
-      environment.put(Context.SECURITY_AUTHENTICATION, "simple");
+      environment.put(Context.SECURITY_AUTHENTICATION, SIMPLE_AUTHENTICATION_MECHANISM);
     }
+    // referral
+    environment.put(Context.REFERRAL,
+        authenticationOptions.getReferral() == null ? FOLLOW_REFERRAL : authenticationOptions.getReferral());
     vertx.executeBlocking(blockingResult -> {
       try {
         LdapContext context = new InitialLdapContext(environment, null);
