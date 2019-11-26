@@ -15,6 +15,6 @@
  */
 
 @ModuleGen(name = "vertx-auth-file", groupPackage = "io.vertx")
-package io.vertx.ext.auth.file;
+package io.vertx.ext.auth.properties;
 
 import io.vertx.codegen.annotations.ModuleGen;

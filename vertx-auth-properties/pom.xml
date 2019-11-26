@@ -30,7 +30,7 @@
     <doc.skip>false</doc.skip>
   </properties>
 
-  <artifactId>vertx-auth-file</artifactId>
+  <artifactId>vertx-auth-properties</artifactId>
 
   <dependencies>
     <dependency>

@@ -10,14 +10,14 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.file;
+package io.vertx.ext.auth.properties;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.file.FileAuthentication;
+import io.vertx.ext.auth.properties.PropertyFileAuthentication;
 import io.vertx.test.core.VertxTestBase;
 
 import org.junit.Test;
@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class FileAuthenticationTest extends VertxTestBase {
+public class PropertyFileAuthenticationTest extends VertxTestBase {
 
   private AuthProvider authProvider;
   
@@ -119,7 +119,7 @@ public class FileAuthenticationTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = FileAuthentication.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
+    authProvider = PropertyFileAuthentication.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
   }
 
   @Test

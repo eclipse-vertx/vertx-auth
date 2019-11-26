@@ -10,7 +10,7 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.file.impl;
+package io.vertx.ext.auth.properties.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -28,15 +28,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
-import io.vertx.ext.auth.file.FileAuthentication;
 import io.vertx.ext.auth.impl.UserImpl;
+import io.vertx.ext.auth.properties.PropertyFileAuthentication;
 
 /**
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-public class FileAuthenticationImpl implements FileAuthentication {
-  private final static Logger logger = Logger.getLogger(FileAuthentication.class.getName());
+public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication {
+  private final static Logger logger = Logger.getLogger(PropertyFileAuthentication.class.getName());
 
   private class User {
     String name;
@@ -74,7 +74,7 @@ public class FileAuthenticationImpl implements FileAuthentication {
   private Map<String, User> users;
   private Map<String, Role> roles;
 
-  public FileAuthenticationImpl(Vertx vertx, String path) {
+  public PropertyFileAuthenticationImpl(Vertx vertx, String path) {
     this.vertx = Objects.requireNonNull(vertx);
     this.path = Objects.requireNonNull(path);
   }

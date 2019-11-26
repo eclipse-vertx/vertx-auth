@@ -10,13 +10,13 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.file;
+package io.vertx.ext.auth.properties;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.file.impl.FileAuthenticationImpl;
+import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
 
 /**
  * Factory interface for creating property file based {@link io.vertx.ext.auth.AuthProvider} instances.
@@ -24,7 +24,7 @@ import io.vertx.ext.auth.file.impl.FileAuthenticationImpl;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 @VertxGen
-public interface FileAuthentication extends AuthProvider {
+public interface PropertyFileAuthentication extends AuthProvider {
 
   /**
    * Create a File authentication provider
@@ -34,8 +34,8 @@ public interface FileAuthentication extends AuthProvider {
    * @return  the authentication provider
    */
   @GenIgnore
-  static FileAuthentication create(Vertx vertx, String path) {
-    return new FileAuthenticationImpl(vertx, path);
+  static PropertyFileAuthentication create(Vertx vertx, String path) {
+    return new PropertyFileAuthenticationImpl(vertx, path);
   }
 
 }
