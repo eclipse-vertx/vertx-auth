@@ -16,9 +16,6 @@
 
 package io.vertx.ext.auth;
 
-import java.util.Collections;
-import java.util.Set;
-
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
@@ -26,6 +23,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
 /**
@@ -47,8 +45,8 @@ public interface User {
    * 
    * @return
    */
-  default Set<Authorization> authorizations() {
-	return Collections.emptySet();
+  default Authorizations authorizations() {
+	return new AuthorizationsImpl();
   }
 
   /**

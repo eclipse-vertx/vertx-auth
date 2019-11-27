@@ -80,7 +80,7 @@ public class PermissionBasedAuthorizationTest {
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
-      user.authorizations().add(PermissionBasedAuthorization.create("p1").setResource("r1"));
+      user.authorizations().add("providerId", PermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertEquals(true, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
@@ -107,7 +107,7 @@ public class PermissionBasedAuthorizationTest {
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.create(new JsonObject().put("username", "dummy user"));
-      user.authorizations().add(PermissionBasedAuthorization.create("p1").setResource("r1"));
+      user.authorizations().add("providerId", PermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertEquals(false, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
