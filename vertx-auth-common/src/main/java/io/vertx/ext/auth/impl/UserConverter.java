@@ -29,11 +29,15 @@ public class UserConverter {
 
     JsonObject json = new JsonObject();
     json.put(FIELD_PRINCIPAL, value.principal());
-    JsonArray authorizations = new JsonArray();
-    for (Authorization authorization : value.authorizations()) {
-      authorizations.add(AuthorizationConverter.encode(authorization));
+    JsonObject jsonAuthorizations = new JsonObject();
+    for (String providerId: value.authorizations().getProviderIds()) {
+      JsonArray jsonAuthorizationByProvider = new JsonArray();
+      jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
+      for (Authorization authorization : value.authorizations().get(providerId)) {
+        jsonAuthorizationByProvider.add(AuthorizationConverter.encode(authorization));
+      }
     }
-    json.put(FIELD_AUTHORIZATIONS, authorizations);
+    json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
     return json;
   }
 
@@ -43,9 +47,13 @@ public class UserConverter {
     JsonObject principal = json.getJsonObject(FIELD_PRINCIPAL);
     User user = User.create((JsonObject) principal);
     // authorizations
-    JsonArray authorizations = json.getJsonArray(FIELD_AUTHORIZATIONS);
-    for (int i = 0; i < authorizations.size(); i++) {
-      user.authorizations().add(AuthorizationConverter.decode(authorizations.getJsonObject(i)));
+    JsonObject jsonAuthorizations = json.getJsonObject(FIELD_AUTHORIZATIONS);
+    for (String fieldName: jsonAuthorizations.fieldNames()) {
+      JsonArray jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(fieldName);
+      for (int i=0; i<jsonAuthorizationByProvider.size(); i++) {
+        JsonObject jsonAuthorization = jsonAuthorizationByProvider.getJsonObject(i);
+        user.authorizations().add(fieldName, AuthorizationConverter.decode(jsonAuthorization));
+      }
     }
     return user;
   }

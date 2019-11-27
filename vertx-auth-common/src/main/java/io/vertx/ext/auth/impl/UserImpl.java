@@ -12,9 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth.impl;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -25,6 +23,7 @@ import io.vertx.core.shareddata.impl.ClusterSerializable;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
+import io.vertx.ext.auth.Authorizations;
 import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
@@ -37,7 +36,7 @@ import io.vertx.ext.auth.User;
 public class UserImpl implements User, ClusterSerializable {
 
   // set of authorizations
-  private Set<Authorization> authorizations;
+  private Authorizations authorizations;
   // the principal of the user
   private JsonObject principal;
 
@@ -47,17 +46,19 @@ public class UserImpl implements User, ClusterSerializable {
 
   public UserImpl(JsonObject principal) {
     this.principal = Objects.requireNonNull(principal);
-    this.authorizations = new HashSet<>();
+    this.authorizations = new AuthorizationsImpl();
   }
 
   @Override
-  public Set<Authorization> authorizations() {
+  public Authorizations authorizations() {
     return authorizations;
   }
 
   @Override
   public User clearCache() {
-    authorizations.clear();
+    for (String providerId: authorizations.getProviderIds()) {
+      authorizations.delete(providerId);
+    }
     return this;
   }
 
