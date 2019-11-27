@@ -33,7 +33,6 @@ public interface LdapAuthentication extends AuthProvider {
    * @param options  the ldap options
    * @return  the authentication provider
    */
-  @GenIgnore
   static LdapAuthentication create(Vertx vertx, LdapAuthenticationOptions options) {
     return new LdapAuthenticationImpl(vertx, options);
   }
