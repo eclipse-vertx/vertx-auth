@@ -21,12 +21,12 @@ public interface OpenIDConnectAuth {
   /**
    * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
    * configuration options and attempt to load the well known descriptor.
-   *
+   * <p>
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @param vertx the vertx instance
-   * @param config the initial config, it should contain a site url
+   * @param vertx   the vertx instance
+   * @param config  the initial config, it should contain a site url
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
@@ -48,7 +48,7 @@ public interface OpenIDConnectAuth {
 
       final OAuth2Response response = res.result();
 
-      if (response.statusCode() !=  200) {
+      if (response.statusCode() != 200) {
         handler.handle(Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body()));
         return;
       }
@@ -62,10 +62,19 @@ public interface OpenIDConnectAuth {
 
       // issuer validation
       if (config.isValidateIssuer()) {
-        final String issuerEndpoint = json.getString("issuer");
-        if (issuerEndpoint != null && !config.getSite().equals(issuerEndpoint)) {
-          handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
-          return;
+        String issuerEndpoint = json.getString("issuer");
+        if (issuerEndpoint != null) {
+          // the provider is letting the user know the issuer endpoint, so we need to validate
+          // as in vertx oauth the issuer (site config) is a url without the trailing slash we
+          // will compare the received endpoint without the final slash is present
+          if (issuerEndpoint.endsWith("/")) {
+            issuerEndpoint = issuerEndpoint.substring(0, issuerEndpoint.length() - 1);
+          }
+
+          if (!config.getSite().equals(issuerEndpoint)) {
+            handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
+            return;
+          }
         }
       }
 
@@ -108,14 +117,14 @@ public interface OpenIDConnectAuth {
   /**
    * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
    * configuration options and attempt to load the well known descriptor.
-   *
+   * <p>
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see OpenIDConnectAuth#discover(Vertx, OAuth2ClientOptions, Handler)
-   * @param vertx the vertx instance
+   * @param vertx  the vertx instance
    * @param config the initial config, it should contain a site url
    * @return future with the instantiated Oauth2 provider instance handler
+   * @see OpenIDConnectAuth#discover(Vertx, OAuth2ClientOptions, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
     Promise<OAuth2Auth> promise = Promise.promise();
