@@ -26,6 +26,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.Authorization;
+import io.vertx.ext.auth.AuthorizationProvider;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.UserImpl;
@@ -35,7 +37,7 @@ import io.vertx.ext.auth.properties.PropertyFileAuthentication;
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication {
+public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication, AuthorizationProvider {
   private final static Logger logger = Logger.getLogger(PropertyFileAuthentication.class.getName());
 
   private class User {
@@ -164,16 +166,18 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     String password = authInfo.getString("password");
     getUser(username, userResult -> {
       if (userResult.succeeded()) {
-        User user = userResult.result();
-        if (Objects.equals(user.password, password)) {
-          io.vertx.ext.auth.User result = new UserImpl(new JsonObject().put("username", user.name));
-          for (Role role: user.roles.values()) {
-            result.authorizations().add(RoleBasedAuthorization.create(role.name));
-            for (String permission: role.permissions) {
-              result.authorizations().add(WildcardPermissionBasedAuthorization.create(permission));
+        User propertyUser = userResult.result();
+        if (Objects.equals(propertyUser.password, password)) {
+          io.vertx.ext.auth.User result = new UserImpl(new JsonObject().put("username", propertyUser.name));
+          getAuthorizations(result, authorizationsResult -> {
+            if (authorizationsResult.failed()) {
+              resultHandler.handle(Future.failedFuture("invalid username/password"));
             }
-          }
-          resultHandler.handle(Future.succeededFuture(result));
+            else {
+              result.authorizations().add(getId(), authorizationsResult.result());
+              resultHandler.handle(Future.succeededFuture(result));
+            }
+          });
         }
         else {
           resultHandler.handle(Future.failedFuture("invalid username/password"));
@@ -181,6 +185,32 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
       }
       else {
         resultHandler.handle(Future.failedFuture("invalid username/password"));
+      }
+    });
+  }
+
+  @Override
+  public String getId() {
+    // use the path as the id
+    return path;
+  }
+
+  @Override
+  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+    String username = user.principal().getString("username");
+    getUser(username, userResult -> {
+      if (userResult.succeeded()) {
+        Set<Authorization> result = new HashSet<>();
+        for (Role role: userResult.result().roles.values()) {
+          result.add(RoleBasedAuthorization.create(role.name));
+          for (String permission: role.permissions) {
+            result.add(WildcardPermissionBasedAuthorization.create(permission));
+          }
+        }
+        resultHandler.handle(Future.succeededFuture(result));
+      }
+      else {
+        resultHandler.handle(Future.failedFuture("invalid username"));
       }
     });
   }
