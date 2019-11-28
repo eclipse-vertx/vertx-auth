@@ -1,3 +1,8 @@
+== Deprecated module 
+Note that Shiro as been deprecated in favor of vertx-auth-properties as well as vertx-auth-ldap
+
+
+
 == The Apache Shiro Auth provider implementation
 
 This is an auth provider implementation that uses http://shiro.apache.org/[Apache Shiro].  To use this

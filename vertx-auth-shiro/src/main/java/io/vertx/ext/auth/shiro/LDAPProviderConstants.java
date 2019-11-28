@@ -18,9 +18,11 @@ package io.vertx.ext.auth.shiro;
 
 /**
  * Configuration keys used when configuring a Shiro LDAP auth realm
+ * @deprecated ShiroAuth has been replaced by {@link io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@link io.vertx.ext.auth.ldap.LdapAuthentication}
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Deprecated
 public interface LDAPProviderConstants {
 
   String LDAP_USER_DN_TEMPLATE_FIELD = "ldap_user_dn_template";

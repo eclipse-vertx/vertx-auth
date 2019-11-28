@@ -26,10 +26,12 @@ import org.apache.shiro.realm.Realm;
 
 /**
  * Factory interface for creating Apache Shiro based {@link io.vertx.ext.auth.AuthProvider} instances.
- *
+ * @deprecated ShiroAuth has been replaced by {@link io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@link io.vertx.ext.auth.ldap.LdapAuthentication}
+ * 
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
+@Deprecated
 public interface ShiroAuth extends AuthProvider {
 
   /**
