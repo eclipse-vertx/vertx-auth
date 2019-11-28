@@ -1,5 +1,7 @@
 package io.vertx.ext.jwt;
 
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
@@ -12,24 +14,22 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.security.spec.*;
 import java.util.*;
 
 /**
  * JWK https://tools.ietf.org/html/rfc7517
- *
+ * <p>
  * In a nutshell a JWK is a Key(Pair) encoded as JSON. This implementation follows the spec with some limitations:
- *
- * * Supported algorithms are: "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512"
- *
+ * <p>
+ * * Supported algorithms are: "PS256", "PS384", "PS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512"
+ * <p>
  * The rationale for this choice is to support the required algorithms for JWT.
- *
+ * <p>
  * The constructor takes a single JWK (the the KeySet) or a PEM encoded pair (used by Google and useful for importing
  * standard PEM files from OpenSSL).
- *
+ * <p>
  * * Certificate chains (x5c) only allow a single element chain, certificate urls and fingerprints are not considered.
  *
  * @author Paulo Lopes
@@ -37,6 +37,7 @@ import java.util.*;
 public final class JWK implements Crypto {
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
+  private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
 
   // JSON JWK properties
   private final String kid;
@@ -60,7 +61,7 @@ public final class JWK implements Crypto {
    * Creates a Symmetric Key (Hash) from pem formatted strings.
    *
    * @param algorithm the algorithm e.g.: HS256
-   * @param secret the private key
+   * @param secret    the private key
    */
   public static JWK symmetricKey(String algorithm, String secret) {
     return new JWK(algorithm, secret);
@@ -89,7 +90,7 @@ public final class JWK implements Crypto {
   /**
    * Creates a Key pair from a PEM formatted string.
    *
-   * @param algorithm the algorithm e.g.: RS256
+   * @param algorithm    the algorithm e.g.: RS256
    * @param pubPemString the public key in PEM format
    * @param secPemString the private key in PEM format
    */
@@ -137,13 +138,85 @@ public final class JWK implements Crypto {
     throw new IllegalArgumentException("Missing PUB/SEC keys");
   }
 
+  public static List<JWK> from(final KeyStore keyStore, final char[] keyStorePassword) {
+
+    Map<String, String> aliases = new HashMap<String, String>() {{
+      put("HS256", "HMacSHA256");
+      put("HS384", "HMacSHA384");
+      put("HS512", "HMacSHA512");
+      put("RS256", "SHA256withRSA");
+      put("RS384", "SHA384withRSA");
+      put("RS512", "SHA512withRSA");
+      put("ES256", "SHA256withECDSA");
+      put("ES384", "SHA384withECDSA");
+      put("ES512", "SHA512withECDSA");
+    }};
+
+    final List<JWK> keys = new ArrayList<>();
+
+    // load MACs
+    for (String alias : Arrays.asList("HS256", "HS384", "HS512")) {
+      try {
+        final Key secretKey = keyStore.getKey(alias, keyStorePassword);
+        // key store does not have the requested algorithm
+        if (secretKey == null) {
+          continue;
+        }
+        // test the algorithm
+        String alg = secretKey.getAlgorithm();
+        // the algorithm cannot be null and it cannot be different from
+        // the alias list
+        final String expected = aliases.get(alias);
+        if (alg == null || !alg.equalsIgnoreCase(expected)) {
+          LOG.warn("The key algorithm does not match " + expected);
+          continue;
+        }
+        // algorithm is valid
+        Mac mac = Mac.getInstance(alg);
+        mac.init(secretKey);
+        keys.add(new JWK(alias, mac));
+      } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | InvalidKeyException e) {
+        LOG.warn("Failed to load key for algorithm: " + alias, e);
+      }
+    }
+
+    for (String alias : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
+      try {
+        // Key pairs on keystores are stored with a certificate, so we use it to load a key pair
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
+        // not found
+        if (certificate == null) {
+          continue;
+        }
+        // start validation
+        certificate.checkValidity();
+        // verify that the algorithms match
+        String alg = certificate.getSigAlgName();
+        // the algorithm cannot be null and it cannot be different from
+        // the alias list
+        final String expected = aliases.get(alias);
+        if (alg == null || !alg.equalsIgnoreCase(expected)) {
+          LOG.warn("The key algorithm does not match " + expected);
+          continue;
+        }
+        // algorithm is valid
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
+        keys.add(new JWK(alias, certificate, privateKey));
+      } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException | NoSuchAlgorithmException | UnrecoverableKeyException | InvalidAlgorithmParameterException e) {
+        LOG.warn("Failed to load key for algorithm: " + alias, e);
+      }
+    }
+
+    return keys;
+  }
+
   /**
    * Creates a Key(Pair) from pem formatted strings.
    *
-   * @param algorithm the algorithm e.g.: RS256
+   * @param algorithm     the algorithm e.g.: RS256
    * @param isCertificate when true the public PEM is assumed to be a X509 Certificate
-   * @param pemPub the public key in PEM format
-   * @param pemSec the private key in PEM format
+   * @param pemPub        the public key in PEM format
+   * @param pemSec        the private key in PEM format
    */
   private JWK(String algorithm, boolean isCertificate, String pemPub, String pemSec) {
 
@@ -183,7 +256,7 @@ public final class JWK implements Crypto {
       }
 
       alg = algorithm;
-      kid = algorithm + (pemPub !=  null ? pemPub.hashCode() : "") + "-" + (pemSec !=  null ? pemSec.hashCode() : "");
+      kid = algorithm + (pemPub != null ? pemPub.hashCode() : "") + "-" + (pemSec != null ? pemSec.hashCode() : "");
 
       if (pemPub != null) {
         if (isCertificate) {
@@ -225,9 +298,9 @@ public final class JWK implements Crypto {
    * Creates a Symmetric Key from a base64 encoded string.
    *
    * @param algorithm the algorithm e.g.: HS256
-   * @param hmac the symmetric key
+   * @param secret    the symmetric key
    */
-  private JWK(String algorithm, String hmac) {
+  private JWK(String algorithm, String secret) {
     try {
       final Map<String, String> alias = new HashMap<String, String>() {{
         put("HS256", "HMacSHA256");
@@ -242,14 +315,89 @@ public final class JWK implements Crypto {
         throw new NoSuchAlgorithmException(alg);
       }
 
-      kid = algorithm + hmac.hashCode();
+      kid = algorithm + '@' + secret.hashCode();
 
       mac = Mac.getInstance(alias.get(alg));
-      mac.init(new SecretKeySpec(hmac.getBytes(UTF8), alias.get(alg)));
+      mac.init(new SecretKeySpec(secret.getBytes(UTF8), alias.get(alg)));
       // this is a symmetric key
       symmetric = true;
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private JWK(String algorithm, Mac mac) throws NoSuchAlgorithmException {
+
+    final Map<String, String> alias = new HashMap<String, String>() {{
+      put("HS256", "HMacSHA256");
+      put("HS384", "HMacSHA384");
+      put("HS512", "HMacSHA512");
+    }};
+
+    alg = algorithm;
+
+    // abort if the specified algorithm is not known
+    if (!alias.containsKey(alg)) {
+      throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
+    }
+
+    kid = algorithm;
+    this.mac = mac;
+    // this is a symmetric key
+    symmetric = true;
+  }
+
+  private JWK(String algorithm, X509Certificate certificate, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+
+    final Map<String, String> alias = new HashMap<String, String>() {{
+      put("RS256", "SHA256withRSA");
+      put("RS384", "SHA384withRSA");
+      put("RS512", "SHA512withRSA");
+      put("ES256", "SHA256withECDSA");
+      put("ES384", "SHA384withECDSA");
+      put("ES512", "SHA512withECDSA");
+      put("PS256", "RSASSA-PSS");
+      put("PS384", "RSASSA-PSS");
+      put("PS512", "RSASSA-PSS");
+    }};
+
+    switch (algorithm) {
+      case "RS256":
+      case "RS384":
+      case "RS512":
+      case "PS256":
+      case "PS384":
+      case "PS512":
+        break;
+      case "ES256":
+      case "ES384":
+      case "ES512":
+        ecdsa = true;
+        ecdsaLength = ECDSALength(alias.get(algorithm));
+        break;
+      default:
+        throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
+    }
+
+    alg = algorithm;
+    kid = algorithm + '@' + certificate.hashCode() + "-" + privateKey.hashCode();
+
+    this.certificate = certificate;
+    this.privateKey = privateKey;
+    // use default
+    signature = Signature.getInstance(alias.get(alg));
+
+    // signature extras
+    switch (alg) {
+      case "PS256":
+        signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
+        break;
+      case "PS384":
+        signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
+        break;
+      case "PS512":
+        signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
+        break;
     }
   }
 
@@ -330,6 +478,8 @@ public final class JWK implements Crypto {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
       certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
+      // assert the certificate is valid
+      certificate.checkValidity();
     }
 
     switch (json.getString("use", "sig")) {
@@ -359,8 +509,8 @@ public final class JWK implements Crypto {
     }
   }
 
-  private String addBoundaries(final String certificate){
-    return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----";
+  private String addBoundaries(final String certificate) {
+    return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----\n";
   }
 
   private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException {

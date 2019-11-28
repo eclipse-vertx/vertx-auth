@@ -18,14 +18,10 @@ package io.vertx.ext.jwt;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 
-import javax.crypto.Mac;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -41,20 +37,7 @@ public final class JWT {
   // simple random as its value is just to create entropy
   private static final Random RND = new Random();
 
-  private static final Map<String, String> ALGORITHM_ALIAS = new HashMap<String, String>() {{
-    put("HS256", "HMacSHA256");
-    put("HS384", "HMacSHA384");
-    put("HS512", "HMacSHA512");
-    put("RS256", "SHA256withRSA");
-    put("RS384", "SHA384withRSA");
-    put("RS512", "SHA512withRSA");
-    put("ES256", "SHA256withECDSA");
-    put("ES384", "SHA384withECDSA");
-    put("ES512", "SHA512withECDSA");
-  }};
-
   private static final Charset UTF8 = StandardCharsets.UTF_8;
-  private static final Logger log = LoggerFactory.getLogger(JWT.class);
 
   // as described in the terminology section: https://tools.ietf.org/html/rfc7515#section-2
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -67,39 +50,18 @@ public final class JWT {
     cryptoMap.put("none", Collections.singletonList(new CryptoNone()));
   }
 
+  /**
+   * Loads all keys from a keystore.
+   * @deprecated Use {@link JWK#from(KeyStore, char[])} instead.
+   * @param keyStore the keystore to load
+   * @param keyStorePassword the keystore password
+   */
   @Deprecated
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
     this();
-
-    // load MACs
-    for (String alg : Arrays.asList("HS256", "HS384", "HS512")) {
-      try {
-        Mac mac = getMac(keyStore, keyStorePassword, alg);
-        if (mac != null) {
-          List<Crypto> l = cryptoMap.computeIfAbsent(alg, k -> new ArrayList<>());
-          l.add(new CryptoMac(mac));
-        } else {
-          log.info(alg + " not available");
-        }
-      } catch (RuntimeException e) {
-        log.warn(alg + " not supported", e);
-      }
-    }
-
-    for (String alg : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
-      try {
-        X509Certificate certificate = getCertificate(keyStore, alg);
-        PrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alg);
-        if (certificate != null && privateKey != null) {
-          List<Crypto> l = cryptoMap.computeIfAbsent(alg, k -> new ArrayList<>());
-          l.add(new CryptoSignature(ALGORITHM_ALIAS.get(alg), certificate, privateKey));
-        } else {
-          log.info(alg + " not available");
-        }
-      } catch (RuntimeException e) {
-        e.printStackTrace();
-        log.warn(alg + " not supported");
-      }
+    // delegate to the JWK loader
+    for (JWK key : JWK.from(keyStore, keyStorePassword)) {
+      addJWK(key);
     }
   }
 
@@ -130,49 +92,6 @@ public final class JWT {
     return this;
   }
 
-  /**
-   * Creates a new Message Authentication Code
-   *
-   * @param keyStore a valid JKS
-   * @param alias    algorithm to use e.g.: HmacSHA256
-   * @return Mac implementation
-   */
-  private Mac getMac(final KeyStore keyStore, final char[] keyStorePassword, final String alias) {
-    try {
-      final Key secretKey = keyStore.getKey(alias, keyStorePassword);
-
-      // key store does not have the requested algorithm
-      if (secretKey == null) {
-        return null;
-      }
-
-      Mac mac = Mac.getInstance(secretKey.getAlgorithm());
-      mac.init(secretKey);
-
-      return mac;
-    } catch (NoSuchAlgorithmException | InvalidKeyException | UnrecoverableKeyException | KeyStoreException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private X509Certificate getCertificate(final KeyStore keyStore, final String alias) {
-    try {
-      return (X509Certificate) keyStore.getCertificate(alias);
-
-    } catch (KeyStoreException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private PrivateKey getPrivateKey(final KeyStore keyStore, final char[] keyStorePassword, final String alias) {
-    try {
-      return (PrivateKey) keyStore.getKey(alias, keyStorePassword);
-
-    } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   public static JsonObject parse(final byte[] token) {
     return parse(new String(token, UTF8));
   }
@@ -200,15 +119,24 @@ public final class JWT {
   }
 
   public JsonObject decode(final String token) {
+    // lock the secure state
+    final boolean unsecure = isUnsecure();
     String[] segments = token.split("\\.");
-    if (segments.length != (isUnsecure() ? 2 : 3)) {
-      throw new RuntimeException("Not enough or too many segments");
+
+    if (unsecure) {
+      if (segments.length != 2) {
+        throw new RuntimeException("JWT is in unsecure mode but token is signed.");
+      }
+    } else {
+      if (segments.length != 3) {
+        throw new RuntimeException("JWT is in secure mode but token is not signed.");
+      }
     }
 
     // All segment should be base64
     String headerSeg = segments[0];
     String payloadSeg = segments[1];
-    String signatureSeg = isUnsecure() ? null : segments[2];
+    String signatureSeg = unsecure ? null : segments[2];
 
     if ("".equals(signatureSeg)) {
       throw new RuntimeException("Signature is required");
@@ -227,12 +155,12 @@ public final class JWT {
     }
 
     // if we only allow secure alg, then none is not a valid option
-    if (!isUnsecure() && "none".equals(alg)) {
+    if (!unsecure && "none".equals(alg)) {
       throw new RuntimeException("Algorithm \"none\" not allowed");
     }
 
     // verify signature. `sign` will return base64 string.
-    if (!isUnsecure()) {
+    if (!unsecure) {
       byte[] payloadInput = base64urlDecode(signatureSeg);
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 

@@ -13,7 +13,6 @@ public class DummyVerticle extends AbstractVerticle {
         .setPassword("secret"));
 
     public void start() {
-        System.out.println(this);
         JWTAuth.create(vertx, config);
     }
 }

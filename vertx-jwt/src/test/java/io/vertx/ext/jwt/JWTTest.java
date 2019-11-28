@@ -33,7 +33,10 @@ public class JWTTest {
       ks.load(in, "secret".toCharArray());
     }
 
-    JWT jwt = new JWT(ks, "secret".toCharArray());
+    JWT jwt = new JWT();
+    for (JWK key : JWK.from(ks, "secret".toCharArray())) {
+      jwt.addJWK(key);
+    }
     assertFalse(jwt.isUnsecure());
     // assert algorithms are available
     assertTrue(jwt.availableAlgorithms().containsAll(Arrays.asList("HS256", "HS512", "RS256", "HS384", "none")));

@@ -50,7 +50,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   private static final JsonArray EMPTY_ARRAY = new JsonArray();
 
-  private final JWT jwt;
+  private final JWT jwt = new JWT();
 
   private final String permissionsClaimKey;
   private final JWTOptions jwtOptions;
@@ -74,12 +74,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
             ks.load(in, keyStore.getPassword().toCharArray());
           }
         }
-
-        this.jwt = new JWT(ks, keyStore.getPassword().toCharArray());
+        // load all available keys in the keystore
+        for (JWK key : JWK.from(ks, keyStore.getPassword().toCharArray())) {
+          jwt.addJWK(key);
+        }
       } else {
         // no key file attempt to load pem keys
-        this.jwt = new JWT();
-
         final List<PubSecKeyOptions> keys = config.getPubSecKeys();
 
         if (keys != null) {

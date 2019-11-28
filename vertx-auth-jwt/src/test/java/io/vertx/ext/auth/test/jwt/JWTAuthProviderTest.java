@@ -499,9 +499,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testGenerateNewTokenForceAlgorithm() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
-        .setPath("gce.jks")
-        .setType("jks")
-        .setPassword("notasecret")));
+        .setPath("keystore.jceks")
+        .setType("jceks")
+        .setPassword("secret")));
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("RS256"));
     assertNotNull(token);
