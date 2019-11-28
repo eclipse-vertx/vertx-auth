@@ -20,10 +20,12 @@ import io.vertx.codegen.annotations.VertxGen;
 
 /**
  * The type of the Shiro auth realm
+ * @deprecated ShiroAuth has been replaced by {@link io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@link io.vertx.ext.auth.ldap.LdapAuthentication}
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
+@Deprecated
 public enum ShiroAuthRealmType {
 
   /**
