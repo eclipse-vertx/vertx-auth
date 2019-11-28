@@ -253,6 +253,12 @@ a good practice `HS256` should be present:
 When no keystore is provided the implementation falls back in unsecure mode and signatures will not be verified, this
 is useful for the cases where the payload if signed and or encrypted by external means.
 
+Key pairs stored on a keystore always include a certificate. The validity of the certificate is tested on load and keys
+will not be loaded if either expired or not yet valid to be use.
+
+All keys algorithms will be checked if can be matched to the given alias. For example an `RS256` key will not be loaded
+if issued with a `EC` algorithm, or if issued with `RSA` but signature `SHA1WithRSA` instead of `SHA256WithRSA`.
+
 ===== Generate a new Keystore file
 
 The only required tool to generate a keystore file is `keytool`, you can now specify which algorithms you need by
