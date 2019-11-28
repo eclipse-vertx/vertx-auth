@@ -24,7 +24,6 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
 import io.vertx.ext.auth.Authorizations;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;

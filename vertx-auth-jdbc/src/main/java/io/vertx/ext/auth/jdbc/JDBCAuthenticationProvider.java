@@ -17,12 +17,10 @@
 package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.Fluent;
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
+import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationProviderImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
@@ -35,27 +33,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
-public interface JDBCAuth extends AuthProvider {
-
-  /**
-   * The default query to be used for authentication
-   */
-  String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD, PASSWORD_SALT FROM USER WHERE USERNAME = ?";
-
-  /**
-   * The default query to retrieve all roles for the user
-   */
-  String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
-
-  /**
-   * The default query to retrieve all permissions for the role
-   */
-  String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
-
-  /**
-   * The default role prefix
-   */
-  String DEFAULT_ROLE_PREFIX = "role:";
+public interface JDBCAuthenticationProvider extends AuthProvider {
 
   /**
    * Create a JDBC auth provider implementation
@@ -63,49 +41,9 @@ public interface JDBCAuth extends AuthProvider {
    * @param client  the JDBC client instance
    * @return  the auth provider
    */
-  static JDBCAuth create(Vertx vertx, JDBCClient client) {
-    return new JDBCAuthImpl(vertx, client);
+  static JDBCAuthenticationProvider create(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
+    return new JDBCAuthenticationProviderImpl(client, hashStrategy, options);
   }
-
-  /**
-   * Set the authentication query to use. Use this if you want to override the default authentication query.
-   * @param authenticationQuery  the authentication query
-   * @return  a reference to this for fluency
-   */
-  @Fluent
-  JDBCAuth setAuthenticationQuery(String authenticationQuery);
-
-  /**
-   * Set the roles query to use. Use this if you want to override the default roles query.
-   * @param rolesQuery  the roles query
-   * @return  a reference to this for fluency
-   */
-  @Fluent
-  JDBCAuth setRolesQuery(String rolesQuery);
-
-  /**
-   * Set the permissions query to use. Use this if you want to override the default permissions query.
-   * @param permissionsQuery  the permissions query
-   * @return  a reference to this for fluency
-   */
-  @Fluent
-  JDBCAuth setPermissionsQuery(String permissionsQuery);
-
-  /**
-   * Set the role prefix to distinguish from permissions when checking for isPermitted requests.
-   * @param rolePrefix a Prefix e.g.: "role:"
-   * @return a reference to this for fluency
-   */
-  @Fluent
-  JDBCAuth setRolePrefix(String rolePrefix);
-
-  /**
-   * Set the hash strategy to use. Use this if you want override the default hash strategy
-   * @param strategy  the strategy
-   * @return a reference to this for fluency
-   */
-  @GenIgnore
-  JDBCAuth setHashStrategy(JDBCHashStrategy strategy);
 
   /**
    * Compute the hashed password given the unhashed password and the salt without nonce
@@ -157,5 +95,5 @@ public interface JDBCAuth extends AuthProvider {
    * @return a reference to this for fluency
    */
   @Fluent
-  JDBCAuth setNonces(JsonArray nonces);
+  JDBCAuthenticationProvider setNonces(JsonArray nonces);
 }
