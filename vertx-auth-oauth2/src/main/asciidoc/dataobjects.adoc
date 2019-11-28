@@ -97,7 +97,7 @@ Set the provider scope separator
 |[[sendBufferSize]]`@sendBufferSize`|`Number (int)`|-
 |[[sendUnmaskedFrames]]`@sendUnmaskedFrames`|`Boolean`|-
 |[[site]]`@site`|`String`|+++
-Root URL for the provider
+Root URL for the provider without trailing slashes
 +++
 |[[soLinger]]`@soLinger`|`Number (int)`|-
 |[[ssl]]`@ssl`|`Boolean`|-

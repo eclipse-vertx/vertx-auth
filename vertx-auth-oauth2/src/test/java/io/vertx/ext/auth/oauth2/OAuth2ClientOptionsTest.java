@@ -46,4 +46,15 @@ public class OAuth2ClientOptionsTest {
     assertEquals("https://login.windows.net/guid", config.getSite());
     assertEquals("guid", config.getExtraParameters().getString("resource"));
   }
+
+  @Test
+  public void TestTraillingSlash() {
+    OAuth2ClientOptions config = new OAuth2ClientOptions();
+
+    config
+      .setSite("https://login.microsoftonline.com/")
+      .replaceVariables(false);
+
+    assertEquals("https://login.microsoftonline.com", config.getSite());
+  }
 }

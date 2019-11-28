@@ -267,7 +267,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   /**
-   * Root URL for the provider
+   * Root URL for the provider without trailing slashes
    * @param site a url
    * @return self
    */
@@ -532,6 +532,11 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   }
 
   public void replaceVariables(boolean strict) {
+    // strip trailing slashes if present
+    if (site != null && site.endsWith("/")) {
+      site = site.substring(0, site.length() - 1);
+    }
+
     site = replaceVariables(site);
 
     authorizationPath = replaceVariables(authorizationPath);
