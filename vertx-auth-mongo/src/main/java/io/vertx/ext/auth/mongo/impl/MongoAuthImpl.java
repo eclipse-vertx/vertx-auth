@@ -23,7 +23,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.ext.auth.PermissionBasedAuthorization;
+import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
 import io.vertx.ext.mongo.MongoClient;
 
@@ -35,6 +38,8 @@ import java.util.List;
  * @author mremme
  */
 public class MongoAuthImpl implements MongoAuth {
+  final static String PROPERTY_FIELD_SALT = "__field-salt__";
+  final static String PROPERTY_FIELD_PASSWORD = "__field-password__";
   private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
   private MongoClient mongoClient;
   private String usernameField = DEFAULT_USERNAME_FIELD;
@@ -127,7 +132,7 @@ public class MongoAuthImpl implements MongoAuth {
     }
     case 1: {
       JsonObject json = resultList.result().get(0);
-      User user = new MongoUser(json, this);
+      User user = createUser(json);
       if (examinePassword(user, authToken))
         return user;
       else {
@@ -165,16 +170,38 @@ public class MongoAuthImpl implements MongoAuth {
     if (permissions != null) {
       principal.put(permissionField, new JsonArray(permissions));
     }
-    MongoUser user = new MongoUser(principal, this);
 
     if (getHashStrategy().getSaltStyle() == HashSaltStyle.COLUMN) {
       principal.put(getSaltField(), DefaultHashStrategy.generateSalt());
     }
 
+    User user = createUser(principal);
     String cryptPassword = getHashStrategy().computeHash(password, user);
     principal.put(getPasswordField(), cryptPassword);
 
     mongoClient.save(getCollectionName(), user.principal(), resultHandler);
+  }
+  
+  private User createUser(JsonObject json) {
+    User user = new UserImpl(json);
+    json.put(PROPERTY_FIELD_SALT, getSaltField());
+    json.put(PROPERTY_FIELD_PASSWORD, getPasswordField());
+    JsonArray roles = json.getJsonArray(roleField);
+    if (roles!=null) {
+      for (int i=0; i<roles.size(); i++) {
+        String role = roles.getString(i);
+        user.authorizations().add("mongo-authentication", RoleBasedAuthorization.create(role));
+      }
+    }
+    JsonArray permissions = json.getJsonArray(permissionField);
+    if (permissions!=null) {
+      for (int i=0; i<permissions.size(); i++) {
+        String permission = permissions.getString(i);
+        user.authorizations().add("mongo-authentication", PermissionBasedAuthorization.create(permission));
+      }
+    }
+    user.setAuthProvider(this);
+    return user;
   }
 
   /**

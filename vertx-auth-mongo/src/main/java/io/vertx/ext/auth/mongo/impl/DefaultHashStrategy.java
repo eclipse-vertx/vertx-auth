@@ -112,7 +112,8 @@ public class DefaultHashStrategy implements HashStrategy {
    */
   @Override
   public String getStoredPwd(User user) {
-    return ((MongoUser) user).getPassword();
+    String fieldPassword = user.principal().getString(MongoAuthImpl.PROPERTY_FIELD_PASSWORD);
+    return fieldPassword != null ? user.principal().getString(fieldPassword) : null;
   }
 
   /*
@@ -126,7 +127,8 @@ public class DefaultHashStrategy implements HashStrategy {
       case NO_SALT:
         return null;
       case COLUMN:
-        return ((MongoUser) user).getSalt();
+        String fieldSalt = user.principal().getString(MongoAuthImpl.PROPERTY_FIELD_SALT);
+        return fieldSalt != null ? user.principal().getString(fieldSalt) : null;
       case EXTERNAL:
         return externalSalt;
       default:

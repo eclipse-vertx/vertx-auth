@@ -16,22 +16,27 @@
 
 package io.vertx.ext.auth.shiro.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.shiro.ShiroAuth;
-import io.vertx.ext.auth.shiro.ShiroAuthOptions;
+import java.util.Objects;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.realm.GetAuthorizationsHack;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.UserImpl;
+import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 
 /**
  *
@@ -41,7 +46,6 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
 
   private Vertx vertx;
   private org.apache.shiro.mgt.SecurityManager securityManager;
-  private String rolePrefix = DEFAULT_ROLE_PREFIX;
   private String realmName;
 
   public static ShiroAuth create(Vertx vertx, ShiroAuthOptions options) {
@@ -78,20 +82,13 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
       AuthenticationToken token = new UsernamePasswordToken(username, password);
       try {
         subject.login(token);
-        fut.complete(new ShiroUser(vertx, securityManager, subject, rolePrefix));
+        fut.complete(createUser(securityManager, subject));
       } catch (AuthenticationException e) {
         fut.fail(e);
       }
     }, resultHandler);
   }
-
-  @Override
-  public ShiroAuth setRolePrefix(String rolePrefix) {
-    this.rolePrefix = rolePrefix;
-    return this;
-  }
-
-
+  
   Vertx getVertx() {
     return vertx;
   }
@@ -103,4 +100,15 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   String getRealmName() {
     return realmName;
   }
+
+  private User createUser(org.apache.shiro.mgt.SecurityManager securityManager, Subject subject) {
+    Objects.requireNonNull(securityManager);
+    Objects.requireNonNull(subject);
+    
+    JsonObject principal = new JsonObject().put("username",  subject.getPrincipal().toString());
+    User result = new UserImpl(principal);
+    result.authorizations().add("shiro-authentication", GetAuthorizationsHack.getAuthorizations(securityManager, subject));
+    return result;
+  }
+
 }

@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.htdigest.HtdigestAuth;
+import io.vertx.ext.auth.impl.UserImpl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -148,7 +149,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
     }
 
     if (digest.equals(authInfo.getString("response"))) {
-      resultHandler.handle(Future.succeededFuture(new HtdigestUser(credential.username, credential.realm)));
+      resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", credential.username).put("realm", credential.realm))));
     } else {
       resultHandler.handle(Future.failedFuture("Bad response"));
     }

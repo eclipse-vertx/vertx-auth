@@ -33,6 +33,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  * as it is the current OWASP recommendation for password storage.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @deprecated This class has been replaced by the class {@link io.vertx.ext.auth.jdbc.JDBCAuthentication} for authentication and {@link io.vertx.ext.auth.jdbc.JDBCAuthorization} for authorization
  */
 @VertxGen
 public interface JDBCAuth extends AuthProvider {
