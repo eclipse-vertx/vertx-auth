@@ -21,18 +21,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-<<<<<<< HEAD
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
-import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
-=======
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
-<<<<<<< HEAD
->>>>>>> updated code based on comments from Paulo:
-=======
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLConnection;
 
@@ -41,23 +32,12 @@ import io.vertx.ext.sql.SQLConnection;
  */
 public class AuthJDBCExamples {
 
-
   public void example5(Vertx vertx, JsonObject jdbcClientConfig) {
 
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
-<<<<<<< HEAD
-<<<<<<< HEAD
     JDBCHashStrategy hashStrategy = JDBCHashStrategy.createPBKDF2(vertx);
     JDBCAuthenticationOptions options = new JDBCAuthenticationOptions();
-    JDBCAuthenticationProvider authenticationProvider = JDBCAuthenticationProvider.create(jdbcClient, hashStrategy, options);
-=======
-
-    JDBCAuthentication authenticationProvider = JDBCAuthentication.create(vertx, jdbcClient);
->>>>>>> updated code based on comments from Paulo:
-=======
-    JDBCHashStrategy jdbcHashStrategy = JDBCHashStrategy.createPBKDF2(vertx);
-    JDBCAuthentication authenticationProvider = JDBCAuthentication.create(jdbcClient, jdbcHashStrategy, new JDBCAuthenticationOptions());
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
+    JDBCAuthentication authenticationProvider = JDBCAuthentication.create(jdbcClient, hashStrategy, options);
   }
 
   public void example6(AuthProvider authProvider) {

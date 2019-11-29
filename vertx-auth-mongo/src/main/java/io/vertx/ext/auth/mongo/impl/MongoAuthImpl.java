@@ -190,14 +190,14 @@ public class MongoAuthImpl implements MongoAuth {
     if (roles!=null) {
       for (int i=0; i<roles.size(); i++) {
         String role = roles.getString(i);
-        user.authorizations().add(RoleBasedAuthorization.create(role));
+        user.authorizations().add("mongo-authentication", RoleBasedAuthorization.create(role));
       }
     }
     JsonArray permissions = json.getJsonArray(permissionField);
     if (permissions!=null) {
       for (int i=0; i<permissions.size(); i++) {
         String permission = permissions.getString(i);
-        user.authorizations().add(PermissionBasedAuthorization.create(permission));
+        user.authorizations().add("mongo-authentication", PermissionBasedAuthorization.create(permission));
       }
     }
     user.setAuthProvider(this);

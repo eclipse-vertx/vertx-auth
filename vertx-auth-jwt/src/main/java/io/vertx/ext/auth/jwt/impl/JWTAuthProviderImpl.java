@@ -172,7 +172,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
       for (Object item : jsonPermissions) {
         if (item instanceof String) {
           String permission = (String) item;
-          result.authorizations().add(PermissionBasedAuthorization.create(permission));
+          result.authorizations().add("jwt-authentication", PermissionBasedAuthorization.create(permission));
         }
       }
     }

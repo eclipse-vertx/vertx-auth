@@ -25,16 +25,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationProviderImpl.java
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationProvider;
-=======
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
-<<<<<<< HEAD
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationImpl.java
-=======
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
@@ -46,31 +38,13 @@ import io.vertx.ext.sql.SQLConnection;
 public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
   private JDBCClient client;
-<<<<<<< HEAD
-=======
-  private JDBCAuthenticationOptions options;
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   private JDBCHashStrategy strategy;
   private JDBCAuthenticationOptions options;
 
-<<<<<<< HEAD
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationProviderImpl.java
-  public JDBCAuthenticationProviderImpl(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
-    this.client = Objects.requireNonNull(client);
-    this.strategy = Objects.requireNonNull(hashStrategy);
-    this.options = Objects.requireNonNull(options);
-=======
-  public JDBCAuthenticationImpl(Vertx vertx, JDBCClient client) {
-    this.client = client;
-    // default strategy
-    strategy = JDBCHashStrategy.createSHA512(vertx);
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationImpl.java
-=======
   public JDBCAuthenticationImpl(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.options = Objects.requireNonNull(options);
     this.strategy = Objects.requireNonNull(hashStrategy);
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   }
 
   @Override
@@ -134,24 +108,6 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
     });
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationProviderImpl.java
-=======
-  @Override
-  public JDBCAuthentication setAuthenticationQuery(String authenticationQuery) {
-    this.authenticateQuery = authenticationQuery;
-    return this;
-  }
-
-  @Override
-  public JDBCAuthentication setHashStrategy(JDBCHashStrategy strategy) {
-    this.strategy = strategy;
-    return this;
-  }
-
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthenticationImpl.java
-=======
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   void executeQuery(String query, JsonArray params, Handler<AsyncResult<ResultSet>> resultHandler) {
     client.getConnection(res -> {
       if (res.succeeded()) {

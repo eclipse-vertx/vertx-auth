@@ -1,9 +1,9 @@
 package org.apache.shiro.realm;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.ModularRealmAuthorizer;
@@ -18,15 +18,15 @@ import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
 public class GetAuthorizationsHack {
 
-  public final static Collection<Authorization> getAuthorizations(SecurityManager securityManager, Subject subject) {
+  public final static Set<Authorization> getAuthorizations(SecurityManager securityManager, Subject subject) {
     Objects.requireNonNull(securityManager);
     
-    Collection<Authorization> result = Collections.emptyList();
+    Set<Authorization> result = Collections.emptySet();
     if (subject.getPrincipals()!=null) {
       if (securityManager instanceof AuthorizingSecurityManager) {
         AuthorizingSecurityManager authorizingSecurityManager = (AuthorizingSecurityManager) securityManager;
         if (authorizingSecurityManager.getAuthorizer() instanceof ModularRealmAuthorizer) {
-          result= new ArrayList<>();
+          result= new HashSet<>();
           ModularRealmAuthorizer modularRealmAuthorizer = (ModularRealmAuthorizer) authorizingSecurityManager.getAuthorizer();
           for (Realm realm: modularRealmAuthorizer.getRealms()) {
             if (realm instanceof AuthorizingRealm) {

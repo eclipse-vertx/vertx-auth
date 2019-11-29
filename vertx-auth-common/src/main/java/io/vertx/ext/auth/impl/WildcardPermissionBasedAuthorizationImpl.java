@@ -74,7 +74,6 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
     if (otherAuthorization instanceof WildcardPermissionBasedAuthorizationImpl) {
       WildcardPermissionBasedAuthorizationImpl otherWildcardPermission = (WildcardPermissionBasedAuthorizationImpl) otherAuthorization;
       if (wildcardPermission.implies((otherWildcardPermission).wildcardPermission)) {
-<<<<<<< HEAD
         if (getResource() == null) {
           return true;
         }
@@ -87,20 +86,6 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
         if (getResource() == null) {
           return true;
         }
-=======
-        if (getResource() == null) {
-          return true;
-        }
-        return getResource().equals(otherWildcardPermission.getResource());
-      }
-    }
-    else if (otherAuthorization instanceof PermissionBasedAuthorization) {
-      PermissionBasedAuthorization otherPermission = (PermissionBasedAuthorization) otherAuthorization;
-      if (this.permission.equals(otherPermission.getPermission())) {
-        if (getResource() == null) {
-          return true;
-        }
->>>>>>> fixed an issue where PermissionBaseAuthorization.verify(Authorization) should be able to verify a WildcardBasedPermission and vice-versa
         return getResource().equals(otherPermission.getResource());
       }
     }

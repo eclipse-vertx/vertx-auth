@@ -32,55 +32,13 @@ public interface JDBCAuthorization extends AuthorizationProvider {
   /**
    * Create a JDBC authorization provider implementation
    *
-<<<<<<< HEAD
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/JDBCAuthorizationProvider.java
    * @param providerId  the provider id
    * @param client  the JDBC client instance
    * @param options  the {@link JDBCAuthorizationOptions}
    * @return  the auth provider
    */
-  static JDBCAuthorizationProvider create(String providerId, JDBCClient client, JDBCAuthorizationOptions options) {
-    return new JDBCAuthorizationProviderImpl(providerId, client, options);
+  static JDBCAuthorization create(String providerId, JDBCClient client, JDBCAuthorizationOptions options) {
+    return new JDBCAuthorizationImpl(providerId, client, options);
   }
 
-=======
-   * @param client the JDBC client instance
-   * @return  the auth provider
-   */
-  static JDBCAuthorization create(JDBCClient client) {
-    return new JDBCAuthorizationImpl(client);
-  }
-
-  /**
-   * Create a JDBC authorization provider implementation
-   *
-=======
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
-   * @param options JDBCAuthorizationOptions
-   * @return  the auth provider
-   */
-  static JDBCAuthorization create(JDBCClient client, JDBCAuthorizationOptions options) {
-    return new JDBCAuthorizationImpl(client, options);
-  }
-
-<<<<<<< HEAD
-  /**
-   * Set the roles query to use. Use this if you want to override the default roles query.
-   * @param rolesQuery  the roles query
-   * @return  a reference to this for fluency
-   */
-  @Fluent
-  JDBCAuthorization setRolesQuery(String rolesQuery);
-
-  /**
-   * Set the permissions query to use. Use this if you want to override the default permissions query.
-   * @param permissionsQuery  the permissions query
-   * @return  a reference to this for fluency
-   */
-  @Fluent
-  JDBCAuthorization setPermissionsQuery(String permissionsQuery);
-
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/JDBCAuthorization.java
-=======
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
 }

@@ -13,13 +13,8 @@ import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthorizationProviderImpl.java
-import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
-import io.vertx.ext.auth.jdbc.JDBCAuthorizationProvider;
-=======
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthorizationImpl.java
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
@@ -30,37 +25,15 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
    * The default key representing the username in the principal
    */
   private final static String DEFAULT_USERNAME_KEY = "username";
-<<<<<<< HEAD
   
   private String providerId;
-  private JDBCClient client;
   private JDBCAuthorizationOptions options;
-=======
-    
   private JDBCClient client;
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
   private String usernameKey;
-  private JDBCAuthorizationOptions options;
-  
-<<<<<<< HEAD
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthorizationProviderImpl.java
-  public JDBCAuthorizationProviderImpl(String providerId, JDBCClient client, JDBCAuthorizationOptions options) {
-    this.providerId = Objects.requireNonNull(providerId);
-=======
-  public JDBCAuthorizationImpl(JDBCClient client) {
-    this.client = Objects.requireNonNull(client);
-    this.roleQuery = DEFAULT_ROLES_QUERY;
-    this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
-    this.usernameKey = DEFAULT_USERNAME_KEY;
-  }
 
-  public JDBCAuthorizationImpl(JDBCAuthorizationOptions options) {
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthorizationImpl.java
+  public JDBCAuthorizationImpl(String providerId, JDBCClient client, JDBCAuthorizationOptions options) {
+    this.providerId = Objects.requireNonNull(providerId);
     this.client = Objects.requireNonNull(client);
-=======
-  public JDBCAuthorizationImpl(JDBCClient client, JDBCAuthorizationOptions options) {
-    this.client = Objects.requireNonNull(client);
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
     this.options = Objects.requireNonNull(options);
     this.usernameKey = DEFAULT_USERNAME_KEY;
   }
@@ -146,23 +119,4 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
       }
     });
   }
-<<<<<<< HEAD
-
-<<<<<<< HEAD:vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthorizationProviderImpl.java
-=======
-  @Override
-  public JDBCAuthorization setRolesQuery(String rolesQuery) {
-    this.roleQuery = rolesQuery;
-    return this;
-  }
-
-  @Override
-  public JDBCAuthorization setPermissionsQuery(String permissionsQuery) {
-    this.permissionsQuery = permissionsQuery;
-    return this;
-  }
-=======
->>>>>>> Added back the class JDBCAuth to be backward compatible. Note that the whole class is marked as deprecated to encourage people to switch to JDBCAuthencation / JDBCAuthorization
-  
->>>>>>> updated code based on comments from Paulo::vertx-auth-jdbc/src/main/java/io/vertx/ext/auth/jdbc/impl/JDBCAuthorizationImpl.java
 }
