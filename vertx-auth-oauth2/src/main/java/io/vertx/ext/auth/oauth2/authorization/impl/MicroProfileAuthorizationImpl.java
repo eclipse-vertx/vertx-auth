@@ -58,7 +58,13 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
     if (groups != null && groups.size() >= 0) {
       for (Object el : groups) {
         // convert to the authorization type
-        authorizations.add(RoleBasedAuthorization.create((String) el));
+        if (el instanceof String) {
+          authorizations.add(RoleBasedAuthorization.create((String) el));
+        } else {
+          // abort the parsing
+          handler.handle(Future.failedFuture("Cannot parse role: " + el));
+          return;
+        }
       }
     }
 
