@@ -17,7 +17,21 @@ package io.vertx.ext.auth.oauth2.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.AuthorizationProvider;
+import io.vertx.ext.auth.oauth2.authorization.impl.MicroProfileAuthorizationImpl;
 
+/**
+ * Implementation of the Microprofile MP-JWT 1.1 RBAC based on the access token groups key.
+ *
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>.
+ */
 @VertxGen
 public interface MicroProfileAuthorization extends AuthorizationProvider {
+
+  /**
+   * Factory method to create a Authorization provider for tokens adhering to the MP-JWT 1.1 spec.
+   * @return a AuthorizationProvider
+   */
+  static MicroProfileAuthorization create() {
+    return new MicroProfileAuthorizationImpl();
+  }
 }
