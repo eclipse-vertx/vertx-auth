@@ -29,6 +29,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthStore;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
@@ -324,7 +325,7 @@ public class WebAuthNImpl implements WebAuthN {
             if (updateUserCredential.failed()) {
               handler.handle(Future.failedFuture(updateUserCredential.cause()));
             } else {
-              handler.handle(Future.succeededFuture(new WebAuthNUser(principal)));
+              handler.handle(Future.succeededFuture(new UserImpl(principal)));
             }
           });
         } catch (RuntimeException | IOException e) {
@@ -363,7 +364,7 @@ public class WebAuthNImpl implements WebAuthN {
                   handler.handle(Future.failedFuture(updateUserCredential.cause()));
                   return;
                 }
-                handler.handle(Future.succeededFuture(new WebAuthNUser(json)));
+                handler.handle(Future.succeededFuture(new UserImpl(json)));
               });
             } catch (RuntimeException | IOException e) {
               handler.handle(Future.failedFuture(e));
