@@ -25,7 +25,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 import io.vertx.ext.auth.htpasswd.impl.hash.Plaintext;
-
+import io.vertx.ext.auth.impl.UserImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +80,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     }
 
     if (strategy.verify(htUsers.get(username), password)) {
-      resultHandler.handle(Future.succeededFuture(new HtpasswdUser(username)));
+      resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", username))));
     } else {
       resultHandler.handle(Future.failedFuture("Bad response"));
     }

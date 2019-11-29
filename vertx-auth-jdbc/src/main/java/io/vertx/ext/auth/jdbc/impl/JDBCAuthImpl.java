@@ -16,18 +16,23 @@
 
 package io.vertx.ext.auth.jdbc.impl;
 
-import io.vertx.core.*;
+import java.util.Objects;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
+import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.jdbc.JDBCAuthorization;
+import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.SQLConnection;
-
-import java.util.function.Consumer;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -35,145 +40,95 @@ import java.util.function.Consumer;
 public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   private JDBCClient client;
-  private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
-  private String rolesQuery = DEFAULT_ROLES_QUERY;
-  private String permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
-  private String rolePrefix = DEFAULT_ROLE_PREFIX;
-  private JDBCHashStrategy strategy;
+  private JDBCAuthentication authenticationProvider;
+  private JDBCAuthenticationOptions authenticationOptions;
+  private JDBCAuthorization authorizationProvider;
+  private JDBCAuthorizationOptions authorizationOptions;
+  private JDBCHashStrategy hashStrategy;
 
   public JDBCAuthImpl(Vertx vertx, JDBCClient client) {
     this.client = client;
-    // default strategy
-    strategy = JDBCHashStrategy.createSHA512(vertx);
+    this.hashStrategy = JDBCHashStrategy.createSHA512(vertx);
+    this.authenticationOptions = new JDBCAuthenticationOptions();
+    this.authorizationOptions = new JDBCAuthorizationOptions();
+    this.authenticationProvider = JDBCAuthentication.create(client, hashStrategy, authenticationOptions);
+    this.authorizationProvider = JDBCAuthorization.create("jdbc-auth", client, authorizationOptions);
   }
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-
-    String username = authInfo.getString("username");
-    if (username == null) {
-      resultHandler.handle(Future.failedFuture("authInfo must contain username in 'username' field"));
-      return;
-    }
-    String password = authInfo.getString("password");
-    if (password == null) {
-      resultHandler.handle(Future.failedFuture("authInfo must contain password in 'password' field"));
-      return;
-    }
-    executeQuery(authenticateQuery, new JsonArray().add(username), resultHandler, rs -> {
-
-      switch (rs.getNumRows()) {
-        case 0: {
-          // Unknown user/password
-          resultHandler.handle(Future.failedFuture("Invalid username/password"));
-          break;
-        }
-        case 1: {
-          JsonArray row = rs.getResults().get(0);
-          String hashedStoredPwd = strategy.getHashedStoredPwd(row);
-          String salt = strategy.getSalt(row);
-          // extract the version (-1 means no version)
-          int version = -1;
-          int sep = hashedStoredPwd.lastIndexOf('$');
-          if (sep != -1) {
-            try {
-              version = Integer.parseInt(hashedStoredPwd.substring(sep + 1));
-            } catch (NumberFormatException e) {
-              // the nonce version is not a number
-              resultHandler.handle(Future.failedFuture("Invalid nonce version: " + version));
-              return;
-            }
+    authenticationProvider.authenticate(authInfo, authenticationResult -> {
+      if (authenticationResult.failed()) {
+        resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
+      } else {
+        User user = authenticationResult.result();
+        authorizationProvider.getAuthorizations(user, userAuthorizationResult -> {
+          if (userAuthorizationResult.failed()) {
+            // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
+            // for now, lets return a faillure
+            resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
           }
-          String hashedPassword = strategy.computeHash(password, salt, version);
-          if (JDBCHashStrategy.isEqual(hashedStoredPwd, hashedPassword)) {
-            resultHandler.handle(Future.succeededFuture(new JDBCUser(username, this, rolePrefix)));
-          } else {
-            resultHandler.handle(Future.failedFuture("Invalid username/password"));
+          else {
+            user.authorizations().add(authorizationProvider.getId(), userAuthorizationResult.result());
+            resultHandler.handle(Future.succeededFuture(user));
           }
-          break;
-        }
-        default: {
-          // More than one row returned!
-          resultHandler.handle(Future.failedFuture("Failure in authentication"));
-          break;
-        }
+        });
       }
     });
   }
 
   @Override
   public JDBCAuth setAuthenticationQuery(String authenticationQuery) {
-    this.authenticateQuery = authenticationQuery;
+    this.authenticationOptions.setAuthenticationQuery(authenticationQuery);
     return this;
   }
 
   @Override
   public JDBCAuth setRolesQuery(String rolesQuery) {
-    this.rolesQuery = rolesQuery;
+    this.authorizationOptions.setRolesQuery(rolesQuery);
     return this;
   }
 
   @Override
   public JDBCAuth setPermissionsQuery(String permissionsQuery) {
-    this.permissionsQuery = permissionsQuery;
+    this.authorizationOptions.setPermissionsQuery(permissionsQuery);
     return this;
   }
 
   @Override
   public JDBCAuth setRolePrefix(String rolePrefix) {
-    this.rolePrefix = rolePrefix;
     return this;
   }
 
   @Override
   public JDBCAuth setHashStrategy(JDBCHashStrategy strategy) {
-    this.strategy = strategy;
+    this.hashStrategy = Objects.requireNonNull(strategy);
+    // we've got to recreate the authenticationProvider provider to pick-up the new hash strategy
+    this.authenticationProvider = JDBCAuthentication.create(client, strategy, authenticationOptions);
     return this;
   }
 
-  <T> void executeQuery(String query, JsonArray params, Handler<AsyncResult<T>> resultHandler,
-                                  Consumer<ResultSet> resultSetConsumer) {
-    client.getConnection(res -> {
-      if (res.succeeded()) {
-        SQLConnection conn = res.result();
-        conn.queryWithParams(query, params, queryRes -> {
-          if (queryRes.succeeded()) {
-            ResultSet rs = queryRes.result();
-            resultSetConsumer.accept(rs);
-          } else {
-            resultHandler.handle(Future.failedFuture(queryRes.cause()));
-          }
-          conn.close(closeRes -> {
-          });
-        });
-      } else {
-        resultHandler.handle(Future.failedFuture(res.cause()));
-      }
-    });
-  }
-
-
   @Override
   public String computeHash(String password, String salt, int version) {
-    return strategy.computeHash(password, salt, version);
+    return hashStrategy.computeHash(password, salt, version);
   }
 
   @Override
   public String generateSalt() {
-    return strategy.generateSalt();
+    return hashStrategy.generateSalt();
   }
 
   @Override
   public JDBCAuth setNonces(JsonArray nonces) {
-    strategy.setNonces(nonces);
+    hashStrategy.setNonces(nonces);
     return this;
   }
 
   String getRolesQuery() {
-    return rolesQuery;
+    return authorizationOptions.getRolesQuery();
   }
 
   String getPermissionsQuery() {
-    return permissionsQuery;
+    return authorizationOptions.getPermissionsQuery();
   }
 }

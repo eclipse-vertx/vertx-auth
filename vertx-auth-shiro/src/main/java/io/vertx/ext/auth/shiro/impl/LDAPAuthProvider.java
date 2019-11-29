@@ -16,13 +16,21 @@
 
 package io.vertx.ext.auth.shiro.impl;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_AUTHENTICATION_MECHANISM;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_CONTEXT_FACTORY_CLASS_NAME;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_POOLING_ENABLED;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_REFERRAL;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_SYSTEM_PASSWORD;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_SYSTEM_USERNAME;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_URL;
+import static io.vertx.ext.auth.shiro.LDAPProviderConstants.LDAP_USER_DN_TEMPLATE_FIELD;
+
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.apache.shiro.realm.ldap.JndiLdapRealm;
 
-import static io.vertx.ext.auth.shiro.LDAPProviderConstants.*;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 
 /**
  *

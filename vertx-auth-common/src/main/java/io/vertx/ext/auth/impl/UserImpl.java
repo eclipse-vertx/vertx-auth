@@ -24,7 +24,6 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.Authorization;
 import io.vertx.ext.auth.AuthorizationContext;
 import io.vertx.ext.auth.Authorizations;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
 import io.vertx.ext.auth.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
@@ -90,7 +89,7 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   // TODO: remove this method
-  public User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
+  private User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
     Objects.requireNonNull(authorization);
     Objects.requireNonNull(resultHandler);
 

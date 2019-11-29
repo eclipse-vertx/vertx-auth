@@ -21,7 +21,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuth;
+import io.vertx.ext.auth.jdbc.JDBCAuthentication;
+import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLConnection;
 
@@ -30,12 +32,12 @@ import io.vertx.ext.sql.SQLConnection;
  */
 public class AuthJDBCExamples {
 
-
   public void example5(Vertx vertx, JsonObject jdbcClientConfig) {
 
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
-
-    JDBCAuth authProvider = JDBCAuth.create(vertx, jdbcClient);
+    JDBCHashStrategy hashStrategy = JDBCHashStrategy.createPBKDF2(vertx);
+    JDBCAuthenticationOptions options = new JDBCAuthenticationOptions();
+    JDBCAuthentication authenticationProvider = JDBCAuthentication.create(jdbcClient, hashStrategy, options);
   }
 
   public void example6(AuthProvider authProvider) {
@@ -75,10 +77,10 @@ public class AuthJDBCExamples {
 
   }
 
-  public void example9(JDBCAuth auth, SQLConnection conn) {
+  public void example9(JDBCHashStrategy hashStrategy, SQLConnection conn) {
 
-    String salt = auth.generateSalt();
-    String hash = auth.computeHash("sausages", salt);
+    String salt = hashStrategy.generateSalt();
+    String hash = hashStrategy.computeHash("sausages", salt, -1);
     // save to the database
     conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
       if (res.succeeded()) {
@@ -87,17 +89,17 @@ public class AuthJDBCExamples {
     });
   }
 
-  public void example10(JDBCAuth auth) {
-    auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+  public void example10(JDBCHashStrategy hashStrategy) {
+    hashStrategy.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
   }
 
-  public void example11(JDBCAuth auth, SQLConnection conn) {
+  public void example11(JDBCHashStrategy hashStrategy, SQLConnection conn) {
 
-    auth.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
+    hashStrategy.setNonces(new JsonArray().add("random_hash_1").add("random_hash_1"));
 
-    String salt = auth.generateSalt();
+    String salt = hashStrategy.generateSalt();
     // we will pick the second nonce
-    String hash = auth.computeHash("sausages", salt, 1);
+    String hash = hashStrategy.computeHash("sausages", salt, 1);
     // save to the database
     conn.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add("tim").add(hash).add(salt), res -> {
       if (res.succeeded()) {

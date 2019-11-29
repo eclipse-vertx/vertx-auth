@@ -22,10 +22,12 @@ import io.vertx.ext.jdbc.JDBCClient;
 
 /**
  * Options configuring JDBC authentication.
+ * @deprecated This class has been replaced by the class {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions} for authentication and {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions} for authorization
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
+@Deprecated
 public class JDBCAuthOptions implements io.vertx.ext.auth.AuthOptions {
 
   private boolean shared;

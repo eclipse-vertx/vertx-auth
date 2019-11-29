@@ -35,3 +35,43 @@ Set whether the JDBC client is shared or non shared.
 +++
 |===
 
+[[JDBCAuthenticationOptions]]
+== JDBCAuthenticationOptions
+
+++++
+ Options configuring JDBC authentication.
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[authenticationQuery]]`@authenticationQuery`|`String`|+++
+Set the authentication query to use. Use this if you want to override the
+ default authentication query.
++++
+|===
+
+[[JDBCAuthorizationOptions]]
+== JDBCAuthorizationOptions
+
+++++
+ Options configuring JDBC authentication.
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[permissionsQuery]]`@permissionsQuery`|`String`|+++
+Set the permissions query to use. Use this if you want to override the
+ default permissions query.
++++
+|[[rolesQuery]]`@rolesQuery`|`String`|+++
+Set the roles query to use. Use this if you want to override the default
+ roles query.
++++
+|===
+
