@@ -10,22 +10,22 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.authorization.AndAuthorization;
 import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.OrAuthorization;
 
-public class AndAuthorizationConverter {
+public class OrAuthorizationConverter {
 
   private final static String FIELD_TYPE = "type";
-  private final static String TYPE_AND_AUTHORIZATION = "and";
+  private final static String TYPE_AND_AUTHORIZATION = "or";
   private final static String FIELD_AUTHORIZATIONS = "authorizations";
 
-  public static JsonObject encode(AndAuthorization value) throws IllegalArgumentException {
+  public static JsonObject encode(OrAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
@@ -38,11 +38,11 @@ public class AndAuthorizationConverter {
     return result;
   }
 
-  public static AndAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static OrAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_AND_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {
-      AndAuthorization result = AndAuthorization.create();
+      OrAuthorization result = OrAuthorization.create();
       JsonArray authorizations = json.getJsonArray(FIELD_AUTHORIZATIONS);
       for (int i = 0; i < authorizations.size(); i++) {
         JsonObject authorization = authorizations.getJsonObject(i);

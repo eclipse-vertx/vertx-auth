@@ -15,7 +15,7 @@ package io.vertx.ext.auth.authorization;
 import java.util.List;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.AndAuthorizationImpl;
+import io.vertx.ext.auth.authorization.impl.AndAuthorizationImpl;
 
 /**
  * Allows to perform a logical 'and' between several authorizations

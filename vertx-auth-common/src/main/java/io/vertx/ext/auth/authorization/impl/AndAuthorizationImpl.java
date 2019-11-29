@@ -10,7 +10,7 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.ArrayList;
 import java.util.List;

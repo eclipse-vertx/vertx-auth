@@ -24,8 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.AuthorizationContextImpl;
-import io.vertx.ext.auth.impl.PermissionBasedAuthorizationConverter;
+import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
+import io.vertx.ext.auth.authorization.impl.PermissionBasedAuthorizationConverter;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;

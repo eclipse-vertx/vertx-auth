@@ -27,6 +27,8 @@ import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
+import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 
 /**
  * Default implementation of a User

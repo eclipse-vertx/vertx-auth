@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;

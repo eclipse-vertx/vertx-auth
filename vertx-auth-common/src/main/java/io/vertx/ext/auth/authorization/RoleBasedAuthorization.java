@@ -14,7 +14,7 @@ package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.RoleBasedAuthorizationImpl;
+import io.vertx.ext.auth.authorization.impl.RoleBasedAuthorizationImpl;
 
 /**
  * Represents a role. Note that this role can optionally be assigned to a

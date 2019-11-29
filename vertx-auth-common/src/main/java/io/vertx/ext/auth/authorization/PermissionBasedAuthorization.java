@@ -14,7 +14,7 @@ package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.PermissionBasedAuthorizationImpl;
+import io.vertx.ext.auth.authorization.impl.PermissionBasedAuthorizationImpl;
 
 /**
  * Represents a permission Note that the permission can optionally be assigned

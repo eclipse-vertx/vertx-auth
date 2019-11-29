@@ -24,7 +24,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorizations;
-import io.vertx.ext.auth.impl.AuthorizationsImpl;
+import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
 /**

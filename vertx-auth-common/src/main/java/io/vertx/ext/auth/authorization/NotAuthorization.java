@@ -13,7 +13,7 @@
 package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.NotAuthorizationImpl;
+import io.vertx.ext.auth.authorization.impl.NotAuthorizationImpl;
 
 /**
  * Allows to perform a logical 'not' of the specified authorization
