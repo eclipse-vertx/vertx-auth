@@ -13,6 +13,9 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -72,7 +75,7 @@ public class PermissionBasedAuthorizationTest {
     assertTrue(PermissionBasedAuthorization.create("p1").verify(WildcardPermissionBasedAuthorization.create("p1")));
     assertTrue(PermissionBasedAuthorization.create("p1.*").verify(WildcardPermissionBasedAuthorization.create("p1.*")));
   }
-  
+
   @Test
   public void testMatch1(TestContext should) {
     final Async test = should.async();

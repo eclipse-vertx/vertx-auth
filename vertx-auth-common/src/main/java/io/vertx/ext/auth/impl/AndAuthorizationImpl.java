@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.vertx.ext.auth.AndAuthorization;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.AuthorizationContext;
+import io.vertx.ext.auth.authorization.AndAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
 
 public class AndAuthorizationImpl implements AndAuthorization {
 

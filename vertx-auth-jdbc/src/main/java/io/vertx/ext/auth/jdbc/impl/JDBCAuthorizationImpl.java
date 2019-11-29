@@ -9,9 +9,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
-import io.vertx.ext.auth.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
@@ -20,12 +20,12 @@ import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
 public class JDBCAuthorizationImpl implements JDBCAuthorization {
-  
+
   /**
    * The default key representing the username in the principal
    */
   private final static String DEFAULT_USERNAME_KEY = "username";
-  
+
   private String providerId;
   private JDBCAuthorizationOptions options;
   private JDBCClient client;

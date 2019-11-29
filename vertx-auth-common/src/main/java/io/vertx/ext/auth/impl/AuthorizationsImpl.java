@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.Authorizations;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.Authorizations;
 
 public class AuthorizationsImpl implements Authorizations {
 

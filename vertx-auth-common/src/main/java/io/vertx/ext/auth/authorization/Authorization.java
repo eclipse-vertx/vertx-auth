@@ -10,16 +10,16 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
- * Interface representing any kind of authorization such as: 
+ * Interface representing any kind of authorization such as:
  * <ul>
  *   <li>Role based authorization
  *   <li>Permission based authorization
- *   <li>Logical authorization (AND, OR, NOT) 
+ *   <li>Logical authorization (AND, OR, NOT)
  *   <li>Time based authorization (ie: allow access the last 5 days of the month, from 8am till 10am, etc.)
  *   <li>Context based authorization (ie: allow access if the ip address is 'xxx.xxx.xxx.xxx')
  *   <li>Custom based authorization (ie: based on a script or hard-coded code specific to an application)
@@ -34,7 +34,7 @@ import io.vertx.codegen.annotations.VertxGen;
  *   <li>{@link RoleBasedAuthorization}
  *   <li>{@link WildcardPermissionBasedAuthorization}
  * </ul>
- * 
+ *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
@@ -44,7 +44,7 @@ public interface Authorization {
   /**
    * this methods verifies whether or not the authorization match the specified
    * context.
-   * 
+   *
    * @param context
    * @return
    */
@@ -52,13 +52,13 @@ public interface Authorization {
 
   /**
    * this method verifies whether or not the authorization implies the specified
-   * authorization. 
+   * authorization.
    * </br>Note that it doesn't always mean an exact match. For instance,
    * in the case of a {@link WildcardPermissionBasedAuthorization}, this method
    * may return true even if the permissions are different
-   * </br>WildcardPermissionBasedAuthorization.create('*').implies(WildcardPermissionBasedAuthorization.create('anypermission')) 
+   * </br>WildcardPermissionBasedAuthorization.create('*').implies(WildcardPermissionBasedAuthorization.create('anypermission'))
    * would return true
-   * 
+   *
    * @param authorization
    * @return
    */

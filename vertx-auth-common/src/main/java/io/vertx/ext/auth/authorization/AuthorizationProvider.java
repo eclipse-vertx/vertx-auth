@@ -10,7 +10,7 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.ext.auth.User;
 
 /**
  * The role of an AuthorizationProvider is to return a set of Authorization.

@@ -13,11 +13,11 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.oauth2.authorization;
+package io.vertx.ext.auth.authorization.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.AuthorizationProvider;
-import io.vertx.ext.auth.oauth2.authorization.impl.MicroProfileAuthorizationImpl;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.providers.impl.MicroProfileAuthorizationImpl;
 
 /**
  * Implementation of the Microprofile MP-JWT 1.1 RBAC based on the access token groups key.
@@ -32,6 +32,18 @@ public interface MicroProfileAuthorization extends AuthorizationProvider {
    * @return a AuthorizationProvider
    */
   static MicroProfileAuthorization create() {
-    return new MicroProfileAuthorizationImpl();
+    return create(null);
+  }
+
+  /**
+   * Factory method to create a Authorization provider for tokens adhering to the MP-JWT 1.1 spec.
+   * When the user is known to not be a JWT, (e.g.: a OAuth2 response token) then the root claim
+   * is expected to be {@code accessToken}.
+   *
+   * @param rootClaim the root claim where the JWT resides in the principal object.
+   * @return a AuthorizationProvider
+   */
+  static MicroProfileAuthorization create(String rootClaim) {
+    return new MicroProfileAuthorizationImpl(rootClaim);
   }
 }

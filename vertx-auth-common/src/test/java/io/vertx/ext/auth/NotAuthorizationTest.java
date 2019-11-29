@@ -12,6 +12,8 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
+import io.vertx.ext.auth.authorization.NotAuthorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import org.junit.Assert;
 import org.junit.Test;
 

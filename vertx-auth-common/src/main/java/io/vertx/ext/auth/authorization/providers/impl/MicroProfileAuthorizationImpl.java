@@ -13,17 +13,17 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.oauth2.authorization.impl;
+package io.vertx.ext.auth.authorization.providers.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.authorization.MicroProfileAuthorization;
+import io.vertx.ext.auth.authorization.providers.MicroProfileAuthorization;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +32,13 @@ import java.util.Set;
  * Default implementation for Micro Profile JWT 1.1
  */
 public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization {
+
+  private final String rootClaim;
+
+  public MicroProfileAuthorizationImpl(String rootClaim) {
+    this.rootClaim = rootClaim;
+  }
+
   @Override
   public String getId() {
     return "mp-jwt";
@@ -39,7 +46,10 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
-    JsonObject accessToken = user.principal().getJsonObject("accessToken");
+    JsonObject accessToken =
+      rootClaim == null ?
+        user.principal() :
+        user.principal().getJsonObject(rootClaim);
 
     if (accessToken == null) {
       handler.handle(Future.failedFuture("User doesn't contain a decoded accessToken"));

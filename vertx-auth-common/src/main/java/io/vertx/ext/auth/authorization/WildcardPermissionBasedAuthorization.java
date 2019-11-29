@@ -10,7 +10,7 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
@@ -19,7 +19,7 @@ import io.vertx.ext.auth.impl.WildcardPermissionBasedAuthorizationImpl;
 /**
  * Represents a wildcard permission (ie: 'manage:order:*' '*:orders', '*', etc.)
  * Note that it can optionally be assigned to a specific resource
- * 
+ *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
@@ -32,21 +32,21 @@ public interface WildcardPermissionBasedAuthorization extends Authorization {
 
   /**
    * return the value of the wildcard permission
-   * 
+   *
    * @return
    */
   String getPermission();
 
   /**
    * returns an optional resource that the permission is assigned-on
-   * 
+   *
    * @return
    */
   String getResource();
 
   /**
    * sets an optional resource that the permission is assigned-on
-   * 
+   *
    * @return
    */
   @Fluent

@@ -12,9 +12,9 @@ import org.apache.shiro.mgt.AuthorizingSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.RoleBasedAuthorization;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class GetAuthorizationsHack {
 

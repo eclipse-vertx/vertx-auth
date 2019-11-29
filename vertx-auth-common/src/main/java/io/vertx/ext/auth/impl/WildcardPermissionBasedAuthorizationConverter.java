@@ -15,7 +15,7 @@ package io.vertx.ext.auth.impl;
 import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class WildcardPermissionBasedAuthorizationConverter {
 

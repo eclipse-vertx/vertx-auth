@@ -10,46 +10,46 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.PermissionBasedAuthorizationImpl;
+import io.vertx.ext.auth.impl.RoleBasedAuthorizationImpl;
 
 /**
- * Represents a permission Note that the permission can optionally be assigned
- * to a specific resource
- * 
+ * Represents a role. Note that this role can optionally be assigned to a
+ * specific resource
+ *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
 @VertxGen
-public interface PermissionBasedAuthorization extends Authorization {
+public interface RoleBasedAuthorization extends Authorization {
 
-  static PermissionBasedAuthorization create(String permission) {
-    return new PermissionBasedAuthorizationImpl(permission);
+  static RoleBasedAuthorization create(String role) {
+    return new RoleBasedAuthorizationImpl(role);
   }
 
   /**
-   * returns the value of the permission
-   * 
+   * returns the role
+   *
    * @return
    */
-  String getPermission();
+  String getRole();
 
   /**
-   * returns an optional resource that the permission is assigned-on
-   * 
+   * returns an optional resource that the role is assigned-on
+   *
    * @return
    */
   String getResource();
 
   /**
-   * sets an optional resource that the permission is assigned-on
-   * 
+   * sets an optional resource that the role is assigned-on
+   *
    * @return
    */
   @Fluent
-  PermissionBasedAuthorization setResource(String resource);
+  RoleBasedAuthorization setResource(String resource);
 
 }

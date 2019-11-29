@@ -23,6 +23,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
@@ -42,7 +43,7 @@ public interface User {
 
   /**
    * returns user's authorizations
-   * 
+   *
    * @return
    */
   default Authorizations authorizations() {
@@ -77,7 +78,7 @@ public interface User {
     isAuthorized(authority, promise);
     return promise.future();
   }
- 
+
   /**
    * The User object will cache any authorities that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.

@@ -16,7 +16,7 @@ import java.util.Objects;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.Authorization;
+import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.User;
 
 public class UserConverter {

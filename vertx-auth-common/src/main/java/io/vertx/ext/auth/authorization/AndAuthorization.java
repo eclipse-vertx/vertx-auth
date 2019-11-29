@@ -10,7 +10,7 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import java.util.List;
 
@@ -19,9 +19,9 @@ import io.vertx.ext.auth.impl.AndAuthorizationImpl;
 
 /**
  * Allows to perform a logical 'and' between several authorizations
- * 
+ *
  * @author <a href="mailto:stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- * 
+ *
  */
 @VertxGen
 public interface AndAuthorization extends Authorization {

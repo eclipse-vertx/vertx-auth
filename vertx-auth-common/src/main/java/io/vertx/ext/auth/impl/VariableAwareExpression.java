@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import io.vertx.ext.auth.AuthorizationContext;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
 
 class VariableAwareExpression {
   private String value;
