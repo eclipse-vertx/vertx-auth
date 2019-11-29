@@ -111,12 +111,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> {
-        user.isAuthorized("role:dev", onSuccess(has -> {
-          assertTrue(has);
-          testComplete();
-        }));
-      });
+      fillUserAuthorizations(user, done -> user.isAuthorized("role:dev", onSuccess(has -> {
+        assertTrue(has);
+        testComplete();
+      })));
     }));
     await();
   }
@@ -127,12 +125,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> {
-        user.isAuthorized("role:manager", onSuccess(has -> {
-          assertFalse(has);
-          testComplete();
-        }));
-      });
+      fillUserAuthorizations(user, done -> user.isAuthorized("role:manager", onSuccess(has -> {
+        assertFalse(has);
+        testComplete();
+      })));
     }));
     await();
   }
@@ -143,12 +139,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> {
-        user.isAuthorized("commit_code", onSuccess(has -> {
-          assertTrue(has);
-          testComplete();
-        }));
-      });
+      fillUserAuthorizations(user, done -> user.isAuthorized("commit_code", onSuccess(has -> {
+        assertTrue(has);
+        testComplete();
+      })));
     }));
     await();
   }
@@ -159,12 +153,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> {
-        user.isAuthorized("eat_sandwich", onSuccess(has -> {
-          assertFalse(has);
-          testComplete();
-        }));
-      });
+      fillUserAuthorizations(user, done -> user.isAuthorized("eat_sandwich", onSuccess(has -> {
+        assertFalse(has);
+        testComplete();
+      })));
     }));
     await();
   }

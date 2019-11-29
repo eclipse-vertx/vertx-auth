@@ -20,7 +20,7 @@ import io.vertx.codegen.annotations.VertxGen;
 
 /**
  * The type of the Shiro auth realm
- * @deprecated ShiroAuth has been replaced by {@link io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@link io.vertx.ext.auth.ldap.LdapAuthentication}
+ * @deprecated ShiroAuth has been replaced by {@code io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@code io.vertx.ext.auth.ldap.LdapAuthentication}
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */

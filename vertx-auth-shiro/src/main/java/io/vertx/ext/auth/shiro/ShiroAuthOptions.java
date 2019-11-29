@@ -23,7 +23,7 @@ import io.vertx.ext.auth.AuthProvider;
 
 /**
  * Shiro auth configuration options, see Vert.x Auth Shiro component and/or Apache Shiro project.
- * @deprecated ShiroAuth has been replaced by {@link io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@link io.vertx.ext.auth.ldap.LdapAuthentication}
+ * @deprecated ShiroAuth has been replaced by {@code io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@code io.vertx.ext.auth.ldap.LdapAuthentication}
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */

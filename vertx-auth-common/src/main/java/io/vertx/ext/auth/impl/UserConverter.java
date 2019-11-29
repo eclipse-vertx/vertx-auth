@@ -45,7 +45,7 @@ public class UserConverter {
     Objects.requireNonNull(json);
 
     JsonObject principal = json.getJsonObject(FIELD_PRINCIPAL);
-    User user = User.create((JsonObject) principal);
+    User user = User.create(principal);
     // authorizations
     JsonObject jsonAuthorizations = json.getJsonObject(FIELD_AUTHORIZATIONS);
     for (String fieldName: jsonAuthorizations.fieldNames()) {

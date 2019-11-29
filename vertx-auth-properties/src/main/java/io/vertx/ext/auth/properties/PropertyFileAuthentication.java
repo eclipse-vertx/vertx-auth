@@ -28,9 +28,8 @@ public interface PropertyFileAuthentication extends AuthProvider {
 
   /**
    * Create a File authentication provider
-   * 
+   *
    * @param vertx  the Vert.x instance
-   * @param realm  the path
    * @return  the authentication provider
    */
   @GenIgnore

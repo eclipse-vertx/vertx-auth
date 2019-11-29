@@ -60,7 +60,7 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   }
 
   private void createLdapContext(String principal, String credential, Handler<AsyncResult<LdapContext>> resultHandler) {
-    Hashtable<String, Object> environment = new Hashtable<String, Object>();
+    Hashtable<String, Object> environment = new Hashtable<>();
     // set the initial cntext factory
     environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
     // set the url

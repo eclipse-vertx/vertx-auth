@@ -55,9 +55,9 @@ class VariableAwareExpression {
           hasVariable = true;
           tmpParts.add(ctx -> {
             // substitute parameter
-            Object result = ctx.variables().get(variableName);
-            if (result instanceof String) {
-              return (String) result;
+            String result = ctx.variables().get(variableName);
+            if (result != null) {
+              return result;
             }
             return part;
           });

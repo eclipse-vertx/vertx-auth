@@ -67,7 +67,7 @@ public class ChainAuthTest {
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        should.assertEquals(2, res.result().principal().getInteger("provider"));
         test.complete();
       } else {
         should.fail();
@@ -94,7 +94,7 @@ public class ChainAuthTest {
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        should.assertEquals(2, res.result().principal().getInteger("provider"));
         test.complete();
       } else {
         should.fail();

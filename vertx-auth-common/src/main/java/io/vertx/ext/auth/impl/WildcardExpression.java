@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * The following code has been adapted from the class WildcardPermission from
  * Apache Shiro
- * 
+ *
  * A <code>WildcardPermission</code> is a very flexible permission construct
  * supporting multiple levels of permission matching. However, most people will
  * probably follow some standard conventions as explained below.
@@ -174,13 +174,12 @@ class WildcardExpression {
   ============================================*/
 
   public boolean implies(WildcardExpression p) {
-    // By default only supports comparisons with other WildcardPermissions
-    if (!(p instanceof WildcardExpression)) {
+    if (p == null) {
       return false;
     }
 
-    WildcardExpression wp = (WildcardExpression) p;
-    List<Set<String>> otherParts = wp.parts;
+    // By default only supports comparisons with other WildcardPermissions
+    List<Set<String>> otherParts = p.parts;
 
     int i = 0;
     for (Set<String> otherPart : otherParts) {
@@ -216,9 +215,8 @@ class WildcardExpression {
       throw new IllegalArgumentException("Wildcard string cannot be empty");
     }
 
-    List<String> parts = Arrays.asList(wildcardString.split(PART_DIVIDER_TOKEN));
-    this.parts = new ArrayList<Set<String>>();
-    for (String part : parts) {
+    this.parts = new ArrayList<>();
+    for (String part : wildcardString.split(PART_DIVIDER_TOKEN)) {
       Set<String> subparts = new LinkedHashSet<>(Arrays.asList(part.split(SUBPART_DIVIDER_TOKEN)));
       if (subparts.isEmpty()) {
         throw new IllegalArgumentException(

@@ -42,7 +42,7 @@ public class Oauth2TokenTest extends VertxTestBase {
     super.setUp();
     oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, keycloakConfig);
 
-    OAuth2TokenImpl token = new OAuth2TokenImpl((OAuth2AuthProviderImpl) oauth2, keycloakToken);
+    OAuth2TokenImpl token = new OAuth2TokenImpl(oauth2, keycloakToken);
 
     assertNotNull(token.opaqueAccessToken());
     assertNotNull(token.opaqueRefreshToken());
@@ -68,7 +68,7 @@ public class Oauth2TokenTest extends VertxTestBase {
     );
 
     try {
-      OAuth2TokenImpl token = new OAuth2TokenImpl((OAuth2AuthProviderImpl) oauth2, json);
+      OAuth2TokenImpl token = new OAuth2TokenImpl(oauth2, json);
     } catch (RuntimeException e) {
       fail();
     }

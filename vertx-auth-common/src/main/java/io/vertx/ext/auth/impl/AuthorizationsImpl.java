@@ -78,11 +78,7 @@ public class AuthorizationsImpl implements Authorizations {
   }
 
   private Set<Authorization> getOrCreateAuthorizations(String providerId) {
-    Set<Authorization> result = authorizations.get(providerId);
-    if (result == null) {
-      result = new HashSet<>();
-      authorizations.put(providerId, result);
-    }
+    Set<Authorization> result = authorizations.computeIfAbsent(providerId, k -> new HashSet<>());
     return result;
   }
 

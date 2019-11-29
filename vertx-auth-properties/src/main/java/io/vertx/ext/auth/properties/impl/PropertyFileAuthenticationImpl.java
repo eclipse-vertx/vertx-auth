@@ -40,7 +40,7 @@ import io.vertx.ext.auth.properties.PropertyFileAuthentication;
 public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication, AuthorizationProvider {
   private final static Logger logger = Logger.getLogger(PropertyFileAuthentication.class.getName());
 
-  private class User {
+  private static class User {
     String name;
     String password;
     Map<String, Role> roles;
@@ -56,7 +56,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     }
   }
 
-  private class Role {
+  private static class Role {
     String name;
     Set<String> permissions;
 
