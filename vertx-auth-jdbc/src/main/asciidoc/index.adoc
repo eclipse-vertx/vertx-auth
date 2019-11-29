@@ -1,7 +1,7 @@
 == JDBC Auth Provider implementation
 
-We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} as well as 
-{@link io.vertx.ext.auth.AuthorizationProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}
+We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} as well as
+{@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}
 to perform authentication and authorization against any JDBC compliant database. To use this project,
 add the following dependency to the _dependencies_ section of your build descriptor:
 
@@ -35,7 +35,7 @@ Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBC
 
 Once you've got your instance you can authenticate and authorize with it just like any {@link io.vertx.ext.auth.AuthProvider}.
 
-The out of the box config assumes certain queries for authentication and authorization, these can easily be changed with the operations 
+The out of the box config assumes certain queries for authentication and authorization, these can easily be changed with the operations
 {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setAuthenticationQuery(String)},
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setPermissionsQuery(String)} and
 {@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different database schema.
@@ -77,7 +77,7 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES rol
 
 == Hashing Strategy
 
-THe hashing strategy is now required to instantiate JDBCAuthentication {@link {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)} 
+THe hashing strategy is now required to instantiate JDBCAuthentication {@link {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)}
 You have the choice between SHA-512 or PBKDF2. Note that as of 2018-01-08 OWASP recommends
 the usage of stronger algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
 
