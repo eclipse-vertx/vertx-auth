@@ -38,7 +38,7 @@ import io.vertx.codegen.annotations.VertxGen;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
-@VertxGen
+@VertxGen(concrete = false)
 public interface Authorization {
 
   /**

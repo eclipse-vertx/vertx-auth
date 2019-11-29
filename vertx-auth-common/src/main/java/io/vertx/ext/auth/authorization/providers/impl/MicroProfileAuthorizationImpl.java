@@ -46,13 +46,13 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
-    JsonObject accessToken =
+    final JsonObject accessToken =
       rootClaim == null ?
         user.principal() :
         user.principal().getJsonObject(rootClaim);
 
     if (accessToken == null) {
-      handler.handle(Future.failedFuture("User doesn't contain a decoded accessToken"));
+      handler.handle(Future.failedFuture("User doesn't contain a decoded Token"));
       return;
     }
 

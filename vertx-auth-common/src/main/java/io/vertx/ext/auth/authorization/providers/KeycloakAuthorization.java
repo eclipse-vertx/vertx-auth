@@ -17,33 +17,34 @@ package io.vertx.ext.auth.authorization.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
-import io.vertx.ext.auth.authorization.providers.impl.MicroProfileAuthorizationImpl;
+import io.vertx.ext.auth.authorization.providers.impl.KeycloakAuthorizationImpl;
 
 /**
- * Implementation of the Microprofile MP-JWT 1.1 RBAC based on the access token groups key.
+ * Implementation of the Keycloak Authorization Provider.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>.
  */
 @VertxGen
-public interface MicroProfileAuthorization extends AuthorizationProvider {
+public interface KeycloakAuthorization extends AuthorizationProvider {
 
   /**
-   * Factory method to create a Authorization provider for tokens adhering to the MP-JWT 1.1 spec.
-   * @return a AuthorizationProvider
+   * Factory method to create an Authorization Provider for tokens adhering to the Keycloak token format.
+   *
+   * @return a KeycloakAuthorization.
    */
-  static MicroProfileAuthorization create() {
+  static KeycloakAuthorization create() {
     return create(null);
   }
 
   /**
-   * Factory method to create a Authorization provider for tokens adhering to the MP-JWT 1.1 spec.
+   * Factory method to create an Authorization Provider for tokens adhering to the Keycloak token format.
    * When the user is known to not be a JWT, (e.g.: a OAuth2 response token) then the root claim
    * is expected to be the {@code accessToken}.
    *
    * @param rootClaim the root claim where the JWT resides in the principal object.
    * @return a AuthorizationProvider
    */
-  static MicroProfileAuthorization create(String rootClaim) {
-    return new MicroProfileAuthorizationImpl(rootClaim);
+  static KeycloakAuthorization create(String rootClaim) {
+    return new KeycloakAuthorizationImpl(rootClaim);
   }
 }
