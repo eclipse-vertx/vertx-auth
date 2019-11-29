@@ -158,7 +158,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
     return jwt.sign(_claims, options);
   }
 
-  private final static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
+  private static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
     if (permissionsClaimKey.contains("/")) {
       return getNestedJsonValue(jwtToken, permissionsClaimKey);
     }
@@ -179,7 +179,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
     return result;
   }
 
-  private final static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
+  private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
     String[] keys = permissionsClaimKey.split("/");
     JsonObject obj = null;
     for (int i = 0; i < keys.length; i++) {

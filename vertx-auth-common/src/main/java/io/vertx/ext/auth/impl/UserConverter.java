@@ -24,7 +24,7 @@ public class UserConverter {
   private final static String FIELD_PRINCIPAL = "principal";
   private final static String FIELD_AUTHORIZATIONS = "authorizations";
 
-  public final static JsonObject encode(User value) throws IllegalArgumentException {
+  public static JsonObject encode(User value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject json = new JsonObject();
@@ -41,7 +41,7 @@ public class UserConverter {
     return json;
   }
 
-  public final static User decode(JsonObject json) throws IllegalArgumentException {
+  public static User decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     JsonObject principal = json.getJsonObject(FIELD_PRINCIPAL);

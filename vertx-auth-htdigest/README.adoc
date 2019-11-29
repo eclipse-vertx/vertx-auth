@@ -1,4 +1,4 @@
-# Vert.x .htdigest Auth
+= Vert.x .htdigest Auth
 
 This module contains contains a Vert.x auth implementation which uses a .htdigest file to query user information.
 

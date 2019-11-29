@@ -25,7 +25,7 @@ public class OrAuthorizationConverter {
   private final static String TYPE_AND_AUTHORIZATION = "or";
   private final static String FIELD_AUTHORIZATIONS = "authorizations";
 
-  public final static JsonObject encode(OrAuthorization value) throws IllegalArgumentException {
+  public static JsonObject encode(OrAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
@@ -38,7 +38,7 @@ public class OrAuthorizationConverter {
     return result;
   }
 
-  public final static OrAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static OrAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_AND_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

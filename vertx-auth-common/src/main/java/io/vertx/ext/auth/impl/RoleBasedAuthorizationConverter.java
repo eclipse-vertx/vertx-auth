@@ -24,7 +24,7 @@ public class RoleBasedAuthorizationConverter {
   private final static String FIELD_ROLE = "role";
   private final static String FIELD_RESOURCE = "resource";
 
-  public final static JsonObject encode(RoleBasedAuthorization value) throws IllegalArgumentException {
+  public static JsonObject encode(RoleBasedAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
@@ -36,7 +36,7 @@ public class RoleBasedAuthorizationConverter {
     return result;
   }
 
-  public final static RoleBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static RoleBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_ROLE_BASED_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

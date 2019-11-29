@@ -24,7 +24,7 @@ import io.vertx.core.Handler;
 /**
  * The role of an AuthorizationProvider is to return a set of Authorization.
  * Note that each AuthorizationProvider must provide its own unique Id
- * 
+ *
  * @author stephane bastian
  *
  */
@@ -33,7 +33,7 @@ public interface AuthorizationProvider {
 
   /**
    * create an authorization provider with the specified id and authorizations
-   * 
+   *
    * @param id
    * @param authorizations
    * @return
@@ -56,17 +56,17 @@ public interface AuthorizationProvider {
 
   /**
    * returns the id of the authorization provider
-   * 
+   *
    * @return
    */
-  public String getId();
+  String getId();
 
   /**
    * Returns the set of authorizations of the specified user
-   * 
+   *
    * @param user
    * @param handler
    */
-  public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler);
+  void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler);
 
 }

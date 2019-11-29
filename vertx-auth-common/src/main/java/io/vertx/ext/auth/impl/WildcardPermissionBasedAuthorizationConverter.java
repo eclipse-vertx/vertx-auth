@@ -24,7 +24,7 @@ public class WildcardPermissionBasedAuthorizationConverter {
   private final static String FIELD_PERMISSION = "permission";
   private final static String FIELD_RESOURCE = "resource";
 
-  public final static JsonObject encode(WildcardPermissionBasedAuthorization value) throws IllegalArgumentException {
+  public static JsonObject encode(WildcardPermissionBasedAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
@@ -36,7 +36,7 @@ public class WildcardPermissionBasedAuthorizationConverter {
     return result;
   }
 
-  public final static WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_WILDCARD_PERMISSION.equals(json.getString(FIELD_TYPE))) {

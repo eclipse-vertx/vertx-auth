@@ -12,7 +12,6 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap;
 
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.AuthProvider;
@@ -28,7 +27,7 @@ public interface LdapAuthentication extends AuthProvider {
 
   /**
    * Create a LDAP authentication provider
-   * 
+   *
    * @param vertx  the Vert.x instance
    * @param options  the ldap options
    * @return  the authentication provider

@@ -1,4 +1,4 @@
-# Vert.x Auth Common
+= Vert.x Auth Common
 
 This module contains common auth interfaces.
 

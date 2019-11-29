@@ -1,4 +1,4 @@
-# Vert.x Auth
+= Vert.x Auth
 
 image:https://travis-ci.org/vert-x3/vertx-auth.svg?branch=master["Build Status", link="https://travis-ci.org/vert-x3/vertx-auth"]
 

@@ -25,7 +25,7 @@ public class AndAuthorizationConverter {
   private final static String TYPE_AND_AUTHORIZATION = "and";
   private final static String FIELD_AUTHORIZATIONS = "authorizations";
 
-  public final static JsonObject encode(AndAuthorization value) throws IllegalArgumentException {
+  public static JsonObject encode(AndAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
@@ -38,7 +38,7 @@ public class AndAuthorizationConverter {
     return result;
   }
 
-  public final static AndAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static AndAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_AND_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

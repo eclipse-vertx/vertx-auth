@@ -4,11 +4,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
-import java.security.*;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
-import java.util.Enumeration;
-
 import static org.junit.Assert.*;
 
 public class JWKTest {

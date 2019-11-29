@@ -18,9 +18,9 @@ import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
 public class GetAuthorizationsHack {
 
-  public final static Set<Authorization> getAuthorizations(SecurityManager securityManager, Subject subject) {
+  public static Set<Authorization> getAuthorizations(SecurityManager securityManager, Subject subject) {
     Objects.requireNonNull(securityManager);
-    
+
     Set<Authorization> result = Collections.emptySet();
     if (subject.getPrincipals()!=null) {
       if (securityManager instanceof AuthorizingSecurityManager) {
@@ -53,11 +53,11 @@ public class GetAuthorizationsHack {
               }
             }
           }
-          
+
         }
       }
     }
     return result;
   }
-  
+
 }

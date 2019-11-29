@@ -1,4 +1,4 @@
-# Vert.x Ldap Auth
+= Vert.x Ldap Auth
 
 This module contains contains a Vert.x auth implementation which uses LDAP
 

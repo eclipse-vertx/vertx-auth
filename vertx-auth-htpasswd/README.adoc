@@ -1,4 +1,4 @@
-# Vert.x htpasswd Auth
+= Vert.x htpasswd Auth
 
 This module contains a Vert.x auth implementation which uses a Apache htpasswd file to query user information.
 

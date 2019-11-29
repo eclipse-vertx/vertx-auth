@@ -23,7 +23,7 @@ public class NotAuthorizationConverter {
   private final static String TYPE_NOT_AUTHORIZATION = "not";
   private final static String FIELD_AUTHORIZATION = "authorization";
 
-  public final static JsonObject encode(NotAuthorization value) throws IllegalArgumentException {
+  public static JsonObject encode(NotAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
@@ -32,7 +32,7 @@ public class NotAuthorizationConverter {
     return result;
   }
 
-  public final static NotAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static NotAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_NOT_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

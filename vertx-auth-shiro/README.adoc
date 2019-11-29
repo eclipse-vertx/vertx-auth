@@ -1,4 +1,4 @@
-# Vert.x Shiro Auth
+= Vert.x Shiro Auth
 
 This module contains contains a Vert.x auth implementation which uses Apache Shiro
 

@@ -1,34 +1,36 @@
-# Vert.x OAuth2 Auth
+= Vert.x OAuth2 Auth
 
 Please see the documentation for more information.
 
-## Running test
+== Running test
 
 Standard unit tests are run against a mock of some providers, `Google`, `Keycloak` to run
 against a real provider (`Keycloak`) the `IT` profile must be enabled, which you can do by:
 
-```
+[source]
+----
 mvn -PIT ...
-```
+----
 
 Or by having the environment variable `TRAVIS` set to `true`. When running the integration
 tests you must have a local keycloak installed with the configuration file `src/test/fixtures/vertx-test-realm.json`.
 
 And the container can be run locally as:
 
-```
+[source]
+----
 # build the image if not present
 docker build -t vertx-test-keycloak src/test/fixtures
 # run once there is a image
 docker run -d -p 8888:8080 vertx-test-keycloak
-```
+----
 
-### IntelliJ IDE
+=== IntelliJ IDE
 
 In IntelliJ IDE, you have to uncheck `argLine` in Preferences -> Build,Execution,Deployment -> Build Tools -> Maven -> Running Tests ...
 
 to avoid `IntelliJ Error when running unit test: Could not find or load main class ${surefireArgLine}`
 
 - https://github.com/vert-x3/vertx-ext-parent/issues/7
-- https://stackoverflow.com/questions/24115142/intellij-error-when-running-unit-test-could-not-find-or-load-main-class-suref 
+- https://stackoverflow.com/questions/24115142/intellij-error-when-running-unit-test-could-not-find-or-load-main-class-suref
 

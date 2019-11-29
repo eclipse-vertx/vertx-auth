@@ -25,7 +25,7 @@ import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
 
 public class AuthorizationConverter {
 
-  public final static Authorization decode(JsonObject json) throws IllegalArgumentException {
+  public static Authorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     Authorization result = AndAuthorizationConverter.decode(json);
@@ -47,7 +47,7 @@ public class AuthorizationConverter {
     return result;
   }
 
-  public final static JsonObject encode(Authorization value) throws IllegalArgumentException {
+  public static JsonObject encode(Authorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     // decide which JsonCodec we should use
