@@ -48,9 +48,46 @@ public interface User {
   /**
    * Gets extra attributes of the user. Attributes contains any attributes related
    * to the outcome of authenticating a user (e.g.: issued date, metadata, etc...)
+   *
    * @return a json object with any relevant attribute.
    */
   JsonObject attributes();
+
+  /**
+   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
+   * the current clock time is post the expiration date.
+   *
+   * @return {@code true} if expired
+   */
+  default boolean expired() {
+    return expired(0);
+  }
+
+  /**
+   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
+   * the current clock time is post the expiration date. If the user {@code attributes} do not contain a key
+   * {@code expires_at} is consider not to expire.
+   * <p>
+   * Implementations of this interface might relax this rule to account for a leeway to safeguard against
+   * clock drifting.
+   *
+   * @param leeway a greater than zero leeway value.
+   * @return {@code true} if expired
+   */
+  default boolean expired(int leeway) {
+    JsonObject attributes = attributes();
+    if (attributes != null) {
+      long expiresAt = attributes().getLong("expires_at", -1L);
+      if (expiresAt == -1L) {
+        // no expires at (this user has no expiration date)
+        return false;
+      }
+      return System.currentTimeMillis() - leeway > expiresAt;
+    } else {
+      // this user has no metadata (the user has no expiration date)
+      return false;
+    }
+  }
 
   /**
    * returns user's authorizations
@@ -58,17 +95,17 @@ public interface User {
    * @return
    */
   default Authorizations authorizations() {
-	return new AuthorizationsImpl();
+    return new AuthorizationsImpl();
   }
 
   /**
    * Is the user authorised to
    *
-   * @param authority  the authority - what this really means is determined by the specific implementation. It might
-   *                   represent a permission to access a resource e.g. `printers:printer34` or it might represent
-   *                   authority to a role in a roles based model, e.g. `role:admin`.
-   * @param resultHandler  handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                       `true` if the they has the authority or `false` otherwise.
+   * @param authority     the authority - what this really means is determined by the specific implementation. It might
+   *                      represent a permission to access a resource e.g. `printers:printer34` or it might represent
+   *                      authority to a role in a roles based model, e.g. `role:admin`.
+   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
+   *                      `true` if the they has the authority or `false` otherwise.
    * @return the User to enable fluent use
    */
   @Fluent
@@ -77,12 +114,12 @@ public interface User {
   /**
    * Is the user authorised to
    *
-   * @see User#isAuthorized(String, Handler)
-   * @param authority  the authority - what this really means is determined by the specific implementation. It might
-   *                   represent a permission to access a resource e.g. `printers:printer34` or it might represent
-   *                   authority to a role in a roles based model, e.g. `role:admin`.
+   * @param authority the authority - what this really means is determined by the specific implementation. It might
+   *                  represent a permission to access a resource e.g. `printers:printer34` or it might represent
+   *                  authority to a role in a roles based model, e.g. `role:admin`.
    * @return Future handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *    *                       `true` if the they has the authority or `false` otherwise.
+   * *                       `true` if the they has the authority or `false` otherwise.
+   * @see User#isAuthorized(String, Handler)
    */
   default Future<Boolean> isAuthorized(String authority) {
     Promise<Boolean> promise = Promise.promise();
@@ -107,6 +144,7 @@ public interface User {
    *     "username", "tim"
    *   }
    * </pre>
+   *
    * @return JSON representation of the Principal
    */
   JsonObject principal();
@@ -115,7 +153,7 @@ public interface User {
    * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
    * after it has been deserialized.
    *
-   * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
+   * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
   void setAuthProvider(AuthProvider authProvider);
 }
