@@ -57,6 +57,10 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     super(provider, token);
   }
 
+  public JsonObject attributes() {
+    return new JsonObject();
+  }
+
   @Override
   public AccessToken setTrustJWT(boolean trust) {
     // refresh the tokens

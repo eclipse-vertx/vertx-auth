@@ -37,12 +37,23 @@ import io.vertx.ext.auth.impl.UserImpl;
 public interface User {
 
   static User create(JsonObject principal) {
-    return new UserImpl(principal);
+    return create(principal, new JsonObject());
+  }
+
+  static User create(JsonObject principal, JsonObject attributes) {
+    return new UserImpl(principal, attributes);
   }
 
   /**
+   * Gets extra attributes of the user. Attributes contains any attributes related
+   * to the outcome of authenticating a user (e.g.: issued date, metadata, etc...)
+   * @return a json object with any relevant attribute.
+   */
+  JsonObject attributes();
+
+  /**
    * returns user's authorizations
-   * 
+   *
    * @return
    */
   default Authorizations authorizations() {
@@ -77,7 +88,7 @@ public interface User {
     isAuthorized(authority, promise);
     return promise.future();
   }
- 
+
   /**
    * The User object will cache any authorities that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.
