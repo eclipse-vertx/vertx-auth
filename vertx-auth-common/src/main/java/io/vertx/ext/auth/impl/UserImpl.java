@@ -12,8 +12,6 @@
  ********************************************************************************/
 package io.vertx.ext.auth.impl;
 
-import java.util.Objects;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -30,6 +28,8 @@ import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 
+import java.util.Objects;
+
 /**
  * Default implementation of a User
  *
@@ -39,6 +39,8 @@ public class UserImpl implements User, ClusterSerializable {
 
   // set of authorizations
   private Authorizations authorizations;
+  // attributes
+  private JsonObject attributes;
   // the principal of the user
   private JsonObject principal;
 
@@ -47,7 +49,12 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   public UserImpl(JsonObject principal) {
+    this(principal, new JsonObject());
+  }
+
+  public UserImpl(JsonObject principal, JsonObject attributes) {
     this.principal = Objects.requireNonNull(principal);
+    this.attributes = attributes;
     this.authorizations = new AuthorizationsImpl();
   }
 
@@ -57,8 +64,13 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   @Override
+  public JsonObject attributes() {
+    return attributes;
+  }
+
+  @Override
   public User clearCache() {
-    for (String providerId: authorizations.getProviderIds()) {
+    for (String providerId : authorizations.getProviderIds()) {
       authorizations.delete(providerId);
     }
     return this;
@@ -73,12 +85,15 @@ public class UserImpl implements User, ClusterSerializable {
     if (getClass() != obj.getClass())
       return false;
     UserImpl other = (UserImpl) obj;
-    return Objects.equals(authorizations, other.authorizations) && Objects.equals(principal, other.principal);
+    return
+      Objects.equals(authorizations, other.authorizations) &&
+        Objects.equals(principal, other.principal) &&
+        Objects.equals(attributes, other.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authorizations, principal);
+    return Objects.hash(authorizations, principal, attributes);
   }
 
   @Override
@@ -87,7 +102,7 @@ public class UserImpl implements User, ClusterSerializable {
     Objects.requireNonNull(resultHandler);
 
     return isAuthorized(authority.startsWith("role:") ? RoleBasedAuthorization.create(authority.substring(5))
-        : WildcardPermissionBasedAuthorization.create(authority), resultHandler);
+      : WildcardPermissionBasedAuthorization.create(authority), resultHandler);
   }
 
   // TODO: remove this method
@@ -122,6 +137,7 @@ public class UserImpl implements User, ClusterSerializable {
     User readUser = UserConverter.decode(jsonObject);
     this.principal = readUser.principal();
     this.authorizations = readUser.authorizations();
+    this.attributes = readUser.attributes();
     return read;
   }
 }

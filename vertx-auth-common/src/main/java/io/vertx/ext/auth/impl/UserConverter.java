@@ -23,6 +23,7 @@ import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
 public class UserConverter {
 
   private final static String FIELD_PRINCIPAL = "principal";
+  private final static String FIELD_ATTRIBUTES = "attributes";
   private final static String FIELD_AUTHORIZATIONS = "authorizations";
 
   public static JsonObject encode(User value) throws IllegalArgumentException {
@@ -30,6 +31,7 @@ public class UserConverter {
 
     JsonObject json = new JsonObject();
     json.put(FIELD_PRINCIPAL, value.principal());
+    json.put(FIELD_ATTRIBUTES, value.attributes());
     JsonObject jsonAuthorizations = new JsonObject();
     for (String providerId: value.authorizations().getProviderIds()) {
       JsonArray jsonAuthorizationByProvider = new JsonArray();
@@ -46,7 +48,8 @@ public class UserConverter {
     Objects.requireNonNull(json);
 
     JsonObject principal = json.getJsonObject(FIELD_PRINCIPAL);
-    User user = User.create(principal);
+    JsonObject attributes = json.getJsonObject(FIELD_ATTRIBUTES);
+    User user = User.create(principal, attributes);
     // authorizations
     JsonObject jsonAuthorizations = json.getJsonObject(FIELD_AUTHORIZATIONS);
     for (String fieldName: jsonAuthorizations.fieldNames()) {
@@ -58,5 +61,4 @@ public class UserConverter {
     }
     return user;
   }
-
 }
