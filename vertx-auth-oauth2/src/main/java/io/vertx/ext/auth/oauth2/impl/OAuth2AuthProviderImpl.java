@@ -18,9 +18,6 @@ package io.vertx.ext.auth.oauth2.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -30,7 +27,6 @@ import io.vertx.ext.auth.impl.AuthProviderInternal;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.auth.oauth2.*;
-import io.vertx.ext.auth.oauth2.impl.flow.*;
 
 /**
  * @author Paulo Lopes
@@ -39,45 +35,24 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
-  private final Vertx vertx;
   private final OAuth2ClientOptions config;
   private final JWT jwt = new JWT();
-
-  private final OAuth2Flow flow;
   private final OAuth2API api;
 
   private OAuth2RBAC rbac;
 
-  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
-    this.vertx = vertx;
+  public OAuth2AuthProviderImpl(OAuth2API api, OAuth2ClientOptions config) {
+    this.api = api;
     this.config = config;
     // compute paths with variables, at this moment it is only relevant that
     // all variables are properly computed
     this.config.replaceVariables(true);
-
-    this.api = new OAuth2API(vertx, config);
+    this.config.validate();
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
         jwt.addJWK(JWK.from(pubSecKey));
       }
-    }
-
-    switch (config.getFlow()) {
-      case AUTH_CODE:
-        flow = new AuthCodeImpl(this);
-        break;
-      case CLIENT:
-        flow = new ClientImpl(this);
-        break;
-      case PASSWORD:
-        flow = new PasswordImpl(this);
-        break;
-      case AUTH_JWT:
-        flow = new AuthJWTImpl(this);
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported oauth2 flow type: " + config.getFlow());
     }
   }
 
@@ -90,74 +65,21 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   @Override
   public OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler) {
-    final JsonObject headers = new JsonObject();
-    // specify preferred accepted content type
-    headers.put("Accept", "application/json");
-
-    api.fetch(
-      HttpMethod.GET,
-      config.getJwkPath(),
-      headers,
-      null,
-      res -> {
-        if (res.failed()) {
-          handler.handle(Future.failedFuture(res.cause()));
-          return;
-        }
-
-        final OAuth2Response reply = res.result();
-
-        if (reply.body() == null || reply.body().length() == 0) {
-          handler.handle(Future.failedFuture("No Body"));
-          return;
-        }
-
-        JsonObject json;
-
-        if (reply.is("application/json")) {
+    api.jwkSet(res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+      } else {
+        for (Object key : res.result()) {
           try {
-            json = reply.jsonObject();
+            jwt.addJWK(new JWK((JsonObject) key));
           } catch (RuntimeException e) {
-            handler.handle(Future.failedFuture(e));
-            return;
+            LOG.warn("Skipped unsupported JWK: " + e.getMessage());
           }
-        } else {
-          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
-          return;
         }
 
-        try {
-          if (json.containsKey("error")) {
-            String description;
-            Object error = json.getValue("error");
-            if (error instanceof JsonObject) {
-              description = ((JsonObject) error).getString("message");
-            } else {
-              // attempt to handle the error as a string
-              try {
-                description = json.getString("error_description", json.getString("error"));
-              } catch (RuntimeException e) {
-                description = error.toString();
-              }
-            }
-            handler.handle(Future.failedFuture(description));
-          } else {
-            JsonArray keys = json.getJsonArray("keys");
-            for (Object key : keys) {
-              try {
-                jwt.addJWK(new JWK((JsonObject) key));
-              } catch (RuntimeException e) {
-                LOG.warn("Skipped unsupported JWK: " + e.getMessage());
-              }
-            }
-
-            handler.handle(Future.succeededFuture());
-          }
-        } catch (RuntimeException e) {
-          handler.handle(Future.failedFuture(e));
-        }
-      });
-
+        handler.handle(Future.succeededFuture());
+      }
+    });
     return this;
   }
 
@@ -177,10 +99,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   public OAuth2ClientOptions getConfig() {
     return config;
-  }
-
-  public Vertx getVertx() {
-    return vertx;
   }
 
   public JWT getJWT() {
@@ -246,19 +164,42 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
     } else {
       // the authInfo object does not contain a token, so rely on the
       // configured flow to retrieve a token for the user
-      flow.getToken(authInfo, getToken -> {
+
+      if (config.getFlow() == OAuth2FlowType.AUTH_JWT) {
+        authInfo
+          .put("assertion", jwt.sign(authInfo, config.getJWTOptions()));
+      }
+
+      api.token(config.getFlow().getGrantType(), authInfo, getToken -> {
         if (getToken.failed()) {
           resultHandler.handle(Future.failedFuture(getToken.cause()));
         } else {
-          resultHandler.handle(Future.succeededFuture(getToken.result()));
+
+          AccessToken token;
+
+          try {
+            token = new OAuth2TokenImpl(this, getToken.result());
+          } catch (RuntimeException e) {
+            resultHandler.handle(Future.failedFuture(e));
+            return;
+          }
+
+          resultHandler.handle(Future.succeededFuture(token));
         }
       });
     }
   }
 
   @Override
-  public String authorizeURL(JsonObject params) {
-    return flow.authorizeURL(params);
+  public OAuth2Auth authorizeURL(JsonObject params, Handler<AsyncResult<String>> handler) {
+    api.authorizeURL(params, handler);
+    return this;
+  }
+
+  @Override
+  public OAuth2Auth endSessionURL(String idToken, JsonObject params, Handler<AsyncResult<String>> handler) {
+    api.endSessionURL(idToken, params, handler);
+    return this;
   }
 
   @Override
@@ -308,7 +249,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
     return config.getFlow();
   }
 
-  public OAuth2Flow getFlow() {
-    return flow;
+  OAuth2API api() {
+    return api;
   }
 }

@@ -43,11 +43,17 @@ public class AuthOAuth2Examples {
 
     // when there is a need to access a protected resource or call a protected method,
     // call the authZ url for a challenge
-
-    String authorization_uri = oauth2.authorizeURL(new JsonObject()
+    oauth2.authorizeURL(new JsonObject()
       .put("redirect_uri", "http://localhost:8080/callback")
       .put("scope", "notifications")
-      .put("state", "3(#0/!~"));
+      .put("state", "3(#0/!~"), res -> {
+
+      if (res.succeeded()) {
+        // the computer URL can be used now...
+        String authorization_uri = res.result();
+      }
+
+    });
 
     // when working with web application use the above string as a redirect url
 
@@ -79,29 +85,32 @@ public class AuthOAuth2Examples {
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
 
     // Authorization oauth2 URI
-    String authorization_uri = oauth2.authorizeURL(new JsonObject()
+    oauth2.authorizeURL(new JsonObject()
       .put("redirect_uri", "http://localhost:8080/callback")
       .put("scope", "<scope>")
-      .put("state", "<state>"));
+      .put("state", "<state>"), res -> {
 
-    // Redirect example using Vert.x
-    response.putHeader("Location", authorization_uri)
-      .setStatusCode(302)
-      .end();
+      String authorization_uri = res.result();
 
-    JsonObject tokenConfig = new JsonObject()
-      .put("code", "<code>")
-      .put("redirect_uri", "http://localhost:3000/callback");
+      // Redirect example using Vert.x
+      response.putHeader("Location", authorization_uri)
+        .setStatusCode(302)
+        .end();
 
-    // Callbacks
-    // Save the access token
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        System.err.println("Access Token Error: " + res.cause().getMessage());
-      } else {
-        // Get the access token object (the authorization code is given from the previous step).
-        User token = res.result();
-      }
+      JsonObject tokenConfig = new JsonObject()
+        .put("code", "<code>")
+        .put("redirect_uri", "http://localhost:3000/callback");
+
+      // Callbacks
+      // Save the access token
+      oauth2.authenticate(tokenConfig, authenticate -> {
+        if (authenticate.failed()) {
+          System.err.println("Access Token Error: " + authenticate.cause().getMessage());
+        } else {
+          // Get the access token object (the authorization code is given from the previous step).
+          User token = authenticate.result();
+        }
+      });
     });
   }
 

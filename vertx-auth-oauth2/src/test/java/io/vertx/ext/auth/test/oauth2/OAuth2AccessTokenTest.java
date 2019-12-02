@@ -44,9 +44,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
 
   private static final JsonObject refreshConfig = new JsonObject()
     .put("refresh_token", "ec1a59d298")
-    .put("client_secret", "client-secret")
-    .put("grant_type", "refresh_token")
-    .put("client_id", "client-id");
+    .put("grant_type", "refresh_token");
 
   private static final JsonObject revokeConfig = new JsonObject()
     .put("token_type_hint", "refresh_token")
@@ -57,8 +55,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
     .put("redirect_uri", "http://callback.com")
-    .put("grant_type", "authorization_code")
-    .put("client_id", "client-id");
+    .put("grant_type", "authorization_code");
 
   private OAuth2Auth oauth2;
   private HttpServer server;
@@ -77,6 +74,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
 
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
+        assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
             JsonObject expectedRequest = config;
