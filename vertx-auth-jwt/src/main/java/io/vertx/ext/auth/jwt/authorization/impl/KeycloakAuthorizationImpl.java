@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.authorization.providers.impl;
+package io.vertx.ext.auth.jwt.authorization.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -23,7 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.authorization.providers.KeycloakAuthorization;
+import io.vertx.ext.auth.jwt.authorization.KeycloakAuthorization;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,12 +33,6 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
 
   private static final JsonObject EMPTY_JSON = new JsonObject(Collections.EMPTY_MAP);
 
-  private final String rootClaim;
-
-  public KeycloakAuthorizationImpl(String rootClaim) {
-    this.rootClaim = rootClaim;
-  }
-
   @Override
   public String getId() {
     return "keycloak";
@@ -46,6 +40,7 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
+    final String rootClaim = user.attributes().getString("accessToken");
     final JsonObject accessToken =
       rootClaim == null ?
         user.principal() :

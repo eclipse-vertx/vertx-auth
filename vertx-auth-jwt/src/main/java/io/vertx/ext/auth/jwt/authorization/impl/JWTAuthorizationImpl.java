@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.authorization.providers.impl;
+package io.vertx.ext.auth.jwt.authorization.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -23,7 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.authorization.providers.JWTAuthorization;
+import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 
 import java.util.HashSet;
 import java.util.Objects;

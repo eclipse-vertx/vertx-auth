@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.authorization.providers.impl;
+package io.vertx.ext.auth.jwt.authorization.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -23,7 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authorization.providers.MicroProfileAuthorization;
+import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,12 +33,6 @@ import java.util.Set;
  */
 public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization {
 
-  private final String rootClaim;
-
-  public MicroProfileAuthorizationImpl(String rootClaim) {
-    this.rootClaim = rootClaim;
-  }
-
   @Override
   public String getId() {
     return "mp-jwt";
@@ -46,6 +40,7 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
+    final String rootClaim = user.attributes().getString("accessToken");
     final JsonObject accessToken =
       rootClaim == null ?
         user.principal() :
