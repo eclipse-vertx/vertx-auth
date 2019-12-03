@@ -64,9 +64,18 @@ public interface User {
   }
 
   /**
-   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
-   * the current clock time is post the expiration date. If the user {@code attributes} do not contain a key
-   * {@code expires_at} is consider not to expire.
+   * Flags this user object to be expired. Expiration takes 3 values in account:
+   *
+   * <ol>
+   *   <li>{@code exp} "expiration" timestamp in seconds.</li>
+   *   <li>{@code iat} "issued at" in seconds.</li>
+   *   <li>{@code nbf} "not before" in seconds.</li>
+   * </ol>
+   * A User is considered expired if it contains any of the above and
+   * the current clock time does not agree with the parameter value. If the {@link #principal()} do not contain a key
+   * then {@link #attributes()} are checked.
+   * <p>
+   * If all of the properties are not available the user will not expire.
    * <p>
    * Implementations of this interface might relax this rule to account for a leeway to safeguard against
    * clock drifting.
@@ -75,18 +84,34 @@ public interface User {
    * @return {@code true} if expired
    */
   default boolean expired(int leeway) {
-    JsonObject attributes = attributes();
-    if (attributes != null) {
-      long expiresAt = attributes().getLong("expires_at", -1L);
-      if (expiresAt == -1L) {
-        // no expires at (this user has no expiration date)
-        return false;
+    // All dates are of type NumericDate
+    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+    // the specified UTC date/time, ignoring leap seconds
+    final long now = (System.currentTimeMillis() / 1000);
+
+    if (principal().containsKey("exp") || attributes().containsKey("exp")) {
+      if (now - leeway >= principal().getLong("exp", attributes().getLong("exp"))) {
+        return true;
       }
-      return System.currentTimeMillis() - leeway > expiresAt;
-    } else {
-      // this user has no metadata (the user has no expiration date)
-      return false;
     }
+
+    if (principal().containsKey("iat") || attributes().containsKey("iat")) {
+      Long iat = principal().getLong("iat", attributes().getLong("iat"));
+      // issue at must be in the past
+      if (iat > now + leeway) {
+        return true;
+      }
+    }
+
+    if (principal().containsKey("nbf") || attributes().containsKey("nbf")) {
+      Long nbf = principal().getLong("nbf", attributes().getLong("nbf"));
+      // not before must be after now
+      if (nbf > now + leeway) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
