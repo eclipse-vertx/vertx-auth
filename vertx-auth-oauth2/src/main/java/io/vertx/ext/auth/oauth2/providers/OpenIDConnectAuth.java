@@ -92,7 +92,7 @@ public interface OpenIDConnectAuth {
         final OAuth2Auth oidc = new OAuth2AuthProviderImpl(api, config);
 
         if (config.getJwkPath() != null) {
-          oidc.loadJWK(v -> {
+          oidc.jWKSet(v -> {
             if (v.failed()) {
               handler.handle(Future.failedFuture(v.cause()));
               return;

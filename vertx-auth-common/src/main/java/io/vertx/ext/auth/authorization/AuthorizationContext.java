@@ -15,6 +15,7 @@ package io.vertx.ext.auth.authorization;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 
 /**
  * The AuthorizationContext contains properties that can be used to match
@@ -25,6 +26,10 @@ import io.vertx.ext.auth.User;
  */
 @VertxGen
 public interface AuthorizationContext {
+
+  static AuthorizationContext create(User user) {
+    return new AuthorizationContextImpl(user);
+  }
 
   /**
    * Get the authenticated user

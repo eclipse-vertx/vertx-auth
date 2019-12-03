@@ -56,4 +56,9 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
     // return
     handler.handle(Future.succeededFuture(authorizations));
   }
+
+  @Override
+  public String separator() {
+    return scopeSeparator;
+  }
 }

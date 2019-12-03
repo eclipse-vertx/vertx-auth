@@ -40,7 +40,7 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
-    final String rootClaim = user.attributes().getString("accessToken");
+    final String rootClaim = user.attributes().getString("rootClaim");
     final JsonObject accessToken =
       rootClaim == null ?
         user.principal() :

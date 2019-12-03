@@ -25,6 +25,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 import io.vertx.ext.jwt.JWTOptions;
 
 /**
@@ -235,5 +236,16 @@ public class AuthJWTExamples {
       ));
 
     String token = provider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("ES256"));
+  }
+
+  public void example27(User user) {
+    // use the MP-JWT 1.1 spec handler to
+    // handle Role-Based Access Control (AuthZ)
+    MicroProfileAuthorization mpAuthZProvider = MicroProfileAuthorization.create();
+
+    // later roles can be extracted with
+    mpAuthZProvider.getAuthorizations(user, res -> {
+      // ...
+    });
   }
 }

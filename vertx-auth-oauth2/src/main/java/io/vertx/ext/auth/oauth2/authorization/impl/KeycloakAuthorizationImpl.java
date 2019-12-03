@@ -40,7 +40,7 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
-    final String rootClaim = user.attributes().getString("accessToken");
+    final String rootClaim = user.attributes().getString("rootClaim");
     final JsonObject accessToken =
       rootClaim == null ?
         user.principal() :
@@ -56,14 +56,14 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
 
     // 1. application roles
     try {
-      extractRoles(accessToken, "resource_access", authorizations);
+      extractApplicationRoles(accessToken, authorizations);
     } catch (RuntimeException e) {
       handler.handle(Future.failedFuture(e));
       return;
     }
     // 2. realm roles
     try {
-      extractRoles(accessToken, "realm_access", authorizations);
+      extractRealmRoles(accessToken, authorizations);
     } catch (RuntimeException e) {
       handler.handle(Future.failedFuture(e));
       return;
@@ -73,9 +73,9 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
     handler.handle(Future.succeededFuture(authorizations));
   }
 
-  private static void extractRoles(JsonObject accessToken, String access, Set<Authorization> authorizations) {
+  private static void extractApplicationRoles(JsonObject accessToken, Set<Authorization> authorizations) {
     JsonObject resourceAccess = accessToken
-      .getJsonObject(access, EMPTY_JSON);
+      .getJsonObject("resource_access", EMPTY_JSON);
 
     for (String resource : resourceAccess.fieldNames()) {
       JsonArray appRoles = resourceAccess
@@ -93,6 +93,24 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
               // fix it to the right resource
               .setResource(resource));
         }
+      }
+    }
+  }
+
+  private static void extractRealmRoles(JsonObject accessToken, Set<Authorization> authorizations) {
+    JsonArray appRoles = accessToken
+      .getJsonObject("realm_access", EMPTY_JSON)
+      // locate the role list
+      .getJsonArray("roles");
+
+    if (appRoles != null && appRoles.size() >= 0) {
+      for (Object el : appRoles) {
+        // convert to the authorization type
+        authorizations.add(
+          RoleBasedAuthorization
+            .create((String) el)
+            // fix it to the right resource
+            .setResource("realm"));
       }
     }
   }

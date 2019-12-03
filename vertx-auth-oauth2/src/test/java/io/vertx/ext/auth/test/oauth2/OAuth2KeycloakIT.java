@@ -1,7 +1,14 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
+import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -15,7 +22,6 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(Parameterized.class)
 @Parameterized.UseParametersRunnerFactory(VertxUnitRunnerWithParametersFactory.class)
@@ -78,9 +84,9 @@ public class OAuth2KeycloakIT {
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
-      AccessToken token = (AccessToken) authn.result();
+      User token = authn.result();
 
-      keycloak.authenticate(new JsonObject().put("access_token", token.opaqueAccessToken()).put("token_type", "Bearer"), authn2 -> {
+      keycloak.authenticate(new JsonObject().put("access_token", token.principal().getString("access_token")).put("token_type", "Bearer"), authn2 -> {
         should.assertTrue(authn2.succeeded());
         should.assertNotNull(authn2.result());
         test.complete();
@@ -108,7 +114,7 @@ public class OAuth2KeycloakIT {
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
-      AccessToken token = (AccessToken) authn.result();
+      User token = authn.result();
 
       OAuth2ClientOptions options = new OAuth2ClientOptions()
         .setFlow(OAuth2FlowType.PASSWORD)
@@ -119,7 +125,7 @@ public class OAuth2KeycloakIT {
 
       options.setTrustAll(true);
 
-        // get a auth handler for the confidential client
+      // get a auth handler for the confidential client
       KeycloakAuth.discover(
         rule.vertx(),
         options,
@@ -127,7 +133,7 @@ public class OAuth2KeycloakIT {
           should.assertTrue(discover.succeeded());
           OAuth2Auth confidential = discover.result();
 
-          confidential.introspectToken(token.opaqueAccessToken(), introspect -> {
+          confidential.authenticate(token.principal(), introspect -> {
             should.assertTrue(introspect.succeeded());
             test.complete();
           });
@@ -144,7 +150,7 @@ public class OAuth2KeycloakIT {
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
-      AccessToken token = (AccessToken) authn.result();
+      User token = authn.result();
 
       // assert that the user has the following roles:
       final List<String> roles = Arrays.asList(
@@ -159,17 +165,39 @@ public class OAuth2KeycloakIT {
         "account:view-profile"
       );
 
-      final AtomicInteger cnt = new AtomicInteger(roles.size());
+      ScopeAuthorization.create(" ").getAuthorizations(token, authz1 -> {
+        should.assertTrue(authz1.succeeded());
+        should.assertTrue(
+          authz1.result()
+            .contains(PermissionBasedAuthorization.create("profile")));
+        should.assertTrue(
+          authz1.result()
+            .contains(PermissionBasedAuthorization.create("email")));
 
-      for (String role : roles) {
-        token.isAuthorized(role, authz -> {
-          should.assertTrue(authz.succeeded());
-          should.assertTrue(authz.result());
-          if (cnt.decrementAndGet() == 0) {
-            test.complete();
-          }
+        KeycloakAuthorization.create().getAuthorizations(token, authz2 -> {
+          should.assertTrue(authz2.succeeded());
+          should.assertTrue(
+            authz2.result()
+              .contains(RoleBasedAuthorization.create("offline_access").setResource("realm")));
+          should.assertTrue(
+            authz2.result()
+              .contains(RoleBasedAuthorization.create("user").setResource("realm")));
+          should.assertTrue(
+            authz2.result()
+              .contains(RoleBasedAuthorization.create("test").setResource("confidential-client")));
+          should.assertTrue(
+            authz2.result()
+              .contains(RoleBasedAuthorization.create("manage-account").setResource("account")));
+          should.assertTrue(
+            authz2.result()
+              .contains(RoleBasedAuthorization.create("manage-account-links").setResource("account")));
+          should.assertTrue(
+            authz2.result()
+              .contains(RoleBasedAuthorization.create("view-profile").setResource("account")));
+
+          test.complete();
         });
-      }
+      });
     });
   }
 
@@ -182,7 +210,7 @@ public class OAuth2KeycloakIT {
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
-      AccessToken token = (AccessToken) authn.result();
+      User token = authn.result();
 
       token.isAuthorized("sudo", authz -> {
         should.assertTrue(authz.succeeded());
@@ -201,9 +229,9 @@ public class OAuth2KeycloakIT {
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
-      AccessToken token = (AccessToken) authn.result();
+      User token = authn.result();
 
-      token.userInfo(userinfo -> {
+      keycloak.userInfo(token, userinfo -> {
         should.assertTrue(userinfo.succeeded());
         should.assertNotNull(userinfo.result());
 
@@ -222,14 +250,14 @@ public class OAuth2KeycloakIT {
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
-      AccessToken token = (AccessToken) authn.result();
+      User token = authn.result();
 
-      final String origToken = token.opaqueAccessToken();
+      final String origToken = token.principal().getString("access_token");
 
-      token.refresh(refresh -> {
+      keycloak.refresh(token, refresh -> {
         should.assertTrue(refresh.succeeded());
 
-        should.assertNotEquals(origToken, token.opaqueAccessToken());
+        should.assertNotEquals(origToken, refresh.result().principal().getString("access_token"));
         test.complete();
       });
     });
@@ -239,7 +267,7 @@ public class OAuth2KeycloakIT {
   public void shouldReloadJWK(TestContext should) {
     final Async test = should.async();
 
-    keycloak.loadJWK(load -> {
+    keycloak.jWKSet(load -> {
       should.assertTrue(load.succeeded());
 
       keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
@@ -247,9 +275,9 @@ public class OAuth2KeycloakIT {
         should.assertNotNull(authn.result());
 
         // generate a access token from the user
-        AccessToken token = (AccessToken) authn.result();
+        User token = authn.result();
 
-        should.assertNotNull(token.accessToken());
+        should.assertNotNull(token.principal().getJsonObject("accessToken"));
         test.complete();
       });
     });

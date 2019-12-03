@@ -105,8 +105,8 @@ What this returns depends on the underlying implementation.
 
 If you wish to create your own auth provider you should implement the {@link io.vertx.ext.auth.AuthProvider} interface.
 
-We provide an abstract implementation of user called {@link io.vertx.ext.auth.AbstractUser} which you can subclass
-to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
+We provide an facgtory implementation of user called {@link io.vertx.ext.auth.User#create(io.vertx.core.json.JsonObject)}
+which you can use to make your user instance. This contains the caching logic so you don't have to implement that yourself.
 
 If you wish your user objects to be clusterable you should make sure they implement {@link io.vertx.core.shareddata.impl.ClusterSerializable}.
 

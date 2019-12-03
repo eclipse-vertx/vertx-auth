@@ -1,4 +1,4 @@
-FROM jboss/keycloak
+FROM jboss/keycloak:6.0.0
 
 ENV KEYCLOAK_USER=user
 ENV KEYCLOAK_PASSWORD=password

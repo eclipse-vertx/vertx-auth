@@ -45,7 +45,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
-  private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
 
   private OAuth2FlowType flow;
@@ -161,7 +160,6 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
     revocationPath = REVOKATION_PATH;
-    scopeSeparator = SCOPE_SEPARATOR;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtOptions = JWT_OPTIONS;

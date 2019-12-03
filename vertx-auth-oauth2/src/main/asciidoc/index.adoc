@@ -294,19 +294,6 @@ Or if the user can access the `year-report` in the `finance` department:
 {@link examples.AuthOAuth2Examples#example19}
 ----
 
-=== MicroProfile JWT 1.1 spec
-
-Another format in the form of a spec is the MP-JWT 1.1. This spec defines a JSON array of strings under the property
-name `groups` that define the "groups" the token has an authority over.
-
-In order to use this spec to assert AuthZ the right handler must be set:
-
-[source,$lang]
-----
-{@link examples.AuthOAuth2Examples#example27}
-----
-
-
 == Token Management
 
 === Check if it is expired

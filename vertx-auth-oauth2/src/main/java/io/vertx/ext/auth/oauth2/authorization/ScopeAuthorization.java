@@ -45,4 +45,11 @@ public interface ScopeAuthorization extends AuthorizationProvider {
   static ScopeAuthorization create(String scopeSeparator) {
     return new ScopeAuthorizationImpl(scopeSeparator);
   }
+
+  /**
+   * Returns the configured separator.
+   *
+   * @return the separator.
+   */
+  String separator();
 }

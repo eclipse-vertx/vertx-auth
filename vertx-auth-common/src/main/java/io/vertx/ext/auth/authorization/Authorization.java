@@ -56,7 +56,7 @@ public interface Authorization {
    * </br>Note that it doesn't always mean an exact match. For instance,
    * in the case of a {@link WildcardPermissionBasedAuthorization}, this method
    * may return true even if the permissions are different
-   * </br>WildcardPermissionBasedAuthorization.create('*').implies(WildcardPermissionBasedAuthorization.create('anypermission'))
+   * </br>WildcardPermissionBasedAuthorization.create('*').verify(WildcardPermissionBasedAuthorization.create('anypermission'))
    * would return true
    *
    * @param authorization

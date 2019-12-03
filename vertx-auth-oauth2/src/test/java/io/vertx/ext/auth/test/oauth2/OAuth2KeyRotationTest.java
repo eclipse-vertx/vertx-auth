@@ -17,7 +17,7 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
   public void testLoadJWK() {
     OAuth2Auth oauth2 = GoogleAuth.create(vertx, "", "");
 
-    oauth2.loadJWK(load -> {
+    oauth2.jWKSet(load -> {
       assertFalse(load.failed());
       testComplete();
     });

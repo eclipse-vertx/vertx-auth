@@ -163,11 +163,13 @@ public class JWTOptions {
     return permissions;
   }
 
+  @Deprecated
   public JWTOptions setScopes(List<String> scopes) {
     this.scopes = scopes;
     return this;
   }
 
+  @Deprecated
   public JWTOptions addScope(String scope) {
     if (this.scopes == null) {
       this.scopes = new ArrayList<>();
@@ -176,12 +178,14 @@ public class JWTOptions {
     return this;
   }
 
+  @Deprecated
   public List<String> getScopes() {
     return scopes;
   }
 
+  @Deprecated
   public String getScopeDelimiter() {
-    return scopeDelimiter!=null?scopeDelimiter:DEFAULT_SCOPE_DELIMITER;
+    return scopeDelimiter != null ? scopeDelimiter : DEFAULT_SCOPE_DELIMITER;
   }
 
   public JWTOptions withScopeDelimiter(String scopeDelimiter) {
@@ -189,7 +193,8 @@ public class JWTOptions {
     return this;
   }
 
+  @Deprecated
   public boolean hasScopeDelimiter() {
-    return this.scopeDelimiter!=null;
+    return this.scopeDelimiter != null;
   }
 }

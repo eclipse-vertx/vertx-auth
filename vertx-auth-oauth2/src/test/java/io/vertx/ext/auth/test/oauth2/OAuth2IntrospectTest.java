@@ -3,10 +3,12 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -121,33 +123,27 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   public void introspectAccessToken() {
     config = oauthIntrospect;
     fixture = fixtureIntrospect;
-    oauth2.introspectToken(token, res -> {
+    oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
-        assertNotNull(token);
-        JsonObject principal = token.principal();
+        User token2 = res.result();
+        assertNotNull(token2);
+        JsonObject principal = token2.principal().copy();
 
         // clean time specific value
         principal.remove("expires_at");
         principal.remove("access_token");
 
         final JsonObject assertion = fixtureIntrospect.copy();
-        // remove control fields
-        assertion.remove("active");
-        assertion.remove("exp");
-        assertion.remove("iat");
-        assertion.remove("nbf");
-        principal.remove("expires_in");
 
         assertEquals(assertion.getMap(), principal.getMap());
 
-        token.isAuthorized("scopeB", res0 -> {
+        ScopeAuthorization.create(" ").getAuthorizations(token2, res0 -> {
           if (res0.failed()) {
             fail(res0.cause().getMessage());
           } else {
-            if (res0.result()) {
+            if (res0.result().contains(PermissionBasedAuthorization.create("scopeB"))) {
               testComplete();
             } else {
               fail("Should be allowed");
@@ -163,30 +159,25 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   public void introspectAccessTokenGoogleWay() {
     config = oauthIntrospect;
     fixture = fixtureGoogle;
-    oauth2.introspectToken(token, res -> {
+    oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = res.result();
+        User token = res.result();
         assertNotNull(token);
         // make a copy because later we need to original data
         JsonObject principal = token.principal().copy();
 
-        // clean time specific value
-        principal.remove("expires_at");
-        principal.remove("access_token");
         // clean up control
         final JsonObject assertion = fixtureGoogle.copy();
-        assertion.remove("audience");
-        assertion.remove("user_id");
 
         assertEquals(assertion.getMap(), principal.getMap());
 
-        token.isAuthorized("profile", res0 -> {
+        ScopeAuthorization.create(" ").getAuthorizations(token, res0 -> {
           if (res0.failed()) {
             fail(res0.cause().getMessage());
           } else {
-            if (res0.result()) {
+            if (res0.result().contains(PermissionBasedAuthorization.create("profile"))) {
               // Issue #142
 
               // the test is a replay of the same test so all checks have
@@ -194,7 +185,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
               // the replay shows that the api can be used from the user object
               // directly too
-              token.introspect(v -> {
+              oauth2.authenticate(token.principal().put("access_token", OAuth2IntrospectTest.token).put("token_type", "Bearer"), v -> {
                 if (v.failed()) {
                   fail(v.cause());
                 } else {
@@ -215,11 +206,11 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   public void introspectAccessTokenKeyCloakWay() {
     config = oauthIntrospect;
     fixture = fixtureKeycloak;
-    oauth2.introspectToken(token, res -> {
+    oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
       if (res.failed()) {
         fail(res.cause());
       } else {
-        AccessToken token = res.result();
+        User token = res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
         testComplete();
