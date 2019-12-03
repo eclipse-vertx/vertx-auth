@@ -13,12 +13,12 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.jwt.authorization;
+package io.vertx.ext.auth.oauth2.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jwt.authorization.impl.KeycloakAuthorizationImpl;
+import io.vertx.ext.auth.oauth2.authorization.impl.KeycloakAuthorizationImpl;
 
 /**
  * Implementation of the Keycloak Authorization Provider.
