@@ -19,6 +19,8 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.oauth2.authorization.impl.ScopeAuthorizationImpl;
 
+import java.util.List;
+
 /**
  * Scope is a mechanism in OAuth 2.0 to limit an application's access to a user's account.
  * An application can request one or more scopes, this information is then presented to the
@@ -29,7 +31,7 @@ import io.vertx.ext.auth.oauth2.authorization.impl.ScopeAuthorizationImpl;
  * the application compared to what is requested, although there are not many examples of
  * services doing this in practice.
  *
- * OAuth does not define any particular values for scopes, since it is highly dependent
+ * OAuth2 does not define any particular values for scopes, since it is highly dependent
  * on the service's internal architecture and needs.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>.
@@ -52,4 +54,11 @@ public interface ScopeAuthorization extends AuthorizationProvider {
    * @return the separator.
    */
   String separator();
+
+  /**
+   * Returns a String with the given scopes concatenated with the given separator.
+   * @param scopes a list of scopes
+   * @return concatenated string.
+   */
+  String encode(List<String> scopes);
 }

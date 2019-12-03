@@ -16,9 +16,7 @@
 package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jdbc.JDBCClient;
 
 /**
  * Options configuring JDBC authentication.
@@ -28,7 +26,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  */
 @DataObject(generateConverter = true)
 @Deprecated
-public class JDBCAuthOptions implements io.vertx.ext.auth.AuthOptions {
+public class JDBCAuthOptions {
 
   private boolean shared;
   private String datasourceName;
@@ -52,39 +50,6 @@ public class JDBCAuthOptions implements io.vertx.ext.auth.AuthOptions {
   public JDBCAuthOptions(JsonObject json) {
     this();
     JDBCAuthOptionsConverter.fromJson(json, this);
-  }
-
-  @Override
-  public JDBCAuthOptions clone() {
-    return new JDBCAuthOptions(this);
-  }
-
-  @Override
-  public JDBCAuth createProvider(Vertx vertx) {
-    JDBCClient client;
-    if (shared) {
-      if (datasourceName != null) {
-        client = JDBCClient.createShared(vertx, config, datasourceName);
-      } else {
-        client = JDBCClient.createShared(vertx, config);
-      }
-    } else {
-      client = JDBCClient.createNonShared(vertx, config);
-    }
-    JDBCAuth auth = JDBCAuth.create(vertx, client);
-    if (authenticationQuery != null) {
-      auth.setAuthenticationQuery(authenticationQuery);
-    }
-    if (rolesQuery != null) {
-      auth.setRolesQuery(rolesQuery);
-    }
-    if (permissionsQuery != null) {
-      auth.setPermissionsQuery(permissionsQuery);
-    }
-    if (rolesPrefix != null) {
-      auth.setRolePrefix(rolesPrefix);
-    }
-    return auth;
   }
 
   public boolean isShared() {

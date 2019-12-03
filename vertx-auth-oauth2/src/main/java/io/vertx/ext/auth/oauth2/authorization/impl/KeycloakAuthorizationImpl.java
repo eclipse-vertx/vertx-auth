@@ -106,11 +106,7 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
     if (appRoles != null && appRoles.size() >= 0) {
       for (Object el : appRoles) {
         // convert to the authorization type
-        authorizations.add(
-          RoleBasedAuthorization
-            .create((String) el)
-            // fix it to the right resource
-            .setResource("realm"));
+        authorizations.add(RoleBasedAuthorization.create((String) el));
       }
     }
   }

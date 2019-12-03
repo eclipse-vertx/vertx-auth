@@ -12,13 +12,10 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization;
 
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 
@@ -31,29 +28,6 @@ import io.vertx.ext.auth.User;
  */
 @VertxGen(concrete = false)
 public interface AuthorizationProvider {
-
-//  /**
-//   * create an authorization provider with the specified id and authorizations
-//   *
-//   * @param id
-//   * @param authorizations
-//   * @return
-//   */
-//  static AuthorizationProvider create(String id, Set<Authorization> authorizations) {
-//    Set<Authorization> _authorizations = new HashSet<>(Objects.requireNonNull(authorizations));
-//    return new AuthorizationProvider() {
-//
-//      @Override
-//      public String getId() {
-//        return id;
-//      }
-//
-//      @Override
-//      public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
-//        handler.handle(Future.succeededFuture(new HashSet<>(_authorizations)));
-//      }
-//    };
-//  }
 
   /**
    * returns the id of the authorization provider

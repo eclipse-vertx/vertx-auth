@@ -225,9 +225,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth authorizeURL(JsonObject params, Handler<AsyncResult<String>> handler) {
-    api.authorizeURL(params, handler);
-    return this;
+  public String authorizeURL(JsonObject params) {
+    return api.authorizeURL(params);
   }
 
   @Override
@@ -267,9 +266,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth endSessionURL(User user, JsonObject params, Handler<AsyncResult<String>> handler) {
-    api.endSessionURL(user.principal().getString("id_token"), params, handler);
-    return this;
+  public String endSessionURL(User user, JsonObject params) {
+    return api.endSessionURL(user.principal().getString("id_token"), params);
   }
 
   OAuth2API api() {

@@ -60,7 +60,7 @@ public interface User {
    * @return {@code true} if expired
    */
   default boolean expired() {
-    return expired(0);
+    return expired(attributes().getInteger("leeway", 0));
   }
 
   /**

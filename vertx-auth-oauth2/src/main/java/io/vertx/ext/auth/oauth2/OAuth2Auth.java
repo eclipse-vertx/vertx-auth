@@ -83,26 +83,9 @@ public interface OAuth2Auth extends AuthProvider {
    * OAuth 2.0 flows which require end-user interaction.
    *
    * @param params extra params to be included in the final URL.
-   * @param handler the handler success/failure.
-   * @return fluent self.
+   * @return the url to be used to authorize the user.
    */
-  @Fluent
-  OAuth2Auth authorizeURL(JsonObject params, Handler<AsyncResult<String>> handler);
-
-  /**
-   * The client sends the end-user's browser to this endpoint to request their
-   * authentication and consent. This endpoint is used in the code and implicit
-   * OAuth 2.0 flows which require end-user interaction.
-   *
-   * @param params extra parameters to apply to the url
-   * @return future result
-   * @see OAuth2Auth#authorizeURL(JsonObject, Handler)
-   */
-  default Future<String> authorizeURL(JsonObject params) {
-    Promise<String> promise = Promise.promise();
-    authorizeURL(params, promise);
-    return promise.future();
-  }
+  String authorizeURL(JsonObject params);
 
   /**
    * Refresh the current User (access token).
@@ -206,51 +189,18 @@ public interface OAuth2Auth extends AuthProvider {
    *
    * @param user the user to generate the url for
    * @param params extra parameters to apply to the url
-   * @param handler the handler success/failure.
-   * @return fluent self.
+   * @return the url to end the session.
    */
-  @Fluent
-  OAuth2Auth endSessionURL(User user, JsonObject params, Handler<AsyncResult<String>> handler);
+  String endSessionURL(User user, JsonObject params);
 
   /**
    * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
    * More info: <a href="https://openid.net/specs/openid-connect-session-1_0.html">https://openid.net/specs/openid-connect-session-1_0.html</a>.
    *
    * @param user the user to generate the url for
-   * @param params extra parameters to apply to the url
-   * @return future result
-   * @see OAuth2Auth#endSessionURL(User, JsonObject, Handler)
+   * @return the url to end the session.
    */
-  default Future<String> endSessionURL(User user, JsonObject params) {
-    Promise<String> promise = Promise.promise();
-    endSessionURL(user, params, promise);
-    return promise.future();
-  }
-
-  /**
-   * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
-   * More info: <a href="https://openid.net/specs/openid-connect-session-1_0.html">https://openid.net/specs/openid-connect-session-1_0.html</a>.
-   *
-   * @param user the user to generate the url for
-   * @param handler the handler success/failure.
-   * @return fluent self.
-   */
-  @Fluent
-  default OAuth2Auth endSessionURL(User user, Handler<AsyncResult<String>> handler) {
-    return endSessionURL(user, new JsonObject(), handler);
-  }
-
-  /**
-   * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
-   * More info: <a href="https://openid.net/specs/openid-connect-session-1_0.html">https://openid.net/specs/openid-connect-session-1_0.html</a>.
-   *
-   * @param user the user to generate the url for
-   * @return future result
-   * @see OAuth2Auth#endSessionURL(User, Handler)
-   */
-  default Future<String> endSessionURL(User user) {
-    Promise<String> promise = Promise.promise();
-    endSessionURL(user, promise);
-    return promise.future();
+  default String endSessionURL(User user) {
+    return endSessionURL(user, new JsonObject());
   }
 }

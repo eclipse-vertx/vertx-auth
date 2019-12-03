@@ -16,10 +16,7 @@
 package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthOptions;
-import io.vertx.ext.auth.AuthProvider;
 
 /**
  * Options configuring htpasswd authentication.
@@ -27,7 +24,7 @@ import io.vertx.ext.auth.AuthProvider;
  * @author Neven Radovanović
  */
 @DataObject(generateConverter = true)
-public class HtpasswdAuthOptions implements AuthOptions {
+public class HtpasswdAuthOptions {
 
   private String htpasswdFile;
   private boolean plainTextEnabled;
@@ -64,21 +61,5 @@ public class HtpasswdAuthOptions implements AuthOptions {
   public HtpasswdAuthOptions setHtpasswdFile(String htpasswdFile) {
     this.htpasswdFile = htpasswdFile;
     return this;
-  }
-
-  @Override
-  public AuthOptions clone() {
-    return new HtpasswdAuthOptions(this);
-  }
-
-  @Override
-  public AuthProvider createProvider(Vertx vertx) {
-    return HtpasswdAuth.create(vertx, this);
-  }
-
-  public JsonObject toJson() {
-    final JsonObject json = new JsonObject();
-    HtpasswdAuthOptionsConverter.toJson(this, json);
-    return json;
   }
 }

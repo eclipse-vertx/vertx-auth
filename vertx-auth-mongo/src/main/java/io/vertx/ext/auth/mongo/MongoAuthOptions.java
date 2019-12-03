@@ -16,9 +16,7 @@
 package io.vertx.ext.auth.mongo;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClient;
 
 /**
  * Options configuring Mongo authentication.
@@ -26,7 +24,7 @@ import io.vertx.ext.mongo.MongoClient;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
-public class MongoAuthOptions implements io.vertx.ext.auth.AuthOptions {
+public class MongoAuthOptions {
 
   private boolean shared;
   private String datasourceName;
@@ -71,28 +69,6 @@ public class MongoAuthOptions implements io.vertx.ext.auth.AuthOptions {
   public MongoAuthOptions(JsonObject json) {
     this();
     MongoAuthOptionsConverter.fromJson(json, this);
-  }
-
-  @Override
-  public MongoAuthOptions clone() {
-    return new MongoAuthOptions(this);
-  }
-
-  @Override
-  public MongoAuth createProvider(Vertx vertx) {
-    MongoClient client;
-    if (shared) {
-      if (datasourceName != null) {
-        client = MongoClient.createShared(vertx, config, datasourceName);
-      } else {
-        client = MongoClient.createShared(vertx, config);
-      }
-    } else {
-      client = MongoClient.createNonShared(vertx, config);
-    }
-    JsonObject authConfig = new JsonObject();
-    MongoAuthOptionsConverter.toJson(this, authConfig);
-    return MongoAuth.create(client, authConfig);
   }
 
   public boolean getShared() {

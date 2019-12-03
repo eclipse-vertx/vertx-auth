@@ -42,17 +42,10 @@ public class AuthOAuth2Examples {
 
     // when there is a need to access a protected resource or call a protected method,
     // call the authZ url for a challenge
-    oauth2.authorizeURL(new JsonObject()
+    String authorization_uri = oauth2.authorizeURL(new JsonObject()
       .put("redirect_uri", "http://localhost:8080/callback")
       .put("scope", "notifications")
-      .put("state", "3(#0/!~"), res -> {
-
-      if (res.succeeded()) {
-        // the computer URL can be used now...
-        String authorization_uri = res.result();
-      }
-
-    });
+      .put("state", "3(#0/!~"));
 
     // when working with web application use the above string as a redirect url
 
@@ -84,32 +77,29 @@ public class AuthOAuth2Examples {
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
 
     // Authorization oauth2 URI
-    oauth2.authorizeURL(new JsonObject()
+    String authorization_uri = oauth2.authorizeURL(new JsonObject()
       .put("redirect_uri", "http://localhost:8080/callback")
       .put("scope", "<scope>")
-      .put("state", "<state>"), res -> {
+      .put("state", "<state>"));
 
-      String authorization_uri = res.result();
+    // Redirect example using Vert.x
+    response.putHeader("Location", authorization_uri)
+      .setStatusCode(302)
+      .end();
 
-      // Redirect example using Vert.x
-      response.putHeader("Location", authorization_uri)
-        .setStatusCode(302)
-        .end();
+    JsonObject tokenConfig = new JsonObject()
+      .put("code", "<code>")
+      .put("redirect_uri", "http://localhost:3000/callback");
 
-      JsonObject tokenConfig = new JsonObject()
-        .put("code", "<code>")
-        .put("redirect_uri", "http://localhost:3000/callback");
-
-      // Callbacks
-      // Save the access token
-      oauth2.authenticate(tokenConfig, authenticate -> {
-        if (authenticate.failed()) {
-          System.err.println("Access Token Error: " + authenticate.cause().getMessage());
-        } else {
-          // Get the access token object (the authorization code is given from the previous step).
-          User token = authenticate.result();
-        }
-      });
+    // Callbacks
+    // Save the access token
+    oauth2.authenticate(tokenConfig, authenticate -> {
+      if (authenticate.failed()) {
+        System.err.println("Access Token Error: " + authenticate.cause().getMessage());
+      } else {
+        // Get the access token object (the authorization code is given from the previous step).
+        User token = authenticate.result();
+      }
     });
   }
 
@@ -285,16 +275,9 @@ public class AuthOAuth2Examples {
   }
 
   public void example20(OAuth2Auth oauth2, User user) {
-    oauth2.endSessionURL(user, res -> {
-      if (res.succeeded()) {
-        // the logout url call succeeded
-        // make a request to the url will logout the user
-      } else {
-        // the user might not have been logged out
-        // to know why:
-        System.out.println(res.cause());
-      }
-    });
+    // the logout url call succeeded
+    // make a request to the url will logout the user
+    String session_end_url = oauth2.endSessionURL(user);
   }
 
   public void example21(User user) {

@@ -97,12 +97,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   @Test
   public void generateAuthorizeURL() throws Exception {
     String expected = "http://localhost:8080/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
-    oauth2.authorizeURL(authorizeConfig, authorizeURL -> {
-      assertTrue(authorizeURL.succeeded());
-      assertEquals(expected, authorizeURL.result());
-      testComplete();
-    });
-    await();
+    assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
   }
 
   @Test

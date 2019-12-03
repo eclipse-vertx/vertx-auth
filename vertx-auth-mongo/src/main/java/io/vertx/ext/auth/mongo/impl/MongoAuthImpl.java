@@ -19,13 +19,13 @@ package io.vertx.ext.auth.mongo.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
 import io.vertx.ext.mongo.MongoClient;
@@ -58,10 +58,8 @@ public class MongoAuthImpl implements MongoAuth {
   /**
    * Creates a new instance
    *
-   * @param mongoClient
-   *          the {@link MongoClient} to be used
-   * @param config
-   *          the config for configuring the new instance
+   * @param mongoClient the {@link MongoClient} to be used
+   * @param config      the config for configuring the new instance
    * @see MongoAuth#create(MongoClient, JsonObject)
    */
   public MongoAuthImpl(MongoClient mongoClient, JsonObject config) {
@@ -123,31 +121,31 @@ public class MongoAuthImpl implements MongoAuth {
    * @return
    */
   private User handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
-      throws AuthenticationException {
+    throws AuthenticationException {
     switch (resultList.result().size()) {
-    case 0: {
-      String message = "No account found for user [" + authToken.username + "]";
-      // log.warn(message);
-      throw new AuthenticationException(message);
-    }
-    case 1: {
-      JsonObject json = resultList.result().get(0);
-      User user = createUser(json);
-      if (examinePassword(user, authToken))
-        return user;
-      else {
-        String message = "Invalid username/password [" + authToken.username + "]";
+      case 0: {
+        String message = "No account found for user [" + authToken.username + "]";
         // log.warn(message);
         throw new AuthenticationException(message);
       }
-    }
-    default: {
-      // More than one row returned!
-      String message = "More than one user row found for user [" + authToken.username + "( "
+      case 1: {
+        JsonObject json = resultList.result().get(0);
+        User user = createUser(json);
+        if (examinePassword(user, authToken))
+          return user;
+        else {
+          String message = "Invalid username/password [" + authToken.username + "]";
+          // log.warn(message);
+          throw new AuthenticationException(message);
+        }
+      }
+      default: {
+        // More than one row returned!
+        String message = "More than one user row found for user [" + authToken.username + "( "
           + resultList.result().size() + " )]. Usernames must be unique.";
-      // log.warn(message);
-      throw new AuthenticationException(message);
-    }
+        // log.warn(message);
+        throw new AuthenticationException(message);
+      }
     }
   }
 
@@ -159,7 +157,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public void insertUser(String username, String password, List<String> roles, List<String> permissions,
-      Handler<AsyncResult<String>> resultHandler) {
+                         Handler<AsyncResult<String>> resultHandler) {
     JsonObject principal = new JsonObject();
     principal.put(getUsernameField(), username);
 
@@ -187,15 +185,15 @@ public class MongoAuthImpl implements MongoAuth {
     json.put(PROPERTY_FIELD_SALT, getSaltField());
     json.put(PROPERTY_FIELD_PASSWORD, getPasswordField());
     JsonArray roles = json.getJsonArray(roleField);
-    if (roles!=null) {
-      for (int i=0; i<roles.size(); i++) {
+    if (roles != null) {
+      for (int i = 0; i < roles.size(); i++) {
         String role = roles.getString(i);
         user.authorizations().add("mongo-authentication", RoleBasedAuthorization.create(role));
       }
     }
     JsonArray permissions = json.getJsonArray(permissionField);
-    if (permissions!=null) {
-      for (int i=0; i<permissions.size(); i++) {
+    if (permissions != null) {
+      for (int i = 0; i < permissions.size(); i++) {
         String permission = permissions.getString(i);
         user.authorizations().add("mongo-authentication", PermissionBasedAuthorization.create(permission));
       }

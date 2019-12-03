@@ -1,19 +1,5 @@
 = Cheatsheets
 
-[[AuthOptions]]
-== AuthOptions
-
-++++
- A common base object for authentication options.<p>
-++++
-'''
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|===
-
 [[KeyStoreOptions]]
 == KeyStoreOptions
 

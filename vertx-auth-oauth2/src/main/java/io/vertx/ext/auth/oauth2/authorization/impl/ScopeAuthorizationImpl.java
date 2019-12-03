@@ -24,6 +24,7 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -60,5 +61,10 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
   @Override
   public String separator() {
     return scopeSeparator;
+  }
+
+  @Override
+  public String encode(List<String> scopes) {
+    return String.join(separator(), scopes);
   }
 }

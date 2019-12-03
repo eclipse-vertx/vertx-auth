@@ -7,9 +7,9 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2Response;
 import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
+import io.vertx.ext.auth.oauth2.impl.OAuth2Response;
 
 /**
  * Simplified factory to create an {@link io.vertx.ext.auth.oauth2.OAuth2Auth} for OpenID Connect.
@@ -59,7 +59,7 @@ public interface OpenIDConnectAuth {
         return;
       }
 
-      final JsonObject json = response.jsonObject();
+      final JsonObject json = new JsonObject(response.body());
 
       // issuer validation
       if (config.isValidateIssuer()) {

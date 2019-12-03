@@ -27,7 +27,6 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.OAuth2Response;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -80,7 +79,7 @@ public class OAuth2API {
 
         if (reply.is("application/json")) {
           try {
-            json = reply.jsonObject();
+            json = new JsonObject(reply.body());
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -107,12 +106,11 @@ public class OAuth2API {
    *
    * see: https://tools.ietf.org/html/rfc6749
    */
-  public void authorizeURL(JsonObject params, Handler<AsyncResult<String>> handler) {
+  public String authorizeURL(JsonObject params) {
     final JsonObject query = params.copy();
 
     if (config.getFlow() != OAuth2FlowType.AUTH_CODE) {
-      handler.handle(Future.failedFuture("authorization URL cannot be computed for non AUTH_CODE flow"));
-      return;
+      throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
     }
 
     if (query.containsKey("scopes")) {
@@ -127,7 +125,7 @@ public class OAuth2API {
     final String path = config.getAuthorizationPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
-    handler.handle(Future.succeededFuture(url + '?' + stringify(query)));
+    return url + '?' + stringify(query);
   }
 
   /**
@@ -196,7 +194,7 @@ public class OAuth2API {
 
         if (reply.is("application/json")) {
           try {
-            json = reply.jsonObject();
+            json = new JsonObject(reply.body());
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -278,7 +276,7 @@ public class OAuth2API {
 
         if (reply.is("application/json")) {
           try {
-            json = reply.jsonObject();
+            json = new JsonObject(reply.body());
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -402,7 +400,7 @@ public class OAuth2API {
         if (reply.is("application/json")) {
           try {
             // userInfo is expected to be an object
-            userInfo = reply.jsonObject();
+            userInfo = new JsonObject(reply.body());
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -430,7 +428,7 @@ public class OAuth2API {
    *
    * see: https://openid.net/specs/openid-connect-session-1_0.html
    */
-  public void endSessionURL(String idToken, JsonObject params, Handler<AsyncResult<String>> handler) {
+  public String endSessionURL(String idToken, JsonObject params) {
     final JsonObject query = params.copy();
 
     if (idToken != null) {
@@ -440,7 +438,7 @@ public class OAuth2API {
     final String path = config.getLogoutPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
-    handler.handle(Future.succeededFuture(url + '?' + stringify(query)));
+    return url + '?' + stringify(query);
   }
 
   /**
@@ -566,7 +564,7 @@ public class OAuth2API {
               callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
             }
           } else {
-            callback.handle(Future.succeededFuture(new OAuth2ResponseImpl(resp.statusCode(), resp.headers(), body)));
+            callback.handle(Future.succeededFuture(new OAuth2Response(resp.statusCode(), resp.headers(), body)));
           }
         });
       } else {
