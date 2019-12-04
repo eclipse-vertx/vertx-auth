@@ -164,12 +164,4 @@ public interface User {
    * @return JSON representation of the Principal
    */
   JsonObject principal();
-
-  /**
-   * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
-   * after it has been deserialized.
-   *
-   * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
-   */
-  void setAuthProvider(AuthProvider authProvider);
 }

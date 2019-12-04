@@ -18,7 +18,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.impl.ClusterSerializable;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.Authorizations;
@@ -110,11 +109,6 @@ public class UserImpl implements User, ClusterSerializable {
   @Override
   public JsonObject principal() {
     return principal;
-  }
-
-  @Override
-  public void setAuthProvider(AuthProvider authProvider) {
-    // do nothing for now
   }
 
   @Override

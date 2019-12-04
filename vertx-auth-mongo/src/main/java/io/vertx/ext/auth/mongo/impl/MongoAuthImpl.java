@@ -198,7 +198,6 @@ public class MongoAuthImpl implements MongoAuth {
         user.authorizations().add("mongo-authentication", PermissionBasedAuthorization.create(permission));
       }
     }
-    user.setAuthProvider(this);
     return user;
   }
 

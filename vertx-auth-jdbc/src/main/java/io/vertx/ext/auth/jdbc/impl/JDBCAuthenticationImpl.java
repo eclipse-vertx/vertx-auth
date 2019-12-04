@@ -88,7 +88,6 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
             String hashedPassword = strategy.computeHash(password, salt, version);
             if (JDBCHashStrategy.isEqual(hashedStoredPwd, hashedPassword)) {
               User user = new UserImpl(new JsonObject().put("username", username));
-              user.setAuthProvider(this);
               resultHandler.handle(Future.succeededFuture(user));
             } else {
               resultHandler.handle(Future.failedFuture("Invalid username/password"));
