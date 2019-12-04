@@ -1,0 +1,6 @@
+= Vert.x SQL Client Auth
+
+This module contains a Vert.x auth implementation which uses a Vert.x SQL client to query user/role/permission
+information.
+
+Please see the http://vertx.io/docs/#authentication_and_authorisation[documentation] for more information.

@@ -32,6 +32,7 @@
     <module>vertx-auth-htpasswd</module>
     <module>vertx-auth-webauthn</module>
     <module>vertx-auth-properties</module>
+    <module>vertx-auth-sql</module>
   </modules>
 
   <parent>
