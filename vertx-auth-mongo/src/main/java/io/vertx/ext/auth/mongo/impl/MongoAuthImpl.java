@@ -23,8 +23,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
-import io.vertx.ext.auth.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
@@ -181,7 +181,7 @@ public class MongoAuthImpl implements MongoAuth {
 
     mongoClient.save(getCollectionName(), user.principal(), resultHandler);
   }
-  
+
   private User createUser(JsonObject json) {
     User user = new UserImpl(json);
     json.put(PROPERTY_FIELD_SALT, getSaltField());

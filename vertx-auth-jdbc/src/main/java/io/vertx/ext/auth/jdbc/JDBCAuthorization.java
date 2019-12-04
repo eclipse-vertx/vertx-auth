@@ -17,12 +17,12 @@
 package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthorizationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
- * Factory interface for creating {@link io.vertx.ext.auth.AuthorizationProvider} instances that use the Vert.x JDBC client.
+ * Factory interface for creating {@link AuthorizationProvider} instances that use the Vert.x JDBC client.
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */

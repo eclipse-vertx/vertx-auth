@@ -26,10 +26,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.AuthorizationProvider;
-import io.vertx.ext.auth.RoleBasedAuthorization;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.properties.PropertyFileAuthentication;
 

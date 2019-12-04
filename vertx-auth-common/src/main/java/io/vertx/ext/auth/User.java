@@ -23,7 +23,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.AuthorizationsImpl;
+import io.vertx.ext.auth.authorization.Authorizations;
+import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
 /**
@@ -37,12 +38,85 @@ import io.vertx.ext.auth.impl.UserImpl;
 public interface User {
 
   static User create(JsonObject principal) {
-    return new UserImpl(principal);
+    return create(principal, new JsonObject());
+  }
+
+  static User create(JsonObject principal, JsonObject attributes) {
+    return new UserImpl(principal, attributes);
+  }
+
+  /**
+   * Gets extra attributes of the user. Attributes contains any attributes related
+   * to the outcome of authenticating a user (e.g.: issued date, metadata, etc...)
+   *
+   * @return a json object with any relevant attribute.
+   */
+  JsonObject attributes();
+
+  /**
+   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
+   * the current clock time is post the expiration date.
+   *
+   * @return {@code true} if expired
+   */
+  default boolean expired() {
+    return expired(attributes().getInteger("leeway", 0));
+  }
+
+  /**
+   * Flags this user object to be expired. Expiration takes 3 values in account:
+   *
+   * <ol>
+   *   <li>{@code exp} "expiration" timestamp in seconds.</li>
+   *   <li>{@code iat} "issued at" in seconds.</li>
+   *   <li>{@code nbf} "not before" in seconds.</li>
+   * </ol>
+   * A User is considered expired if it contains any of the above and
+   * the current clock time does not agree with the parameter value. If the {@link #principal()} do not contain a key
+   * then {@link #attributes()} are checked.
+   * <p>
+   * If all of the properties are not available the user will not expire.
+   * <p>
+   * Implementations of this interface might relax this rule to account for a leeway to safeguard against
+   * clock drifting.
+   *
+   * @param leeway a greater than zero leeway value.
+   * @return {@code true} if expired
+   */
+  default boolean expired(int leeway) {
+    // All dates are of type NumericDate
+    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+    // the specified UTC date/time, ignoring leap seconds
+    final long now = (System.currentTimeMillis() / 1000);
+
+    if (principal().containsKey("exp") || attributes().containsKey("exp")) {
+      if (now - leeway >= principal().getLong("exp", attributes().getLong("exp"))) {
+        return true;
+      }
+    }
+
+    if (principal().containsKey("iat") || attributes().containsKey("iat")) {
+      Long iat = principal().getLong("iat", attributes().getLong("iat"));
+      // issue at must be in the past
+      if (iat > now + leeway) {
+        return true;
+      }
+    }
+
+    if (principal().containsKey("nbf") || attributes().containsKey("nbf")) {
+      Long nbf = principal().getLong("nbf", attributes().getLong("nbf"));
+      // not before must be after now
+      if (nbf > now + leeway) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
    * returns user's authorizations
-   * 
+   *
    * @return
    */
   default Authorizations authorizations() {
@@ -77,7 +151,7 @@ public interface User {
     isAuthorized(authority, promise);
     return promise.future();
   }
- 
+
   /**
    * The User object will cache any authorities that it knows it has to avoid hitting the
    * underlying auth provider each time.  Use this method if you want to clear this cache.
