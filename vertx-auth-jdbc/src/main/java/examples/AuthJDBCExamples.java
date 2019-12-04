@@ -21,9 +21,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuthentication;
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
-import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
+import io.vertx.ext.auth.sql.JDBCAuthentication;
+import io.vertx.ext.auth.sql.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.sql.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLConnection;
 

@@ -18,7 +18,7 @@ package io.vertx.ext.auth.test.jdbc;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jdbc.JDBCAuth;
+import io.vertx.ext.auth.sql.JDBCAuth;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.BeforeClass;

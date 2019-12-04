@@ -26,9 +26,9 @@ import org.junit.Test;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jdbc.JDBCAuthentication;
-import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
-import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
+import io.vertx.ext.auth.sql.JDBCAuthentication;
+import io.vertx.ext.auth.sql.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.sql.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.test.core.VertxTestBase;
 
@@ -109,7 +109,7 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
     }
     return jdbcClient;
   }
-  
+
   protected JDBCHashStrategy getHashStrategy() {
     if (jdbcHashStrategy==null) {
       jdbcHashStrategy = JDBCHashStrategy.createSHA512(vertx);
@@ -117,7 +117,7 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
     }
     return jdbcHashStrategy;
   }
-  
+
   protected JDBCAuthentication getAuthenticationProvider() {
     if (authenticationProvider == null) {
       authenticationProvider = JDBCAuthentication.create(getJDBCCLient(), getHashStrategy(), new JDBCAuthenticationOptions());

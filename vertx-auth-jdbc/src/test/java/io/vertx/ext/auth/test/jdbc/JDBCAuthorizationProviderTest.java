@@ -27,8 +27,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuthorization;
-import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
+import io.vertx.ext.auth.sql.JDBCAuthorization;
+import io.vertx.ext.auth.sql.JDBCAuthorizationOptions;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
