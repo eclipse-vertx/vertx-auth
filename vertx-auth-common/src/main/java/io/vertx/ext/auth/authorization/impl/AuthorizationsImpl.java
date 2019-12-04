@@ -10,7 +10,7 @@
  * Contributors: 1
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.Authorizations;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.Authorizations;
 
 public class AuthorizationsImpl implements Authorizations {
 

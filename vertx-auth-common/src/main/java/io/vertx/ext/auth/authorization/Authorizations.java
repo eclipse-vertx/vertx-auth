@@ -7,31 +7,30 @@
  *
  * SPDX-License-Identifier: EPL-2.0 3
  *
- * Contributors: 4
+ * Contributors: 1
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
-import java.util.List;
+import java.util.Set;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.OrAuthorizationImpl;
 
-/**
- * Allows to perform a logical 'or' between several authorizations
- * 
- * @author <a href="mailto:stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- * 
- */
 @VertxGen
-public interface OrAuthorization extends Authorization {
+public interface Authorizations {
 
-  static OrAuthorization create() {
-    return new OrAuthorizationImpl();
-  }
+  @Fluent
+  Authorizations add(String providerId, Set<Authorization> authorizations);
 
-  List<Authorization> getAuthorizations();
+  @Fluent
+  Authorizations add(String providerId, Authorization authorization);
 
-  OrAuthorization addAuthorization(Authorization authorization);
+  @Fluent
+  Authorizations delete(String providerId);
+
+  Set<Authorization> get(String providerId);
+
+  Set<String> getProviderIds();
 
 }

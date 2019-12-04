@@ -10,14 +10,14 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.OrAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.OrAuthorization;
 
 public class OrAuthorizationConverter {
 

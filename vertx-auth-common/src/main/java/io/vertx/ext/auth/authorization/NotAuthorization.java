@@ -7,30 +7,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0 3
  *
- * Contributors: 1
+ * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
-import java.util.Set;
-
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.ext.auth.authorization.impl.NotAuthorizationImpl;
 
+/**
+ * Allows to perform a logical 'not' of the specified authorization
+ *
+ * @author <a href="mailto:stephane.bastian.dev@gmail.com">Stephane Bastian</a>
+ *
+ */
 @VertxGen
-public interface Authorizations {
+public interface NotAuthorization extends Authorization {
 
-  @Fluent
-  Authorizations add(String providerId, Set<Authorization> authorizations);
+  static NotAuthorization create(Authorization authorization) {
+    return new NotAuthorizationImpl(authorization);
+  }
 
-  @Fluent
-  Authorizations add(String providerId, Authorization authorization);
-
-  @Fluent
-  Authorizations delete(String providerId);
-
-  Set<Authorization> get(String providerId);
-
-  Set<String> getProviderIds();
+  Authorization getAuthorization();
 
 }

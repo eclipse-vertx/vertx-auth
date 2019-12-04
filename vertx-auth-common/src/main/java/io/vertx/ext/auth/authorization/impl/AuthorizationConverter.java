@@ -10,18 +10,18 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AndAuthorization;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.NotAuthorization;
-import io.vertx.ext.auth.OrAuthorization;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
-import io.vertx.ext.auth.RoleBasedAuthorization;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.AndAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.NotAuthorization;
+import io.vertx.ext.auth.authorization.OrAuthorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class AuthorizationConverter {
 

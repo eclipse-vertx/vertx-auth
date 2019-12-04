@@ -10,46 +10,46 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.RoleBasedAuthorizationImpl;
+import io.vertx.ext.auth.authorization.impl.WildcardPermissionBasedAuthorizationImpl;
 
 /**
- * Represents a role. Note that this role can optionally be assigned to a
- * specific resource
- * 
+ * Represents a wildcard permission (ie: 'manage:order:*' '*:orders', '*', etc.)
+ * Note that it can optionally be assigned to a specific resource
+ *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
 @VertxGen
-public interface RoleBasedAuthorization extends Authorization {
+public interface WildcardPermissionBasedAuthorization extends Authorization {
 
-  static RoleBasedAuthorization create(String role) {
-    return new RoleBasedAuthorizationImpl(role);
+  static WildcardPermissionBasedAuthorization create(String permission) {
+    return new WildcardPermissionBasedAuthorizationImpl(permission);
   }
 
   /**
-   * returns the role
-   * 
+   * return the value of the wildcard permission
+   *
    * @return
    */
-  String getRole();
+  String getPermission();
 
   /**
-   * returns an optional resource that the role is assigned-on
-   * 
+   * returns an optional resource that the permission is assigned-on
+   *
    * @return
    */
   String getResource();
 
   /**
-   * sets an optional resource that the role is assigned-on
-   * 
+   * sets an optional resource that the permission is assigned-on
+   *
    * @return
    */
   @Fluent
-  RoleBasedAuthorization setResource(String resource);
+  WildcardPermissionBasedAuthorization setResource(String resource);
 
 }

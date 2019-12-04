@@ -13,6 +13,9 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -21,8 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.AuthorizationContextImpl;
-import io.vertx.ext.auth.impl.WildcardPermissionBasedAuthorizationConverter;
+import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
+import io.vertx.ext.auth.authorization.impl.WildcardPermissionBasedAuthorizationConverter;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
@@ -91,7 +94,7 @@ public class WildcardPermissionBasedAuthorizationTest {
     assertFalse(WildcardPermissionBasedAuthorization.create("*:read")
       .verify(WildcardPermissionBasedAuthorization.create("printer:edit")));
   }
-  
+
   @Test
   public void testVerifyPermisionAuthorization() {
     assertTrue(WildcardPermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1")));

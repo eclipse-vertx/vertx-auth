@@ -21,12 +21,14 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.impl.ClusterSerializable;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.AuthorizationContext;
-import io.vertx.ext.auth.Authorizations;
-import io.vertx.ext.auth.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+import io.vertx.ext.auth.authorization.Authorizations;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
+import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 
 /**
  * Default implementation of a User

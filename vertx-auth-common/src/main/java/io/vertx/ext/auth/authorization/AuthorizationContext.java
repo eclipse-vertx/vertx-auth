@@ -10,15 +10,16 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.MultiMap;
+import io.vertx.ext.auth.User;
 
 /**
  * The AuthorizationContext contains properties that can be used to match
  * authorizations.
- * 
+ *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
@@ -27,7 +28,7 @@ public interface AuthorizationContext {
 
   /**
    * Get the authenticated user
-   * 
+   *
    * @return the user
    */
   User user();

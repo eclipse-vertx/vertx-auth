@@ -10,15 +10,15 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.AuthorizationContext;
-import io.vertx.ext.auth.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthorization {
 
@@ -94,7 +94,7 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
           return otherWildcardPermissionBasedAuthorization.getResource() == null;
         }
         return getResource().equals(otherWildcardPermissionBasedAuthorization.getResource());
-      }      
+      }
     }
     return false;
   }

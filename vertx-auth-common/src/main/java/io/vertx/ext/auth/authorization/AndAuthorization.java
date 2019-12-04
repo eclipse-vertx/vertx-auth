@@ -10,24 +10,28 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.authorization;
+
+import java.util.List;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.impl.NotAuthorizationImpl;
+import io.vertx.ext.auth.authorization.impl.AndAuthorizationImpl;
 
 /**
- * Allows to perform a logical 'not' of the specified authorization
- * 
+ * Allows to perform a logical 'and' between several authorizations
+ *
  * @author <a href="mailto:stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- * 
+ *
  */
 @VertxGen
-public interface NotAuthorization extends Authorization {
+public interface AndAuthorization extends Authorization {
 
-  static NotAuthorization create(Authorization authorization) {
-    return new NotAuthorizationImpl(authorization);
+  static AndAuthorization create() {
+    return new AndAuthorizationImpl();
   }
 
-  Authorization getAuthorization();
+  List<Authorization> getAuthorizations();
+
+  AndAuthorization addAuthorization(Authorization authorization);
 
 }

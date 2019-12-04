@@ -10,26 +10,26 @@
  * Contributors: 4
  *   Stephane Bastian - initial API and implementation
  ********************************************************************************/
-package io.vertx.ext.auth.impl;
+package io.vertx.ext.auth.authorization.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.vertx.ext.auth.AndAuthorization;
-import io.vertx.ext.auth.Authorization;
-import io.vertx.ext.auth.AuthorizationContext;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+import io.vertx.ext.auth.authorization.OrAuthorization;
 
-public class AndAuthorizationImpl implements AndAuthorization {
+public class OrAuthorizationImpl implements OrAuthorization {
 
   private List<Authorization> authorizations;
 
-  public AndAuthorizationImpl() {
+  public OrAuthorizationImpl() {
     this.authorizations = new ArrayList<>();
   }
 
   @Override
-  public AndAuthorization addAuthorization(Authorization authorization) {
+  public OrAuthorization addAuthorization(Authorization authorization) {
     this.authorizations.add(Objects.requireNonNull(authorization));
     return this;
   }
@@ -38,9 +38,9 @@ public class AndAuthorizationImpl implements AndAuthorization {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (!(obj instanceof AndAuthorizationImpl))
+    if (!(obj instanceof OrAuthorizationImpl))
       return false;
-    AndAuthorizationImpl other = (AndAuthorizationImpl) obj;
+    OrAuthorizationImpl other = (OrAuthorizationImpl) obj;
     return Objects.equals(authorizations, other.authorizations);
   }
 
@@ -59,38 +59,23 @@ public class AndAuthorizationImpl implements AndAuthorization {
     Objects.requireNonNull(context);
 
     for (Authorization authorization : authorizations) {
-      if (!authorization.match(context)) {
-        return false;
+      if (authorization.match(context)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   @Override
   public boolean verify(Authorization otherAuthorization) {
     Objects.requireNonNull(otherAuthorization);
 
-    boolean match = false;
-    if (otherAuthorization instanceof AndAuthorization) {
-      // is there at least one authorization that implies each others authorizations
-      for (Authorization otherAndAuthorization : ((AndAuthorization) otherAuthorization).getAuthorizations()) {
-        for (Authorization authorization : authorizations) {
-          if (authorization.verify(otherAndAuthorization)) {
-            match = true;
-            break;
-          }
-        }
-      }
-    } else {
-      for (Authorization authorization : authorizations) {
-        if (authorization.verify(otherAuthorization)) {
-          match = true;
-          break;
-        }
-      }
-      return match;
+    if (otherAuthorization instanceof OrAuthorization) {
+      return this.equals(otherAuthorization);
+    } else if (authorizations.size() == 1) {
+      return authorizations.get(0).verify(otherAuthorization);
     }
-    return match;
+    return false;
   }
 
 }

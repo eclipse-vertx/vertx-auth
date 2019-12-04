@@ -12,6 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
+import io.vertx.ext.auth.authorization.*;
 import org.junit.Assert;
 import org.junit.Test;
 
