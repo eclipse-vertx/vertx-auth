@@ -583,4 +583,9 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     }
     return api;
   }
+
+  @Override
+  public JsonObject attributes() {
+    return new JsonObject();
+  }
 }
