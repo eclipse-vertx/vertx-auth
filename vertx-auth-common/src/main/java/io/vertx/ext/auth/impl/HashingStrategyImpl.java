@@ -8,6 +8,7 @@ import io.vertx.ext.auth.HashString;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HashingStrategyImpl implements HashingStrategy {
 
@@ -21,7 +22,7 @@ public class HashingStrategyImpl implements HashingStrategy {
 
   @Override
   public String hash(String id, Map<String, String> params, String salt, String password) {
-    HashingAlgorithm algorithm = algorithms.get(id);
+    HashingAlgorithm algorithm = algorithms.get(Objects.requireNonNull(id));
 
     if (algorithm == null) {
       throw new RuntimeException(id +  " algorithm is not available.");
@@ -67,13 +68,12 @@ public class HashingStrategyImpl implements HashingStrategy {
 
   @Override
   public HashingAlgorithm get(String id) {
-    return algorithms.get(id);
+    return algorithms.get(Objects.requireNonNull(id));
   }
 
   @Override
   public HashingStrategy put(String id, HashingAlgorithm algorithm) {
-
-    if (algorithms.containsKey(id)) {
+    if (algorithms.containsKey(Objects.requireNonNull(id))) {
       LOG.warn("Existing algorithm: " + id + " will be replaced!");
     }
 

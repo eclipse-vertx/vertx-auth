@@ -25,6 +25,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.AuthStore;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthNImpl;
 
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
@@ -35,7 +36,7 @@ import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface WebAuthN extends AuthProvider {
+public interface WebAuthN extends AuthenticationProvider {
 
   /**
    * Create a WebAuthN auth provider

@@ -19,6 +19,7 @@ package io.vertx.ext.auth.htdigest;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.htdigest.impl.HtdigestAuthImpl;
 
 /**
@@ -27,7 +28,7 @@ import io.vertx.ext.auth.htdigest.impl.HtdigestAuthImpl;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface HtdigestAuth extends AuthProvider {
+public interface HtdigestAuth extends AuthenticationProvider {
 
   /**
    * The property name to be used to set the name of the collection inside the config

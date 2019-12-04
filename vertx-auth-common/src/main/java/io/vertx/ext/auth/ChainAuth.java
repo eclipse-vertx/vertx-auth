@@ -17,6 +17,7 @@ package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.impl.ChainAuthImpl;
 
 /**
@@ -24,7 +25,7 @@ import io.vertx.ext.auth.impl.ChainAuthImpl;
  * several providers, for example, database and fallback to passwd file.
  */
 @VertxGen
-public interface ChainAuth extends AuthProvider {
+public interface ChainAuth extends AuthenticationProvider {
 
   /**
    * Create a Chainable Auth Provider auth provider
