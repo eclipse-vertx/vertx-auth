@@ -153,15 +153,6 @@ public interface User {
   }
 
   /**
-   * The User object will cache any authorities that it knows it has to avoid hitting the
-   * underlying auth provider each time.  Use this method if you want to clear this cache.
-   *
-   * @return the User to enable fluent use
-   */
-  @Fluent
-  User clearCache();
-
-  /**
    * Get the underlying principal for the User. What this actually returns depends on the implementation.
    * For a simple user/password based auth, it's likely to contain a JSON object with the following structure:
    * <pre>

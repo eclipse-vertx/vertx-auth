@@ -93,7 +93,7 @@ implementation and Vert.x makes no assumptions here.
 The user object will cache any authorities so subsequently calls to check if it has the same authorities will result
 in the underlying provider being called.
 
-In order to clear the internal cache you can use {@link io.vertx.ext.auth.User#clearCache()}.
+In order to clear the internal cache you can use {@link io.vertx.ext.auth.authorization.Authorizations#clear()}.
 
 === The User Principal
 

@@ -69,14 +69,6 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   @Override
-  public User clearCache() {
-    for (String providerId : authorizations.getProviderIds()) {
-      authorizations.delete(providerId);
-    }
-    return this;
-  }
-
-  @Override
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
