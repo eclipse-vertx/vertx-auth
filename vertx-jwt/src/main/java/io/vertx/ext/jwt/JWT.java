@@ -15,6 +15,12 @@
  */
 package io.vertx.ext.jwt;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -36,6 +42,7 @@ public final class JWT {
 
   // simple random as its value is just to create entropy
   private static final Random RND = new Random();
+  private static final Logger LOG = LoggerFactory.getLogger(JWT.class);
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
 
@@ -43,7 +50,7 @@ public final class JWT {
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
-  private final Map<String, List<Crypto>> cryptoMap = new ConcurrentHashMap<>();
+  private Map<String, List<Crypto>> cryptoMap = new ConcurrentHashMap<>();
 
   public JWT() {
     // Spec requires "none" to always be available
@@ -81,6 +88,7 @@ public final class JWT {
         // replace
         current.set(i, jwk);
         replaced = true;
+        break;
       }
     }
 
@@ -89,6 +97,46 @@ public final class JWT {
       current.add(jwk);
     }
 
+    return this;
+  }
+
+  public JWT loadJWK(Vertx vertx, final KeyStore keyStore, final char[] keyStorePassword, Handler<AsyncResult<Void>> handler) {
+    vertx.<List<JWK>>executeBlocking(promise -> {
+      try {
+        promise.complete(JWK.from(keyStore, keyStorePassword));
+      } catch (RuntimeException e) {
+        promise.fail(e);
+      }
+    }, true, load -> {
+      if (load.failed()) {
+        handler.handle(Future.failedFuture(load.cause()));
+      } else {
+        final Map<String, List<Crypto>> cryptoMap = new ConcurrentHashMap<>();
+        // populate the map
+        load: for (JWK jwk : load.result()) {
+          List<Crypto> current = cryptoMap.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+          for (int i = 0; i < current.size(); i++) {
+            if (current.get(i).getId().equals(jwk.getId())) {
+              LOG.warn("Replaced key with id: " + jwk.getId());
+              // replace existing key
+              current.set(i, jwk);
+              break load;
+            }
+          }
+          // non existent, add it!
+          current.add(jwk);
+        }
+        // swap
+        this.cryptoMap = cryptoMap;
+        // succeed
+        handler.handle(Future.succeededFuture());
+      }
+    });
+
+    return this;
+  }
+
+  public JWT loadJWK(Vertx vertx, String keyUrl, Handler<AsyncResult<Void>> handler) {
     return this;
   }
 
@@ -125,11 +173,11 @@ public final class JWT {
 
     if (unsecure) {
       if (segments.length != 2) {
-        throw new RuntimeException("JWT is in unsecure mode but token is signed.");
+        throw new IllegalStateException("JWT is in unsecure mode but token is signed.");
       }
     } else {
       if (segments.length != 3) {
-        throw new RuntimeException("JWT is in secure mode but token is not signed.");
+        throw new IllegalStateException("JWT is in secure mode but token is not signed.");
       }
     }
 
@@ -139,7 +187,7 @@ public final class JWT {
     String signatureSeg = unsecure ? null : segments[2];
 
     if ("".equals(signatureSeg)) {
-      throw new RuntimeException("Signature is required");
+      throw new IllegalStateException("Signature is required");
     }
 
     // base64 decode and parse JSON
@@ -151,12 +199,12 @@ public final class JWT {
     List<Crypto> cryptos = cryptoMap.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
-      throw new RuntimeException("Algorithm not supported [" + alg + "]");
+      throw new IllegalStateException("Algorithm not supported [" + alg + "]");
     }
 
     // if we only allow secure alg, then none is not a valid option
     if (!unsecure && "none".equals(alg)) {
-      throw new RuntimeException("Algorithm \"none\" not allowed");
+      throw new IllegalStateException("Algorithm \"none\" not allowed");
     }
 
     // verify signature. `sign` will return base64 string.

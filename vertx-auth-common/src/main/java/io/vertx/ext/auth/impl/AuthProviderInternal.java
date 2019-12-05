@@ -21,7 +21,10 @@ import io.vertx.ext.auth.AuthProvider;
  * Internal interface to encapsulate the using password check
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+ * @deprecated this was used internally to detect if a provider takes a username + password for authn.
+ * Just rely on the provider authn method to resolve this.
  */
+@Deprecated
 public interface AuthProviderInternal extends AuthProvider {
 
   /**

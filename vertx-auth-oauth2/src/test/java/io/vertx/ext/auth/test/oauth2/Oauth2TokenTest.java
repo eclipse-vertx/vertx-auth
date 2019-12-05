@@ -1,10 +1,10 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
-import io.vertx.ext.auth.oauth2.impl.OAuth2TokenImpl;
+import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -42,14 +42,11 @@ public class Oauth2TokenTest extends VertxTestBase {
     super.setUp();
     oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, keycloakConfig);
 
-    OAuth2TokenImpl token = new OAuth2TokenImpl(oauth2, keycloakToken);
+    AccessToken token = new AccessTokenImpl(keycloakToken, oauth2);
 
     assertNotNull(token.opaqueAccessToken());
     assertNotNull(token.opaqueRefreshToken());
     assertNull(token.accessToken());
-    // trust it
-    token.setTrustJWT(true);
-    assertNotNull(token.accessToken());
   }
 
   @Test
@@ -68,7 +65,7 @@ public class Oauth2TokenTest extends VertxTestBase {
     );
 
     try {
-      OAuth2TokenImpl token = new OAuth2TokenImpl(oauth2, json);
+      AccessToken token = new AccessTokenImpl(json, oauth2);
     } catch (RuntimeException e) {
       fail();
     }

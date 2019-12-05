@@ -33,12 +33,8 @@ import io.vertx.ext.auth.User;
  * @author Paulo Lopes
  */
 @VertxGen
+@Deprecated
 public interface AccessToken extends User {
-
-  /**
-   * Check if the access token is expired or not.
-   */
-  boolean expired();
 
   /**
    * Check if the access token own the required scopes to access to the resource.

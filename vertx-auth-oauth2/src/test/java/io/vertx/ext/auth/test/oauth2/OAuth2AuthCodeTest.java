@@ -35,8 +35,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
     .put("redirect_uri", "http://callback.com")
-    .put("grant_type", "authorization_code")
-    .put("client_id", "client-id");
+    .put("grant_type", "authorization_code");
 
   private static final JsonObject authorizeConfig = new JsonObject()
     .put("redirect_uri", "http://localhost:3000/callback")
@@ -64,6 +63,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
       .connectionHandler(c -> connectionCounter++)
       .requestHandler(req -> {
         if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
+          assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
           req.setExpectMultipart(true).bodyHandler(buffer -> {
             try {
               assertEquals(config, queryToJSON(buffer.toString()));

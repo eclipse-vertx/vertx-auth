@@ -4,15 +4,19 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
@@ -108,11 +112,10 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauth2.authenticate(config, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        fail(res.cause());
       } else {
         AccessToken token = (AccessToken) res.result();
         assertFalse(token.expired());
-        assertTrue(token.isScopeGranted());
         testComplete();
       }
     });
@@ -140,12 +143,18 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauth2.authenticate(config, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        fail(res.cause());
       } else {
         AccessToken token = (AccessToken) res.result();
         assertFalse(token.expired());
-        assertTrue(token.isScopeGranted());
-        testComplete();
+
+        ScopeAuthorization.create(" ").getAuthorizations(token, call -> {
+          assertTrue(call.succeeded());
+          Set<Authorization> authorizations = call.result();
+          assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeA")));
+          assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeB")));
+          testComplete();
+        });
       }
     });
     await();
@@ -170,12 +179,15 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
     oauth2.authenticate(config, res -> {
-      if (res.failed()) {
-        assertEquals("Missing required scopes token",res.cause().getMessage());
+      assertTrue(res.succeeded());
+      ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
+        assertTrue(call.succeeded());
+        Set<Authorization> authorizations = call.result();
+        // the scopes are missing
+        assertFalse(authorizations.contains(PermissionBasedAuthorization.create("scopeX")));
+        assertFalse(authorizations.contains(PermissionBasedAuthorization.create("scopeB")));
         testComplete();
-      } else {
-        fail("Test should have failed");
-      }
+      });
     });
     await();
   }
@@ -200,12 +212,16 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
     oauth2.authenticate(config, res -> {
-      if (res.failed()) {
-        assertEquals("Missing required scopes token",res.cause().getMessage());
+      assertTrue(res.succeeded());
+      ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
+        assertTrue(call.succeeded());
+        Set<Authorization> authorizations = call.result();
+        assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeA")));
+        assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeB")));
+        // the scope is missing
+        assertFalse(authorizations.contains(PermissionBasedAuthorization.create("scopeX")));
         testComplete();
-      } else {
-        fail("Test should have failed");
-      }
+      });
     });
     await();
   }

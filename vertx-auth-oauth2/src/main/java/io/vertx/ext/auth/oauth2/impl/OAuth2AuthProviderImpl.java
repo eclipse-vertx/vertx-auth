@@ -18,177 +18,71 @@ package io.vertx.ext.auth.oauth2.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.impl.AuthProviderInternal;
+import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
-import io.vertx.ext.auth.oauth2.*;
-import io.vertx.ext.auth.oauth2.impl.flow.*;
 
 /**
  * @author Paulo Lopes
  */
-public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal {
+public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
-  private final Vertx vertx;
   private final OAuth2ClientOptions config;
-  private final JWT jwt = new JWT();
-
-  private final OAuth2Flow flow;
   private final OAuth2API api;
 
-  private OAuth2RBAC rbac;
+  private JWT jwt = new JWT();
 
-  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2ClientOptions config) {
-    this.vertx = vertx;
+  public OAuth2AuthProviderImpl(OAuth2API api, OAuth2ClientOptions config) {
+    this.api = api;
     this.config = config;
     // compute paths with variables, at this moment it is only relevant that
     // all variables are properly computed
     this.config.replaceVariables(true);
-
-    this.api = new OAuth2API(vertx, config);
+    this.config.validate();
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
         jwt.addJWK(JWK.from(pubSecKey));
       }
     }
-
-    switch (config.getFlow()) {
-      case AUTH_CODE:
-        flow = new AuthCodeImpl(this);
-        break;
-      case CLIENT:
-        flow = new ClientImpl(this);
-        break;
-      case PASSWORD:
-        flow = new PasswordImpl(this);
-        break;
-      case AUTH_JWT:
-        flow = new AuthJWTImpl(this);
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported oauth2 flow type: " + config.getFlow());
-    }
   }
 
   @Override
-  public void verifyIsUsingPassword() {
-    if (getFlowType() != OAuth2FlowType.PASSWORD) {
-      throw new IllegalArgumentException("OAuth2Auth + Basic Auth requires OAuth2 PASSWORD flow");
-    }
-  }
-
-  @Override
-  public OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler) {
-    final JsonObject headers = new JsonObject();
-    // specify preferred accepted content type
-    headers.put("Accept", "application/json");
-
-    api.fetch(
-      HttpMethod.GET,
-      config.getJwkPath(),
-      headers,
-      null,
-      res -> {
-        if (res.failed()) {
-          handler.handle(Future.failedFuture(res.cause()));
-          return;
-        }
-
-        final OAuth2Response reply = res.result();
-
-        if (reply.body() == null || reply.body().length() == 0) {
-          handler.handle(Future.failedFuture("No Body"));
-          return;
-        }
-
-        JsonObject json;
-
-        if (reply.is("application/json")) {
+  public OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
+    api.jwkSet(res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+      } else {
+        JWT jwt = new JWT();
+        for (Object key : res.result()) {
           try {
-            json = reply.jsonObject();
+            jwt.addJWK(new JWK((JsonObject) key));
           } catch (RuntimeException e) {
-            handler.handle(Future.failedFuture(e));
-            return;
+            LOG.warn("Skipped unsupported JWK: " + e.getMessage());
           }
-        } else {
-          handler.handle(Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type")));
-          return;
         }
-
-        try {
-          if (json.containsKey("error")) {
-            String description;
-            Object error = json.getValue("error");
-            if (error instanceof JsonObject) {
-              description = ((JsonObject) error).getString("message");
-            } else {
-              // attempt to handle the error as a string
-              try {
-                description = json.getString("error_description", json.getString("error"));
-              } catch (RuntimeException e) {
-                description = error.toString();
-              }
-            }
-            handler.handle(Future.failedFuture(description));
-          } else {
-            JsonArray keys = json.getJsonArray("keys");
-            for (Object key : keys) {
-              try {
-                jwt.addJWK(new JWK((JsonObject) key));
-              } catch (RuntimeException e) {
-                LOG.warn("Skipped unsupported JWK: " + e.getMessage());
-              }
-            }
-
-            handler.handle(Future.succeededFuture());
-          }
-        } catch (RuntimeException e) {
-          handler.handle(Future.failedFuture(e));
-        }
-      });
-
+        // swap
+        this.jwt = jwt;
+        // return
+        handler.handle(Future.succeededFuture());
+      }
+    });
     return this;
-  }
-
-  @Override
-  public OAuth2Auth rbacHandler(OAuth2RBAC rbac) {
-    if (this.rbac != null) {
-      throw new IllegalStateException("There is already a RBAC handler registered");
-    }
-
-    this.rbac = rbac;
-    return this;
-  }
-
-  OAuth2RBAC getRBACHandler() {
-    return rbac;
   }
 
   public OAuth2ClientOptions getConfig() {
     return config;
   }
 
-  public Vertx getVertx() {
-    return vertx;
-  }
-
-  public JWT getJWT() {
-    return jwt;
-  }
-
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
     // if the authInfo object already contains a token validate it to confirm that it
     // can be reused, otherwise, based on the configured flow, request a new token
     // from the authority provider
@@ -196,8 +90,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
     if (
       // authInfo contains a token_type of Bearer
       authInfo.containsKey("token_type") && "Bearer".equalsIgnoreCase(authInfo.getString("token_type")) &&
-      // authInfo contains a non null token
-      authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
+        // authInfo contains a non null token
+        authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
 
       // this validation can be done in 2 different ways:
       // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
@@ -205,52 +99,128 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
       // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-      final AccessToken oauth2Token = new OAuth2TokenImpl(this, authInfo);
+      final User user = createAccessToken(authInfo);
 
       // the token is not a JWT or there are no loaded keys to validate
-      if (oauth2Token.accessToken() == null || jwt.isUnsecure()) {
+      if (!user.principal().containsKey("accessToken") || jwt.isUnsecure()) {
         // the token is not in JWT format or this auth provider is not configured for secure JWTs
         // in this case we must rely on token introspection in order to know more about its state
         // attempt to create a token object from the given string representation
 
         // perform the introspection
-        oauth2Token.introspect(introspect -> {
-          if (introspect.failed()) {
-            resultHandler.handle(Future.failedFuture(introspect.cause()));
-            return;
-          }
-          // the access token object should have updated it's claims/authorities plus expiration, recheck
-          if (oauth2Token.expired()) {
-            resultHandler.handle(Future.failedFuture("Expired token"));
-            return;
-          }
-          if (!oauth2Token.isScopeGranted()) {
-            resultHandler.handle(Future.failedFuture("Missing required scopes token"));
-            return;
-          }
-          // return self
-          resultHandler.handle(Future.succeededFuture(oauth2Token));
-        });
+        api
+          .tokenIntrospection("access_token", user.principal().getString("access_token"), res -> {
+            if (res.failed()) {
+              handler.handle(Future.failedFuture(res.cause()));
+              return;
+            }
+
+            final JsonObject json = res.result();
+
+            // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
+            if (json.containsKey("active") && !json.getBoolean("active", false)) {
+              handler.handle(Future.failedFuture("Inactive Token"));
+              return;
+            }
+
+            // OPTIONALS
+
+            // validate client id
+            if (json.containsKey("client_id")) {
+              // response included a client id. Match against config client id
+              if (!config.getClientID().equals(json.getString("client_id"))) {
+                // Client identifier for the OAuth 2.0 client that requested this token.
+                handler.handle(Future.failedFuture("Wrong client_id"));
+                return;
+              }
+            }
+
+            // validate token type
+            if (json.containsKey("token_type")) {
+              // response included a token type
+              if (!"Bearer".equalsIgnoreCase(json.getString("token_type"))) {
+                // Token type for the requested token.
+                handler.handle(Future.failedFuture("Wrong token_type"));
+                return;
+              }
+            }
+
+            // attempt to create a user from the json object
+            final User newUser = createAccessToken(json);
+
+            // final step, verify if the user is not expired
+            // this may happen if the user tokens have been issued for future use for example
+            if (newUser.expired(config.getJWTOptions().getLeeway())) {
+              handler.handle(Future.failedFuture("Used is expired."));
+            } else {
+              handler.handle(Future.succeededFuture(newUser));
+            }
+          });
+
       } else {
         // a valid JWT token should have the access token value decoded
         // the token might be valid, but expired
-        if (oauth2Token.expired()) {
-          resultHandler.handle(Future.failedFuture("Expired Token"));
-        } else if (!oauth2Token.isScopeGranted()){
-          resultHandler.handle(Future.failedFuture("Missing required scopes token"));
+        if (user.expired(config.getJWTOptions().getLeeway())) {
+          handler.handle(Future.failedFuture("Expired Token"));
         } else {
-          resultHandler.handle(Future.succeededFuture(oauth2Token));
+          handler.handle(Future.succeededFuture(user));
         }
       }
 
     } else {
       // the authInfo object does not contain a token, so rely on the
       // configured flow to retrieve a token for the user
-      flow.getToken(authInfo, getToken -> {
+      // depending on the flow type the authentication will behave in different ways
+      final JsonObject params = new JsonObject();
+      switch (config.getFlow()) {
+        case PASSWORD:
+          if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
+            params
+              .put("username", authInfo.getString("username"))
+              .put("password", authInfo.getString("password"));
+          } else {
+            // the auth info object is incomplete, we can't proceed from here
+            handler.handle(Future.failedFuture("PASSWORD flow requires {username, password}"));
+            return;
+          }
+          break;
+        case AUTH_CODE:
+          if (authInfo.containsKey("code") && authInfo.containsKey("redirect_uri")) {
+            params.mergeIn(authInfo);
+          } else {
+            // the auth info object is incomplete, we can't proceed from here
+            handler.handle(Future.failedFuture("AUTH_CODE flow requires {code, redirect_uri}"));
+            return;
+          }
+          break;
+        case CLIENT:
+          params.mergeIn(authInfo);
+          break;
+        case AUTH_JWT:
+          params.mergeIn(authInfo);
+          params
+            .put("assertion", jwt.sign(authInfo, config.getJWTOptions()));
+          break;
+        default:
+          handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
+          return;
+      }
+
+      api.token(config.getFlow().getGrantType(), params, getToken -> {
         if (getToken.failed()) {
-          resultHandler.handle(Future.failedFuture(getToken.cause()));
+          handler.handle(Future.failedFuture(getToken.cause()));
         } else {
-          resultHandler.handle(Future.succeededFuture(getToken.result()));
+
+          // attempt to create a user from the json object
+          final User newUser = createAccessToken(getToken.result());
+
+          // final step, verify if the user is not expired
+          // this may happen if the user tokens have been issued for future use for example
+          if (newUser.expired(config.getJWTOptions().getLeeway())) {
+            handler.handle(Future.failedFuture("Used is expired."));
+          } else {
+            handler.handle(Future.succeededFuture(newUser));
+          }
         }
       });
     }
@@ -258,45 +228,129 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   @Override
   public String authorizeURL(JsonObject params) {
-    return flow.authorizeURL(params);
+    return api.authorizeURL(params);
   }
 
   @Override
-  public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
-    authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), auth -> {
-      if (auth.succeeded()) {
-        handler.handle(Future.succeededFuture((AccessToken) auth.result()));
-      } else {
-        handler.handle(Future.failedFuture(auth.cause()));
-      }
-    });
+  public OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
+    api.token(
+      "refresh_token",
+      new JsonObject()
+        .put("refresh_token", user.principal().getString("refresh_token")),
+      getToken -> {
+        if (getToken.failed()) {
+          handler.handle(Future.failedFuture(getToken.cause()));
+        } else {
+          // attempt to create a user from the json object
+          final User newUser = createUser(getToken.result());
+          // final step, verify if the user is not expired
+          // this may happen if the user tokens have been issued for future use for example
+          if (newUser.expired(config.getJWTOptions().getLeeway())) {
+            handler.handle(Future.failedFuture("Used is expired."));
+          } else {
+            handler.handle(Future.succeededFuture(newUser));
+          }
+        }
+      });
     return this;
   }
 
   @Override
-  public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
-    try {
-      // attempt to create a token object from the given string representation
-      final AccessToken accessToken = new OAuth2TokenImpl(this, new JsonObject().put(tokenType, token));
-      // if token is expired avoid going to the server
-      if (accessToken.expired()) {
-        handler.handle(Future.failedFuture("Expired token"));
-        return this;
+  public OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
+    api.tokenRevocation(tokenType, user.principal().getString(tokenType), handler);
+    return this;
+  }
+
+  @Override
+  public OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
+    api.userInfo(user.principal().getString("access_token"), handler);
+    return this;
+  }
+
+  @Override
+  public String endSessionURL(User user, JsonObject params) {
+    return api.endSessionURL(user.principal().getString("id_token"), params);
+  }
+
+  OAuth2API api() {
+    return api;
+  }
+
+  /**
+   * Create a User object with some initial validations related to JWT.
+   */
+  private User createUser(JsonObject json) {
+    // update the principal
+    final User user = User.create(json);
+    final long now = System.currentTimeMillis() / 1000;
+
+    // compute the expires_at if any
+    if (json.containsKey("expires_in")) {
+      Long expiresIn;
+      try {
+        expiresIn = json.getLong("expires_in");
+      } catch (ClassCastException e) {
+        // for some reason someone decided to send a number as a String...
+        expiresIn = Long.valueOf(json.getString("expires_in"));
       }
-      // perform the introspection
-      accessToken.introspect(introspect -> {
-        if (introspect.failed()) {
-          handler.handle(Future.failedFuture(introspect.cause()));
-          return;
+      // don't interfere with the principal object
+      user.attributes()
+        .put("iat", now)
+        .put("exp", now + expiresIn);
+    }
+
+    // attempt to decode tokens
+    if (json.getString("access_token") != null) {
+      try {
+        user.principal()
+          .put("accessToken", jwt.decode(json.getString("access_token")));
+
+        // re-compute expires at if not present and access token has been successfully decoded from JWT
+        if (!user.attributes().containsKey("exp")) {
+          Long exp = user.principal()
+            .getJsonObject("accessToken").getLong("exp");
+
+          if (exp != null) {
+            user.attributes()
+              .put("exp", exp);
+          }
         }
-        // the access token object should have updated it's claims/authorities plus expiration, recheck
-        if (accessToken.expired()) {
-          handler.handle(Future.failedFuture("Expired token"));
-          return;
-        }
-        // return self
-        handler.handle(Future.succeededFuture(accessToken));
-      });
+
+        // root claim meta data for JWT AuthZ
+        user.attributes()
+          .put("rootClaim", "accessToken");
+
+      } catch (IllegalStateException e) {
+        // explicity catch and log as debug. exception here is a valid case
+        // the reason is that it can be for several factors, such as bad token
+        // or invalid JWT key setup, in that case we fall back to opaque token
+        // which is the default operational mode for OAuth2.
+        LOG.debug("Cannot decode access token:", e);
+      }
+    }
+
+    if (json.getString("id_token") != null) {
+      try {
+        user.principal()
+          .put("idToken", jwt.decode(json.getString("id_token")));
+      } catch (IllegalStateException e) {
+        // explicity catch and log as debug. exception here is a valid case
+        // the reason is that it can be for several factors, such as bad token
+        // or invalid JWT key setup, in that case we fall back to opaque token
+        // which is the default operational mode for OAuth2.
+        LOG.debug("Cannot decode id token:", e);
+      }
+    }
+
+    return user;
+  }
+
+  @Override
+  @Deprecated
+  public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
+    try {
+      JsonObject json = jwt.decode(token);
+      handler.handle(Future.succeededFuture(createAccessToken(json)));
     } catch (RuntimeException e) {
       handler.handle(Future.failedFuture(e));
     }
@@ -304,11 +358,89 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   }
 
   @Override
+  @Deprecated
+  public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
+    return this;
+  }
+
+  @Override
+  @Deprecated
   public OAuth2FlowType getFlowType() {
     return config.getFlow();
   }
 
-  public OAuth2Flow getFlow() {
-    return flow;
+  @Override
+  @Deprecated
+  public OAuth2Auth rbacHandler(OAuth2RBAC rbac) {
+    return null;
+  }
+
+  /**
+   * Create a User object with some initial validations related to JWT.
+   */
+  private AccessToken createAccessToken(JsonObject json) {
+    // update the principal
+    final AccessToken user = new AccessTokenImpl(json, this);
+    final long now = System.currentTimeMillis() / 1000;
+
+    // compute the expires_at if any
+    if (json.containsKey("expires_in")) {
+      Long expiresIn;
+      try {
+        expiresIn = json.getLong("expires_in");
+      } catch (ClassCastException e) {
+        // for some reason someone decided to send a number as a String...
+        expiresIn = Long.valueOf(json.getString("expires_in"));
+      }
+      // don't interfere with the principal object
+      user.attributes()
+        .put("iat", now)
+        .put("exp", now + expiresIn);
+    }
+
+    // attempt to decode tokens
+    if (json.getString("access_token") != null) {
+      try {
+        user.principal()
+          .put("accessToken", jwt.decode(json.getString("access_token")));
+
+        // re-compute expires at if not present and access token has been successfully decoded from JWT
+        if (!user.attributes().containsKey("exp")) {
+          Long exp = user.principal()
+            .getJsonObject("accessToken").getLong("exp");
+
+          if (exp != null) {
+            user.attributes()
+              .put("exp", exp);
+          }
+        }
+
+        // root claim meta data for JWT AuthZ
+        user.attributes()
+          .put("rootClaim", "accessToken");
+
+      } catch (IllegalStateException e) {
+        // explicity catch and log as debug. exception here is a valid case
+        // the reason is that it can be for several factors, such as bad token
+        // or invalid JWT key setup, in that case we fall back to opaque token
+        // which is the default operational mode for OAuth2.
+        LOG.debug("Cannot decode access token:", e);
+      }
+    }
+
+    if (json.getString("id_token") != null) {
+      try {
+        user.principal()
+          .put("idToken", jwt.decode(json.getString("id_token")));
+      } catch (IllegalStateException e) {
+        // explicity catch and log as debug. exception here is a valid case
+        // the reason is that it can be for several factors, such as bad token
+        // or invalid JWT key setup, in that case we fall back to opaque token
+        // which is the default operational mode for OAuth2.
+        LOG.debug("Cannot decode id token:", e);
+      }
+    }
+
+    return user;
   }
 }
