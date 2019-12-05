@@ -4,7 +4,6 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -15,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
+import static org.junit.Assert.assertNotEquals;
 
 public class OAuth2AccessTokenTest extends VertxTestBase {
 
@@ -44,9 +44,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
 
   private static final JsonObject refreshConfig = new JsonObject()
     .put("refresh_token", "ec1a59d298")
-    .put("client_secret", "client-secret")
-    .put("grant_type", "refresh_token")
-    .put("client_id", "client-id");
+    .put("grant_type", "refresh_token");
 
   private static final JsonObject revokeConfig = new JsonObject()
     .put("token_type_hint", "refresh_token")
@@ -57,8 +55,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
     .put("redirect_uri", "http://callback.com")
-    .put("grant_type", "authorization_code")
-    .put("client_id", "client-id");
+    .put("grant_type", "authorization_code");
 
   private OAuth2Auth oauth2;
   private HttpServer server;
@@ -77,6 +74,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
 
     server = vertx.createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
+        assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
             JsonObject expectedRequest = config;
@@ -157,7 +155,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User token = res.result();
         assertFalse(token.expired());
         testComplete();
       }
@@ -172,9 +170,9 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = (AccessToken) res.result();
-        // hack the token to set the expires_at (to yesterday)
-        token.principal().put("expires_at", System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+        User token = res.result();
+        // hack the token to set the exp (to yesterday)
+        token.principal().put("exp", System.currentTimeMillis() / 1000 - 24 * 60 * 60);
         assertTrue(token.expired());
         testComplete();
       }
@@ -187,17 +185,15 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        fail(res.cause());
       } else {
-        AccessToken token = (AccessToken) res.result();
-        final long origTTl = token.principal().getLong("expires_at");
+        User token = res.result();
         // refresh the token
         config = refreshConfig;
-        token.refresh(v -> {
+        oauth2.refresh(token, v -> {
           if (v.failed()) {
             fail(v.cause().getMessage());
           } else {
-            assertTrue(origTTl < token.principal().getLong("expires_at"));
             testComplete();
           }
         });
@@ -213,10 +209,10 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User token = res.result();
         // refresh the token
         config = revokeConfig;
-        token.revoke("refresh_token", v -> {
+        oauth2.revoke(token, "refresh_token", v -> {
           if (v.failed()) {
             fail(v.cause().getMessage());
           } else {

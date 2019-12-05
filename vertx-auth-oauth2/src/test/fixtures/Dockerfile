@@ -1,4 +1,4 @@
-FROM jboss/keycloak
+FROM jboss/keycloak:6.0.0
 
 ENV KEYCLOAK_USER=user
 ENV KEYCLOAK_PASSWORD=password
@@ -10,4 +10,3 @@ EXPOSE 8080
 EXPOSE 8443
 
 CMD ["-b", "0.0.0.0", "-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.file=/tmp/vertx-test-realm.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"]
-

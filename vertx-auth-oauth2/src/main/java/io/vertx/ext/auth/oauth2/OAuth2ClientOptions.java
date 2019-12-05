@@ -230,7 +230,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * Flag to use HTTP basic auth header with client id, client secret.
    *
    * @return boolean
+   * @deprecated this value is not considered.
    */
+  @Deprecated
   public boolean isUseBasicAuthorizationHeader() {
     return useBasicAuthorizationHeader;
   }
@@ -239,7 +241,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * Flag to use HTTP basic auth header with client id, client secret.
    *
    * @return self
+   * @deprecated this value is not considered.
    */
+  @Deprecated
   public OAuth2ClientOptions setUseBasicAuthorizationHeader(boolean useBasicAuthorizationHeader) {
     this.useBasicAuthorizationHeader = useBasicAuthorizationHeader;
     return this;
@@ -407,7 +411,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
   /**
    * Set the provider scope separator
    * @return a single character string usually a space or a plus
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
    */
+  @Deprecated
   public String getScopeSeparator() {
     return scopeSeparator;
   }
@@ -416,7 +422,9 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * Set the provider scope separator
    * @param scopeSeparator a separator e.g.: ' ', '+', ','
    * @return self
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
    */
+  @Deprecated
   public OAuth2ClientOptions setScopeSeparator(String scopeSeparator) {
     this.scopeSeparator = scopeSeparator;
     return this;
@@ -579,6 +587,31 @@ public class OAuth2ClientOptions extends HttpClientOptions {
     }
 
     return path;
+  }
+
+  public void validate() throws IllegalStateException {
+    if (flow == null) {
+      throw new IllegalStateException("Missing OAuth2 flow [e.g.: AUTH_CODE]");
+    }
+    switch (flow) {
+      case AUTH_CODE:
+        throwIfNull("clientId", clientID);
+        break;
+      case AUTH_JWT:
+        throwIfNull("clientId", clientID);
+        throwIfNull("pubSecKeys", pubSecKeys);
+        // keys can't be empty
+        if (pubSecKeys.size() == 0) {
+          throw new IllegalStateException("Configuration missing. You need to specify [pubSecKeys]");
+        }
+        break;
+    }
+  }
+
+  private static void throwIfNull(String key, Object value) throws IllegalStateException {
+    if (value == null) {
+      throw new IllegalStateException("Configuration missing. You need to specify [" + key + "]");
+    }
   }
 
   public JsonObject toJson() {

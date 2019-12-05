@@ -31,8 +31,11 @@ import io.vertx.core.json.JsonObject;
  * A fetch is a simplified HTTP response from a protected resource.
  *
  * @author Paulo Lopes
+ * @deprecated this interface was available before webclient was present, today it makes more sense to use a webclient
+ * to do http related calls.
  */
 @VertxGen
+@Deprecated
 public interface OAuth2Response {
 
   /**

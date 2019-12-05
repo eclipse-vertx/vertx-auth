@@ -21,8 +21,12 @@
 |[[permissions]]`@permissions`|`Array of String`|+++
 The permissions of this token.
 +++
-|[[scopeDelimiter]]`@scopeDelimiter`|`String`|-
-|[[scopes]]`@scopes`|`Array of String`|-
+|[[scopeDelimiter]]`@scopeDelimiter`|`String`|+++
+
++++
+|[[scopes]]`@scopes`|`Array of String`|+++
+
++++
 |[[subject]]`@subject`|`String`|-
 |===
 

@@ -163,11 +163,19 @@ public class JWTOptions {
     return permissions;
   }
 
+  /**
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+   */
+  @Deprecated
   public JWTOptions setScopes(List<String> scopes) {
     this.scopes = scopes;
     return this;
   }
 
+  /**
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+   */
+  @Deprecated
   public JWTOptions addScope(String scope) {
     if (this.scopes == null) {
       this.scopes = new ArrayList<>();
@@ -176,19 +184,35 @@ public class JWTOptions {
     return this;
   }
 
+  /**
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+   */
+  @Deprecated
   public List<String> getScopes() {
     return scopes;
   }
 
+  /**
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+   */
+  @Deprecated
   public String getScopeDelimiter() {
     return scopeDelimiter!=null?scopeDelimiter:DEFAULT_SCOPE_DELIMITER;
   }
 
+  /**
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+   */
+  @Deprecated
   public JWTOptions withScopeDelimiter(String scopeDelimiter) {
     this.scopeDelimiter = scopeDelimiter;
     return this;
   }
 
+  /**
+   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+   */
+  @Deprecated
   public boolean hasScopeDelimiter() {
     return this.scopeDelimiter!=null;
   }

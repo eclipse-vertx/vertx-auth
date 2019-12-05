@@ -29,8 +29,11 @@ import java.util.Set;
  * Helper class for processing Keycloak principal.
  *
  * @author Eric Zhao
+ * @deprecated Use the {@link io.vertx.ext.auth.User} principal to access this data as this class is not guaranteed to
+ * be secure as no cryptographic signatures are verified.
  */
 @VertxGen
+@Deprecated
 public interface KeycloakHelper {
 
   /**

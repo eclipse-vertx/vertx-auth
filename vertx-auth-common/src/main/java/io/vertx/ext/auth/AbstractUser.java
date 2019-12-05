@@ -20,6 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.impl.ClusterSerializable;
 
 import java.nio.charset.StandardCharsets;
@@ -34,7 +35,9 @@ import java.util.Set;
  * Just implement the abstract methods in your concrete sub-class.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @deprecated All user objects should be created using {@link User#create(JsonObject)}.
  */
+@Deprecated
 public abstract class AbstractUser implements User, ClusterSerializable {
 
   private final Set<String> cachedPermissions = new HashSet<>();

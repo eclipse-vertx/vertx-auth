@@ -84,7 +84,7 @@ public class OAuth2AuthJWTTest extends VertxTestBase {
 
     oauth2.authenticate(jwt, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        fail(res.cause());
       } else {
         User token = res.result();
         assertNotNull(token);

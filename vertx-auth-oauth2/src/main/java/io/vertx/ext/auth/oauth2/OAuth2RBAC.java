@@ -31,9 +31,12 @@ import io.vertx.core.Promise;
  * The contract is that once an authority is checked for a given user, it's value is cached during the execution
  * of the request. If a user is stored to a persistent storage, or the token is introspected, the cache is cleared
  * and a new call will be handled to the implementation.
+ *
+ * @deprecated use the new Authorization API {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
  */
 @VertxGen
 @FunctionalInterface
+@Deprecated
 public interface OAuth2RBAC {
 
   /**

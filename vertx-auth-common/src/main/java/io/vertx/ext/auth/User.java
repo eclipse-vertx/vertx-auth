@@ -179,5 +179,6 @@ public interface User {
    *
    * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
+  @Deprecated
   void setAuthProvider(AuthProvider authProvider);
 }
