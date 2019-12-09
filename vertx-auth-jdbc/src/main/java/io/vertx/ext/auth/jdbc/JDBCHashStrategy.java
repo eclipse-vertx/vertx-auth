@@ -28,8 +28,10 @@ import io.vertx.ext.auth.jdbc.impl.SHA512Strategy;
  * You can implement this to provide a different hashing strategy to the default.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @deprecated A P-H-C hashing strategy is available, this class should not be used anymore.
  */
 @VertxGen
+@Deprecated
 public interface JDBCHashStrategy {
 
   /**

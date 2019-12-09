@@ -34,8 +34,8 @@ Device attestation is a verification of the device itself. Currently the followi
 * U2F (FIDO-U2F tokens, e.g.: Yubikey's)
 * Packed
 * Android Key
+* Android Safetynet
 
 Still not implemented are:
 
-* Android Safetynet
 * TPM

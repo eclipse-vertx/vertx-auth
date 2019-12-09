@@ -1,6 +1,6 @@
 == JDBC Auth Provider implementation
 
-We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} as well as
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} as well as
 {@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}
 to perform authentication and authorization against any JDBC compliant database. To use this project,
 add the following dependency to the _dependencies_ section of your build descriptor:
@@ -33,7 +33,7 @@ Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBC
 {@link examples.AuthJDBCExamples#example5}
 ----
 
-Once you've got your instance you can authenticate and authorize with it just like any {@link io.vertx.ext.auth.AuthProvider}.
+Once you've got your instance you can authenticate and authorize with it just like any {@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
 
 The out of the box config assumes certain queries for authentication and authorization, these can easily be changed with the operations
 {@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setAuthenticationQuery(String)},
@@ -77,14 +77,17 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES rol
 
 == Hashing Strategy
 
-THe hashing strategy is now required to instantiate JDBCAuthentication {@link {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)}
-You have the choice between SHA-512 or PBKDF2. Note that as of 2018-01-08 OWASP recommends
-the usage of stronger algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
+The provider uses the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a> to
+hash password. In the past releases this wasn't the rule. In order to keep backward compatibility a authentication
+provider can be created with a legacy hashing strategy. It is highly recommended to avoid this, and upgrade the user
+hashes to the new format (by requesting the user to renew the password for example).
 
+THe legacy hashing strategy can be used on the *deprecated* factory method of JDBCAuthentication {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)}
+You have the choice between SHA-512 or PBKDF2. Note that as of 2018-01-08 OWASP recommends the usage of stronger
+algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
 
-WARNING: If you already have a running application switching the strategies will make break your existing
-passwords, so you will need to migrate the passwords from one algorithm to the second.
-
+WARNING: If you already have a running legacy application switching the strategies will break your existing
+passwords. The new format will for suffer from this.
 
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
@@ -148,32 +151,6 @@ to hash new password before storing it to the database. Doing it is a 3 step tas
 {@link examples.AuthJDBCExamples#example9}
 ----
 
-WARNING: Hashing user password with salt can be not enough, this approach his good enough for avoiding rainbow tables
-attacks or precomputed table attacks but if the attacker gets the database it will be easier to setup a brute force
-attack. This kind of attack is slower but all required information is given: the hash and the salt.
-
-To make the hash attack more complex the default strategy allows you to provide an application level list of nonces
-to be used in the computation. This list should not be stored in the database since it add an extra variable to the
-computation that is unknown, making the brute force attack as potentially the only way to crack the hash. You might
-want to refresh the nonces now and then so you should add and never remove entries to the list, for example:
-
-[source,$lang]
-----
-{@link examples.AuthJDBCExamples#example10}
-----
-
-In order to decode there is no change required to the code, however to generate a new user you must specify which
-nonce (by it's index) you want to use. If you look at the previous example, the usage is quite similar:
-
-1. Generate a salt string
-2. Hash the password given the salt string and choosen nonce
-3. Store it to the database
-
-[source,$lang]
-----
-{@link examples.AuthJDBCExamples#example11}
-----
-
 == Authentication
 
 When authenticating using this implementation, it assumes `username` and `password` fields are present in the
@@ -197,6 +174,3 @@ If validating if a user has a particular permission simply pass the permission i
 ----
 {@link examples.AuthJDBCExamples#example7}
 ----
-
-@author <a href="mailto:julien@julienviet.com">Julien Viet</a>
-@author <a href="http://tfox.org">Tim Fox</a>

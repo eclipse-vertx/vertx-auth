@@ -1,6 +1,6 @@
 == Mongo Auth Provider implementation
 
-We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the Vert.x {@link io.vertx.ext.mongo.MongoClient}
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the Vert.x {@link io.vertx.ext.mongo.MongoClient}
 to perform authentication and authorisation against a MongoDb.
 
 To use this project, add the following
@@ -34,7 +34,7 @@ Once you've got one of those you can create a {@link io.vertx.ext.auth.mongo.Mon
 {@link examples.AuthMongoExamples#example1(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
 ----
 
-Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.AuthProvider}.
+Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
 
 The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
 some others.

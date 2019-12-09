@@ -1,6 +1,6 @@
 == htpasswd Auth Provider implementation
 <p>
-We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the Apache htpasswd file format
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the Apache htpasswd file format
 to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
 user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
 <p>
@@ -34,7 +34,7 @@ Once you've got one of these you can create a {@link io.vertx.ext.auth.htpasswd.
 {@link examples.AuthHtpasswdExamples#example1(io.vertx.core.Vertx)}
 ----
 <p>
-Once you've got your instance you can authenticate with it just like any {@link io.vertx.ext.auth.AuthProvider}.
+Once you've got your instance you can authenticate with it just like any {@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
 <p>
 The out of the box config assumes the usage of the file htpasswd in the root of the project.
 <p>

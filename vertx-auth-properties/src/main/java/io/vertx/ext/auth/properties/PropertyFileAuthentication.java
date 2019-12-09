@@ -19,7 +19,7 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
 
 /**
- * Factory interface for creating property file based {@link io.vertx.ext.auth.AuthProvider} instances.
+ * Factory interface for creating property file based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */

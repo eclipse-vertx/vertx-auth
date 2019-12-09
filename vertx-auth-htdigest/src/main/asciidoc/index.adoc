@@ -1,6 +1,6 @@
 == .htdigest Auth Provider implementation
 
-We provide an implementation of {@link io.vertx.ext.auth.AuthProvider} which uses the .digest file format
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the `.digest` file format
 to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
 user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
 
@@ -34,7 +34,7 @@ Once you've got one of these you can create a {@link io.vertx.ext.auth.htdigest.
 {@link examples.AuthHtdigestExamples#example1(io.vertx.core.Vertx)}
 ----
 
-Once you've got your instance you can authenticate with it just like any {@link io.vertx.ext.auth.AuthProvider}.
+Once you've got your instance you can authenticate with it just like any {@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
 
 The out of the box config assumes the usage of the file .htdigest in the root of the project.
 
@@ -59,5 +59,5 @@ generation of `nonce` strings and counters must be handled outside this provider
 Finally `auth-int` `qop` is not supported to avoid having to consume potential large blobs of data in order to
 validate the hash of the full request. This is usually also not present on modern web browsers.
 
-If validating if a user has a particular permission it will always return false since the htdigest file is a pure
+When validating a user for a particular permission it will always return false since the htdigest file is a pure
 authentication mechanism and not authorization.

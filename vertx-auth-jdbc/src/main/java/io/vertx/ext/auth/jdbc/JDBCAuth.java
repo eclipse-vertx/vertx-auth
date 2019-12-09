@@ -26,7 +26,7 @@ import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
- * Factory interface for creating {@link io.vertx.ext.auth.AuthProvider} instances that use the Vert.x JDBC client.
+ * Factory interface for creating {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances that use the Vert.x JDBC client.
  *
  * By default the hashing strategy is SHA-512. If you're already running in production this is backwards
  * compatible, however for new deployments or security upgrades it is recommended to use the PBKDF2 strategy

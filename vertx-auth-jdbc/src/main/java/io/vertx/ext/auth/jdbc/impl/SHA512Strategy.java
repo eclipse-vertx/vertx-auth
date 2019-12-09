@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Deprecated
 public class SHA512Strategy extends AbstractHashingStrategy implements JDBCHashStrategy {
 
   private final MessageDigest md;

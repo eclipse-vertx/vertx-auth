@@ -24,7 +24,7 @@ import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import io.vertx.ext.jwt.JWTOptions;
 
 /**
- * Factory interface for creating JWT based {@link io.vertx.ext.auth.AuthProvider} instances.
+ * Factory interface for creating JWT based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
  *
  * @author Paulo Lopes
  */

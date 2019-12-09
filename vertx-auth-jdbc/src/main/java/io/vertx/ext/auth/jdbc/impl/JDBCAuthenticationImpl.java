@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.jdbc.impl;
 
+import java.util.Map;
 import java.util.Objects;
 
 import io.vertx.core.AsyncResult;
@@ -23,6 +24,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
@@ -37,14 +39,21 @@ import io.vertx.ext.sql.SQLConnection;
  */
 public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
+  private final HashingStrategy strategy = HashingStrategy.load();
+
   private JDBCClient client;
-  private JDBCHashStrategy strategy;
+  private JDBCHashStrategy legacyStrategy;
   private JDBCAuthenticationOptions options;
 
   public JDBCAuthenticationImpl(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.options = Objects.requireNonNull(options);
-    this.strategy = Objects.requireNonNull(hashStrategy);
+    this.legacyStrategy = Objects.requireNonNull(hashStrategy);
+  }
+
+  public JDBCAuthenticationImpl(JDBCClient client, JDBCAuthenticationOptions options) {
+    this.client = Objects.requireNonNull(client);
+    this.options = Objects.requireNonNull(options);
   }
 
   @Override
@@ -71,27 +80,16 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
           }
           case 1: {
             JsonArray row = rs.getResults().get(0);
-            String hashedStoredPwd = strategy.getHashedStoredPwd(row);
-            String salt = strategy.getSalt(row);
-            // extract the version (-1 means no version)
-            int version = -1;
-            int sep = hashedStoredPwd.lastIndexOf('$');
-            if (sep != -1) {
-              try {
-                version = Integer.parseInt(hashedStoredPwd.substring(sep + 1));
-              } catch (NumberFormatException e) {
-                // the nonce version is not a number
-                resultHandler.handle(Future.failedFuture("Invalid nonce version: " + version));
-                return;
+            try {
+              if (verify(row, password)) {
+                User user = new UserImpl(new JsonObject().put("username", username));
+                user.setAuthProvider(this);
+                resultHandler.handle(Future.succeededFuture(user));
+              } else {
+                resultHandler.handle(Future.failedFuture("Invalid username/password"));
               }
-            }
-            String hashedPassword = strategy.computeHash(password, salt, version);
-            if (JDBCHashStrategy.isEqual(hashedStoredPwd, hashedPassword)) {
-              User user = new UserImpl(new JsonObject().put("username", username));
-              user.setAuthProvider(this);
-              resultHandler.handle(Future.succeededFuture(user));
-            } else {
-              resultHandler.handle(Future.failedFuture("Invalid username/password"));
+            } catch (RuntimeException e) {
+              resultHandler.handle(Future.failedFuture(e));
             }
             break;
           }
@@ -106,6 +104,31 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
         resultHandler.handle(Future.failedFuture(queryResponse.cause()));
       }
     });
+  }
+
+  private boolean verify(JsonArray row, String password) {
+    String hash = row.getString(0);
+    if (hash.charAt(0) != '$') {
+      // this isn't a phc-string, it's legacy
+      if (legacyStrategy == null) {
+        throw new IllegalStateException("JDBC Authentication cannot handle legacy hashes without a JDBCStrategy");
+      }
+      String salt = row.getString(1);
+      // extract the version (-1 means no version)
+      int version = -1;
+      int sep = hash.lastIndexOf('$');
+      if (sep != -1) {
+        try {
+          version = Integer.parseInt(hash.substring(sep + 1));
+        } catch (NumberFormatException e) {
+          // the nonce version is not a number
+          throw new IllegalStateException("Invalid nonce version: " + version);
+        }
+      }
+      return JDBCHashStrategy.isEqual(hash, legacyStrategy.computeHash(password, salt, version));
+    } else {
+      return strategy.verify(hash, password);
+    }
   }
 
   void executeQuery(String query, JsonArray params, Handler<AsyncResult<ResultSet>> resultHandler) {
@@ -123,4 +146,8 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
     });
   }
 
+  @Override
+  public String hash(String id, Map<String, String> params, String salt, String password) {
+    return strategy.hash(id, params, salt, password);
+  }
 }

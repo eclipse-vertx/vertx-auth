@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 
+@Deprecated
 public abstract class AbstractHashingStrategy implements JDBCHashStrategy {
 
   private final PRNG random;

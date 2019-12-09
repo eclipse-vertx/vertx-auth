@@ -25,7 +25,7 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthProviderImpl;
 
 /**
- * Factory interface for creating Apache Shiro based {@link io.vertx.ext.auth.AuthProvider} instances.
+ * Factory interface for creating Apache Shiro based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
  * @deprecated ShiroAuth has been replaced by {@code io.vertx.ext.auth.properties.PropertyFileAuthentication} and {@code io.vertx.ext.auth.ldap.LdapAuthentication}
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
