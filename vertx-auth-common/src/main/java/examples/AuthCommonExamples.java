@@ -21,6 +21,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -44,28 +47,34 @@ public class AuthCommonExamples {
     });
   }
 
-  public void example2(User user) {
-
-    user.isAuthorized("printers:printer1234", res -> {
+  public void example2(User user, AuthorizationProvider authorizationProvider) {
+    // load the authorization for the given user:
+    authorizationProvider.getAuthorizations(user, res -> {
       if (res.succeeded()) {
+        user.authorizations().add(authorizationProvider.getId(), res.result());
+        // cache is populated, perform query
+        user.isAuthorized(PermissionBasedAuthorization.create("printer1234"), res2 -> {
+          if (res2.succeeded()) {
 
-        boolean hasAuthority = res.result();
+            boolean hasAuthority = res2.result();
 
-        if (hasAuthority) {
-          System.out.println("User has the authority");
-        } else {
-          System.out.println("User does not have the authority");
-        }
+            if (hasAuthority) {
+              System.out.println("User has the authority");
+            } else {
+              System.out.println("User does not have the authority");
+            }
 
-      } else {
-        res.cause().printStackTrace();
+          } else {
+            res.cause().printStackTrace();
+          }
+        });
       }
     });
   }
 
   public void example3(User user) {
 
-    user.isAuthorized("role:admin", res -> {
+    user.isAuthorized(RoleBasedAuthorization.create("admin"), res -> {
       if (res.succeeded()) {
 
         boolean hasAuthority = res.result();

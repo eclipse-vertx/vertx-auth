@@ -48,10 +48,16 @@ public class AuthorizationsImpl implements Authorizations {
   }
 
   @Override
-  public Authorizations delete(String providerId) {
+  public Authorizations clear(String providerId) {
     Objects.requireNonNull(providerId);
 
     authorizations.remove(providerId);
+    return this;
+  }
+
+  @Override
+  public Authorizations clear() {
+    authorizations.clear();
     return this;
   }
 

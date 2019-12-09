@@ -27,7 +27,10 @@ public interface Authorizations {
   Authorizations add(String providerId, Authorization authorization);
 
   @Fluent
-  Authorizations delete(String providerId);
+  Authorizations clear(String providerId);
+
+  @Fluent
+  Authorizations clear();
 
   Set<Authorization> get(String providerId);
 

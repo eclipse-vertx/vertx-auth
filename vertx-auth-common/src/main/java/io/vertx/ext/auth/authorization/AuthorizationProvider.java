@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.ext.auth.User;
 
 /**
@@ -70,4 +71,9 @@ public interface AuthorizationProvider {
    */
   void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler);
 
+  default Future<Set<Authorization>> getAuthorizations(User user) {
+    Promise<Set<Authorization>> promise = Promise.promise();
+    getAuthorizations(user, promise);
+    return promise.future();
+  }
 }

@@ -64,14 +64,6 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   @Override
-  public User clearCache() {
-    for (String providerId: authorizations.getProviderIds()) {
-      authorizations.delete(providerId);
-    }
-    return this;
-  }
-
-  @Override
   public JsonObject attributes() {
     return attributes;
   }
@@ -97,16 +89,7 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   @Override
-  public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-    Objects.requireNonNull(authority);
-    Objects.requireNonNull(resultHandler);
-
-    return isAuthorized(authority.startsWith("role:") ? RoleBasedAuthorization.create(authority.substring(5))
-        : WildcardPermissionBasedAuthorization.create(authority), resultHandler);
-  }
-
-  // TODO: remove this method
-  private User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
+  public User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
     Objects.requireNonNull(authorization);
     Objects.requireNonNull(resultHandler);
 
