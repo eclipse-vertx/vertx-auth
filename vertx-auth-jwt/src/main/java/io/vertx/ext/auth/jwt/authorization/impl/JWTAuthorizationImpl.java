@@ -44,7 +44,7 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
 
     final JsonArray roles;
 
@@ -78,9 +78,9 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
         }
       }
     }
-
+    user.authorizations().add(getId(), authorizations);
     // return
-    handler.handle(Future.succeededFuture(authorizations));
+    handler.handle(Future.succeededFuture());
   }
 
   private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {

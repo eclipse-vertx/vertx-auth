@@ -65,8 +65,6 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
     loginThen(user ->
       authz.getAuthorizations(user, get -> {
         assertTrue(get.succeeded());
-        user.authorizations().add(authz.getId(), get.result());
-
         assertTrue(
           RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
 
@@ -82,8 +80,6 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   public void testNotHasRole() throws Exception {
     loginThen(user -> authz.getAuthorizations(user, get -> {
       assertTrue(get.succeeded());
-      user.authorizations().add(authz.getId(), get.result());
-
       assertFalse(
         RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
 
@@ -99,8 +95,6 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   public void testHasPermission() throws Exception {
     loginThen(user -> authz.getAuthorizations(user, get -> {
       assertTrue(get.succeeded());
-      user.authorizations().add(authz.getId(), get.result());
-
       assertTrue(
         PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
 
@@ -116,8 +110,6 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   public void testNotHasPermission() throws Exception {
     loginThen(user -> authz.getAuthorizations(user, get -> {
       assertTrue(get.succeeded());
-      user.authorizations().add(authz.getId(), get.result());
-
       assertFalse(
         PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
 
@@ -152,7 +144,6 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
 
       authz.getAuthorizations(user, get -> {
         assertTrue(get.succeeded());
-        user.authorizations().add(authz.getId(), get.result());
         // paulo can do anything...
         assertTrue(
           WildcardPermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
@@ -170,8 +161,6 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
       // editor can edit any newsletter item...
       authz.getAuthorizations(user, get -> {
         assertTrue(get.succeeded());
-        user.authorizations().add(authz.getId(), get.result());
-
         assertTrue(
           WildcardPermissionBasedAuthorization.create("newsletter:edit:13").match(AuthorizationContext.create(user)));
         testComplete();

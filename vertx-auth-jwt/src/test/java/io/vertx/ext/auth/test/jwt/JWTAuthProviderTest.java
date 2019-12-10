@@ -82,7 +82,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
       assertNotNull(user);
       JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
         assertTrue(res.succeeded());
-        user.authorizations().add("jwt", res.result());
         assertTrue(PermissionBasedAuthorization.create("write").match(user));
         testComplete();
       });
@@ -97,7 +96,6 @@ public class JWTAuthProviderTest extends VertxTestBase {
       assertNotNull(user);
       JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
         assertTrue(res.succeeded());
-        user.authorizations().add("jwt", res.result());
         assertFalse(PermissionBasedAuthorization.create("drop").match(user));
         testComplete();
       });

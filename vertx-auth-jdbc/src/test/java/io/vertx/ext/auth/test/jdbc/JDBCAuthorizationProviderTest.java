@@ -99,12 +99,7 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   }
 
   private void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizationProvider().getAuthorizations(user, authorizationResponse -> {
-      if (authorizationResponse.succeeded()) {
-        user.authorizations().add(getAuthorizationProvider().getId(), authorizationResponse.result());
-      }
-      handler.handle(Future.succeededFuture());
-    });
+    getAuthorizationProvider().getAuthorizations(user, handler);
   }
 
   @Test

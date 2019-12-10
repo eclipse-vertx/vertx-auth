@@ -49,7 +49,6 @@ public class AuthCommonExamples {
     // load the authorization for the given user:
     authorizationProvider.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        user.authorizations().add(authorizationProvider.getId(), res.result());
         // cache is populated, perform query
         if (PermissionBasedAuthorization.create("printer1234").match(user)) {
           System.out.println("User has the authority");
@@ -64,7 +63,6 @@ public class AuthCommonExamples {
     // load the authorization for the given user:
     authorizationProvider.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        user.authorizations().add(authorizationProvider.getId(), res.result());
         // cache is populated, perform query
         if (RoleBasedAuthorization.create("admin").match(user)) {
           System.out.println("User has the authority");

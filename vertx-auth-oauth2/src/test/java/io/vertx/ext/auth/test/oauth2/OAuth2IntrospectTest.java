@@ -143,7 +143,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
           if (res0.failed()) {
             fail(res0.cause().getMessage());
           } else {
-            if (res0.result().contains(PermissionBasedAuthorization.create("scopeB"))) {
+            if (PermissionBasedAuthorization.create("scopeB").match(token2)) {
               testComplete();
             } else {
               fail("Should be allowed");
@@ -177,7 +177,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
           if (res0.failed()) {
             fail(res0.cause().getMessage());
           } else {
-            if (res0.result().contains(PermissionBasedAuthorization.create("profile"))) {
+            if (PermissionBasedAuthorization.create("profile").match(token)) {
               // Issue #142
 
               // the test is a replay of the same test so all checks have

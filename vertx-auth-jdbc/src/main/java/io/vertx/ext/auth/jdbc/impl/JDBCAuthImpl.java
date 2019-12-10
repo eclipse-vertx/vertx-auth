@@ -69,7 +69,6 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
             resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
           }
           else {
-            user.authorizations().add(authorizationProvider.getId(), userAuthorizationResult.result());
             resultHandler.handle(Future.succeededFuture(user));
           }
         });

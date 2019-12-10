@@ -208,8 +208,6 @@ public class AuthOAuth2Examples {
 
         authz.getAuthorizations(user, res1 -> {
           if (res1.succeeded()) {
-            user.authorizations().add(authz.getId(), res1.result());
-
             if (RoleBasedAuthorization.create("manage-account").setResource("account").match(user)) {
               // this user is authorized to manage its account
             }

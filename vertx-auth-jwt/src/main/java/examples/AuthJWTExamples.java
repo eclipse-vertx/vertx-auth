@@ -144,7 +144,6 @@ public class AuthJWTExamples {
 
     authz.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        user.authorizations().add(authz.getId(), res.result());
         // and now we can perform checks as needed
         if (PermissionBasedAuthorization.create("create-report").match(user)) {
           // Yes the user can create reports

@@ -39,7 +39,7 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
     final String rootClaim = user.attributes().getString("rootClaim");
     final JsonObject accessToken =
       rootClaim == null ?
@@ -73,7 +73,8 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
       }
     }
 
+    user.authorizations().add(getId(), authorizations);
     // return
-    handler.handle(Future.succeededFuture(authorizations));
+    handler.handle(Future.succeededFuture());
   }
 }

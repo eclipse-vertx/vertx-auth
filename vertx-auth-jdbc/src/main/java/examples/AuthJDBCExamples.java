@@ -59,8 +59,6 @@ public class AuthJDBCExamples {
   public void example7(User user, JDBCAuthorization jdbcAuthZ) {
     jdbcAuthZ.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        user.authorizations().add(jdbcAuthZ.getId(), res.result());
-
         if (PermissionBasedAuthorization.create("commit_code").match(user)) {
           // Has permission!
         }
@@ -71,8 +69,6 @@ public class AuthJDBCExamples {
   public void example8(User user, JDBCAuthorization jdbcAuthZ) {
     jdbcAuthZ.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        user.authorizations().add(jdbcAuthZ.getId(), res.result());
-
         if (RoleBasedAuthorization.create("manager").match(user)) {
           // has role!
         }

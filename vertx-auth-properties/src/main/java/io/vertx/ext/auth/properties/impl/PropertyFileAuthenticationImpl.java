@@ -179,7 +179,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Void>> resultHandler) {
     String username = user.principal().getString("username");
     getUser(username, userResult -> {
       if (userResult.succeeded()) {
@@ -190,7 +190,8 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
             result.add(WildcardPermissionBasedAuthorization.create(permission));
           }
         }
-        resultHandler.handle(Future.succeededFuture(result));
+        user.authorizations().add(getId(), result);
+        resultHandler.handle(Future.succeededFuture());
       } else {
         resultHandler.handle(Future.failedFuture("invalid username"));
       }

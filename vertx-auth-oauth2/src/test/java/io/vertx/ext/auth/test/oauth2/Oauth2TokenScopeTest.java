@@ -150,9 +150,8 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
         ScopeAuthorization.create(" ").getAuthorizations(token, call -> {
           assertTrue(call.succeeded());
-          Set<Authorization> authorizations = call.result();
-          assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeA")));
-          assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeB")));
+          assertTrue(PermissionBasedAuthorization.create("scopeA").match(token));
+          assertTrue(PermissionBasedAuthorization.create("scopeB").match(token));
           testComplete();
         });
       }
@@ -182,10 +181,9 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       assertTrue(res.succeeded());
       ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
         assertTrue(call.succeeded());
-        Set<Authorization> authorizations = call.result();
         // the scopes are missing
-        assertFalse(authorizations.contains(PermissionBasedAuthorization.create("scopeX")));
-        assertFalse(authorizations.contains(PermissionBasedAuthorization.create("scopeB")));
+        assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
+        assertFalse(PermissionBasedAuthorization.create("scopeB").match(res.result()));
         testComplete();
       });
     });
@@ -215,11 +213,10 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       assertTrue(res.succeeded());
       ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
         assertTrue(call.succeeded());
-        Set<Authorization> authorizations = call.result();
-        assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeA")));
-        assertTrue(authorizations.contains(PermissionBasedAuthorization.create("scopeB")));
+        assertTrue(PermissionBasedAuthorization.create("scopeA").match(res.result()));
+        assertTrue(PermissionBasedAuthorization.create("scopeB").match(res.result()));
         // the scope is missing
-        assertFalse(authorizations.contains(PermissionBasedAuthorization.create("scopeX")));
+        assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
         testComplete();
       });
     });
