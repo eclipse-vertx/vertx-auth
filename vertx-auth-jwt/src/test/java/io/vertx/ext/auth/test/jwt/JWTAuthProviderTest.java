@@ -18,8 +18,10 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -78,11 +80,12 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-
-      user.isAuthorized("write", onSuccess(res -> {
-        assertNotNull(res);
+      JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
+        assertTrue(res.succeeded());
+        user.authorizations().add("jwt", res.result());
+        assertTrue(PermissionBasedAuthorization.create("write").match(user));
         testComplete();
-      }));
+      });
     }));
     await();
   }
@@ -92,11 +95,12 @@ public class JWTAuthProviderTest extends VertxTestBase {
     JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-
-      user.isAuthorized("drop", onSuccess(hasPermission -> {
-        assertFalse(hasPermission);
+      JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
+        assertTrue(res.succeeded());
+        user.authorizations().add("jwt", res.result());
+        assertFalse(PermissionBasedAuthorization.create("drop").match(user));
         testComplete();
-      }));
+      });
     }));
     await();
   }

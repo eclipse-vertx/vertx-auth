@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 
@@ -69,7 +70,7 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
       for (Object el : roles) {
         // convert to the authorization type
         if (el instanceof String) {
-          authorizations.add(RoleBasedAuthorization.create((String) el));
+          authorizations.add(PermissionBasedAuthorization.create((String) el));
         } else {
           // abort the parsing
           handler.handle(Future.failedFuture("Cannot parse role: " + el));

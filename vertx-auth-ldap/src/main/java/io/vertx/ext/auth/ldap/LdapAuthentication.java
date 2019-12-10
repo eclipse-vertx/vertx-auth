@@ -15,6 +15,7 @@ package io.vertx.ext.auth.ldap;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.ldap.impl.LdapAuthenticationImpl;
 
 /**
@@ -23,7 +24,7 @@ import io.vertx.ext.auth.ldap.impl.LdapAuthenticationImpl;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 @VertxGen
-public interface LdapAuthentication extends AuthProvider {
+public interface LdapAuthentication extends AuthenticationProvider {
 
   /**
    * Create a LDAP authentication provider
@@ -35,5 +36,4 @@ public interface LdapAuthentication extends AuthProvider {
   static LdapAuthentication create(Vertx vertx, LdapAuthenticationOptions options) {
     return new LdapAuthenticationImpl(vertx, options);
   }
-
 }

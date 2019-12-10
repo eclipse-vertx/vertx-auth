@@ -137,6 +137,7 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
+  @Deprecated
   User isAuthorized(Authorization authority, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
@@ -169,6 +170,7 @@ public interface User {
    * `true` if the they has the authority or `false` otherwise.
    * @see User#isAuthorized(Authorization, Handler)
    */
+  @Deprecated
   default Future<Boolean> isAuthorized(Authorization authority) {
     Promise<Boolean> promise = Promise.promise();
     isAuthorized(authority, promise);

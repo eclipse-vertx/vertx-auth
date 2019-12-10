@@ -51,40 +51,26 @@ public class AuthCommonExamples {
       if (res.succeeded()) {
         user.authorizations().add(authorizationProvider.getId(), res.result());
         // cache is populated, perform query
-        user.isAuthorized(PermissionBasedAuthorization.create("printer1234"), res2 -> {
-          if (res2.succeeded()) {
-
-            boolean hasAuthority = res2.result();
-
-            if (hasAuthority) {
-              System.out.println("User has the authority");
-            } else {
-              System.out.println("User does not have the authority");
-            }
-
-          } else {
-            res.cause().printStackTrace();
-          }
-        });
+        if (PermissionBasedAuthorization.create("printer1234").match(user)) {
+          System.out.println("User has the authority");
+        } else {
+          System.out.println("User does not have the authority");
+        }
       }
     });
   }
 
-  public void example3(User user) {
-
-    user.isAuthorized(RoleBasedAuthorization.create("admin"), res -> {
+  public void example3(User user, AuthorizationProvider authorizationProvider) {
+    // load the authorization for the given user:
+    authorizationProvider.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-
-        boolean hasAuthority = res.result();
-
-        if (hasAuthority) {
-          System.out.println("User has the authority to the role of admin");
+        user.authorizations().add(authorizationProvider.getId(), res.result());
+        // cache is populated, perform query
+        if (RoleBasedAuthorization.create("admin").match(user)) {
+          System.out.println("User has the authority");
         } else {
           System.out.println("User does not have the authority");
         }
-
-      } else {
-        res.cause().printStackTrace();
       }
     });
   }

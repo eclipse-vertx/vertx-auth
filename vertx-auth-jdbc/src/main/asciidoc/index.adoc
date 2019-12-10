@@ -53,8 +53,7 @@ The basic data definition for the storage should look like this:
 --
 CREATE TABLE `user` (
   `username` VARCHAR(255) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
-  `password_salt` VARCHAR(255) NOT NULL
+  `password` VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE `user_roles` (
@@ -167,8 +166,7 @@ Although Vert.x auth itself does not mandate any specific model of permissions (
 implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
 can have zero or more permissions.
 
-If validating if a user has a particular permission simply pass the permission into.
-{@link io.vertx.ext.auth.User#isAuthorized(java.lang.String, io.vertx.core.Handler)} as follows:
+If validating if a user has a particular permission simply match the user against a given permission as follows:
 
 [source,$lang]
 ----

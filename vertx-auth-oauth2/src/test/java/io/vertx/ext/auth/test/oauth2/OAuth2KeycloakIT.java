@@ -212,9 +212,9 @@ public class OAuth2KeycloakIT {
       // generate a access token from the user
       User token = authn.result();
 
-      token.isAuthorized("sudo", authz -> {
+      KeycloakAuthorization.create().getAuthorizations(token, authz -> {
         should.assertTrue(authz.succeeded());
-        should.assertFalse(authz.result());
+        should.assertFalse(PermissionBasedAuthorization.create("sudo").match(token));
         test.complete();
       });
     });

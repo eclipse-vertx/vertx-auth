@@ -21,6 +21,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
@@ -209,11 +210,9 @@ public class AuthOAuth2Examples {
           if (res1.succeeded()) {
             user.authorizations().add(authz.getId(), res1.result());
 
-            user.isAuthorized(RoleBasedAuthorization.create("manage-account").setResource("account"), r -> {
-              if (r.result()) {
-                // this user is authorized to manage its account
-              }
-            });
+            if (RoleBasedAuthorization.create("manage-account").setResource("account").match(user)) {
+              // this user is authorized to manage its account
+            }
           }
         });
       }
@@ -259,32 +258,26 @@ public class AuthOAuth2Examples {
 
 
   public void example17(User user) {
-    user.isAuthorized("print", res -> {
-      // in this case it is assumed that the role is the current application
-      if (res.succeeded() && res.result()) {
-        // Yes the user can print
-      }
-    });
+    // in this case it is assumed that the role is the current application
+    if (PermissionBasedAuthorization.create("print").match(user)) {
+      // Yes the user can print
+    }
   }
 
   public void example18(User user) {
-    user.isAuthorized("realm:add-user", res -> {
-      // the role is "realm"
-      // the authority is "add-user"
-      if (res.succeeded() && res.result()) {
-        // Yes the user can add users to the application
-      }
-    });
+    // the resource is "realm"
+    // the authority is "add-user"
+    if (PermissionBasedAuthorization.create("add-user").setResource("realm").match(user)) {
+      // Yes the user can add users to the application
+    }
   }
 
   public void example19(User user) {
-    user.isAuthorized("finance:year-report", res -> {
-      // the role is "finance"
-      // the authority is "year-report"
-      if (res.succeeded() && res.result()) {
-        // Yes the user can access the year report from the finance department
-      }
-    });
+    // the role is "finance"
+    // the authority is "year-report"
+    if (PermissionBasedAuthorization.create("year-report").setResource("finance").match(user)) {
+      // Yes the user can access the year report from the finance department
+    }
   }
 
   public void example20(AccessToken user) {

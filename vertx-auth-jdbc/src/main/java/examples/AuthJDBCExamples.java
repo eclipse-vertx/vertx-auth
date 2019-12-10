@@ -22,10 +22,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
+import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLConnection;
 
@@ -54,28 +56,28 @@ public class AuthJDBCExamples {
     });
   }
 
-  public void example7(User user) {
-
-    user.isAuthorized(PermissionBasedAuthorization.create("commit_code"), res -> {
+  public void example7(User user, JDBCAuthorization jdbcAuthZ) {
+    jdbcAuthZ.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        boolean hasPermission = res.result();
-      } else {
-        // Failed to
+        user.authorizations().add(jdbcAuthZ.getId(), res.result());
+
+        if (PermissionBasedAuthorization.create("commit_code").match(user)) {
+          // Has permission!
+        }
       }
     });
-
   }
 
-  public void example8(User user) {
-
-    user.isAuthorized(RoleBasedAuthorization.create("manager"), res -> {
+  public void example8(User user, JDBCAuthorization jdbcAuthZ) {
+    jdbcAuthZ.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-        boolean hasRole = res.result();
-      } else {
-        // Failed to
+        user.authorizations().add(jdbcAuthZ.getId(), res.result());
+
+        if (RoleBasedAuthorization.create("manager").match(user)) {
+          // has role!
+        }
       }
     });
-
   }
 
   public void example9(JDBCAuthentication jdbcAuth, SQLConnection conn) {

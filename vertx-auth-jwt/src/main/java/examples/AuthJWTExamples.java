@@ -23,6 +23,7 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -42,7 +43,7 @@ public class AuthJWTExamples {
         .setPath("keystore.jceks")
         .setPassword("secret"));
 
-    AuthProvider provider = JWTAuth.create(vertx, config);
+    AuthenticationProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example7(Vertx vertx, String username, String password) {
@@ -69,7 +70,7 @@ public class AuthJWTExamples {
         .setAlgorithm("RS256")
         .setBuffer("BASE64-ENCODED-PUBLIC_KEY"));
 
-    AuthProvider provider = JWTAuth.create(vertx, config);
+    AuthenticationProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example9(JWTAuth jwtAuth) {
@@ -145,11 +146,9 @@ public class AuthJWTExamples {
       if (res.succeeded()) {
         user.authorizations().add(authz.getId(), res.result());
         // and now we can perform checks as needed
-        user.isAuthorized(PermissionBasedAuthorization.create("create-report"), res2 -> {
-          if (res2.succeeded() && res2.result()) {
-            // Yes the user can create reports
-          }
-        });
+        if (PermissionBasedAuthorization.create("create-report").match(user)) {
+          // Yes the user can create reports
+        }
       }
     });
   }
@@ -161,7 +160,7 @@ public class AuthJWTExamples {
       // since we're consuming keycloak JWTs we need to locate the permission claims in the token
       .put("permissionsClaimKey", "realm_access/roles");
 
-    AuthProvider provider = JWTAuth.create(vertx, new JWTAuthOptions(config));
+    AuthenticationProvider provider = JWTAuth.create(vertx, new JWTAuthOptions(config));
   }
 
   public void example15(Vertx vertx) {

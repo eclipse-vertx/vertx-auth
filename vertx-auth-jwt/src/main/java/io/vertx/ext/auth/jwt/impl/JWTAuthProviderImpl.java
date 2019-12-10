@@ -139,7 +139,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         return;
       }
 
-      resultHandler.handle(Future.succeededFuture(createUser(payload, permissionsClaimKey)));
+      resultHandler.handle(Future.succeededFuture(User.create(payload)));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
