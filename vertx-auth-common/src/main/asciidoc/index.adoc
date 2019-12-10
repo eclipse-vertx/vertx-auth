@@ -176,3 +176,48 @@ your application, for example:
 ----
 {@link examples.AuthCommonExamples#example4}
 ----
+
+== Working with Keys
+
+When working with security you will face the need to load security keys. There are many formats and standards for
+security keys which makes it quite a complex task. In order to simplify the work on the developer side, this module
+contains 2 abstractions:
+
+1. {@link io.vertx.ext.auth.KeyStoreOptions} that abstract the JVM keystore common format.
+2. {@link io.vertx.ext.auth.PubSecKeyOptions} that abstract the PEM common format.
+
+To load a local keystore modules shall ask for an options object like:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example5}
+----
+
+The type is quite important as it varies with the JVM version used. Before 9, the default is `jks` which is JVM specific
+after it `pkcs12` which is a common standard.
+
+Non JVM keystore keys can be imported to a `pkcs12` file, even without the need of the `keytool` command, for example
+this is how it can be done with `OpenSSL`:
+
+----
+openssl pkcs12 -export -in mykeycertificate.pem -out mykeystore.pkcs12 -name myAlias -noiter -nomaciter
+----
+
+The command above will convert an existing pem file to a pkcs12 keystore and put the given key under the name `myAlias`.
+The extra arguments `-noiter -nomaciter` are required in order to make the file compatible with the JVM loader.
+
+To load a `PEM` file you should be aware that there are a few limitations. The default JVM classes only support keys in
+`PKCS8` format, so if you have a different PEM file you need to convert it with `OpenSSL` like:
+
+----
+openssl pkcs8 -topk8 -inform PEM -in private.pem -out private_key.pem -nocrypt
+----
+
+After this using such file is as trivial as:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example6}
+----
+
+PEM files are common and easy to use but are not password protected, so private keys can easily be sniffed.

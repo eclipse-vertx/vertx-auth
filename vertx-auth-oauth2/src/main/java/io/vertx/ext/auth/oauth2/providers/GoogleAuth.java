@@ -113,14 +113,6 @@ public interface GoogleAuth extends OpenIDConnectAuth {
    * @param httpClientOptions  custom http client options
    */
   static OAuth2Auth create(Vertx vertx, JsonObject serviceAccountJson, HttpClientOptions httpClientOptions) {
-    final StringBuilder privateKey = new StringBuilder();
-    for (String s : serviceAccountJson.getString("private_key").split("\n")) {
-      if ("-----BEGIN PRIVATE KEY-----".equals(s) || "-----END PRIVATE KEY-----".equals(s)) {
-        continue;
-      }
-      privateKey.append(s);
-    }
-
     return
       OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_JWT)
@@ -129,7 +121,7 @@ public interface GoogleAuth extends OpenIDConnectAuth {
         .setTokenPath(serviceAccountJson.getString("token_uri"))
         .addPubSecKey(new PubSecKeyOptions()
           .setAlgorithm("RS256")
-          .setSecretKey(privateKey.toString()))
+          .setBuffer(serviceAccountJson.getString("private_key")))
         .setJWTOptions(new JWTOptions()
           .setAlgorithm("RS256")
           .setExpiresInMinutes(60)

@@ -1,5 +1,6 @@
 package io.vertx.ext.jwt;
 
+import io.vertx.ext.auth.PubSecKeyOptions;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -73,7 +74,10 @@ public class CryptoTest {
   public void ecdsaSignatureComplianceTest() throws Exception {
 
     JWT jwt = new JWT()
-      .addJWK(JWK.pubKey("ES512", "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="));
+      .addJWK(new JWK(
+        new PubSecKeyOptions()
+          .setAlgorithm("ES512")
+          .setBuffer("-----BEGIN PUBLIC KEY-----\nMIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg=\n-----END PUBLIC KEY-----\n")));
 
     assertFalse(jwt.isUnsecure());
     //Test verification for token created using https://github.com/auth0/node-jsonwebtoken/tree/v7.0.1

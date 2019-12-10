@@ -68,9 +68,6 @@ Loading keys can be performed in 3 different ways:
 * Using OpenSSL `pem` formatted files (pub/sec keys)
 * Using Java Keystore files (both symmetric and pub/sec keys)
 
-It is recommended to avoid java keystores, as java keystores are complex to generate and make many assumptions in order
-to choose the right key for the authenticator.
-
 ==== Using Symmetric Keys
 
 The default signature method for JWT's is known as `HS256`. `HS` stands in this case for `HMAC Signature using SHA256`.
@@ -164,9 +161,6 @@ Now you can use this to issue or validate tokens:
 ----
 {@link examples.AuthJWTExamples#example15}
 ----
-
-Do note that all the lines `-----BEGIN ...` and `-----END...` should be stripped from the string to be passed to the
-configuration.
 
 ==== Using EC keys
 
@@ -276,6 +270,9 @@ keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret 
 keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 521 -alias ES512 -keypass secret -sigalg SHA512withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 ----
 
+For more information on keystores and how to use the `PKCS12` format (Default from Java >=9) please see the documentation
+of the common module.
+
 === Read only tokens
 
 If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that
@@ -338,7 +335,15 @@ And the same for the issuer:
 === Authorizing (AuthZ)
 
 Once a token is parsed and is valid we can use it to perform authorization tasks. The most simple is to verify if a
-user has a specific authority. In this case one needs to to:
+user has a specific authority. Authorization will follow the common {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
+API. Choose the provider that generated your token and evaluate.
+
+Currently there are 2 factories:
+
+* {@link io.vertx.ext.auth.jwt.authorization.JWTAuthorization} inspects tokens based on the "permissions" claim key.
+* {@link io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization} inspects tokens based on the <a href="https://www.eclipse.org/community/eclipse_newsletter/2017/september/article2.php">MP JWT spec</a>.
+
+The typical usage is to extract the permissions form the user object using the provider and perform the attestation:
 
 [source,$lang]
 ----
@@ -394,6 +399,3 @@ fields `audience`, `issuer` and `subject` are then picked from the config is ava
 
 Finally the token is signed and encoded in the correct format.
 
-@author <a href="mailto:julien@julienviet.com">Julien Viet</a>
-@author <a href="http://tfox.org">Tim Fox</a>
-@author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>

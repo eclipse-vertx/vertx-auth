@@ -105,7 +105,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .put("token", JWT);
 
     oauthConfig
-      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setSecretKey("vertx").setSymmetric(true))
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true))
       .setJWTOptions(new JWTOptions().addScope("scopeA").addScope("scopeB"));
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
@@ -173,7 +173,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .put("token", JWT);
 
     oauthConfig
-      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setSecretKey("vertx").setSymmetric(true))
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true))
       .setJWTOptions(new JWTOptions().addScope("scopeX").addScope("scopeB"));
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
@@ -281,7 +281,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .put("token", JWT);
 
     oauthConfig
-      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setSecretKey("vertx").setSymmetric(true));
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true));
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 

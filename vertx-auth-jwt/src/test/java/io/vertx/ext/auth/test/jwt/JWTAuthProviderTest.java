@@ -18,7 +18,6 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.jwt.JWTOptions;
@@ -423,6 +422,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("es256-keystore.jceks")
+        .setType("jceks")
         .setPassword("secret")));
 
     String token = authProvider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions().setAlgorithm("ES256"));
@@ -446,9 +446,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testGenerateNewTokenWithMacSecret() {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addPubSecKey(new PubSecKeyOptions()
-        .setAlgorithm("HS256")
-        .setSecretKey("notasecret"))
+      .addJwk(new JsonObject()
+        .put("kty", "oct")
+        .put("k", "notasecret"))
     );
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("HS256"));
@@ -467,9 +467,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testValidateTokenWithInvalidMacSecret() {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addPubSecKey(new PubSecKeyOptions()
-        .setAlgorithm("HS256")
-        .setSecretKey("a bad secret"))
+      .addJwk(new JsonObject()
+        .put("kty", "oct")
+        .put("k", "a bad secret"))
     );
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onFailure(res -> {
@@ -483,9 +483,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   public void testValidateTokenWithValidMacSecret() {
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addPubSecKey(new PubSecKeyOptions()
-        .setAlgorithm("HS256")
-        .setSecretKey("notasecret"))
+      .addJwk(new JsonObject()
+        .put("kty", "oct")
+        .put("k", "notasecret"))
     );
     JsonObject authInfo = new JsonObject().put("jwt", token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
@@ -662,12 +662,11 @@ public class JWTAuthProviderTest extends VertxTestBase {
   @Test
   public void testValidateTokenWithIgnoreExpired() throws InterruptedException {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
-      .addPubSecKey(new PubSecKeyOptions()
-        .setAlgorithm("HS256")
-        .setSecretKey("notasecret"))
+      .addJwk(new JsonObject()
+        .put("kty", "oct")
+        .put("k", "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow"))
       .setJWTOptions(new JWTOptions()
-        .setIgnoreExpiration(true))
-    );
+        .setIgnoreExpiration(true)));
 
     String token = authProvider
       .generateToken(

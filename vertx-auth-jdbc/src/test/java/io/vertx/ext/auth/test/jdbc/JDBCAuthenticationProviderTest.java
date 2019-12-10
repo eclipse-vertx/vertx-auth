@@ -58,7 +58,7 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
     // add a modern user
     SQL.add(
-      "insert into user values ('lopus', '$pbkdf2$1drH02tXcgS5ipJIf8v/AlL/qm3CjAgAp7Qt3hyJx/c=$/lONU4cTa3ayMRJbHIup47nX/1HhysyzDA0dpoFpsf727LoGH2OZ+SyFCGtv/pIEZK3mQtJv+yjzD+W0quF6xg==', null);");
+      "insert into user values ('lopus', '$pbkdf2$1drH02tXcgS5ipJIf8v/AlL/qm3CjAgAp7Qt3hyJx/c$/lONU4cTa3ayMRJbHIup47nX/1HhysyzDA0dpoFpsf727LoGH2OZ+SyFCGtv/pIEZK3mQtJv+yjzD+W0quF6xg', null);");
 
     // and a second set of tables with slight differences
 

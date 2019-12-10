@@ -18,9 +18,7 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.*;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -96,5 +94,19 @@ public class AuthCommonExamples {
     String token = VertxContextPRNG.current(vertx).nextString(32);
     // Generate a secure random integer
     int randomInt = VertxContextPRNG.current(vertx).nextInt();
+  }
+
+  public void example5() {
+    KeyStoreOptions options = new KeyStoreOptions()
+      .setPath("/path/to/keystore/file")
+      .setType("pkcs8")
+      .setPassword("keystore-password")
+      .putPasswordProtection("key-alias", "alias-password");
+  }
+
+  public void example6(Vertx vertx) {
+    PubSecKeyOptions options = new PubSecKeyOptions()
+      .setAlgorithm("RS256")
+      .setBuffer(vertx.fileSystem().readFileBlocking("/path/to/pem/file").toString());
   }
 }

@@ -10,6 +10,7 @@ public class DummyVerticle extends AbstractVerticle {
     private static final JWTAuthOptions config = new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("keystore.jceks")
+        .setType("jceks")
         .setPassword("secret"));
 
     public void start() {

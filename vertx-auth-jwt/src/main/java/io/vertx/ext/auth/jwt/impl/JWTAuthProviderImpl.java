@@ -76,25 +76,25 @@ public class JWTAuthProviderImpl implements JWTAuth {
           }
         }
         // load all available keys in the keystore
-        for (JWK key : JWK.from(ks, keyStore.getPassword().toCharArray())) {
+        for (JWK key : JWK.load(ks, keyStore.getPassword(), keyStore.getPasswordProtection())) {
           jwt.addJWK(key);
         }
-      } else {
-        // no key file attempt to load pem keys
-        final List<PubSecKeyOptions> keys = config.getPubSecKeys();
+      }
+      // attempt to load pem keys
+      final List<PubSecKeyOptions> keys = config.getPubSecKeys();
 
-        if (keys != null) {
-          for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-            jwt.addJWK(JWK.from(pubSecKey));
-          }
+      if (keys != null) {
+        for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
+          jwt.addJWK(new JWK(pubSecKey));
         }
+      }
 
-        final List<JsonObject> jwks = config.getJwks();
+      // attempt to load jwks
+      final List<JsonObject> jwks = config.getJwks();
 
-        if (jwks != null) {
-          for (JsonObject jwk : jwks) {
-            this.jwt.addJWK(new JWK(jwk));
-          }
+      if (jwks != null) {
+        for (JsonObject jwk : jwks) {
+          this.jwt.addJWK(new JWK(jwk));
         }
       }
 
