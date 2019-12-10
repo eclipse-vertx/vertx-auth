@@ -35,7 +35,7 @@ public class PBKDF2 implements HashingAlgorithm {
 
   private static final int DEFAULT_ITERATIONS = 10000;
   private static final Base64.Decoder B64DEC = Base64.getDecoder();
-  private static final Base64.Encoder B64ENC = Base64.getEncoder();
+  private static final Base64.Encoder B64ENC = Base64.getEncoder().withoutPadding();
 
   private static final Set<String> DEFAULT_CONFIG = Collections.singleton("it");
 
