@@ -33,6 +33,7 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2UserImpl;
  * @author Paulo Lopes
  */
 @VertxGen
+@Deprecated
 public interface AccessToken extends User {
 
   /**

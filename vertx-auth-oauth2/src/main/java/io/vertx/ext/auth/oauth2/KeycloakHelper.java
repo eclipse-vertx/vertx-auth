@@ -30,6 +30,7 @@ import java.util.Set;
  * @author Eric Zhao
  */
 @VertxGen
+@Deprecated
 public interface KeycloakHelper {
 
   /**

@@ -26,6 +26,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
+@Deprecated
 public class JDBCAuthOptions implements io.vertx.ext.auth.AuthOptions {
 
   private boolean shared;

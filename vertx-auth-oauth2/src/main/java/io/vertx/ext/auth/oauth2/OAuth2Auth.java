@@ -170,6 +170,7 @@ public interface OAuth2Auth extends AuthProvider {
    * @return self
    */
   @Fluent
+  @Deprecated
   default OAuth2Auth introspectToken(String token, Handler<AsyncResult<AccessToken>> handler) {
     return introspectToken(token, "access_token", handler);
   }
@@ -184,6 +185,7 @@ public interface OAuth2Auth extends AuthProvider {
    * @return self
    */
   @Fluent
+  @Deprecated
   OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler);
 
   /**
@@ -203,6 +205,7 @@ public interface OAuth2Auth extends AuthProvider {
    *
    * @return the flow type.
    */
+  @Deprecated
   OAuth2FlowType getFlowType();
 
   /**
@@ -211,8 +214,10 @@ public interface OAuth2Auth extends AuthProvider {
    * When calling this method several times, the loaded JWKs are updated in the underlying JWT object.
    */
   @Fluent
+  @Deprecated
   OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler);
 
   @Fluent
+  @Deprecated
   OAuth2Auth rbacHandler(OAuth2RBAC rbac);
 }

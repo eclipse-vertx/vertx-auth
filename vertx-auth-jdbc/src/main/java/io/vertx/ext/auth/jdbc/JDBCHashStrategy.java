@@ -30,6 +30,7 @@ import io.vertx.ext.auth.jdbc.impl.SHA512Strategy;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
+@Deprecated
 public interface JDBCHashStrategy {
 
   /**
