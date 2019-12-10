@@ -126,7 +126,7 @@ public interface KeycloakHelper {
       throw new IllegalArgumentException("Parsing error");
     }
     try {
-      String decoded = new String(Base64.getDecoder().decode(parts[1]), "UTF-8");
+      String decoded = new String(Base64.getUrlDecoder().decode(parts[1]), "UTF-8");
       return new JsonObject(decoded); // get "payload" part
     } catch (Exception e) {
       e.printStackTrace();
