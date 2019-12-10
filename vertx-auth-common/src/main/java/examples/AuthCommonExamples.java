@@ -19,6 +19,7 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.*;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -92,5 +93,21 @@ public class AuthCommonExamples {
     PubSecKeyOptions options = new PubSecKeyOptions()
       .setAlgorithm("RS256")
       .setBuffer(vertx.fileSystem().readFileBlocking("/path/to/pem/file").toString());
+  }
+
+  public void example7(Vertx vertx, AuthenticationProvider ldapAuthProvider, AuthenticationProvider propertiesAuthProvider) {
+    // users will be checked on the 2 providers
+    // and on the first success the operation completes
+    ChainAuth.any()
+      .add(ldapAuthProvider)
+      .add(propertiesAuthProvider);
+  }
+
+  public void example8(Vertx vertx, AuthenticationProvider ldapAuthProvider, AuthenticationProvider propertiesAuthProvider) {
+    // users will be checked on the 2 providers
+    // and on all providers success the operation completes
+    ChainAuth.all()
+      .add(ldapAuthProvider)
+      .add(propertiesAuthProvider);
   }
 }

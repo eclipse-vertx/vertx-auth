@@ -221,3 +221,21 @@ After this using such file is as trivial as:
 ----
 
 PEM files are common and easy to use but are not password protected, so private keys can easily be sniffed.
+
+== Chaining authentication providers
+
+There are cases where it might be interesting to have support for chaining authentication providers, for example look up
+users on LDAP or properties files. This can be achieved with the {@link io.vertx.ext.auth.ChainAuth}.
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example7}
+----
+
+It is also possible to perform a *all* match, a user must be matched on LDAP and Properties for example:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example8}
+----
+
