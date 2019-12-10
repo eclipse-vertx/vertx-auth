@@ -18,9 +18,9 @@ public class ChainAuthTest {
   public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
-  public void emptyTest(TestContext should) {
+  public void emptyTestAny(TestContext should) {
     final Async test = should.async();
-    ChainAuth auth = ChainAuth.create();
+    ChainAuth auth = ChainAuth.any();
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
@@ -32,11 +32,25 @@ public class ChainAuthTest {
   }
 
   @Test
-  public void singleTest(TestContext should) {
+  public void emptyTestAll(TestContext should) {
     final Async test = should.async();
-    ChainAuth auth = ChainAuth.create();
+    ChainAuth auth = ChainAuth.all();
 
-    auth.append((authInfo, res) -> {
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        should.fail();
+      } else {
+        test.complete();
+      }
+    });
+  }
+
+  @Test
+  public void singleTestAny(TestContext should) {
+    final Async test = should.async();
+    ChainAuth auth = ChainAuth.any();
+
+    auth.add((authInfo, res) -> {
       // always OK
       res.handle(Future.succeededFuture(createUser(new JsonObject())));
     });
@@ -51,16 +65,35 @@ public class ChainAuthTest {
   }
 
   @Test
-  public void multipleTest(TestContext should) {
+  public void singleTestAll(TestContext should) {
     final Async test = should.async();
-    ChainAuth auth = ChainAuth.create();
+    ChainAuth auth = ChainAuth.all();
 
-    auth.append((authInfo, res) -> {
+    auth.add((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject())));
+    });
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        test.complete();
+      } else {
+        should.fail();
+      }
+    });
+  }
+
+  @Test
+  public void multipleTestAny(TestContext should) {
+    final Async test = should.async();
+    ChainAuth auth = ChainAuth.any();
+
+    auth.add((authInfo, res) -> {
       // always Fail
       res.handle(Future.failedFuture("some error/bad auth"));
     });
 
-    auth.append((authInfo, res) -> {
+    auth.add((authInfo, res) -> {
       // always OK
       res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
@@ -76,25 +109,75 @@ public class ChainAuthTest {
   }
 
   @Test
-  public void stopOnMatchTest(TestContext should) {
+  public void multipleTestAll(TestContext should) {
     final Async test = should.async();
-    ChainAuth auth = ChainAuth.create();
+    ChainAuth auth = ChainAuth.all();
 
-    auth.append((authInfo, res) -> {
+    auth.add((authInfo, res) -> {
       // always Fail
       res.handle(Future.failedFuture("some error/bad auth"));
     });
 
-    auth.append((authInfo, res) -> {
+    auth.add((authInfo, res) -> {
       // always OK
       res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
 
-    auth.append((authInfo, res) -> should.fail("should not be called"));
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        should.assertEquals(2, res.result().principal().getInteger("provider"));
+        should.fail();
+      } else {
+        test.complete();
+      }
+    });
+  }
+
+  @Test
+  public void stopOnMatchTest(TestContext should) {
+    final Async test = should.async();
+    ChainAuth auth = ChainAuth.any();
+
+    auth.add((authInfo, res) -> {
+      // always Fail
+      res.handle(Future.failedFuture("some error/bad auth"));
+    });
+
+    auth.add((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+    });
+
+    auth.add((authInfo, res) -> should.fail("should not be called"));
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
         should.assertEquals(2, res.result().principal().getInteger("provider"));
+        test.complete();
+      } else {
+        should.fail();
+      }
+    });
+  }
+
+  @Test
+  public void matchAllTest(TestContext should) {
+    final Async test = should.async();
+    ChainAuth auth = ChainAuth.all();
+
+    auth.add((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 1))));
+    });
+
+    auth.add((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+    });
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
         test.complete();
       } else {
         should.fail();
