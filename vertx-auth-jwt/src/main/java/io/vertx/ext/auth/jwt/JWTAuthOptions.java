@@ -78,10 +78,12 @@ public class JWTAuthOptions {
   }
 
 
+  @Deprecated
   public String getPermissionsClaimKey() {
     return permissionsClaimKey;
   }
 
+  @Deprecated
   public JWTAuthOptions setPermissionsClaimKey(String permissionsClaimKey) {
     this.permissionsClaimKey = permissionsClaimKey;
     return this;

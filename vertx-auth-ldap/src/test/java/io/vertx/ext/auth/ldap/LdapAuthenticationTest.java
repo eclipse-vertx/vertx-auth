@@ -15,8 +15,8 @@ package io.vertx.ext.auth.ldap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.ldap.LdapAuthentication;
 import io.vertx.test.core.VertxTestBase;
 
@@ -35,11 +35,11 @@ import java.util.function.Consumer;
 @CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", address = "localhost") })
 @ApplyLdifFiles({ "ldap.ldif" })
 public class LdapAuthenticationTest extends VertxTestBase {
-  
+
   @ClassRule
   public static CreateLdapServerRule serverRule = new CreateLdapServerRule();
-  private AuthProvider authProvider;
-  
+  private AuthenticationProvider authProvider;
+
   @Test
   public void testSimpleAuthenticate() throws Exception {
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
@@ -129,7 +129,7 @@ public class LdapAuthenticationTest extends VertxTestBase {
     super.setUp();
     LdapAuthenticationOptions ldapOptions = new LdapAuthenticationOptions().setUrl("ldap://localhost:" + serverRule.getLdapServer().getPort())
         .setAuthenticationQuery("uid={0},ou=Users,dc=myorg,dc=com");
-    
+
     authProvider = LdapAuthentication.create(vertx, ldapOptions);
   }
 /*

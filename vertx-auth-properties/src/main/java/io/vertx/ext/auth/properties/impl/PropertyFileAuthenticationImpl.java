@@ -12,32 +12,26 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties.impl;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.properties.PropertyFileAuthentication;
+import io.vertx.ext.auth.properties.PropertyFileAuthorization;
+
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication, AuthorizationProvider {
+public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication, PropertyFileAuthorization {
   private final static Logger logger = Logger.getLogger(PropertyFileAuthentication.class.getName());
 
   private static class User {
@@ -152,11 +146,11 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     if (users == null) {
       readFile(readFileResponse -> {
         User result = users.get(username);
-        handler.handle(result!=null ? Future.succeededFuture(result) : Future.failedFuture("unknown user"));
+        handler.handle(result != null ? Future.succeededFuture(result) : Future.failedFuture("unknown user"));
       });
     } else {
       User result = users.get(username);
-      handler.handle(result!=null ? Future.succeededFuture(result) : Future.failedFuture("unknown user"));
+      handler.handle(result != null ? Future.succeededFuture(result) : Future.failedFuture("unknown user"));
     }
   }
 
@@ -168,22 +162,11 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
       if (userResult.succeeded()) {
         User propertyUser = userResult.result();
         if (Objects.equals(propertyUser.password, password)) {
-          io.vertx.ext.auth.User result = new UserImpl(new JsonObject().put("username", propertyUser.name));
-          getAuthorizations(result, authorizationsResult -> {
-            if (authorizationsResult.failed()) {
-              resultHandler.handle(Future.failedFuture("invalid username/password"));
-            }
-            else {
-              result.authorizations().add(getId(), authorizationsResult.result());
-              resultHandler.handle(Future.succeededFuture(result));
-            }
-          });
-        }
-        else {
+          resultHandler.handle(Future.succeededFuture(io.vertx.ext.auth.User.create(new JsonObject().put("username", propertyUser.name))));
+        } else {
           resultHandler.handle(Future.failedFuture("invalid username/password"));
         }
-      }
-      else {
+      } else {
         resultHandler.handle(Future.failedFuture("invalid username/password"));
       }
     });
@@ -196,20 +179,20 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Void>> resultHandler) {
     String username = user.principal().getString("username");
     getUser(username, userResult -> {
       if (userResult.succeeded()) {
         Set<Authorization> result = new HashSet<>();
-        for (Role role: userResult.result().roles.values()) {
+        for (Role role : userResult.result().roles.values()) {
           result.add(RoleBasedAuthorization.create(role.name));
-          for (String permission: role.permissions) {
+          for (String permission : role.permissions) {
             result.add(WildcardPermissionBasedAuthorization.create(permission));
           }
         }
-        resultHandler.handle(Future.succeededFuture(result));
-      }
-      else {
+        user.authorizations().add(getId(), result);
+        resultHandler.handle(Future.succeededFuture());
+      } else {
         resultHandler.handle(Future.failedFuture("invalid username"));
       }
     });

@@ -86,7 +86,7 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> resultHandler) {
     client.getConnection(connectionResponse -> {
       if (connectionResponse.succeeded()) {
         String username = user.principal().getString(usernameKey);
@@ -99,7 +99,8 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
               getPermissions(connection, params, permissionResponse -> {
                 if (permissionResponse.succeeded()) {
                   authorizations.addAll(permissionResponse.result());
-                  resultHandler.handle(Future.succeededFuture(authorizations));
+                  user.authorizations().add(getId(), authorizations);
+                  resultHandler.handle(Future.succeededFuture());
                 } else {
                   resultHandler.handle(Future.failedFuture(permissionResponse.cause()));
                 }

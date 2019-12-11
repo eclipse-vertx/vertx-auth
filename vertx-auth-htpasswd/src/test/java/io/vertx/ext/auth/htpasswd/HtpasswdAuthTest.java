@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -96,10 +97,8 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
     authProviderUsersAreAuthorizedForNothing.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorized("something", onSuccess(res -> {
-        assertFalse(res);
-        testComplete();
-      }));
+      assertFalse(PermissionBasedAuthorization.create("something").match(user));
+      testComplete();
     }));
     await();
   }

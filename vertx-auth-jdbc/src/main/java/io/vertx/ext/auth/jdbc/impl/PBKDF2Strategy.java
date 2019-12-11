@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+@Deprecated
 public class PBKDF2Strategy extends AbstractHashingStrategy implements JDBCHashStrategy {
 
   private static final int DEFAULT_ITERATIONS = 10000;

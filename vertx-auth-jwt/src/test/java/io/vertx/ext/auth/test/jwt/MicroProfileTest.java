@@ -44,7 +44,7 @@ public class MicroProfileTest {
     MicroProfileAuthorization.create().getAuthorizations(user, call -> {
       should.assertTrue(call.succeeded());
       for (String role : roles) {
-        should.assertTrue(call.result().contains(RoleBasedAuthorization.create(role)));
+        should.assertTrue(RoleBasedAuthorization.create(role).match(user));
       }
       test.complete();
     });
@@ -67,7 +67,6 @@ public class MicroProfileTest {
 
     MicroProfileAuthorization.create().getAuthorizations(user, call -> {
       should.assertTrue(call.succeeded());
-      should.assertTrue(call.result().isEmpty());
       test.complete();
     });
   }
@@ -91,8 +90,8 @@ public class MicroProfileTest {
 
     MicroProfileAuthorization.create().getAuthorizations(user, call -> {
       should.assertTrue(call.succeeded());
-      should.assertFalse(call.result().isEmpty());
-      should.assertFalse(call.result().contains(RoleBasedAuthorization.create("unknown")));
+      should.assertFalse(user.authorizations().getProviderIds().isEmpty());
+      should.assertFalse(RoleBasedAuthorization.create("unknown").match(user));
       test.complete();
     });
   }

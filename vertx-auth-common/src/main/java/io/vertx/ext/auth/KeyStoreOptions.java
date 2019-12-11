@@ -18,6 +18,10 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Options describing how an JWT KeyStore should behave.
  *
@@ -27,11 +31,12 @@ import io.vertx.core.json.JsonObject;
 public class KeyStoreOptions {
 
   // Defaults
-  private static final String TYPE = "jceks";
+  private static final String TYPE = KeyStore.getDefaultType();
 
   private String type;
   private String path;
   private String password;
+  private Map<String, String> passwordProtection;
 
   /**
    * Default constructor
@@ -49,6 +54,7 @@ public class KeyStoreOptions {
     type = other.getType();
     path = other.getPath();
     password = other.getPassword();
+    passwordProtection = other.getPasswordProtection();
   }
 
   private void init() {
@@ -89,6 +95,24 @@ public class KeyStoreOptions {
 
   public KeyStoreOptions setPassword(String password) {
     this.password = password;
+    return this;
+  }
+
+  public Map<String, String> getPasswordProtection() {
+    return passwordProtection;
+  }
+
+  public KeyStoreOptions setPasswordProtection(Map<String, String> passwordProtection) {
+    this.passwordProtection = passwordProtection;
+    return this;
+  }
+
+  public KeyStoreOptions putPasswordProtection(String alias, String password) {
+    if (passwordProtection == null) {
+      passwordProtection = new HashMap<>();
+    }
+
+    this.passwordProtection.put(alias, password);
     return this;
   }
 }

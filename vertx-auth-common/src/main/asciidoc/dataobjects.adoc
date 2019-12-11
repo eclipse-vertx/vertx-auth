@@ -27,6 +27,7 @@
 |===
 ^|Name | Type ^| Description
 |[[password]]`@password`|`String`|-
+|[[passwordProtection]]`@passwordProtection`|`String`|-
 |[[path]]`@path`|`String`|-
 |[[type]]`@type`|`String`|-
 |===
@@ -35,7 +36,7 @@
 == PubSecKeyOptions
 
 ++++
- Options describing how a Cryptographic Key.
+ Options describing Key stored in PEM format.
 ++++
 '''
 
@@ -44,7 +45,11 @@
 |===
 ^|Name | Type ^| Description
 |[[algorithm]]`@algorithm`|`String`|-
+|[[buffer]]`@buffer`|`String`|+++
+The PEM or Secret key buffer
++++
 |[[certificate]]`@certificate`|`Boolean`|-
+|[[id]]`@id`|`String`|-
 |[[publicKey]]`@publicKey`|`String`|-
 |[[secretKey]]`@secretKey`|`String`|-
 |[[symmetric]]`@symmetric`|`Boolean`|-

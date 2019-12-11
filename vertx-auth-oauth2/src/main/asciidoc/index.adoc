@@ -67,6 +67,10 @@ The client credentials grant type MUST only be used by confidential clients.
 
 For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4[Oauth2 specification, section 4.4].
 
+=== JWT (on behalf of) Flow
+
+The client can request an access token using JWTs also known as "on-behalf-of".
+
 === Extensions
 
 The provider supports RFC7523 an extension to allow server to server authorization based on JWT.
@@ -138,7 +142,7 @@ A couple of well known OpenID Connect Discovery providers are:
 
 This and the given `client id` is enough to configure your auth provider object.
 
-=== AccessToken object
+=== User object
 
 When a token expires we need to refresh it. OAuth2 offers the AccessToken class that add a couple of useful methods
 to refresh the access token when it is expired.
@@ -251,11 +255,11 @@ OAuth2 is an AuthN protocol, however OpenId Connect adds JWTs to the token forma
 at the token level. Currently there are 2 known JWT AuthZ known formats:
 
 * Keycloak
-* MicroProfile JWT 1.1 spec
+* MicroProfile JWT 1.1 spec (from the auth-jwt module)
 
 === Keycloak JWT
 
-Given that Keycloak does provide `JWT` `access_token`s one can authorize at two distinct levels:
+Given that Keycloak does provide `JWT` access_tokens one can authorize at two distinct levels:
 
 * role
 * authority
@@ -299,12 +303,8 @@ Or if the user can access the `year-report` in the `finance` department:
 Another format in the form of a spec is the MP-JWT 1.1. This spec defines a JSON array of strings under the property
 name `groups` that define the "groups" the token has an authority over.
 
-In order to use this spec to assert AuthZ the right handler must be set:
-
-[source,$lang]
-----
-{@link examples.AuthOAuth2Examples#example27}
-----
+In order to use this spec to assert AuthZ use the {@link io.vertx.ext.auth.authorization.AuthorizationProvider} factory
+provided on the `auth-jwt` module.
 
 
 == Token Management

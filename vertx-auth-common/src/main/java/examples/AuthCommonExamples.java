@@ -18,9 +18,11 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.*;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -44,40 +46,30 @@ public class AuthCommonExamples {
     });
   }
 
-  public void example2(User user) {
-
-    user.isAuthorized("printers:printer1234", res -> {
+  public void example2(User user, AuthorizationProvider authorizationProvider) {
+    // load the authorization for the given user:
+    authorizationProvider.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-
-        boolean hasAuthority = res.result();
-
-        if (hasAuthority) {
+        // cache is populated, perform query
+        if (PermissionBasedAuthorization.create("printer1234").match(user)) {
           System.out.println("User has the authority");
         } else {
           System.out.println("User does not have the authority");
         }
-
-      } else {
-        res.cause().printStackTrace();
       }
     });
   }
 
-  public void example3(User user) {
-
-    user.isAuthorized("role:admin", res -> {
+  public void example3(User user, AuthorizationProvider authorizationProvider) {
+    // load the authorization for the given user:
+    authorizationProvider.getAuthorizations(user, res -> {
       if (res.succeeded()) {
-
-        boolean hasAuthority = res.result();
-
-        if (hasAuthority) {
-          System.out.println("User has the authority to the role of admin");
+        // cache is populated, perform query
+        if (RoleBasedAuthorization.create("admin").match(user)) {
+          System.out.println("User has the authority");
         } else {
           System.out.println("User does not have the authority");
         }
-
-      } else {
-        res.cause().printStackTrace();
       }
     });
   }
@@ -87,5 +79,35 @@ public class AuthCommonExamples {
     String token = VertxContextPRNG.current(vertx).nextString(32);
     // Generate a secure random integer
     int randomInt = VertxContextPRNG.current(vertx).nextInt();
+  }
+
+  public void example5() {
+    KeyStoreOptions options = new KeyStoreOptions()
+      .setPath("/path/to/keystore/file")
+      .setType("pkcs8")
+      .setPassword("keystore-password")
+      .putPasswordProtection("key-alias", "alias-password");
+  }
+
+  public void example6(Vertx vertx) {
+    PubSecKeyOptions options = new PubSecKeyOptions()
+      .setAlgorithm("RS256")
+      .setBuffer(vertx.fileSystem().readFileBlocking("/path/to/pem/file").toString());
+  }
+
+  public void example7(Vertx vertx, AuthenticationProvider ldapAuthProvider, AuthenticationProvider propertiesAuthProvider) {
+    // users will be checked on the 2 providers
+    // and on the first success the operation completes
+    ChainAuth.any()
+      .add(ldapAuthProvider)
+      .add(propertiesAuthProvider);
+  }
+
+  public void example8(Vertx vertx, AuthenticationProvider ldapAuthProvider, AuthenticationProvider propertiesAuthProvider) {
+    // users will be checked on the 2 providers
+    // and on all providers success the operation completes
+    ChainAuth.all()
+      .add(ldapAuthProvider)
+      .add(propertiesAuthProvider);
   }
 }

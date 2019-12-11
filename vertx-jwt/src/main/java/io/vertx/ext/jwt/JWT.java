@@ -15,12 +15,6 @@
  */
 package io.vertx.ext.jwt;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -42,7 +36,6 @@ public final class JWT {
 
   // simple random as its value is just to create entropy
   private static final Random RND = new Random();
-  private static final Logger LOG = LoggerFactory.getLogger(JWT.class);
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
 
@@ -59,7 +52,7 @@ public final class JWT {
 
   /**
    * Loads all keys from a keystore.
-   * @deprecated Use {@link JWK#from(KeyStore, char[])} instead.
+   * @deprecated Use {@link JWK#load(KeyStore, String, Map)} instead.
    * @param keyStore the keystore to load
    * @param keyStorePassword the keystore password
    */
@@ -67,7 +60,7 @@ public final class JWT {
   public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
     this();
     // delegate to the JWK loader
-    for (JWK key : JWK.from(keyStore, keyStorePassword)) {
+    for (JWK key : JWK.load(keyStore, new String(keyStorePassword), null)) {
       addJWK(key);
     }
   }
@@ -97,46 +90,6 @@ public final class JWT {
       current.add(jwk);
     }
 
-    return this;
-  }
-
-  public JWT loadJWK(Vertx vertx, final KeyStore keyStore, final char[] keyStorePassword, Handler<AsyncResult<Void>> handler) {
-    vertx.<List<JWK>>executeBlocking(promise -> {
-      try {
-        promise.complete(JWK.from(keyStore, keyStorePassword));
-      } catch (RuntimeException e) {
-        promise.fail(e);
-      }
-    }, true, load -> {
-      if (load.failed()) {
-        handler.handle(Future.failedFuture(load.cause()));
-      } else {
-        final Map<String, List<Crypto>> cryptoMap = new ConcurrentHashMap<>();
-        // populate the map
-        load: for (JWK jwk : load.result()) {
-          List<Crypto> current = cryptoMap.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
-          for (int i = 0; i < current.size(); i++) {
-            if (current.get(i).getId().equals(jwk.getId())) {
-              LOG.warn("Replaced key with id: " + jwk.getId());
-              // replace existing key
-              current.set(i, jwk);
-              break load;
-            }
-          }
-          // non existent, add it!
-          current.add(jwk);
-        }
-        // swap
-        this.cryptoMap = cryptoMap;
-        // succeed
-        handler.handle(Future.succeededFuture());
-      }
-    });
-
-    return this;
-  }
-
-  public JWT loadJWK(Vertx vertx, String keyUrl, Handler<AsyncResult<Void>> handler) {
     return this;
   }
 

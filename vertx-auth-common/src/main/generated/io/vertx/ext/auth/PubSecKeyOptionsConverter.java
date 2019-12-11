@@ -20,9 +20,19 @@ public class PubSecKeyOptionsConverter {
             obj.setAlgorithm((String)member.getValue());
           }
           break;
+        case "buffer":
+          if (member.getValue() instanceof String) {
+            obj.setBuffer((String)member.getValue());
+          }
+          break;
         case "certificate":
           if (member.getValue() instanceof Boolean) {
             obj.setCertificate((Boolean)member.getValue());
+          }
+          break;
+        case "id":
+          if (member.getValue() instanceof String) {
+            obj.setId((String)member.getValue());
           }
           break;
         case "publicKey":
@@ -52,7 +62,13 @@ public class PubSecKeyOptionsConverter {
     if (obj.getAlgorithm() != null) {
       json.put("algorithm", obj.getAlgorithm());
     }
+    if (obj.getBuffer() != null) {
+      json.put("buffer", obj.getBuffer());
+    }
     json.put("certificate", obj.isCertificate());
+    if (obj.getId() != null) {
+      json.put("id", obj.getId());
+    }
     if (obj.getPublicKey() != null) {
       json.put("publicKey", obj.getPublicKey());
     }

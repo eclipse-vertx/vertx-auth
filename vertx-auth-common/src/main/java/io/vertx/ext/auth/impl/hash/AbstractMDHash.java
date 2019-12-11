@@ -31,7 +31,7 @@ import java.util.Base64;
  */
 public abstract class AbstractMDHash implements HashingAlgorithm {
 
-  private static final Base64.Encoder B64ENC = Base64.getEncoder();
+  private static final Base64.Encoder B64ENC = Base64.getEncoder().withoutPadding();
 
   private final MessageDigest md;
 

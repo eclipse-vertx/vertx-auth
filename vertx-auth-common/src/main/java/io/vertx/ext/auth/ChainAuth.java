@@ -17,24 +17,43 @@ package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.impl.ChainAuthImpl;
 
 /**
- * Chain several auth providers as if they were one. This is useful for cases where one want to authenticate across
+ * Chain several authentication providers as if they were one. This is useful for cases where one want to authenticate across
  * several providers, for example, database and fallback to passwd file.
  */
 @VertxGen
-public interface ChainAuth extends AuthProvider {
+public interface ChainAuth extends AuthenticationProvider {
 
   /**
    * Create a Chainable Auth Provider auth provider
    *
    * @return the auth provider
    */
+  @Deprecated
   static ChainAuth create() {
-    return new ChainAuthImpl();
+    return any();
   }
 
+  /**
+   * Create a Chainable Auth Provider auth provider that will resolve if all auth providers are successful.
+   *
+   * @return the auth provider
+   */
+  static ChainAuth all() {
+    return new ChainAuthImpl(true);
+  }
+
+  /**
+   * Create a Chainable Auth Provider auth provider that will resolve on the first success.
+   *
+   * @return the auth provider
+   */
+  static ChainAuth any() {
+    return new ChainAuthImpl(false);
+  }
 
   /**
    * Appends a auth provider to the chain.
@@ -43,17 +62,5 @@ public interface ChainAuth extends AuthProvider {
    * @return self
    */
   @Fluent
-  ChainAuth append(AuthProvider other);
-
-  /**
-   * Removes a provider from the chain.
-   * @param other provider to remove
-   * @return true if provider was removed, false if non existent in the chain.
-   */
-  boolean remove(AuthProvider other);
-
-  /**
-   * Clears the chain.
-   */
-  void clear();
+  ChainAuth add(AuthenticationProvider other);
 }

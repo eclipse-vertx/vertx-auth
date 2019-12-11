@@ -26,7 +26,6 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthStore;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;

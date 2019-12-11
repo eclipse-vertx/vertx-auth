@@ -18,7 +18,6 @@ package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.htdigest.impl.HtdigestAuthImpl;
 

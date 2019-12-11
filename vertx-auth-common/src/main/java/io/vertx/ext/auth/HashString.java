@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class to encode/decore hashed strings to be stored on a persistent storage.
+ * Utility class to encode/decode hashed strings to be stored on a persistent storage.
  *
  * This follows as close as possible the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a>.
  *

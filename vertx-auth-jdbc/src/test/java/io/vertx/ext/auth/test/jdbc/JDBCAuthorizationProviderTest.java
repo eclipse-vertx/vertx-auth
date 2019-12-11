@@ -19,11 +19,12 @@ package io.vertx.ext.auth.test.jdbc;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -97,12 +98,7 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   }
 
   private void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizationProvider().getAuthorizations(user, authorizationResponse -> {
-      if (authorizationResponse.succeeded()) {
-        user.authorizations().add(getAuthorizationProvider().getId(), authorizationResponse.result());
-      }
-      handler.handle(Future.succeededFuture());
-    });
+    getAuthorizationProvider().getAuthorizations(user, handler);
   }
 
   @Test
@@ -111,10 +107,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> user.isAuthorized("role:dev", onSuccess(has -> {
-        assertTrue(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertTrue(RoleBasedAuthorization.create("dev").match(user));
         testComplete();
-      })));
+      }));
     }));
     await();
   }
@@ -125,10 +121,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> user.isAuthorized("role:manager", onSuccess(has -> {
-        assertFalse(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertFalse(RoleBasedAuthorization.create("manager").match(user));
         testComplete();
-      })));
+      }));
     }));
     await();
   }
@@ -139,10 +135,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> user.isAuthorized("commit_code", onSuccess(has -> {
-        assertTrue(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
         testComplete();
-      })));
+      }));
     }));
     await();
   }
@@ -153,10 +149,10 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     authInfo.put("username", "tim").put("password", "sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      fillUserAuthorizations(user, done -> user.isAuthorized("eat_sandwich", onSuccess(has -> {
-        assertFalse(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));
         testComplete();
-      })));
+      }));
     }));
     await();
   }

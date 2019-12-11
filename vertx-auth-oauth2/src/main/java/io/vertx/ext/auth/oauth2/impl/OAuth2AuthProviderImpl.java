@@ -49,7 +49,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-        jwt.addJWK(JWK.from(pubSecKey));
+        jwt.addJWK(new JWK(pubSecKey));
       }
     }
   }

@@ -32,18 +32,37 @@ _Authentication_ means verifying the identity of a user.
 _Authorisation_ means verifying a user has an authority.
 
 What the authority means is determined by the particular implementation and we don't mandate any particular model,
-e.g. a permissions/roles model, to keep things very flexible.
+e.g. a permissions/roles model, to keep things very flexible all authorization operations are performed on the type
+{@link io.vertx.ext.auth.authorization.Authorization}.
 
 For some implementations an authority might represent a permission, for example the authority to access all printers,
 or a specific printer. Other implementations must support roles too, and will often represent this by prefixing
 the authority with something like `role:`, e.g. `role:admin`. Another implementation might have a completely
-different model of representing authorities.
+different model of representing authorities. In order to provide a small set of implementation the following factories
+are available:
 
-To find out what a particular auth provider expects, consult the documentation for that auth provider..
+* {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization} Role based authorization.
+* {@link io.vertx.ext.auth.authorization.PermissionBasedAuthorization} Permission based authorization.
+* {@link io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization} Role based authorization matched as a wildcard.
+* {@link io.vertx.ext.auth.authorization.AndAuthorization} Logical authorization.
+* {@link io.vertx.ext.auth.authorization.OrAuthorization} Logical authorization.
+* {@link io.vertx.ext.auth.authorization.NotAuthorization} Logical authorization.
+
+This set of authorizations represent any kind of authorization such as:
+
+* Role based authorization
+* Permission based authorization
+* Logical authorization (AND, OR, NOT)
+* Time based authorization (ie: allow access the last 5 days of the month, from 8am till 10am, etc.)
+* Context based authorization (ie: allow access if the ip address is 'xxx.xxx.xxx.xxx')
+* Custom based authorization (ie: based on a script or hard-coded code specific to an application)
+* etc...
+
+To find out what a particular auth provider expects, consult the documentation for that auth provider.
 
 == Authentication
 
-To authenticate a user you use {@link io.vertx.ext.auth.AuthProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
+To authenticate a user you use {@link io.vertx.ext.auth.authentication.AuthenticationProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
 
 The first argument is a JSON object which contains authentication information. What this actually contains depends
 on the specific implementation; for a simple username/password based authentication it might contain something like:
@@ -59,7 +78,13 @@ For an implementation based on JWT token or OAuth bearer tokens it might contain
 
 Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
 the call. The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated
-user and contains operations which allow the user to be authorised.
+user.
+
+The authentication user object has no context or information on which authorizations the object is entitled. The reason
+why authorization and authentication are decoupled is because, authentication and authorization are two distinguished
+operations that are not required to be performed on the same provider. A simple example would be, a user authenticating
+with plain `OAuth2.0` can use a `JWT` authorization provider to match the token for a given authority, or any other
+scenario such as authenticating using `LDAP` and perform authorization using `MongoDB`.
 
 Here's an example of authenticating a user using a simple username/password implementation:
 
@@ -70,30 +95,33 @@ Here's an example of authenticating a user using a simple username/password impl
 
 == Authorisation
 
-Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it.
+Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it. A newly created
+object will contain no cached authorizations, which means that the object is not authorized for any action. Once a user
+is updated using an {@link io.vertx.ext.auth.authorization.AuthorizationProvider} then the cache can be used to verify
+a given authorization.
 
 to check if a user has a specific authority you use {@link io.vertx.ext.auth.User#isAuthorized}.
 
 The results of all the above are provided asynchronously in the handler.
 
-Here's an example of authorising a user:
+Here's an example loading the authorization cache an authorising a user:
 
 [source,$lang]
 ----
 {@link examples.AuthCommonExamples#example2}
 ----
 
-And another example of authorising in a roles based model which uses `role:` as a prefix.
+And another example of authorising in a roles based model which uses the the interface {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
 
 Please note, as discussed above how the authority string is interpreted is completely determined by the underlying
 implementation and Vert.x makes no assumptions here.
 
 === Caching authorities
 
-The user object will cache any authorities so subsequently calls to check if it has the same authorities will result
-in the underlying provider being called.
+The user object holds a cache with authorities so subsequently calls should check if it has the same authorities and it
+will result in avoiding one more IO operation to the underlying authorization provider to load the authorizations.
 
-In order to clear the internal cache you can use {@link io.vertx.ext.auth.User#clearCache()}.
+In order to clear the internal cache you can use {@link io.vertx.ext.auth.authorization.Authorizations#clear()}.
 
 === The User Principal
 
@@ -103,12 +131,22 @@ What this returns depends on the underlying implementation.
 
 == Creating your own auth implementation
 
-If you wish to create your own auth provider you should implement the {@link io.vertx.ext.auth.AuthProvider} interface.
+If you wish to create your own auth provider you should implement the one or both of the interfaces:
 
-We provide an abstract implementation of user called {@link io.vertx.ext.auth.AbstractUser} which you can subclass
-to make your user implementation. This contains the caching logic so you don't have to implement that yourself.
+* {@link io.vertx.ext.auth.authentication.AuthenticationProvider}
+* {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
 
-If you wish your user objects to be clusterable you should make sure they implement {@link io.vertx.core.shareddata.impl.ClusterSerializable}.
+The user factory can create a {@link io.vertx.ext.auth.User} object with the given `principal` JSON content. Optionally
+a second argument `attributes` can be provided to provide extra meta data for later usage. One example are the following
+attributes:
+
+* `exp` - Expires at in seconds.
+* `iat` - Issued at in seconds.
+* `nbf` - Not before in seconds.
+* `leeway` - clock drift leeway in seconds.
+
+While the first 3 control how the {@link io.vertx.ext.auth.User#expired()} method will compute the expiration of the
+user, the last can be used to allow clock drifting compensation while computing the expiration time.
 
 == Pseudo Random Number Generator
 
@@ -139,5 +177,65 @@ your application, for example:
 {@link examples.AuthCommonExamples#example4}
 ----
 
-@author <a href="mailto:julien@julienviet.com">Julien Viet</a>
-@author <a href="http://tfox.org">Tim Fox</a>
+== Working with Keys
+
+When working with security you will face the need to load security keys. There are many formats and standards for
+security keys which makes it quite a complex task. In order to simplify the work on the developer side, this module
+contains 2 abstractions:
+
+1. {@link io.vertx.ext.auth.KeyStoreOptions} that abstract the JVM keystore common format.
+2. {@link io.vertx.ext.auth.PubSecKeyOptions} that abstract the PEM common format.
+
+To load a local keystore modules shall ask for an options object like:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example5}
+----
+
+The type is quite important as it varies with the JVM version used. Before 9, the default is `jks` which is JVM specific
+after it `pkcs12` which is a common standard.
+
+Non JVM keystore keys can be imported to a `pkcs12` file, even without the need of the `keytool` command, for example
+this is how it can be done with `OpenSSL`:
+
+----
+openssl pkcs12 -export -in mykeycertificate.pem -out mykeystore.pkcs12 -name myAlias -noiter -nomaciter
+----
+
+The command above will convert an existing pem file to a pkcs12 keystore and put the given key under the name `myAlias`.
+The extra arguments `-noiter -nomaciter` are required in order to make the file compatible with the JVM loader.
+
+To load a `PEM` file you should be aware that there are a few limitations. The default JVM classes only support keys in
+`PKCS8` format, so if you have a different PEM file you need to convert it with `OpenSSL` like:
+
+----
+openssl pkcs8 -topk8 -inform PEM -in private.pem -out private_key.pem -nocrypt
+----
+
+After this using such file is as trivial as:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example6}
+----
+
+PEM files are common and easy to use but are not password protected, so private keys can easily be sniffed.
+
+== Chaining authentication providers
+
+There are cases where it might be interesting to have support for chaining authentication providers, for example look up
+users on LDAP or properties files. This can be achieved with the {@link io.vertx.ext.auth.ChainAuth}.
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example7}
+----
+
+It is also possible to perform a *all* match, a user must be matched on LDAP and Properties for example:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example8}
+----
+

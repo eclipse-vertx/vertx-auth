@@ -167,34 +167,17 @@ public class OAuth2KeycloakIT {
 
       ScopeAuthorization.create(" ").getAuthorizations(token, authz1 -> {
         should.assertTrue(authz1.succeeded());
-        should.assertTrue(
-          authz1.result()
-            .contains(PermissionBasedAuthorization.create("profile")));
-        should.assertTrue(
-          authz1.result()
-            .contains(PermissionBasedAuthorization.create("email")));
+        should.assertTrue(PermissionBasedAuthorization.create("profile").match(token));
+        should.assertTrue(PermissionBasedAuthorization.create("email").match(token));
 
         KeycloakAuthorization.create().getAuthorizations(token, authz2 -> {
           should.assertTrue(authz2.succeeded());
-          should.assertTrue(
-            authz2.result()
-              .contains(RoleBasedAuthorization.create("offline_access")));
-          should.assertTrue(
-            authz2.result()
-              .contains(RoleBasedAuthorization.create("user")));
-          should.assertTrue(
-            authz2.result()
-              .contains(RoleBasedAuthorization.create("test").setResource("confidential-client")));
-          should.assertTrue(
-            authz2.result()
-              .contains(RoleBasedAuthorization.create("manage-account").setResource("account")));
-          should.assertTrue(
-            authz2.result()
-              .contains(RoleBasedAuthorization.create("manage-account-links").setResource("account")));
-          should.assertTrue(
-            authz2.result()
-              .contains(RoleBasedAuthorization.create("view-profile").setResource("account")));
-
+          should.assertTrue(RoleBasedAuthorization.create("offline_access").match(token));
+          should.assertTrue(RoleBasedAuthorization.create("user").match(token));
+          should.assertTrue(RoleBasedAuthorization.create("test").setResource("confidential-client").match(token));
+          should.assertTrue(RoleBasedAuthorization.create("manage-account").setResource("account").match(token));
+          should.assertTrue(RoleBasedAuthorization.create("manage-account-links").setResource("account").match(token));
+          should.assertTrue(RoleBasedAuthorization.create("view-profile").setResource("account").match(token));
           test.complete();
         });
       });
@@ -212,9 +195,9 @@ public class OAuth2KeycloakIT {
       // generate a access token from the user
       User token = authn.result();
 
-      token.isAuthorized("sudo", authz -> {
+      KeycloakAuthorization.create().getAuthorizations(token, authz -> {
         should.assertTrue(authz.succeeded());
-        should.assertFalse(authz.result());
+        should.assertFalse(PermissionBasedAuthorization.create("sudo").match(token));
         test.complete();
       });
     });

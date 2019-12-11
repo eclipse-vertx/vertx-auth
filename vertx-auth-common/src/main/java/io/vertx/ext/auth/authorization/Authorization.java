@@ -12,7 +12,11 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.ext.auth.User;
+
+import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**
  * Interface representing any kind of authorization such as:
@@ -45,10 +49,23 @@ public interface Authorization {
    * this methods verifies whether or not the authorization match the specified
    * context.
    *
-   * @param context
-   * @return
+   * @param context the context.
+   * @return true if there's a match.
    */
   boolean match(AuthorizationContext context);
+
+  /**
+   * this methods verifies whether or not the authorization match the specified
+   * user. Internally a basic context is created with the user and the method
+   * delegates to {@link #match(AuthorizationContext)}
+   *
+   * @param user the user.
+   * @return true if there's a match
+   */
+  @GenIgnore(PERMITTED_TYPE)
+  default boolean match(User user) {
+    return match(AuthorizationContext.create(user));
+  }
 
   /**
    * this method verifies whether or not the authorization implies the specified
@@ -56,12 +73,11 @@ public interface Authorization {
    * </br>Note that it doesn't always mean an exact match. For instance,
    * in the case of a {@link WildcardPermissionBasedAuthorization}, this method
    * may return true even if the permissions are different
-   * </br>WildcardPermissionBasedAuthorization.create('*').implies(WildcardPermissionBasedAuthorization.create('anypermission'))
+   * </br>WildcardPermissionBasedAuthorization.create('*').verify(WildcardPermissionBasedAuthorization.create('anypermission'))
    * would return true
    *
-   * @param authorization
-   * @return
+   * @param authorization the authorization.
+   * @return true if implies the argument.
    */
   boolean verify(Authorization authorization);
-
 }

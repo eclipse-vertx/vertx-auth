@@ -20,10 +20,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth;
-import io.vertx.ext.auth.oauth2.rbac.MicroProfileRBAC;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -121,11 +124,9 @@ public class AuthOAuth2Examples {
         System.err.println("Access Token Error: " + res.cause().getMessage());
       } else {
         // Get the access token object (the authorization code is given from the previous step).
-        AccessToken token = (AccessToken) res.result();
-
-        token.fetch("/users", res2 -> {
-          // the user object should be returned here...
-        });
+        User user = res.result();
+        // you can now make requests using the `Authorization` header and the value:
+        String httpAuthorizationHeader = user.principal().getString("access_token");
       }
     });
   }
@@ -157,11 +158,11 @@ public class AuthOAuth2Examples {
     });
   }
 
-  public void example5(AccessToken token) {
+  public void example5(OAuth2Auth oauth2, User user) {
     // Check if the token is expired. If expired it is refreshed.
-    if (token.expired()) {
+    if (user.expired()) {
       // Callbacks
-      token.refresh(res -> {
+      oauth2.refresh(user, res -> {
         if (res.succeeded()) {
           // success
         } else {
@@ -171,13 +172,13 @@ public class AuthOAuth2Examples {
     }
   }
 
-  public void example6(AccessToken token) {
+  public void example6(OAuth2Auth oauth2, User user) {
     // Revoke only the access token
-    token.revoke("access_token", res -> {
+    oauth2.revoke(user, "access_token", res -> {
       // Session ended. But the refresh_token is still valid.
 
       // Revoke the refresh_token
-      token.revoke("refresh_token", res1 -> System.out.println("token revoked."));
+      oauth2.revoke(user, "refresh_token", res1 -> System.out.println("token revoked."));
     });
   }
 
@@ -200,39 +201,43 @@ public class AuthOAuth2Examples {
       if (res.failed()) {
         // error handling...
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User user = res.result();
 
         // now check for permissions
-        token.isAuthorized("account:manage-account", r -> {
-          if (r.result()) {
-            // this user is authorized to manage its account
+        AuthorizationProvider authz = KeycloakAuthorization.create();
+
+        authz.getAuthorizations(user, res1 -> {
+          if (res1.succeeded()) {
+            if (RoleBasedAuthorization.create("manage-account").setResource("account").match(user)) {
+              // this user is authorized to manage its account
+            }
           }
         });
       }
     });
   }
 
-  public void example14(JsonObject principal) {
+  public void example14(User user) {
     // you can get the decoded `id_token` from the Keycloak principal
-    JsonObject idToken = KeycloakHelper.idToken(principal);
+    JsonObject idToken = user.principal().getJsonObject("idToken");
 
     // you can also retrieve some properties directly from the Keycloak principal
     // e.g. `preferred_username`
-    String username = KeycloakHelper.preferredUsername(principal);
+    String username = user.principal().getString("preferred_username");
   }
 
 
-  public void example15(OAuth2Auth oauth2, AccessToken token) {
+  public void example15(OAuth2Auth oauth2, User user) {
     // OAuth2Auth level
-    oauth2.introspectToken("opaque string", res -> {
+    oauth2.authenticate(new JsonObject().put("access_token", "opaque string"), res -> {
       if (res.succeeded()) {
         // token is valid!
-        AccessToken accessToken = res.result();
+        User accessToken = res.result();
       }
     });
 
     // User level
-    token.introspect(res -> {
+    oauth2.authenticate(user.principal(), res -> {
       if (res.succeeded()) {
         // Token is valid!
       }
@@ -244,39 +249,33 @@ public class AuthOAuth2Examples {
     oauth2.decodeToken("jwt-token", res -> {
       if (res.succeeded()) {
         // token is valid!
-        AccessToken accessToken = res.result();
+        User accessToken = res.result();
       }
     });
   }
 
 
-  public void example17(AccessToken user) {
-    user.isAuthorized("print", res -> {
-      // in this case it is assumed that the role is the current application
-      if (res.succeeded() && res.result()) {
-        // Yes the user can print
-      }
-    });
+  public void example17(User user) {
+    // in this case it is assumed that the role is the current application
+    if (PermissionBasedAuthorization.create("print").match(user)) {
+      // Yes the user can print
+    }
   }
 
-  public void example18(AccessToken user) {
-    user.isAuthorized("realm:add-user", res -> {
-      // the role is "realm"
-      // the authority is "add-user"
-      if (res.succeeded() && res.result()) {
-        // Yes the user can add users to the application
-      }
-    });
+  public void example18(User user) {
+    // the resource is "realm"
+    // the authority is "add-user"
+    if (PermissionBasedAuthorization.create("add-user").setResource("realm").match(user)) {
+      // Yes the user can add users to the application
+    }
   }
 
-  public void example19(AccessToken user) {
-    user.isAuthorized("finance:year-report", res -> {
-      // the role is "finance"
-      // the authority is "year-report"
-      if (res.succeeded() && res.result()) {
-        // Yes the user can access the year report from the finance department
-      }
-    });
+  public void example19(User user) {
+    // the role is "finance"
+    // the authority is "year-report"
+    if (PermissionBasedAuthorization.create("year-report").setResource("finance").match(user)) {
+      // Yes the user can access the year report from the finance department
+    }
   }
 
   public void example20(AccessToken user) {
@@ -286,18 +285,18 @@ public class AuthOAuth2Examples {
       } else {
         // the user might not have been logged out
         // to know why:
-        System.out.println(res.cause());
+        System.err.println(res.cause());
       }
     });
   }
 
-  public void example21(AccessToken user) {
+  public void example21(User user) {
     // internal validation against, expiration date
     boolean isExpired = user.expired();
   }
 
-  public void example22(AccessToken user) {
-    user.refresh(res -> {
+  public void example22(OAuth2Auth oauth2, User user) {
+    oauth2.refresh(user, res -> {
       if (res.succeeded()) {
         // the refresh call succeeded
       } else {
@@ -309,8 +308,8 @@ public class AuthOAuth2Examples {
     });
   }
 
-  public void example23(AccessToken user) {
-    user.revoke("access_token", res -> {
+  public void example23(OAuth2Auth oauth2, User user) {
+    oauth2.revoke(user, "access_token", res -> {
       if (res.succeeded()) {
         // the refresh call succeeded
       } else {
@@ -322,8 +321,8 @@ public class AuthOAuth2Examples {
     });
   }
 
-  public void example24(AccessToken user) {
-    user.introspect(res -> {
+  public void example24(OAuth2Auth oauth2, User user) {
+    oauth2.authenticate(user.principal(), res -> {
       if (res.succeeded()) {
         // the introspection call succeeded
       } else {
@@ -369,11 +368,5 @@ public class AuthOAuth2Examples {
           // the setup failed.
         }
       });
-  }
-
-  public void example27(OAuth2Auth oauth2Auth) {
-    // use the MP-JWT 1.1 spec handler to
-    // handle Role-Based Access Control (AuthZ)
-    oauth2Auth.rbacHandler(MicroProfileRBAC.create());
   }
 }

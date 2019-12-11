@@ -19,12 +19,15 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 import io.vertx.ext.jwt.JWTOptions;
 
 /**
@@ -39,7 +42,7 @@ public class AuthJWTExamples {
         .setPath("keystore.jceks")
         .setPassword("secret"));
 
-    AuthProvider provider = JWTAuth.create(vertx, config);
+    AuthenticationProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example7(Vertx vertx, String username, String password) {
@@ -64,9 +67,9 @@ public class AuthJWTExamples {
     JWTAuthOptions config = new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("RS256")
-        .setPublicKey("BASE64-ENCODED-PUBLIC_KEY"));
+        .setBuffer("BASE64-ENCODED-PUBLIC_KEY"));
 
-    AuthProvider provider = JWTAuth.create(vertx, config);
+    AuthenticationProvider provider = JWTAuth.create(vertx, config);
   }
 
   public void example9(JWTAuth jwtAuth) {
@@ -136,13 +139,17 @@ public class AuthJWTExamples {
   }
 
   public void example13(User user) {
-    user.isAuthorized("create-report", res -> {
-      if (res.succeeded() && res.result()) {
-        // Yes the user can create reports
+    AuthorizationProvider authz = MicroProfileAuthorization.create();
+
+    authz.getAuthorizations(user, res -> {
+      if (res.succeeded()) {
+        // and now we can perform checks as needed
+        if (PermissionBasedAuthorization.create("create-report").match(user)) {
+          // Yes the user can create reports
+        }
       }
     });
   }
-
 
   public void example14(Vertx vertx) {
 
@@ -151,23 +158,28 @@ public class AuthJWTExamples {
       // since we're consuming keycloak JWTs we need to locate the permission claims in the token
       .put("permissionsClaimKey", "realm_access/roles");
 
-    AuthProvider provider = JWTAuth.create(vertx, new JWTAuthOptions(config));
+    AuthenticationProvider provider = JWTAuth.create(vertx, new JWTAuthOptions(config));
   }
 
   public void example15(Vertx vertx) {
     JWTAuth provider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("RS256")
-        .setPublicKey(
-          "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPSbCQY5mBKFDIn1kggv\n" +
+        .setBuffer(
+            "-----BEGIN PUBLIC KEY-----\n" +
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPSbCQY5mBKFDIn1kggv\n" +
             "Wb4ChjrctqD4nFnJOJk4mpuZ/u3h2ZgeKJJkJv8+5oFO6vsEwF7/TqKXp0XDp6IH\n" +
             "byaOSWdkl535rCYR5AxDSjwnuSXsSp54pvB+fEEFDPFF81GHixepIbqXCB+BnCTg\n" +
             "N65BqwNn/1Vgqv6+H3nweNlbTv8e/scEgbg6ZYcsnBBB9kYLp69FSwNWpvPmd60e\n" +
             "3DWyIo3WCUmKlQgjHL4PHLKYwwKgOHG/aNl4hN4/wqTixCAHe6KdLnehLn71x+Z0\n" +
             "SyXbWooftefpJP1wMbwlCpH3ikBzVIfHKLWT9QIOVoRgchPU3WAsZv/ePgl5i8Co\n" +
-            "qwIDAQAB")
-        .setSecretKey(
-          "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDE9JsJBjmYEoUM\n" +
+            "qwIDAQAB\n" +
+            "-----END PUBLIC KEY-----"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("RS256")
+        .setBuffer(
+            "-----BEGIN PRIVATE KEY-----\n" +
+            "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDE9JsJBjmYEoUM\n" +
             "ifWSCC9ZvgKGOty2oPicWck4mTiam5n+7eHZmB4okmQm/z7mgU7q+wTAXv9Oopen\n" +
             "RcOnogdvJo5JZ2SXnfmsJhHkDENKPCe5JexKnnim8H58QQUM8UXzUYeLF6khupcI\n" +
             "H4GcJOA3rkGrA2f/VWCq/r4fefB42VtO/x7+xwSBuDplhyycEEH2Rgunr0VLA1am\n" +
@@ -192,7 +204,8 @@ public class AuthJWTExamples {
             "/7igiQYux486PNBLv4QByK0gV0SPejDzeqzIyB+xAoGAe5if7DAAKhH0r2M8vTkm\n" +
             "JvbCFjwuvhjuI+A8AuS8zw634BHne2a1Fkvc8c3d9VDbqsHCtv2tVkxkKXPjVvtB\n" +
             "DtzuwUbp6ebF+jOfPK0LDuJoTdTdiNjIcXJ7iTTI3cXUnUNWWphYnFogzPFq9CyL\n" +
-            "0fPinYmDJpkwMYHqQaLGQyg=")
+            "0fPinYmDJpkwMYHqQaLGQyg=\n" +
+            "-----END PRIVATE KEY-----")
       ));
 
     String token = provider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("RS256"));
@@ -202,8 +215,7 @@ public class AuthJWTExamples {
     JWTAuth provider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("HS256")
-        .setPublicKey("keyboard cat")
-        .setSymmetric(true)));
+        .setBuffer("keyboard cat")));
 
     String token = provider.generateToken(new JsonObject());
   }
@@ -212,10 +224,12 @@ public class AuthJWTExamples {
     JWTAuth provider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("ES256")
-        .setSecretKey(
-          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgeRyEfU1NSHPTCuC9\n" +
+        .setBuffer(
+            "-----BEGIN PRIVATE KEY-----\n" +
+            "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgeRyEfU1NSHPTCuC9\n" +
             "rwLZMukaWCH2Fk6q5w+XBYrKtLihRANCAAStpUnwKmSvBM9EI+W5QN3ALpvz6bh0\n" +
-            "SPCXyz5KfQZQuSj4f3l+xNERDUDaygIUdLjBXf/bc15ur2iZjcq4r0Mr")
+            "SPCXyz5KfQZQuSj4f3l+xNERDUDaygIUdLjBXf/bc15ur2iZjcq4r0Mr\n" +
+            "-----END PRIVATE KEY-----\n")
       ));
 
     String token = provider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("ES256"));
@@ -225,11 +239,16 @@ public class AuthJWTExamples {
     JWTAuth provider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("ES256")
-        .setPublicKey(
-          "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEraVJ8CpkrwTPRCPluUDdwC6b8+m4\n" +
-            "dEjwl8s+Sn0GULko+H95fsTREQ1A2soCFHS4wV3/23Nebq9omY3KuK9DKw==\n")
-        .setSecretKey(
-          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgeRyEfU1NSHPTCuC9\n" +
+        .setBuffer(
+            "-----BEGIN PUBLIC KEY-----\n" +
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEraVJ8CpkrwTPRCPluUDdwC6b8+m4\n" +
+            "dEjwl8s+Sn0GULko+H95fsTREQ1A2soCFHS4wV3/23Nebq9omY3KuK9DKw==\n" +
+            "-----END PUBLIC KEY-----"))
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("RS256")
+        .setBuffer(
+            "-----BEGIN PRIVATE KEY-----\n" +
+            "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgeRyEfU1NSHPTCuC9\n" +
             "rwLZMukaWCH2Fk6q5w+XBYrKtLihRANCAAStpUnwKmSvBM9EI+W5QN3ALpvz6bh0\n" +
             "SPCXyz5KfQZQuSj4f3l+xNERDUDaygIUdLjBXf/bc15ur2iZjcq4r0Mr")
       ));

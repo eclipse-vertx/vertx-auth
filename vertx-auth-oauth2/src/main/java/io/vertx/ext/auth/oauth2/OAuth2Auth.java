@@ -26,7 +26,7 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
- * Factory interface for creating OAuth2 based {@link io.vertx.ext.auth.AuthProvider} instances.
+ * Factory interface for creating OAuth2 based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
  *
  * @author Paulo Lopes
  */

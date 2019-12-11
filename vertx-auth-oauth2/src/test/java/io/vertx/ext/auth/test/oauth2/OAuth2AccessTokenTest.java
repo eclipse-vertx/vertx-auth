@@ -14,7 +14,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
-import static org.junit.Assert.assertNotEquals;
 
 public class OAuth2AccessTokenTest extends VertxTestBase {
 

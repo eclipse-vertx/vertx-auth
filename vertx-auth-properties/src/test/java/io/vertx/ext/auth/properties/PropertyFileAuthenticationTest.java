@@ -12,12 +12,10 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.properties.PropertyFileAuthentication;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authorization.*;
 import io.vertx.test.core.VertxTestBase;
 
 import org.junit.Test;
@@ -29,12 +27,13 @@ import java.util.function.Consumer;
  */
 public class PropertyFileAuthenticationTest extends VertxTestBase {
 
-  private AuthProvider authProvider;
-  
+  private AuthenticationProvider authn;
+  private AuthorizationProvider authz;
+
   @Test
   public void testSimpleAuthenticate() throws Exception {
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authn.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -44,7 +43,7 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   @Test
   public void testSimpleAuthenticateFailWrongPassword() throws Exception {
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "wrongpassword");
-    authProvider.authenticate(authInfo, onFailure(thr -> {
+    authn.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -54,7 +53,7 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   @Test
   public void testSimpleAuthenticateFailWrongUser() throws Exception {
     JsonObject authInfo = new JsonObject().put("username", "frank").put("password", "sausages");
-    authProvider.authenticate(authInfo, onFailure(thr -> {
+    authn.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -64,74 +63,92 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   @Test
   public void testHasRole() throws Exception {
     loginThen(user ->
-      this.<Boolean>executeTwice(handler -> user.isAuthorized("role:morris_dancer", handler), res -> {
-        assertTrue(res.succeeded());
-        assertTrue(res.result());
+      authz.getAuthorizations(user, get -> {
+        assertTrue(get.succeeded());
+        assertTrue(
+          RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
+
+        assertTrue(
+          RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
+
+        testComplete();
       }));
     await();
   }
 
   @Test
   public void testNotHasRole() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("role:manager", handler), res -> {
-      assertTrue(res.succeeded());
-      assertFalse(res.result());
+    loginThen(user -> authz.getAuthorizations(user, get -> {
+      assertTrue(get.succeeded());
+      assertFalse(
+        RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
+
+      assertFalse(
+        RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
+
+      testComplete();
     }));
     await();
   }
 
   @Test
   public void testHasPermission() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("do_actual_work", handler), res -> {
-      assertTrue(res.succeeded());
-      assertTrue(res.result());
+    loginThen(user -> authz.getAuthorizations(user, get -> {
+      assertTrue(get.succeeded());
+      assertTrue(
+        PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
+
+      assertTrue(
+        PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
+
+      testComplete();
     }));
     await();
   }
 
   @Test
   public void testNotHasPermission() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("play_golf", handler), res -> {
-      assertTrue(res.succeeded());
-      assertFalse(res.result());
+    loginThen(user -> authz.getAuthorizations(user, get -> {
+      assertTrue(get.succeeded());
+      assertFalse(
+        PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
+
+      assertFalse(
+        PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
+
+      testComplete();
     }));
     await();
   }
 
-  private void loginThen(Consumer<User> runner) throws Exception {
+  private void loginThen(Consumer<User> runner) {
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authn.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       runner.accept(user);
     }));
   }
 
-  private <T> void executeTwice(Consumer<Handler<AsyncResult<T>>> action, Consumer<AsyncResult<T>> resultConsumer) {
-    action.accept(res -> {
-      resultConsumer.accept(res);
-      action.accept(res2 -> {
-        resultConsumer.accept(res);
-        testComplete();
-      });
-    });
-  }
-
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    authProvider = PropertyFileAuthentication.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
+    authn = PropertyFileAuthentication.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
+    authz = PropertyFileAuthorization.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
   }
 
   @Test
-  public void testHasWildcardPermission() throws Exception {
+  public void testHasWildcardPermission() {
     JsonObject authInfo = new JsonObject().put("username", "paulo").put("password", "secret");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authn.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      // paulo can do anything...
-      user.isAuthorized("do_actual_work", onSuccess(res -> {
-        assertTrue(res);
+
+      authz.getAuthorizations(user, get -> {
+        assertTrue(get.succeeded());
+        // paulo can do anything...
+        assertTrue(
+          WildcardPermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
         testComplete();
-      }));
+      });
     }));
     await();
   }
@@ -139,13 +156,15 @@ public class PropertyFileAuthenticationTest extends VertxTestBase {
   @Test
   public void testHasWildcardMatchPermission() throws Exception {
     JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "secret");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authn.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       // editor can edit any newsletter item...
-      user.isAuthorized("newsletter:edit:13", onSuccess(res -> {
-        assertTrue(res);
+      authz.getAuthorizations(user, get -> {
+        assertTrue(get.succeeded());
+        assertTrue(
+          WildcardPermissionBasedAuthorization.create("newsletter:edit:13").match(AuthorizationContext.create(user)));
         testComplete();
-      }));
+      });
     }));
     await();
   }

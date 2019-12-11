@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.ext.auth.User;
 
 /**
@@ -49,8 +50,9 @@ public interface AuthorizationProvider {
       }
 
       @Override
-      public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler) {
-        handler.handle(Future.succeededFuture(new HashSet<>(_authorizations)));
+      public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+        user.authorizations().add(getId(), _authorizations);
+        handler.handle(Future.succeededFuture());
       }
     };
   }
@@ -63,11 +65,16 @@ public interface AuthorizationProvider {
   String getId();
 
   /**
-   * Returns the set of authorizations of the specified user
+   * Updates the user with the set of authorizations.
    *
-   * @param user
-   * @param handler
+   * @param user user to lookup and update
+   * @param handler result handler
    */
-  void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> handler);
+  void getAuthorizations(User user, Handler<AsyncResult<Void>> handler);
 
+  default Future<Void> getAuthorizations(User user) {
+    Promise<Void> promise = Promise.promise();
+    getAuthorizations(user, promise);
+    return promise.future();
+  }
 }

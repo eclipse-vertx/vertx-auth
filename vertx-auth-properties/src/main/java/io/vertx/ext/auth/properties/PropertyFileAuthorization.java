@@ -14,7 +14,7 @@ package io.vertx.ext.auth.properties;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
-import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
 
 /**
@@ -23,7 +23,7 @@ import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 @VertxGen
-public interface PropertyFileAuthentication extends AuthenticationProvider {
+public interface PropertyFileAuthorization extends AuthorizationProvider {
 
   /**
    * Create a File authentication provider
@@ -31,7 +31,7 @@ public interface PropertyFileAuthentication extends AuthenticationProvider {
    * @param vertx  the Vert.x instance
    * @return  the authentication provider
    */
-  static PropertyFileAuthentication create(Vertx vertx, String path) {
+  static PropertyFileAuthorization create(Vertx vertx, String path) {
     return new PropertyFileAuthenticationImpl(vertx, path);
   }
 

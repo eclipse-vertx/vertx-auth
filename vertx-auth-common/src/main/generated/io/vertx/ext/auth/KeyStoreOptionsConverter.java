@@ -20,6 +20,16 @@ public class KeyStoreOptionsConverter {
             obj.setPassword((String)member.getValue());
           }
           break;
+        case "passwordProtection":
+          if (member.getValue() instanceof JsonObject) {
+            java.util.Map<String, java.lang.String> map = new java.util.LinkedHashMap<>();
+            ((Iterable<java.util.Map.Entry<String, Object>>)member.getValue()).forEach(entry -> {
+              if (entry.getValue() instanceof String)
+                map.put(entry.getKey(), (String)entry.getValue());
+            });
+            obj.setPasswordProtection(map);
+          }
+          break;
         case "path":
           if (member.getValue() instanceof String) {
             obj.setPath((String)member.getValue());
@@ -41,6 +51,11 @@ public class KeyStoreOptionsConverter {
   public static void toJson(KeyStoreOptions obj, java.util.Map<String, Object> json) {
     if (obj.getPassword() != null) {
       json.put("password", obj.getPassword());
+    }
+    if (obj.getPasswordProtection() != null) {
+      JsonObject map = new JsonObject();
+      obj.getPasswordProtection().forEach((key, value) -> map.put(key, value));
+      json.put("passwordProtection", map);
     }
     if (obj.getPath() != null) {
       json.put("path", obj.getPath());
