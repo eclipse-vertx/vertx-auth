@@ -22,6 +22,7 @@ import io.vertx.ext.auth.AuthProvider;
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
+@Deprecated
 public interface AuthProviderInternal extends AuthProvider {
 
   /**

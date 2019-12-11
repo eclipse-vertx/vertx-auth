@@ -34,7 +34,9 @@ import java.util.Set;
  * Just implement the abstract methods in your concrete sub-class.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @deprecated in 4.0 this class will not be used
  */
+@Deprecated
 public abstract class AbstractUser implements User, ClusterSerializable {
 
   private final Set<String> cachedPermissions = new HashSet<>();

@@ -43,6 +43,7 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
+  @Deprecated
   User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler);
 
   /**
@@ -61,6 +62,7 @@ public interface User {
    * @return the User to enable fluent use
    */
   @Fluent
+  @Deprecated
   User clearCache();
 
   /**
@@ -81,5 +83,6 @@ public interface User {
    *
    * @param authProvider  the AuthProvider - this must be the same type of AuthProvider that originally created the User
    */
+  @Deprecated
   void setAuthProvider(AuthProvider authProvider);
 }

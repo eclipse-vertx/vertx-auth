@@ -54,37 +54,45 @@ public class PubSecKeyOptions {
     return this;
   }
 
+  @Deprecated
   public String getPublicKey() {
     return publicKey;
   }
 
+  @Deprecated
   public PubSecKeyOptions setPublicKey(String publicKey) {
     this.publicKey = publicKey;
     return this;
   }
 
+  @Deprecated
   public String getSecretKey() {
     return secretKey;
   }
 
+  @Deprecated
   public PubSecKeyOptions setSecretKey(String secretKey) {
     this.secretKey = secretKey;
     return this;
   }
 
+  @Deprecated
   public boolean isSymmetric() {
     return symmetric;
   }
 
+  @Deprecated
   public PubSecKeyOptions setSymmetric(boolean symmetric) {
     this.symmetric = symmetric;
     return this;
   }
 
+  @Deprecated
   public boolean isCertificate() {
     return certificate;
   }
 
+  @Deprecated
   public PubSecKeyOptions setCertificate(boolean certificate) {
     this.certificate = certificate;
     return this;

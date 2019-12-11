@@ -30,6 +30,7 @@ import org.apache.shiro.realm.Realm;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
+@Deprecated
 public interface ShiroAuth extends AuthProvider {
 
   /**

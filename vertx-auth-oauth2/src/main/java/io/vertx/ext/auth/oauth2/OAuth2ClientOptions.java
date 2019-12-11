@@ -219,6 +219,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    *
    * @return boolean
    */
+  @Deprecated
   public boolean isUseBasicAuthorizationHeader() {
     return useBasicAuthorizationHeader;
   }
@@ -228,6 +229,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    *
    * @return self
    */
+  @Deprecated
   public OAuth2ClientOptions setUseBasicAuthorizationHeader(boolean useBasicAuthorizationHeader) {
     this.useBasicAuthorizationHeader = useBasicAuthorizationHeader;
     return this;
@@ -396,6 +398,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * Set the provider scope separator
    * @return a single character string usually a space or a plus
    */
+  @Deprecated
   public String getScopeSeparator() {
     return scopeSeparator;
   }
@@ -405,6 +408,7 @@ public class OAuth2ClientOptions extends HttpClientOptions {
    * @param scopeSeparator a separator e.g.: ' ', '+', ','
    * @return self
    */
+  @Deprecated
   public OAuth2ClientOptions setScopeSeparator(String scopeSeparator) {
     this.scopeSeparator = scopeSeparator;
     return this;
