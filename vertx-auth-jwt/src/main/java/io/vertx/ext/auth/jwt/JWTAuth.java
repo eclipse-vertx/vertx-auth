@@ -19,7 +19,6 @@ package io.vertx.ext.auth.jwt;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import io.vertx.ext.jwt.JWTOptions;

@@ -23,7 +23,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 
 import java.util.HashSet;

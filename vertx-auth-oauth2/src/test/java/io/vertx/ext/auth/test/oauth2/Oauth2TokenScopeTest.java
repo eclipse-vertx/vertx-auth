@@ -4,7 +4,6 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -16,7 +15,6 @@ import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;

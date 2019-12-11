@@ -22,7 +22,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
-import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;

@@ -12,10 +12,8 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties;
 
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
 
