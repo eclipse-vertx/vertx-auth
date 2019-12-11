@@ -54,8 +54,9 @@ public class OAuth2API {
    */
   public void jwkSet(Handler<AsyncResult<JsonArray>> handler) {
     final JsonObject headers = new JsonObject();
-    // specify preferred accepted content type
-    headers.put("Accept", "application/json");
+    // specify preferred accepted content type, according to https://tools.ietf.org/html/rfc7517#section-8.5
+    // there's a specific media type for this resource: application/jwk-set+json but we also allow plain application/json
+    headers.put("Accept", "application/jwk-set+json, application/json");
 
     fetch(
       HttpMethod.GET,
@@ -77,7 +78,7 @@ public class OAuth2API {
 
         JsonObject json;
 
-        if (reply.is("application/json")) {
+        if (reply.is("application/jwk-set+json") || reply.is("application/json")) {
           try {
             json = new JsonObject(reply.body());
           } catch (RuntimeException e) {
