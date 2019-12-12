@@ -28,7 +28,7 @@ public class SQLAuthorizationOptions {
   /**
    * The default query to retrieve all roles for the user
    */
-  private final static String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USER_ROLES WHERE USERNAME = ?";
+  private final static String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USERS_ROLES WHERE USERNAME = ?";
 
   /**
    * The default query to retrieve all permissions for the role

@@ -30,7 +30,7 @@ public class SQLAuthenticationOptions {
   /**
    * The default query to be used for authentication
    */
-  private final static String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD FROM USER WHERE USERNAME = ?";
+  private final static String DEFAULT_AUTHENTICATE_QUERY = "SELECT PASSWORD FROM USERS WHERE USERNAME = ?";
 
   private String authenticationQuery;
 
