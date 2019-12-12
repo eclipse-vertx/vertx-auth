@@ -50,11 +50,11 @@ public class WebAuthNImpl implements WebAuthN {
   private final MessageDigest sha256;
   private final PRNG random;
   private final WebAuthNOptions options;
-  private final AuthStore store;
+  private final CredentialStore store;
 
   private final Map<String, Attestation> attestations = new HashMap<>();
 
-  public WebAuthNImpl(Vertx vertx, WebAuthNOptions options, AuthStore store) {
+  public WebAuthNImpl(Vertx vertx, WebAuthNOptions options, CredentialStore store) {
     random = new PRNG(vertx);
     this.options = options;
     this.store = store;

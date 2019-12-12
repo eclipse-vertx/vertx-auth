@@ -34,7 +34,7 @@ import java.util.UUID;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface AuthStore {
+public interface CredentialStore {
 
   /**
    * Generates a unique ID that doesn't contain any user identifiable information. By default it generates a random UUID.
@@ -56,7 +56,7 @@ public interface AuthStore {
    * @return fluent self.
    */
   @Fluent
-  default AuthStore getUserCredentialsByName(String username, Handler<AsyncResult<List<JsonObject>>> handler) {
+  default CredentialStore getUserCredentialsByName(String username, Handler<AsyncResult<List<JsonObject>>> handler) {
     handler.handle(Future.failedFuture("getUserCredentials not supported"));
     return this;
   }
@@ -79,7 +79,7 @@ public interface AuthStore {
    * @return fluent self.
    */
   @Fluent
-  default AuthStore getUserCredentialsById(String rawId, Handler<AsyncResult<List<JsonObject>>> handler) {
+  default CredentialStore getUserCredentialsById(String rawId, Handler<AsyncResult<List<JsonObject>>> handler) {
     handler.handle(Future.failedFuture("getUserCredentials not supported"));
     return this;
   }
@@ -103,7 +103,7 @@ public interface AuthStore {
    * @return fluent self.
    */
   @Fluent
-  default AuthStore updateUserCredential(String id, JsonObject data, boolean upsert, Handler<AsyncResult<Void>> handler) {
+  default CredentialStore updateUserCredential(String id, JsonObject data, boolean upsert, Handler<AsyncResult<Void>> handler) {
     handler.handle(Future.failedFuture("updateUserCredentials not supported"));
     return this;
   }
@@ -114,50 +114,6 @@ public interface AuthStore {
   default Future<Void> updateUserCredential(String id, JsonObject data, boolean upsert) {
     Promise<Void> promise = Promise.promise();
     updateUserCredential(id, data, upsert, promise);
-    return promise.future();
-  }
-
-  /**
-   * Get the user roles from the storage.
-   *
-   * @param id the unique user identifier.
-   * @param handler the handler for the result callback.
-   * @return fluent self.
-   */
-  @Fluent
-  default AuthStore getUserRoles(String id, Handler<AsyncResult<List<String>>> handler) {
-    handler.handle(Future.failedFuture("getUserRoles not supported"));
-    return this;
-  }
-
-  /**
-   * Same as {@link #getUserRoles(String, Handler)} but using a Future.
-   */
-  default Future<List<String>> getUserRoles(String id) {
-    Promise<List<String>> promise = Promise.promise();
-    getUserRoles(id, promise);
-    return promise.future();
-  }
-
-  /**
-   * Get the user permissions from the storage.
-   *
-   * @param id the unique user identifier.
-   * @param handler the handler for the result callback.
-   * @return fluent self.
-   */
-  @Fluent
-  default AuthStore getUserPermissions(String id, Handler<AsyncResult<List<String>>> handler) {
-    handler.handle(Future.failedFuture("getUserPermissions not supported"));
-    return this;
-  }
-
-  /**
-   * Same as {@link #getUserPermissions(String, Handler)} but using a Future.
-   */
-  default Future<List<String>> getUserPermissions(String id) {
-    Promise<List<String>> promise = Promise.promise();
-    getUserPermissions(id, promise);
     return promise.future();
   }
 }

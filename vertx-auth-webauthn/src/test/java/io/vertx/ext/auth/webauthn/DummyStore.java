@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DummyStore implements AuthStore {
+public class DummyStore implements CredentialStore {
 
   public static class StoreEntry {
     String username;
@@ -73,7 +73,7 @@ public class DummyStore implements AuthStore {
   }
 
   @Override
-  public AuthStore getUserCredentialsByName(String username, Handler<AsyncResult<List<JsonObject>>> handler) {
+  public CredentialStore getUserCredentialsByName(String username, Handler<AsyncResult<List<JsonObject>>> handler) {
 
     handler.handle(Future.succeededFuture(
       database.stream()
@@ -86,7 +86,7 @@ public class DummyStore implements AuthStore {
   }
 
   @Override
-  public AuthStore getUserCredentialsById(String id, Handler<AsyncResult<List<JsonObject>>> handler) {
+  public CredentialStore getUserCredentialsById(String id, Handler<AsyncResult<List<JsonObject>>> handler) {
     handler.handle(Future.succeededFuture(
       database.stream()
         .filter(entry -> id.equals(entry.credID))
@@ -98,7 +98,7 @@ public class DummyStore implements AuthStore {
   }
 
   @Override
-  public AuthStore updateUserCredential(String id, JsonObject data, boolean upsert, Handler<AsyncResult<Void>> handler) {
+  public CredentialStore updateUserCredential(String id, JsonObject data, boolean upsert, Handler<AsyncResult<Void>> handler) {
 
     long updated = database.stream()
       .filter(entry -> id.equals(entry.credID))

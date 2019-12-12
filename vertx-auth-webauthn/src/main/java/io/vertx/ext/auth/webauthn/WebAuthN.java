@@ -43,7 +43,7 @@ public interface WebAuthN extends AuthenticationProvider {
    * @param store the user store used to load credentials.
    * @return the auth provider.
    */
-  static WebAuthN create(Vertx vertx, AuthStore store) {
+  static WebAuthN create(Vertx vertx, CredentialStore store) {
     return create(vertx, new WebAuthNOptions(), store);
   }
 
@@ -55,7 +55,7 @@ public interface WebAuthN extends AuthenticationProvider {
    * @param store the user store used to load credentials.
    * @return the auth provider.
    */
-  static WebAuthN create(Vertx vertx, WebAuthNOptions options, AuthStore store) {
+  static WebAuthN create(Vertx vertx, WebAuthNOptions options, CredentialStore store) {
     return new WebAuthNImpl(vertx, options, store);
   }
 
