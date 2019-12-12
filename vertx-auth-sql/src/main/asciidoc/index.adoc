@@ -1,8 +1,8 @@
-== JDBC Auth Provider implementation
+== SQL Auth Provider implementation
 
 We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} as well as
-{@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}
-to perform authentication and authorization against any JDBC compliant database. To use this project,
+{@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.sqlclient.SqlClient}
+to perform authentication and authorization against any SQL compliant database. To use this project,
 add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -11,7 +11,7 @@ add the following dependency to the _dependencies_ section of your build descrip
 ----
 <dependency>
   <groupId>io.vertx</groupId>
-  <artifactId>vertx-auth-jdbc</artifactId>
+  <artifactId>vertx-auth-sql</artifactId>
   <version>${maven.version}</version>
 </dependency>
 ----
@@ -20,29 +20,25 @@ add the following dependency to the _dependencies_ section of your build descrip
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-auth-jdbc:${maven.version}'
+compile 'io.vertx:vertx-auth-sql:${maven.version}'
 ----
 
-To create an instance you first need an instance of {@link io.vertx.ext.jdbc.JDBCClient}. To learn how to create one
-of those please consult the documentation for the JDBC client.
+To create an instance you first need an instance of {@link io.vertx.sqlclient.SqlClient}. To learn how to create one
+of those please consult the documentation for the SQL client.
 
-Once you've got one of those you can create a {@link io.vertx.ext.auth.jdbc.JDBCAuthentication} instance as follows:
+Once you've got one of those you can create a {@link io.vertx.ext.auth.sql.SQLAuthentication} instance as follows:
 
 [source,$lang]
 ----
-{@link examples.AuthJDBCExamples#example5}
+{@link examples.AuthSQLExamples#example5}
 ----
 
 Once you've got your instance you can authenticate and authorize with it just like any {@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
 
 The out of the box config assumes certain queries for authentication and authorization, these can easily be changed with the operations
-{@link io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions#setAuthenticationQuery(String)},
-{@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setPermissionsQuery(String)} and
-{@link io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different database schema.
-
-The {@link io.vertx.ext.auth.jdbc.JDBCHashStrategy} is a required parameter to build an instance of {@link io.vertx.ext.auth.jdbc.JDBCAuthorization}
-The Sha-512 hash strategy assumes that the password is stored in the database as a SHA-512 hash after being
-concatenated with a salt. It also assumes the salt is stored in the table too.
+{@link io.vertx.ext.auth.sql.SQLAuthenticationOptions#setAuthenticationQuery(String)},
+{@link io.vertx.ext.auth.sql.SQLAuthorizationOptions#setPermissionsQuery(String)} and
+{@link io.vertx.ext.auth.sql.SQLAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different database schema.
 
 The basic data definition for the storage should look like this:
 
@@ -77,16 +73,11 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_roles FOREIGN KEY (role) REFERENCES rol
 == Hashing Strategy
 
 The provider uses the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a> to
-hash password. In the past releases this wasn't the rule. In order to keep backward compatibility a authentication
-provider can be created with a legacy hashing strategy. It is highly recommended to avoid this, and upgrade the user
-hashes to the new format (by requesting the user to renew the password for example).
-
-THe legacy hashing strategy can be used on the *deprecated* factory method of JDBCAuthentication {@link io.vertx.ext.auth.jdbc.JDBCAuthentication#create(JDBCClient, JDBCHashStrategy,  JDBCAuthenticationOptions)}
-You have the choice between SHA-512 or PBKDF2. Note that as of 2018-01-08 OWASP recommends the usage of stronger
-algorithms, for this case you can use the PBKDF2 strategy (OWASP recommendation).
+hash password.
 
 WARNING: If you already have a running legacy application switching the strategies will break your existing
-passwords. The new format will *not* for suffer from this.
+passwords. The new format will not for suffer from this. In order to upgrade request users to reset their password and
+update the record appropriately.
 
 WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
@@ -129,7 +120,7 @@ email from a mailing list you are not allowed to do so if the flag is true.
 
 The right to erasure does not mean that you must wipe all records from your application, e.g.: in a bank this right
 cannot be used to erase a running loan or debt. You are allowed to keep your application data but must erase the
-personal data. In case of Vert.x Auth JDBC you should delete your table but can still use a foreign key to the
+personal data. In case of Vert.x Auth SQL you should delete your table but can still use a foreign key to the
 username as long as is not possible to link the username to the personal data.
 
 Important note is that this must survive backups! As a tip backup the data, and data erasure on different archives so
@@ -147,7 +138,7 @@ to hash new password before storing it to the database. Doing it is a 3 step tas
 
 [source,$lang]
 ----
-{@link examples.AuthJDBCExamples#example9}
+{@link examples.AuthSQLExamples#example9}
 ----
 
 == Authentication
@@ -157,7 +148,7 @@ authentication info:
 
 [source,$lang]
 ----
-{@link examples.AuthJDBCExamples#example6}
+{@link examples.AuthSQLExamples#example6}
 ----
 
 == Authorisation - Permission-Role Model
@@ -170,5 +161,5 @@ If validating if a user has a particular permission simply match the user agains
 
 [source,$lang]
 ----
-{@link examples.AuthJDBCExamples#example7}
+{@link examples.AuthSQLExamples#example7}
 ----
