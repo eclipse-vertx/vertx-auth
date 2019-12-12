@@ -39,9 +39,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-public class WebAuthNImpl implements WebAuthN {
+public class WebAuthnImpl implements WebAuthn {
 
-  private static final Logger LOG = LoggerFactory.getLogger(WebAuthNImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WebAuthnImpl.class);
 
   // codecs
   private final Base64.Encoder b64enc = Base64.getUrlEncoder().withoutPadding();
@@ -49,12 +49,12 @@ public class WebAuthNImpl implements WebAuthN {
 
   private final MessageDigest sha256;
   private final PRNG random;
-  private final WebAuthNOptions options;
+  private final WebAuthnOptions options;
   private final CredentialStore store;
 
   private final Map<String, Attestation> attestations = new HashMap<>();
 
-  public WebAuthNImpl(Vertx vertx, WebAuthNOptions options, CredentialStore store) {
+  public WebAuthnImpl(Vertx vertx, WebAuthnOptions options, CredentialStore store) {
     random = new PRNG(vertx);
     this.options = options;
     this.store = store;
@@ -82,7 +82,7 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public WebAuthN createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
+  public WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
 
     store.getUserCredentialsByName(user.getString("name"), getUserCredentials -> {
       if (getUserCredentials.failed()) {
@@ -196,7 +196,7 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public WebAuthN getCredentialsOptions(String username, Handler<AsyncResult<JsonObject>> handler) {
+  public WebAuthn getCredentialsOptions(String username, Handler<AsyncResult<JsonObject>> handler) {
 
     // we allow Resident Credentials or (RK) requests
     // this means that username is not required
@@ -255,7 +255,7 @@ public class WebAuthNImpl implements WebAuthN {
   }
 
   @Override
-  public void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler) {
+  public void authenticate(WebAuthnInfo authInfo, Handler<AsyncResult<User>> handler) {
     //    {
     //      "rawId": "base64url",
     //      "id": "base64url",

@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.webauthn.WebAuthNOptions}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.WebAuthNOptions} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.webauthn.WebAuthnOptions}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.WebAuthnOptions} original class using Vert.x codegen.
  */
-public class WebAuthNOptionsConverter {
+public class WebAuthnOptionsConverter {
 
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthNOptions obj) {
+  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthnOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "attestation":
@@ -93,11 +93,11 @@ public class WebAuthNOptionsConverter {
     }
   }
 
-  public static void toJson(WebAuthNOptions obj, JsonObject json) {
+  public static void toJson(WebAuthnOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(WebAuthNOptions obj, java.util.Map<String, Object> json) {
+  public static void toJson(WebAuthnOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAttestation() != null) {
       json.put("attestation", obj.getAttestation().name());
     }

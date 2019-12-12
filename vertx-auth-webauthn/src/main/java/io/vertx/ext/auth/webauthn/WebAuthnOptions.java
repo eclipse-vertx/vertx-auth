@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @DataObject(generateConverter = true)
-public class WebAuthNOptions {
+public class WebAuthnOptions {
 
   private String origin;
   private Set<String> transports;
@@ -51,13 +51,13 @@ public class WebAuthNOptions {
 
   private int challengeLength = 32;
 
-  public WebAuthNOptions() {
+  public WebAuthnOptions() {
     init();
   }
 
-  public WebAuthNOptions(JsonObject json) {
+  public WebAuthnOptions(JsonObject json) {
     super();
-    WebAuthNOptionsConverter.fromJson(json, this);
+    WebAuthnOptionsConverter.fromJson(json, this);
   }
 
   // sensible defaults
@@ -75,7 +75,7 @@ public class WebAuthNOptions {
     return rpName;
   }
 
-  public WebAuthNOptions setRpName(String rpName) {
+  public WebAuthnOptions setRpName(String rpName) {
     this.rpName = rpName;
     return this;
   }
@@ -84,7 +84,7 @@ public class WebAuthNOptions {
     return rpId;
   }
 
-  public WebAuthNOptions setRpId(String rpId) {
+  public WebAuthnOptions setRpId(String rpId) {
     this.rpId = rpId;
     return this;
   }
@@ -93,7 +93,7 @@ public class WebAuthNOptions {
     return origin;
   }
 
-  public WebAuthNOptions setOrigin(String origin) {
+  public WebAuthnOptions setOrigin(String origin) {
     this.origin = origin;
     return this;
   }
@@ -102,7 +102,7 @@ public class WebAuthNOptions {
     return rpIcon;
   }
 
-  public WebAuthNOptions setRpIcon(String rpIcon) {
+  public WebAuthnOptions setRpIcon(String rpIcon) {
     this.rpIcon = rpIcon;
     return this;
   }
@@ -111,12 +111,12 @@ public class WebAuthNOptions {
     return transports;
   }
 
-  public WebAuthNOptions setTransports(Set<String> transports) {
+  public WebAuthnOptions setTransports(Set<String> transports) {
     this.transports = transports;
     return this;
   }
 
-  public WebAuthNOptions addTransport(String transport) {
+  public WebAuthnOptions addTransport(String transport) {
     if (transports == null) {
       transports = new HashSet<>();
     }
@@ -129,7 +129,7 @@ public class WebAuthNOptions {
     return attestation;
   }
 
-  public WebAuthNOptions setAttestation(Attestation attestation) {
+  public WebAuthnOptions setAttestation(Attestation attestation) {
     this.attestation = attestation;
     return this;
   }
@@ -138,7 +138,7 @@ public class WebAuthNOptions {
     return pubKeyCredParams;
   }
 
-  public WebAuthNOptions addPubKeyCredParam(String pubKeyCredParam) {
+  public WebAuthnOptions addPubKeyCredParam(String pubKeyCredParam) {
     if (this.pubKeyCredParams == null) {
       this.pubKeyCredParams = new HashSet<>();
     }
@@ -146,7 +146,7 @@ public class WebAuthNOptions {
     return this;
   }
 
-  public WebAuthNOptions setPubKeyCredParams(Set<String> pubKeyCredParams) {
+  public WebAuthnOptions setPubKeyCredParams(Set<String> pubKeyCredParams) {
     this.pubKeyCredParams = pubKeyCredParams;
     return this;
   }
@@ -155,7 +155,7 @@ public class WebAuthNOptions {
     return authenticatorAttachment;
   }
 
-  public WebAuthNOptions setAuthenticatorAttachment(AuthenticatorAttachment authenticatorAttachment) {
+  public WebAuthnOptions setAuthenticatorAttachment(AuthenticatorAttachment authenticatorAttachment) {
     this.authenticatorAttachment = authenticatorAttachment;
     return this;
   }
@@ -164,7 +164,7 @@ public class WebAuthNOptions {
     return requireResidentKey;
   }
 
-  public WebAuthNOptions setRequireResidentKey(Boolean requireResidentKey) {
+  public WebAuthnOptions setRequireResidentKey(Boolean requireResidentKey) {
     this.requireResidentKey = requireResidentKey;
     return this;
   }
@@ -173,7 +173,7 @@ public class WebAuthNOptions {
     return userVerification;
   }
 
-  public WebAuthNOptions setUserVerification(UserVerification userVerification) {
+  public WebAuthnOptions setUserVerification(UserVerification userVerification) {
     this.userVerification = userVerification;
     return this;
   }
@@ -182,7 +182,7 @@ public class WebAuthNOptions {
     return timeout;
   }
 
-  public WebAuthNOptions setTimeout(int timeout) {
+  public WebAuthnOptions setTimeout(int timeout) {
     this.timeout = timeout;
     return this;
   }
@@ -234,7 +234,7 @@ public class WebAuthNOptions {
 
   public JsonObject toJson() {
     final JsonObject json = new JsonObject();
-    WebAuthNOptionsConverter.toJson(this, json);
+    WebAuthnOptionsConverter.toJson(this, json);
     return json;
   }
 

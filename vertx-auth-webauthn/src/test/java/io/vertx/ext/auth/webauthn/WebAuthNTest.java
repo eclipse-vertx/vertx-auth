@@ -28,9 +28,9 @@ public class WebAuthNTest {
   public void testFIDORegister(TestContext should) {
     final Async test = should.async();
 
-    WebAuthN webAuthN = WebAuthN.create(
+    WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
+      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -55,9 +55,9 @@ public class WebAuthNTest {
   @Test(timeout = 1000)
   public void testFIDOLogin(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(
+    WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000").setRequireResidentKey(true),
+      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000").setRequireResidentKey(true),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -82,7 +82,7 @@ public class WebAuthNTest {
   @Ignore("test data contains an expired certificate")
   public void testPAckedFull(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(rule.vertx(), new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
+    WebAuthn webAuthN = WebAuthn.create(rule.vertx(), new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"wsLryOAxXMU54s2fCSWPzWjXHOBKPploN-UHftj4_rpIu6BZxNXppm82f7Y6iX9FEOKKeS5-N2TALeyzLnJfAA\",\n" +
@@ -107,9 +107,9 @@ public class WebAuthNTest {
   @Test(timeout = 1000)
   public void testPAckedSurrogate(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(
+    WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
+      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -153,9 +153,9 @@ public class WebAuthNTest {
   @Test(timeout = 1000)
   public void testAndroidKey(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(
+    WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"),
+      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -189,9 +189,9 @@ public class WebAuthNTest {
   @Ignore("test data contains an expired certificate")
   public void testAndroidSafetyNet(TestContext should) {
     final Async test = should.async();
-    WebAuthN webAuthN = WebAuthN.create(
+    WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthNOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"),
+      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()

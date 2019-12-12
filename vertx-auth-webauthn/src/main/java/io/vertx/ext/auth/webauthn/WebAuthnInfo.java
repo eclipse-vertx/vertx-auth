@@ -20,23 +20,23 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject(generateConverter = true)
-public class WebAuthNInfo {
+public class WebAuthnInfo {
 
   private String challenge;
   private JsonObject webauthn;
   private String username;
 
-  public WebAuthNInfo() {}
+  public WebAuthnInfo() {}
 
-  public WebAuthNInfo(JsonObject json) {
-    WebAuthNInfoConverter.fromJson(json, this);
+  public WebAuthnInfo(JsonObject json) {
+    WebAuthnInfoConverter.fromJson(json, this);
   }
 
   public String getChallenge() {
     return challenge;
   }
 
-  public WebAuthNInfo setChallenge(String challenge) {
+  public WebAuthnInfo setChallenge(String challenge) {
     this.challenge = challenge;
     return this;
   }
@@ -45,7 +45,7 @@ public class WebAuthNInfo {
     return webauthn;
   }
 
-  public WebAuthNInfo setWebauthn(JsonObject webauthn) {
+  public WebAuthnInfo setWebauthn(JsonObject webauthn) {
     this.webauthn = webauthn;
     return this;
   }
@@ -54,14 +54,14 @@ public class WebAuthNInfo {
     return username;
   }
 
-  public WebAuthNInfo setUsername(String username) {
+  public WebAuthnInfo setUsername(String username) {
     this.username = username;
     return this;
   }
 
   public JsonObject toJson() {
     final JsonObject json = new JsonObject();
-    WebAuthNInfoConverter.toJson(this, json);
+    WebAuthnInfoConverter.toJson(this, json);
     return json;
   }
 }

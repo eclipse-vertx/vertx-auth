@@ -24,7 +24,7 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.webauthn.impl.WebAuthNImpl;
+import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
 
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
@@ -34,7 +34,7 @@ import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface WebAuthN extends AuthenticationProvider {
+public interface WebAuthn extends AuthenticationProvider {
 
   /**
    * Create a WebAuthN auth provider
@@ -43,8 +43,8 @@ public interface WebAuthN extends AuthenticationProvider {
    * @param store the user store used to load credentials.
    * @return the auth provider.
    */
-  static WebAuthN create(Vertx vertx, CredentialStore store) {
-    return create(vertx, new WebAuthNOptions(), store);
+  static WebAuthn create(Vertx vertx, CredentialStore store) {
+    return create(vertx, new WebAuthnOptions(), store);
   }
 
   /**
@@ -55,8 +55,8 @@ public interface WebAuthN extends AuthenticationProvider {
    * @param store the user store used to load credentials.
    * @return the auth provider.
    */
-  static WebAuthN create(Vertx vertx, WebAuthNOptions options, CredentialStore store) {
-    return new WebAuthNImpl(vertx, options, store);
+  static WebAuthn create(Vertx vertx, WebAuthnOptions options, CredentialStore store) {
+    return new WebAuthnImpl(vertx, options, store);
   }
 
   /**
@@ -67,7 +67,7 @@ public interface WebAuthN extends AuthenticationProvider {
    * @return fluent self
    */
   @Fluent
-  WebAuthN createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler);
 
   /**
    * Same as {@link #createCredentialsOptions(JsonObject, Handler)} but returning a Future.
@@ -87,7 +87,7 @@ public interface WebAuthN extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  WebAuthN getCredentialsOptions(@Nullable String username, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthn getCredentialsOptions(@Nullable String username, Handler<AsyncResult<JsonObject>> handler);
 
   /**
    * Same as {@link #getCredentialsOptions(String, Handler)} but returning a Future.
@@ -99,10 +99,10 @@ public interface WebAuthN extends AuthenticationProvider {
   }
 
   @GenIgnore(PERMITTED_TYPE)
-  void authenticate(WebAuthNInfo authInfo, Handler<AsyncResult<User>> handler);
+  void authenticate(WebAuthnInfo authInfo, Handler<AsyncResult<User>> handler);
 
   @GenIgnore(PERMITTED_TYPE)
-  default Future<User> authenticate(WebAuthNInfo authInfo) {
+  default Future<User> authenticate(WebAuthnInfo authInfo) {
     Promise<User> promise = Promise.promise();
     authenticate(authInfo, promise);
     return promise.future();
@@ -110,6 +110,6 @@ public interface WebAuthN extends AuthenticationProvider {
 
   @Override
   default void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-    authenticate(new WebAuthNInfo(authInfo), handler);
+    authenticate(new WebAuthnInfo(authInfo), handler);
   }
 }

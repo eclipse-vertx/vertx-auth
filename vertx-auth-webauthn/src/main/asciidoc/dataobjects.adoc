@@ -10,8 +10,8 @@
 ^|Name | Type ^| Description
 |===
 
-[[WebAuthNInfo]]
-== WebAuthNInfo
+[[WebAuthnInfo]]
+== WebAuthnInfo
 
 
 [cols=">25%,25%,50%"]
@@ -23,8 +23,8 @@
 |[[webauthn]]`@webauthn`|`Json object`|-
 |===
 
-[[WebAuthNOptions]]
-== WebAuthNOptions
+[[WebAuthnOptions]]
+== WebAuthnOptions
 
 
 [cols=">25%,25%,50%"]
