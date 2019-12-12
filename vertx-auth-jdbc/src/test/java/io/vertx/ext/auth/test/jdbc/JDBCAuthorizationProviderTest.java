@@ -42,11 +42,14 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     SQL.add("create table user_roles (username varchar(255), role varchar(255));");
     SQL.add("create table roles_perms (role varchar(255), perm varchar(255));");
 
-    SQL.add("insert into user_roles values ('tim', 'dev');");
-    SQL.add("insert into user_roles values ('tim', 'admin');");
+    SQL.add("ALTER TABLE user_roles ADD CONSTRAINT pk_user_roles PRIMARY KEY (username, role);");
+    SQL.add("ALTER TABLE roles_perms ADD CONSTRAINT pk_roles_perms PRIMARY KEY (role, perm);");
+
     SQL.add("insert into roles_perms values ('dev', 'commit_code');");
     SQL.add("insert into roles_perms values ('dev', 'eat_pizza');");
     SQL.add("insert into roles_perms values ('admin', 'merge_pr');");
+    SQL.add("insert into user_roles values ('tim', 'dev');");
+    SQL.add("insert into user_roles values ('tim', 'admin');");
 
     // and a second set of tables with slight differences
     SQL.add("drop table if exists user_roles2;");
@@ -54,11 +57,11 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     SQL.add("create table user_roles2 (user_name varchar(255), role varchar(255));");
     SQL.add("create table roles_perms2 (role varchar(255), perm varchar(255));");
 
-    SQL.add("insert into user_roles2 values ('tim', 'dev');");
-    SQL.add("insert into user_roles2 values ('tim', 'admin');");
     SQL.add("insert into roles_perms2 values ('dev', 'commit_code');");
     SQL.add("insert into roles_perms2 values ('dev', 'eat_pizza');");
     SQL.add("insert into roles_perms2 values ('admin', 'merge_pr');");
+    SQL.add("insert into user_roles2 values ('tim', 'dev');");
+    SQL.add("insert into user_roles2 values ('tim', 'admin');");
   }
 
   private JDBCAuthorization authorizationProvider;
