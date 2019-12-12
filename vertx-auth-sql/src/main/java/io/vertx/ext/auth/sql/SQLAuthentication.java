@@ -18,19 +18,19 @@ package io.vertx.ext.auth.sql;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.sql.impl.SQLAuthenticationImpl;
 import io.vertx.sqlclient.SqlClient;
 
+import java.util.Map;
+
 /**
- * Factory interface for creating {@link io.vertx.ext.auth.AuthProvider} instances that use the Vert.x JDBC client.
- *
- * By default the hashing strategy is PBKDF2 which is the current recommended hashing strategy by OWASP
- * for password storage.
+ * Factory interface for creating {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances that use the Vert.x SQL client.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface SQLAuthentication extends AuthProvider {
+public interface SQLAuthentication extends AuthenticationProvider {
 
   /**
    * Create a JDBC auth provider implementation
@@ -43,4 +43,19 @@ public interface SQLAuthentication extends AuthProvider {
     return new SQLAuthenticationImpl(client, options);
   }
 
+  /**
+   * Hashes a password to be stored.
+   *
+   * See: {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
+   */
+  String hash(String id, Map<String, String> params, String salt, String password);
+
+  /**
+   * Hashes a password to be stored.
+   *
+   * See: {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
+   */
+  default String hash(String id, String salt, String password) {
+    return hash(id, null, salt, password);
+  }
 }

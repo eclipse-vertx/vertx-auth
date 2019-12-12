@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.sql.impl;
 
+import java.util.Map;
 import java.util.Objects;
 
 import io.vertx.core.AsyncResult;
@@ -88,5 +89,10 @@ public class SQLAuthenticationImpl implements SQLAuthentication {
         resultHandler.handle(Future.failedFuture(preparedQuery.cause()));
       }
     });
+  }
+
+  @Override
+  public String hash(String id, Map<String, String> params, String salt, String password) {
+    return strategy.hash(id, params, salt, password);
   }
 }

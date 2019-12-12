@@ -75,7 +75,7 @@ public class SQLAuthorizationImpl implements SQLAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> resultHandler) {
     String username = user.principal().getString("username");
     if (username != null) {
       getRoles(username, roleResponse -> {
@@ -84,7 +84,8 @@ public class SQLAuthorizationImpl implements SQLAuthorization {
           getPermissions(username, permissionResponse -> {
             if (permissionResponse.succeeded()) {
               authorizations.addAll(permissionResponse.result());
-              resultHandler.handle(Future.succeededFuture(authorizations));
+              user.authorizations().add(getId(), authorizations);
+              resultHandler.handle(Future.succeededFuture());
             } else {
               resultHandler.handle(Future.failedFuture(permissionResponse.cause()));
             }

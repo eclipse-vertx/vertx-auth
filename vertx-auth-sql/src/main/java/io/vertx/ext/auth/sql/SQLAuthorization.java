@@ -22,9 +22,9 @@ import io.vertx.ext.auth.sql.impl.SQLAuthorizationImpl;
 import io.vertx.sqlclient.SqlClient;
 
 /**
- * Factory interface for creating {@link AuthorizationProvider} instances that use the Vert.x JDBC client.
+ * Factory interface for creating {@link AuthorizationProvider} instances that use the Vert.x SQL client.
  *
- * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
 public interface SQLAuthorization extends AuthorizationProvider {
@@ -39,5 +39,4 @@ public interface SQLAuthorization extends AuthorizationProvider {
   static SQLAuthorization create(SqlClient client, SQLAuthorizationOptions options) {
     return new SQLAuthorizationImpl(client, options);
   }
-
 }
