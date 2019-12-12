@@ -226,7 +226,8 @@ PEM files are common and easy to use but are not password protected, so private 
 
 JWKs are a standard used by OpenID connect and JWT providers. They represent a key as a JSON object. Usually these JSON
 documents are provided by an identity provider server like Google, Microsoft, etc... but you can also generate your own
-keys using the online application <a href="https://mkjwk.org/">https://mkjwk.org</a>.
+keys using the online application <a href="https://mkjwk.org/">https://mkjwk.org</a>. For an offline experience there is
+also the tool: <a href="https://connect2id.com/products/nimbus-jose-jwt/generator">https://connect2id.com/products/nimbus-jose-jwt/generator</a>.
 
 == Chaining authentication providers
 
