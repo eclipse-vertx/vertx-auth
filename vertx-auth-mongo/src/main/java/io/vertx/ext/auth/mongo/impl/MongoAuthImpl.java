@@ -37,6 +37,7 @@ import java.util.List;
  *
  * @author mremme
  */
+@Deprecated
 public class MongoAuthImpl implements MongoAuth {
   final static String PROPERTY_FIELD_SALT = "__field-salt__";
   final static String PROPERTY_FIELD_PASSWORD = "__field-password__";

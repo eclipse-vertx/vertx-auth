@@ -16,7 +16,16 @@
 
 package io.vertx.ext.auth.mongo.test;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.impl.UserImpl;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
+import io.vertx.ext.auth.mongo.MongoAuthentication;
+import io.vertx.ext.auth.mongo.impl.DefaultHashStrategy;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.test.core.VertxTestBase;
 
@@ -129,14 +138,6 @@ public abstract class MongoBaseTest extends VertxTestBase {
     dropCollections(latch);
     awaitLatch(latch);
   }
-
-  /**
-   * Initialize the demo data needed for the tests
-   *
-   * @throws Exception
-   *           any Exception by submethods
-   */
-  public abstract void initDemoData() throws Exception;
 
   /**
    * Create a name of a collection by adding a certain suffix. All Collections with this suffix will be cleared by start

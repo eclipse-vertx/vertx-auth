@@ -16,20 +16,25 @@
 
 package io.vertx.ext.auth.mongo.test;
 
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.ext.auth.mongo.AuthenticationException;
-import io.vertx.ext.auth.mongo.MongoAuth;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.mongo.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runners.model.InitializationError;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runners.model.InitializationError;
 
 /**
  * Testing MongoAuth with no encryption for the user password
@@ -37,16 +42,15 @@ import org.junit.runners.model.InitializationError;
  * @author mremme
  */
 
-public class MongoAuthNO_SALTTest extends MongoBaseTest {
-  private static final Logger log = LoggerFactory.getLogger(MongoAuthNO_SALTTest.class);
+public class MongoAuthorizationNO_SALTTest extends MongoAuthenticationNO_SALTTest {
+  private static final Logger log = LoggerFactory.getLogger(MongoAuthorizationNO_SALTTest.class);
 
-  protected MongoAuth authProvider;
+  protected MongoAuthorization authorizationProvider;
+  protected MongoAuthorizationOptions authorizationOptions = new MongoAuthorizationOptions();
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    getMongoClient();
-    initAuthService();
   }
 
   @Before
@@ -59,47 +63,26 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     super.tearDown();
   }
 
-  @Test
-  public void testAuthenticate() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testAuthenticateFailBadPwd() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "eggs");
-    authProvider.authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testAuthenticateFailBadUser() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "blah").put(authProvider.getPasswordField(), "whatever");
-    authProvider.authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
-      testComplete();
-    }));
-    await();
+  protected MongoAuthorization getAuthorizationProvider() {
+    if (authorizationProvider == null) {
+      MongoAuthorizationOptions options = new MongoAuthorizationOptions();
+      try {
+        authorizationProvider = MongoAuthorization.create("id", getMongoClient(), options);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return authorizationProvider;
   }
 
   @Test
   public void testAuthoriseHasRole() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "sausages");
+    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorized("role:developer", onSuccess(has -> {
-        assertTrue(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertTrue(RoleBasedAuthorization.create("developer").match(user));
         testComplete();
       }));
     }));
@@ -109,11 +92,11 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
   @Test
   public void testAuthoriseNotHasRole() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "sausages");
+    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorized("role:manager", onSuccess(has -> {
-        assertFalse(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertFalse(RoleBasedAuthorization.create("manager").match(user));
         testComplete();
       }));
     }));
@@ -123,11 +106,11 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
   @Test
   public void testAuthoriseHasPermission() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "sausages");
+    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorized("commit_code", onSuccess(has -> {
-        assertTrue(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
         testComplete();
       }));
     }));
@@ -137,11 +120,11 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
   @Test
   public void testAuthoriseNotHasPermission() {
     JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "sausages");
+    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
-      user.isAuthorized("eat_sandwich", onSuccess(has -> {
-        assertFalse(has);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));
         testComplete();
       }));
     }));
@@ -152,7 +135,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
    * ################################################## preparation methods
    * ##################################################
    */
-  protected List<InternalUser> createUserList() {
+  private List<InternalUser> createUserList() {
     List<InternalUser> users = new ArrayList<>();
     users.add(new InternalUser("Michael", "ps1", null, null));
     users.add(new InternalUser("Doublette", "ps1", null, null));
@@ -164,17 +147,9 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     return users;
   }
 
-  protected void initAuthService() throws Exception {
-    if (authProvider == null) {
-      log.info("initAuthService");
-      authProvider = createProvider();
-    }
-  }
-
-  protected MongoAuth createProvider() throws Exception {
-    JsonObject config = new JsonObject();
-    config.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-    return MongoAuth.create(getMongoClient(), config);
+  @Override
+  protected void dropCollections(CountDownLatch latch) {
+    super.dropCollections(latch);
   }
 
   private void initTestUsers() throws Exception {
@@ -195,7 +170,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
   private boolean verifyUserData() throws Exception {
     final StringBuffer buffer = new StringBuffer();
     CountDownLatch intLatch = new CountDownLatch(1);
-    String collectionName = authProvider.getCollectionName();
+    String collectionName = authenticationOptions.getCollectionName();
     log.info("verifyUserData in " + collectionName);
     getMongoClient().find(collectionName, new JsonObject(), res -> {
       if (res.succeeded()) {
@@ -211,6 +186,26 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     return buffer.length() == 0;
   }
 
+  private void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizationProvider().getAuthorizations(user, handler);
+  }
+
+  public Future<String> insertAuth(String username, List<String> roles, List<String> permissions) {
+
+    JsonObject user = new JsonObject();
+    user.put(authorizationOptions.getUsernameField(), username);
+    user.put(authorizationOptions.getRoleField(), roles);
+    user.put(authorizationOptions.getPermissionField(), permissions);
+
+    Promise promise = Promise.promise();
+    try {
+      getMongoClient().save(authorizationOptions.getCollectionName(), user, promise);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    return promise.future();
+  }
+
   /**
    * Creates a user inside mongo. Returns true, if user was successfully added
    *
@@ -224,7 +219,9 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     CountDownLatch intLatch = new CountDownLatch(1);
     final StringBuffer buffer = new StringBuffer();
 
-    authProvider.insertUser(user.username, user.password, user.roles, user.permissions, res -> {
+    insertUser(getAuthenticationProvider(), user.username, user.password)
+      .compose(res -> insertAuth(user.username, user.roles, user.permissions)
+    ).setHandler(res -> {
       if (res.succeeded()) {
         log.info("user added: " + user.username);
         latch.countDown();
@@ -238,22 +235,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     return buffer.length() == 0;
   }
 
-  /**
-   * Creates JsonObject for login in the convenient way
-   *
-   * @param username
-   *          the username to be used
-   * @param password
-   *          the password to be used
-   * @return a {@link JsonObject} with valid parameters
-   */
-  public JsonObject createAuthInfo(String username, String password) {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), username).put(authProvider.getPasswordField(), password);
-    return authInfo;
-  }
-
-  class InternalUser {
+  private class InternalUser {
     String username;
     String password;
     List<String> roles;

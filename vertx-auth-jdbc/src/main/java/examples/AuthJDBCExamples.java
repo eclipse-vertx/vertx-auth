@@ -78,7 +78,7 @@ public class AuthJDBCExamples {
   public void example9(JDBCAuthentication jdbcAuth, SQLConnection conn) {
 
     String hash = jdbcAuth.hash(
-      "pkdbf2", // hashing algorithm
+      "pbkdf2", // hashing algorithm
       VertxContextPRNG.current().nextString(32), // secure random salt
       "sausages" // password
     );

@@ -34,6 +34,7 @@ import java.util.List;
  * An extension of AuthProvider which is using {@link MongoClient} as store
  *
  * @author mremme
+ * @deprecated This class has been replaced by the class {@link io.vertx.ext.auth.mongo.MongoAuthentication} for authentication and {@link io.vertx.ext.auth.mongo.MongoAuthorization} for authorization
  */
 @VertxGen
 public interface MongoAuth extends AuthProvider {

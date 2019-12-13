@@ -3,6 +3,7 @@ package io.vertx.ext.auth.mongo;
 import io.vertx.codegen.annotations.VertxGen;
 
 @VertxGen
+@Deprecated
 public enum HashAlgorithm {
   /**
    * The default algorithm for backward compatible systems.
