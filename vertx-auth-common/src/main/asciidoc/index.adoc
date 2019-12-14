@@ -1,9 +1,9 @@
-= Vert.x Auth - Authentication and Authorisation
+= Vert.x Auth - Authentication and Authorization
 
-This Vert.x component provides interfaces for authentication and authorisation that can be used from
+This Vert.x component provides interfaces for authentication and authorization that can be used from
 your Vert.x applications and can be backed by different providers.
 
-Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
+Vert.x auth is also used by vertx-web to handle its authentication and authorization.
 
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
@@ -29,7 +29,7 @@ compile 'io.vertx:vertx-auth-common:${maven.version}'
 
 _Authentication_ means verifying the identity of a user.
 
-_Authorisation_ means verifying a user has an authority.
+_Authorization_ means verifying a user has an authority.
 
 What the authority means is determined by the particular implementation and we don't mandate any particular model,
 e.g. a permissions/roles model, to keep things very flexible all authorization operations are performed on the type
@@ -93,9 +93,9 @@ Here's an example of authenticating a user using a simple username/password impl
 {@link examples.AuthCommonExamples#example1}
 ----
 
-== Authorisation
+== Authorization
 
-Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorise it. A newly created
+Once you have an {@link io.vertx.ext.auth.User} instance you can call methods on it to authorize it. A newly created
 object will contain no cached authorizations, which means that the object is not authorized for any action. Once a user
 is updated using an {@link io.vertx.ext.auth.authorization.AuthorizationProvider} then the cache can be used to verify
 a given authorization.
@@ -104,14 +104,14 @@ to check if a user has a specific authority you use {@link io.vertx.ext.auth.Use
 
 The results of all the above are provided asynchronously in the handler.
 
-Here's an example loading the authorization cache an authorising a user:
+Here's an example loading the authorization cache an authorizing a user:
 
 [source,$lang]
 ----
 {@link examples.AuthCommonExamples#example2}
 ----
 
-And another example of authorising in a roles based model which uses the the interface {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
+And another example of authorizing in a roles based model which uses the the interface {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
 
 Please note, as discussed above how the authority string is interpreted is completely determined by the underlying
 implementation and Vert.x makes no assumptions here.
