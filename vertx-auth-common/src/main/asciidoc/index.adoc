@@ -1,9 +1,9 @@
-= Vert.x Auth - Authentication and Authorisation
+= Vert.x Auth - Authentication and Authorization
 
-This Vert.x component provides interfaces for authentication and authorisation that can be used from
+This Vert.x component provides interfaces for authentication and authorization that can be used from
 your Vert.x applications and can be backed by different providers.
 
-Vert.x auth is also used by vertx-web to handle its authentication and authorisation.
+Vert.x auth is also used by vertx-web to handle its authentication and authorization.
 
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
@@ -29,7 +29,7 @@ compile 'io.vertx:vertx-auth-common:${maven.version}'
 
 _Authentication_ means verifying the identity of a user.
 
-_Authorisation_ means verifying a user is authorized to perform a specific task
+_Authorization_ means verifying a user is authorized to perform a specific task
 
 To support many models and keep things very flexible, all authorization operations are performed on the type
 {@link io.vertx.ext.auth.authorization.Authorization}.
@@ -91,7 +91,7 @@ Here's an example of authenticating a user using a simple username/password impl
 {@link examples.AuthCommonExamples#example1}
 ----
 
-== Authorisation
+== Authorization
 
 Once you have an {@link io.vertx.ext.auth.User} instance you can call {@link io.vertx.ext.auth.User#authorizations} to get its authorizations. A newly created
 user will contain no authorizations. You can directly add authorization on the {@link io.vertx.ext.auth.User} itself or via an {@link io.vertx.ext.auth.authorization.AuthorizationProvider}.
@@ -105,7 +105,7 @@ Here's an example adding authorizations via an {@link io.vertx.ext.auth.authoriz
 {@link examples.AuthCommonExamples#example2}
 ----
 
-And another example of authorising in a roles based model which uses the the interface {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
+And another example of authorizing in a roles based model which uses the the interface {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
 
 Please note, as discussed above how the authority string is interpreted is completely determined by the underlying
 implementation and Vert.x makes no assumptions here.
