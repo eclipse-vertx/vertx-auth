@@ -1,5 +1,52 @@
 = Cheatsheets
 
+[[MongoAuthOptions]]
+== MongoAuthOptions
+
+++++
+ Options configuring Mongo authentication.
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[collectionName]]`@collectionName`|`String`|+++
+The property name to be used to set the name of the collection inside the config.
++++
+|[[config]]`@config`|`Json object`|+++
+The mongo client configuration: see Mongo Client documentation.
++++
+|[[datasourceName]]`@datasourceName`|`String`|+++
+The mongo data source name: see Mongo Client documentation.
++++
+|[[passwordField]]`@passwordField`|`String`|+++
+The property name to be used to set the name of the field, where the password is stored inside
++++
+|[[permissionField]]`@permissionField`|`String`|+++
+The property name to be used to set the name of the field, where the permissions are stored inside.
++++
+|[[roleField]]`@roleField`|`String`|+++
+The property name to be used to set the name of the field, where the roles are stored inside.
++++
+|[[saltField]]`@saltField`|`String`|+++
+The property name to be used to set the name of the field, where the SALT is stored inside.
++++
+|[[saltStyle]]`@saltStyle`|`link:enums.html#HashSaltStyle[HashSaltStyle]`|+++
+The property name to be used to set the name of the field, where the salt style is stored inside
++++
+|[[shared]]`@shared`|`Boolean`|+++
+Use a shared Mongo client or not.
++++
+|[[usernameCredentialField]]`@usernameCredentialField`|`String`|+++
+The property name to be used to set the name of the field, where the username for the credentials is stored inside.
++++
+|[[usernameField]]`@usernameField`|`String`|+++
+The property name to be used to set the name of the field, where the username is stored inside.
++++
+|===
+
 [[MongoAuthenticationOptions]]
 == MongoAuthenticationOptions
 
@@ -15,24 +62,23 @@
 |[[collectionName]]`@collectionName`|`String`|+++
 The property name to be used to set the name of the collection inside the config.
 +++
-|[[usernameField]]`@usernameField`|`String`|+++
-The property name to be used to set the name of the field, where the username is stored inside.
-+++
+|[[passwordCredentialField]]`@passwordCredentialField`|`String`|-
 |[[passwordField]]`@passwordField`|`String`|+++
 The property name to be used to set the name of the field, where the password is stored inside
 +++
 |[[usernameCredentialField]]`@usernameCredentialField`|`String`|+++
 The property name to be used to set the name of the field, where the username for the credentials is stored inside.
 +++
-|[[passwordCredentialField]]`@passwordCredentialField`|`String`|+++
-The property name to be used to set the name of the field, where the password for the credentials is stored inside.
+|[[usernameField]]`@usernameField`|`String`|+++
+The property name to be used to set the name of the field, where the username is stored inside.
 +++
-|
+|===
 
+[[MongoAuthorizationOptions]]
 == MongoAuthorizationOptions
 
 ++++
- Options configuring Mongo authorization.
+ Options configuring Mongo authentication.
 ++++
 '''
 
@@ -43,17 +89,11 @@ The property name to be used to set the name of the field, where the password fo
 |[[collectionName]]`@collectionName`|`String`|+++
 The property name to be used to set the name of the collection inside the config.
 +++
-|[[passwordField]]`@passwordField`|`String`|+++
-The property name to be used to set the name of the field, where the password is stored inside
-+++
 |[[permissionField]]`@permissionField`|`String`|+++
 The property name to be used to set the name of the field, where the permissions are stored inside.
 +++
 |[[roleField]]`@roleField`|`String`|+++
 The property name to be used to set the name of the field, where the roles are stored inside.
-+++
-|[[usernameCredentialField]]`@usernameCredentialField`|`String`|+++
-The property name to be used to set the name of the field, where the username for the credentials is stored inside.
 +++
 |[[usernameField]]`@usernameField`|`String`|+++
 The property name to be used to set the name of the field, where the username is stored inside.

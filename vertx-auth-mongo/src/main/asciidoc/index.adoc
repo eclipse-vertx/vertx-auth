@@ -112,11 +112,11 @@ authentication info:
 
 [source,$lang]
 ----
-{@link examples.AuthMongoExamples#example2(MongoAuth)}
+{@link examples.AuthMongoExamples#example2(MongoAuthentication)}
 ----
 Instead of the `username` and `password` field names used in the previous snippet, you should use:
-{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#getUsernameCredentialField(String) } and
-{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#getPasswordCredentialField(String) }
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#getUsernameCredentialField() } and
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#getPasswordCredentialField() }
 
 == Authorisation - Permission-Role Model
 
@@ -125,14 +125,14 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-{@link io.vertx.ext.auth.User#isAuthorized(io.vertx.ext.auth.authorization, io.vertx.core.Handler)} as follows:
+{@link io.vertx.ext.auth.User#isAuthorized(io.vertx.ext.auth.authorization.Authorization, io.vertx.core.Handler)} as follows:
 
 [source,$lang]
 ----
 {@link examples.AuthMongoExamples#example3(io.vertx.ext.auth.User)}
 ----
 
-If validating that a user has a particular _role_ then you simply use the {@link io.vertx.ext.auth.authorizationRoleBasedPermission}.
+If validating that a user has a particular _role_ then you simply use the {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
 
 [source,$lang]
 ----

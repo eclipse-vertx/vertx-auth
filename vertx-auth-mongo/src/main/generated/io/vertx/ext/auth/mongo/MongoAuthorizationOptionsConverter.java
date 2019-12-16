@@ -1,10 +1,13 @@
 package io.vertx.ext.auth.mongo;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link MongoAuthorizationOptions}.
- * NOTE: This class has been automatically generated from the {@link MongoAuthorizationOptions} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.mongo.MongoAuthorizationOptions}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.mongo.MongoAuthorizationOptions} original class using Vert.x codegen.
  */
 public class MongoAuthorizationOptionsConverter {
 
