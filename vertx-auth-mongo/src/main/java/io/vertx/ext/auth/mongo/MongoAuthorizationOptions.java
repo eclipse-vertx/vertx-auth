@@ -29,17 +29,12 @@ import io.vertx.ext.mongo.MongoClient;
 @DataObject(generateConverter = true)
 public class MongoAuthorizationOptions {
 
-  private boolean shared;
-  private String datasourceName;
   private String collectionName;
   private String usernameField;
   private String roleField;
   private String permissionField;
-  private JsonObject config;
 
   public MongoAuthorizationOptions() {
-    shared = false;
-    datasourceName = null;
     collectionName = MongoAuthorization.DEFAULT_COLLECTION_NAME;
     usernameField = MongoAuthorization.DEFAULT_USERNAME_FIELD;
     roleField = MongoAuthorization.DEFAULT_ROLE_FIELD;
@@ -49,51 +44,6 @@ public class MongoAuthorizationOptions {
   public MongoAuthorizationOptions(JsonObject json) {
     this();
     MongoAuthorizationOptionsConverter.fromJson(json, this);
-  }
-
-  public boolean getShared() {
-    return shared;
-  }
-
-  /**
-   * Use a shared Mongo client or not.
-   *
-   * @param shared true to use a shared client
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthorizationOptions setShared(boolean shared) {
-    this.shared = shared;
-    return this;
-  }
-
-  public String getDatasourceName() {
-    return datasourceName;
-  }
-
-  /**
-   * The mongo data source name: see Mongo Client documentation.
-   *
-   * @param datasourceName the data source name
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthorizationOptions setDatasourceName(String datasourceName) {
-    this.datasourceName = datasourceName;
-    return this;
-  }
-
-  public JsonObject getConfig() {
-    return config;
-  }
-
-  /**
-   * The mongo client configuration: see Mongo Client documentation.
-   *
-   * @param config the mongo config
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthorizationOptions setConfig(JsonObject config) {
-    this.config = config;
-    return this;
   }
 
   public String getCollectionName() {

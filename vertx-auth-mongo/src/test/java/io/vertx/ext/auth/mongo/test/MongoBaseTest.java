@@ -16,27 +16,6 @@
 
 package io.vertx.ext.auth.mongo.test;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.impl.UserImpl;
-import io.vertx.ext.auth.mongo.HashSaltStyle;
-import io.vertx.ext.auth.mongo.MongoAuthentication;
-import io.vertx.ext.auth.mongo.impl.DefaultHashStrategy;
-import io.vertx.ext.mongo.MongoClient;
-import io.vertx.test.core.VertxTestBase;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.IMongodConfig;
@@ -44,12 +23,30 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.mongo.MongoAuthentication;
+import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.test.core.VertxTestBase;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author mremme
  */
 
 public abstract class MongoBaseTest extends VertxTestBase {
+
+  private static final Logger log = LoggerFactory.getLogger(MongoBaseTest.class);
 
   public static final String TABLE_PREFIX = "TestMongo_";
 
@@ -212,6 +209,38 @@ public abstract class MongoBaseTest extends VertxTestBase {
         latch.countDown();
       }
     }));
+  }
+
+  protected Future<String> insertUser(MongoAuthentication authenticationProvider, MongoAuthenticationOptions authenticationOptions, String username, String password) throws Exception {
+
+    String hashedPassword = authenticationProvider.hash("pbkdf2", "somesalt", password);
+
+    JsonObject user = new JsonObject();
+    user.put(authenticationOptions.getUsernameField(), username);
+    user.put(authenticationOptions.getPasswordField(), hashedPassword);
+
+    Promise promise = Promise.promise();
+    getMongoClient().save(authenticationOptions.getCollectionName(), user, promise);
+    return promise.future();
+  }
+
+  protected boolean verifyUserData(MongoAuthenticationOptions authenticationOptions) throws Exception {
+    final StringBuffer buffer = new StringBuffer();
+    CountDownLatch intLatch = new CountDownLatch(1);
+    String collectionName = authenticationOptions.getCollectionName();
+    log.info("verifyUserData in " + collectionName);
+    getMongoClient().find(collectionName, new JsonObject(), res -> {
+      if (res.succeeded()) {
+        log.info(res.result().size() + " users found: " + res.result());
+
+      } else {
+        log.error("", res.cause());
+        buffer.append("false");
+      }
+      intLatch.countDown();
+    });
+    awaitLatch(intLatch);
+    return buffer.length() == 0;
   }
 
 }

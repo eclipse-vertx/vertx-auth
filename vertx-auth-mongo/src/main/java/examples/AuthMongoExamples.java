@@ -19,8 +19,12 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.mongo.HashAlgorithm;
 import io.vertx.ext.auth.mongo.MongoAuth;
+import io.vertx.ext.auth.mongo.MongoAuthentication;
+import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
 import io.vertx.ext.mongo.MongoClient;
 
 /**
@@ -30,11 +34,11 @@ public class AuthMongoExamples {
 
   public void example1(Vertx vertx, JsonObject mongoClientConfig) {
     MongoClient client = MongoClient.createShared(vertx, mongoClientConfig);
-    JsonObject authProperties = new JsonObject();
-    MongoAuth authProvider = MongoAuth.create(client, authProperties);
+    MongoAuthenticationOptions options = new MongoAuthenticationOptions();
+    MongoAuthentication authenticationProvider = MongoAuthentication.create(client, options);
   }
 
-  public void example2(MongoAuth authProvider) {
+  public void example2(MongoAuthentication authProvider) {
     JsonObject authInfo = new JsonObject()
         .put("username", "tim")
         .put("password", "sausages");
@@ -49,7 +53,7 @@ public class AuthMongoExamples {
 
   public void example3(User user) {
 
-    user.isAuthorized("commit_code", res -> {
+    user.isAuthorized(PermissionBasedAuthorization.create("commit_code"), res -> {
       if (res.succeeded()) {
         boolean hasPermission = res.result();
       } else {
@@ -61,7 +65,7 @@ public class AuthMongoExamples {
 
   public void example4(User user) {
 
-    user.isAuthorized(MongoAuth.ROLE_PREFIX + "manager", res -> {
+    user.isAuthorized(RoleBasedAuthorization.create("manager"), res -> {
       if (res.succeeded()) {
         boolean hasRole = res.result();
       } else {
@@ -69,12 +73,5 @@ public class AuthMongoExamples {
       }
     });
 
-  }
-
-  public void example5(Vertx vertx, JsonObject mongoClientConfig) {
-    MongoClient client = MongoClient.createShared(vertx, mongoClientConfig);
-    JsonObject authProperties = new JsonObject();
-    MongoAuth authProvider = MongoAuth.create(client, authProperties);
-    authProvider.setHashAlgorithm(HashAlgorithm.PBKDF2);
   }
 }

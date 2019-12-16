@@ -16,14 +16,9 @@
 
 package io.vertx.ext.auth.mongo.test;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.mongo.AuthenticationException;
 import io.vertx.ext.auth.mongo.MongoAuthentication;
 import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
@@ -41,21 +36,32 @@ import java.util.concurrent.CountDownLatch;
  * @author mremme
  */
 
-public class MongoAuthenticationNO_SALTTest extends MongoBaseTest {
-  private static final Logger log = LoggerFactory.getLogger(MongoAuthenticationNO_SALTTest.class);
+public class MongoAuthenticationTest extends MongoBaseTest {
+  private static final Logger log = LoggerFactory.getLogger(MongoAuthenticationTest.class);
 
   private MongoAuthentication authenticationProvider;
-  protected MongoAuthenticationOptions authenticationOptions = new MongoAuthenticationOptions();
+  protected MongoAuthenticationOptions authenticationOptions = new MongoAuthenticationOptions().setCollectionName(createCollectionName(MongoAuthentication.DEFAULT_COLLECTION_NAME));
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    getMongoClient();
+    getMongoClient(); // note: also drop existing collections
   }
 
   @Before
-  public void createDb() throws Exception {
-    initTestUsers();
+  public void initTestUsers() throws Exception {
+    log.info("initTestUsers");
+    List<InternalUser> users = createUserList();
+    CountDownLatch latch = new CountDownLatch(users.size());
+
+    for (InternalUser user : users) {
+      if (!initOneUser(getAuthenticationProvider(), authenticationOptions, user.username, user.password, latch))
+        throw new InitializationError("could not create users");
+    }
+    awaitLatch(latch);
+    if (!verifyUserData(authenticationOptions))
+      throw new InitializationError("users weren't created");
+
   }
 
   @Override
@@ -91,7 +97,7 @@ public class MongoAuthenticationNO_SALTTest extends MongoBaseTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "eggs");
     getAuthenticationProvider().authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
+      assertTrue(v instanceof Exception);
       testComplete();
     }));
     await();
@@ -102,7 +108,7 @@ public class MongoAuthenticationNO_SALTTest extends MongoBaseTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authenticationOptions.getUsernameField(), "blah").put(authenticationOptions.getPasswordField(), "whatever");
     getAuthenticationProvider().authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
+      assertTrue(v instanceof Exception);
       testComplete();
     }));
     await();
@@ -123,53 +129,6 @@ public class MongoAuthenticationNO_SALTTest extends MongoBaseTest {
     return users;
   }
 
-  private void initTestUsers() throws Exception {
-    log.info("initTestUsers");
-    List<InternalUser> users = createUserList();
-    CountDownLatch latch = new CountDownLatch(users.size());
-
-    for (InternalUser user : users) {
-      if (!initOneUser(user.username, user.password, latch))
-        throw new InitializationError("could not create users");
-    }
-    awaitLatch(latch);
-    if (!verifyUserData())
-      throw new InitializationError("users weren't created");
-
-  }
-
-  private boolean verifyUserData() throws Exception {
-    final StringBuffer buffer = new StringBuffer();
-    CountDownLatch intLatch = new CountDownLatch(1);
-    String collectionName = authenticationOptions.getCollectionName();
-    log.info("verifyUserData in " + collectionName);
-    getMongoClient().find(collectionName, new JsonObject(), res -> {
-      if (res.succeeded()) {
-        log.info(res.result().size() + " users found: " + res.result());
-
-      } else {
-        log.error("", res.cause());
-        buffer.append("false");
-      }
-      intLatch.countDown();
-    });
-    awaitLatch(intLatch);
-    return buffer.length() == 0;
-  }
-
-  public Future<String> insertUser(MongoAuthentication authenticationProvider, String username, String password) throws Exception {
-
-    String hashedPassword = authenticationProvider.hash("pbkdf2", "somesalt", password);
-
-    JsonObject user = new JsonObject();
-    user.put(authenticationOptions.getUsernameField(), username);
-    user.put(authenticationOptions.getPasswordField(), hashedPassword);
-
-    Promise promise = Promise.promise();
-    getMongoClient().save(authenticationOptions.getCollectionName(), user, promise);
-    return promise.future();
-  }
-
   /**
    * Creates a user inside mongo. Returns true, if user was successfully added
    *
@@ -178,11 +137,11 @@ public class MongoAuthenticationNO_SALTTest extends MongoBaseTest {
    * @throws Exception
    * @throws Throwable
    */
-  private boolean initOneUser(String username, String password, CountDownLatch latch) throws Exception {
+  protected boolean initOneUser(MongoAuthentication authenticationProvider, MongoAuthenticationOptions authenticationOptions, String username, String password, CountDownLatch latch) throws Exception {
     CountDownLatch intLatch = new CountDownLatch(1);
     final StringBuffer buffer = new StringBuffer();
 
-    insertUser(getAuthenticationProvider(), username, password).setHandler(res -> {
+    insertUser(authenticationProvider, authenticationOptions, username, password).setHandler(res -> {
       if (res.succeeded()) {
         log.info("user added: " + username);
         latch.countDown();

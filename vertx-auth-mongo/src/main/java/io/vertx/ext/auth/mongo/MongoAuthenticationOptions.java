@@ -29,78 +29,23 @@ import io.vertx.ext.mongo.MongoClient;
 @DataObject(generateConverter = true)
 public class MongoAuthenticationOptions {
 
-  private boolean shared;
-  private String datasourceName;
   private String collectionName;
   private String usernameField;
   private String passwordField;
   private String usernameCredentialField;
   private String passwordCredentialField;
-  private String saltField;
-  private HashSaltStyle saltStyle;
-  private HashAlgorithm hashAlgorithm;
-  private JsonObject config;
 
   public MongoAuthenticationOptions() {
-    shared = false;
-    datasourceName = null;
     collectionName = MongoAuthentication.DEFAULT_COLLECTION_NAME;
     usernameField = MongoAuthentication.DEFAULT_USERNAME_FIELD;
     passwordField = MongoAuthentication.DEFAULT_PASSWORD_FIELD;
     usernameCredentialField = MongoAuthentication.DEFAULT_CREDENTIAL_USERNAME_FIELD;
     passwordCredentialField = MongoAuthentication.DEFAULT_CREDENTIAL_PASSWORD_FIELD;
-    saltField = MongoAuthentication.DEFAULT_SALT_FIELD;
-    saltStyle = null;
   }
 
   public MongoAuthenticationOptions(JsonObject json) {
     this();
     MongoAuthenticationOptionsConverter.fromJson(json, this);
-  }
-
-  public boolean getShared() {
-    return shared;
-  }
-
-  /**
-   * Use a shared Mongo client or not.
-   *
-   * @param shared true to use a shared client
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthenticationOptions setShared(boolean shared) {
-    this.shared = shared;
-    return this;
-  }
-
-  public String getDatasourceName() {
-    return datasourceName;
-  }
-
-  /**
-   * The mongo data source name: see Mongo Client documentation.
-   *
-   * @param datasourceName the data source name
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthenticationOptions setDatasourceName(String datasourceName) {
-    this.datasourceName = datasourceName;
-    return this;
-  }
-
-  public JsonObject getConfig() {
-    return config;
-  }
-
-  /**
-   * The mongo client configuration: see Mongo Client documentation.
-   *
-   * @param config the mongo config
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthenticationOptions setConfig(JsonObject config) {
-    this.config = config;
-    return this;
   }
 
   public String getCollectionName() {
@@ -169,45 +114,6 @@ public class MongoAuthenticationOptions {
 
   public MongoAuthenticationOptions setPasswordCredentialField(String passwordCredentialField) {
     this.passwordCredentialField = passwordCredentialField;
-    return this;
-  }
-
-  public String getSaltField() {
-    return saltField;
-  }
-
-  /**
-   * The property name to be used to set the name of the field, where the SALT is stored inside.
-   *
-   * @param saltField the salt field
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthenticationOptions setSaltField(String saltField) {
-    this.saltField = saltField;
-    return this;
-  }
-
-  public HashSaltStyle getSaltStyle() {
-    return saltStyle;
-  }
-
-  /**
-   * The property name to be used to set the name of the field, where the salt style is stored inside
-   *
-   * @param saltStyle the salt style
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MongoAuthenticationOptions setSaltStyle(HashSaltStyle saltStyle) {
-    this.saltStyle = saltStyle;
-    return this;
-  }
-
-  public HashAlgorithm getHashAlgorithm() {
-    return hashAlgorithm;
-  }
-
-  public MongoAuthenticationOptions setHashAlgorithm(HashAlgorithm hashAlgorithm) {
-    this.hashAlgorithm = hashAlgorithm;
     return this;
   }
 }

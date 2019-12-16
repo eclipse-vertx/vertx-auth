@@ -75,7 +75,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "eggs");
     authProvider.authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
+      assertTrue(v instanceof Exception);
       testComplete();
     }));
     await();
@@ -86,7 +86,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authProvider.getUsernameField(), "blah").put(authProvider.getPasswordField(), "whatever");
     authProvider.authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
+      assertTrue(v instanceof Exception);
       testComplete();
     }));
     await();

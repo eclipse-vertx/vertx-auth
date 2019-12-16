@@ -47,6 +47,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   private MongoClient mongoClient;
   private MongoAuthenticationOptions options;
   private HashStrategy legacyStrategy;
+  private String hashField;
 
   /**
    * Creates a new instance
@@ -61,10 +62,17 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
     this.options = options;
   }
 
-  public MongoAuthenticationImpl(MongoClient mongoClient, HashStrategy legacyStrategy, MongoAuthenticationOptions options) {
+  /**
+   * Provided for backward compatibility
+   * @param mongoClient
+   * @param legacyStrategy
+   * @param options
+   */
+  public MongoAuthenticationImpl(MongoClient mongoClient, HashStrategy legacyStrategy, String hashField, MongoAuthenticationOptions options) {
     this.mongoClient = mongoClient;
     this.options = options;
     this.legacyStrategy = legacyStrategy;
+    this.hashField = hashField;
   }
 
   @Override
@@ -93,7 +101,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
         } else {
           resultHandler.handle(Future.failedFuture(res.cause()));
         }
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.warn(e);
         resultHandler.handle(Future.failedFuture(e));
       }
@@ -120,12 +128,12 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
    * @return
    */
   private User handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
-      throws AuthenticationException {
+      throws Exception {
     switch (resultList.result().size()) {
     case 0: {
       String message = "No account found for user [" + authToken.username + "]";
       // log.warn(message);
-      throw new AuthenticationException(message);
+      throw new Exception(message);
     }
     case 1: {
       JsonObject json = resultList.result().get(0);
@@ -135,7 +143,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
       else {
         String message = "Invalid username/password [" + authToken.username + "]";
         // log.warn(message);
-        throw new AuthenticationException(message);
+        throw new Exception(message);
       }
     }
     default: {
@@ -143,15 +151,17 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
       String message = "More than one user row found for user [" + authToken.username + "( "
           + resultList.result().size() + " )]. Usernames must be unique.";
       // log.warn(message);
-      throw new AuthenticationException(message);
+      throw new Exception(message);
     }
     }
   }
 
   private User createUser(JsonObject json) {
     User user = new UserImpl(json);
-    json.put(MongoAuthImpl.PROPERTY_FIELD_SALT, options.getSaltField());
-    json.put(MongoAuthImpl.PROPERTY_FIELD_PASSWORD, options.getPasswordField());
+    if (legacyStrategy != null) {
+      json.put(MongoAuthImpl.PROPERTY_FIELD_SALT, hashField);
+      json.put(MongoAuthImpl.PROPERTY_FIELD_PASSWORD, options.getPasswordField());
+    }
     user.setAuthProvider(this);
     return user;
   }

@@ -26,7 +26,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.mongo.*;
+import io.vertx.ext.auth.mongo.MongoAuthorization;
+import io.vertx.ext.auth.mongo.MongoAuthorizationOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runners.model.InitializationError;
@@ -42,8 +43,8 @@ import java.util.concurrent.CountDownLatch;
  * @author mremme
  */
 
-public class MongoAuthorizationNO_SALTTest extends MongoAuthenticationNO_SALTTest {
-  private static final Logger log = LoggerFactory.getLogger(MongoAuthorizationNO_SALTTest.class);
+public class MongoAuthorizationTest extends MongoAuthenticationTest {
+  private static final Logger log = LoggerFactory.getLogger(MongoAuthorizationTest.class);
 
   protected MongoAuthorization authorizationProvider;
   protected MongoAuthorizationOptions authorizationOptions = new MongoAuthorizationOptions();
@@ -51,11 +52,23 @@ public class MongoAuthorizationNO_SALTTest extends MongoAuthenticationNO_SALTTes
   @Override
   public void setUp() throws Exception {
     super.setUp();
+    getMongoClient(); // note: also drop existing collections
   }
 
   @Before
-  public void createDb() throws Exception {
-    initTestUsers();
+  public void initTestUsers() throws Exception {
+    log.info("initTestUsers");
+    List<InternalUser> users = createUserList();
+    CountDownLatch latch = new CountDownLatch(users.size());
+
+    for (InternalUser user : users) {
+      if (!initOneUser(user, latch))
+        throw new InitializationError("could not create users");
+    }
+    awaitLatch(latch);
+    if (!verifyUserData(authenticationOptions))
+      throw new InitializationError("users weren't created");
+
   }
 
   @Override
@@ -152,30 +165,16 @@ public class MongoAuthorizationNO_SALTTest extends MongoAuthenticationNO_SALTTes
     super.dropCollections(latch);
   }
 
-  private void initTestUsers() throws Exception {
-    log.info("initTestUsers");
-    List<InternalUser> users = createUserList();
-    CountDownLatch latch = new CountDownLatch(users.size());
-
-    for (InternalUser user : users) {
-      if (!initOneUser(user, latch))
-        throw new InitializationError("could not create users");
-    }
-    awaitLatch(latch);
-    if (!verifyUserData())
-      throw new InitializationError("users weren't created");
-
-  }
-
-  private boolean verifyUserData() throws Exception {
-    final StringBuffer buffer = new StringBuffer();
+  private boolean initOneUser(InternalUser user, CountDownLatch latch) throws Exception {
     CountDownLatch intLatch = new CountDownLatch(1);
-    String collectionName = authenticationOptions.getCollectionName();
-    log.info("verifyUserData in " + collectionName);
-    getMongoClient().find(collectionName, new JsonObject(), res -> {
-      if (res.succeeded()) {
-        log.info(res.result().size() + " users found: " + res.result());
+    final StringBuffer buffer = new StringBuffer();
 
+    insertUser(getAuthenticationProvider(), authenticationOptions, user.username, user.password)
+      .compose(res -> insertAuth(user.username, user.roles, user.permissions)
+      ).setHandler(res -> {
+      if (res.succeeded()) {
+        log.info("user added: " + user.username);
+        latch.countDown();
       } else {
         log.error("", res.cause());
         buffer.append("false");
@@ -185,6 +184,8 @@ public class MongoAuthorizationNO_SALTTest extends MongoAuthenticationNO_SALTTes
     awaitLatch(intLatch);
     return buffer.length() == 0;
   }
+
+
 
   private void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
     getAuthorizationProvider().getAuthorizations(user, handler);
@@ -204,35 +205,6 @@ public class MongoAuthorizationNO_SALTTest extends MongoAuthenticationNO_SALTTes
       throw new RuntimeException(e);
     }
     return promise.future();
-  }
-
-  /**
-   * Creates a user inside mongo. Returns true, if user was successfully added
-   *
-   * @param user
-   * @param latch
-   * @return
-   * @throws Exception
-   * @throws Throwable
-   */
-  private boolean initOneUser(InternalUser user, CountDownLatch latch) throws Exception {
-    CountDownLatch intLatch = new CountDownLatch(1);
-    final StringBuffer buffer = new StringBuffer();
-
-    insertUser(getAuthenticationProvider(), user.username, user.password)
-      .compose(res -> insertAuth(user.username, user.roles, user.permissions)
-    ).setHandler(res -> {
-      if (res.succeeded()) {
-        log.info("user added: " + user.username);
-        latch.countDown();
-      } else {
-        log.error("", res.cause());
-        buffer.append("false");
-      }
-      intLatch.countDown();
-    });
-    awaitLatch(intLatch);
-    return buffer.length() == 0;
   }
 
   private class InternalUser {

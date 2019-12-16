@@ -17,16 +17,6 @@ public class MongoAuthorizationOptionsConverter {
             obj.setCollectionName((String)member.getValue());
           }
           break;
-        case "config":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setConfig(((JsonObject)member.getValue()).copy());
-          }
-          break;
-        case "datasourceName":
-          if (member.getValue() instanceof String) {
-            obj.setDatasourceName((String)member.getValue());
-          }
-          break;
         case "permissionField":
           if (member.getValue() instanceof String) {
             obj.setPermissionField((String)member.getValue());
@@ -35,11 +25,6 @@ public class MongoAuthorizationOptionsConverter {
         case "roleField":
           if (member.getValue() instanceof String) {
             obj.setRoleField((String)member.getValue());
-          }
-          break;
-        case "shared":
-          if (member.getValue() instanceof Boolean) {
-            obj.setShared((Boolean)member.getValue());
           }
           break;
         case "usernameField":
@@ -59,19 +44,12 @@ public class MongoAuthorizationOptionsConverter {
     if (obj.getCollectionName() != null) {
       json.put("collectionName", obj.getCollectionName());
     }
-    if (obj.getConfig() != null) {
-      json.put("config", obj.getConfig());
-    }
-    if (obj.getDatasourceName() != null) {
-      json.put("datasourceName", obj.getDatasourceName());
-    }
     if (obj.getPermissionField() != null) {
       json.put("permissionField", obj.getPermissionField());
     }
     if (obj.getRoleField() != null) {
       json.put("roleField", obj.getRoleField());
     }
-    json.put("shared", obj.getShared());
     if (obj.getUsernameField() != null) {
       json.put("usernameField", obj.getUsernameField());
     }

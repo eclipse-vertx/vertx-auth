@@ -74,13 +74,7 @@ public interface MongoAuthentication extends AuthProvider {
   String DEFAULT_SALT_FIELD = "salt";
 
   /**
-   * Creates an instance of MongoAuth by using the given {@link MongoClient} and configuration object. An example for a
-   * configuration object:
-   *
-   * <pre>
-   * JsonObject js = new JsonObject();
-   * js.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
-   * </pre>
+   * Creates an instance of MongoAuth by using the given {@link MongoClient} and configuration object.
    *
    * @param mongoClient
    *          an instance of {@link MongoClient} to be used for data storage and retrival
@@ -93,7 +87,7 @@ public interface MongoAuthentication extends AuthProvider {
   }
 
   static MongoAuthentication create(MongoClient mongoClient, HashStrategy hashStrategy, MongoAuthenticationOptions options) {
-    return new MongoAuthenticationImpl(mongoClient, hashStrategy, options);
+    return new MongoAuthenticationImpl(mongoClient, hashStrategy, DEFAULT_SALT_FIELD, options);
   }
 
   /**
