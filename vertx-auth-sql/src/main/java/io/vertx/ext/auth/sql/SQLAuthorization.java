@@ -33,6 +33,16 @@ public interface SQLAuthorization extends AuthorizationProvider {
    * Create a JDBC authorization provider implementation
    *
    * @param client  the SQL client instance
+   * @return  the auth provider
+   */
+  static SQLAuthorization create(SqlClient client) {
+    return create(client, new SQLAuthorizationOptions());
+  }
+
+  /**
+   * Create a JDBC authorization provider implementation
+   *
+   * @param client  the SQL client instance
    * @param options  the {@link SQLAuthorizationOptions}
    * @return  the auth provider
    */

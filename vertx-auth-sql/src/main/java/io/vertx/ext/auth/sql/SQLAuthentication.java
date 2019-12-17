@@ -36,6 +36,16 @@ public interface SQLAuthentication extends AuthenticationProvider {
    * Create a JDBC auth provider implementation
    *
    * @param client  the JDBC client instance
+   * @return  the auth provider
+   */
+  static SQLAuthentication create(SqlClient client) {
+    return create(client, new SQLAuthenticationOptions());
+  }
+
+  /**
+   * Create a JDBC auth provider implementation
+   *
+   * @param client  the JDBC client instance
    * @param options authentication options
    * @return  the auth provider
    */

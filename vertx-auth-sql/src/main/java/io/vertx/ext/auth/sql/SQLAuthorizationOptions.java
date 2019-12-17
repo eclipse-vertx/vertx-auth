@@ -28,12 +28,12 @@ public class SQLAuthorizationOptions {
   /**
    * The default query to retrieve all roles for the user
    */
-  private final static String DEFAULT_ROLES_QUERY = "SELECT ROLE FROM USERS_ROLES WHERE USERNAME = ?";
+  private final static String DEFAULT_ROLES_QUERY = "SELECT role FROM users_roles WHERE username = ?";
 
   /**
    * The default query to retrieve all permissions for the role
    */
-  private final static String DEFAULT_PERMISSIONS_QUERY = "SELECT PERM FROM ROLES_PERMS RP, USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE";
+  private final static String DEFAULT_PERMISSIONS_QUERY = "SELECT perm FROM roles_perms RP, users_roles UR WHERE UR.username = ? AND UR.role = RP.role";
 
   private String rolesQuery;
   private String permissionsQuery;
