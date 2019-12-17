@@ -37,19 +37,19 @@ import java.util.List;
  *
  * @author mremme
  */
+@Deprecated
 public class MongoAuthImpl implements MongoAuth {
   final static String PROPERTY_FIELD_SALT = "__field-salt__";
   final static String PROPERTY_FIELD_PASSWORD = "__field-password__";
   private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
+  private static final String PROVIDER_ID = "mongo-authentication";
   private MongoClient mongoClient;
-  private String usernameField = DEFAULT_USERNAME_FIELD;
-  private String passwordField = DEFAULT_PASSWORD_FIELD;
-  private String roleField = DEFAULT_ROLE_FIELD;
-  private String permissionField = DEFAULT_PERMISSION_FIELD;
-  private String usernameCredentialField = DEFAULT_CREDENTIAL_USERNAME_FIELD;
-  private String passwordCredentialField = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
   private String saltField = DEFAULT_SALT_FIELD;
-  private String collectionName = DEFAULT_COLLECTION_NAME;
+
+  private MongoAuthentication mongoAuthentication;
+  private MongoAuthenticationOptions mongoAuthenticationOptions;
+  private MongoAuthorization mongoAuthorization;
+  private MongoAuthorizationOptions mongoAuthorizationOptions;
 
   private JsonObject config;
 
@@ -67,88 +67,32 @@ public class MongoAuthImpl implements MongoAuth {
   public MongoAuthImpl(MongoClient mongoClient, JsonObject config) {
     this.mongoClient = mongoClient;
     this.config = config;
+    this.mongoAuthenticationOptions = new MongoAuthenticationOptions();
+    this.mongoAuthorizationOptions = new MongoAuthorizationOptions();
     init();
+    this.mongoAuthentication = MongoAuthentication.create(mongoClient, getHashStrategy(), mongoAuthenticationOptions);
+    this.mongoAuthorization = MongoAuthorization.create(PROVIDER_ID, mongoClient, mongoAuthorizationOptions);
   }
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    String username = authInfo.getString(this.usernameCredentialField);
-    String password = authInfo.getString(this.passwordCredentialField);
-
-    // Null username is invalid
-    if (username == null) {
-      resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
-      return;
-    }
-    if (password == null) {
-      resultHandler.handle((Future.failedFuture("Password must be set for authentication.")));
-      return;
-    }
-    AuthToken token = new AuthToken(username, password);
-
-    JsonObject query = createQuery(username);
-    mongoClient.find(this.collectionName, query, res -> {
-
-      try {
-        if (res.succeeded()) {
-          User user = handleSelection(res, token);
-          resultHandler.handle(Future.succeededFuture(user));
-        } else {
-          resultHandler.handle(Future.failedFuture(res.cause()));
-        }
-      } catch (Throwable e) {
-        log.warn(e);
-        resultHandler.handle(Future.failedFuture(e));
+    mongoAuthentication.authenticate(authInfo, authenticationResult -> {
+      if (authenticationResult.failed()) {
+        resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
+      } else {
+        User user = authenticationResult.result();
+        mongoAuthorization.getAuthorizations(user, userAuthorizationResult -> {
+          if (userAuthorizationResult.failed()) {
+            // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
+            // for now, lets return a failure
+            resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
+          }
+          else {
+            resultHandler.handle(Future.succeededFuture(user));
+          }
+        });
       }
-
     });
-
-  }
-
-  /**
-   * The default implementation uses the usernameField as search field
-   *
-   * @param username
-   * @return
-   */
-  protected JsonObject createQuery(String username) {
-    return new JsonObject().put(usernameField, username);
-  }
-
-  /**
-   * Examine the selection of found users and return one, if password is fitting,
-   *
-   * @param resultList
-   * @param authToken
-   * @return
-   */
-  private User handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
-      throws AuthenticationException {
-    switch (resultList.result().size()) {
-    case 0: {
-      String message = "No account found for user [" + authToken.username + "]";
-      // log.warn(message);
-      throw new AuthenticationException(message);
-    }
-    case 1: {
-      JsonObject json = resultList.result().get(0);
-      User user = createUser(json);
-      if (examinePassword(user, authToken))
-        return user;
-      else {
-        String message = "Invalid username/password [" + authToken.username + "]";
-        // log.warn(message);
-        throw new AuthenticationException(message);
-      }
-    }
-    default: {
-      // More than one row returned!
-      String message = "More than one user row found for user [" + authToken.username + "( "
-          + resultList.result().size() + " )]. Usernames must be unique.";
-      // log.warn(message);
-      throw new AuthenticationException(message);
-    }
-    }
   }
 
   /*
@@ -164,11 +108,11 @@ public class MongoAuthImpl implements MongoAuth {
     principal.put(getUsernameField(), username);
 
     if (roles != null) {
-      principal.put(roleField, new JsonArray(roles));
+      principal.put(mongoAuthorizationOptions.getRoleField(), new JsonArray(roles));
     }
 
     if (permissions != null) {
-      principal.put(permissionField, new JsonArray(permissions));
+      principal.put(mongoAuthorizationOptions.getPermissionField(), new JsonArray(permissions));
     }
 
     if (getHashStrategy().getSaltStyle() == HashSaltStyle.COLUMN) {
@@ -186,35 +130,22 @@ public class MongoAuthImpl implements MongoAuth {
     User user = new UserImpl(json);
     json.put(PROPERTY_FIELD_SALT, getSaltField());
     json.put(PROPERTY_FIELD_PASSWORD, getPasswordField());
-    JsonArray roles = json.getJsonArray(roleField);
+    JsonArray roles = json.getJsonArray(mongoAuthorizationOptions.getRoleField());
     if (roles!=null) {
       for (int i=0; i<roles.size(); i++) {
         String role = roles.getString(i);
-        user.authorizations().add("mongo-authentication", RoleBasedAuthorization.create(role));
+        user.authorizations().add(PROVIDER_ID, RoleBasedAuthorization.create(role));
       }
     }
-    JsonArray permissions = json.getJsonArray(permissionField);
+    JsonArray permissions = json.getJsonArray(mongoAuthorizationOptions.getPermissionField());
     if (permissions!=null) {
       for (int i=0; i<permissions.size(); i++) {
         String permission = permissions.getString(i);
-        user.authorizations().add("mongo-authentication", PermissionBasedAuthorization.create(permission));
+        user.authorizations().add(PROVIDER_ID, PermissionBasedAuthorization.create(permission));
       }
     }
     user.setAuthProvider(this);
     return user;
-  }
-
-  /**
-   * Examine the given user object. Returns true, if object fits the given authentication
-   *
-   * @param user
-   * @param authToken
-   * @return
-   */
-  private boolean examinePassword(User user, AuthToken authToken) {
-    String storedPassword = getHashStrategy().getStoredPwd(user);
-    String givenPassword = getHashStrategy().computeHash(authToken.password, user);
-    return storedPassword != null && storedPassword.equals(givenPassword);
   }
 
   /**
@@ -276,7 +207,8 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setCollectionName(String collectionName) {
-    this.collectionName = collectionName;
+    this.mongoAuthenticationOptions.setCollectionName(collectionName);
+    this.mongoAuthorizationOptions.setCollectionName(collectionName);
     return this;
   }
 
@@ -287,7 +219,8 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setUsernameField(String fieldName) {
-    this.usernameField = fieldName;
+    this.mongoAuthenticationOptions.setUsernameField(fieldName);
+    this.mongoAuthorizationOptions.setUsernameField(fieldName);
     return this;
   }
 
@@ -298,7 +231,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setPasswordField(String fieldName) {
-    this.passwordField = fieldName;
+    this.mongoAuthenticationOptions.setPasswordField(fieldName);
     return this;
   }
 
@@ -309,7 +242,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setRoleField(String fieldName) {
-    this.roleField = fieldName;
+    this.mongoAuthorizationOptions.setRoleField(fieldName);
     return this;
   }
 
@@ -320,7 +253,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setUsernameCredentialField(String fieldName) {
-    this.usernameCredentialField = fieldName;
+    this.mongoAuthenticationOptions.setUsernameCredentialField(fieldName);
     return this;
   }
 
@@ -331,7 +264,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setPasswordCredentialField(String fieldName) {
-    this.passwordCredentialField = fieldName;
+    this.mongoAuthenticationOptions.setPasswordCredentialField(fieldName);
     return this;
   }
 
@@ -353,7 +286,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public String getCollectionName() {
-    return collectionName;
+    return mongoAuthenticationOptions.getCollectionName();
   }
 
   /*
@@ -363,7 +296,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public final String getUsernameField() {
-    return usernameField;
+    return mongoAuthenticationOptions.getUsernameField();
   }
 
   /*
@@ -373,7 +306,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public final String getPasswordField() {
-    return passwordField;
+    return mongoAuthenticationOptions.getPasswordField();
   }
 
   /*
@@ -383,7 +316,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public final String getRoleField() {
-    return roleField;
+    return mongoAuthorizationOptions.getRoleField();
   }
 
   /*
@@ -393,7 +326,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public final String getUsernameCredentialField() {
-    return usernameCredentialField;
+    return mongoAuthenticationOptions.getUsernameCredentialField();
   }
 
   /*
@@ -403,7 +336,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public final String getPasswordCredentialField() {
-    return passwordCredentialField;
+    return mongoAuthenticationOptions.getPasswordCredentialField();
   }
 
   /*
@@ -423,7 +356,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public MongoAuth setPermissionField(String fieldName) {
-    this.permissionField = fieldName;
+    this.mongoAuthorizationOptions.setPermissionField(fieldName);
     return this;
   }
 
@@ -434,7 +367,7 @@ public class MongoAuthImpl implements MongoAuth {
    */
   @Override
   public String getPermissionField() {
-    return this.permissionField;
+    return this.mongoAuthorizationOptions.getPermissionField();
   }
 
   /*
@@ -469,21 +402,6 @@ public class MongoAuthImpl implements MongoAuth {
   public MongoAuth setHashAlgorithm(HashAlgorithm hashAlgorithm) {
     getHashStrategy().setAlgorithm(hashAlgorithm);
     return this;
-  }
-
-  /**
-   * The incoming data from an authentication request
-   *
-   * @author mremme
-   */
-  static class AuthToken {
-    String username;
-    String password;
-
-    AuthToken(String username, String password) {
-      this.username = username;
-      this.password = password;
-    }
   }
 
   @Override

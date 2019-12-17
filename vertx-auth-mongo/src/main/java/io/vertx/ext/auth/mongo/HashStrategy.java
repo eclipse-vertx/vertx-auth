@@ -27,6 +27,7 @@ import io.vertx.ext.auth.User;
  * @author mremme
  */
 @VertxGen
+@Deprecated
 public interface HashStrategy {
 
   /**

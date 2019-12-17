@@ -36,7 +36,7 @@ import java.util.Random;
  *
  * @author mremme
  */
-
+@Deprecated
 public class DefaultHashStrategy implements HashStrategy {
   private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
   private static final int WORK_FACTOR = 10000;
