@@ -16,21 +16,13 @@
 
 package io.vertx.ext.auth.mongo;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.mongo.impl.MongoAuthImpl;
 import io.vertx.ext.auth.mongo.impl.MongoAuthenticationImpl;
 import io.vertx.ext.mongo.MongoClient;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,7 +31,7 @@ import java.util.Map;
  * @author francoisprunier
  */
 @VertxGen
-public interface MongoAuthentication extends AuthProvider {
+public interface MongoAuthentication extends AuthenticationProvider {
 
   /**
    * The default name of the collection to be used

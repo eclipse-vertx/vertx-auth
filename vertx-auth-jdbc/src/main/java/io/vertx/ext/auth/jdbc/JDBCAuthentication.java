@@ -17,7 +17,7 @@
 package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
@@ -33,7 +33,7 @@ import java.util.Map;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
-public interface JDBCAuthentication extends AuthProvider {
+public interface JDBCAuthentication extends AuthenticationProvider {
 
   /**
    * Create a JDBC auth provider implementation

@@ -162,7 +162,6 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
       json.put(MongoAuthImpl.PROPERTY_FIELD_SALT, hashField);
       json.put(MongoAuthImpl.PROPERTY_FIELD_PASSWORD, options.getPasswordField());
     }
-    user.setAuthProvider(this);
     return user;
   }
 

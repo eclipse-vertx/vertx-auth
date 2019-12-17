@@ -20,8 +20,8 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
@@ -31,7 +31,7 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface OAuth2Auth extends AuthProvider {
+public interface OAuth2Auth extends AuthenticationProvider {
 
   /**
    * Create a OAuth2 auth provider

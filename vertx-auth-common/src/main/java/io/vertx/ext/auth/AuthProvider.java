@@ -24,7 +24,9 @@ import io.vertx.ext.auth.authentication.AuthenticationProvider;
  * User-facing interface for authenticating users.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @deprecated This interface was quite opionated. The new alternative is to use one of the specific interfaces: {@link AuthenticationProvider} or {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
  */
 @VertxGen
+@Deprecated
 public interface AuthProvider extends AuthenticationProvider {
 }
