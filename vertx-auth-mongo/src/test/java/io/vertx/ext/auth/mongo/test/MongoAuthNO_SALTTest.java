@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runners.model.InitializationError;
 
@@ -46,7 +47,11 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     super.setUp();
     getMongoClient();
     initAuthService();
-    initDemoData();
+  }
+
+  @Before
+  public void createDb() throws Exception {
+    initTestUsers();
   }
 
   @Override
@@ -70,7 +75,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "eggs");
     authProvider.authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
+      assertTrue(v instanceof Exception);
       testComplete();
     }));
     await();
@@ -81,7 +86,7 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put(authProvider.getUsernameField(), "blah").put(authProvider.getPasswordField(), "whatever");
     authProvider.authenticate(authInfo, onFailure(v -> {
-      assertTrue(v instanceof AuthenticationException);
+      assertTrue(v instanceof Exception);
       testComplete();
     }));
     await();
@@ -170,11 +175,6 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
     JsonObject config = new JsonObject();
     config.put(MongoAuth.PROPERTY_COLLECTION_NAME, createCollectionName(MongoAuth.DEFAULT_COLLECTION_NAME));
     return MongoAuth.create(getMongoClient(), config);
-  }
-
-  @Override
-  public void initDemoData() throws Exception {
-    initTestUsers();
   }
 
   private void initTestUsers() throws Exception {

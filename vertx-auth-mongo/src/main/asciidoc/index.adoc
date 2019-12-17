@@ -36,8 +36,8 @@ Once you've got one of those you can create a {@link io.vertx.ext.auth.mongo.Mon
 
 Once you've got your instance you can authenticate and authorise with it just like any {@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
 
-The out of the box config assumes the usage of the collection with name "user", the username stored and read by field "username"
-some others.
+The out of the box config assumes the usage of the collection with name "user", the username stored and read in the field "username", and the password
+stored in the field "password".
 
 In order to avoid duplicates of user names your "user" collection should have a unique index on "username". In order
 to do this you should run the following snippet on your mongo server:
@@ -52,41 +52,15 @@ insert the row and fail if duplicate.
 
 You can also change all the defaults for the mongo collection and column names using any of the methods:
 
-{@link io.vertx.ext.auth.mongo.MongoAuth#setCollectionName(String)}
-{@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameField(String)}
-{@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordField(String)}
-{@link io.vertx.ext.auth.mongo.MongoAuth#setPermissionField(String)}
-{@link io.vertx.ext.auth.mongo.MongoAuth#setRoleField(String)}
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#setCollectionName(String)}
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#setUsernameField(String)}
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#setPasswordField(String)}
 if you want to adapt that to your needs.
 
-The default implementation assumes that the password is stored in the database as a SHA-512 hash after being
-concatenated with a salt. It also assumes the salt is stored in the table too. The field, where the salt is
-stored can be set by {@link io.vertx.ext.auth.mongo.MongoAuth#setSaltField(String) }, the default is "salt".
-You are able to change this behaviour by using {@link io.vertx.ext.auth.mongo.HashStrategy#setSaltStyle(HashSaltStyle)}.
-The HashStrategy you can retrieve by  {@link io.vertx.ext.auth.mongo.MongoAuth#getHashStrategy() }.
-By using this, you are able to set:
-{@link io.vertx.ext.auth.mongo.HashSaltStyle#NO_SALT} by which passwords are not crypted and stored
-in cleartext. ( see the warning below! )
-{@link io.vertx.ext.auth.mongo.HashSaltStyle#COLUMN}, which will create a salt per user and store this
-inside the defined column of the user. ( see the warning below! )
-{@link io.vertx.ext.auth.mongo.HashSaltStyle#EXTERNAL}, which will store only the crypted password in the
-database and will use a salt from external, which you will have to set by {@link io.vertx.ext.auth.mongo.HashStrategy#setExternalSalt(String)}
+The default implementation assumes that the password is stored in the database according to the generic {@link io.vertx.ext.auth.HashingStrategy} (so the salt is stored in the hash).
 
 If you want to override this behaviour you can do so by providing an alternative hash strategy and setting it with
  {@link io.vertx.ext.auth.mongo.MongoAuth#setHashStrategy(HashStrategy) }
-
-WARNING: It is strongly advised to use the {@link io.vertx.ext.auth.mongo.HashSaltStyle#EXTERNAL} option.
-The NO_SALT option is existing for development phase only and even the COLUMN option is not recommended, cause
-salt and password are stored inside the same place!
-
-WARNING: As of 2018 OWASP recommends the usage of stronger encryption algorithms to hash user passwords for
-this case you can change from the default (preserved for backwards-compatibility) to PBKDF2. For new projects
-this should be the standard.
-
-[source,$lang]
-----
-{@link examples.AuthMongoExamples#example5(io.vertx.core.Vertx, io.vertx.core.json.JsonObject)}
-----
 
 == Vertx Auth JDBC and GDPR
 
@@ -138,11 +112,11 @@ authentication info:
 
 [source,$lang]
 ----
-{@link examples.AuthMongoExamples#example2(MongoAuth)}
+{@link examples.AuthMongoExamples#example2(MongoAuthentication)}
 ----
 Instead of the `username` and `password` field names used in the previous snippet, you should use:
-{@link io.vertx.ext.auth.mongo.MongoAuth#setUsernameCredentialField(String) } and
-{@link io.vertx.ext.auth.mongo.MongoAuth#setPasswordCredentialField(String) }
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#getUsernameCredentialField() } and
+{@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions#getPasswordCredentialField() }
 
 == Authorisation - Permission-Role Model
 
@@ -151,14 +125,14 @@ implementation assumes a familiar user/role/permission model, where a user can h
 can have zero or more permissions.
 
 If validating if a user has a particular permission simply pass the permission into.
-{@link io.vertx.ext.auth.User#isAuthorized(java.lang.String, io.vertx.core.Handler)} as follows:
+{@link io.vertx.ext.auth.User#isAuthorized(io.vertx.ext.auth.authorization.Authorization, io.vertx.core.Handler)} as follows:
 
 [source,$lang]
 ----
 {@link examples.AuthMongoExamples#example3(io.vertx.ext.auth.User)}
 ----
 
-If validating that a user has a particular _role_ then you should prefix the argument with the role prefix.
+If validating that a user has a particular _role_ then you simply use the {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
 
 [source,$lang]
 ----

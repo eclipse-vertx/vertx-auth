@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.VertxGen;
 
 /**
  * Password hash salt configuration.
+ * @deprecated Please use the provided generic PHC strings at the column level
  */
 @VertxGen
 public enum HashSaltStyle {
