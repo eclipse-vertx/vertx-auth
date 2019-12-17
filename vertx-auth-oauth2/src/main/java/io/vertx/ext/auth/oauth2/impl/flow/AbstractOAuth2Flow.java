@@ -53,7 +53,11 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
 
     final JsonObject headers = new JsonObject();
 
-    if (config.isUseBasicAuthorizationHeader()) {
+    boolean confidentialClient =
+      config.getClientID() != null &&
+        config.getClientSecret() != null;
+
+    if (confidentialClient) {
       String basic = config.getClientID() + ":" + config.getClientSecret();
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
     }
@@ -69,11 +73,13 @@ abstract class AbstractOAuth2Flow implements OAuth2Flow {
       form.mergeIn(config.getExtraParameters());
     }
 
-    form.put("client_id", config.getClientID());
     form.put("grant_type", grantType);
+    if (!confidentialClient) {
+      form.put("client_id", config.getClientID());
 
-    if (config.getClientSecretParameterName() != null) {
-      form.put(config.getClientSecretParameterName(), config.getClientSecret());
+      if (config.getClientSecretParameterName() != null) {
+        form.put(config.getClientSecretParameterName(), config.getClientSecret());
+      }
     }
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");

@@ -31,9 +31,7 @@ public class OAuth2PasswordTest extends VertxTestBase {
 
   private static final JsonObject oauthConfig = new JsonObject()
       .put("password", "secret")
-      .put("client_secret", "client-secret")
       .put("grant_type", "password")
-      .put("client_id", "client-id")
       .put("username", "alice");
 
   protected OAuth2Auth oauth2;

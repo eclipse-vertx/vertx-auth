@@ -61,10 +61,19 @@ public interface OpenIDConnectAuth {
 
       // issuer validation
       if (config.isValidateIssuer()) {
-        final String issuerEndpoint = json.getString("issuer");
-        if (issuerEndpoint != null && !config.getSite().equals(issuerEndpoint)) {
-          handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
-          return;
+        String issuerEndpoint = json.getString("issuer");
+        if (issuerEndpoint != null) {
+          // the provider is letting the user know the issuer endpoint, so we need to validate
+          // as in vertx oauth the issuer (site config) is a url without the trailing slash we
+          // will compare the received endpoint without the final slash is present
+          if (issuerEndpoint.endsWith("/")) {
+            issuerEndpoint = issuerEndpoint.substring(0, issuerEndpoint.length() - 1);
+          }
+
+          if (!config.getSite().equals(issuerEndpoint)) {
+            handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
+            return;
+          }
         }
       }
 

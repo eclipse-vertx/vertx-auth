@@ -195,7 +195,11 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
 
       final JsonObject headers = new JsonObject();
 
-      if (config.isUseBasicAuthorizationHeader()) {
+      boolean confidentialClient =
+        config.getClientID() != null &&
+          config.getClientSecret() != null;
+
+      if (confidentialClient) {
         String basic = config.getClientID() + ":" + (config.getClientSecret() == null ? "" : config.getClientSecret());
         headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
       }
@@ -314,7 +318,11 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
     final OAuth2AuthProviderImpl provider = getProvider();
     final OAuth2ClientOptions config = provider.getConfig();
 
-    if (config.isUseBasicAuthorizationHeader()) {
+    boolean confidentialClient =
+      config.getClientID() != null &&
+        config.getClientSecret() != null;
+
+    if (confidentialClient) {
       String basic = config.getClientID() + ":" + (config.getClientSecret() == null ? "" : config.getClientSecret());
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
     }

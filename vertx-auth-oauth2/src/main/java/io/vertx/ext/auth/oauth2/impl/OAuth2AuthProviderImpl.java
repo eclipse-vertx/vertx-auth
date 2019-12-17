@@ -92,7 +92,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   public OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler) {
     final JsonObject headers = new JsonObject();
     // specify preferred accepted content type
-    headers.put("Accept", "application/json");
+    headers.put("Accept", "application/json, application/jwk-set+json");
 
     fetch(
       vertx,
@@ -116,7 +116,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
         JsonObject json;
 
-        if (reply.is("application/json")) {
+        if (reply.is("application/json") || reply.is("application/jwk-set+json")) {
           try {
             json = reply.jsonObject();
           } catch (RuntimeException e) {

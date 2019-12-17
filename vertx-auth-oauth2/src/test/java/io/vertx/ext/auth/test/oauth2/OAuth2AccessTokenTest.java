@@ -50,16 +50,12 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
 
   private static final JsonObject revokeConfig = new JsonObject()
       .put("token_type_hint", "refresh_token")
-      .put("client_secret", "client-secret")
-      .put("client_id", "client-id")
       .put("token", "ec1a59d298");
 
   private static final JsonObject oauthConfig = new JsonObject()
       .put("code", "code")
       .put("redirect_uri", "http://callback.com")
-      .put("client_secret", "client-secret")
-      .put("grant_type", "authorization_code")
-      .put("client_id", "client-id");
+      .put("grant_type", "authorization_code");
 
   private OAuth2Auth oauth2;
   private HttpServer server;
