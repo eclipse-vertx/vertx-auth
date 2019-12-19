@@ -24,7 +24,7 @@ import io.vertx.core.json.JsonObject;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
-public class SQLAuthorizationOptions {
+public class SqlAuthorizationOptions {
   /**
    * The default query to retrieve all roles for the user
    */
@@ -38,14 +38,14 @@ public class SQLAuthorizationOptions {
   private String rolesQuery;
   private String permissionsQuery;
 
-  public SQLAuthorizationOptions() {
+  public SqlAuthorizationOptions() {
     this.rolesQuery = DEFAULT_ROLES_QUERY;
     this.permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
   }
 
-  public SQLAuthorizationOptions(JsonObject json) {
+  public SqlAuthorizationOptions(JsonObject json) {
     this();
-    SQLAuthorizationOptionsConverter.fromJson(json, this);
+    SqlAuthorizationOptionsConverter.fromJson(json, this);
   }
 
   public String getRolesQuery() {
@@ -59,7 +59,7 @@ public class SQLAuthorizationOptions {
    * @param rolesQuery the roles query
    * @return a reference to this, so the API can be used fluently
    */
-  public SQLAuthorizationOptions setRolesQuery(String rolesQuery) {
+  public SqlAuthorizationOptions setRolesQuery(String rolesQuery) {
     this.rolesQuery = rolesQuery;
     return this;
   }
@@ -75,9 +75,14 @@ public class SQLAuthorizationOptions {
    * @param permissionsQuery the permissions query
    * @return a reference to this, so the API can be used fluently
    */
-  public SQLAuthorizationOptions setPermissionsQuery(String permissionsQuery) {
+  public SqlAuthorizationOptions setPermissionsQuery(String permissionsQuery) {
     this.permissionsQuery = permissionsQuery;
     return this;
   }
 
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+    SqlAuthorizationOptionsConverter.toJson(this, json);
+    return json;
+  }
 }

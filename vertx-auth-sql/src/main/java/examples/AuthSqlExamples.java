@@ -24,25 +24,25 @@ import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.sql.SQLAuthentication;
-import io.vertx.ext.auth.sql.SQLAuthenticationOptions;
-import io.vertx.ext.auth.sql.SQLAuthorization;
+import io.vertx.ext.auth.sql.SqlAuthentication;
+import io.vertx.ext.auth.sql.SqlAuthenticationOptions;
+import io.vertx.ext.auth.sql.SqlAuthorization;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class AuthSQLExamples {
+public class AuthSqlExamples {
 
   public void example5(Vertx vertx, SqlClient sqlClient) {
 
-    SQLAuthenticationOptions options = new SQLAuthenticationOptions();
+    SqlAuthenticationOptions options = new SqlAuthenticationOptions();
     // SQL client can be any of the known implementations
     // *. Postgres
     // *. MySQL
     // *. etc...
-    AuthenticationProvider authenticationProvider = SQLAuthentication.create(sqlClient, options);
+    AuthenticationProvider authenticationProvider = SqlAuthentication.create(sqlClient, options);
   }
 
   public void example6(AuthProvider authProvider) {
@@ -58,7 +58,7 @@ public class AuthSQLExamples {
     });
   }
 
-  public void example7(User user, SQLAuthorization jdbcAuthZ) {
+  public void example7(User user, SqlAuthorization jdbcAuthZ) {
     jdbcAuthZ.getAuthorizations(user, res -> {
       if (res.succeeded()) {
         if (PermissionBasedAuthorization.create("commit_code").match(user)) {
@@ -68,7 +68,7 @@ public class AuthSQLExamples {
     });
   }
 
-  public void example8(User user, SQLAuthorization jdbcAuthZ) {
+  public void example8(User user, SqlAuthorization jdbcAuthZ) {
     jdbcAuthZ.getAuthorizations(user, res -> {
       if (res.succeeded()) {
         if (RoleBasedAuthorization.create("manager").match(user)) {
@@ -78,7 +78,7 @@ public class AuthSQLExamples {
     });
   }
 
-  public void example9(SQLAuthentication jdbcAuth, SqlClient sqlClient) {
+  public void example9(SqlAuthentication jdbcAuth, SqlClient sqlClient) {
 
     String hash = jdbcAuth.hash(
       "pkdbf2", // hashing algorithm (OWASP recommended)

@@ -18,7 +18,7 @@ package io.vertx.ext.auth.sql;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
-import io.vertx.ext.auth.sql.impl.SQLAuthorizationImpl;
+import io.vertx.ext.auth.sql.impl.SqlAuthorizationImpl;
 import io.vertx.sqlclient.SqlClient;
 
 /**
@@ -27,7 +27,7 @@ import io.vertx.sqlclient.SqlClient;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface SQLAuthorization extends AuthorizationProvider {
+public interface SqlAuthorization extends AuthorizationProvider {
 
   /**
    * Create a JDBC authorization provider implementation
@@ -35,18 +35,18 @@ public interface SQLAuthorization extends AuthorizationProvider {
    * @param client  the SQL client instance
    * @return  the auth provider
    */
-  static SQLAuthorization create(SqlClient client) {
-    return create(client, new SQLAuthorizationOptions());
+  static SqlAuthorization create(SqlClient client) {
+    return create(client, new SqlAuthorizationOptions());
   }
 
   /**
    * Create a JDBC authorization provider implementation
    *
    * @param client  the SQL client instance
-   * @param options  the {@link SQLAuthorizationOptions}
+   * @param options  the {@link SqlAuthorizationOptions}
    * @return  the auth provider
    */
-  static SQLAuthorization create(SqlClient client, SQLAuthorizationOptions options) {
-    return new SQLAuthorizationImpl(client, options);
+  static SqlAuthorization create(SqlClient client, SqlAuthorizationOptions options) {
+    return new SqlAuthorizationImpl(client, options);
   }
 }

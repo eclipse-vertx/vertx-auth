@@ -17,9 +17,8 @@
 package io.vertx.ext.auth.sql;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.sql.impl.SQLAuthenticationImpl;
+import io.vertx.ext.auth.sql.impl.SqlAuthenticationImpl;
 import io.vertx.sqlclient.SqlClient;
 
 import java.util.Map;
@@ -30,7 +29,7 @@ import java.util.Map;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface SQLAuthentication extends AuthenticationProvider {
+public interface SqlAuthentication extends AuthenticationProvider {
 
   /**
    * Create a JDBC auth provider implementation
@@ -38,8 +37,8 @@ public interface SQLAuthentication extends AuthenticationProvider {
    * @param client  the JDBC client instance
    * @return  the auth provider
    */
-  static SQLAuthentication create(SqlClient client) {
-    return create(client, new SQLAuthenticationOptions());
+  static SqlAuthentication create(SqlClient client) {
+    return create(client, new SqlAuthenticationOptions());
   }
 
   /**
@@ -49,8 +48,8 @@ public interface SQLAuthentication extends AuthenticationProvider {
    * @param options authentication options
    * @return  the auth provider
    */
-  static SQLAuthentication create(SqlClient client, SQLAuthenticationOptions options) {
-    return new SQLAuthenticationImpl(client, options);
+  static SqlAuthentication create(SqlClient client, SqlAuthenticationOptions options) {
+    return new SqlAuthenticationImpl(client, options);
   }
 
   /**

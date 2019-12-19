@@ -1,7 +1,7 @@
 = Cheatsheets
 
-[[SQLAuthenticationOptions]]
-== SQLAuthenticationOptions
+[[SqlAuthenticationOptions]]
+== SqlAuthenticationOptions
 
 ++++
  Options configuring JDBC authentication.
@@ -18,8 +18,8 @@ Set the authentication query to use. Use this if you want to override the
 +++
 |===
 
-[[SQLAuthorizationOptions]]
-== SQLAuthorizationOptions
+[[SqlAuthorizationOptions]]
+== SqlAuthorizationOptions
 
 ++++
  Options configuring JDBC authentication.

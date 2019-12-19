@@ -61,7 +61,7 @@ public class MySQLTest {
   public void testAuthenticate(TestContext should) {
     final Async test = should.async();
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopus").put("password", "secret");
@@ -78,7 +78,7 @@ public class MySQLTest {
   public void testAuthenticateBadPassword(TestContext should) {
     final Async test = should.async();
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopus").put("password", "s3cr3t");
@@ -95,7 +95,7 @@ public class MySQLTest {
   public void testAuthenticateBadUser(TestContext should) {
     final Async test = should.async();
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopes").put("password", "s3cr3t");
@@ -115,13 +115,13 @@ public class MySQLTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopus").put("password", "secret");
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.succeeded());
       final User user = authenticate.result();
       should.assertNotNull(user);
-      AuthorizationProvider authz = SQLAuthorization.create(mysql);
+      AuthorizationProvider authz = SqlAuthorization.create(mysql);
       authz.getAuthorizations(user, getAuthorizations -> {
         should.assertTrue(getAuthorizations.succeeded());
         // attest
@@ -138,13 +138,13 @@ public class MySQLTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopus").put("password", "secret");
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.succeeded());
       final User user = authenticate.result();
       should.assertNotNull(user);
-      AuthorizationProvider authz = SQLAuthorization.create(mysql);
+      AuthorizationProvider authz = SqlAuthorization.create(mysql);
       authz.getAuthorizations(user, getAuthorizations -> {
         should.assertTrue(getAuthorizations.succeeded());
         // attest
@@ -161,13 +161,13 @@ public class MySQLTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopus").put("password", "secret");
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.succeeded());
       final User user = authenticate.result();
       should.assertNotNull(user);
-      AuthorizationProvider authz = SQLAuthorization.create(mysql);
+      AuthorizationProvider authz = SqlAuthorization.create(mysql);
       authz.getAuthorizations(user, getAuthorizations -> {
         should.assertTrue(getAuthorizations.succeeded());
         // attest
@@ -184,13 +184,13 @@ public class MySQLTest {
     JsonObject authInfo = new JsonObject();
     authInfo.put("username", "lopus").put("password", "secret");
 
-    AuthenticationProvider authn = SQLAuthentication.create(mysql);
+    AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.succeeded());
       final User user = authenticate.result();
       should.assertNotNull(user);
-      AuthorizationProvider authz = SQLAuthorization.create(mysql);
+      AuthorizationProvider authz = SqlAuthorization.create(mysql);
       authz.getAuthorizations(user, getAuthorizations -> {
         should.assertTrue(getAuthorizations.succeeded());
         // attest

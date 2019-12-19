@@ -25,7 +25,7 @@ import io.vertx.core.json.JsonObject;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject(generateConverter = true)
-public class SQLAuthenticationOptions {
+public class SqlAuthenticationOptions {
 
   /**
    * The default query to be used for authentication
@@ -34,13 +34,13 @@ public class SQLAuthenticationOptions {
 
   private String authenticationQuery;
 
-  public SQLAuthenticationOptions() {
+  public SqlAuthenticationOptions() {
     this.authenticationQuery = DEFAULT_AUTHENTICATE_QUERY;
   }
 
-  public SQLAuthenticationOptions(JsonObject json) {
+  public SqlAuthenticationOptions(JsonObject json) {
     this();
-    SQLAuthenticationOptionsConverter.fromJson(json, this);
+    SqlAuthenticationOptionsConverter.fromJson(json, this);
   }
 
   public String getAuthenticationQuery() {
@@ -55,9 +55,14 @@ public class SQLAuthenticationOptions {
    * @return a reference to this, so the API can be used fluently
    */
   @Fluent
-  public SQLAuthenticationOptions setAuthenticationQuery(String authenticationQuery) {
+  public SqlAuthenticationOptions setAuthenticationQuery(String authenticationQuery) {
     this.authenticationQuery = authenticationQuery;
     return this;
   }
 
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+    SqlAuthenticationOptionsConverter.toJson(this, json);
+    return json;
+  }
 }

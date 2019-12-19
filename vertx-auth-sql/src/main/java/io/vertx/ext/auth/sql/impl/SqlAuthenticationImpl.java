@@ -25,8 +25,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.sql.SQLAuthentication;
-import io.vertx.ext.auth.sql.SQLAuthenticationOptions;
+import io.vertx.ext.auth.sql.SqlAuthentication;
+import io.vertx.ext.auth.sql.SqlAuthenticationOptions;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlClient;
@@ -35,13 +35,13 @@ import io.vertx.sqlclient.Tuple;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class SQLAuthenticationImpl implements SQLAuthentication {
+public class SqlAuthenticationImpl implements SqlAuthentication {
 
   private final SqlClient client;
-  private final SQLAuthenticationOptions options;
+  private final SqlAuthenticationOptions options;
   private final HashingStrategy strategy = HashingStrategy.load();
 
-  public SQLAuthenticationImpl(SqlClient client, SQLAuthenticationOptions options) {
+  public SqlAuthenticationImpl(SqlClient client, SqlAuthenticationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.options = Objects.requireNonNull(options);
   }

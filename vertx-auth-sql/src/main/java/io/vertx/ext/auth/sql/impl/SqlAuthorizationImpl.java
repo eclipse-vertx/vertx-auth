@@ -7,8 +7,8 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.sql.SQLAuthorization;
-import io.vertx.ext.auth.sql.SQLAuthorizationOptions;
+import io.vertx.ext.auth.sql.SqlAuthorization;
+import io.vertx.ext.auth.sql.SqlAuthorizationOptions;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlClient;
@@ -19,12 +19,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class SQLAuthorizationImpl implements SQLAuthorization {
+public class SqlAuthorizationImpl implements SqlAuthorization {
 
-  private final SQLAuthorizationOptions options;
+  private final SqlAuthorizationOptions options;
   private final SqlClient client;
 
-  public SQLAuthorizationImpl(SqlClient client, SQLAuthorizationOptions options) {
+  public SqlAuthorizationImpl(SqlClient client, SqlAuthorizationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.options = Objects.requireNonNull(options);
   }
