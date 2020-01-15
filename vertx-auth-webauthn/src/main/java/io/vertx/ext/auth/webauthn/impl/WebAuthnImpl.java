@@ -150,17 +150,6 @@ public class WebAuthnImpl implements WebAuthn {
           }
         }
 
-        // relay party configuration
-        final JsonObject rp = new JsonObject()
-          .put("name", options.getRpName());
-
-        if (options.getRpIcon() != null) {
-          rp.put("icon", options.getRpIcon());
-        }
-        if (options.getRpId() != null) {
-          rp.put("id", options.getRpId());
-        }
-
         // user configuration
         final JsonObject _user = new JsonObject()
           .put("id", id)
@@ -174,7 +163,7 @@ public class WebAuthnImpl implements WebAuthn {
         // final assembly
         final JsonObject publicKey = new JsonObject()
           .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
-          .put("rp", rp)
+          .put("rp", options.getRelayParty())
           .put("user", _user)
           .put("authenticatorSelection", authenticatorSelection)
           .put("pubKeyCredParams", pubKeyCredParams);

@@ -28,9 +28,7 @@ public class WebAuthnOptions {
   private String origin;
   private Set<String> transports;
 
-  private String rpName;
-  private String rpId;
-  private String rpIcon;
+  private RelayParty relayParty;
 
   private AuthenticatorAttachment authenticatorAttachment;
   private Boolean requireResidentKey;
@@ -71,21 +69,12 @@ public class WebAuthnOptions {
     addTransport("internal");
   }
 
-  public String getRpName() {
-    return rpName;
+  public RelayParty getRelayParty() {
+    return relayParty;
   }
 
-  public WebAuthnOptions setRpName(String rpName) {
-    this.rpName = rpName;
-    return this;
-  }
-
-  public String getRpId() {
-    return rpId;
-  }
-
-  public WebAuthnOptions setRpId(String rpId) {
-    this.rpId = rpId;
+  public WebAuthnOptions setRelayParty(RelayParty relayParty) {
+    this.relayParty = relayParty;
     return this;
   }
 
@@ -95,15 +84,6 @@ public class WebAuthnOptions {
 
   public WebAuthnOptions setOrigin(String origin) {
     this.origin = origin;
-    return this;
-  }
-
-  public String getRpIcon() {
-    return rpIcon;
-  }
-
-  public WebAuthnOptions setRpIcon(String rpIcon) {
-    this.rpIcon = rpIcon;
     return this;
   }
 
@@ -185,27 +165,6 @@ public class WebAuthnOptions {
   public WebAuthnOptions setTimeout(int timeout) {
     this.timeout = timeout;
     return this;
-  }
-
-  // extras
-
-  public JsonObject getRpObject() {
-    if (rpName == null) {
-      throw new IllegalStateException("rpName is required but not set!");
-    }
-
-    JsonObject rp = new JsonObject()
-      .put("name", rpName);
-
-    if (rpId != null) {
-      rp.put("id", rpId);
-    }
-
-    if (rpIcon != null) {
-      rp.put("icon", rpIcon);
-    }
-
-    return rp;
   }
 
   public JsonObject getAuthenticatorSelection() {

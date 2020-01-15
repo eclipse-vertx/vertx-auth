@@ -8,6 +8,9 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+|[[icon]]`@icon`|`String`|-
+|[[id]]`@id`|`String`|-
+|[[name]]`@name`|`String`|-
 |===
 
 [[WebAuthnInfo]]
@@ -37,11 +40,8 @@
 |[[challengeLength]]`@challengeLength`|`Number (int)`|-
 |[[origin]]`@origin`|`String`|-
 |[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of String`|-
+|[[relayParty]]`@relayParty`|`link:dataobjects.html#RelayParty[RelayParty]`|-
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
-|[[rpIcon]]`@rpIcon`|`String`|-
-|[[rpId]]`@rpId`|`String`|-
-|[[rpName]]`@rpName`|`String`|-
-|[[rpObject]]`@rpObject`|`Json object`|-
 |[[timeout]]`@timeout`|`Number (int)`|-
 |[[transports]]`@transports`|`Array of String`|-
 |[[userVerification]]`@userVerification`|`link:enums.html#UserVerification[UserVerification]`|-
