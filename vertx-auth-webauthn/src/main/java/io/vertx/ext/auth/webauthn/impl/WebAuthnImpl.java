@@ -163,7 +163,7 @@ public class WebAuthnImpl implements WebAuthn {
         // final assembly
         final JsonObject publicKey = new JsonObject()
           .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
-          .put("rp", options.getRelayParty())
+          .put("rp", options.getRelayParty().toJson())
           .put("user", _user)
           .put("authenticatorSelection", authenticatorSelection)
           .put("pubKeyCredParams", pubKeyCredParams);
