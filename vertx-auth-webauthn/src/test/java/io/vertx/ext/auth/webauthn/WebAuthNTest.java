@@ -30,7 +30,7 @@ public class WebAuthNTest {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
+      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("http://localhost:3000"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -57,7 +57,7 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000").setRequireResidentKey(true),
+      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("http://localhost:3000").setRequireResidentKey(true),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -82,7 +82,7 @@ public class WebAuthNTest {
   @Ignore("test data contains an expired certificate")
   public void testPAckedFull(TestContext should) {
     final Async test = should.async();
-    WebAuthn webAuthN = WebAuthn.create(rule.vertx(), new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"), new DummyStore());
+    WebAuthn webAuthN = WebAuthn.create(rule.vertx(), new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("https://webauthn.org"), new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"wsLryOAxXMU54s2fCSWPzWjXHOBKPploN-UHftj4_rpIu6BZxNXppm82f7Y6iX9FEOKKeS5-N2TALeyzLnJfAA\",\n" +
@@ -109,7 +109,7 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("http://localhost:3000"),
+      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("http://localhost:3000"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -155,7 +155,7 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"),
+      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("https://webauthn.org"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()
@@ -191,7 +191,7 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRpName("FIDO Examples Corporation").setOrigin("https://webauthn.org"),
+      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("https://webauthn.org"),
       new DummyStore(
         Arrays.asList(
           new DummyStore.StoreEntry()

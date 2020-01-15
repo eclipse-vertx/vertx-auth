@@ -47,27 +47,15 @@ public class WebAuthnOptionsConverter {
             obj.setPubKeyCredParams(list);
           }
           break;
+        case "relayParty":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setRelayParty(new io.vertx.ext.auth.webauthn.RelayParty((JsonObject)member.getValue()));
+          }
+          break;
         case "requireResidentKey":
           if (member.getValue() instanceof Boolean) {
             obj.setRequireResidentKey((Boolean)member.getValue());
           }
-          break;
-        case "rpIcon":
-          if (member.getValue() instanceof String) {
-            obj.setRpIcon((String)member.getValue());
-          }
-          break;
-        case "rpId":
-          if (member.getValue() instanceof String) {
-            obj.setRpId((String)member.getValue());
-          }
-          break;
-        case "rpName":
-          if (member.getValue() instanceof String) {
-            obj.setRpName((String)member.getValue());
-          }
-          break;
-        case "rpObject":
           break;
         case "timeout":
           if (member.getValue() instanceof Number) {
@@ -116,20 +104,11 @@ public class WebAuthnOptionsConverter {
       obj.getPubKeyCredParams().forEach(item -> array.add(item));
       json.put("pubKeyCredParams", array);
     }
+    if (obj.getRelayParty() != null) {
+      json.put("relayParty", obj.getRelayParty().toJson());
+    }
     if (obj.getRequireResidentKey() != null) {
       json.put("requireResidentKey", obj.getRequireResidentKey());
-    }
-    if (obj.getRpIcon() != null) {
-      json.put("rpIcon", obj.getRpIcon());
-    }
-    if (obj.getRpId() != null) {
-      json.put("rpId", obj.getRpId());
-    }
-    if (obj.getRpName() != null) {
-      json.put("rpName", obj.getRpName());
-    }
-    if (obj.getRpObject() != null) {
-      json.put("rpObject", obj.getRpObject());
     }
     json.put("timeout", obj.getTimeout());
     if (obj.getTransports() != null) {
