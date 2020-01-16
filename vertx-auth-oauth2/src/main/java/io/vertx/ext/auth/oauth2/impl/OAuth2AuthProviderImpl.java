@@ -372,7 +372,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   @Deprecated
   public OAuth2Auth rbacHandler(OAuth2RBAC rbac) {
-    return null;
+    return this;
   }
 
   /**
