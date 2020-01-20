@@ -89,7 +89,7 @@ public class MongoAuthOptions implements io.vertx.ext.auth.AuthOptions {
         client = MongoClient.createShared(vertx, config);
       }
     } else {
-      client = MongoClient.createNonShared(vertx, config);
+      client = MongoClient.create(vertx, config);
     }
     JsonObject authConfig = new JsonObject();
     MongoAuthOptionsConverter.toJson(this, authConfig);
