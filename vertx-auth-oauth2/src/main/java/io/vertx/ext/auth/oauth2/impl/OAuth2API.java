@@ -516,66 +516,60 @@ public class OAuth2API {
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
     LOG.debug("Fetching URL: " + url);
 
-    // create a request
-    final HttpClientRequest request = makeRequest(method, url, callback);
+    RequestOptions options = new RequestOptions().setMethod(method).setAbsoluteURI(url);
 
     // apply the provider required headers
     JsonObject tmp = config.getHeaders();
     if (tmp != null) {
       for (Map.Entry<String, Object> kv : tmp) {
-        request.putHeader(kv.getKey(), (String) kv.getValue());
+        options.addHeader(kv.getKey(), (String) kv.getValue());
       }
     }
 
     if (headers != null) {
       for (Map.Entry<String, Object> kv : headers) {
-        request.putHeader(kv.getKey(), (String) kv.getValue());
+        options.addHeader(kv.getKey(), (String) kv.getValue());
       }
     }
 
     // specific UA
     if (config.getUserAgent() != null) {
-      request.putHeader("User-Agent", config.getUserAgent());
+      options.addHeader("User-Agent", config.getUserAgent());
     }
 
-    if (payload != null) {
-      if (method == HttpMethod.POST || method == HttpMethod.PATCH || method == HttpMethod.PUT) {
-        request.putHeader("Content-Length", Integer.toString(payload.length()));
-        request.write(payload);
-      }
+    if (method != HttpMethod.POST && method != HttpMethod.PATCH && method != HttpMethod.PUT) {
+      payload = null;
     }
 
-    // Make sure the request is ended when you're done with it
-    request.end();
+    // create a request
+    makeRequest(options, payload, callback);
   }
 
-  public HttpClientRequest makeRequest(HttpMethod method, String uri, final Handler<AsyncResult<OAuth2Response>> callback) {
-    final HttpClientRequest request = client.requestAbs(method, uri, ar -> {
-      if (ar.succeeded()) {
-        HttpClientResponse resp = ar.result();
-        resp.exceptionHandler(t -> {
-          callback.handle(Future.failedFuture(t));
-          client.close();
-        });
-        resp.bodyHandler(body -> {
-          if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
-            if (body == null || body.length() == 0) {
-              callback.handle(Future.failedFuture(resp.statusMessage()));
+  public void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<OAuth2Response>> callback) {
+    client.send(options, payload, ar1 -> {
+      if (ar1.succeeded()) {
+        HttpClientResponse resp = ar1.result();
+        resp.body(ar2 -> {
+          if (ar2.succeeded()) {
+            Buffer body = ar2.result();
+            if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
+              if (body == null || body.length() == 0) {
+                callback.handle(Future.failedFuture(resp.statusMessage()));
+              } else {
+                callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
+              }
             } else {
-              callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
+              callback.handle(Future.succeededFuture(new OAuth2Response(resp.statusCode(), resp.headers(), body)));
             }
           } else {
-            callback.handle(Future.succeededFuture(new OAuth2Response(resp.statusCode(), resp.headers(), body)));
+            client.close();
+            callback.handle(ar2.mapEmpty());
           }
         });
       } else {
-        callback.handle(Future.failedFuture(ar.cause()));
+        callback.handle(Future.failedFuture(ar1.cause()));
       }
     });
-
-    request.exceptionHandler(t -> callback.handle(Future.failedFuture(t)));
-
-    return request;
   }
 
   public static String stringify(JsonObject json) {

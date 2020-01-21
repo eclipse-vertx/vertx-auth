@@ -93,7 +93,7 @@ public class PermissionBasedAuthorizationTest {
         return;
       }
 
-      rule.vertx().createHttpClient().getNow(listen.result().actualPort(), "localhost", "/?variable1=r1", res -> {
+      rule.vertx().createHttpClient().get(listen.result().actualPort(), "localhost", "/?variable1=r1", res -> {
         if (res.failed()) {
           should.fail(res.cause());
           return;
@@ -120,7 +120,7 @@ public class PermissionBasedAuthorizationTest {
         return;
       }
 
-      rule.vertx().createHttpClient().getNow(listen.result().actualPort(), "localhost", "/?variable1=r2", res -> {
+      rule.vertx().createHttpClient().get(listen.result().actualPort(), "localhost", "/?variable1=r2", res -> {
         if (res.failed()) {
           should.fail(res.cause());
           return;

@@ -4,6 +4,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
@@ -40,7 +41,13 @@ public interface OpenIDConnectAuth {
     config.replaceVariables(false);
 
     final OAuth2API api = new OAuth2API(vertx, config);
-    final HttpClientRequest request = api.makeRequest(HttpMethod.GET, config.getSite() + "/.well-known/openid-configuration", res -> {
+
+    RequestOptions options = new RequestOptions()
+      .setMethod(HttpMethod.GET)
+      .setAbsoluteURI(config.getSite() + "/.well-known/openid-configuration")
+      .addHeader("Accept", "application/json");
+
+    api.makeRequest(options, null, res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
         return;
@@ -106,12 +113,6 @@ public interface OpenIDConnectAuth {
         handler.handle(Future.failedFuture(e));
       }
     });
-    // handle errors
-    request.exceptionHandler(t -> handler.handle(Future.failedFuture(t)));
-    // we accept JSON as it is the expected response encoding
-    request.putHeader("Accept", "application/json");
-    // trigger
-    request.end();
   }
 
   /**
