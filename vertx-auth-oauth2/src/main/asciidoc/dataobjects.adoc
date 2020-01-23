@@ -69,6 +69,8 @@ Set the provider logout path
 |[[maxPoolSize]]`@maxPoolSize`|`Number (int)`|-
 |[[maxRedirects]]`@maxRedirects`|`Number (int)`|-
 |[[maxWaitQueueSize]]`@maxWaitQueueSize`|`Number (int)`|-
+|[[maxWebSocketFrameSize]]`@maxWebSocketFrameSize`|`Number (int)`|-
+|[[maxWebSocketMessageSize]]`@maxWebSocketMessageSize`|`Number (int)`|-
 |[[maxWebsocketFrameSize]]`@maxWebsocketFrameSize`|`Number (int)`|-
 |[[maxWebsocketMessageSize]]`@maxWebsocketMessageSize`|`Number (int)`|-
 |[[metricsName]]`@metricsName`|`String`|-
@@ -115,8 +117,11 @@ Get the Oauth2 token resource path. e.g.: /oauth/token
 |[[trustAll]]`@trustAll`|`Boolean`|-
 |[[trustStoreOptions]]`@trustStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[tryUseCompression]]`@tryUseCompression`|`Boolean`|-
+|[[tryUsePerFrameWebSocketCompression]]`@tryUsePerFrameWebSocketCompression`|`Boolean`|-
 |[[tryUsePerFrameWebsocketCompression]]`@tryUsePerFrameWebsocketCompression`|`Boolean`|-
+|[[tryUsePerMessageWebSocketCompression]]`@tryUsePerMessageWebSocketCompression`|`Boolean`|-
 |[[tryUsePerMessageWebsocketCompression]]`@tryUsePerMessageWebsocketCompression`|`Boolean`|-
+|[[tryWebSocketDeflateFrameCompression]]`@tryWebSocketDeflateFrameCompression`|`Boolean`|-
 |[[tryWebsocketDeflateFrameCompression]]`@tryWebsocketDeflateFrameCompression`|`Boolean`|-
 |[[useAlpn]]`@useAlpn`|`Boolean`|-
 |[[useBasicAuthorizationHeader]]`@useBasicAuthorizationHeader`|`Boolean`|+++
@@ -134,6 +139,9 @@ Set the provider userInfo resource path
 +++
 |[[validateIssuer]]`@validateIssuer`|`Boolean`|-
 |[[verifyHost]]`@verifyHost`|`Boolean`|-
+|[[webSocketCompressionAllowClientNoContext]]`@webSocketCompressionAllowClientNoContext`|`Boolean`|-
+|[[webSocketCompressionLevel]]`@webSocketCompressionLevel`|`Number (int)`|-
+|[[webSocketCompressionRequestServerNoContext]]`@webSocketCompressionRequestServerNoContext`|`Boolean`|-
 |[[websocketCompressionAllowClientNoContext]]`@websocketCompressionAllowClientNoContext`|`Boolean`|-
 |[[websocketCompressionLevel]]`@websocketCompressionLevel`|`Number (int)`|-
 |[[websocketCompressionRequestServerNoContext]]`@websocketCompressionRequestServerNoContext`|`Boolean`|-
