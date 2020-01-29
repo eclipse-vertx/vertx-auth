@@ -170,10 +170,8 @@ public class WebAuthnOptions {
   public JsonObject getAuthenticatorSelection() {
     JsonObject json = null;
     if (authenticatorAttachment != null) {
-      if (json == null) {
-        json = new JsonObject();
-      }
-      json.put("authenticatorAttachment", authenticatorAttachment.toString());
+      json = new JsonObject()
+        .put("authenticatorAttachment", authenticatorAttachment.toString());
     }
     if (requireResidentKey != null) {
       if (json == null) {

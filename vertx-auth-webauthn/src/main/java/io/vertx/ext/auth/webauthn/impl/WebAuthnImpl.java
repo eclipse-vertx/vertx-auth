@@ -96,9 +96,6 @@ public class WebAuthnImpl implements WebAuthn {
         // generate a new ID for this new potential user
         final String id = store.generateId();
 
-        // STEP 2 Generate Credential Challenge
-        final JsonObject authenticatorSelection = options.getAuthenticatorSelection();
-
         final JsonArray pubKeyCredParams = new JsonArray();
 
         for (String pubKeyCredParam : options.getPubKeyCredParams()) {
@@ -160,13 +157,40 @@ public class WebAuthnImpl implements WebAuthn {
           _user.put("icon", user.getString("icon"));
         }
 
+        final JsonObject authenticatorSelection;
+        // authenticatorSelection configuration
+        if (options.getAuthenticatorAttachment() != null) {
+          // server config takes precedence
+          authenticatorSelection = options.getAuthenticatorSelection();
+        } else {
+          switch (user.getString("type")) {
+            case "cross-platform":
+            case "platform":
+              authenticatorSelection = new JsonObject()
+                  .put("authenticatorAttachment", user.getString("type"));
+
+              if (options.getRequireResidentKey() != null) {
+                authenticatorSelection.put("requireResidentKey", options.getRequireResidentKey());
+              }
+              if (options.getUserVerification() != null) {
+                authenticatorSelection.put("userVerification", options.getUserVerification().toString());
+              }
+              break;
+            default:
+              authenticatorSelection = null;
+          }
+        }
+
         // final assembly
         final JsonObject publicKey = new JsonObject()
           .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
           .put("rp", options.getRelayParty().toJson())
           .put("user", _user)
-          .put("authenticatorSelection", authenticatorSelection)
           .put("pubKeyCredParams", pubKeyCredParams);
+
+        if (authenticatorSelection != null) {
+          publicKey.put("authenticatorSelection", authenticatorSelection);
+        }
 
         if (options.getAttestation() != null) {
           publicKey.put("attestation", options.getAttestation().toString());
