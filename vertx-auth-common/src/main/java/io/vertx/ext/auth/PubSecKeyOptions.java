@@ -96,6 +96,20 @@ public class PubSecKeyOptions {
     return publicKey;
   }
 
+  /**
+   * @deprecated This setter ignored the PEM prefix and suffix which would assume the key to be RSA.
+   *
+   * Use {@link #setBuffer(String)} with the full content of your OpenSSL pem file. A PEM file must
+   * contain at least 3 lines:
+   *
+   * <pre>
+   *   -----BEGIN PUBLIC KEY----
+   *   ...
+   *   -----END PUBLIC KEY---
+   * </pre>
+   * @param publicKey the naked public key
+   * @return self
+   */
   @Deprecated
   public PubSecKeyOptions setPublicKey(String publicKey) {
     this.publicKey = publicKey;
@@ -107,6 +121,20 @@ public class PubSecKeyOptions {
     return secretKey;
   }
 
+  /**
+   * @deprecated This setter ignored the PEM prefix and suffix which would assume the key to be RSA.
+   *
+   * Use {@link #setBuffer(String)} with the full content of your OpenSSL pem file. A PEM file must
+   * contain at least 3 lines:
+   *
+   * <pre>
+   *   -----BEGIN PRIVATE KEY----
+   *   ...
+   *   -----END PRIVATE KEY---
+   * </pre>
+   * @param secretKey the naked public key
+   * @return self
+   */
   @Deprecated
   public PubSecKeyOptions setSecretKey(String secretKey) {
     this.secretKey = secretKey;
