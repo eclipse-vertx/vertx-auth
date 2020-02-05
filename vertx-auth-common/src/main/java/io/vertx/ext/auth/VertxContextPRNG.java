@@ -105,6 +105,11 @@ public interface VertxContextPRNG {
   }
 
   /**
+   * stop seeding the PRNG
+   */
+  void close();
+
+  /**
    * Fills the given byte array with random bytes.
    *
    * @param bytes a byte array.
@@ -143,4 +148,44 @@ public interface VertxContextPRNG {
    */
   int nextInt(int bound);
 
+
+  /**
+   * Returns a secure random boolean
+   *
+   * @return random boolean.
+   */
+  boolean nextBoolean();
+
+
+  /**
+   * Returns a secure random long
+   *
+   * @return random long.
+   */
+  long nextLong();
+
+
+  /**
+   * Returns a secure random float value. The value is uniformly distributed between 0.0 and 1.0
+   *
+   * @return random float.
+   */
+  float nextFloat();
+
+
+  /**
+   * Returns a secure random double value. The value is uniformly distributed between 0.0 and 1.0
+   *
+   * @return random double.
+   */
+  double nextDouble();
+
+
+  /**
+   * Returns a secure random double value. The value is Gaussian ("normally") distributed
+   * with mean 0.0 and standard deviation 1.0
+   *
+   * @return random double.
+   */
+  double nextGaussian();
 }

@@ -89,8 +89,9 @@ public class PRNG implements VertxContextPRNG {
     }
   }
 
+
+  @Override
   public void close() {
-    // stop seeding the PRNG
     if (seedID != -1) {
       vertx.cancelTimer(seedID);
     }
@@ -106,16 +107,65 @@ public class PRNG implements VertxContextPRNG {
 
   @Override
   public int nextInt() {
-    final int rand = random.nextInt();
-    dirty = true;
-    return rand;
+    try {
+      return random.nextInt();
+    } finally {
+      dirty = true;
+    }
   }
 
   @Override
   public int nextInt(final int bound) {
-    final int rand = random.nextInt(bound);
-    dirty = true;
-    return rand;
+    try {
+      return random.nextInt(bound);
+    } finally {
+      dirty = true;
+    }
+  }
+
+  @Override
+  public boolean nextBoolean() {
+    try {
+      return random.nextBoolean();
+    } finally {
+      dirty = true;
+    }
+  }
+
+  @Override
+  public long nextLong() {
+    try {
+      return random.nextLong();
+    } finally {
+      dirty = true;
+    }
+  }
+
+  @Override
+  public float nextFloat() {
+    try {
+      return random.nextFloat();
+    } finally {
+      dirty = true;
+    }
+  }
+
+  @Override
+  public double nextDouble() {
+    try {
+      return random.nextDouble();
+    } finally {
+      dirty = true;
+    }
+  }
+
+  @Override
+  public double nextGaussian() {
+    try {
+      return random.nextGaussian();
+    } finally {
+      dirty = true;
+    }
   }
 
 }
