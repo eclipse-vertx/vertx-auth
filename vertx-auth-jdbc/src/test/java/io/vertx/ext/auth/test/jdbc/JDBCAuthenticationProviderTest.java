@@ -93,7 +93,7 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
   protected JDBCClient getJDBCCLient() {
     if (jdbcClient == null) {
-      jdbcClient = JDBCClient.create(vertx, config());
+      jdbcClient = JDBCClient.createNonShared(vertx, config());
     }
     return jdbcClient;
   }

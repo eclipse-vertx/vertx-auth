@@ -69,7 +69,7 @@ public class JDBCAuthOptions implements io.vertx.ext.auth.AuthOptions {
         client = JDBCClient.createShared(vertx, config);
       }
     } else {
-      client = JDBCClient.create(vertx, config);
+      client = JDBCClient.createNonShared(vertx, config);
     }
     JDBCAuth auth = JDBCAuth.create(vertx, client);
     if (authenticationQuery != null) {

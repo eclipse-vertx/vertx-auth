@@ -50,8 +50,12 @@ The PEM or Secret key buffer
 +++
 |[[certificate]]`@certificate`|`Boolean`|-
 |[[id]]`@id`|`String`|-
-|[[publicKey]]`@publicKey`|`String`|-
-|[[secretKey]]`@secretKey`|`String`|-
+|[[publicKey]]`@publicKey`|`String`|+++
+
++++
+|[[secretKey]]`@secretKey`|`String`|+++
+
++++
 |[[symmetric]]`@symmetric`|`Boolean`|-
 |===
 
