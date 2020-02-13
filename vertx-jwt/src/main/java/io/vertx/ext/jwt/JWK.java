@@ -39,6 +39,9 @@ import java.util.regex.Pattern;
  */
 public final class JWK implements Crypto {
 
+  public static final int USE_SIG = 1;
+  public static final int USE_ENC = 2;
+
   private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
 
@@ -55,6 +58,7 @@ public final class JWK implements Crypto {
   private Mac mac;
 
   // verify/sign mode
+  private int use;
   private boolean symmetric;
   // special handling for ECDSA
   private boolean ecdsa;
@@ -167,6 +171,7 @@ public final class JWK implements Crypto {
           mac.init(new SecretKeySpec(pem.getBytes(), alias.get(alg)));
           // this is a symmetric key
           symmetric = true;
+          use = USE_SIG + USE_ENC;
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -252,12 +257,15 @@ public final class JWK implements Crypto {
         case "CERTIFICATE":
           final CertificateFactory cf = CertificateFactory.getInstance("X.509");
           certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(pem.getBytes()));
+          use = USE_ENC;
           break;
         case "PUBLIC KEY":
           publicKey = kf.generatePublic(new X509EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
+          use = USE_ENC;
           break;
         case "PRIVATE KEY":
           privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
+          use = USE_SIG;
           break;
         default:
           throw new IllegalStateException("Invalid PEM content: " + kind);
@@ -303,6 +311,7 @@ public final class JWK implements Crypto {
     this.mac = mac;
     // this is a symmetric key
     symmetric = true;
+    use = USE_SIG + USE_ENC;
   }
 
   private JWK(String algorithm, X509Certificate certificate, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -344,6 +353,8 @@ public final class JWK implements Crypto {
     this.privateKey = privateKey;
     // use default
     signature = Signature.getInstance(alias.get(alg));
+    // this key does both because we have a certificate (public) + private key
+    use = USE_ENC + USE_SIG;
 
     // signature extras
     switch (alg) {
@@ -408,6 +419,9 @@ public final class JWK implements Crypto {
       final BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("n")));
       final BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("e")));
       publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
+      if (!isFor(USE_ENC)) {
+        use += USE_ENC;
+      }
     }
 
     // private key
@@ -422,6 +436,9 @@ public final class JWK implements Crypto {
       final BigInteger qi = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("qi")));
 
       privateKey = KeyFactory.getInstance("RSA").generatePrivate(new RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, qi));
+      if (!isFor(USE_SIG)) {
+        use += USE_SIG;
+      }
     }
 
     // certificate chain
@@ -438,6 +455,9 @@ public final class JWK implements Crypto {
       certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
       // assert the certificate is valid
       certificate.checkValidity();
+      if (!isFor(USE_ENC)) {
+        use += USE_ENC;
+      }
     }
 
     switch (json.getString("use", "sig")) {
@@ -457,6 +477,11 @@ public final class JWK implements Crypto {
               signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
               break;
           }
+          if (json.containsKey("use")) {
+            if (!isFor(USE_SIG)) {
+              use += USE_SIG;
+            }
+          }
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
           // error
           throw new RuntimeException(e);
@@ -464,6 +489,11 @@ public final class JWK implements Crypto {
         break;
       case "enc":
         cipher = Cipher.getInstance("RSA");
+        if (json.containsKey("use")) {
+          if (!isFor(USE_ENC)) {
+            use += USE_ENC;
+          }
+        }
     }
   }
 
@@ -499,6 +529,9 @@ public final class JWK implements Crypto {
       final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
       publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(new ECPoint(x, y), parameters.getParameterSpec(ECParameterSpec.class)));
+      if (!isFor(USE_ENC)) {
+        use += USE_ENC;
+      }
     }
 
     // public key
@@ -507,6 +540,9 @@ public final class JWK implements Crypto {
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
       final BigInteger d = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("d")));
       privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
+      if (!isFor(USE_SIG)) {
+        use += USE_SIG;
+      }
     }
 
     switch (json.getString("use", "sig")) {
@@ -517,6 +553,11 @@ public final class JWK implements Crypto {
         } catch (NoSuchAlgorithmException e) {
           // error
           throw new RuntimeException(e);
+        }
+        if (json.containsKey("use")) {
+          if (!isFor(USE_SIG)) {
+            use += USE_SIG;
+          }
         }
         break;
       case "enc":
@@ -544,6 +585,7 @@ public final class JWK implements Crypto {
     mac.init(new SecretKeySpec(json.getString("k").getBytes(UTF8), alias.get(alg)));
     // this is a symmetric key
     symmetric = true;
+    use = USE_SIG + USE_ENC;
   }
 
   public String getAlgorithm() {
@@ -598,13 +640,13 @@ public final class JWK implements Crypto {
 
   @Override
   public synchronized byte[] sign(byte[] payload) {
+    if (!isFor(USE_SIG)) {
+      throw new IllegalStateException("Key use is not 'sig'");
+    }
+
     if (symmetric) {
       return mac.doFinal(payload);
     } else {
-      if (signature == null) {
-        throw new RuntimeException("Key use is not 'sig'");
-      }
-
       try {
         signature.initSign(privateKey);
         signature.update(payload);
@@ -621,13 +663,13 @@ public final class JWK implements Crypto {
 
   @Override
   public synchronized boolean verify(byte[] expected, byte[] payload) {
+    if (!isFor(USE_ENC)) {
+      throw new IllegalStateException("Key use is not 'enc'");
+    }
+
     if (symmetric) {
       return Arrays.equals(expected, sign(payload));
     } else {
-      if (signature == null) {
-        throw new RuntimeException("Key use is not 'sig'");
-      }
-
       try {
         if (publicKey != null) {
           signature.initVerify(publicKey);
@@ -668,5 +710,13 @@ public final class JWK implements Crypto {
     }
 
     return true;
+  }
+
+  public boolean isFor(int use) {
+    return (this.use & use) != 0;
+  }
+
+  public int getUse() {
+    return use;
   }
 }

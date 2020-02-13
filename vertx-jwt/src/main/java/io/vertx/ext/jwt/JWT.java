@@ -43,11 +43,14 @@ public final class JWT {
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
-  private Map<String, List<Crypto>> cryptoMap = new ConcurrentHashMap<>();
+  // keep 2 maps (1 for encode, 1 for decode)
+  private final Map<String, List<Crypto>> SIGN = new ConcurrentHashMap<>();
+  private final Map<String, List<Crypto>> VERIFY = new ConcurrentHashMap<>();
 
   public JWT() {
     // Spec requires "none" to always be available
-    cryptoMap.put("none", Collections.singletonList(new CryptoNone()));
+    SIGN.put("none", Collections.singletonList(new CryptoNone()));
+    VERIFY.put("none", Collections.singletonList(new CryptoNone()));
   }
 
   /**
@@ -72,10 +75,28 @@ public final class JWT {
    * @return self
    */
   public JWT addJWK(JWK jwk) {
-    List<Crypto> current = cryptoMap.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
 
+    List<Crypto> current = null;
+
+    if (jwk.isFor(JWK.USE_ENC)) {
+      current = VERIFY.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+      addJWK(current, jwk);
+    }
+
+    if (jwk.isFor(JWK.USE_SIG)) {
+      current = SIGN.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+      addJWK(current, jwk);
+    }
+
+    if (current == null) {
+      throw new IllegalStateException("unknown JWK use: " + jwk.getUse());
+    }
+
+    return this;
+  }
+
+  private void addJWK(List<Crypto> current, JWK jwk) {
     boolean replaced = false;
-
     for (int i = 0; i < current.size(); i++) {
       if (current.get(i).getId().equals(jwk.getId())) {
         // replace
@@ -89,8 +110,6 @@ public final class JWT {
       // non existent, add it!
       current.add(jwk);
     }
-
-    return this;
   }
 
   public static JsonObject parse(final byte[] token) {
@@ -149,7 +168,7 @@ public final class JWT {
 
     String alg = header.getString("alg");
 
-    List<Crypto> cryptos = cryptoMap.get(alg);
+    List<Crypto> cryptos = VERIFY.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
       throw new IllegalStateException("Algorithm not supported [" + alg + "]");
@@ -256,10 +275,10 @@ public final class JWT {
   public String sign(JsonObject payload, JWTOptions options) {
     final String algorithm = options.getAlgorithm();
 
-    List<Crypto> cryptos = cryptoMap.get(algorithm);
+    List<Crypto> cryptos = SIGN.get(algorithm);
 
     if (cryptos == null || cryptos.size() == 0) {
-      throw new RuntimeException("Algorithm not supported");
+      throw new RuntimeException("Algorithm not supported: " + algorithm);
     }
 
     // header, typ is fixed value.
@@ -325,10 +344,15 @@ public final class JWT {
   }
 
   public boolean isUnsecure() {
-    return cryptoMap.size() == 1;
+    return VERIFY.size() == 1 && SIGN.size() == 1;
   }
 
   public Collection<String> availableAlgorithms() {
-    return cryptoMap.keySet();
+    Set<String> algorithms = new HashSet<>();
+
+    algorithms.addAll(VERIFY.keySet());
+    algorithms.addAll(SIGN.keySet());
+
+    return algorithms;
   }
 }
