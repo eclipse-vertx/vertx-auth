@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.jdbc;
+package io.vertx.ext.auth.mongo;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
@@ -6,9 +6,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.ext.auth.jdbc.impl.JDBCUserUtilImpl;
-import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.auth.mongo.impl.MongoUserUtilImpl;
+import io.vertx.ext.mongo.MongoClient;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,15 +18,15 @@ import java.util.Map;
  * read only access to the database, in order to use this API a full read/write access must be granted.
  */
 @VertxGen
-public interface JDBCUserUtil {
+public interface MongoUserUtil {
 
   /**
    * Create an instance of the user helper.
    * @param client the client with write rights to the database.
    * @return the instance
    */
-  static JDBCUserUtil create(JDBCClient client) {
-    return new JDBCUserUtilImpl(client);
+  static MongoUserUtil create(MongoClient client) {
+    return new MongoUserUtilImpl(client);
   }
 
   /**
@@ -33,8 +34,8 @@ public interface JDBCUserUtil {
    * @param client the client with write rights to the database.
    * @return the instance
    */
-  static JDBCUserUtil create(JDBCClient client, String insertUserSQL, String insertUserRoleSQL, String insertRolePermissionSQL) {
-    return new JDBCUserUtilImpl(client, insertUserSQL, insertUserRoleSQL, insertRolePermissionSQL);
+  static MongoUserUtil create(MongoClient client, MongoAuthenticationOptions authenticationOptions, MongoAuthorizationOptions authorizationOptions) {
+    return new MongoUserUtilImpl(client, authenticationOptions, authorizationOptions);
   }
 
   /**
@@ -49,7 +50,7 @@ public interface JDBCUserUtil {
    * @return fluent self
    */
   @Fluent
-  JDBCUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler);
+  MongoUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler);
 
   /**
    * @see #createUser(String, String, Handler).
@@ -72,7 +73,7 @@ public interface JDBCUserUtil {
    * @return fluent self
    */
   @Fluent
-  JDBCUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler);
+  MongoUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler);
 
   /**
    * @see #createHashedUser(String, String, Handler).
@@ -88,44 +89,23 @@ public interface JDBCUserUtil {
    *
    * @param username
    *          the username to be set
-   * @param role
+   * @param roles
+   *          a to be set
+   * @param permissions
    *          a to be set
    * @param resultHandler
    *          the ResultHandler will be provided with the result of the operation
    * @return fluent self
    */
   @Fluent
-  JDBCUserUtil createUserRole(String username, String role, Handler<AsyncResult<Void>> resultHandler);
+  MongoUserUtil createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions, Handler<AsyncResult<Void>> resultHandler);
 
   /**
-   * @see #createUserRole(String, String, Handler).
+   * @see #createUserRolesAndPermissions(String, List, List, Handler).
    */
-  default Future<Void> createUserRole(String user, String role) {
+  default Future<Void> createUserRolesAndPermissions(String user, List<String> roles, List<String> permissions) {
     Promise<Void> promise = Promise.promise();
-    createUserRole(user, role, promise);
-    return promise.future();
-  }
-
-  /**
-   * Insert a role permission into a database.
-   *
-   * @param role
-   *          a to be set
-   * @param permission
-   *          the permission to be set
-   * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
-   * @return fluent self
-   */
-  @Fluent
-  JDBCUserUtil createRolePermission(String role, String permission, Handler<AsyncResult<Void>> resultHandler);
-
-  /**
-   * @see #createRolePermission(String, String, Handler).
-   */
-  default Future<Void> createRolePermission(String role, String permission) {
-    Promise<Void> promise = Promise.promise();
-    createRolePermission(role, permission, promise);
+    createUserRolesAndPermissions(user, roles, permissions, promise);
     return promise.future();
   }
 }

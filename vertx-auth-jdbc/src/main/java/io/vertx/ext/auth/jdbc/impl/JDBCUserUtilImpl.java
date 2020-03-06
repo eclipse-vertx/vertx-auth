@@ -11,7 +11,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 import java.security.SecureRandom;
 import java.util.*;
 
-public class JDBCAuthUtilImpl implements JDBCUserUtil {
+public class JDBCUserUtilImpl implements JDBCUserUtil {
 
   private static final String INSERT_USER = "INSERT INTO user (username, password) VALUES (?, ?)";
   private static final String INSERT_USER_ROLE = "INSERT INTO user_roles (username, role) VALUES (?, ?)";
@@ -25,11 +25,11 @@ public class JDBCAuthUtilImpl implements JDBCUserUtil {
   private final String insertUserRole;
   private final String insertRolePermission;
 
-  public JDBCAuthUtilImpl(JDBCClient client) {
+  public JDBCUserUtilImpl(JDBCClient client) {
     this(client, INSERT_USER, INSERT_USER_ROLE, INSERT_ROLE_PERMISSION);
   }
 
-  public JDBCAuthUtilImpl(JDBCClient client, String insertUser, String insertUserRole, String insertRolePermission) {
+  public JDBCUserUtilImpl(JDBCClient client, String insertUser, String insertUserRole, String insertRolePermission) {
     this.client = client;
     this.insertUser = insertUser;
     this.insertUserRole = insertUserRole;
