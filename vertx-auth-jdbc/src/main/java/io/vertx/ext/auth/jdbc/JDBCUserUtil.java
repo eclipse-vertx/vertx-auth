@@ -12,7 +12,9 @@ import io.vertx.ext.jdbc.JDBCClient;
 import java.util.Map;
 
 /**
- * Utility to create users/roles/permissions.
+ * Utility to create users/roles/permissions. This is a helper class and not intended to be a full user
+ * management utility. While the standard authentication and authorization interfaces will require usually
+ * read only access to the database, in order to use this API a full read/write access must be granted.
  */
 @VertxGen
 public interface JDBCUserUtil {
