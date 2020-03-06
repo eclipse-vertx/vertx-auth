@@ -48,16 +48,12 @@ Set custom headers to be sent with every request to the provider
 |[[http2MultiplexingLimit]]`@http2MultiplexingLimit`|`Number (int)`|-
 |[[idleTimeout]]`@idleTimeout`|`Number (int)`|-
 |[[idleTimeoutUnit]]`@idleTimeoutUnit`|`link:enums.html#TimeUnit[TimeUnit]`|-
-|[[initialSettings]]`@initialSettings`|`link:dataobjects.html#Http2Settings[Http2Settings]`|-
 |[[introspectionPath]]`@introspectionPath`|`String`|+++
 Set the provider token introspection resource path
 +++
-|[[jdkSslEngineOptions]]`@jdkSslEngineOptions`|`link:dataobjects.html#JdkSSLEngineOptions[JdkSSLEngineOptions]`|-
 |[[jwkPath]]`@jwkPath`|`String`|-
-|[[jwtOptions]]`@jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
 |[[keepAlive]]`@keepAlive`|`Boolean`|-
 |[[keepAliveTimeout]]`@keepAliveTimeout`|`Number (int)`|-
-|[[keyStoreOptions]]`@keyStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[localAddress]]`@localAddress`|`String`|-
 |[[logActivity]]`@logActivity`|`Boolean`|-
 |[[logoutPath]]`@logoutPath`|`String`|+++
@@ -72,19 +68,10 @@ Set the provider logout path
 |[[maxWebSocketFrameSize]]`@maxWebSocketFrameSize`|`Number (int)`|-
 |[[maxWebSocketMessageSize]]`@maxWebSocketMessageSize`|`Number (int)`|-
 |[[metricsName]]`@metricsName`|`String`|-
-|[[openSslEngineOptions]]`@openSslEngineOptions`|`link:dataobjects.html#OpenSSLEngineOptions[OpenSSLEngineOptions]`|-
-|[[pemKeyCertOptions]]`@pemKeyCertOptions`|`link:dataobjects.html#PemKeyCertOptions[PemKeyCertOptions]`|-
-|[[pemTrustOptions]]`@pemTrustOptions`|`link:dataobjects.html#PemTrustOptions[PemTrustOptions]`|-
-|[[pfxKeyCertOptions]]`@pfxKeyCertOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
-|[[pfxTrustOptions]]`@pfxTrustOptions`|`link:dataobjects.html#PfxOptions[PfxOptions]`|-
 |[[pipelining]]`@pipelining`|`Boolean`|-
 |[[pipeliningLimit]]`@pipeliningLimit`|`Number (int)`|-
 |[[poolCleanerPeriod]]`@poolCleanerPeriod`|`Number (int)`|-
 |[[protocolVersion]]`@protocolVersion`|`link:enums.html#HttpVersion[HttpVersion]`|-
-|[[proxyOptions]]`@proxyOptions`|`link:dataobjects.html#ProxyOptions[ProxyOptions]`|-
-|[[pubSecKeys]]`@pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|+++
-The provider PubSec key options
-+++
 |[[receiveBufferSize]]`@receiveBufferSize`|`Number (int)`|-
 |[[reuseAddress]]`@reuseAddress`|`Boolean`|-
 |[[reusePort]]`@reusePort`|`Boolean`|-
@@ -119,7 +106,6 @@ Get the Oauth2 token resource path. e.g.: /oauth/token
 +++
 |[[trafficClass]]`@trafficClass`|`Number (int)`|-
 |[[trustAll]]`@trustAll`|`Boolean`|-
-|[[trustStoreOptions]]`@trustStoreOptions`|`link:dataobjects.html#JksOptions[JksOptions]`|-
 |[[tryUseCompression]]`@tryUseCompression`|`Boolean`|-
 |[[tryUsePerFrameWebSocketCompression]]`@tryUsePerFrameWebSocketCompression`|`Boolean`|-
 |[[tryUsePerMessageWebSocketCompression]]`@tryUsePerMessageWebSocketCompression`|`Boolean`|-

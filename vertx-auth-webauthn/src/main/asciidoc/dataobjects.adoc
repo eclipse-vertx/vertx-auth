@@ -40,7 +40,6 @@
 |[[challengeLength]]`@challengeLength`|`Number (int)`|-
 |[[origin]]`@origin`|`String`|-
 |[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of String`|-
-|[[relayParty]]`@relayParty`|`link:dataobjects.html#RelayParty[RelayParty]`|-
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
 |[[timeout]]`@timeout`|`Number (int)`|-
 |[[transports]]`@transports`|`Array of String`|-
