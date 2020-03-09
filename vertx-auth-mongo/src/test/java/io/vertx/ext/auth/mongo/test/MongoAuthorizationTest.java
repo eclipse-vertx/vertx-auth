@@ -171,7 +171,7 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
 
     insertUser(getAuthenticationProvider(), authenticationOptions, user.username, user.password)
       .compose(res -> insertAuth(user.username, user.roles, user.permissions)
-      ).setHandler(res -> {
+      ).onComplete(res -> {
       if (res.succeeded()) {
         log.info("user added: " + user.username);
         latch.countDown();

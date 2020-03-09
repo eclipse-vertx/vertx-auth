@@ -13,9 +13,6 @@
 |===
 ^|Name | Type ^| Description
 |[[jwks]]`@jwks`|`Array of Json object`|-
-|[[jwtOptions]]`@jwtOptions`|`link:dataobjects.html#JWTOptions[JWTOptions]`|-
-|[[keyStore]]`@keyStore`|`link:dataobjects.html#KeyStoreOptions[KeyStoreOptions]`|-
 |[[permissionsClaimKey]]`@permissionsClaimKey`|`String`|-
-|[[pubSecKeys]]`@pubSecKeys`|`Array of link:dataobjects.html#PubSecKeyOptions[PubSecKeyOptions]`|-
 |===
 

@@ -141,7 +141,7 @@ public class MongoAuthenticationTest extends MongoBaseTest {
     CountDownLatch intLatch = new CountDownLatch(1);
     final StringBuffer buffer = new StringBuffer();
 
-    insertUser(authenticationProvider, authenticationOptions, username, password).setHandler(res -> {
+    insertUser(authenticationProvider, authenticationOptions, username, password).onComplete(res -> {
       if (res.succeeded()) {
         log.info("user added: " + username);
         latch.countDown();

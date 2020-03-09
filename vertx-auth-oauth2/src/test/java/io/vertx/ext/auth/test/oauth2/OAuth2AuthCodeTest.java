@@ -122,7 +122,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
       .compose(x -> auth())
       .compose(x -> auth())
       .compose(x -> auth())
-      .setHandler(r -> {
+      .onComplete(r -> {
         if (r.failed()) {
           fail(r.cause());
         } else {
