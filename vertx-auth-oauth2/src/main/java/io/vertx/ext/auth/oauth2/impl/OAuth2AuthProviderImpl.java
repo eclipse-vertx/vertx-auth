@@ -361,47 +361,48 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private void validateUser(User user, Handler<AsyncResult<User>> handler) {
 
-    if (user.principal().containsKey("accessToken")) {
-      // the user object is a JWT so we should validate it as mandated by OIDC
-      final JWTOptions jwtOptions = config.getJWTOptions();
-
-      // basic validation passed, the token is not expired,
-      // the spec mandates that that a few extra checks are performed
-      final JsonObject payload;
-
-      try {
-        payload = user.principal().getJsonObject("accessToken");
-      } catch (RuntimeException e) {
-        handler.handle(Future.failedFuture("User accessToken isn't a JsonObject"));
-        return;
-      }
-
-      if (jwtOptions.getAudience() != null) {
-        JsonArray target;
-        if (payload.getValue("aud") instanceof String) {
-          target = new JsonArray().add(payload.getValue("aud", ""));
-        } else {
-          target = payload.getJsonArray("aud", new JsonArray());
-        }
-
-        if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-          handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
-          return;
-        }
-      }
-
-      if (jwtOptions.getIssuer() != null) {
-        if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
-          handler.handle(Future.failedFuture("Invalid JWT issuer"));
-          return;
-        }
-      }
-
-      handler.handle(Future.succeededFuture(user));
-    } else {
+    if (!user.principal().containsKey("accessToken")) {
       // nothing else to do
       handler.handle(Future.succeededFuture(user));
+      return;
     }
+
+    // the user object is a JWT so we should validate it as mandated by OIDC
+    final JWTOptions jwtOptions = config.getJWTOptions();
+
+    // basic validation passed, the token is not expired,
+    // the spec mandates that that a few extra checks are performed
+    final JsonObject payload;
+
+    try {
+      payload = user.principal().getJsonObject("accessToken");
+    } catch (RuntimeException e) {
+      handler.handle(Future.failedFuture("User accessToken isn't a JsonObject"));
+      return;
+    }
+
+    if (jwtOptions.getAudience() != null) {
+      JsonArray target;
+      if (payload.getValue("aud") instanceof String) {
+        target = new JsonArray().add(payload.getValue("aud", ""));
+      } else {
+        target = payload.getJsonArray("aud", new JsonArray());
+      }
+
+      if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
+        handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
+        return;
+      }
+    }
+
+    if (jwtOptions.getIssuer() != null) {
+      if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
+        handler.handle(Future.failedFuture("Invalid JWT issuer"));
+        return;
+      }
+    }
+
+    handler.handle(Future.succeededFuture(user));
   }
 
   @Override
