@@ -20,12 +20,17 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
+import io.vertx.ext.jwt.JWTOptions;
+
+import java.util.Collections;
 
 /**
  * @author Paulo Lopes
@@ -153,17 +158,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
               handler.handle(Future.failedFuture("Used is expired."));
             } else {
-              handler.handle(Future.succeededFuture(newUser));
+              // basic validation passed, the token is not expired,
+              // the spec mandates that that a few extra checks are performed
+              validateUser(newUser, handler);
             }
           });
 
       } else {
+        final JWTOptions jwtOptions = config.getJWTOptions();
         // a valid JWT token should have the access token value decoded
         // the token might be valid, but expired
-        if (user.expired(config.getJWTOptions().getLeeway())) {
+        if (user.expired(jwtOptions.getLeeway())) {
           handler.handle(Future.failedFuture("Expired Token"));
         } else {
-          handler.handle(Future.succeededFuture(user));
+          // basic validation passed, the token is not expired,
+          // the spec mandates that that a few extra checks are performed
+          validateUser(user, handler);
         }
       }
 
@@ -219,7 +229,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
             handler.handle(Future.failedFuture("Used is expired."));
           } else {
-            handler.handle(Future.succeededFuture(newUser));
+            // basic validation passed, the token is not expired,
+            // the spec mandates that that a few extra checks are performed
+            validateUser(newUser, handler);
           }
         }
       });
@@ -248,7 +260,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
             handler.handle(Future.failedFuture("Used is expired."));
           } else {
-            handler.handle(Future.succeededFuture(newUser));
+            // basic validation passed, the token is not expired,
+            // the spec mandates that that a few extra checks are performed
+            validateUser(newUser, handler);
           }
         }
       });
@@ -343,6 +357,51 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
 
     return user;
+  }
+
+  private void validateUser(User user, Handler<AsyncResult<User>> handler) {
+
+    if (user.principal().containsKey("accessToken")) {
+      // the user object is a JWT so we should validate it as mandated by OIDC
+      final JWTOptions jwtOptions = config.getJWTOptions();
+
+      // basic validation passed, the token is not expired,
+      // the spec mandates that that a few extra checks are performed
+      final JsonObject payload;
+
+      try {
+        payload = user.principal().getJsonObject("accessToken");
+      } catch (RuntimeException e) {
+        handler.handle(Future.failedFuture("User accessToken isn't a JsonObject"));
+        return;
+      }
+
+      if (jwtOptions.getAudience() != null) {
+        JsonArray target;
+        if (payload.getValue("aud") instanceof String) {
+          target = new JsonArray().add(payload.getValue("aud", ""));
+        } else {
+          target = payload.getJsonArray("aud", new JsonArray());
+        }
+
+        if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
+          handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
+          return;
+        }
+      }
+
+      if (jwtOptions.getIssuer() != null) {
+        if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
+          handler.handle(Future.failedFuture("Invalid JWT issuer"));
+          return;
+        }
+      }
+
+      handler.handle(Future.succeededFuture(user));
+    } else {
+      // nothing else to do
+      handler.handle(Future.succeededFuture(user));
+    }
   }
 
   @Override
