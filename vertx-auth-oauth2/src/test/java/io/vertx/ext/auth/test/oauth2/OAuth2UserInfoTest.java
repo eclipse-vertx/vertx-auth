@@ -5,8 +5,9 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -33,7 +34,7 @@ public class OAuth2UserInfoTest extends VertxTestBase {
   private OAuth2Auth oauth2;
   private HttpServer server;
 
-  private final OAuth2ClientOptions oauthConfig = new OAuth2ClientOptions()
+  private final OAuth2Options oauthConfig = new OAuth2Options()
     .setFlow(OAuth2FlowType.AUTH_CODE)
     .setClientID("client-id")
     .setClientSecret("client-secret")

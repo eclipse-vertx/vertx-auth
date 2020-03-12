@@ -17,6 +17,7 @@ package io.vertx.ext.auth.oauth2.rbac;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 import io.vertx.ext.auth.oauth2.rbac.impl.KeycloakRBACImpl;
 
@@ -32,7 +33,7 @@ public interface KeycloakRBAC {
    * Factory method to create a RBAC handler for tokens adhering to the Keycloak token format.
    * @return a RBAC validator
    */
-  static OAuth2RBAC create(OAuth2ClientOptions options) {
+  static OAuth2RBAC create(OAuth2Options options) {
     return new KeycloakRBACImpl(options);
   }
 }

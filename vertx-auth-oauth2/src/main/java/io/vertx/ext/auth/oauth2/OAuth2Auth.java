@@ -40,7 +40,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return the auth provider
    */
   static OAuth2Auth create(Vertx vertx) {
-    return create(vertx, new OAuth2ClientOptions());
+    return create(vertx, new OAuth2Options());
   }
 
   /**
@@ -50,7 +50,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @param config  the config
    * @return the auth provider
    */
-  static OAuth2Auth create(Vertx vertx, OAuth2ClientOptions config) {
+  static OAuth2Auth create(Vertx vertx, OAuth2Options config) {
     return new OAuth2AuthProviderImpl(new OAuth2API(vertx, config), config);
   }
 

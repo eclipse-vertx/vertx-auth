@@ -2,12 +2,11 @@ package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2Response;
 
@@ -30,7 +29,7 @@ public interface OpenIDConnectAuth {
    * @param config  the initial config, it should contain a site url
    * @param handler the instantiated Oauth2 provider instance handler
    */
-  static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+  static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     if (config.getSite() == null) {
       handler.handle(Future.failedFuture("issuer cannot be null"));
       return;
@@ -125,9 +124,9 @@ public interface OpenIDConnectAuth {
    * @param vertx  the vertx instance
    * @param config the initial config, it should contain a site url
    * @return future with the instantiated Oauth2 provider instance handler
-   * @see OpenIDConnectAuth#discover(Vertx, OAuth2ClientOptions, Handler)
+   * @see OpenIDConnectAuth#discover(Vertx, OAuth2Options, Handler)
    */
-  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     Promise<OAuth2Auth> promise = Promise.promise();
     discover(vertx, config, promise);
     return promise.future();

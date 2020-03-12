@@ -5,10 +5,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
@@ -26,7 +23,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
   private OAuth2Auth oauth2;
   private HttpServer server;
   private JsonObject config;
-  private OAuth2ClientOptions oauthConfig;
+  private OAuth2Options oauthConfig;
   private JsonObject fixtureIntrospect;
 
   @Override
@@ -45,7 +42,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
         "  \"nbf\": 7200" +
         "}");
 
-    oauthConfig = new OAuth2ClientOptions()
+    oauthConfig = new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("client-id")
       .setClientSecret("client-secret")

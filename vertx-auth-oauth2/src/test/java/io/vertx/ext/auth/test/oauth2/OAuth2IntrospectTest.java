@@ -6,8 +6,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   private JsonObject config;
   private JsonObject fixture;
 
-  private final OAuth2ClientOptions oauthConfig = new OAuth2ClientOptions()
+  private final OAuth2Options oauthConfig = new OAuth2Options()
     .setFlow(OAuth2FlowType.AUTH_CODE)
     .setClientID("client-id")
     .setClientSecret("client-secret")

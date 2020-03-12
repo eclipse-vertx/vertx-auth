@@ -27,6 +27,7 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -42,11 +43,11 @@ public class OAuth2API {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2API.class);
 
   private final HttpClient client;
-  private final OAuth2ClientOptions config;
+  private final OAuth2Options config;
 
-  public OAuth2API(Vertx vertx, OAuth2ClientOptions config) {
+  public OAuth2API(Vertx vertx, OAuth2Options config) {
     this.config = config;
-    this.client = vertx.createHttpClient(config);
+    this.client = vertx.createHttpClient(config.getHttpClientOptions());
   }
 
   /**

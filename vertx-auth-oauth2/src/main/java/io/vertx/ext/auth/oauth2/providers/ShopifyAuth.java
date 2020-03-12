@@ -4,7 +4,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
 /**
@@ -36,7 +36,8 @@ public interface ShopifyAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, String shop, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2Options()
+        .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientID(clientId)
         .setClientSecret(clientSecret)

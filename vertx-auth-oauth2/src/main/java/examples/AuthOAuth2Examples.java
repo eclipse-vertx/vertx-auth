@@ -35,7 +35,7 @@ public class AuthOAuth2Examples {
 
   public void example1(Vertx vertx) {
 
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions()
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("YOUR_CLIENT_ID")
       .setClientSecret("YOUR_CLIENT_SECRET")
@@ -71,7 +71,7 @@ public class AuthOAuth2Examples {
   public void example2(Vertx vertx, HttpServerResponse response) {
 
     // Set the client credentials and the OAuth2 server
-    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+    OAuth2Options credentials = new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("<client-id>")
       .setClientSecret("<client-secret>")
@@ -111,7 +111,7 @@ public class AuthOAuth2Examples {
   public void example3(Vertx vertx) {
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2ClientOptions().setFlow(OAuth2FlowType.PASSWORD));
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2Options().setFlow(OAuth2FlowType.PASSWORD));
 
     JsonObject tokenConfig = new JsonObject()
       .put("username", "username")
@@ -134,7 +134,7 @@ public class AuthOAuth2Examples {
   public void example4(Vertx vertx) {
 
     // Set the client credentials and the OAuth2 server
-    OAuth2ClientOptions credentials = new OAuth2ClientOptions()
+    OAuth2Options credentials = new OAuth2Options()
       .setFlow(OAuth2FlowType.CLIENT)
       .setClientID("<client-id>")
       .setClientSecret("<client-secret>")
@@ -337,7 +337,7 @@ public class AuthOAuth2Examples {
 
     OpenIDConnectAuth.discover(
       vertx,
-      new OAuth2ClientOptions()
+      new OAuth2Options()
         .setClientID("clientId")
         .setSite("https://accounts.google.com"),
       res -> {
@@ -355,7 +355,7 @@ public class AuthOAuth2Examples {
 
     OpenIDConnectAuth.discover(
       vertx,
-      new OAuth2ClientOptions()
+      new OAuth2Options()
         .setClientID("clientId")
         .setTenant("your_realm")
         .setSite("http://server:port/auth/realms/{tenant}"),
