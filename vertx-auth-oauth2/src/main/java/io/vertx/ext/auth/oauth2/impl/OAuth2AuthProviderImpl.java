@@ -20,6 +20,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
@@ -419,7 +420,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         user.attributes()
           .put("rootClaim", "accessToken");
 
-      } catch (IllegalStateException e) {
+      } catch (DecodeException | IllegalStateException e) {
         // explicity catch and log as debug. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
