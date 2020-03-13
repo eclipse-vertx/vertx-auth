@@ -5,7 +5,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
@@ -46,13 +46,13 @@ public class OAuth2KeycloakIT {
   public void setUp(TestContext should) {
     final Async test = should.async();
 
-    OAuth2ClientOptions options = new OAuth2ClientOptions()
+    OAuth2Options options = new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientID("public-client")
       .setTenant("vertx-test")
       .setSite(site + "/auth/realms/{tenant}");
 
-    options.setTrustAll(true);
+    options.getHttpClientOptions().setTrustAll(true);
 
     KeycloakAuth.discover(
       rule.vertx(),
@@ -116,14 +116,14 @@ public class OAuth2KeycloakIT {
       // generate a access token from the user
       User token = authn.result();
 
-      OAuth2ClientOptions options = new OAuth2ClientOptions()
+      OAuth2Options options = new OAuth2Options()
         .setFlow(OAuth2FlowType.PASSWORD)
         .setClientID("confidential-client")
         .setTenant("vertx-test")
         .setSite(site + "/auth/realms/{realm}")
         .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e");
 
-      options.setTrustAll(true);
+      options.getHttpClientOptions().setTrustAll(true);
 
       // get a auth handler for the confidential client
       KeycloakAuth.discover(

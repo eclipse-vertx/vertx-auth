@@ -18,7 +18,7 @@ public class OAuth2ClientOptionsTest {
 
   @Test(expected = IllegalStateException.class)
   public void testMSLikeConfig() {
-    OAuth2ClientOptions config = new OAuth2ClientOptions();
+    OAuth2Options config = new OAuth2Options();
 
     config
       .setSite("https://login.microsoftonline.com/{tenant}")
@@ -27,7 +27,7 @@ public class OAuth2ClientOptionsTest {
 
   @Test
   public void testMSLikeConfigCorrect() {
-    OAuth2ClientOptions config = new OAuth2ClientOptions();
+    OAuth2Options config = new OAuth2Options();
 
     config
       .setTenant("6731de76-14a6-49ae-97bc-6eba6914391e")
@@ -41,7 +41,7 @@ public class OAuth2ClientOptionsTest {
   public void testVariableReplacement() {
     OAuth2AuthProviderImpl auth = (OAuth2AuthProviderImpl) AzureADAuth.create(rule.vertx(), "clientId", "clientSecret", "guid");
 
-    OAuth2ClientOptions config = auth.getConfig();
+    OAuth2Options config = auth.getConfig();
 
     assertEquals("https://login.windows.net/guid", config.getSite());
     assertEquals("guid", config.getExtraParameters().getString("resource"));
@@ -49,7 +49,7 @@ public class OAuth2ClientOptionsTest {
 
   @Test
   public void TestTraillingSlash() {
-    OAuth2ClientOptions config = new OAuth2ClientOptions();
+    OAuth2Options config = new OAuth2Options();
 
     config
       .setSite("https://login.microsoftonline.com/")

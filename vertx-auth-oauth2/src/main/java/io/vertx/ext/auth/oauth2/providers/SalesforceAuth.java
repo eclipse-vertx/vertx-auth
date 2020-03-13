@@ -4,7 +4,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
 /**
@@ -34,7 +34,8 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2Options()
+        .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientID(clientId)
         .setClientSecret(clientSecret)
@@ -56,12 +57,12 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
    * @param config  the initial config
    * @param handler the instantiated Oauth2 provider instance handler
    */
-  static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+  static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     // don't override if already set
     final String site = config.getSite() == null ? "https://login.salesforce.com" : config.getSite();
 
     OpenIDConnectAuth.discover(vertx,
-      new OAuth2ClientOptions(config)
+      new OAuth2Options(config)
         .setSite(site)
         .setScopeSeparator("+"),
       handler);
@@ -75,12 +76,12 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see SalesforceAuth#discover(Vertx, OAuth2ClientOptions, Handler)
+   * @see SalesforceAuth#discover(Vertx, OAuth2Options, Handler)
    * @param vertx   the vertx instance
    * @param config  the initial config
    * @return future with the instantiated Oauth2 provider instance handler
    */
-  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     Promise<OAuth2Auth> promise = Promise.promise();
     discover(vertx, config, promise);
     return promise.future();

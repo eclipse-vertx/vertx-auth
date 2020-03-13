@@ -3,7 +3,7 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth;
 import io.vertx.test.core.VertxTestBase;
@@ -23,7 +23,7 @@ public class OIDCTest extends VertxTestBase {
 
     OpenIDConnectAuth.discover(
       vertx,
-      new OAuth2ClientOptions()
+      new OAuth2Options()
         .setFlow(OAuth2FlowType.PASSWORD)
         .setClientID("vertx")
         .setSite("http://localhost:8080/auth/realms/master"),
@@ -74,7 +74,7 @@ public class OIDCTest extends VertxTestBase {
   public void testDecode() {
     OpenIDConnectAuth.discover(
       vertx,
-      new OAuth2ClientOptions()
+      new OAuth2Options()
         .setClientID("vertx")
         .setSite("http://localhost:8080/auth/realms/master"),
       res -> {

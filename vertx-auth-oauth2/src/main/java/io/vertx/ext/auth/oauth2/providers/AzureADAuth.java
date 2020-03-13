@@ -5,7 +5,7 @@ import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
 import static io.vertx.ext.auth.oauth2.OAuth2FlowType.AUTH_JWT;
@@ -39,7 +39,8 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, String guid, HttpClientOptions httpClientOptions) {
     return
-      OAuth2Auth.create(vertx, new OAuth2ClientOptions(httpClientOptions)
+      OAuth2Auth.create(vertx, new OAuth2Options()
+        .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientID(clientId)
         .setClientSecret(clientSecret)
@@ -68,7 +69,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * @param config  the initial config
    * @param handler the instantiated Oauth2 provider instance handler
    */
-  static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+  static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     // don't override if already set
     final String site = config.getSite() == null ? "https://login.windows.net/common" : config.getSite();
 
@@ -81,7 +82,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
 
     OpenIDConnectAuth.discover(
       vertx,
-      new OAuth2ClientOptions(config)
+      new OAuth2Options(config)
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
@@ -98,12 +99,12 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see AzureADAuth#discover(Vertx, OAuth2ClientOptions, Handler)
+   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
    * @param vertx   the vertx instance
    * @param config  the initial config
    * @return future with instantiated Oauth2 provider instance handler
    */
-  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     Promise<OAuth2Auth> promise = Promise.promise();
     discover(vertx, config, promise);
     return promise.future();

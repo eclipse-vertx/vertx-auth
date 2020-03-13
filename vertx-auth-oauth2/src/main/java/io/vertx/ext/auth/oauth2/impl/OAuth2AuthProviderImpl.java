@@ -40,12 +40,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
-  private final OAuth2ClientOptions config;
+  private final OAuth2Options config;
   private final OAuth2API api;
 
   private JWT jwt = new JWT();
 
-  public OAuth2AuthProviderImpl(OAuth2API api, OAuth2ClientOptions config) {
+  public OAuth2AuthProviderImpl(OAuth2API api, OAuth2Options config) {
     this.api = api;
     this.config = config;
     // compute paths with variables, at this moment it is only relevant that
@@ -83,7 +83,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return this;
   }
 
-  public OAuth2ClientOptions getConfig() {
+  public OAuth2Options getConfig() {
     return config;
   }
 

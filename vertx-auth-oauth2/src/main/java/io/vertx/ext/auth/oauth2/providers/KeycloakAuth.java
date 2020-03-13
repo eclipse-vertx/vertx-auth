@@ -6,7 +6,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.rbac.KeycloakRBAC;
 
@@ -55,7 +55,8 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * @param httpClientOptions custom http client options
    */
   static OAuth2Auth create(Vertx vertx, OAuth2FlowType flow, JsonObject config, HttpClientOptions httpClientOptions) {
-    final OAuth2ClientOptions options = new OAuth2ClientOptions(httpClientOptions);
+    final OAuth2Options options = new OAuth2Options()
+      .setHttpClientOptions(httpClientOptions);
 
     options.setFlow(flow);
 
@@ -113,8 +114,8 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * @param config  the initial config
    * @param handler the instantiated Oauth2 provider instance handler
    */
-  static void discover(final Vertx vertx, final OAuth2ClientOptions config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    final OAuth2ClientOptions options = new OAuth2ClientOptions(config);
+  static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+    final OAuth2Options options = new OAuth2Options(config);
     OpenIDConnectAuth.discover(vertx, options, discover -> {
       // apply the Keycloak RBAC
       if (discover.succeeded()) {
@@ -132,12 +133,12 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see KeycloakAuth#discover(Vertx, OAuth2ClientOptions, Handler)
+   * @see KeycloakAuth#discover(Vertx, OAuth2Options, Handler)
    * @param vertx   the vertx instance
    * @param config  the initial config
    * @return promise with the instantiated Oauth2 provider instance handler
    */
-  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2ClientOptions config) {
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     Promise<OAuth2Auth> promise = Promise.promise();
     discover(vertx, config, promise);
     return promise.future();
