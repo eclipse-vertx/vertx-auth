@@ -219,7 +219,7 @@ public class AuthOAuth2Examples {
 
   public void example14(User user) {
     // you can get the decoded `id_token` from the Keycloak principal
-    JsonObject idToken = user.principal().getJsonObject("idToken");
+    JsonObject idToken = user.attributes().getJsonObject("idToken");
 
     // you can also retrieve some properties directly from the Keycloak principal
     // e.g. `preferred_username`

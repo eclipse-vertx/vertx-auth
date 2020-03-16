@@ -4,6 +4,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
@@ -109,7 +110,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       if (res.failed()) {
         fail(res.cause());
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User token = res.result();
         assertFalse(token.expired());
         testComplete();
       }
@@ -140,7 +141,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       if (res.failed()) {
         fail(res.cause());
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User token = res.result();
         assertFalse(token.expired());
 
         ScopeAuthorization.create(" ").getAuthorizations(token, call -> {
@@ -253,7 +254,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       if (res.failed()) {
         fail("Test should have not failed");
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User token = res.result();
         assertEquals("username",token.principal().getValue("username"));
         assertNull(token.principal().getValue("scope"));
         testComplete();
@@ -281,7 +282,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       if (res.failed()) {
         fail("Test should have not failed");
       } else {
-        AccessToken token = (AccessToken) res.result();
+        User token = res.result();
         testComplete();
       }
     });
