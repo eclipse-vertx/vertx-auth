@@ -260,7 +260,7 @@ public class OAuth2KeycloakIT {
         // generate a access token from the user
         User token = authn.result();
 
-        should.assertNotNull(token.principal().getJsonObject("accessToken"));
+        should.assertNotNull(token.attributes().getJsonObject("accessToken"));
         test.complete();
       });
     });

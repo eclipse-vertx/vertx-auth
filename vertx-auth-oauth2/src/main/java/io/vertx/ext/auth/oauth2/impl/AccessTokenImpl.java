@@ -43,12 +43,12 @@ public class AccessTokenImpl extends UserImpl implements AccessToken {
 
   @Override
   public JsonObject accessToken() {
-    return principal().getJsonObject("accessToken");
+    return attributes().getJsonObject("accessToken");
   }
 
   @Override
   public JsonObject idToken() {
-    return principal().getJsonObject("idToken");
+    return attributes().getJsonObject("idToken");
   }
 
   @Override

@@ -105,10 +105,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-      final User user = createAccessToken(authInfo);
+      final User user = createUser(authInfo);
 
       // the token is not a JWT or there are no loaded keys to validate
-      if (!user.principal().containsKey("accessToken") || jwt.isUnsecure()) {
+      if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
         // the token is not in JWT format or this auth provider is not configured for secure JWTs
         // in this case we must rely on token introspection in order to know more about its state
         // attempt to create a token object from the given string representation
@@ -152,7 +152,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             }
 
             // attempt to create a user from the json object
-            final User newUser = createAccessToken(json);
+            final User newUser = createUser(json);
 
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
@@ -223,7 +223,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         } else {
 
           // attempt to create a user from the json object
-          final User newUser = createAccessToken(getToken.result());
+          final User newUser = createUser(getToken.result());
 
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
@@ -315,14 +315,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
 
     // attempt to decode tokens
-    if (json.getString("access_token") != null) {
+    if (json.containsKey("access_token")) {
       try {
-        user.principal()
+        user.attributes()
           .put("accessToken", jwt.decode(json.getString("access_token")));
 
         // re-compute expires at if not present and access token has been successfully decoded from JWT
         if (!user.attributes().containsKey("exp")) {
-          Long exp = user.principal()
+          Long exp = user.attributes()
             .getJsonObject("accessToken").getLong("exp");
 
           if (exp != null) {
@@ -335,7 +335,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         user.attributes()
           .put("rootClaim", "accessToken");
 
-      } catch (IllegalStateException e) {
+      } catch (DecodeException | IllegalStateException e) {
         // explicity catch and log as debug. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
@@ -344,11 +344,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       }
     }
 
-    if (json.getString("id_token") != null) {
+    if (json.containsKey("id_token")) {
       try {
-        user.principal()
+        user.attributes()
           .put("idToken", jwt.decode(json.getString("id_token")));
-      } catch (IllegalStateException e) {
+      } catch (DecodeException | IllegalStateException e) {
         // explicity catch and log as debug. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
@@ -362,7 +362,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private void validateUser(User user, Handler<AsyncResult<User>> handler) {
 
-    if (!user.principal().containsKey("accessToken")) {
+    if (!user.attributes().containsKey("accessToken")) {
       // nothing else to do
       handler.handle(Future.succeededFuture(user));
       return;
@@ -376,7 +376,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     final JsonObject payload;
 
     try {
-      payload = user.principal().getJsonObject("accessToken");
+      payload = user.attributes().getJsonObject("accessToken");
     } catch (RuntimeException e) {
       handler.handle(Future.failedFuture("User accessToken isn't a JsonObject"));
       return;
@@ -439,6 +439,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   /**
    * Create a User object with some initial validations related to JWT.
    */
+  @Deprecated
   private AccessToken createAccessToken(JsonObject json) {
     // update the principal
     final AccessToken user = new AccessTokenImpl(json, this);
@@ -462,12 +463,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     // attempt to decode tokens
     if (json.getString("access_token") != null) {
       try {
-        user.principal()
+        user.attributes()
           .put("accessToken", jwt.decode(json.getString("access_token")));
 
         // re-compute expires at if not present and access token has been successfully decoded from JWT
         if (!user.attributes().containsKey("exp")) {
-          Long exp = user.principal()
+          Long exp = user.attributes()
             .getJsonObject("accessToken").getLong("exp");
 
           if (exp != null) {
@@ -491,7 +492,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
     if (json.getString("id_token") != null) {
       try {
-        user.principal()
+        user.attributes()
           .put("idToken", jwt.decode(json.getString("id_token")));
       } catch (DecodeException | IllegalStateException e) {
         // explicity catch and log as debug. exception here is a valid case
