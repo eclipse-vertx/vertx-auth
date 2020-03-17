@@ -37,6 +37,14 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
 
   public OAuth2UserImpl(OAuth2Auth provider, JsonObject principal) {
     this.principal = principal;
+    // mitigate broken tokens
+    if (
+      !(principal.getValue("access_token" , "") instanceof String) ||
+      !(principal.getValue("id_token", "") instanceof String)) {
+      // the token doesn't contain a string based value for the given claims
+      throw new IllegalStateException("Tokens are not valid base64 strings");
+    }
+
     setAuthProvider(provider);
   }
 
