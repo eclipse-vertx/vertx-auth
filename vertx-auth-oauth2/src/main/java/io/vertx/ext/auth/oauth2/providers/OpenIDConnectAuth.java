@@ -41,6 +41,9 @@ public interface OpenIDConnectAuth {
 
     final OAuth2API api = new OAuth2API(vertx, config);
 
+    // the response follows the OpenID Connect provider metadata spec:
+    // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+
     RequestOptions options = new RequestOptions()
       .setMethod(HttpMethod.GET)
       .setAbsoluteURI(config.getSite() + "/.well-known/openid-configuration")
@@ -86,7 +89,6 @@ public interface OpenIDConnectAuth {
 
       config.setAuthorizationPath(json.getString("authorization_endpoint"));
       config.setTokenPath(json.getString("token_endpoint"));
-      config.setIntrospectionPath(json.getString("token_introspection_endpoint"));
       config.setLogoutPath(json.getString("end_session_endpoint"));
       config.setRevocationPath(json.getString("revocation_endpoint"));
       config.setUserInfoPath(json.getString("userinfo_endpoint"));
