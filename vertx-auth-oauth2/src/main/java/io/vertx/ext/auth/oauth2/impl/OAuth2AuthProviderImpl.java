@@ -94,10 +94,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     // from the authority provider
 
     if (
-      // authInfo contains a token_type of Bearer
-      authInfo.containsKey("token_type") && "Bearer".equalsIgnoreCase(authInfo.getString("token_type")) &&
-        // authInfo contains a non null token
-        authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
+      // authInfo contains a non null token
+      authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
 
       // this validation can be done in 2 different ways:
       // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
@@ -137,16 +135,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
               if (!config.getClientID().equals(json.getString("client_id"))) {
                 // Client identifier for the OAuth 2.0 client that requested this token.
                 handler.handle(Future.failedFuture("Wrong client_id"));
-                return;
-              }
-            }
-
-            // validate token type
-            if (json.containsKey("token_type")) {
-              // response included a token type
-              if (!"Bearer".equalsIgnoreCase(json.getString("token_type"))) {
-                // Token type for the requested token.
-                handler.handle(Future.failedFuture("Wrong token_type"));
                 return;
               }
             }
