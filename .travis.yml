@@ -6,7 +6,7 @@ branches:
 services:
   - docker
 before_install:
-- docker pull jboss/keycloak
+- docker pull jboss/keycloak:6.0.0
 - docker build -t vertx-test-keycloak vertx-auth-oauth2/src/test/fixtures
 - docker run -d -p 8888:8080 -p 9443:8443 vertx-test-keycloak
 - docker ps -a
