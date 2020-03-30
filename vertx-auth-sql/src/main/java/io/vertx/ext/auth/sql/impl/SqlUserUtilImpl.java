@@ -78,7 +78,7 @@ public class SqlUserUtilImpl implements SqlUserUtil {
       return this;
     }
 
-    client.preparedQuery(insertUser, Tuple.of(username, hash), prepare -> {
+    client.preparedQuery(insertUser).execute(Tuple.of(username, hash), prepare -> {
       if (prepare.succeeded()) {
         resultHandler.handle(Future.succeededFuture());
       } else {
@@ -95,7 +95,7 @@ public class SqlUserUtilImpl implements SqlUserUtil {
       return this;
     }
 
-    client.preparedQuery(insertUserRole, Tuple.of(username, role), prepare -> {
+    client.preparedQuery(insertUserRole).execute(Tuple.of(username, role), prepare -> {
       if (prepare.succeeded()) {
         resultHandler.handle(Future.succeededFuture());
       } else {
@@ -112,7 +112,7 @@ public class SqlUserUtilImpl implements SqlUserUtil {
       return this;
     }
 
-    client.preparedQuery(insertRolePermission, Tuple.of(role, permission), insert -> {
+    client.preparedQuery(insertRolePermission).execute(Tuple.of(role, permission), insert -> {
       if (insert.succeeded()) {
         resultHandler.handle(Future.succeededFuture());
       } else {

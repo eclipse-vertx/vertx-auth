@@ -60,7 +60,7 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
       return;
     }
 
-    client.preparedQuery(options.getAuthenticationQuery(), Tuple.of(username), preparedQuery -> {
+    client.preparedQuery(options.getAuthenticationQuery()).execute(Tuple.of(username), preparedQuery -> {
       if (preparedQuery.succeeded()) {
         final RowSet<Row> rows = preparedQuery.result();
         switch (rows.size()) {
