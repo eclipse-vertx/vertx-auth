@@ -80,7 +80,7 @@ public class MongoUserUtilImpl implements MongoUserUtil {
       authnOptions.getCollectionName(),
       new JsonObject()
         .put(authnOptions.getUsernameCredentialField(), username)
-        .put(authnOptions.getUsernameCredentialField(), hash),
+        .put(authnOptions.getPasswordCredentialField(), hash),
       resultHandler);
     return this;
   }
