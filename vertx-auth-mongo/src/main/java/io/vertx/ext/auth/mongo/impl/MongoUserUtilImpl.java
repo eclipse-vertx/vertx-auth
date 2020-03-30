@@ -50,7 +50,7 @@ public class MongoUserUtilImpl implements MongoUserUtil {
   }
 
   @Override
-  public MongoUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler) {
+  public MongoUserUtil createUser(String username, String password, Handler<AsyncResult<String>> resultHandler) {
     if (username == null || password == null) {
       resultHandler.handle(Future.failedFuture("username or password are null"));
       return this;
@@ -70,7 +70,7 @@ public class MongoUserUtilImpl implements MongoUserUtil {
   }
 
   @Override
-  public MongoUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler) {
+  public MongoUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<String>> resultHandler) {
     if (username == null || hash == null) {
       resultHandler.handle(Future.failedFuture("username or password hash are null"));
       return this;
@@ -81,18 +81,12 @@ public class MongoUserUtilImpl implements MongoUserUtil {
       new JsonObject()
         .put(authnOptions.getUsernameCredentialField(), username)
         .put(authnOptions.getUsernameCredentialField(), hash),
-      save -> {
-        if (save.succeeded()) {
-          resultHandler.handle(Future.succeededFuture());
-        } else {
-          resultHandler.handle(Future.failedFuture(save.cause()));
-        }
-      });
+      resultHandler);
     return this;
   }
 
   @Override
-  public MongoUserUtil createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions, Handler<AsyncResult<Void>> resultHandler) {
+  public MongoUserUtil createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions, Handler<AsyncResult<String>> resultHandler) {
     if (username == null) {
       resultHandler.handle(Future.failedFuture("username is null"));
       return this;
@@ -104,13 +98,7 @@ public class MongoUserUtilImpl implements MongoUserUtil {
         .put(authzOptions.getUsernameField(), username)
         .put(authzOptions.getRoleField(), roles == null ? Collections.emptyList() : roles)
         .put(authzOptions.getPermissionField(), permissions == null ? Collections.emptyList() : permissions),
-      save -> {
-        if (save.succeeded()) {
-          resultHandler.handle(Future.succeededFuture());
-        } else {
-          resultHandler.handle(Future.failedFuture(save.cause()));
-        }
-      });
+      resultHandler);
 
     return this;
   }
