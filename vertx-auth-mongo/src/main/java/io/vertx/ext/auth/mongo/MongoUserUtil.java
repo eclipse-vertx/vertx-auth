@@ -61,17 +61,17 @@ public interface MongoUserUtil {
    * @param password
    *          the passsword in clear text, will be adapted following the definitions of the defined strategy
    * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   *          the ResultHandler will be provided with the result of the operation and the created user document identifier
    * @return fluent self
    */
   @Fluent
-  MongoUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler);
+  MongoUserUtil createUser(String username, String password, Handler<AsyncResult<String>> resultHandler);
 
   /**
    * @see #createUser(String, String, Handler).
    */
-  default Future<Void> createUser(String username, String password) {
-    Promise<Void> promise = Promise.promise();
+  default Future<String> createUser(String username, String password) {
+    Promise<String> promise = Promise.promise();
     createUser(username, password, promise);
     return promise.future();
   }
@@ -84,17 +84,17 @@ public interface MongoUserUtil {
    * @param hash
    *          the password hash, as result of {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
    * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   *          the ResultHandler will be provided with the result of the operation and the created user document identifier
    * @return fluent self
    */
   @Fluent
-  MongoUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler);
+  MongoUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<String>> resultHandler);
 
   /**
    * @see #createHashedUser(String, String, Handler).
    */
-  default Future<Void> createHashedUser(String username, String hash) {
-    Promise<Void> promise = Promise.promise();
+  default Future<String> createHashedUser(String username, String hash) {
+    Promise<String> promise = Promise.promise();
     createHashedUser(username, hash, promise);
     return promise.future();
   }
@@ -109,17 +109,17 @@ public interface MongoUserUtil {
    * @param permissions
    *          a to be set
    * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   *          the ResultHandler will be provided with the result of the operation and the created user document identifier
    * @return fluent self
    */
   @Fluent
-  MongoUserUtil createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions, Handler<AsyncResult<Void>> resultHandler);
+  MongoUserUtil createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions, Handler<AsyncResult<String>> resultHandler);
 
   /**
    * @see #createUserRolesAndPermissions(String, List, List, Handler).
    */
-  default Future<Void> createUserRolesAndPermissions(String user, List<String> roles, List<String> permissions) {
-    Promise<Void> promise = Promise.promise();
+  default Future<String> createUserRolesAndPermissions(String user, List<String> roles, List<String> permissions) {
+    Promise<String> promise = Promise.promise();
     createUserRolesAndPermissions(user, roles, permissions, promise);
     return promise.future();
   }

@@ -36,7 +36,7 @@ public class SqlAuthorizationImpl implements SqlAuthorization {
 
   private void getRoles(String username, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
     if (options.getRolesQuery() != null) {
-      client.preparedQuery(options.getRolesQuery(), Tuple.of(username), preparedQuery -> {
+      client.preparedQuery(options.getRolesQuery()).execute(Tuple.of(username), preparedQuery -> {
         if (preparedQuery.succeeded()) {
           RowSet<Row> rows = preparedQuery.result();
           Set<Authorization> authorizations = new HashSet<>();
@@ -56,7 +56,7 @@ public class SqlAuthorizationImpl implements SqlAuthorization {
 
   private void getPermissions(String username, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
     if (options.getPermissionsQuery() != null) {
-      client.preparedQuery(options.getPermissionsQuery(), Tuple.of(username), preparedQuery -> {
+      client.preparedQuery(options.getPermissionsQuery()).execute(Tuple.of(username), preparedQuery -> {
         if (preparedQuery.succeeded()) {
           RowSet<Row> rows = preparedQuery.result();
           Set<Authorization> authorizations = new HashSet<>();

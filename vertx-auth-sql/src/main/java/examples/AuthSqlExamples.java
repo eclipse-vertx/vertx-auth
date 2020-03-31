@@ -86,7 +86,7 @@ public class AuthSqlExamples {
       "sausages" // password
     );
     // save to the database
-    sqlClient.preparedQuery("INSERT INTO user (username, password) VALUES (?, ?)", Tuple.of("tim", hash), ar -> {
+    sqlClient.preparedQuery("INSERT INTO user (username, password) VALUES (?, ?)").execute(Tuple.of("tim", hash), ar -> {
       if (ar.succeeded()) {
         // password updated
       }
