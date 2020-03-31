@@ -139,8 +139,17 @@ A couple of well known OpenID Connect Discovery providers are:
 * Google: `https://accounts.google.com`
 * SalesForce: `https://login.salesforce.com`
 * Microsoft: `https://login.windows.net/common`
+* IBM Cloud: `https://<region-id>.appid.cloud.ibm.com/oauth/v4/<tenant-id>`
 
-This and the given `client id` is enough to configure your auth provider object.
+This and the given `client id/client secret` is enough to configure your auth provider object.
+
+For these well known providers a shortcut is provided:
+
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example25b}
+----
+
 
 === User object
 
@@ -179,6 +188,7 @@ For convenience there are several helpers to assist your with your configuration
 * Soundcloud {@link io.vertx.ext.auth.oauth2.providers.SoundcloudAuth}
 * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
 * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
+* IBM Cloud {@link io.vertx.ext.auth.oauth2.providers.IBMCloudAuth}
 
 ==== JBoss Keycloak
 

@@ -25,8 +25,7 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
-import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
-import io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth;
+import io.vertx.ext.auth.oauth2.providers.*;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -339,6 +338,7 @@ public class AuthOAuth2Examples {
       vertx,
       new OAuth2Options()
         .setClientID("clientId")
+        .setClientSecret("clientSecret")
         .setSite("https://accounts.google.com"),
       res -> {
         if (res.succeeded()) {
@@ -348,6 +348,63 @@ public class AuthOAuth2Examples {
         } else {
           // the setup failed.
         }
+      });
+  }
+
+  public void example25b(Vertx vertx) {
+    // keycloak example
+    KeycloakAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setClientID("clientId")
+        .setClientSecret("clientSecret")
+        .setSite("http://keycloakhost:keycloakport/auth/realms/{realm}")
+        .setTenant("your-realm"),
+      res -> {
+        // ...
+      });
+
+    // Google example
+    GoogleAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setClientID("clientId")
+        .setClientSecret("clientSecret"),
+      res -> {
+        // ...
+      });
+
+    // Salesforce example
+    SalesforceAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setClientID("clientId")
+        .setClientSecret("clientSecret"),
+      res -> {
+        // ...
+      });
+
+    // Azure AD example
+    AzureADAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setClientID("clientId")
+        .setClientSecret("clientSecret")
+        .setTenant("your-app-guid"),
+      res -> {
+        // ...
+      });
+
+    // Azure AD example
+    IBMCloudAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setClientID("clientId")
+        .setClientSecret("clientSecret")
+        .setSite("https://<region-id>.appid.cloud.ibm.com/oauth/v4/{tenant}")
+        .setTenant("your-tenant-id"),
+      res -> {
+        // ...
       });
   }
 
