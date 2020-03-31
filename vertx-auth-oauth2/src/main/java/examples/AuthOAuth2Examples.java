@@ -395,7 +395,7 @@ public class AuthOAuth2Examples {
         // ...
       });
 
-    // Azure AD example
+    // IBM Cloud example
     IBMCloudAuth.discover(
       vertx,
       new OAuth2Options()
