@@ -18,41 +18,44 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
-import static io.vertx.ext.auth.oauth2.OAuth2FlowType.AUTH_JWT;
-
 /**
- * Simplified factory to create an {@link OAuth2Auth} for Azure AD.
+ * Simplified factory to create an {@link OAuth2Auth} for IBM Cloud.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface AzureADAuth extends OpenIDConnectAuth {
+public interface IBMCloudAuth extends OpenIDConnectAuth {
 
   /**
-   * Create a OAuth2Auth provider for Microsoft Azure Active Directory
+   * Create a OAuth2Auth provider for IBM Cloud
    *
-   * @param clientId     the client id given to you by Azure
-   * @param clientSecret the client secret given to you by Azure
-   * @param guid         the guid of your application given to you by Azure
+   * @param region       the region to use
+   * @param clientId     the client id given to you by IBM Cloud
+   * @param clientSecret the client secret given to you by IBM Cloud
+   * @param guid         the guid of your application given to you by IBM Cloud
    */
-  static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, String guid) {
-    return create(vertx, clientId, clientSecret, guid, new HttpClientOptions());
+  static OAuth2Auth create(Vertx vertx, String region, String clientId, String clientSecret, String guid) {
+    return create(vertx, region, clientId, clientSecret, guid, new HttpClientOptions());
   }
 
   /**
-   * Create a OAuth2Auth provider for Microsoft Azure Active Directory
+   * Create a OAuth2Auth provider for IBM Cloud
    *
-   * @param clientId          the client id given to you by Azure
-   * @param clientSecret      the client secret given to you by Azure
-   * @param guid              the guid of your application given to you by Azure
+   * @param region            the region to use
+   * @param clientId          the client id given to you by IBM Cloud
+   * @param clientSecret      the client secret given to you by IBM Cloud
+   * @param guid              the guid of your application given to you by IBM Cloud
    * @param httpClientOptions custom http client options
    */
-  static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, String guid, HttpClientOptions httpClientOptions) {
+  static OAuth2Auth create(Vertx vertx, String region, String clientId, String clientSecret, String guid, HttpClientOptions httpClientOptions) {
+    if (region == null) {
+      throw new IllegalStateException("region cannot be null");
+    }
+
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
@@ -60,12 +63,11 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setClientID(clientId)
         .setClientSecret(clientSecret)
         .setTenant(guid)
-        .setSite("https://login.windows.net/{tenant}")
-        .setTokenPath("/oauth2/token")
-        .setAuthorizationPath("/oauth2/authorize")
-        .setScopeSeparator(",")
-        .setExtraParameters(
-          new JsonObject().put("resource", "{tenant}")));
+        .setSite("https://" + region + ".appid.cloud.ibm.com/oauth/v4/{tenant}")
+        .setTokenPath("/token")
+        .setAuthorizationPath("/authorization")
+        .setJwkPath("/publickeys")
+        .setUserInfoPath("/userinfo"));
   }
 
   /**
@@ -75,35 +77,13 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * <p>
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
-   * <p>
-   * With this provider, if the given configuration is using the flow type {@link OAuth2FlowType#AUTH_JWT} then
-   * the extra parameters object will include {@code requested_token_use = on_behalf_of} as required by
-   * <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-on-behalf-of-flow">https://docs.microsoft.com/en-us/azure/active-directory</a>.
    *
    * @param vertx   the vertx instance
    * @param config  the initial config
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    // don't override if already set
-    final String site = config.getSite() == null ? "https://login.windows.net/common" : config.getSite();
-
-    final JsonObject extraParameters = new JsonObject().put("resource", "{tenant}");
-
-    if (config.getFlow() != null && AUTH_JWT == config.getFlow()) {
-      // this is a "on behalf of" mode
-      extraParameters.put("requested_token_use", "on_behalf_of");
-    }
-
-    OpenIDConnectAuth.discover(
-      vertx,
-      new OAuth2Options(config)
-        // Azure OpenId does not return the same url where the request was sent to
-        .setValidateIssuer(false)
-        .setSite(site)
-        .setScopeSeparator(",")
-        .setExtraParameters(extraParameters),
-      handler);
+    OpenIDConnectAuth.discover(vertx, config, handler);
   }
 
   /**
@@ -114,7 +94,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
+   * @see IBMCloudAuth#discover(Vertx, OAuth2Options, Handler)
    * @param vertx   the vertx instance
    * @param config  the initial config
    * @return future with instantiated Oauth2 provider instance handler
