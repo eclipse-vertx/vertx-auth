@@ -52,7 +52,7 @@ public class OAuth2OptionsConverter {
           break;
         case "httpClientOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setHttpClientOptions(new io.vertx.core.http.HttpClientOptions((JsonObject)member.getValue()));
+            obj.setHttpClientOptions(new io.vertx.core.http.HttpClientOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "introspectionPath":
@@ -67,7 +67,7 @@ public class OAuth2OptionsConverter {
           break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)member.getValue()));
+            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "logoutPath":
@@ -80,7 +80,7 @@ public class OAuth2OptionsConverter {
             java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+                list.add(new io.vertx.ext.auth.PubSecKeyOptions((io.vertx.core.json.JsonObject)item));
             });
             obj.setPubSecKeys(list);
           }
