@@ -27,8 +27,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
-import io.vertx.ext.auth.jdbc.AuthFailedException;
-import io.vertx.ext.auth.jdbc.InvalidAuthInfoException;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -63,14 +61,12 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
     String username = authInfo.getString("username");
     if (username == null) {
-      InvalidAuthInfoException exception = new InvalidAuthInfoException("authInfo must contain username in 'username' field");
-      resultHandler.handle(Future.failedFuture(exception));
+      resultHandler.handle(Future.failedFuture("authInfo must contain username in 'username' field"));
       return;
     }
     String password = authInfo.getString("password");
     if (password == null) {
-      InvalidAuthInfoException exception = new InvalidAuthInfoException("authInfo must contain password in 'password' field");
-      resultHandler.handle(Future.failedFuture(exception));
+      resultHandler.handle(Future.failedFuture("authInfo must contain password in 'password' field"));
       return;
     }
     executeQuery(options.getAuthenticationQuery(), new JsonArray().add(username), queryResponse -> {
@@ -79,7 +75,7 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
         switch (rs.getNumRows()) {
           case 0: {
             // Unknown user/password
-            resultHandler.handle(Future.failedFuture(new InvalidAuthInfoException("Invalid username/password")));
+            resultHandler.handle(Future.failedFuture("Invalid username/password"));
             break;
           }
           case 1: {
@@ -89,7 +85,7 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
                 User user = new UserImpl(new JsonObject().put("username", username));
                 resultHandler.handle(Future.succeededFuture(user));
               } else {
-                resultHandler.handle(Future.failedFuture(new InvalidAuthInfoException("Invalid username/password")));
+                resultHandler.handle(Future.failedFuture("Invalid username/password"));
               }
             } catch (RuntimeException e) {
               resultHandler.handle(Future.failedFuture(e));
@@ -98,13 +94,13 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
           }
           default: {
             // More than one row returned!
-            resultHandler.handle(Future.failedFuture(new AuthFailedException("Failure in authentication")));
+            resultHandler.handle(Future.failedFuture("Failure in authentication"));
             break;
           }
         }
       }
       else {
-        resultHandler.handle(Future.failedFuture(new AuthFailedException(queryResponse.cause())));
+        resultHandler.handle(Future.failedFuture(queryResponse.cause()));
       }
     });
   }
