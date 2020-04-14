@@ -57,6 +57,18 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
   }
 
   @Override
+  public void validate(JsonObject authInfo) throws IllegalArgumentException {
+    String username = authInfo.getString("username");
+    if (username == null) {
+      throw new IllegalArgumentException("authInfo must contain username in 'username' field");
+    }
+    String password = authInfo.getString("password");
+    if (password == null) {
+      throw new IllegalArgumentException("authInfo must contain password in 'password' field");
+    }
+  }
+
+  @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
 
     String username = authInfo.getString("username");

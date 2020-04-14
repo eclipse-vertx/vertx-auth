@@ -34,6 +34,29 @@ import io.vertx.ext.auth.User;
 public interface AuthenticationProvider {
 
   /**
+   * Do some basic validation before authenticating.
+   * <p>
+   * The argument <code>authInfo</code> is a JSON object containing information for authenticating the user.
+   * What this actually contains depends on the specific implementation. In the case of
+   * a simple username/password based authentication it is likely to contain a JSON object with the following structure:
+   * <pre>
+   *   {
+   *     "username": "tim",
+   *     "password": "mypassword"
+   *   }
+   * </pre>
+   * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
+   * <p>
+   * This method provides a way to check auth information quickly and synchronously. An implementation may check
+   * the presence of specific fields from the auth information or do some other simple validations.
+   *
+   * @param authInfo The auth information
+   * @throws IllegalArgumentException Thrown when some field doesn't pass the validation rule
+   */
+  default void validate(JsonObject authInfo) throws IllegalArgumentException {
+  }
+
+  /**
    * Authenticate a user.
    * <p>
    * The first argument is a JSON object containing information for authenticating the user. What this actually contains
