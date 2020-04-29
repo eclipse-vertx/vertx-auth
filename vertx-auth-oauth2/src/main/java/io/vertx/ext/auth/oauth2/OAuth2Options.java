@@ -47,6 +47,7 @@ public class OAuth2Options {
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
+  private static final boolean VALIDATE_CODE_FLOW_ACCESS_TOKEN = true;
 
   private OAuth2FlowType flow;
   private String authorizationPath;
@@ -55,6 +56,7 @@ public class OAuth2Options {
   private String scopeSeparator;
   // this is an openid-connect extension
   private boolean validateIssuer;
+  private boolean validateCodeFlowAccessToken;
   private String logoutPath;
   private boolean useBasicAuthorizationHeader;
   private String clientSecretParameterName;
@@ -102,6 +104,7 @@ public class OAuth2Options {
     clientSecret = other.getClientSecret();
     // defaults
     validateIssuer = other.isValidateIssuer();
+    validateCodeFlowAccessToken = other.isValidateCodeFlowAccessToken();
     flow = other.getFlow();
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
@@ -149,6 +152,7 @@ public class OAuth2Options {
   private void init() {
     flow = FLOW;
     validateIssuer = VALIDATE_ISSUER;
+    validateCodeFlowAccessToken = VALIDATE_CODE_FLOW_ACCESS_TOKEN;
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
     revocationPath = REVOKATION_PATH;
@@ -501,6 +505,15 @@ public class OAuth2Options {
 
   public OAuth2Options setValidateIssuer(boolean validateIssuer) {
     this.validateIssuer = validateIssuer;
+    return this;
+  }
+
+  public boolean isValidateCodeFlowAccessToken() {
+	    return validateCodeFlowAccessToken;
+	  }
+
+  public OAuth2Options setValidateCodeFlowAccessToken(boolean validateCodeFlowAccessToken) {
+    this.validateCodeFlowAccessToken = validateCodeFlowAccessToken;
     return this;
   }
 

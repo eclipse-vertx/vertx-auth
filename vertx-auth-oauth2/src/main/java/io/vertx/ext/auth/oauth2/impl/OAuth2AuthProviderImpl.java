@@ -305,31 +305,33 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     // attempt to decode tokens if jwt keys are available
     if (!jwt.isUnsecure()) {
       if (json.containsKey("access_token")) {
-        try {
-          user.attributes()
-            .put("accessToken", jwt.decode(json.getString("access_token")));
+        if (config.isValidateCodeFlowAccessToken()) {
+          try {
+            user.attributes()
+              .put("accessToken", jwt.decode(json.getString("access_token")));
 
-          // re-compute expires at if not present and access token has been successfully decoded from JWT
-          if (!user.attributes().containsKey("exp")) {
-            Long exp = user.attributes()
-              .getJsonObject("accessToken").getLong("exp");
+            // re-compute expires at if not present and access token has been successfully decoded from JWT
+            if (!user.attributes().containsKey("exp")) {
+              Long exp = user.attributes()
+                .getJsonObject("accessToken").getLong("exp");
 
-            if (exp != null) {
-              user.attributes()
-                .put("exp", exp);
+              if (exp != null) {
+                user.attributes()
+                  .put("exp", exp);
+              }
             }
+
+            // root claim meta data for JWT AuthZ
+            user.attributes()
+              .put("rootClaim", "accessToken");
+
+          } catch (DecodeException | IllegalStateException e) {
+            // explicity catch and log as debug. exception here is a valid case
+            // the reason is that it can be for several factors, such as bad token
+            // or invalid JWT key setup, in that case we fall back to opaque token
+            // which is the default operational mode for OAuth2.
+            LOG.debug("Cannot decode access token:", e);
           }
-
-          // root claim meta data for JWT AuthZ
-          user.attributes()
-            .put("rootClaim", "accessToken");
-
-        } catch (DecodeException | IllegalStateException e) {
-          // explicity catch and log as debug. exception here is a valid case
-          // the reason is that it can be for several factors, such as bad token
-          // or invalid JWT key setup, in that case we fall back to opaque token
-          // which is the default operational mode for OAuth2.
-          LOG.debug("Cannot decode access token:", e);
         }
       }
 

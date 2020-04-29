@@ -1,5 +1,13 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.concurrent.CountDownLatch;
+
+import org.junit.Test;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
@@ -7,26 +15,31 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Test;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.concurrent.CountDownLatch;
-
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 
 public class OAuth2AuthCodeTest extends VertxTestBase {
 
-  private static final JsonObject fixture = new JsonObject(
+  private static final JsonObject fixtureTokens = new JsonObject(
     "{" +
       "  \"access_token\": \"4adc339e0\"," +
       "  \"refresh_token\": \"ec1a59d298\"," +
       "  \"token_type\": \"bearer\"," +
       "  \"expires_in\": 7200" +
       "}");
+  private static final JsonObject fixtureJwks = new JsonObject(
+		  "{\"keys\":" +
+		  "  [    " +
+		  "   {" +
+		  "    \"kty\":\"RSA\"," +
+		  "    \"n\": \"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\"," +
+		  "    \"e\":\"AQAB\"," +
+		  "    \"alg\":\"RS256\"," +
+		  "    \"kid\":\"1\"" +
+		  "   }" +
+		  "  ]" +
+		  "}");
 
   private static final JsonObject tokenConfig = new JsonObject()
     .put("code", "code")
@@ -55,6 +68,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
       .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("client-id")
       .setClientSecret("client-secret")
+      .setJwkPath("/oauth/jwks")
       .setSite("http://localhost:8080"));
 
     final CountDownLatch latch = new CountDownLatch(1);
@@ -70,9 +84,13 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
             } catch (UnsupportedEncodingException e) {
               fail(e);
             }
-            req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
+            req.response().putHeader("Content-Type", "application/json").end(fixtureTokens.encode());
           });
-        } else {
+        } else if (req.method() == HttpMethod.GET && "/oauth/jwks".equals(req.path())) {
+            req.bodyHandler(buffer -> {
+              req.response().putHeader("Content-Type", "application/json").end(fixtureJwks.encode());
+            });
+          } else {
           req.response().setStatusCode(400).end();
         }
       })
@@ -103,6 +121,11 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   @Test
   public void getToken() {
     config = oauthConfig;
+    oauth2.jWKSet(res -> {
+        if (res.failed()) {
+            fail(res.cause().getMessage());
+          }
+        });
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
@@ -110,6 +133,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
         User token = res.result();
         assertNotNull(token);
         assertNotNull(token.principal());
+        assertNotNull(token.principal().getString("access_token"));
         testComplete();
       }
     });

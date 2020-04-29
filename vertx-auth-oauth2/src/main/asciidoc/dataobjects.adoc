@@ -123,6 +123,7 @@ Set custom parameters to be sent during the userInfo resource request
 |[[userInfoPath]]`@userInfoPath`|`String`|+++
 Set the provider userInfo resource path
 +++
+|[[validateCodeFlowAccessToken]]`@validateCodeFlowAccessToken`|`Boolean`|-
 |[[validateIssuer]]`@validateIssuer`|`Boolean`|-
 |[[verifyHost]]`@verifyHost`|`Boolean`|-
 |[[webSocketCompressionAllowClientNoContext]]`@webSocketCompressionAllowClientNoContext`|`Boolean`|-
@@ -198,6 +199,7 @@ Set custom parameters to be sent during the userInfo resource request
 |[[userInfoPath]]`@userInfoPath`|`String`|+++
 Set the provider userInfo resource path
 +++
+|[[validateCodeFlowAccessToken]]`@validateCodeFlowAccessToken`|`Boolean`|-
 |[[validateIssuer]]`@validateIssuer`|`Boolean`|-
 |===
 

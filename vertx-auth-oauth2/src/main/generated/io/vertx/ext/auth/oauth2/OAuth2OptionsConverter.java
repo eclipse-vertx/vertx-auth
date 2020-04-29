@@ -130,6 +130,11 @@ public class OAuth2OptionsConverter {
             obj.setUserInfoPath((String)member.getValue());
           }
           break;
+        case "validateCodeFlowAccessToken":
+          if (member.getValue() instanceof Boolean) {
+            obj.setValidateCodeFlowAccessToken((Boolean)member.getValue());
+          }
+          break;
         case "validateIssuer":
           if (member.getValue() instanceof Boolean) {
             obj.setValidateIssuer((Boolean)member.getValue());
@@ -210,6 +215,7 @@ public class OAuth2OptionsConverter {
     if (obj.getUserInfoPath() != null) {
       json.put("userInfoPath", obj.getUserInfoPath());
     }
+    json.put("validateCodeFlowAccessToken", obj.isValidateCodeFlowAccessToken());
     json.put("validateIssuer", obj.isValidateIssuer());
   }
 }
