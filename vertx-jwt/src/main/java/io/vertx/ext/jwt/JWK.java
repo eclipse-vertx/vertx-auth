@@ -347,7 +347,7 @@ public final class JWK implements Crypto {
     }
 
     alg = algorithm;
-    kid = algorithm + '@' + certificate.hashCode() + "-" + privateKey.hashCode();
+    kid = privateKey != null ? algorithm + '@' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '@' + certificate.hashCode();
 
     this.certificate = certificate;
     this.privateKey = privateKey;
