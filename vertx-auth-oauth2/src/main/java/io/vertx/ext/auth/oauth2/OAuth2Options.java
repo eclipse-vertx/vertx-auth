@@ -100,7 +100,6 @@ public class OAuth2Options {
     tenant = other.getTenant();
     clientID = other.getClientID();
     clientSecret = other.getClientSecret();
-    // defaults
     validateIssuer = other.isValidateIssuer();
     flow = other.getFlow();
     authorizationPath = other.getAuthorizationPath();
@@ -111,10 +110,8 @@ public class OAuth2Options {
     scopeSeparator = other.getScopeSeparator();
     useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
     clientSecretParameterName = other.getClientSecretParameterName();
-    // specialization
     site = other.getSite();
     pubSecKeys = other.getPubSecKeys();
-    // jwt options
     jwtOptions = other.getJWTOptions();
     logoutPath = other.getLogoutPath();
     // extras
@@ -138,9 +135,9 @@ public class OAuth2Options {
     } else {
       headers = null;
     }
-    // JWK path RFC7517
     jwkPath = other.getJwkPath();
     httpClientOptions = other.getHttpClientOptions();
+    userAgent = other.getUserAgent();
     // compute paths with variables, at this moment it is only relevant that
     // the paths and site are properly computed
     replaceVariables(false);
