@@ -16,7 +16,6 @@
 package io.vertx.ext.auth.oauth2.rbac;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 import io.vertx.ext.auth.oauth2.rbac.impl.KeycloakRBACImpl;
