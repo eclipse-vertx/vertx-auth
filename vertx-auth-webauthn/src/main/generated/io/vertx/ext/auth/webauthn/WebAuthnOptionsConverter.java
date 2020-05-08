@@ -49,7 +49,7 @@ public class WebAuthnOptionsConverter {
           break;
         case "relayParty":
           if (member.getValue() instanceof JsonObject) {
-            obj.setRelayParty(new io.vertx.ext.auth.webauthn.RelayParty((JsonObject)member.getValue()));
+            obj.setRelayParty(new io.vertx.ext.auth.webauthn.RelayParty((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "requireResidentKey":

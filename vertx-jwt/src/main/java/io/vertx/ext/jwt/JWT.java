@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.jwt;
 
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -33,6 +35,8 @@ import java.util.stream.Stream;
  * @author Paulo Lopes
  */
 public final class JWT {
+
+  private final Logger logger = LoggerFactory.getLogger(JWT.class);
 
   // simple random as its value is just to create entropy
   private static final Random RND = new Random();
@@ -145,7 +149,7 @@ public final class JWT {
 
     if (unsecure) {
       if (segments.length != 2) {
-        throw new IllegalStateException("JWT is in unsecure mode but token is signed.");
+        throw new IllegalStateException("JWT is in unsecured mode but token is signed.");
       }
     } else {
       if (segments.length != 3) {
@@ -209,7 +213,10 @@ public final class JWT {
 
     if (jwt.containsKey("exp") && !options.isIgnoreExpiration()) {
       if (now - options.getLeeway() >= jwt.getLong("exp")) {
-        throw new RuntimeException("Expired JWT token: exp <= now");
+        if (logger.isDebugEnabled()) {
+          logger.debug(String.format("Expired JWT token: exp[%d] <= (now[%d] - leeway[%d])", jwt.getLong("exp"), now, options.getLeeway()));
+        }
+        return true;
       }
     }
 
@@ -217,7 +224,10 @@ public final class JWT {
       Long iat = jwt.getLong("iat");
       // issue at must be in the past
       if (iat > now + options.getLeeway()) {
-        throw new RuntimeException("Invalid JWT token: iat > now");
+        if (logger.isDebugEnabled()) {
+          logger.debug(String.format("Invalid JWT token: iat[%d] > now[%d] + leeway[%d]", iat, now, options.getLeeway()));
+        }
+        return true;
       }
     }
 
@@ -225,7 +235,10 @@ public final class JWT {
       Long nbf = jwt.getLong("nbf");
       // not before must be after now
       if (nbf > now + options.getLeeway()) {
-        throw new RuntimeException("Invalid JWT token: nbf > now");
+        if (logger.isDebugEnabled()) {
+          logger.debug(String.format("Invalid JWT token: nbf[%d] > now[%d] + leeway[%d]", nbf, now, options.getLeeway()));
+        }
+        return true;
       }
     }
 
@@ -251,7 +264,10 @@ public final class JWT {
     }
 
     if(jwt.getValue("scope") == null) {
-      throw new RuntimeException("Invalid JWT: scope claim is required");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Invalid JWT: scope claim is required");
+      }
+      return false;
     }
 
     JsonArray target;
@@ -266,7 +282,10 @@ public final class JWT {
     }
 
     if(!target.getList().containsAll(options.getScopes())) {
-      throw new RuntimeException("Invalid JWT scopes expected: " + Json.encode(options.getScopes()));
+      if (logger.isDebugEnabled()) {
+        logger.debug(String.format("Invalid JWT scopes expected[%s] actual[%s]", options.getScopes(), target.getList()));
+      }
+      return false;
     }
 
     return true;

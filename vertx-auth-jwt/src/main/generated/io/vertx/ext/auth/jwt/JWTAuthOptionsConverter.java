@@ -27,12 +27,12 @@ public class JWTAuthOptionsConverter {
           break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((JsonObject)member.getValue()));
+            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "keyStore":
           if (member.getValue() instanceof JsonObject) {
-            obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((JsonObject)member.getValue()));
+            obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "permissionsClaimKey":
@@ -45,7 +45,7 @@ public class JWTAuthOptionsConverter {
             java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.PubSecKeyOptions((JsonObject)item));
+                list.add(new io.vertx.ext.auth.PubSecKeyOptions((io.vertx.core.json.JsonObject)item));
             });
             obj.setPubSecKeys(list);
           }
