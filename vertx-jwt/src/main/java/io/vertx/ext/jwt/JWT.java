@@ -17,7 +17,6 @@ package io.vertx.ext.jwt;
 
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -213,8 +212,8 @@ public final class JWT {
 
     if (jwt.containsKey("exp") && !options.isIgnoreExpiration()) {
       if (now - options.getLeeway() >= jwt.getLong("exp")) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(String.format("Expired JWT token: exp[%d] <= (now[%d] - leeway[%d])", jwt.getLong("exp"), now, options.getLeeway()));
+        if (logger.isTraceEnabled()) {
+          logger.trace(String.format("Expired JWT token: exp[%d] <= (now[%d] - leeway[%d])", jwt.getLong("exp"), now, options.getLeeway()));
         }
         return true;
       }
@@ -224,8 +223,8 @@ public final class JWT {
       Long iat = jwt.getLong("iat");
       // issue at must be in the past
       if (iat > now + options.getLeeway()) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(String.format("Invalid JWT token: iat[%d] > now[%d] + leeway[%d]", iat, now, options.getLeeway()));
+        if (logger.isTraceEnabled()) {
+          logger.trace(String.format("Invalid JWT token: iat[%d] > now[%d] + leeway[%d]", iat, now, options.getLeeway()));
         }
         return true;
       }
@@ -235,8 +234,8 @@ public final class JWT {
       Long nbf = jwt.getLong("nbf");
       // not before must be after now
       if (nbf > now + options.getLeeway()) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(String.format("Invalid JWT token: nbf[%d] > now[%d] + leeway[%d]", nbf, now, options.getLeeway()));
+        if (logger.isTraceEnabled()) {
+          logger.trace(String.format("Invalid JWT token: nbf[%d] > now[%d] + leeway[%d]", nbf, now, options.getLeeway()));
         }
         return true;
       }

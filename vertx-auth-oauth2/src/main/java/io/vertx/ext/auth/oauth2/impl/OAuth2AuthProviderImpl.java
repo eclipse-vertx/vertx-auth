@@ -325,11 +325,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             .put("rootClaim", "accessToken");
 
         } catch (DecodeException | IllegalStateException e) {
-          // explicity catch and log as debug. exception here is a valid case
+          // explicitly catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
           // or invalid JWT key setup, in that case we fall back to opaque token
           // which is the default operational mode for OAuth2.
-          LOG.debug("Cannot decode access token:", e);
+          LOG.trace("Cannot decode access token:", e);
         }
       }
 
@@ -338,11 +338,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           user.attributes()
             .put("idToken", jwt.decode(json.getString("id_token")));
         } catch (DecodeException | IllegalStateException e) {
-          // explicity catch and log as debug. exception here is a valid case
+          // explicity catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
           // or invalid JWT key setup, in that case we fall back to opaque token
           // which is the default operational mode for OAuth2.
-          LOG.debug("Cannot decode id token:", e);
+          LOG.trace("Cannot decode id token:", e);
         }
       }
     }
@@ -472,11 +472,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           .put("rootClaim", "accessToken");
 
       } catch (DecodeException | IllegalStateException e) {
-        // explicity catch and log as debug. exception here is a valid case
+        // explicity catch and log as trace. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
         // which is the default operational mode for OAuth2.
-        LOG.debug("Cannot decode access token:", e);
+        LOG.trace("Cannot decode access token:", e);
       }
     }
 
@@ -485,11 +485,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         user.attributes()
           .put("idToken", jwt.decode(json.getString("id_token")));
       } catch (DecodeException | IllegalStateException e) {
-        // explicity catch and log as debug. exception here is a valid case
+        // explicity catch and log as trace. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
         // which is the default operational mode for OAuth2.
-        LOG.debug("Cannot decode id token:", e);
+        LOG.trace("Cannot decode id token:", e);
       }
     }
 
