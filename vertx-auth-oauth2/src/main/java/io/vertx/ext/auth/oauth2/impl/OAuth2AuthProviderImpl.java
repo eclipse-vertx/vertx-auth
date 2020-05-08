@@ -15,23 +15,29 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
+import java.util.Collections;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
+import io.vertx.ext.jwt.JWTException;
+import io.vertx.ext.jwt.JWTException.Reason;
 import io.vertx.ext.jwt.JWTOptions;
-
-import java.util.Collections;
 
 /**
  * @author Paulo Lopes
@@ -44,6 +50,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   private final OAuth2API api;
 
   private JWT jwt = new JWT();
+  private Object forcedRefreshLock = new Object();
+  private long lastForcedRefreshTime;
 
   public OAuth2AuthProviderImpl(OAuth2API api, OAuth2Options config) {
     this.api = api;
@@ -103,7 +111,30 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-      final User user = createUser(authInfo);
+      User user = null;
+      try {
+        user = createUser(authInfo);
+      } catch (JWTException ex) {
+        if (ex.getReason() == Reason.JWK_HAS_NO_MATCHING_KID) {
+          synchronized (forcedRefreshLock) {
+            final long now = System.currentTimeMillis();
+            //TODO: 10 mins interval, should be configurable
+            if (lastForcedRefreshTime == 0 || now > lastForcedRefreshTime + 10 * 60 * 1000) {
+              lastForcedRefreshTime = now;
+              api.jwkSet(res -> {
+                if (res.failed()) {
+                  handler.handle(Future.failedFuture(res.cause()));
+                  return;
+                }
+              });
+              user = createUser(authInfo);
+            }
+          }
+        } else {
+          handler.handle(Future.failedFuture(ex));
+          return;
+        }
+      }
 
       // the token is not a JWT or there are no loaded keys to validate
       if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
@@ -123,7 +154,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
             // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
             if (json.containsKey("active") && !json.getBoolean("active", false)) {
-              handler.handle(Future.failedFuture("Inactive Token"));
+              handler.handle(Future.failedFuture(new JWTException("Inactive Token")));
               return;
             }
 
@@ -134,7 +165,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
               // response included a client id. Match against config client id
               if (!config.getClientID().equals(json.getString("client_id"))) {
                 // Client identifier for the OAuth 2.0 client that requested this token.
-                handler.handle(Future.failedFuture("Wrong client_id"));
+                handler.handle(Future.failedFuture(new JWTException("Wrong client_id")));
                 return;
               }
             }
@@ -145,7 +176,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
-              handler.handle(Future.failedFuture("Used is expired."));
+              handler.handle(Future.failedFuture(new JWTException(Reason.EXPIRED, "Used is expired.")));
             } else {
               // basic validation passed, the token is not expired,
               // the spec mandates that that a few extra checks are performed
@@ -158,7 +189,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         // a valid JWT token should have the access token value decoded
         // the token might be valid, but expired
         if (user.expired(jwtOptions.getLeeway())) {
-          handler.handle(Future.failedFuture("Expired Token"));
+          handler.handle(Future.failedFuture(new JWTException(Reason.EXPIRED, "Expired Token")));
         } else {
           // basic validation passed, the token is not expired,
           // the spec mandates that that a few extra checks are performed
@@ -330,6 +361,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           // or invalid JWT key setup, in that case we fall back to opaque token
           // which is the default operational mode for OAuth2.
           LOG.debug("Cannot decode access token:", e);
+          if (e instanceof JWTException && ((JWTException)e).getReason() == Reason.JWK_HAS_NO_MATCHING_KID) {
+            throw e;
+          }
         }
       }
 
@@ -343,6 +377,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           // or invalid JWT key setup, in that case we fall back to opaque token
           // which is the default operational mode for OAuth2.
           LOG.debug("Cannot decode id token:", e);
+          if (e instanceof JWTException && ((JWTException)e).getReason() == Reason.JWK_HAS_NO_MATCHING_KID) {
+            throw e;
+          }
         }
       }
     }

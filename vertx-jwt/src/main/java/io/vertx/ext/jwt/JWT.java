@@ -20,6 +20,7 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jwt.JWTException.Reason;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -149,11 +150,11 @@ public final class JWT {
 
     if (unsecure) {
       if (segments.length != 2) {
-        throw new IllegalStateException("JWT is in unsecured mode but token is signed.");
+        throw new JWTException("JWT is in unsecured mode but token is signed.");
       }
     } else {
       if (segments.length != 3) {
-        throw new IllegalStateException("JWT is in secure mode but token is not signed.");
+        throw new JWTException("JWT is in secure mode but token is not signed.");
       }
     }
 
@@ -163,7 +164,7 @@ public final class JWT {
     String signatureSeg = unsecure ? null : segments[2];
 
     if ("".equals(signatureSeg)) {
-      throw new IllegalStateException("Signature is required");
+      throw new JWTException("Signature is required");
     }
 
     // base64 decode and parse JSON
@@ -175,12 +176,12 @@ public final class JWT {
     List<Crypto> cryptos = VERIFY.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
-      throw new IllegalStateException("Algorithm not supported [" + alg + "]");
+      throw new JWTException("Algorithm not supported [" + alg + "]");
     }
 
     // if we only allow secure alg, then none is not a valid option
     if (!unsecure && "none".equals(alg)) {
-      throw new IllegalStateException("Algorithm \"none\" not allowed");
+      throw new JWTException("Algorithm \"none\" not allowed");
     }
 
     // verify signature. `sign` will return base64 string.
@@ -188,13 +189,20 @@ public final class JWT {
       byte[] payloadInput = base64urlDecode(signatureSeg);
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
+      String tokenKid = header.getString("kid");
+      boolean matchingJwkAvailable = false;
+      //TODO: if token kid is available then all the Crypto with 'kid' which do not match must be skipped.
       for (Crypto c : cryptos) {
-        if (c.verify(payloadInput, signingInput)) {
+    	if (c.verify(payloadInput, signingInput)) {
           return payload;
+        } else if (tokenKid != null && c.getId().equals(tokenKid)) {
+          matchingJwkAvailable = true;
+          break;
         }
       }
 
-      throw new RuntimeException("Signature verification failed");
+      throw new JWTException(matchingJwkAvailable ? Reason.INVALID_SIGNATURE : Reason.JWK_HAS_NO_MATCHING_KID,
+        "Signature verification failed");
     }
 
     return payload;
