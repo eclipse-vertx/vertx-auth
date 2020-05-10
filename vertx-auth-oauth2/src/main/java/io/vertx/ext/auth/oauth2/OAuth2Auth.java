@@ -22,7 +22,6 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.oauth2.impl.OAuth2API;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
 /**
@@ -51,12 +50,17 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return the auth provider
    */
   static OAuth2Auth create(Vertx vertx, OAuth2Options config) {
-    return new OAuth2AuthProviderImpl(new OAuth2API(vertx, config), config);
+    return new OAuth2AuthProviderImpl(vertx, config);
   }
 
   /**
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
-   * of issued ID and access tokens.
+   * of issued ID and access tokens. The provider will refresh the keys according to:
+   * https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
+   *
+   * This means that the provider will look at the cache headers and will refresh when
+   * the max-age is reached. If the server does not return any cache headers it shall
+   * be up to the end user to call this method to refresh.
    *
    * @param handler the handler success/failure.
    * @return fluent self.
@@ -76,6 +80,21 @@ public interface OAuth2Auth extends AuthenticationProvider {
     jWKSet(promise);
     return promise.future();
   }
+
+  /**
+   * Handled to be called when a key (mentioned on a JWT) is missing from the current config.
+   * Users are advised to call {@link OAuth2Auth#jWKSet(Handler)} but being careful to implement
+   * some rate limiting function.
+   *
+   * This method isn't generic for several reasons. The provider is not aware of the capabilities
+   * of the backend IdP in terms of max allowed API calls. Some validation could be done at the
+   * key id, which only the end user is aware of.
+
+   * @return Future result.
+   * @see OAuth2Auth#missingKeyHandler(Handler)
+   */
+  @Fluent
+  OAuth2Auth missingKeyHandler(Handler<String> handler);
 
   /**
    * The client sends the end-user's browser to this endpoint to request their

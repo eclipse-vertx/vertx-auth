@@ -32,7 +32,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Paulo Lopes
@@ -40,6 +43,7 @@ import java.util.Map;
 public class OAuth2API {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2API.class);
+  private static final Pattern MAX_AGE = Pattern.compile("max-age=\"?(\\d+)\"?");
 
   private final HttpClient client;
   private final OAuth2Options config;
@@ -52,7 +56,7 @@ public class OAuth2API {
   /**
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity of issued ID and access tokens.
    */
-  public void jwkSet(Handler<AsyncResult<JsonArray>> handler) {
+  public void jwkSet(Handler<AsyncResult<JsonObject>> handler) {
     final JsonObject headers = new JsonObject();
     // specify preferred accepted content type, according to https://tools.ietf.org/html/rfc7517#section-8.5
     // there's a specific media type for this resource: application/jwk-set+json but we also allow plain application/json
@@ -94,7 +98,25 @@ public class OAuth2API {
           if (json.containsKey("error")) {
             handler.handle(Future.failedFuture(extractErrorDescription(json)));
           } else {
-            handler.handle(Future.succeededFuture(json.getJsonArray("keys")));
+            // process the cache headers as recommended by: https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
+            List<String> cacheControl = reply.headers().getAll(HttpHeaders.CACHE_CONTROL);
+            if (cacheControl != null) {
+              for (String header : cacheControl) {
+                // we need at least "max-age="
+                if (header.length() > 8) {
+                  Matcher match = MAX_AGE.matcher(header);
+                  if (match.find()) {
+                    try {
+                      json.put("maxAge", Long.valueOf(match.group(1)));
+                      break;
+                    } catch (RuntimeException e) {
+                      // ignore bad formed headers
+                    }
+                  }
+                }
+              }
+            }
+            handler.handle(Future.succeededFuture(json));
           }
         } catch (RuntimeException e) {
           handler.handle(Future.failedFuture(e));

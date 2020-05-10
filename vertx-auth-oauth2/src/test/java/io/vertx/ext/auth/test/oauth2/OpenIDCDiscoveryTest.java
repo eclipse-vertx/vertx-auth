@@ -60,7 +60,7 @@ public class OpenIDCDiscoveryTest extends VertxTestBase {
       load -> {
         // will fail as there is no application config, but the parsing should have happened
         assertTrue(load.failed());
-        assertEquals("Configuration missing. You need to specify [clientId]", load.cause().getMessage());
+        assertEquals("Not Found: {\"status\":404,\"error_description\":\"Invalid TENANT ID\",\"error_code\":\"INVALID_TENANTID\"}", load.cause().getMessage());
         testComplete();
       });
     await();
