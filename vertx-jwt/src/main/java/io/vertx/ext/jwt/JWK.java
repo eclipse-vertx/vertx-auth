@@ -45,6 +45,13 @@ public final class JWK implements Crypto {
   private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
 
+  // the label is a synthetic id that allows comparing 2 keys
+  // that are expected to replace each other but are not necessarely
+  // the same key cryptographically speaking.
+  // In most cases it should be the same as kid, or synthetically generated
+  // when there's no kid.
+  private final String label;
+
   // JSON JWK properties
   private final String kid;
   private String alg;
@@ -165,7 +172,8 @@ public final class JWK implements Crypto {
             throw new NoSuchAlgorithmException(alg);
           }
           // default to the algorithm if id is missing
-          this.kid = kid == null ? algorithm + "#" + pem.hashCode() : kid;
+          this.kid = kid;
+          this.label = kid == null ? algorithm + "#" + pem.hashCode() : kid;
 
           mac = Mac.getInstance(alias.get(alg));
           mac.init(new SecretKeySpec(pem.getBytes(), alias.get(alg)));
@@ -251,7 +259,8 @@ public final class JWK implements Crypto {
 
       alg = algorithm;
       // default to the algorithm if id is missing
-      this.kid = kid == null ? algorithm + "#" + pem.hashCode() : kid;
+      this.kid = kid;
+      this.label = kid == null ? algorithm + "#" + pem.hashCode() : kid;
 
       switch (kind) {
         case "CERTIFICATE":
@@ -307,7 +316,9 @@ public final class JWK implements Crypto {
       throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
     }
 
-    kid = algorithm;
+    kid = null;
+    label = algorithm; // TODO: there can be more than 1
+
     this.mac = mac;
     // this is a symmetric key
     symmetric = true;
@@ -347,7 +358,8 @@ public final class JWK implements Crypto {
     }
 
     alg = algorithm;
-    kid = privateKey != null ? algorithm + '@' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '@' + certificate.hashCode();
+    kid = null;
+    label = privateKey != null ? algorithm + '@' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '@' + certificate.hashCode();
 
     this.certificate = certificate;
     this.privateKey = privateKey;
@@ -371,7 +383,7 @@ public final class JWK implements Crypto {
   }
 
   public JWK(JsonObject json) {
-    kid = json.getString("kid", UUID.randomUUID().toString());
+    kid = json.getString("kid");
 
     try {
       switch (json.getString("kty")) {
@@ -389,6 +401,9 @@ public final class JWK implements Crypto {
         default:
           throw new RuntimeException("Unsupported key type: " + json.getString("kty"));
       }
+
+      label = kid != null ? kid : alg + "#" + json.hashCode();
+
     } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException e) {
       throw new RuntimeException(e);
     }
@@ -592,7 +607,6 @@ public final class JWK implements Crypto {
     return alg;
   }
 
-  @Override
   public String getId() {
     return kid;
   }
@@ -718,5 +732,10 @@ public final class JWK implements Crypto {
 
   public int getUse() {
     return use;
+  }
+
+  @Override
+  public String getLabel() {
+    return label;
   }
 }

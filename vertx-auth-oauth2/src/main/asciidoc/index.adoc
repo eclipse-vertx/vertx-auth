@@ -387,3 +387,31 @@ user this is as simple as:
 ----
 {@link examples.AuthOAuth2Examples#example20}
 ----
+
+== Key Management
+
+When the provider is configured with a `jwks` path. Either manually or using the discovery mechanism, there are events
+when keys must be rotated. For this reason this provider implements the 2 recommended ways by the openid connect core
+spec.
+
+When calling the refresh method, if the server returns the recommended cache header as described on
+https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys then a periodic task will run at the recommeneded
+time by the server to reload the keys.
+
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example21}
+----
+
+However there are times when servers change keys and this provider isn't aware. For example, to mitigate a leak or an
+expired certificate. In such event the server will start emitting tokens with a different kid than the ones on the store
+as described: https://openid.net/specs/openid-connect-core-1_0.html#RotateSigKeys For this situation and to avoid DDoS
+attacks the provider will notify you that a unknown key is missing:
+
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example22}
+----
+
+A special note on this is that if a user will send many requests with a missing key, your handler should throttle the
+calls to refresh the new key set, or you might end up DDoS your IdP server.

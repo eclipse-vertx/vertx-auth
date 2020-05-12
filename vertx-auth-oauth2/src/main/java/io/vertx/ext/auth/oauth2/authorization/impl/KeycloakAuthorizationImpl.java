@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
 
-  private static final JsonObject EMPTY_JSON = new JsonObject(Collections.EMPTY_MAP);
+  private static final JsonObject EMPTY_JSON = new JsonObject(Collections.emptyMap());
 
   @Override
   public String getId() {

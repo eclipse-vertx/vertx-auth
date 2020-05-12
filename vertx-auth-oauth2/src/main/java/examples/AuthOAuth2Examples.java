@@ -426,4 +426,29 @@ public class AuthOAuth2Examples {
         }
       });
   }
+
+  public void example21(OAuth2Auth oauth2) {
+    // OAuth2Auth level
+    oauth2.jWKSet(res -> {
+      if (res.succeeded()) {
+        // load was successful, if the server returned the header
+        // `Cache-Control` with a `max-age` then a periodic task
+        // will run at that time to refresh the keys
+      }
+    });
+  }
+
+  public void example22(OAuth2Auth oauth2) {
+    // OAuth2Auth level
+    oauth2.missingKeyHandler(keyId -> {
+      // we can now decide what to do:
+      // 1. we can inspect the key id, does it make sense?
+      if (keyId.equals("the-new-id")) {
+        // 2. refresh the keys
+        oauth2.jWKSet(res -> {
+          // ...
+        });
+      }
+    });
+  }
 }

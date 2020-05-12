@@ -18,6 +18,7 @@ package io.vertx.ext.auth.oauth2.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
@@ -30,6 +31,7 @@ import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.jwt.JWK;
 import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.jwt.JWTOptions;
+import io.vertx.ext.jwt.NoSuchKeyIdException;
 
 import java.util.Collections;
 
@@ -40,14 +42,18 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
+  private final Vertx vertx;
   private final OAuth2Options config;
   private final OAuth2API api;
 
   private JWT jwt = new JWT();
+  private long updateTimerId = -1;
+  private Handler<String> missingKeyHandler;
 
-  public OAuth2AuthProviderImpl(OAuth2API api, OAuth2Options config) {
-    this.api = api;
+  public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
+    this.vertx = vertx;
     this.config = config;
+    this.api = new OAuth2API(vertx, config);
     // compute paths with variables, at this moment it is only relevant that
     // all variables are properly computed
     this.config.replaceVariables(true);
@@ -62,12 +68,21 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
+    // cancel any running timer to avoid multiple updates
+    // it is not important if the timer isn't active anymore
+
+    // this could happen if both the user triggers the update and
+    // there's a timer already in progress
+    vertx.cancelTimer(updateTimerId);
+
     api.jwkSet(res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
       } else {
+        final JsonObject json = res.result();
         JWT jwt = new JWT();
-        for (Object key : res.result()) {
+        JsonArray keys = json.getJsonArray("keys");
+        for (Object key : keys) {
           try {
             jwt.addJWK(new JWK((JsonObject) key));
           } catch (RuntimeException e) {
@@ -76,10 +91,27 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         }
         // swap
         this.jwt = jwt;
+        // compute the next update if the server told us too
+        if (json.containsKey("maxAge")) {
+          // delay is in ms, while cache max age is sec
+          final long delay = json.getLong("maxAge") * 1000;
+          this.updateTimerId = vertx.setPeriodic(delay, t ->
+            jWKSet(autoUpdateRes -> {
+              if (autoUpdateRes.failed()) {
+                LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
+              }
+            }));
+        }
         // return
         handler.handle(Future.succeededFuture());
       }
     });
+    return this;
+  }
+
+  @Override
+  public OAuth2Auth missingKeyHandler(Handler<String> handler) {
+    this.missingKeyHandler = handler;
     return this;
   }
 
@@ -324,6 +356,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           user.attributes()
             .put("rootClaim", "accessToken");
 
+        } catch (NoSuchKeyIdException e) {
+          // the JWT store has no knowledge about the key id on this token
+          // if the user has specified a handler for this situation then it
+          // shall be executed, otherwise just log as a typical validation
+          if (missingKeyHandler != null) {
+            missingKeyHandler.handle(e.id());
+          } else {
+            LOG.trace("Cannot decode access token:", e);
+          }
         } catch (DecodeException | IllegalStateException e) {
           // explicitly catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
@@ -337,6 +378,26 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         try {
           user.attributes()
             .put("idToken", jwt.decode(json.getString("id_token")));
+
+          // re-compute expires at if not present and id token has been successfully decoded from JWT
+          if (!user.attributes().containsKey("exp")) {
+            Long exp = user.attributes()
+              .getJsonObject("idToken").getLong("exp");
+
+            if (exp != null) {
+              user.attributes()
+                .put("exp", exp);
+            }
+          }
+        } catch (NoSuchKeyIdException e) {
+          // the JWT store has no knowledge about the key id on this token
+          // if the user has specified a handler for this situation then it
+          // shall be executed, otherwise just log as a typical validation
+          if (missingKeyHandler != null) {
+            missingKeyHandler.handle(e.id());
+          } else {
+            LOG.trace("Cannot decode access token:", e);
+          }
         } catch (DecodeException | IllegalStateException e) {
           // explicity catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
@@ -471,6 +532,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         user.attributes()
           .put("rootClaim", "accessToken");
 
+      } catch (NoSuchKeyIdException e) {
+        // the JWT store has no knowledge about the key id on this token
+        // if the user has specified a handler for this situation then it
+        // shall be executed, otherwise just log as a typical validation
+        if (missingKeyHandler != null) {
+          missingKeyHandler.handle(e.id());
+        } else {
+          LOG.trace("Cannot decode access token:", e);
+        }
       } catch (DecodeException | IllegalStateException e) {
         // explicity catch and log as trace. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
@@ -484,6 +554,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       try {
         user.attributes()
           .put("idToken", jwt.decode(json.getString("id_token")));
+      } catch (NoSuchKeyIdException e) {
+        // the JWT store has no knowledge about the key id on this token
+        // if the user has specified a handler for this situation then it
+        // shall be executed, otherwise just log as a typical validation
+        if (missingKeyHandler != null) {
+          missingKeyHandler.handle(e.id());
+        } else {
+          LOG.trace("Cannot decode access token:", e);
+        }
       } catch (DecodeException | IllegalStateException e) {
         // explicity catch and log as trace. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token

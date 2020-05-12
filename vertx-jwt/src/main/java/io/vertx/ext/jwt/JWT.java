@@ -101,7 +101,7 @@ public final class JWT {
   private void addJWK(List<Crypto> current, JWK jwk) {
     boolean replaced = false;
     for (int i = 0; i < current.size(); i++) {
-      if (current.get(i).getId().equals(jwk.getId())) {
+      if (current.get(i).getLabel().equals(jwk.getLabel())) {
         // replace
         current.set(i, jwk);
         replaced = true;
@@ -174,7 +174,7 @@ public final class JWT {
     List<Crypto> cryptos = VERIFY.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
-      throw new IllegalStateException("Algorithm not supported [" + alg + "]");
+      throw new NoSuchKeyIdException(alg);
     }
 
     // if we only allow secure alg, then none is not a valid option
@@ -187,13 +187,26 @@ public final class JWT {
       byte[] payloadInput = base64urlDecode(signatureSeg);
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
+      String kid = header.getString("kid");
+      boolean hasKey = false;
+
       for (Crypto c : cryptos) {
+        // if a token has a kid and it doesn't match the crypto id skip it
+        if (kid != null && c.getId() != null && !kid.equals(c.getId())) {
+          continue;
+        }
+        // signal that this object crypto's list has the required key
+        hasKey = true;
         if (c.verify(payloadInput, signingInput)) {
           return payload;
         }
       }
 
-      throw new RuntimeException("Signature verification failed");
+      if (hasKey) {
+        throw new RuntimeException("Signature verification failed");
+      } else {
+        throw new NoSuchKeyIdException(alg, kid);
+      }
     }
 
     return payload;
@@ -299,11 +312,19 @@ public final class JWT {
       throw new RuntimeException("Algorithm not supported: " + algorithm);
     }
 
+    // lock the crypto implementation
+    final Crypto crypto = cryptos.get(RND.nextInt(cryptos.size()));
+
     // header, typ is fixed value.
     JsonObject header = new JsonObject()
       .mergeIn(options.getHeader())
       .put("typ", "JWT")
       .put("alg", algorithm);
+
+    // add kid if present
+    if (crypto.getId() != null) {
+      header.put("kid", crypto.getId());
+    }
 
     // NumericDate is a number is seconds since 1st Jan 1970 in UTC
     long timestamp = System.currentTimeMillis() / 1000;
@@ -344,7 +365,7 @@ public final class JWT {
     String headerSegment = base64urlEncode(header.encode());
     String payloadSegment = base64urlEncode(payload.encode());
     String signingInput = headerSegment + "." + payloadSegment;
-    String signSegment = base64urlEncode(cryptos.get(RND.nextInt(cryptos.size())).sign(signingInput.getBytes(UTF8)));
+    String signSegment = base64urlEncode(crypto.sign(signingInput.getBytes(UTF8)));
 
     return headerSegment + "." + payloadSegment + "." + signSegment;
   }
