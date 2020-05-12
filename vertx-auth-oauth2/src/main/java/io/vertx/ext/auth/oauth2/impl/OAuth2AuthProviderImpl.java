@@ -95,12 +95,18 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         if (json.containsKey("maxAge")) {
           // delay is in ms, while cache max age is sec
           final long delay = json.getLong("maxAge") * 1000;
-          this.updateTimerId = vertx.setPeriodic(delay, t ->
-            jWKSet(autoUpdateRes -> {
-              if (autoUpdateRes.failed()) {
-                LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
-              }
-            }));
+          // salesforce (for example) sometimes disables the max-age as setting it to 0
+          // for these cases we just cancel
+          if (delay > 0) {
+            this.updateTimerId = vertx.setPeriodic(delay, t ->
+              jWKSet(autoUpdateRes -> {
+                if (autoUpdateRes.failed()) {
+                  LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
+                }
+              }));
+          } else {
+            updateTimerId = -1;
+          }
         }
         // return
         handler.handle(Future.succeededFuture());
