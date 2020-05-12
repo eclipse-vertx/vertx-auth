@@ -1,7 +1,9 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -37,6 +39,11 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
   private HttpServer server;
   private int connectionCounter;
 
+  final AtomicInteger cnt = new AtomicInteger(0);
+  final AtomicLong then = new AtomicLong();
+
+  private Handler<HttpServerRequest> requestHandler;
+
   @Override
   public void setUp() throws Exception {
     super.setUp();
@@ -48,8 +55,6 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
       .setSite("http://localhost:8080"));
 
     final CountDownLatch latch = new CountDownLatch(1);
-    final AtomicInteger cnt = new AtomicInteger(0);
-    final AtomicLong then = new AtomicLong();
 
     server = vertx.createHttpServer()
       .connectionHandler(c -> connectionCounter++)
@@ -66,15 +71,9 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
               return;
             }
             if (cnt.compareAndSet(1, 2)) {
-              if (then.get() + 5000 <= System.currentTimeMillis()) {
-                req.response()
-                  .putHeader("Content-Type", "application/json")
-                  .end(fixtureJwks.encode());
-                // allow the process to complete
-                vertx.runOnContext(v -> testComplete());
-              } else {
-                fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
-              }
+              requestHandler.handle(req);
+            } else {
+              fail("Too many calls on the mock");
             }
           });
         } else {
@@ -112,9 +111,61 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
 
   @Test
   public void testAutoRefresh() {
+    requestHandler = req -> {
+      if (then.get() + 5000 <= System.currentTimeMillis()) {
+        req.response()
+          .putHeader("Content-Type", "application/json")
+          .end(fixtureJwks.encode());
+        // allow the process to complete
+        vertx.runOnContext(n -> testComplete());
+      } else {
+        fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
+      }
+    };
+
     oauth2.jWKSet(res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void testMissingKey() {
+    requestHandler = req -> {
+      if (then.get() + 5000 <= System.currentTimeMillis()) {
+        req.response()
+          .putHeader("Content-Type", "application/json")
+          .end(fixtureJwks.encode());
+        // allow the process to complete
+        vertx.runOnContext(n -> testComplete());
+      } else {
+        fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
+      }
+    };
+
+    String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIifQ.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NYY8FXsouaKSuMafoNshtQ997X4x1Jta0GEtl3BAJGY";
+
+    oauth2.jWKSet(res -> {
+      if (res.failed()) {
+        fail(res.cause());
+      } else {
+        oauth2
+          .missingKeyHandler(kid -> {
+            if ("HS256#<null>".equals(kid)) {
+              testComplete();
+            } else {
+              fail("wrong key id");
+            }
+          })
+          .authenticate(new JsonObject().put("access_token", jwt), authenticate -> {
+          if (authenticate.failed()) {
+            // OK
+          } else {
+            fail("we don't have such key");
+          }
+        });
       }
     });
     await();
