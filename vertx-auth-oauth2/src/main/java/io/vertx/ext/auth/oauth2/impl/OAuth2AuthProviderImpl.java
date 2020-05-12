@@ -93,7 +93,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         this.jwt = jwt;
         // compute the next update if the server told us too
         if (json.containsKey("maxAge")) {
-          this.updateTimerId = vertx.setPeriodic(json.getLong("maxAge"), t ->
+          // delay is in ms, while cache max age is sec
+          final long delay = json.getLong("maxAge") * 1000;
+          this.updateTimerId = vertx.setPeriodic(delay, t ->
             jWKSet(autoUpdateRes -> {
               if (autoUpdateRes.failed()) {
                 LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
