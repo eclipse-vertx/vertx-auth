@@ -38,7 +38,18 @@ public interface Crypto {
     "SHA512withECDSA"
   };
 
-  String getId();
+  /**
+   * The key id or null.
+   */
+  default String getId() {
+    return null;
+  }
+
+  /**
+   * A not null label for the key, labels are the same for same algorithm, kid objects
+   * but not necessarily different internal keys/certificates
+   */
+  String getLabel();
 
   byte[] sign(byte[] payload);
 
@@ -83,7 +94,7 @@ class CryptoMac implements Crypto {
   }
 
   @Override
-  public String getId() {
+  public String getLabel() {
     return id;
   }
 
@@ -132,7 +143,7 @@ class CryptoKeyPair implements Crypto {
   }
 
   @Override
-  public String getId() {
+  public String getLabel() {
     return id;
   }
 
@@ -227,7 +238,7 @@ final class CryptoNone implements Crypto {
   private static final byte[] NOOP = new byte[0];
 
   @Override
-  public String getId() {
+  public String getLabel() {
     return "none";
   }
 

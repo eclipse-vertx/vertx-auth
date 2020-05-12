@@ -220,4 +220,18 @@ public interface OAuth2Auth extends AuthProvider {
   @Fluent
   @Deprecated
   OAuth2Auth rbacHandler(OAuth2RBAC rbac);
-}
+
+  /**
+   * Handled to be called when a key (mentioned on a JWT) is missing from the current config.
+   * Users are advised to call {@link OAuth2Auth#loadJWK(Handler)} but being careful to implement
+   * some rate limiting function.
+   *
+   * This method isn't generic for several reasons. The provider is not aware of the capabilities
+   * of the backend IdP in terms of max allowed API calls. Some validation could be done at the
+   * key id, which only the end user is aware of.
+   * @return Future result.
+   * @see OAuth2Auth#missingKeyHandler(Handler)
+   */
+  @Fluent
+  OAuth2Auth missingKeyHandler(Handler<String> handler);
+  }

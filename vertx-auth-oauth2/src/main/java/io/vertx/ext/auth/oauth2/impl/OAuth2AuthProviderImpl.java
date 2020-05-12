@@ -19,6 +19,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,6 +33,10 @@ import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.impl.flow.*;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.fetch;
 
 /**
@@ -40,10 +45,15 @@ import static io.vertx.ext.auth.oauth2.impl.OAuth2API.fetch;
 public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
+  private static final Pattern MAX_AGE = Pattern.compile("max-age=\"?(\\d+)\"?");
 
   private final Vertx vertx;
   private final OAuth2ClientOptions config;
-  private final JWT jwt = new JWT();
+
+  private long updateTimerId = -1;
+  private Handler<String> missingKeyHandler;
+
+  private JWT jwt = new JWT();
 
   private final OAuth2Flow flow;
 
@@ -82,6 +92,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
   }
 
   @Override
+  public OAuth2Auth missingKeyHandler(Handler<String> handler) {
+    this.missingKeyHandler = handler;
+    return this;
+  }
+
+  @Override
   public void verifyIsUsingPassword() {
     if (getFlowType() != OAuth2FlowType.PASSWORD) {
       throw new IllegalArgumentException("OAuth2Auth + Basic Auth requires OAuth2 PASSWORD flow");
@@ -90,6 +106,48 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   @Override
   public OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler) {
+    // cancel any running timer to avoid multiple updates
+    // it is not important if the timer isn't active anymore
+
+    // this could happen if both the user triggers the update and
+    // there's a timer already in progress
+    vertx.cancelTimer(updateTimerId);
+
+    internalLoadJWK(res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+      } else {
+        final JsonObject json = res.result();
+        JWT jwt = new JWT();
+        JsonArray keys = json.getJsonArray("keys");
+        for (Object key : keys) {
+          try {
+            jwt.addJWK(new JWK((JsonObject) key));
+          } catch (RuntimeException e) {
+            LOG.warn("Skipped unsupported JWK: " + e.getMessage());
+          }
+        }
+        // swap
+        this.jwt = jwt;
+        // compute the next update if the server told us too
+        if (json.containsKey("maxAge")) {
+          // delay is in ms, while cache max age is sec
+          final long delay = json.getLong("maxAge") * 1000;
+          this.updateTimerId = vertx.setPeriodic(delay, t ->
+            loadJWK(autoUpdateRes -> {
+              if (autoUpdateRes.failed()) {
+                LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
+              }
+            }));
+        }
+        // return
+        handler.handle(Future.succeededFuture());
+      }
+    });
+    return this;
+  }
+
+  public void internalLoadJWK(Handler<AsyncResult<JsonObject>> handler) {
     final JsonObject headers = new JsonObject();
     // specify preferred accepted content type
     headers.put("Accept", "application/json, application/jwk-set+json");
@@ -144,23 +202,30 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
             }
             handler.handle(Future.failedFuture(description));
           } else {
-            JsonArray keys = json.getJsonArray("keys");
-            for (Object key : keys) {
-              try {
-                jwt.addJWK(new JWK((JsonObject) key));
-              } catch (RuntimeException e) {
-                LOG.warn("Skipped unsupported JWK: " + e.getMessage());
+            // process the cache headers as recommended by: https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
+            List<String> cacheControl = reply.headers().getAll(HttpHeaders.CACHE_CONTROL);
+            if (cacheControl != null) {
+              for (String header : cacheControl) {
+                // we need at least "max-age="
+                if (header.length() > 8) {
+                  Matcher match = MAX_AGE.matcher(header);
+                  if (match.find()) {
+                    try {
+                      json.put("maxAge", Long.valueOf(match.group(1)));
+                      break;
+                    } catch (RuntimeException e) {
+                      // ignore bad formed headers
+                    }
+                  }
+                }
               }
             }
-
-            handler.handle(Future.succeededFuture());
+            handler.handle(Future.succeededFuture(json));
           }
         } catch (RuntimeException e) {
           handler.handle(Future.failedFuture(e));
         }
       });
-
-    return this;
   }
 
   @Override
@@ -196,10 +261,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
     // from the authority provider
 
     if (
-      // authInfo contains a token_type of Bearer
-      authInfo.containsKey("token_type") && "Bearer".equalsIgnoreCase(authInfo.getString("token_type")) &&
-      // authInfo contains a non null token
-      authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
+        // authInfo contains a non null token
+        authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
 
       // this validation can be done in 2 different ways:
       // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
@@ -320,5 +383,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   public OAuth2Flow getFlow() {
     return flow;
+  }
+
+  Handler<String> missingKeyHandler() {
+    return missingKeyHandler;
   }
 }

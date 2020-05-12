@@ -37,6 +37,13 @@ public final class JWK implements Crypto {
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
 
+  // the label is a synthetic id that allows comparing 2 keys
+  // that are expected to replace each other but are not necessarely
+  // the same key cryptographically speaking.
+  // In most cases it should be the same as kid, or synthetically generated
+  // when there's no kid.
+  private final String label;
+
   // JSON JWK properties
   private final String kid;
   private String alg;
@@ -106,7 +113,8 @@ public final class JWK implements Crypto {
       }
 
       alg = algorithm;
-      kid = algorithm + (pemPub !=  null ? pemPub.hashCode() : "") + "-" + (pemSec !=  null ? pemSec.hashCode() : "");
+      kid = null;
+      label = algorithm + (pemPub !=  null ? pemPub.hashCode() : "") + "-" + (pemSec !=  null ? pemSec.hashCode() : "");
 
       if (pemPub != null) {
         if (isCertificate) {
@@ -153,7 +161,8 @@ public final class JWK implements Crypto {
         throw new NoSuchAlgorithmException(alg);
       }
 
-      kid = algorithm + hmac.hashCode();
+      kid = null;
+      label = algorithm + hmac.hashCode();
 
       mac = Mac.getInstance(alias.get(alg));
       mac.init(new SecretKeySpec(hmac.getBytes(UTF8), alias.get(alg)));
@@ -165,7 +174,8 @@ public final class JWK implements Crypto {
   }
 
   public JWK(JsonObject json) {
-    kid = json.getString("kid", UUID.randomUUID().toString());
+    kid = json.getString("kid");
+    label = kid == null ? UUID.randomUUID().toString() : kid;
 
     try {
       switch (json.getString("kty")) {
@@ -438,5 +448,9 @@ public final class JWK implements Crypto {
     }
 
     return true;
+  }
+
+  public String getLabel() {
+    return label;
   }
 }

@@ -51,7 +51,7 @@ public class OAuth2API {
     }
 
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
-    LOG.debug("Fetching URL: " + url);
+    LOG.trace("Fetching URL: " + url);
 
     // create a request
     final HttpClientRequest request = makeRequest(vertx, config, method, url, callback);

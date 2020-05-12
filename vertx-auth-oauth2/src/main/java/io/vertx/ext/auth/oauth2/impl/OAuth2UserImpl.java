@@ -14,6 +14,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 import io.vertx.ext.jwt.JWT;
 import io.vertx.ext.jwt.JWTOptions;
+import io.vertx.ext.jwt.NoSuchKeyIdException;
 
 import java.util.Base64;
 import java.util.regex.Pattern;
@@ -180,12 +181,23 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
       } else {
         return provider.getJWT().decode(((String) opaque));
       }
+    } catch (NoSuchKeyIdException e) {
+      Handler<String> handler = provider.missingKeyHandler();
+      if (handler != null) {
+        handler.handle(e.id());
+      } else {
+        // explicity catch and log as debug. exception here is a valid case
+        // the reason is that it can be for several factors, such as bad token
+        // or invalid JWT key setup, in that case we fall back to opaque token
+        // which is the default operational mode for OAuth2.
+        LOG.trace("Cannot decode token:", e);
+      }
     } catch (RuntimeException e) {
       // explicity catch and log as debug. exception here is a valid case
       // the reason is that it can be for several factors, such as bad token
       // or invalid JWT key setup, in that case we fall back to opaque token
       // which is the default operational mode for OAuth2.
-      LOG.debug("Cannot decode token:", e);
+      LOG.trace("Cannot decode token:", e);
     }
     return null;
   }
