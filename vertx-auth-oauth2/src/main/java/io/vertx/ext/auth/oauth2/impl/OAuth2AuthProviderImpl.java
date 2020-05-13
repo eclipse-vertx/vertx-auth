@@ -106,17 +106,19 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
 
   @Override
   public OAuth2Auth loadJWK(Handler<AsyncResult<Void>> handler) {
-    // cancel any running timer to avoid multiple updates
-    // it is not important if the timer isn't active anymore
-
-    // this could happen if both the user triggers the update and
-    // there's a timer already in progress
-    vertx.cancelTimer(updateTimerId);
-
     internalLoadJWK(res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
       } else {
+        if (updateTimerId != -1) {
+          // cancel any running timer to avoid multiple updates
+          // it is not important if the timer isn't active anymore
+
+          // this could happen if both the user triggers the update and
+          // there's a timer already in progress
+          vertx.cancelTimer(updateTimerId);
+        }
+
         final JsonObject json = res.result();
         JWT jwt = new JWT();
         JsonArray keys = json.getJsonArray("keys");
@@ -133,12 +135,16 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, AuthProviderInternal 
         if (json.containsKey("maxAge")) {
           // delay is in ms, while cache max age is sec
           final long delay = json.getLong("maxAge") * 1000;
-          this.updateTimerId = vertx.setPeriodic(delay, t ->
-            loadJWK(autoUpdateRes -> {
-              if (autoUpdateRes.failed()) {
-                LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
-              }
-            }));
+          if (delay > 0) {
+            updateTimerId = vertx.setPeriodic(delay, t ->
+              loadJWK(autoUpdateRes -> {
+                if (autoUpdateRes.failed()) {
+                  LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
+                }
+              }));
+          } else {
+            updateTimerId = -1;
+          }
         }
         // return
         handler.handle(Future.succeededFuture());
