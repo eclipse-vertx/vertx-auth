@@ -68,17 +68,18 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
-    // cancel any running timer to avoid multiple updates
-    // it is not important if the timer isn't active anymore
-
-    // this could happen if both the user triggers the update and
-    // there's a timer already in progress
-    vertx.cancelTimer(updateTimerId);
-
     api.jwkSet(res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
       } else {
+        if (updateTimerId != -1) {
+          // cancel any running timer to avoid multiple updates
+          // it is not important if the timer isn't active anymore
+
+          // this could happen if both the user triggers the update and
+          // there's a timer already in progress
+          vertx.cancelTimer(updateTimerId);
+        }
         final JsonObject json = res.result();
         JWT jwt = new JWT();
         JsonArray keys = json.getJsonArray("keys");
