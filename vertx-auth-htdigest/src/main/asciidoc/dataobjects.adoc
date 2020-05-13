@@ -1,0 +1,23 @@
+= Cheatsheets
+
+[[HtDigestAuthInfo]]
+== HtDigestAuthInfo
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[algorithm]]`@algorithm`|`String`|-
+|[[cnonce]]`@cnonce`|`String`|-
+|[[empty]]`@empty`|`Boolean`|-
+|[[method]]`@method`|`String`|-
+|[[nc]]`@nc`|`String`|-
+|[[nonce]]`@nonce`|`String`|-
+|[[qop]]`@qop`|`String`|-
+|[[realm]]`@realm`|`String`|-
+|[[response]]`@response`|`String`|-
+|[[uri]]`@uri`|`String`|-
+|[[username]]`@username`|`String`|-
+|===
+

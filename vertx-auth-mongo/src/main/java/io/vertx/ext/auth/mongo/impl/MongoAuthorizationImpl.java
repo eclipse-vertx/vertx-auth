@@ -26,11 +26,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
 import io.vertx.ext.mongo.MongoClient;
 
-import java.util.List;
 import java.util.Objects;
 
 /**

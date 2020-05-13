@@ -16,9 +16,7 @@
 package io.vertx.ext.auth.mongo;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClient;
 
 /**
  * Options configuring Mongo authentication.
