@@ -1,11 +1,9 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.providers.AzureADAuth;
-import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
-import io.vertx.ext.auth.oauth2.providers.IBMCloudAuth;
-import io.vertx.ext.auth.oauth2.providers.SalesforceAuth;
+import io.vertx.ext.auth.oauth2.providers.*;
 import io.vertx.test.core.VertxTestBase;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class OpenIDCDiscoveryTest extends VertxTestBase {
@@ -61,6 +59,23 @@ public class OpenIDCDiscoveryTest extends VertxTestBase {
         // will fail as there is no application config, but the parsing should have happened
         assertTrue(load.failed());
         assertEquals("Not Found: {\"status\":404,\"error_description\":\"Invalid TENANT ID\",\"error_code\":\"INVALID_TENANTID\"}", load.cause().getMessage());
+        testComplete();
+      });
+    await();
+  }
+
+  @Test
+  @Ignore
+  public void testAmazonCognito() {
+    AmazonCognitoAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setSite("https://cognito-idp.eu-central-1.amazonaws.com/{tenant}")
+        .setClientID("the-client-id")
+        .setClientSecret("the-client-secret")
+        .setTenant("user-pool-id"),
+      load -> {
+        // will fail as there is no application config, but the parsing should have happened
         testComplete();
       });
     await();
