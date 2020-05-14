@@ -397,6 +397,11 @@ public class OAuth2API {
     final JsonObject extraParams = config.getUserInfoParameters();
     String path = config.getUserInfoPath();
 
+    if (path == null) {
+      handler.handle(Future.failedFuture("userInfo path is not configured"));
+      return;
+    }
+
     if (extraParams != null) {
       path += "?" + stringify(extraParams);
     }
@@ -452,13 +457,19 @@ public class OAuth2API {
    * see: https://openid.net/specs/openid-connect-session-1_0.html
    */
   public String endSessionURL(String idToken, JsonObject params) {
+    final String path = config.getLogoutPath();
+
+    if (path == null) {
+      // we can't generate anything, there's no configured logout path
+      return null;
+    }
+
     final JsonObject query = params.copy();
 
     if (idToken != null) {
       query.put("id_token_hint", idToken);
     }
 
-    final String path = config.getLogoutPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
     return url + '?' + stringify(query);
