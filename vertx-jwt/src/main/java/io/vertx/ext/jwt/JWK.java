@@ -26,15 +26,17 @@ import java.util.regex.Pattern;
  * JWK https://tools.ietf.org/html/rfc7517
  * <p>
  * In a nutshell a JWK is a Key(Pair) encoded as JSON. This implementation follows the spec with some limitations:
- * <p>
+ *
  * * Supported algorithms are: "PS256", "PS384", "PS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512"
- * <p>
+ *
+ * When working with COSE, then "RS1" is also a valid algorithm.
+ *
  * The rationale for this choice is to support the required algorithms for JWT.
- * <p>
+ *
  * The constructor takes a single JWK (the the KeySet) or a PEM encoded pair (used by Google and useful for importing
  * standard PEM files from OpenSSL).
- * <p>
- * * Certificate chains (x5c) only allow a single element chain, certificate urls and fingerprints are not considered.
+ *
+ * Certificate chains (x5c) are allowed and verified, certificate urls and fingerprints are not considered.
  *
  * @author Paulo Lopes
  */
@@ -651,7 +653,7 @@ public final class JWK implements Crypto {
       final BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("n")));
       final BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("e")));
       publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
-      if (!isFor(USE_ENC)) {
+      if ((use & USE_ENC) == 0) {
         use += USE_ENC;
       }
     }
@@ -668,7 +670,7 @@ public final class JWK implements Crypto {
       final BigInteger qi = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("qi")));
 
       privateKey = KeyFactory.getInstance("RSA").generatePrivate(new RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, qi));
-      if (!isFor(USE_SIG)) {
+      if ((use & USE_SIG) == 0) {
         use += USE_SIG;
       }
     }
@@ -677,19 +679,31 @@ public final class JWK implements Crypto {
     if (json.containsKey("x5c")) {
       JsonArray x5c = json.getJsonArray("x5c");
 
-      if (x5c.size() > 1) {
-        // TODO: handle more than 1 value
-        throw new RuntimeException("Certificate Chain length > 1 is not supported");
+      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+      final X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
+      // verify the leaf certificate
+      certificate.checkValidity();
+
+      try {
+        if (x5c.size() > 1) {
+          List<X509Certificate> certChain = new ArrayList<>();
+          certChain.add(certificate);
+          for (int i = 1; i < x5c.size(); i++) {
+            final X509Certificate c = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(i)).getBytes(UTF8)));
+            // verify the leaf certificate
+            c.checkValidity();
+            certChain.add(c);
+          }
+          // validate the chain
+          validateCertificatePath(certChain);
+        }
+      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException e) {
+        throw new RuntimeException(e);
       }
 
-      CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
-      X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
-      // assert the certificate is valid
-      certificate.checkValidity();
       // extract the public key
       publicKey = certificate.getPublicKey();
-      if (!isFor(USE_ENC)) {
+      if ((use & USE_ENC) == 0) {
         use += USE_ENC;
       }
     }
@@ -712,7 +726,7 @@ public final class JWK implements Crypto {
               break;
           }
           if (json.containsKey("use")) {
-            if (!isFor(USE_SIG)) {
+            if ((use & USE_SIG) == 0) {
               use += USE_SIG;
             }
           }
@@ -724,13 +738,35 @@ public final class JWK implements Crypto {
       case "enc":
         cipher = Cipher.getInstance("RSA");
         if (json.containsKey("use")) {
-          if (!isFor(USE_ENC)) {
+          if ((use & USE_ENC) == 0) {
             use += USE_ENC;
           }
         }
     }
 
     return use;
+  }
+
+  public static void validateCertificatePath(List<X509Certificate> certificates) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
+
+    for (int i = 0; i < certificates.size(); i++) {
+      X509Certificate subjectCert = certificates.get(i);
+      X509Certificate issuerCert;
+
+      if (i + 1 >= certificates.size()) {
+        issuerCert = subjectCert;
+      } else {
+        issuerCert = certificates.get(i + 1);
+      }
+
+      // verify that the issuer matches the next one in the list
+      if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
+        throw new CertificateException("Failed to validate certificate path! Issuers dont match!");
+      }
+
+      // verify the certificate against the issuer
+      subjectCert.verify(issuerCert.getPublicKey());
+    }
   }
 
   private String addBoundaries(final String certificate) {
@@ -747,7 +783,7 @@ public final class JWK implements Crypto {
       final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
       publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(new ECPoint(x, y), parameters.getParameterSpec(ECParameterSpec.class)));
-      if (!isFor(USE_ENC)) {
+      if ((use & USE_ENC) == 0) {
         use += USE_ENC;
       }
     }
@@ -758,7 +794,7 @@ public final class JWK implements Crypto {
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
       final BigInteger d = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("d")));
       privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
-      if (!isFor(USE_SIG)) {
+      if ((use & USE_SIG) == 0) {
         use += USE_SIG;
       }
     }
@@ -773,7 +809,7 @@ public final class JWK implements Crypto {
           throw new RuntimeException(e);
         }
         if (json.containsKey("use")) {
-          if (!isFor(USE_SIG)) {
+          if ((use & USE_SIG) == 0) {
             use += USE_SIG;
           }
         }
