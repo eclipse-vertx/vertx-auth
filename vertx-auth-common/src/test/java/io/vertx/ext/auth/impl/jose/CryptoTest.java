@@ -1,4 +1,4 @@
-package io.vertx.ext.jwt;
+package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.ext.auth.PubSecKeyOptions;
 import org.junit.Test;

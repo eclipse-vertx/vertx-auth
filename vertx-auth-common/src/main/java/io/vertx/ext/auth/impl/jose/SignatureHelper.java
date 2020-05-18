@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.jwt.impl;
+package io.vertx.ext.auth.impl.jose;
 
 /**
  * Helper functions to convert from DER to JWS and vice versa.

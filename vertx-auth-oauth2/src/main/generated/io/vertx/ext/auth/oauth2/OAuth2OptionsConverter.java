@@ -67,7 +67,7 @@ public class OAuth2OptionsConverter {
           break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.jwt.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
+            obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "logoutPath":

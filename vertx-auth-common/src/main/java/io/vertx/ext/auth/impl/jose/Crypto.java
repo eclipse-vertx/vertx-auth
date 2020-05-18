@@ -13,9 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.jwt;
-
-import io.vertx.ext.jwt.impl.SignatureHelper;
+package io.vertx.ext.auth.impl.jose;
 
 import java.security.*;
 import java.security.cert.X509Certificate;
