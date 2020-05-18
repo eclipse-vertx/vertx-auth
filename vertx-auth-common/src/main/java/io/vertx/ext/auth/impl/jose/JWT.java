@@ -13,12 +13,14 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.jwt;
+package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.NoSuchKeyIdException;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

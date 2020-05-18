@@ -40,9 +40,9 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.jwt.JWK;
-import io.vertx.ext.jwt.JWT;
-import io.vertx.ext.jwt.JWTOptions;
+import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.JWTOptions;
 
 /**
  * @author Paulo Lopes

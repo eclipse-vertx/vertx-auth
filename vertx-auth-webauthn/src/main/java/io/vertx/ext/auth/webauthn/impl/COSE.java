@@ -17,7 +17,7 @@
 package io.vertx.ext.auth.webauthn.impl;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jwt.JWK;
+import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.util.HashMap;
 import java.util.Map;

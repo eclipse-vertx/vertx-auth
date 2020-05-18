@@ -1,4 +1,4 @@
-package io.vertx.ext.jwt;
+package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;

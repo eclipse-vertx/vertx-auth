@@ -1,7 +1,9 @@
-package io.vertx.ext.jwt;
+package io.vertx.ext.auth;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.impl.jose.JWT;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

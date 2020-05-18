@@ -19,7 +19,7 @@ package io.vertx.ext.auth.webauthn.impl;
 import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jwt.JWK;
+import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.io.IOException;
 import java.util.Base64;

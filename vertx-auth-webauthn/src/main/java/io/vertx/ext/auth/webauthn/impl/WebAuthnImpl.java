@@ -32,7 +32,7 @@ import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
-import io.vertx.ext.jwt.JWK;
+import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.io.IOException;
 import java.security.MessageDigest;

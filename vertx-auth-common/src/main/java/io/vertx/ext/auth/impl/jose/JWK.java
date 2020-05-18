@@ -1,4 +1,4 @@
-package io.vertx.ext.jwt;
+package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.logging.Logger;
@@ -6,7 +6,6 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.jwt.impl.SignatureHelper;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;

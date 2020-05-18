@@ -28,10 +28,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.*;
-import io.vertx.ext.jwt.JWK;
-import io.vertx.ext.jwt.JWT;
-import io.vertx.ext.jwt.JWTOptions;
-import io.vertx.ext.jwt.NoSuchKeyIdException;
+import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.NoSuchKeyIdException;
 
 import java.util.Collections;
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
 import io.vertx.ext.auth.webauthn.impl.COSE;
-import io.vertx.ext.jwt.JWK;
+import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;

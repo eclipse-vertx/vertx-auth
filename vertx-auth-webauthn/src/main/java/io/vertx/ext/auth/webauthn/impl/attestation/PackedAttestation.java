@@ -20,7 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
-import io.vertx.ext.jwt.JWK;
+import io.vertx.ext.auth.impl.jose.JWK;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
