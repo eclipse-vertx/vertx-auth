@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -147,4 +148,19 @@ public class JWKTest {
     new JWK(jwk);
   }
 
+
+  @Test
+  @Ignore("JDK only supports EdDSA in JDK 15")
+  public void publicEdDSA() {
+    JsonObject jwk = new JsonObject()
+      .put("kty", "OKP")
+      .put("crv", "Ed25519")
+      .put("d", "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A")
+      .put("x", "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo")
+      .put("use", "sig")
+      .put("alg", "EdDSA");
+
+    new JWK(jwk);
+    // eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg
+  }
 }
