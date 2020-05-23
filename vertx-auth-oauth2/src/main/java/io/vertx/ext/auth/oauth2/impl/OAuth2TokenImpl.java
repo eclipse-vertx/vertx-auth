@@ -78,7 +78,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
   @Override
   public OAuth2TokenImpl refresh(Handler<AsyncResult<Void>> handler) {
 
-    LOG.debug("Refreshing AccessToken");
+    LOG.trace("Refreshing AccessToken");
 
     final JsonObject headers = new JsonObject();
     final OAuth2AuthProviderImpl provider = getProvider();
@@ -165,7 +165,7 @@ public class OAuth2TokenImpl extends OAuth2UserImpl {
             handler.handle(Future.failedFuture(description));
           } else {
             OAuth2API.processNonStandardHeaders(json, reply, config.getScopeSeparator());
-            LOG.debug("Got new AccessToken");
+            LOG.trace("Got new AccessToken");
             init(json);
             handler.handle(Future.succeededFuture());
           }
