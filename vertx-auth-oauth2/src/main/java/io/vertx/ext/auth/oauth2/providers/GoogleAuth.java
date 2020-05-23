@@ -10,7 +10,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.jwt.JWTOptions;
+import io.vertx.ext.auth.JWTOptions;
 
 /**
  * Simplified factory to create an {@link io.vertx.ext.auth.oauth2.OAuth2Auth} for Google.

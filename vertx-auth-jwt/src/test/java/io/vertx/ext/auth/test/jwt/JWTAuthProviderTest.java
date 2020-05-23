@@ -22,7 +22,7 @@ import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.jwt.JWK;
-import io.vertx.ext.jwt.JWTOptions;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 

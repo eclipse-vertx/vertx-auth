@@ -9,6 +9,8 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 
+import io.vertx.ext.auth.JWTOptions;
+
 import static org.junit.Assert.*;
 
 /**

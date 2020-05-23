@@ -30,7 +30,7 @@ import io.vertx.core.json.JsonObject;
  */
 @Deprecated
 @DataObject
-public class JWTOptions extends io.vertx.ext.jwt.JWTOptions {
+public class JWTOptions extends io.vertx.ext.auth.JWTOptions {
 
   public JWTOptions() {
     super();

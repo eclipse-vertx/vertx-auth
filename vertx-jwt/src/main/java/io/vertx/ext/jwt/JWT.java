@@ -20,6 +20,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import io.vertx.ext.auth.JWTOptions;
+
 import javax.crypto.Mac;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
