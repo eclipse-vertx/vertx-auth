@@ -126,7 +126,7 @@ public final class JWT {
     boolean replaced = false;
 
     for (int i = 0; i < current.size(); i++) {
-      if (current.get(i).getId().equals(jwk.getId())) {
+      if (current.get(i).getLabel().equals(jwk.getLabel())) {
         // replace
         current.set(i, jwk);
         replaced = true;
@@ -279,7 +279,7 @@ public final class JWT {
     List<Crypto> cryptos = cryptoMap.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
-      throw new RuntimeException("Algorithm not supported");
+      throw new NoSuchKeyIdException(alg);
     }
 
     // if we only allow secure alg, then none is not a valid option
@@ -292,13 +292,26 @@ public final class JWT {
       byte[] payloadInput = base64urlDecode(signatureSeg);
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
+      String kid = header.getString("kid");
+      boolean hasKey = false;
+
       for (Crypto c : cryptos) {
+        // if a token has a kid and it doesn't match the crypto id skip it
+        if (kid != null && c.getId() != null && !kid.equals(c.getId())) {
+          continue;
+        }
+        // signal that this object crypto's list has the required key
+        hasKey = true;
         if (c.verify(payloadInput, signingInput)) {
           return payload;
         }
       }
 
-      throw new RuntimeException("Signature verification failed");
+      if (hasKey) {
+        throw new RuntimeException("Signature verification failed");
+      } else {
+        throw new NoSuchKeyIdException(alg, kid);
+      }
     }
 
     return payload;
