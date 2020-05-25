@@ -13,7 +13,7 @@ import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2RBAC;
 import io.vertx.ext.jwt.JWT;
-import io.vertx.ext.jwt.JWTOptions;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.jwt.NoSuchKeyIdException;
 
 import java.util.Base64;

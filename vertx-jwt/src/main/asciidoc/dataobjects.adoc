@@ -18,9 +18,7 @@
 |[[issuer]]`@issuer`|`String`|-
 |[[leeway]]`@leeway`|`Number (int)`|-
 |[[noTimestamp]]`@noTimestamp`|`Boolean`|-
-|[[permissions]]`@permissions`|`Array of String`|+++
-The permissions of this token.
-+++
+|[[permissions]]`@permissions`|`Array of String`|-
 |[[subject]]`@subject`|`String`|-
 |===
 

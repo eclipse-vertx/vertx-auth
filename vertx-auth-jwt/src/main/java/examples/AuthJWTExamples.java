@@ -23,9 +23,9 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.jwt.JWTOptions;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
