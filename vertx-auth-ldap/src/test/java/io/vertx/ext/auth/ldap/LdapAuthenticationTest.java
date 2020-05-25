@@ -16,8 +16,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.ldap.LdapAuthentication;
 import io.vertx.test.core.VertxTestBase;
 
 import org.apache.directory.server.annotations.CreateLdapServer;
@@ -38,11 +36,11 @@ public class LdapAuthenticationTest extends VertxTestBase {
 
   @ClassRule
   public static CreateLdapServerRule serverRule = new CreateLdapServerRule();
-  private AuthenticationProvider authProvider;
+  private LdapAuthentication authProvider;
 
   @Test
   public void testSimpleAuthenticate() throws Exception {
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("tim").setPassword("sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
@@ -52,7 +50,7 @@ public class LdapAuthenticationTest extends VertxTestBase {
 
   @Test
   public void testSimpleAuthenticateFailWrongPassword() throws Exception {
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "wrongpassword");
+    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("tim").setPassword("wrongpassword");
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
@@ -62,7 +60,7 @@ public class LdapAuthenticationTest extends VertxTestBase {
 
   @Test
   public void testSimpleAuthenticateFailWrongUser() throws Exception {
-    JsonObject authInfo = new JsonObject().put("username", "frank").put("password", "sausages");
+    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("frank").setPassword("sausages");
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
@@ -107,7 +105,7 @@ public class LdapAuthenticationTest extends VertxTestBase {
   }
 */
   private void loginThen(Consumer<User> runner) throws Exception {
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("tim").setPassword("sausages");
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       runner.accept(user);

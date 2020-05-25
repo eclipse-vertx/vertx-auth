@@ -17,7 +17,10 @@
 package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.htdigest.impl.HtdigestAuthImpl;
 
@@ -59,4 +62,13 @@ public interface HtdigestAuth extends AuthenticationProvider {
    * @return  the realm
    */
   String realm();
+  
+  /**
+   * Authenticate a User using the specified {@link HtdigestAuthInfo}
+   * 
+   * @param authInfo
+   * @param handler
+   */
+  void authenticate(HtdigestAuthInfo authInfo, Handler<AsyncResult<User>> handler);
+  
 }

@@ -1,6 +1,5 @@
 package io.vertx.ext.auth.htpasswd;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
@@ -26,9 +25,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
   @Test
   @Ignore
   public void bcrypt() {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "bcrypt")
-      .put("password", "myPassword");
+    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
+      .setUsername("bcrypt")
+      .setPassword("myPassword");
 
     authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -39,9 +38,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void md5() {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "md5")
-      .put("password", "myPassword");
+    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
+      .setUsername("md5")
+      .setPassword("myPassword");
 
     authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -52,9 +51,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void sha1() {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "sha1")
-      .put("password", "myPassword");
+    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
+      .setUsername("sha1")
+      .setPassword("myPassword");
 
     authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -65,9 +64,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void crypt() {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "crypt")
-      .put("password", "myPassword");
+    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
+      .setUsername("crypt")
+      .setPassword("myPassword");
 
     authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -78,9 +77,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void plaintext() {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "plaintext")
-      .put("password", "myPassword");
+    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
+      .setUsername("plaintext")
+      .setPassword("myPassword");
 
     authProviderPlainText.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -91,9 +90,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void authzFalse() {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "md5")
-      .put("password", "myPassword");
+    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
+      .setUsername("md5")
+      .setPassword("myPassword");
 
     authProviderUsersAreAuthorizedForNothing.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
@@ -102,4 +101,5 @@ public class HtpasswdAuthTest extends VertxTestBase {
     }));
     await();
   }
+
 }

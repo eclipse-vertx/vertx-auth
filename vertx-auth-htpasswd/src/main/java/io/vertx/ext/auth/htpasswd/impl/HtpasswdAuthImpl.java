@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
+import io.vertx.ext.auth.htpasswd.HtpasswdAuthInfo;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 import io.vertx.ext.auth.htpasswd.impl.hash.Plaintext;
 import io.vertx.ext.auth.impl.UserImpl;
@@ -65,22 +66,25 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    String username = authInfo.getString("username");
-    String password = authInfo.getString("password");
+    authenticate(new HtpasswdAuthInfo(authInfo), resultHandler);
+  }
+  
+  @Override
+  public void authenticate(HtpasswdAuthInfo authInfo, Handler<AsyncResult<User>> resultHandler) {
 
     // Null or empty username is invalid
-    if (username == null || username.length() == 0) {
+    if (authInfo.getUsername() == null || authInfo.getUsername().length() == 0) {
       resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
       return;
     }
 
-    if (!htUsers.containsKey(username)) {
+    if (!htUsers.containsKey(authInfo.getUsername())) {
       resultHandler.handle((Future.failedFuture("Unknown username.")));
       return;
     }
 
-    if (strategy.verify(htUsers.get(username), password)) {
-      resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", username))));
+    if (strategy.verify(htUsers.get(authInfo.getUsername()), authInfo.getPassword())) {
+      resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", authInfo.getUsername()))));
     } else {
       resultHandler.handle(Future.failedFuture("Bad response"));
     }

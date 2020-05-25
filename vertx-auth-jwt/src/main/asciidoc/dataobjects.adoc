@@ -1,5 +1,16 @@
 = Cheatsheets
 
+[[JWTAuthInfo]]
+== JWTAuthInfo
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[jwt]]`@jwt`|`String`|-
+|===
+
 [[JWTAuthOptions]]
 == JWTAuthOptions
 
