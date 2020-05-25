@@ -18,9 +18,12 @@ package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
@@ -64,12 +67,24 @@ public interface JDBCAuthentication extends AuthenticationProvider {
   }
 
   /**
-   * Authenticate a User using the specified {@link JDBCAuthInfo}
+   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
    * 
-   * @param authInfo
+   * @param credentials
    * @param handler
    */
-  void authenticate(JDBCAuthInfo authInfo, Handler<AsyncResult<User>> handler);
+  void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> handler);
+
+  /**
+   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
+   * 
+   * @param credential
+   * @param handler
+   */
+  default Future<User> authenticate(UsernamePasswordCredentials credentials) {
+    Promise<User> promise = Promise.promise();
+    authenticate(credentials, promise);
+    return promise.future();
+  }
 
   /**
    * Hashes a password to be stored.

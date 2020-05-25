@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.htdigest.HtdigestAuthInfo}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.htdigest.HtdigestAuthInfo} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.htdigest.HtdigestCredentials}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.htdigest.HtdigestCredentials} original class using Vert.x codegen.
  */
-public class HtdigestAuthInfoConverter {
+public class HtdigestCredentialsConverter {
 
 
-   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HtdigestAuthInfo obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HtdigestCredentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "algorithm":
@@ -69,11 +69,11 @@ public class HtdigestAuthInfoConverter {
     }
   }
 
-   static void toJson(HtdigestAuthInfo obj, JsonObject json) {
+   static void toJson(HtdigestCredentials obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-   static void toJson(HtdigestAuthInfo obj, java.util.Map<String, Object> json) {
+   static void toJson(HtdigestCredentials obj, java.util.Map<String, Object> json) {
     if (obj.getAlgorithm() != null) {
       json.put("algorithm", obj.getAlgorithm());
     }

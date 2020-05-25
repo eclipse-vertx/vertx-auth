@@ -26,8 +26,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
-import io.vertx.ext.auth.jdbc.JDBCAuthInfo;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
@@ -58,12 +58,12 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new JDBCAuthInfo(authInfo), resultHandler);
+    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
   }
 
   @Override
-  public void authenticate(JDBCAuthInfo authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticationProvider.authenticate(authInfo, authenticationResult -> {
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticationProvider.authenticate(credentials, authenticationResult -> {
       if (authenticationResult.failed()) {
         resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
       } else {

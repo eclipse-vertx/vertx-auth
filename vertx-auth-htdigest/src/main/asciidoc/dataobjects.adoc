@@ -1,8 +1,12 @@
 = Cheatsheets
 
-[[HtdigestAuthInfo]]
-== HtdigestAuthInfo
+[[HtdigestCredentials]]
+== HtdigestCredentials
 
+++++
+ Credentials specific to the link authentication provider
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]

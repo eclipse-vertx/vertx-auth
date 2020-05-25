@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.jwt.JWTAuthInfo}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTAuthInfo} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.jwt.JWTCredentials}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jwt.JWTCredentials} original class using Vert.x codegen.
  */
-public class JWTAuthInfoConverter {
+public class JWTCredentialsConverter {
 
 
-   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTAuthInfo obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTCredentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "jwt":
@@ -24,11 +24,11 @@ public class JWTAuthInfoConverter {
     }
   }
 
-   static void toJson(JWTAuthInfo obj, JsonObject json) {
+   static void toJson(JWTCredentials obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-   static void toJson(JWTAuthInfo obj, java.util.Map<String, Object> json) {
+   static void toJson(JWTCredentials obj, java.util.Map<String, Object> json) {
     if (obj.getJwt() != null) {
       json.put("jwt", obj.getJwt());
     }

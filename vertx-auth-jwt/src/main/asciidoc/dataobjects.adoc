@@ -1,16 +1,5 @@
 = Cheatsheets
 
-[[JWTAuthInfo]]
-== JWTAuthInfo
-
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[jwt]]`@jwt`|`String`|-
-|===
-
 [[JWTAuthOptions]]
 == JWTAuthOptions
 
@@ -25,5 +14,20 @@
 ^|Name | Type ^| Description
 |[[jwks]]`@jwks`|`Array of Json object`|-
 |[[permissionsClaimKey]]`@permissionsClaimKey`|`String`|-
+|===
+
+[[JWTCredentials]]
+== JWTCredentials
+
+++++
+ Credentials specific to the link provider
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[jwt]]`@jwt`|`String`|-
 |===
 

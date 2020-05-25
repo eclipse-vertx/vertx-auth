@@ -39,7 +39,7 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTAuthInfo;
+import io.vertx.ext.auth.jwt.JWTCredentials;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
@@ -110,7 +110,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
   }
   
   @Override
-  public void authenticate(JWTAuthInfo authInfo, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(JWTCredentials authInfo, Handler<AsyncResult<User>> resultHandler) {
     try {
       final JsonObject payload = jwt.decode(authInfo.getJwt());
 

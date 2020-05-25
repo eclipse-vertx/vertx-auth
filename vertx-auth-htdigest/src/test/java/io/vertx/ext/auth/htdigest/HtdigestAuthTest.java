@@ -30,7 +30,7 @@ public class HtdigestAuthTest extends VertxTestBase {
 
   @Test
   public void testValidDigestWithQOP() {
-    HtdigestAuthInfo authInfo = new HtdigestAuthInfo()
+    HtdigestCredentials authInfo = new HtdigestCredentials()
       .setMethod("GET")
       .setUsername("Mufasa")
       .setRealm("testrealm@host.com")
@@ -50,7 +50,7 @@ public class HtdigestAuthTest extends VertxTestBase {
 
   @Test
   public void testValidDigestWithoutQOP() {
-    HtdigestAuthInfo authInfo = new HtdigestAuthInfo()
+    HtdigestCredentials authInfo = new HtdigestCredentials()
       .setMethod("GET")
       .setUsername("Mufasa")
       .setRealm("testrealm@host.com")

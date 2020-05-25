@@ -26,8 +26,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
-import io.vertx.ext.auth.jdbc.JDBCAuthInfo;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -59,21 +59,21 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new JDBCAuthInfo(authInfo), resultHandler);
+    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
   }
   
   @Override
-  public void authenticate(JDBCAuthInfo authInfo, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
 
-    if (authInfo.getUsername() == null) {
+    if (credentials.getUsername() == null) {
       resultHandler.handle(Future.failedFuture("authInfo must contain username in 'username' field"));
       return;
     }
-    if (authInfo.getPassword() == null) {
+    if (credentials.getPassword() == null) {
       resultHandler.handle(Future.failedFuture("authInfo must contain password in 'password' field"));
       return;
     }
-    executeQuery(options.getAuthenticationQuery(), new JsonArray().add(authInfo.getUsername()), queryResponse -> {
+    executeQuery(options.getAuthenticationQuery(), new JsonArray().add(credentials.getUsername()), queryResponse -> {
       if (queryResponse.succeeded()) {
         ResultSet rs = queryResponse.result();
         switch (rs.getNumRows()) {
@@ -85,8 +85,8 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
           case 1: {
             JsonArray row = rs.getResults().get(0);
             try {
-              if (verify(row, authInfo.getPassword())) {
-                User user = new UserImpl(new JsonObject().put("username", authInfo.getUsername()));
+              if (verify(row, credentials.getPassword())) {
+                User user = new UserImpl(new JsonObject().put("username", credentials.getUsername()));
                 resultHandler.handle(Future.succeededFuture(user));
               } else {
                 resultHandler.handle(Future.failedFuture("Invalid username/password"));

@@ -46,12 +46,12 @@ public interface JWTAuth extends AuthenticationProvider {
   }
 
   /**
-   * Authenticate a User using the specified {@link JWTAuthInfo}
+   * Authenticate a User using the specified {@link JWTCredentials}
    * 
    * @param authInfo
    * @param handler
    */
-  void authenticate(JWTAuthInfo authInfo, Handler<AsyncResult<User>> handler);
+  void authenticate(JWTCredentials authInfo, Handler<AsyncResult<User>> handler);
 
   /**
    * Generate a new JWT token.

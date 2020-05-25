@@ -12,11 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.test.core.VertxTestBase;
+import java.util.function.Consumer;
 
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
@@ -27,7 +23,11 @@ import org.apache.directory.server.core.integ.CreateLdapServerRule;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.util.function.Consumer;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
+import io.vertx.test.core.VertxTestBase;
 
 @CreateDS(name = "myDS", partitions = { @CreatePartition(name = "test", suffix = "dc=myorg,dc=com") })
 @CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", address = "localhost") })
@@ -40,8 +40,8 @@ public class LdapAuthenticationTest extends VertxTestBase {
 
   @Test
   public void testSimpleAuthenticate() throws Exception {
-    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -50,8 +50,8 @@ public class LdapAuthenticationTest extends VertxTestBase {
 
   @Test
   public void testSimpleAuthenticateFailWrongPassword() throws Exception {
-    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("tim").setPassword("wrongpassword");
-    authProvider.authenticate(authInfo, onFailure(thr -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "wrongpassword");
+    authProvider.authenticate(credentials, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -60,8 +60,8 @@ public class LdapAuthenticationTest extends VertxTestBase {
 
   @Test
   public void testSimpleAuthenticateFailWrongUser() throws Exception {
-    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("frank").setPassword("sausages");
-    authProvider.authenticate(authInfo, onFailure(thr -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("frank", "sausages");
+    authProvider.authenticate(credentials, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
     }));
@@ -105,8 +105,8 @@ public class LdapAuthenticationTest extends VertxTestBase {
   }
 */
   private void loginThen(Consumer<User> runner) throws Exception {
-    LdapAuthInfo authInfo = new LdapAuthInfo().setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       runner.accept(user);
     }));

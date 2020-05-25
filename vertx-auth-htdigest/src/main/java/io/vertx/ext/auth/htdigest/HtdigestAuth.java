@@ -64,11 +64,11 @@ public interface HtdigestAuth extends AuthenticationProvider {
   String realm();
   
   /**
-   * Authenticate a User using the specified {@link HtdigestAuthInfo}
+   * Authenticate a User using the specified {@link HtdigestCredentials}
    * 
-   * @param authInfo
+   * @param credentials
    * @param handler
    */
-  void authenticate(HtdigestAuthInfo authInfo, Handler<AsyncResult<User>> handler);
+  void authenticate(HtdigestCredentials credentials, Handler<AsyncResult<User>> handler);
   
 }

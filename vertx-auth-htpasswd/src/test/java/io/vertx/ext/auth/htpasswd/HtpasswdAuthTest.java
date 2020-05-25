@@ -1,5 +1,6 @@
 package io.vertx.ext.auth.htpasswd;
 
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
@@ -25,11 +26,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
   @Test
   @Ignore
   public void bcrypt() {
-    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
-      .setUsername("bcrypt")
-      .setPassword("myPassword");
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("bcrypt", "myPassword");
 
-    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(credentials, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -38,11 +37,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void md5() {
-    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
-      .setUsername("md5")
-      .setPassword("myPassword");
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("md5", "myPassword");
 
-    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(credentials, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -51,11 +48,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void sha1() {
-    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
-      .setUsername("sha1")
-      .setPassword("myPassword");
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("sha1", "myPassword");
 
-    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(credentials, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -64,11 +59,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void crypt() {
-    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
-      .setUsername("crypt")
-      .setPassword("myPassword");
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("crypt", "myPassword");
 
-    authProviderCrypt.authenticate(authInfo, onSuccess(res -> {
+    authProviderCrypt.authenticate(credentials, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -77,11 +70,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void plaintext() {
-    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
-      .setUsername("plaintext")
-      .setPassword("myPassword");
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("plaintext", "myPassword");
 
-    authProviderPlainText.authenticate(authInfo, onSuccess(res -> {
+    authProviderPlainText.authenticate(credentials, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
     }));
@@ -90,11 +81,9 @@ public class HtpasswdAuthTest extends VertxTestBase {
 
   @Test
   public void authzFalse() {
-    HtpasswdAuthInfo authInfo = new HtpasswdAuthInfo()
-      .setUsername("md5")
-      .setPassword("myPassword");
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("md5", "myPassword");
 
-    authProviderUsersAreAuthorizedForNothing.authenticate(authInfo, onSuccess(user -> {
+    authProviderUsersAreAuthorizedForNothing.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       assertFalse(PermissionBasedAuthorization.create("something").match(user));
       testComplete();

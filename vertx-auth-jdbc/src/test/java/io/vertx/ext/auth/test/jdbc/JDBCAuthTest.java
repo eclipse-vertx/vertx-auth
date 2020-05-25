@@ -16,18 +16,20 @@
 
 package io.vertx.ext.auth.test.jdbc;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jdbc.JDBCAuth;
-import io.vertx.ext.auth.jdbc.JDBCAuthInfo;
-import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.test.core.VertxTestBase;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.*;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
+import io.vertx.ext.auth.jdbc.JDBCAuth;
+import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.test.core.VertxTestBase;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -112,9 +114,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthenticate() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -123,9 +124,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthenticateFailBadPwd() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("eggs");
-    authProvider.authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "eggs");
+    authProvider.authenticate(credentials, onFailure(v -> {
       assertEquals("Invalid username/password", v.getMessage());
       testComplete();
     }));
@@ -134,9 +134,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthenticateFailBadUser() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("blah").setPassword("whatever");
-    authProvider.authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("blah", "whatever");
+    authProvider.authenticate(credentials, onFailure(v -> {
       assertEquals("Invalid username/password", v.getMessage());
       testComplete();
     }));
@@ -145,9 +144,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthoriseHasRole() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("role:dev", onSuccess(has -> {
         assertTrue(has);
@@ -159,9 +157,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthoriseNotHasRole() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("role:manager", onSuccess(has -> {
         assertFalse(has);
@@ -173,9 +170,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthoriseHasPermission() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("commit_code", onSuccess(has -> {
         assertTrue(has);
@@ -187,9 +183,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthoriseNotHasPermission() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("eat_sandwich", onSuccess(has -> {
         assertFalse(has);
@@ -201,9 +196,8 @@ public class JDBCAuthTest extends VertxTestBase {
 
   @Test
   public void testAuthenticateWithNonce() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("paulo").setPassword("secret");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("paulo", "secret");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));

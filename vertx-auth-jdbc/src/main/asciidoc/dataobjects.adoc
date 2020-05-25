@@ -1,17 +1,5 @@
 = Cheatsheets
 
-[[JDBCAuthInfo]]
-== JDBCAuthInfo
-
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[password]]`@password`|`String`|-
-|[[username]]`@username`|`String`|-
-|===
-
 [[JDBCAuthOptions]]
 == JDBCAuthOptions
 

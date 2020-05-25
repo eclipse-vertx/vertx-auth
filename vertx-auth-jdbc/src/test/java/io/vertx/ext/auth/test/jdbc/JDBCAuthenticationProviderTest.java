@@ -18,7 +18,7 @@ package io.vertx.ext.auth.test.jdbc;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jdbc.JDBCAuthInfo;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -136,9 +136,8 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
   @Test
   public void testAuthenticate() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("sausages");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -147,9 +146,8 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
   @Test
   public void testAuthenticateFailBadPwd() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("tim").setPassword("eggs");
-    getAuthenticationProvider().authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "eggs");
+    getAuthenticationProvider().authenticate(credentials, onFailure(v -> {
       assertEquals("Invalid username/password", v.getMessage());
       testComplete();
     }));
@@ -158,9 +156,8 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
   @Test
   public void testAuthenticateFailBadUser() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("blah").setPassword("whatever");
-    getAuthenticationProvider().authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("blah", "whatever");
+    getAuthenticationProvider().authenticate(credentials, onFailure(v -> {
       assertEquals("Invalid username/password", v.getMessage());
       testComplete();
     }));
@@ -169,9 +166,8 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
   @Test
   public void testAuthenticateWithNonce() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("paulo").setPassword("secret");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("paulo", "secret");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -180,11 +176,9 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
 
   @Test
   public void testPHC() {
-    JDBCAuthInfo authInfo = new JDBCAuthInfo();
-    authInfo.setUsername("lopus").setPassword("secret");
-
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("lopus", "secret");
     getPHCAuthenticationProvider()
-      .authenticate(authInfo, onSuccess(user -> {
+      .authenticate(credentials, onSuccess(user -> {
         assertNotNull(user);
         testComplete();
       }));

@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.htpasswd;
+package io.vertx.ext.auth.authentication;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthInfo}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.htpasswd.HtpasswdAuthInfo} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.authentication.UsernamePasswordCredentials}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.authentication.UsernamePasswordCredentials} original class using Vert.x codegen.
  */
-public class HtpasswdAuthInfoConverter {
+public class UsernamePasswordCredentialsConverter {
 
 
-   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HtpasswdAuthInfo obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, UsernamePasswordCredentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "password":
@@ -29,11 +29,11 @@ public class HtpasswdAuthInfoConverter {
     }
   }
 
-   static void toJson(HtpasswdAuthInfo obj, JsonObject json) {
+   static void toJson(UsernamePasswordCredentials obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-   static void toJson(HtpasswdAuthInfo obj, java.util.Map<String, Object> json) {
+   static void toJson(UsernamePasswordCredentials obj, java.util.Map<String, Object> json) {
     if (obj.getPassword() != null) {
       json.put("password", obj.getPassword());
     }

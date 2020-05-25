@@ -1,10 +1,28 @@
+/********************************************************************************
+ * Copyright (c) 2029 Stephane Bastian
+ *
+ * This program and the accompanying materials are made available under the 2
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 3
+ *
+ * Contributors: 4
+ *   Stephane Bastian - initial API and implementation
+ ********************************************************************************/
 package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Credentials specific to the {@link HtdigestAuth} authentication provider
+ * 
+ * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
+ *
+ */
 @DataObject(generateConverter = true, publicConverter = false)
-public class HtdigestAuthInfo {
+public class HtdigestCredentials {
 
   private String algorithm;
   private String cnonce;
@@ -17,11 +35,11 @@ public class HtdigestAuthInfo {
   private String uri;
   private String username;
 
-  public HtdigestAuthInfo() {
+  public HtdigestCredentials() {
   }
 
-  public HtdigestAuthInfo(JsonObject jsonObject) {
-    HtdigestAuthInfoConverter.fromJson(jsonObject, this);
+  public HtdigestCredentials(JsonObject jsonObject) {
+    HtdigestCredentialsConverter.fromJson(jsonObject, this);
   }
 
   public String getAlgorithm() {
@@ -64,59 +82,59 @@ public class HtdigestAuthInfo {
     return username;
   }
 
-  public HtdigestAuthInfo setAlgorithm(String algorithm) {
+  public HtdigestCredentials setAlgorithm(String algorithm) {
     this.algorithm = algorithm;
     return this;
   }
 
-  public HtdigestAuthInfo setCnonce(String cnonce) {
+  public HtdigestCredentials setCnonce(String cnonce) {
     this.cnonce = cnonce;
     return this;
   }
 
-  public HtdigestAuthInfo setMethod(String method) {
+  public HtdigestCredentials setMethod(String method) {
     this.method = method;
     return this;
   }
 
-  public HtdigestAuthInfo setNc(String nc) {
+  public HtdigestCredentials setNc(String nc) {
     this.nc = nc;
     return this;
   }
 
-  public HtdigestAuthInfo setNonce(String nonce) {
+  public HtdigestCredentials setNonce(String nonce) {
     this.nonce = nonce;
     return this;
   }
 
-  public HtdigestAuthInfo setQop(String qop) {
+  public HtdigestCredentials setQop(String qop) {
     this.qop = qop;
     return this;
   }
 
-  public HtdigestAuthInfo setRealm(String realm) {
+  public HtdigestCredentials setRealm(String realm) {
     this.realm = realm;
     return this;
   }
 
-  public HtdigestAuthInfo setResponse(String response) {
+  public HtdigestCredentials setResponse(String response) {
     this.response = response;
     return this;
   }
 
-  public HtdigestAuthInfo setUri(String uri) {
+  public HtdigestCredentials setUri(String uri) {
     this.uri = uri;
     return this;
   }
 
-  public HtdigestAuthInfo setUsername(String username) {
+  public HtdigestCredentials setUsername(String username) {
     this.username = username;
     return this;
   }
 
   public JsonObject toJson() {
     JsonObject result = new JsonObject();
-    HtdigestAuthInfoConverter.toJson(this, result);
+    HtdigestCredentialsConverter.toJson(this, result);
     return result;
   }
 

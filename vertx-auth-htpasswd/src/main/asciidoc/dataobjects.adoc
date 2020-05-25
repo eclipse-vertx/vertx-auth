@@ -1,17 +1,5 @@
 = Cheatsheets
 
-[[HtpasswdAuthInfo]]
-== HtpasswdAuthInfo
-
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[password]]`@password`|`String`|-
-|[[username]]`@username`|`String`|-
-|===
-
 [[HtpasswdAuthOptions]]
 == HtpasswdAuthOptions
 

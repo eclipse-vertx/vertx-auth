@@ -19,6 +19,7 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.mongo.MongoAuth;
 
 import java.util.ArrayList;
@@ -60,9 +61,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthenticate() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -71,9 +71,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthenticateFailBadPwd() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "eggs");
-    authProvider.authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "eggs");
+    authProvider.authenticate(credentials, onFailure(v -> {
       assertTrue(v instanceof Exception);
       testComplete();
     }));
@@ -82,9 +81,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthenticateFailBadUser() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "blah").put(authProvider.getPasswordField(), "whatever");
-    authProvider.authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("blah", "whatever");
+    authProvider.authenticate(credentials, onFailure(v -> {
       assertTrue(v instanceof Exception);
       testComplete();
     }));
@@ -93,9 +91,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthoriseHasRole() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("role:developer", onSuccess(has -> {
         assertTrue(has);
@@ -107,9 +104,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthoriseNotHasRole() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("role:manager", onSuccess(has -> {
         assertFalse(has);
@@ -121,9 +117,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthoriseHasPermission() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("commit_code", onSuccess(has -> {
         assertTrue(has);
@@ -135,9 +130,8 @@ public class MongoAuthNO_SALTTest extends MongoBaseTest {
 
   @Test
   public void testAuthoriseNotHasPermission() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authProvider.getUsernameField(), "tim").put(authProvider.getPasswordField(), "sausages");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    authProvider.authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       user.isAuthorized("eat_sandwich", onSuccess(has -> {
         assertFalse(has);
