@@ -17,11 +17,14 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.User;
 
 /**
  * Factory interface for creating JWT based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
@@ -41,6 +44,14 @@ public interface JWTAuth extends AuthenticationProvider {
   static JWTAuth create(Vertx vertx, JWTAuthOptions config) {
     return new JWTAuthProviderImpl(vertx, config);
   }
+
+  /**
+   * Authenticate a User using the specified {@link JWTAuthInfo}
+   * 
+   * @param authInfo
+   * @param handler
+   */
+  void authenticate(JWTAuthInfo authInfo, Handler<AsyncResult<User>> handler);
 
   /**
    * Generate a new JWT token.
@@ -64,4 +75,5 @@ public interface JWTAuth extends AuthenticationProvider {
   default String generateToken(JsonObject claims) {
     return generateToken(claims, new JWTOptions());
   }
+  
 }

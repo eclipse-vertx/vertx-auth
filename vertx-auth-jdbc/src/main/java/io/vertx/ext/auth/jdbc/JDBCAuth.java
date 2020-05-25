@@ -19,9 +19,12 @@ package io.vertx.ext.auth.jdbc;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
@@ -159,4 +162,13 @@ public interface JDBCAuth extends AuthProvider {
    */
   @Fluent
   JDBCAuth setNonces(JsonArray nonces);
+   
+  /**
+   * Authenticate a User using the specified {@link JDBCAuthInfo}
+   * 
+   * @param authInfo
+   * @param handler
+   */
+  void authenticate(JDBCAuthInfo authInfo, Handler<AsyncResult<User>> handler);
+  
 }

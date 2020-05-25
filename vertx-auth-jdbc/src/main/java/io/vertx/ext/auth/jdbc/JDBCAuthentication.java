@@ -17,6 +17,9 @@
 package io.vertx.ext.auth.jdbc;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthenticationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -59,6 +62,14 @@ public interface JDBCAuthentication extends AuthenticationProvider {
   static JDBCAuthentication create(JDBCClient client, JDBCAuthenticationOptions options) {
     return new JDBCAuthenticationImpl(client, options);
   }
+
+  /**
+   * Authenticate a User using the specified {@link JDBCAuthInfo}
+   * 
+   * @param authInfo
+   * @param handler
+   */
+  void authenticate(JDBCAuthInfo authInfo, Handler<AsyncResult<User>> handler);
 
   /**
    * Hashes a password to be stored.

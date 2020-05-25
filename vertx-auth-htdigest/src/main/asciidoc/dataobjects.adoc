@@ -1,7 +1,7 @@
 = Cheatsheets
 
-[[HtDigestAuthInfo]]
-== HtDigestAuthInfo
+[[HtdigestAuthInfo]]
+== HtdigestAuthInfo
 
 
 [cols=">25%,25%,50%"]
@@ -10,7 +10,6 @@
 ^|Name | Type ^| Description
 |[[algorithm]]`@algorithm`|`String`|-
 |[[cnonce]]`@cnonce`|`String`|-
-|[[empty]]`@empty`|`Boolean`|-
 |[[method]]`@method`|`String`|-
 |[[nc]]`@nc`|`String`|-
 |[[nonce]]`@nonce`|`String`|-

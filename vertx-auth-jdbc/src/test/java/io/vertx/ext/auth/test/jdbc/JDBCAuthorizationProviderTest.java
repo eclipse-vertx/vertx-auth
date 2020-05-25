@@ -26,8 +26,8 @@ import org.junit.Test;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jdbc.JDBCAuthInfo;
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 
@@ -106,8 +106,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseHasRole() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
+    JDBCAuthInfo authInfo = new JDBCAuthInfo();
+    authInfo.setUsername("tim").setPassword("sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
@@ -120,8 +120,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseNotHasRole() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
+    JDBCAuthInfo authInfo = new JDBCAuthInfo();
+    authInfo.setUsername("tim").setPassword("sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
@@ -134,8 +134,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseHasPermission() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
+    JDBCAuthInfo authInfo = new JDBCAuthInfo();
+    authInfo.setUsername("tim").setPassword("sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
@@ -148,8 +148,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseNotHasPermission() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
+    JDBCAuthInfo authInfo = new JDBCAuthInfo();
+    authInfo.setUsername("tim").setPassword("sausages");
     getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {

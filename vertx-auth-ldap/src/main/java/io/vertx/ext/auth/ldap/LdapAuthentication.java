@@ -13,7 +13,10 @@
 package io.vertx.ext.auth.ldap;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.ldap.impl.LdapAuthenticationImpl;
 
@@ -35,4 +38,13 @@ public interface LdapAuthentication extends AuthenticationProvider {
   static LdapAuthentication create(Vertx vertx, LdapAuthenticationOptions options) {
     return new LdapAuthenticationImpl(vertx, options);
   }
+  
+  /**
+   * Authenticate a User using the specified {@link LdapAuthInfo}
+   * 
+   * @param authInfo
+   * @param handler
+   */
+  void authenticate(LdapAuthInfo authInfo, Handler<AsyncResult<User>> handler);
+
 }
