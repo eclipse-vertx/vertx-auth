@@ -24,6 +24,7 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
 import io.vertx.ext.mongo.MongoClient;
@@ -73,22 +74,21 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    String username = authInfo.getString(options.getUsernameCredentialField());
-    String password = authInfo.getString(options.getPasswordCredentialField());
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
+  }
+  
+  @Override
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
 
     // Null username is invalid
-    if (username == null) {
-      resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
+    if (credentials == null) {
+      resultHandler.handle((Future.failedFuture("Credentials must be set for authentication.")));
       return;
     }
-    if (password == null) {
-      resultHandler.handle((Future.failedFuture("Password must be set for authentication.")));
-      return;
-    }
-    AuthToken token = new AuthToken(username, password);
+    AuthToken token = new AuthToken(credentials.getUsername(), credentials.getPassword());
 
-    JsonObject query = createQuery(username);
+    JsonObject query = createQuery(credentials.getUsername());
     mongoClient.find(options.getCollectionName(), query, res -> {
 
       try {

@@ -25,6 +25,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.ldap.LdapAuthentication;
 import io.vertx.ext.auth.ldap.LdapAuthenticationOptions;
 
@@ -45,13 +46,16 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    String principal = authInfo.getString("username");
-    String credential = authInfo.getString("password");
-    String ldapPrincipal = getLdapPrincipal(principal);
-    createLdapContext(ldapPrincipal, credential, contextResponse -> {
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
+    authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
+  }
+  
+  @Override
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
+    String ldapPrincipal = getLdapPrincipal(credentials.getUsername());
+    createLdapContext(ldapPrincipal, credentials.getPassword(), contextResponse -> {
       if (contextResponse.succeeded()) {
-        User user = User.create(new JsonObject().put("username", principal));
+        User user = User.create(new JsonObject().put("username", credentials.getUsername()));
         resultHandler.handle(Future.succeededFuture(user));
       } else {
         resultHandler.handle(Future.failedFuture(contextResponse.cause()));
