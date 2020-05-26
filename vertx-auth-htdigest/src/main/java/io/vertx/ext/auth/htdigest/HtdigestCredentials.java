@@ -17,7 +17,7 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * Credentials specific to the {@link HtdigestAuth} authentication provider
- * 
+ *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  *
  */
@@ -138,4 +138,8 @@ public class HtdigestCredentials {
     return result;
   }
 
+  @Override
+  public String toString() {
+    return toJson().encode();
+  }
 }

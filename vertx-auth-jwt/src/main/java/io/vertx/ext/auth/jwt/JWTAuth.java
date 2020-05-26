@@ -17,9 +17,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
@@ -47,11 +45,23 @@ public interface JWTAuth extends AuthenticationProvider {
 
   /**
    * Authenticate a User using the specified {@link JWTCredentials}
-   * 
-   * @param authInfo
-   * @param handler
+   *
+   * @param credentials the credentials to use.
+   * @param handler the callback
    */
-  void authenticate(JWTCredentials authInfo, Handler<AsyncResult<User>> handler);
+  void authenticate(JWTCredentials credentials, Handler<AsyncResult<User>> handler);
+
+  /**
+   * Authenticate a User using the specified {@link JWTCredentials}
+   *
+   * @param credentials to use
+   * @return future result
+   */
+  default Future<User> authenticate(JWTCredentials credentials) {
+    Promise<User> promise = Promise.promise();
+    authenticate(credentials, promise);
+    return promise.future();
+  }
 
   /**
    * Generate a new JWT token.
@@ -75,5 +85,4 @@ public interface JWTAuth extends AuthenticationProvider {
   default String generateToken(JsonObject claims) {
     return generateToken(claims, new JWTOptions());
   }
-  
 }

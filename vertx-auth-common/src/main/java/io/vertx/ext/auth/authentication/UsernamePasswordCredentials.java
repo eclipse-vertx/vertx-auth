@@ -1,4 +1,4 @@
-/********************************************************************************
+/* ******************************************************************************
  * Copyright (c) 2020 Stephane Bastian
  *
  * This program and the accompanying materials are made available under the 2
@@ -28,6 +28,8 @@ public class UsernamePasswordCredentials {
 
   private String password;
   private String username;
+
+  protected UsernamePasswordCredentials() {}
 
   public UsernamePasswordCredentials(String username, String password) {
     setUsername(username);
@@ -62,4 +64,8 @@ public class UsernamePasswordCredentials {
     return result;
   }
 
+  @Override
+  public String toString() {
+    return toJson().encode();
+  }
 }

@@ -13,8 +13,8 @@
 |[[name]]`@name`|`String`|-
 |===
 
-[[WebAuthnInfo]]
-== WebAuthnInfo
+[[WebAuthnCredentials]]
+== WebAuthnCredentials
 
 
 [cols=">25%,25%,50%"]

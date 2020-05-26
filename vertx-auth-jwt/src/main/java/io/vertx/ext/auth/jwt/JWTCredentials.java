@@ -42,10 +42,14 @@ public class JWTCredentials {
     return this;
   }
 
-  public JsonObject toJson() { 
+  public JsonObject toJson() {
     JsonObject result = new JsonObject();
     JWTCredentialsConverter.toJson(this,
-    result); return result; 
+    result); return result;
   }
 
+  @Override
+  public String toString() {
+    return toJson().encode();
+  }
 }

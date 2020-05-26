@@ -105,7 +105,7 @@ public interface MongoAuthentication extends AuthenticationProvider {
 
   /**
    * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   * 
+   *
    * @param credentials
    * @param handler
    */
@@ -113,14 +113,13 @@ public interface MongoAuthentication extends AuthenticationProvider {
 
   /**
    * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   * 
-   * @param credential
-   * @param handler
+   *
+   * @param credentials
+   * @return future result
    */
   default Future<User> authenticate(UsernamePasswordCredentials credentials) {
     Promise<User> promise = Promise.promise();
     authenticate(credentials, promise);
     return promise.future();
   }
-
 }
