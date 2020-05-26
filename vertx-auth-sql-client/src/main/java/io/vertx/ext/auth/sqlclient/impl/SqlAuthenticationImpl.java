@@ -25,6 +25,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.sqlclient.SqlAuthentication;
 import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions;
 import io.vertx.sqlclient.Row;
@@ -48,19 +49,13 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
+  }
 
-    String username = authInfo.getString("username");
-    if (username == null) {
-      resultHandler.handle(Future.failedFuture("authInfo must contain username in 'username' field"));
-      return;
-    }
-    String password = authInfo.getString("password");
-    if (password == null) {
-      resultHandler.handle(Future.failedFuture("authInfo must contain password in 'password' field"));
-      return;
-    }
+  @Override
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
 
-    client.preparedQuery(options.getAuthenticationQuery()).execute(Tuple.of(username), preparedQuery -> {
+    client.preparedQuery(options.getAuthenticationQuery()).execute(Tuple.of(credentials.getUsername()), preparedQuery -> {
       if (preparedQuery.succeeded()) {
         final RowSet<Row> rows = preparedQuery.result();
         switch (rows.size()) {
@@ -72,8 +67,8 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
           case 1: {
             Row row = rows.iterator().next();
             String hashedStoredPwd = row.getString(0);
-            if (strategy.verify(hashedStoredPwd, password)) {
-              resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", username))));
+            if (strategy.verify(hashedStoredPwd, credentials.getPassword())) {
+              resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", credentials.getUsername()))));
             } else {
               resultHandler.handle(Future.failedFuture("Invalid username/password"));
             }

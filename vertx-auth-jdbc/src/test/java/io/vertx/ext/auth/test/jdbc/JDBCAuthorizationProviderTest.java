@@ -26,8 +26,8 @@ import org.junit.Test;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
 
@@ -106,9 +106,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseHasRole() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
         assertTrue(RoleBasedAuthorization.create("dev").match(user));
@@ -120,9 +119,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseNotHasRole() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
         assertFalse(RoleBasedAuthorization.create("manager").match(user));
@@ -134,9 +132,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseHasPermission() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
         assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
@@ -148,9 +145,8 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
 
   @Test
   public void testAuthoriseNotHasPermission() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "tim").put("password", "sausages");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       fillUserAuthorizations(user, onSuccess(has -> {
         assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));

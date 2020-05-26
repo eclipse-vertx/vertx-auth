@@ -17,7 +17,6 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.Fluent;
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
@@ -25,8 +24,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
-
-import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**
  * Factory interface for creating WebAuthN based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
@@ -98,11 +95,9 @@ public interface WebAuthn extends AuthenticationProvider {
     return promise.future();
   }
 
-  @GenIgnore(PERMITTED_TYPE)
-  void authenticate(WebAuthnInfo authInfo, Handler<AsyncResult<User>> handler);
+  void authenticate(WebAuthnCredentials authInfo, Handler<AsyncResult<User>> handler);
 
-  @GenIgnore(PERMITTED_TYPE)
-  default Future<User> authenticate(WebAuthnInfo authInfo) {
+  default Future<User> authenticate(WebAuthnCredentials authInfo) {
     Promise<User> promise = Promise.promise();
     authenticate(authInfo, promise);
     return promise.future();
@@ -110,6 +105,6 @@ public interface WebAuthn extends AuthenticationProvider {
 
   @Override
   default void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-    authenticate(new WebAuthnInfo(authInfo), handler);
+    authenticate(new WebAuthnCredentials(authInfo), handler);
   }
 }

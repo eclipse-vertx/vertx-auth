@@ -50,10 +50,10 @@ public interface AuthenticationProvider {
    * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
    * The user object can then be used for authorisation.
    *
-   * @param authInfo  The auth information
+   * @param credentials  The credentials
    * @param resultHandler  The result handler
    */
-  void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler);
+  void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler);
 
   /**
    * Authenticate a user.
@@ -73,12 +73,12 @@ public interface AuthenticationProvider {
    * The user object can then be used for authorisation.
    *
    * @see AuthenticationProvider#authenticate(JsonObject, Handler)
-   * @param authInfo  The auth information
+   * @param credentials  The credentials
    * @return The result future
    */
-  default Future<User> authenticate(JsonObject authInfo) {
+  default Future<User> authenticate(JsonObject credentials) {
     Promise<User> promise = Promise.promise();
-    authenticate(authInfo, promise);
+    authenticate(credentials, promise);
     return promise.future();
   }
 }

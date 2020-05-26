@@ -1,8 +1,12 @@
 = Cheatsheets
 
-[[HtDigestAuthInfo]]
-== HtDigestAuthInfo
+[[HtdigestCredentials]]
+== HtdigestCredentials
 
+++++
+ Credentials specific to the link authentication provider
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]
@@ -10,7 +14,6 @@
 ^|Name | Type ^| Description
 |[[algorithm]]`@algorithm`|`String`|-
 |[[cnonce]]`@cnonce`|`String`|-
-|[[empty]]`@empty`|`Boolean`|-
 |[[method]]`@method`|`String`|-
 |[[nc]]`@nc`|`String`|-
 |[[nonce]]`@nonce`|`String`|-

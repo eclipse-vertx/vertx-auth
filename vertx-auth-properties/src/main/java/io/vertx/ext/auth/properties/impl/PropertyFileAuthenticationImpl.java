@@ -17,6 +17,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
@@ -65,8 +66,9 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     }
   }
 
-  private Vertx vertx;
-  private String path;
+  private final Vertx vertx;
+  private final String path;
+
   private Map<String, User> users;
   private Map<String, Role> roles;
 
@@ -156,12 +158,15 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    String username = authInfo.getString("username");
-    String password = authInfo.getString("password");
-    getUser(username, userResult -> {
+    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
+  }
+
+  @Override
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
+    getUser(credentials.getUsername(), userResult -> {
       if (userResult.succeeded()) {
         User propertyUser = userResult.result();
-        if (Objects.equals(propertyUser.password, password)) {
+        if (Objects.equals(propertyUser.password, credentials.getPassword())) {
           resultHandler.handle(Future.succeededFuture(io.vertx.ext.auth.User.create(new JsonObject().put("username", propertyUser.name))));
         } else {
           resultHandler.handle(Future.failedFuture("invalid username/password"));

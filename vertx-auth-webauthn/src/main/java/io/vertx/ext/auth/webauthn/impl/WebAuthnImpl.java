@@ -268,7 +268,7 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public void authenticate(WebAuthnInfo authInfo, Handler<AsyncResult<User>> handler) {
+  public void authenticate(WebAuthnCredentials authInfo, Handler<AsyncResult<User>> handler) {
     //    {
     //      "rawId": "base64url",
     //      "id": "base64url",

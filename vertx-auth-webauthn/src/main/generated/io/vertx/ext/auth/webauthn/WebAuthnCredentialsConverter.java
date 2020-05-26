@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.webauthn.WebAuthnInfo}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.WebAuthnInfo} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.webauthn.WebAuthnCredentials}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.WebAuthnCredentials} original class using Vert.x codegen.
  */
-public class WebAuthnInfoConverter {
+public class WebAuthnCredentialsConverter {
 
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthnInfo obj) {
+  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthnCredentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "challenge":
@@ -34,11 +34,11 @@ public class WebAuthnInfoConverter {
     }
   }
 
-  public static void toJson(WebAuthnInfo obj, JsonObject json) {
+  public static void toJson(WebAuthnCredentials obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(WebAuthnInfo obj, java.util.Map<String, Object> json) {
+  public static void toJson(WebAuthnCredentials obj, java.util.Map<String, Object> json) {
     if (obj.getChallenge() != null) {
       json.put("challenge", obj.getChallenge());
     }

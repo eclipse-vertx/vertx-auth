@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.mongo.test;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -38,9 +39,7 @@ public class MongoUserUtilTest extends MongoBaseTest {
     userUtil.createUser("foo", "bar")
       .flatMap(id -> {
         assertTrue(id.length() > 0);
-        JsonObject credentials = new JsonObject()
-          .put("username", "foo")
-          .put("password", "bar");
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("foo", "bar");
         return authProvider.authenticate(credentials);
       })
       .onFailure(this::fail)

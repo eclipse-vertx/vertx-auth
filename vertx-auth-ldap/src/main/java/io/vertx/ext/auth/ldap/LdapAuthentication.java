@@ -13,8 +13,14 @@
 package io.vertx.ext.auth.ldap;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.ldap.impl.LdapAuthenticationImpl;
 
 /**
@@ -35,4 +41,25 @@ public interface LdapAuthentication extends AuthenticationProvider {
   static LdapAuthentication create(Vertx vertx, LdapAuthenticationOptions options) {
     return new LdapAuthenticationImpl(vertx, options);
   }
+
+  /**
+   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
+   *
+   * @param credentials
+   * @param handler
+   */
+  void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> handler);
+
+  /**
+   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
+   *
+   * @param credentials
+   * @return future result
+   */
+  default Future<User> authenticate(UsernamePasswordCredentials credentials) {
+    Promise<User> promise = Promise.promise();
+    authenticate(credentials, promise);
+    return promise.future();
+  }
+
 }

@@ -16,21 +16,29 @@
 
 package io.vertx.ext.auth.mongo.impl;
 
+import java.util.List;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
-import io.vertx.ext.auth.mongo.*;
+import io.vertx.ext.auth.mongo.HashAlgorithm;
+import io.vertx.ext.auth.mongo.HashSaltStyle;
+import io.vertx.ext.auth.mongo.HashStrategy;
+import io.vertx.ext.auth.mongo.MongoAuth;
+import io.vertx.ext.auth.mongo.MongoAuthentication;
+import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
+import io.vertx.ext.auth.mongo.MongoAuthorization;
+import io.vertx.ext.auth.mongo.MongoAuthorizationOptions;
 import io.vertx.ext.mongo.MongoClient;
-
-import java.util.List;
 
 /**
  * An implementation of {@link MongoAuth}
@@ -75,8 +83,13 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    mongoAuthentication.authenticate(authInfo, authenticationResult -> {
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
+  }
+
+  @Override
+  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    mongoAuthentication.authenticate(credentials, authenticationResult -> {
       if (authenticationResult.failed()) {
         resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
       } else {

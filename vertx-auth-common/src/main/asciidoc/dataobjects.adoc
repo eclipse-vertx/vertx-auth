@@ -89,3 +89,19 @@ The PEM or Secret key buffer
 |[[symmetric]]`@symmetric`|`Boolean`|-
 |===
 
+[[UsernamePasswordCredentials]]
+== UsernamePasswordCredentials
+
+++++
+ Credentials used by any link that requires username and password to perform its authentication
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[password]]`@password`|`String`|-
+|[[username]]`@username`|`String`|-
+|===
+

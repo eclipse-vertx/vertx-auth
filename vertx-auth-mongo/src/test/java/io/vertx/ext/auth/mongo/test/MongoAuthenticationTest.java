@@ -19,6 +19,7 @@ package io.vertx.ext.auth.mongo.test;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.mongo.MongoAuthentication;
 import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
 import org.junit.Before;
@@ -82,9 +83,8 @@ public class MongoAuthenticationTest extends MongoBaseTest {
 
   @Test
   public void testAuthenticate() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "sausages");
-    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
       assertNotNull(user);
       testComplete();
     }));
@@ -93,9 +93,8 @@ public class MongoAuthenticationTest extends MongoBaseTest {
 
   @Test
   public void testAuthenticateFailBadPwd() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "eggs");
-    getAuthenticationProvider().authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "eggs");
+    getAuthenticationProvider().authenticate(credentials, onFailure(v -> {
       assertTrue(v instanceof Exception);
       testComplete();
     }));
@@ -104,9 +103,8 @@ public class MongoAuthenticationTest extends MongoBaseTest {
 
   @Test
   public void testAuthenticateFailBadUser() {
-    JsonObject authInfo = new JsonObject();
-    authInfo.put(authenticationOptions.getUsernameField(), "blah").put(authenticationOptions.getPasswordField(), "whatever");
-    getAuthenticationProvider().authenticate(authInfo, onFailure(v -> {
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("blah", "whatever");
+    getAuthenticationProvider().authenticate(credentials, onFailure(v -> {
       assertTrue(v instanceof Exception);
       testComplete();
     }));

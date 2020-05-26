@@ -128,13 +128,18 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    authenticate(new Oauth2Credentials(authInfo), handler);
+  }
+
+  @Override
+  public void authenticate(Oauth2Credentials authInfo, Handler<AsyncResult<User>> handler) {
     // if the authInfo object already contains a token validate it to confirm that it
     // can be reused, otherwise, based on the configured flow, request a new token
     // from the authority provider
 
     if (
       // authInfo contains a non null token
-      authInfo.containsKey("access_token") && authInfo.getString("access_token") != null) {
+      authInfo.getAccessToken() != null) {
 
       // this validation can be done in 2 different ways:
       // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
@@ -142,7 +147,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-      final User user = createUser(authInfo);
+      final User user = createUser(authInfo.toJson());
 
       // the token is not a JWT or there are no loaded keys to validate
       if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
@@ -212,10 +217,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       final JsonObject params = new JsonObject();
       switch (config.getFlow()) {
         case PASSWORD:
-          if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
+          if (authInfo.getUsername() != null && authInfo.getPassword() != null) {
             params
-              .put("username", authInfo.getString("username"))
-              .put("password", authInfo.getString("password"));
+              .put("username", authInfo.getUsername())
+              .put("password", authInfo.getPassword());
           } else {
             // the auth info object is incomplete, we can't proceed from here
             handler.handle(Future.failedFuture("PASSWORD flow requires {username, password}"));
@@ -223,8 +228,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           }
           break;
         case AUTH_CODE:
-          if (authInfo.containsKey("code") && authInfo.containsKey("redirect_uri")) {
-            params.mergeIn(authInfo);
+          if (authInfo.getCode() != null && authInfo.getRedirectUri() != null) {
+            params.mergeIn(authInfo.toJson());
           } else {
             // the auth info object is incomplete, we can't proceed from here
             handler.handle(Future.failedFuture("AUTH_CODE flow requires {code, redirect_uri}"));
@@ -232,12 +237,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           }
           break;
         case CLIENT:
-          params.mergeIn(authInfo);
+          params.mergeIn(authInfo.toJson());
           break;
         case AUTH_JWT:
-          params.mergeIn(authInfo);
+          final JsonObject credentials = authInfo.toJson();
+
+          params.mergeIn(credentials);
           params
-            .put("assertion", jwt.sign(authInfo, config.getJWTOptions()));
+            .put("assertion", jwt.sign(credentials, config.getJWTOptions()));
           break;
         default:
           handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));

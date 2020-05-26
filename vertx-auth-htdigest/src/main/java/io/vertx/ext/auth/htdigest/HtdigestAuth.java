@@ -16,8 +16,11 @@
 
 package io.vertx.ext.auth.htdigest;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.htdigest.impl.HtdigestAuthImpl;
 
@@ -56,7 +59,27 @@ public interface HtdigestAuth extends AuthenticationProvider {
   /**
    * Return the currently used realm
    *
-   * @return  the realm
+   * @return the realm
    */
   String realm();
+
+  /**
+   * Authenticate a User using the specified {@link HtdigestCredentials}
+   *
+   * @param credentials
+   * @param handler
+   */
+  void authenticate(HtdigestCredentials credentials, Handler<AsyncResult<User>> handler);
+
+  /**
+   * Authenticate a User using the specified {@link HtdigestCredentials}
+   *
+   * @param credentials
+   * @return future result
+   */
+  default Future<User> authenticate(HtdigestCredentials credentials) {
+    Promise<User> promise = Promise.promise();
+    authenticate(credentials, promise);
+    return promise.future();
+  }
 }

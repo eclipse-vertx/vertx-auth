@@ -20,6 +20,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTCredentials;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.ext.auth.JWTOptions;
@@ -57,7 +58,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testValidJWT() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
@@ -67,7 +68,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testInvalidJWT() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_INVALID);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(JWT_INVALID);
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
@@ -77,7 +78,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testJWTValidPermission() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
@@ -91,7 +92,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
   @Test
   public void testJWTInvalidPermission() {
-    JsonObject authInfo = new JsonObject().put("jwt", JWT_VALID);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(user -> {
       assertNotNull(user);
       JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
@@ -146,7 +147,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -166,7 +167,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     final String token = authProvider.generateToken(payload, new JWTOptions());
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       assertTrue(res.principal().containsKey("iat"));
@@ -186,7 +187,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     assertNotNull(token);
 
     vertx.setTimer(2000L, t -> {
-      JsonObject authInfo = new JsonObject().put("jwt", token);
+      JWTCredentials authInfo = new JWTCredentials().setJwt(token);
       authProvider.authenticate(authInfo, onFailure(thr -> {
         assertNotNull(thr);
         testComplete();
@@ -204,10 +205,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://vertx.io"));
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token)
-      .put("options", new JsonObject()
-        .put("issuer", "https://vertx.io"));
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -226,8 +224,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://auth0.io"));
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -252,8 +249,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -278,8 +274,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -304,8 +299,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -331,8 +325,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -357,8 +350,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -383,8 +375,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -409,8 +400,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
@@ -430,8 +420,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions().setAlgorithm("ES256"));
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject()
-      .put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, res -> {
       if (res.failed()) {
@@ -457,7 +446,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     assertNotNull(token);
 
     // reverse
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
@@ -473,7 +462,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
         .put("kty", "oct")
         .put("k", "a bad secret"))
     );
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     authProvider.authenticate(authInfo, onFailure(res -> {
       assertNotNull(res);
       testComplete();
@@ -489,7 +478,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
         .put("kty", "oct")
         .put("k", "notasecret"))
     );
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
@@ -509,7 +498,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     assertNotNull(token);
 
     // reverse
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
       testComplete();
@@ -538,7 +527,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     // build attack token
     String attackerJWT = headerSeg + "." + payloadSeg + "." + signatureSeg;
-    JsonObject authInfo = new JsonObject().put("jwt", attackerJWT);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(attackerJWT);
     authProvider.authenticate(authInfo, onFailure(thr -> {
       assertNotNull(thr);
       testComplete();
@@ -562,7 +551,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     final String token = authProvider.generateToken(payload, new JWTOptions().setSubject("UserUnderTest").setAlgorithm("none"));
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
@@ -584,7 +573,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(payload);
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     // fail because exp is <= to now
     authProvider.authenticate(authInfo, onFailure(t -> testComplete()));
     await();
@@ -603,7 +592,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(payload);
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     // fail because iat is > now (clock drifted 2 sec)
     authProvider.authenticate(authInfo, onFailure(t -> testComplete()));
     await();
@@ -623,7 +612,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(payload);
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     // fail because exp is <= to now
     authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
     await();
@@ -642,7 +631,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     String token = authProvider.generateToken(payload);
     assertNotNull(token);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
     // pass because iat is > now (clock drifted 2 sec) and we have a leeway of 5sec
     authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
     await();
@@ -681,7 +670,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     // force a sleep to invalidate the token
     Thread.sleep(1001);
 
-    JsonObject authInfo = new JsonObject().put("jwt", token);
+    JWTCredentials authInfo = new JWTCredentials().setJwt(token);
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
