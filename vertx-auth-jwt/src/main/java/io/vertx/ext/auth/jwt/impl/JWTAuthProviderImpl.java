@@ -106,9 +106,9 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-  
+    authenticate(new JWTCredentials(authInfo), resultHandler);
   }
-  
+
   @Override
   public void authenticate(JWTCredentials authInfo, Handler<AsyncResult<User>> resultHandler) {
     try {
