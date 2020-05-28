@@ -13,8 +13,7 @@
   ~      http://www.opensource.org/licenses/apache2.0.php
   ~
   ~  You may elect to redistribute this code under either of these licenses.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -42,12 +41,12 @@
   </parent>
 
   <artifactId>vertx-auth</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0-milestone5</version>
 
   <name>Vert.x Auth</name>
 
   <properties>
-    <stack.version>4.0.0-SNAPSHOT</stack.version>
+    <stack.version>4.0.0-milestone5</stack.version>
     <doc.skip>true</doc.skip>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
   </properties>
