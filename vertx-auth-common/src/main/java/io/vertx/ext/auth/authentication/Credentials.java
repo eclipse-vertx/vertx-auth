@@ -25,8 +25,7 @@ import io.vertx.core.json.JsonObject;
  * @author Paulo Lopes
  */
 @VertxGen(concrete = false)
-public interface Credentials
-{
+public interface Credentials {
   /**
    * Implementors should override this method to perform validation. An argument is allowed to
    * allow custom validation, for example, when given a configuration property, a specific
@@ -41,6 +40,7 @@ public interface Credentials
 
   /**
    * Simple interop to downcast back to JSON for backwards compatibility.
+   *
    * @return JSON representation of this credential.
    */
   JsonObject toJson();

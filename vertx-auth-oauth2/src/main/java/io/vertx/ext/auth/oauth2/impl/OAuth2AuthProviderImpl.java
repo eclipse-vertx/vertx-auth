@@ -28,6 +28,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
@@ -129,22 +132,28 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    if (authInfo.containsKey("access_token")) {
+      authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
+      return;
+    }
+    if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
+      authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
+      return;
+    }
     authenticate(new Oauth2Credentials(authInfo), handler);
   }
 
   @Override
-  public void authenticate(Oauth2Credentials authInfo, Handler<AsyncResult<User>> handler) {
-
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
     try {
-      authInfo.checkValid(config.getFlow());
-
       // if the authInfo object already contains a token validate it to confirm that it
       // can be reused, otherwise, based on the configured flow, request a new token
       // from the authority provider
 
-      if (
+      if (credentials instanceof TokenCredentials) {
         // authInfo contains a non null token
-        authInfo.getAccessToken() != null) {
+        TokenCredentials tokenCredentials = (TokenCredentials) credentials;
+        tokenCredentials.checkValid(null);
 
         // this validation can be done in 2 different ways:
         // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
@@ -152,7 +161,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
         // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-        final User user = createUser(authInfo.toJson(), false);
+        final User user = createUser(new JsonObject().put("access_token", tokenCredentials.getToken()), false);
 
         // the token is not a JWT or there are no loaded keys to validate
         if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
@@ -234,22 +243,28 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         final JsonObject params = new JsonObject();
         switch (config.getFlow()) {
           case PASSWORD:
+            UsernamePasswordCredentials usernamePasswordCredentials = (UsernamePasswordCredentials) credentials;
+            usernamePasswordCredentials.checkValid(config.getFlow());
+
             params
-              .put("username", authInfo.getUsername())
-              .put("password", authInfo.getPassword());
+              .put("username", usernamePasswordCredentials.getUsername())
+              .put("password", usernamePasswordCredentials.getPassword());
             break;
           case AUTH_CODE:
-            params.mergeIn(authInfo.toJson());
-            break;
           case CLIENT:
-            params.mergeIn(authInfo.toJson());
+            Oauth2Credentials oauth2Credentials = (Oauth2Credentials) credentials;
+            oauth2Credentials.checkValid(config.getFlow());
+
+            params.mergeIn(oauth2Credentials.toJson());
             break;
           case AUTH_JWT:
-            final JsonObject credentials = authInfo.toJson();
+            Oauth2Credentials oauth2OnBehalfOfCredentials = (Oauth2Credentials) credentials;
+            oauth2OnBehalfOfCredentials.checkValid(config.getFlow());
 
-            params.mergeIn(credentials);
+            final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
+            params.mergeIn(token);
             params
-              .put("assertion", jwt.sign(credentials, config.getJWTOptions()));
+              .put("assertion", jwt.sign(token, config.getJWTOptions()));
             break;
           default:
             handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
@@ -276,7 +291,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           }
         });
       }
-    } catch (CredentialValidationException e) {
+    } catch (ClassCastException | CredentialValidationException e) {
       handler.handle(Future.failedFuture(e));
     }
   }

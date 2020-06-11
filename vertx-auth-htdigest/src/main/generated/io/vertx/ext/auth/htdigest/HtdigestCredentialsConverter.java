@@ -40,6 +40,11 @@ public class HtdigestCredentialsConverter {
             obj.setNonce((String)member.getValue());
           }
           break;
+        case "opaque":
+          if (member.getValue() instanceof String) {
+            obj.setOpaque((String)member.getValue());
+          }
+          break;
         case "qop":
           if (member.getValue() instanceof String) {
             obj.setQop((String)member.getValue());
@@ -88,6 +93,9 @@ public class HtdigestCredentialsConverter {
     }
     if (obj.getNonce() != null) {
       json.put("nonce", obj.getNonce());
+    }
+    if (obj.getOpaque() != null) {
+      json.put("opaque", obj.getOpaque());
     }
     if (obj.getQop() != null) {
       json.put("qop", obj.getQop());

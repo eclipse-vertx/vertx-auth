@@ -25,6 +25,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.sqlclient.SqlAuthentication;
 import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions;
@@ -53,37 +55,43 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
   }
 
   @Override
-  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
 
-    client.preparedQuery(options.getAuthenticationQuery()).execute(Tuple.of(credentials.getUsername()), preparedQuery -> {
-      if (preparedQuery.succeeded()) {
-        final RowSet<Row> rows = preparedQuery.result();
-        switch (rows.size()) {
-          case 0: {
-            // Unknown user/password
-            resultHandler.handle(Future.failedFuture("Invalid username/password"));
-            break;
-          }
-          case 1: {
-            Row row = rows.iterator().next();
-            String hashedStoredPwd = row.getString(0);
-            if (strategy.verify(hashedStoredPwd, credentials.getPassword())) {
-              resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", credentials.getUsername()))));
-            } else {
+      client.preparedQuery(options.getAuthenticationQuery()).execute(Tuple.of(authInfo.getUsername()), preparedQuery -> {
+        if (preparedQuery.succeeded()) {
+          final RowSet<Row> rows = preparedQuery.result();
+          switch (rows.size()) {
+            case 0: {
+              // Unknown user/password
               resultHandler.handle(Future.failedFuture("Invalid username/password"));
+              break;
             }
-            break;
+            case 1: {
+              Row row = rows.iterator().next();
+              String hashedStoredPwd = row.getString(0);
+              if (strategy.verify(hashedStoredPwd, authInfo.getPassword())) {
+                resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", authInfo.getUsername()))));
+              } else {
+                resultHandler.handle(Future.failedFuture("Invalid username/password"));
+              }
+              break;
+            }
+            default: {
+              // More than one row returned!
+              resultHandler.handle(Future.failedFuture("Failure in authentication"));
+              break;
+            }
           }
-          default: {
-            // More than one row returned!
-            resultHandler.handle(Future.failedFuture("Failure in authentication"));
-            break;
-          }
+        } else {
+          resultHandler.handle(Future.failedFuture(preparedQuery.cause()));
         }
-      } else {
-        resultHandler.handle(Future.failedFuture(preparedQuery.cause()));
-      }
-    });
+      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   @Override

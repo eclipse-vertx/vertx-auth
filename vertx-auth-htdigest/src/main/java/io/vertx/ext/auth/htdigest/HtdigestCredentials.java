@@ -31,6 +31,7 @@ public class HtdigestCredentials implements Credentials {
   private String method;
   private String nc;
   private String nonce;
+  private String opaque;
   private String qop;
   private String realm;
   private String response;
@@ -62,6 +63,10 @@ public class HtdigestCredentials implements Credentials {
 
   public String getNonce() {
     return nonce;
+  }
+
+  public String getOpaque() {
+    return opaque;
   }
 
   public String getQop() {
@@ -106,6 +111,11 @@ public class HtdigestCredentials implements Credentials {
 
   public HtdigestCredentials setNonce(String nonce) {
     this.nonce = nonce;
+    return this;
+  }
+
+  public HtdigestCredentials setOpaque(String opaque) {
+    this.opaque = opaque;
     return this;
   }
 

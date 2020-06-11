@@ -18,6 +18,10 @@ package io.vertx.ext.auth.shiro.impl;
 
 import java.util.Objects;
 
+import io.vertx.core.Future;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -71,24 +75,37 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    vertx.executeBlocking(fut -> {
-      // before doing any shiro operations set the context
-      SecurityUtils.setSecurityManager(securityManager);
-      // proceed
-      SubjectContext subjectContext = new DefaultSubjectContext();
-      Subject subject = securityManager.createSubject(subjectContext);
-      String username = authInfo.getString("username");
-      String password = authInfo.getString("password");
-      AuthenticationToken token = new UsernamePasswordToken(username, password);
-      try {
-        subject.login(token);
-        fut.complete(createUser(securityManager, subject));
-      } catch (AuthenticationException e) {
-        fut.fail(e);
-      }
-    }, resultHandler);
+    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
   }
-  
+
+  @Override
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+
+      vertx.executeBlocking(fut -> {
+        // before doing any shiro operations set the context
+        SecurityUtils.setSecurityManager(securityManager);
+        // proceed
+        SubjectContext subjectContext = new DefaultSubjectContext();
+        Subject subject = securityManager.createSubject(subjectContext);
+        String username = authInfo.getUsername();
+        String password = authInfo.getPassword();
+        AuthenticationToken token = new UsernamePasswordToken(username, password);
+        try {
+          subject.login(token);
+          fut.complete(createUser(securityManager, subject));
+        } catch (AuthenticationException e) {
+          fut.fail(e);
+        }
+      }, resultHandler);
+
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
+  }
+
   Vertx getVertx() {
     return vertx;
   }
@@ -104,7 +121,7 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   private User createUser(org.apache.shiro.mgt.SecurityManager securityManager, Subject subject) {
     Objects.requireNonNull(securityManager);
     Objects.requireNonNull(subject);
-    
+
     JsonObject principal = new JsonObject().put("username",  subject.getPrincipal().toString());
     User result = new UserImpl(principal);
     result.authorizations().add("shiro-authentication", GetAuthorizationsHack.getAuthorizations(securityManager, subject));

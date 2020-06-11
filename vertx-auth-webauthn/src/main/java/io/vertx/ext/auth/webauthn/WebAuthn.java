@@ -94,17 +94,4 @@ public interface WebAuthn extends AuthenticationProvider {
     getCredentialsOptions(username, promise);
     return promise.future();
   }
-
-  void authenticate(WebAuthnCredentials authInfo, Handler<AsyncResult<User>> handler);
-
-  default Future<User> authenticate(WebAuthnCredentials authInfo) {
-    Promise<User> promise = Promise.promise();
-    authenticate(authInfo, promise);
-    return promise.future();
-  }
-
-  @Override
-  default void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-    authenticate(new WebAuthnCredentials(authInfo), handler);
-  }
 }

@@ -36,11 +36,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTCredentials;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
@@ -107,15 +108,18 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new JWTCredentials(authInfo), resultHandler);
+    authenticate(new TokenCredentials(authInfo.getString("jwt")), resultHandler);
   }
 
   @Override
-  public void authenticate(JWTCredentials authInfo, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     try {
+      // cast
+      TokenCredentials authInfo = (TokenCredentials) credentials;
+      // check
       authInfo.checkValid(null);
 
-      final JsonObject payload = jwt.decode(authInfo.getJwt());
+      final JsonObject payload = jwt.decode(authInfo.getToken());
 
       if (jwt.isExpired(payload, jwtOptions)) {
         resultHandler.handle(Future.failedFuture("Expired JWT token."));

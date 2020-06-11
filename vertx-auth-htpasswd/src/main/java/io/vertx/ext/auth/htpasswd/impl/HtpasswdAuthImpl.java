@@ -27,6 +27,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
@@ -68,25 +70,26 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
     authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
   }
-  
+
   @Override
-  public void authenticate(UsernamePasswordCredentials credential, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(Credentials credential, Handler<AsyncResult<User>> resultHandler) {
 
-    // Null or empty username is invalid
-    if (credential.getUsername() == null || credential.getUsername().length() == 0) {
-      resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
-      return;
-    }
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credential;
+      authInfo.checkValid(null);
 
-    if (!htUsers.containsKey(credential.getUsername())) {
-      resultHandler.handle((Future.failedFuture("Unknown username.")));
-      return;
-    }
+      if (!htUsers.containsKey(authInfo.getUsername())) {
+        resultHandler.handle((Future.failedFuture("Unknown username.")));
+        return;
+      }
 
-    if (strategy.verify(htUsers.get(credential.getUsername()), credential.getPassword())) {
-      resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", credential.getUsername()))));
-    } else {
-      resultHandler.handle(Future.failedFuture("Bad response"));
+      if (strategy.verify(htUsers.get(authInfo.getUsername()), authInfo.getPassword())) {
+        resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", authInfo.getUsername()))));
+      } else {
+        resultHandler.handle(Future.failedFuture("Bad response"));
+      }
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
     }
   }
 }

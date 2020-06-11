@@ -16,14 +16,8 @@
 package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.htpasswd.impl.HtpasswdAuthImpl;
 
 /**
@@ -40,24 +34,5 @@ public interface HtpasswdAuth extends AuthenticationProvider {
 
   static HtpasswdAuth create(Vertx vertx, HtpasswdAuthOptions htpasswdAuthOptions) {
     return new HtpasswdAuthImpl(vertx, htpasswdAuthOptions);
-  }
-
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   *
-   * @param credential
-   * @param handler
-   */
-  void authenticate(UsernamePasswordCredentials credential, Handler<AsyncResult<User>> handler);
-
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   *
-   * @param credentials
-   */
-  default Future<User> authenticate(UsernamePasswordCredentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
   }
 }

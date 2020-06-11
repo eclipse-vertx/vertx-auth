@@ -29,6 +29,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
@@ -269,8 +270,16 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public void authenticate(WebAuthnCredentials authInfo, Handler<AsyncResult<User>> handler) {
+  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    authenticate(new WebAuthnCredentials(authInfo), handler);
+  }
+
+  @Override
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
     try {
+      // cast
+      WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
+      // check
       authInfo.checkValid(null);
 
       //    {
@@ -393,7 +402,7 @@ public class WebAuthnImpl implements WebAuthn {
         default:
           handler.handle(Future.failedFuture("Can not determine type of response!"));
       }
-    } catch (CredentialValidationException e) {
+    } catch (ClassCastException | CredentialValidationException e) {
       handler.handle(Future.failedFuture(e));
     }
   }

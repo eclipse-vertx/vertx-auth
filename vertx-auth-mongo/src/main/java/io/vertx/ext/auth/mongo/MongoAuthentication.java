@@ -17,14 +17,9 @@
 package io.vertx.ext.auth.mongo;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.mongo.impl.MongoAuthenticationImpl;
 import io.vertx.ext.mongo.MongoClient;
 
@@ -101,25 +96,5 @@ public interface MongoAuthentication extends AuthenticationProvider {
    */
   default String hash(String id, String salt, String password) {
     return hash(id, null, salt, password);
-  }
-
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   *
-   * @param credentials
-   * @param handler
-   */
-  void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> handler);
-
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   *
-   * @param credentials
-   * @return future result
-   */
-  default Future<User> authenticate(UsernamePasswordCredentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
   }
 }

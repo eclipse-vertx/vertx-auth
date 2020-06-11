@@ -12,15 +12,13 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authentication;
 
-import java.util.Objects;
-
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Credentials used by any {@link AuthenticationProvider} that requires username and password to perform its authentication
+ * Credentials used by any {@link AuthenticationProvider} that requires tokens, for example JWT, Oauth2, OpenId Connect
  *
- * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
+ * @author Paulo Lopes
  *
  */
 @DataObject(generateConverter = true, publicConverter = false)

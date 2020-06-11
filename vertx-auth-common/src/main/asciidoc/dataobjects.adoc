@@ -89,11 +89,26 @@ The PEM or Secret key buffer
 |[[symmetric]]`@symmetric`|`Boolean`|-
 |===
 
+[[TokenCredentials]]
+== TokenCredentials
+
+++++
+ Credentials used by any link that requires username and password to perform its authentication
+++++
+'''
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[token]]`@token`|`String`|-
+|===
+
 [[UsernamePasswordCredentials]]
 == UsernamePasswordCredentials
 
 ++++
- Credentials used by any link that requires username and password to perform its authentication
+ Credentials used by any link that requires tokens, for example JWT, Oauth2, OpenId Connect
 ++++
 '''
 

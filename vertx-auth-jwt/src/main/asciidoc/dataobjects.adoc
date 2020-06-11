@@ -16,18 +16,3 @@
 |[[permissionsClaimKey]]`@permissionsClaimKey`|`String`|-
 |===
 
-[[JWTCredentials]]
-== JWTCredentials
-
-++++
- Credentials specific to the link provider
-++++
-'''
-
-[cols=">25%,25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[jwt]]`@jwt`|`String`|-
-|===
-
