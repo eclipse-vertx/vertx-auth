@@ -147,13 +147,25 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-      final User user = createUser(authInfo.toJson());
+      final User user = createUser(authInfo.toJson(), false);
 
       // the token is not a JWT or there are no loaded keys to validate
       if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
         // the token is not in JWT format or this auth provider is not configured for secure JWTs
         // in this case we must rely on token introspection in order to know more about its state
         // attempt to create a token object from the given string representation
+
+        // Not all providers support this so we need to check if the call is possible
+        if (config.getIntrospectionPath() == null) {
+          // this provider doesn't allow introspection, this means we are not able to perform
+          // any authentication,
+          if (user.attributes().containsKey("missing-kid")) {
+            handler.handle(Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid"))));
+          } else {
+            handler.handle(Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection"));
+          }
+          return;
+        }
 
         // perform the introspection
         api
@@ -184,7 +196,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             }
 
             // attempt to create a user from the json object
-            final User newUser = createUser(json);
+            final User newUser = createUser(json, user.attributes().containsKey("missing-kid"));
 
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
@@ -257,7 +269,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         } else {
 
           // attempt to create a user from the json object
-          final User newUser = createUser(getToken.result());
+          final User newUser = createUser(getToken.result(), false);
 
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
@@ -289,7 +301,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           handler.handle(Future.failedFuture(getToken.cause()));
         } else {
           // attempt to create a user from the json object
-          final User newUser = createUser(getToken.result());
+          final User newUser = createUser(getToken.result(), false);
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
@@ -328,10 +340,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   /**
    * Create a User object with some initial validations related to JWT.
    */
-  private User createUser(JsonObject json) {
+  private User createUser(JsonObject json, boolean skipMissingKeyNotify) {
     // update the principal
     final User user = User.create(json);
     final long now = System.currentTimeMillis() / 1000;
+
+    // keep track of the missing kid if any, to debounce calls to
+    // the missing key handler (at most 1 per missing key id)
+    String missingKid = null;
 
     // compute the expires_at if any
     if (json.containsKey("expires_in")) {
@@ -371,13 +387,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             .put("rootClaim", "accessToken");
 
         } catch (NoSuchKeyIdException e) {
-          // the JWT store has no knowledge about the key id on this token
-          // if the user has specified a handler for this situation then it
-          // shall be executed, otherwise just log as a typical validation
-          if (missingKeyHandler != null) {
-            missingKeyHandler.handle(e.id());
-          } else {
-            LOG.trace("Cannot decode access token:", e);
+          if (!skipMissingKeyNotify) {
+            // tag the user attributes that we don't have the required key too
+            user.attributes()
+              .put("missing-kid", e.id());
+
+            // save the missing kid
+            missingKid = e.id();
+
+            // the JWT store has no knowledge about the key id on this token
+            // if the user has specified a handler for this situation then it
+            // shall be executed, otherwise just log as a typical validation
+            if (missingKeyHandler != null) {
+              missingKeyHandler.handle(e.id());
+            } else {
+              LOG.trace("Cannot decode access token:", e);
+            }
           }
         } catch (DecodeException | IllegalStateException e) {
           // explicitly catch and log. The exception here is a valid case
@@ -404,13 +429,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             }
           }
         } catch (NoSuchKeyIdException e) {
-          // the JWT store has no knowledge about the key id on this token
-          // if the user has specified a handler for this situation then it
-          // shall be executed, otherwise just log as a typical validation
-          if (missingKeyHandler != null) {
-            missingKeyHandler.handle(e.id());
-          } else {
-            LOG.trace("Cannot decode access token:", e);
+          if (!skipMissingKeyNotify) {
+            // we haven't notified this id yet
+            if (!e.id().equals(missingKid)) {
+              // tag the user attributes that we don't have the required key too
+              user.attributes()
+                .put("missing-kid", e.id());
+
+              // the JWT store has no knowledge about the key id on this token
+              // if the user has specified a handler for this situation then it
+              // shall be executed, otherwise just log as a typical validation
+              if (missingKeyHandler != null) {
+                missingKeyHandler.handle(e.id());
+              } else {
+                LOG.trace("Cannot decode access token:", e);
+              }
+            }
           }
         } catch (DecodeException | IllegalStateException e) {
           // explicity catch and log. The exception here is a valid case
