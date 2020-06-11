@@ -129,7 +129,7 @@ If validating if a user has a particular permission simply pass the permission i
 
 [source,$lang]
 ----
-{@link examples.AuthMongoExamples#example3(io.vertx.ext.auth.User)}
+{@link examples.AuthMongoExamples#example3}
 ----
 
 If validating that a user has a particular _role_ then you simply use the {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
