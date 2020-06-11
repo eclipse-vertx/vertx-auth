@@ -18,9 +18,11 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 
 @DataObject(generateConverter = true)
-public class WebAuthnCredentials {
+public class WebAuthnCredentials implements Credentials {
 
   private String challenge;
   private JsonObject webauthn;
@@ -57,6 +59,26 @@ public class WebAuthnCredentials {
   public WebAuthnCredentials setUsername(String username) {
     this.username = username;
     return this;
+  }
+
+  @Override
+  public <V> void checkValid(V arg) throws CredentialValidationException {
+    if (challenge == null || challenge.length() == 0) {
+      throw new CredentialValidationException("challenge cannot be null or empty");
+    }
+
+    if (webauthn == null) {
+      throw new CredentialValidationException("webauthn cannot be null");
+    }
+
+    Object response = webauthn.getValue("response");
+
+    if (!(response instanceof JsonObject)) {
+      throw new CredentialValidationException("webauthn.response must be JSON");
+    }
+
+    // Username may be null once the system has stored it once.
+
   }
 
   public JsonObject toJson() {

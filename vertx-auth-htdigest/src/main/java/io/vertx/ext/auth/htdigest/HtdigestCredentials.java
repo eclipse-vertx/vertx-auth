@@ -14,6 +14,8 @@ package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 
 /**
  * Credentials specific to the {@link HtdigestAuth} authentication provider
@@ -22,7 +24,7 @@ import io.vertx.core.json.JsonObject;
  *
  */
 @DataObject(generateConverter = true, publicConverter = false)
-public class HtdigestCredentials {
+public class HtdigestCredentials implements Credentials {
 
   private String algorithm;
   private String cnonce;
@@ -130,6 +132,24 @@ public class HtdigestCredentials {
   public HtdigestCredentials setUsername(String username) {
     this.username = username;
     return this;
+  }
+
+  @Override
+  public <V> void checkValid(V arg) throws CredentialValidationException {
+    if (username == null || username.length() == 0) {
+      throw new CredentialValidationException("username cannot be null or empty");
+    }
+
+    if (realm == null) {
+      throw new CredentialValidationException("realm cannot be null");
+    }
+
+    if (response == null) {
+      throw new CredentialValidationException("response cannot be null");
+    }
+
+    // all remaining fields have dependencies between themselves, which means
+    // the authentication process will take care of it's validation
   }
 
   public JsonObject toJson() {

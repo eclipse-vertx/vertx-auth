@@ -14,6 +14,8 @@ package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 
 /**
  * Credentials specific to the {@link JWTAuth} provider
@@ -22,7 +24,7 @@ import io.vertx.core.json.JsonObject;
  *
  */
 @DataObject(generateConverter = true, publicConverter = false)
-public class JWTCredentials {
+public class JWTCredentials implements Credentials {
 
   private String jwt;
 
@@ -40,6 +42,14 @@ public class JWTCredentials {
   public JWTCredentials setJwt(String jwt) {
     this.jwt = jwt;
     return this;
+  }
+
+  @Override
+  public <V> void checkValid(V arg) throws CredentialValidationException {
+    if (jwt == null || jwt.length() < 2) {
+      // a token has at least 2 segments splitted by a dot
+      throw new CredentialValidationException("jwt cannot be null or empty");
+    }
   }
 
   public JsonObject toJson() {

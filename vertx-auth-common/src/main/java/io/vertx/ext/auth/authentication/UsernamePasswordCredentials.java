@@ -24,7 +24,7 @@ import io.vertx.core.json.JsonObject;
  *
  */
 @DataObject(generateConverter = true, publicConverter = false)
-public class UsernamePasswordCredentials {
+public class UsernamePasswordCredentials implements Credentials {
 
   private String password;
   private String username;
@@ -49,13 +49,25 @@ public class UsernamePasswordCredentials {
   }
 
   public UsernamePasswordCredentials setPassword(String password) {
-    this.password = Objects.requireNonNull(password);
+    this.password = password;
     return this;
   }
 
   public UsernamePasswordCredentials setUsername(String username) {
-    this.username = Objects.requireNonNull(username);
+    this.username = username;
     return this;
+  }
+
+  @Override
+  public <V> void checkValid(V arg) throws CredentialValidationException {
+    if (username == null || username.length() == 0) {
+      throw new CredentialValidationException("username cannot be null or empty");
+    }
+    // passwords are allowed to be empty
+    // for example this is used by basic auth
+    if (password == null) {
+      throw new CredentialValidationException("password cannot be null");
+    }
   }
 
   public JsonObject toJson() {

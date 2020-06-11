@@ -17,6 +17,7 @@ package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 
 import java.util.Map;
@@ -133,6 +134,27 @@ public class Oauth2Credentials extends UsernamePasswordCredentials {
       json.mergeIn(extra);
     }
     return json;
+  }
+
+  @Override
+  public <V> void checkValid(V arg) throws CredentialValidationException {
+    if (accessToken == null || accessToken.length() == 0) {
+      OAuth2FlowType flow = (OAuth2FlowType) arg;
+      // when there's no access token, validation shall be performed according to each flow
+      switch (flow) {
+        case PASSWORD:
+          super.checkValid(null);
+          break;
+        case AUTH_CODE:
+          if (code == null || code.length() == 0) {
+            throw new CredentialValidationException("code cannot be null or empty");
+          }
+          if (redirectUri == null || redirectUri.length() == 0) {
+            throw new CredentialValidationException("redirectUri cannot be null or empty");
+          }
+          break;
+      }
+    }
   }
 
   @Override

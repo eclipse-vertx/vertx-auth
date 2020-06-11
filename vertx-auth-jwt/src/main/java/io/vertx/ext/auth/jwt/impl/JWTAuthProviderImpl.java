@@ -35,6 +35,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
@@ -112,6 +113,8 @@ public class JWTAuthProviderImpl implements JWTAuth {
   @Override
   public void authenticate(JWTCredentials authInfo, Handler<AsyncResult<User>> resultHandler) {
     try {
+      authInfo.checkValid(null);
+
       final JsonObject payload = jwt.decode(authInfo.getJwt());
 
       if (jwt.isExpired(payload, jwtOptions)) {
@@ -147,7 +150,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
       resultHandler.handle(Future.succeededFuture(User.create(payload)));
 
-    } catch (RuntimeException e) {
+    } catch (CredentialValidationException | RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }
