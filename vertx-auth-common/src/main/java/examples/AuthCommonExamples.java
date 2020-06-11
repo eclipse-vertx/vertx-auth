@@ -29,9 +29,10 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
  */
 public class AuthCommonExamples {
 
-  public void example1(AuthProvider authProvider) {
+  public void example1(AuthenticationProvider authProvider) {
 
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "mypassword");
+    JsonObject authInfo = new JsonObject()
+      .put("username", "tim").put("password", "mypassword");
 
     authProvider.authenticate(authInfo, res -> {
       if (res.succeeded()) {
@@ -92,7 +93,10 @@ public class AuthCommonExamples {
   public void example6(Vertx vertx) {
     PubSecKeyOptions options = new PubSecKeyOptions()
       .setAlgorithm("RS256")
-      .setBuffer(vertx.fileSystem().readFileBlocking("/path/to/pem/file").toString());
+      .setBuffer(
+        vertx.fileSystem()
+          .readFileBlocking("/path/to/pem/file")
+          .toString());
   }
 
   public void example7(Vertx vertx, AuthenticationProvider ldapAuthProvider, AuthenticationProvider propertiesAuthProvider) {

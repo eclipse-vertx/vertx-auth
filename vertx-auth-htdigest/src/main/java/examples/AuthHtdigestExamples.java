@@ -39,12 +39,10 @@ public class AuthHtdigestExamples {
       .put("uri", "/dir/index.html")
       .put("response", "6629fae49393a05397450978507c4ef1");
 
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-        User user = res.result();
-      } else {
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> System.out.println("User: " + user.principal()))
+      .onFailure(err -> {
         // Failed!
-      }
-    });
+      });
   }
 }

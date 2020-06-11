@@ -42,40 +42,39 @@ public class AuthSqlExamples {
     // *. Postgres
     // *. MySQL
     // *. etc...
-    AuthenticationProvider authenticationProvider = SqlAuthentication.create(sqlClient, options);
+    AuthenticationProvider authenticationProvider =
+      SqlAuthentication.create(sqlClient, options);
   }
 
-  public void example6(AuthProvider authProvider) {
+  public void example6(AuthenticationProvider authProvider) {
 
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+    JsonObject authInfo = new JsonObject()
+      .put("username", "tim")
+      .put("password", "sausages");
 
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-        User user = res.result();
-      } else {
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> System.out.println("User: " + user.principal()))
+      .onFailure(err -> {
         // Failed!
-      }
-    });
+      });
   }
 
-  public void example7(User user, SqlAuthorization jdbcAuthZ) {
-    jdbcAuthZ.getAuthorizations(user, res -> {
-      if (res.succeeded()) {
+  public void example7(User user, SqlAuthorization sqlAuthZ) {
+    sqlAuthZ.getAuthorizations(user)
+      .onSuccess(v -> {
         if (PermissionBasedAuthorization.create("commit_code").match(user)) {
           // Has permission!
         }
-      }
-    });
+      });
   }
 
-  public void example8(User user, SqlAuthorization jdbcAuthZ) {
-    jdbcAuthZ.getAuthorizations(user, res -> {
-      if (res.succeeded()) {
+  public void example8(User user, SqlAuthorization sqlAuthZ) {
+    sqlAuthZ.getAuthorizations(user)
+      .onSuccess(v -> {
         if (RoleBasedAuthorization.create("manager").match(user)) {
-          // has role!
+          // Has role!
         }
-      }
-    });
+      });
   }
 
   public void example9(SqlAuthentication jdbcAuth, SqlClient sqlClient) {
@@ -85,11 +84,13 @@ public class AuthSqlExamples {
       VertxContextPRNG.current().nextString(32), // secure random salt
       "sausages" // password
     );
+
     // save to the database
-    sqlClient.preparedQuery("INSERT INTO user (username, password) VALUES (?, ?)").execute(Tuple.of("tim", hash), ar -> {
-      if (ar.succeeded()) {
+    sqlClient
+      .preparedQuery("INSERT INTO user (username, password) VALUES (?, ?)")
+      .execute(Tuple.of("tim", hash))
+      .onSuccess(rowset -> {
         // password updated
-      }
-    });
+      });
   }
 }

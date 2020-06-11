@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
@@ -39,38 +40,40 @@ public class AuthJDBCExamples {
 
     JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
     JDBCAuthenticationOptions options = new JDBCAuthenticationOptions();
-    JDBCAuthentication authenticationProvider = JDBCAuthentication.create(jdbcClient, options);
+
+    JDBCAuthentication authenticationProvider =
+      JDBCAuthentication.create(jdbcClient, options);
   }
 
-  public void example6(AuthProvider authProvider) {
+  public void example6(AuthenticationProvider authProvider) {
 
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+    JsonObject authInfo = new JsonObject()
+      .put("username", "tim")
+      .put("password", "sausages");
 
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-        User user = res.result();
-      } else {
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> {
+        System.out.println("User: " + user.principal());
+      })
+      .onFailure(err -> {
         // Failed!
-      }
-    });
+      });
   }
 
   public void example7(User user, JDBCAuthorization jdbcAuthZ) {
-    jdbcAuthZ.getAuthorizations(user, res -> {
-      if (res.succeeded()) {
+    jdbcAuthZ.getAuthorizations(user)
+      .onSuccess(v -> {
         if (PermissionBasedAuthorization.create("commit_code").match(user)) {
           // Has permission!
         }
-      }
-    });
+      });
   }
 
   public void example8(User user, JDBCAuthorization jdbcAuthZ) {
-    jdbcAuthZ.getAuthorizations(user, res -> {
-      if (res.succeeded()) {
-        if (RoleBasedAuthorization.create("manager").match(user)) {
-          // has role!
-        }
+    jdbcAuthZ.getAuthorizations(user)
+      .onSuccess(v -> {
+      if (RoleBasedAuthorization.create("manager").match(user)) {
+        // has role!
       }
     });
   }
@@ -83,7 +86,9 @@ public class AuthJDBCExamples {
       "sausages" // password
     );
     // save to the database
-    conn.updateWithParams("INSERT INTO user (username, password) VALUES (?, ?)", new JsonArray().add("tim").add(hash), res -> {
+    conn.updateWithParams(
+      "INSERT INTO user (username, password) VALUES (?, ?)",
+      new JsonArray().add("tim").add(hash), res -> {
       if (res.succeeded()) {
         // success!
       }

@@ -28,7 +28,8 @@ import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 public class AuthHtpasswdExamples {
 
   public void example1(Vertx vertx) {
-    HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions());
+    HtpasswdAuth authProvider = HtpasswdAuth
+      .create(vertx, new HtpasswdAuthOptions());
   }
 
   public void example2(HtpasswdAuth authProvider) {
@@ -36,12 +37,12 @@ public class AuthHtpasswdExamples {
       .put("username", "someUser")
       .put("password", "somePassword");
 
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-        User user = res.result();
-      } else {
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> {
+        // OK
+      })
+      .onFailure(err -> {
         // Failed!
-      }
-    });
+      });
   }
 }

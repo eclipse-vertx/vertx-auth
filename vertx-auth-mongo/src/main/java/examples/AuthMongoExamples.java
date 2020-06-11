@@ -23,6 +23,7 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.mongo.MongoAuthentication;
 import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
+import io.vertx.ext.auth.mongo.MongoAuthorization;
 import io.vertx.ext.mongo.MongoClient;
 
 /**
@@ -33,43 +34,38 @@ public class AuthMongoExamples {
   public void example1(Vertx vertx, JsonObject mongoClientConfig) {
     MongoClient client = MongoClient.createShared(vertx, mongoClientConfig);
     MongoAuthenticationOptions options = new MongoAuthenticationOptions();
-    MongoAuthentication authenticationProvider = MongoAuthentication.create(client, options);
+    MongoAuthentication authenticationProvider =
+      MongoAuthentication.create(client, options);
   }
 
   public void example2(MongoAuthentication authProvider) {
     JsonObject authInfo = new JsonObject()
-        .put("username", "tim")
-        .put("password", "sausages");
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-        User user = res.result();
-      } else {
+      .put("username", "tim")
+      .put("password", "sausages");
+
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> System.out.println("User: " + user.principal()))
+      .onFailure(err -> {
         // Failed!
-      }
-    });
+      });
   }
 
-  public void example3(User user) {
-
-    user.isAuthorized(PermissionBasedAuthorization.create("commit_code"), res -> {
-      if (res.succeeded()) {
-        boolean hasPermission = res.result();
-      } else {
-        // Failed to
-      }
-    });
-
+  public void example3(User user, MongoAuthorization mongoAuthZ) {
+    mongoAuthZ.getAuthorizations(user)
+      .onSuccess(v -> {
+        if (PermissionBasedAuthorization.create("commit_code").match(user)) {
+          // Has permission!
+        }
+      });
   }
 
-  public void example4(User user) {
+  public void example4(User user, MongoAuthorization mongoAuthZ) {
 
-    user.isAuthorized(RoleBasedAuthorization.create("manager"), res -> {
-      if (res.succeeded()) {
-        boolean hasRole = res.result();
-      } else {
-        // Failed to
-      }
-    });
-
+    mongoAuthZ.getAuthorizations(user)
+      .onSuccess(v -> {
+        if (RoleBasedAuthorization.create("manager").match(user)) {
+          // Has role!
+        }
+      });
   }
 }
