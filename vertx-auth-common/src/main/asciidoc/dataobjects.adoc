@@ -93,7 +93,8 @@ The PEM or Secret key buffer
 == TokenCredentials
 
 ++++
- Credentials used by any link that requires username and password to perform its authentication
+ Credentials used by any link that requires Tokens, such as OAuth2 or JWT
+ to perform its authentication
 ++++
 '''
 

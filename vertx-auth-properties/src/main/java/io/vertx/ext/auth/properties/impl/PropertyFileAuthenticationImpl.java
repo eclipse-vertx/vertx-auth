@@ -89,6 +89,11 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
         String fileContent = readResponse.result().toString(StandardCharsets.UTF_8);
         String[] lines = fileContent.split("\n");
         for (String line : lines) {
+          if (line.length() == 0 || line.startsWith("#")) {
+            // skip empty lines or comments
+            continue;
+          }
+
           if (line.startsWith("user.")) {
             logger.log(Level.FINE, () -> "read user line: " + line);
             String usernameAndRoles = line.substring(5);
