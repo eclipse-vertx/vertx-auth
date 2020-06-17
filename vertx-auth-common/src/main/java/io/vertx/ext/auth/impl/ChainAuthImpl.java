@@ -22,6 +22,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.ChainAuth;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,16 @@ public class ChainAuthImpl implements ChainAuth {
   public ChainAuth add(AuthenticationProvider other) {
     providers.add(other);
     return this;
+  }
+
+  @Override
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      credentials.checkValid(null);
+      authenticate(credentials.toJson(), resultHandler);
+    } catch (CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   @Override

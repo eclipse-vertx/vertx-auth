@@ -24,6 +24,8 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
@@ -77,34 +79,39 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
     authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
   }
-  
+
   @Override
-  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
 
-    // Null username is invalid
-    if (credentials == null) {
-      resultHandler.handle((Future.failedFuture("Credentials must be set for authentication.")));
-      return;
-    }
-    AuthToken token = new AuthToken(credentials.getUsername(), credentials.getPassword());
-
-    JsonObject query = createQuery(credentials.getUsername());
-    mongoClient.find(options.getCollectionName(), query, res -> {
-
-      try {
-        if (res.succeeded()) {
-          User user = handleSelection(res, token);
-          resultHandler.handle(Future.succeededFuture(user));
-        } else {
-          resultHandler.handle(Future.failedFuture(res.cause()));
-        }
-      } catch (Exception e) {
-        log.warn(e);
-        resultHandler.handle(Future.failedFuture(e));
+      // Null username is invalid
+      if (credentials == null) {
+        resultHandler.handle((Future.failedFuture("Credentials must be set for authentication.")));
+        return;
       }
+      AuthToken token = new AuthToken(authInfo.getUsername(), authInfo.getPassword());
 
-    });
+      JsonObject query = createQuery(authInfo.getUsername());
+      mongoClient.find(options.getCollectionName(), query, res -> {
 
+        try {
+          if (res.succeeded()) {
+            User user = handleSelection(res, token);
+            resultHandler.handle(Future.succeededFuture(user));
+          } else {
+            resultHandler.handle(Future.failedFuture(res.cause()));
+          }
+        } catch (Exception e) {
+          log.warn(e);
+          resultHandler.handle(Future.failedFuture(e));
+        }
+
+      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   /**

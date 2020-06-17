@@ -26,6 +26,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
@@ -62,24 +64,31 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   }
 
   @Override
-  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticationProvider.authenticate(credentials, authenticationResult -> {
-      if (authenticationResult.failed()) {
-        resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
-      } else {
-        User user = authenticationResult.result();
-        authorizationProvider.getAuthorizations(user, userAuthorizationResult -> {
-          if (userAuthorizationResult.failed()) {
-            // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
-            // for now, lets return a faillure
-            resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
-          }
-          else {
-            resultHandler.handle(Future.succeededFuture(user));
-          }
-        });
-      }
-    });
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+
+      authenticationProvider.authenticate(credentials, authenticationResult -> {
+        if (authenticationResult.failed()) {
+          resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
+        } else {
+          User user = authenticationResult.result();
+          authorizationProvider.getAuthorizations(user, userAuthorizationResult -> {
+            if (userAuthorizationResult.failed()) {
+              // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
+              // for now, lets return a faillure
+              resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
+            }
+            else {
+              resultHandler.handle(Future.succeededFuture(user));
+            }
+          });
+        }
+      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   @Override

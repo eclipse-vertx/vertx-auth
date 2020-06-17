@@ -21,7 +21,6 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
 
@@ -93,18 +92,5 @@ public interface WebAuthn extends AuthenticationProvider {
     Promise<JsonObject> promise = Promise.promise();
     getCredentialsOptions(username, promise);
     return promise.future();
-  }
-
-  void authenticate(WebAuthnCredentials authInfo, Handler<AsyncResult<User>> handler);
-
-  default Future<User> authenticate(WebAuthnCredentials authInfo) {
-    Promise<User> promise = Promise.promise();
-    authenticate(authInfo, promise);
-    return promise.future();
-  }
-
-  @Override
-  default void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-    authenticate(new WebAuthnCredentials(authInfo), handler);
   }
 }

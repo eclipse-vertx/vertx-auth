@@ -13,10 +13,8 @@
 package io.vertx.ext.auth.properties;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
-import io.vertx.ext.auth.User;
+import io.vertx.core.Vertx;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
 
 /**
@@ -35,24 +33,5 @@ public interface PropertyFileAuthentication extends AuthenticationProvider {
    */
   static PropertyFileAuthentication create(Vertx vertx, String path) {
     return new PropertyFileAuthenticationImpl(vertx, path);
-  }
-
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   *
-   * @param credential
-   * @param handler
-   */
-  void authenticate(UsernamePasswordCredentials credential, Handler<AsyncResult<User>> handler);
-
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   *
-   * @param credentials
-   */
-  default Future<User> authenticate(UsernamePasswordCredentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
   }
 }

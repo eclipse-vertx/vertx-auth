@@ -17,6 +17,7 @@
 |[[method]]`@method`|`String`|-
 |[[nc]]`@nc`|`String`|-
 |[[nonce]]`@nonce`|`String`|-
+|[[opaque]]`@opaque`|`String`|-
 |[[qop]]`@qop`|`String`|-
 |[[realm]]`@realm`|`String`|-
 |[[response]]`@response`|`String`|-

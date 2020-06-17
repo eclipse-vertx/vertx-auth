@@ -25,6 +25,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.ldap.LdapAuthentication;
 import io.vertx.ext.auth.ldap.LdapAuthenticationOptions;
@@ -49,18 +51,25 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   public void authenticate(JsonObject credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
     authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
   }
-  
+
   @Override
-  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    String ldapPrincipal = getLdapPrincipal(credentials.getUsername());
-    createLdapContext(ldapPrincipal, credentials.getPassword(), contextResponse -> {
-      if (contextResponse.succeeded()) {
-        User user = User.create(new JsonObject().put("username", credentials.getUsername()));
-        resultHandler.handle(Future.succeededFuture(user));
-      } else {
-        resultHandler.handle(Future.failedFuture(contextResponse.cause()));
-      }
-    });
+  public void authenticate(Credentials credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+
+      String ldapPrincipal = getLdapPrincipal(authInfo.getUsername());
+      createLdapContext(ldapPrincipal, authInfo.getPassword(), contextResponse -> {
+        if (contextResponse.succeeded()) {
+          User user = User.create(new JsonObject().put("username", authInfo.getUsername()));
+          resultHandler.handle(Future.succeededFuture(user));
+        } else {
+          resultHandler.handle(Future.failedFuture(contextResponse.cause()));
+        }
+      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   private void createLdapContext(String principal, String credential, Handler<AsyncResult<LdapContext>> resultHandler) {

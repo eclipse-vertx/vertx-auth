@@ -54,26 +54,6 @@ public interface OAuth2Auth extends AuthenticationProvider {
   }
 
   /**
-   * Authenticate a User using the specified {@link Oauth2Credentials}
-   *
-   * @param credentials the credentials to use.
-   * @param handler the callback
-   */
-  void authenticate(Oauth2Credentials credentials, Handler<AsyncResult<User>> handler);
-
-  /**
-   * Authenticate a User using the specified {@link Oauth2Credentials}
-   *
-   * @param credentials to use
-   * @return future result
-   */
-  default Future<User> authenticate(Oauth2Credentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
-  }
-
-  /**
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
    * of issued ID and access tokens. The provider will refresh the keys according to:
    * https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys

@@ -26,6 +26,8 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -88,24 +90,32 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   @Override
-  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
-    mongoAuthentication.authenticate(credentials, authenticationResult -> {
-      if (authenticationResult.failed()) {
-        resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
-      } else {
-        User user = authenticationResult.result();
-        mongoAuthorization.getAuthorizations(user, userAuthorizationResult -> {
-          if (userAuthorizationResult.failed()) {
-            // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
-            // for now, lets return a failure
-            resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
-          }
-          else {
-            resultHandler.handle(Future.succeededFuture(user));
-          }
-        });
-      }
-    });
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+
+      mongoAuthentication.authenticate(authInfo, authenticationResult -> {
+        if (authenticationResult.failed()) {
+          resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
+        } else {
+          User user = authenticationResult.result();
+          mongoAuthorization.getAuthorizations(user, userAuthorizationResult -> {
+            if (userAuthorizationResult.failed()) {
+              // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
+              // for now, lets return a failure
+              resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
+            }
+            else {
+              resultHandler.handle(Future.succeededFuture(user));
+            }
+          });
+        }
+      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   /*

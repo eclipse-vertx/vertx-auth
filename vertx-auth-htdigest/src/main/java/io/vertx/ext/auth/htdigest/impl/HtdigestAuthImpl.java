@@ -22,6 +22,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.htdigest.HtdigestAuth;
 import io.vertx.ext.auth.htdigest.HtdigestCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
@@ -94,66 +96,61 @@ public class HtdigestAuthImpl implements HtdigestAuth {
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
     authenticate(new HtdigestCredentials(authInfo), resultHandler);
   }
-  
+
   @Override
-  public void authenticate(HtdigestCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
-    // Null or empty username is invalid
-    if (credentials.getUsername() == null || credentials.getUsername().length() == 0) {
-      resultHandler.handle((Future.failedFuture("Username must be set for authentication.")));
-      return;
-    }
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      HtdigestCredentials authInfo = (HtdigestCredentials) credentials;
+      authInfo.checkValid(null);
 
-    if (!htdigest.containsKey(credentials.getUsername())) {
-      resultHandler.handle((Future.failedFuture("Unknown username.")));
-      return;
-    }
+      if (!htdigest.containsKey(authInfo.getUsername())) {
+        resultHandler.handle((Future.failedFuture("Unknown username.")));
+        return;
+      }
 
-    // Null realm is invalid
-    if (credentials.getRealm() == null) {
-      resultHandler.handle((Future.failedFuture("Realm must be set for authentication.")));
-      return;
-    }
+      final Digest credential = htdigest.get(authInfo.getUsername());
 
-    final Digest credential = htdigest.get(credentials.getUsername());
+      if (!credential.realm.equals(authInfo.getRealm())) {
+        resultHandler.handle((Future.failedFuture("Invalid realm.")));
+        return;
+      }
 
-    if (!credential.realm.equals(credentials.getRealm())) {
-      resultHandler.handle((Future.failedFuture("Invalid realm.")));
-      return;
-    }
+      // calculate ha1
+      final String ha1;
+      if ("MD5-sess".equals(authInfo.getAlgorithm())) {
+        ha1=md5(credential.password + ":" + authInfo.getNonce() + ":" + authInfo.getCnonce());
+      } else {
+        ha1 = credential.password;
+      }
 
-    // calculate ha1
-    final String ha1;
-    if ("MD5-sess".equals(credentials.getAlgorithm())) {
-      ha1=md5(credential.password + ":" + credentials.getNonce() + ":" + credentials.getCnonce());
-    } else {
-      ha1 = credential.password;
-    }
+      // calculate ha2
+      final String ha2;
+      if (authInfo.getQop()==null || "auth".equals(authInfo.getQop())) {
+        ha2 = md5(authInfo.getMethod() + ":" + authInfo.getUri());
+      } else if ("auth-int".equals(authInfo.getQop())){
+        resultHandler.handle((Future.failedFuture("qop: auth-int not supported.")));
+        return;
+      } else {
+        resultHandler.handle((Future.failedFuture("Invalid qop.")));
+        return;
+      }
 
-    // calculate ha2
-    final String ha2;
-    if (credentials.getQop()==null || "auth".equals(credentials.getQop())) {
-      ha2 = md5(credentials.getMethod() + ":" + credentials.getUri());
-    } else if ("auth-int".equals(credentials.getQop())){
-      resultHandler.handle((Future.failedFuture("qop: auth-int not supported.")));
-      return;
-    } else {
-      resultHandler.handle((Future.failedFuture("Invalid qop.")));
-      return;
-    }
+      // calculate request digest
+      final String digest;
+      if (authInfo.getQop()==null) {
+        // For RFC 2069 compatibility
+        digest = md5(ha1 + ":" + authInfo.getNonce() + ":" + ha2);
+      } else {
+        digest = md5(ha1 + ":" + authInfo.getNonce() + ":" + authInfo.getNc() + ":" + authInfo.getCnonce() + ":" + authInfo.getQop() + ":" + ha2);
+      }
 
-    // calculate request digest
-    final String digest;
-    if (credentials.getQop()==null) {
-      // For RFC 2069 compatibility
-      digest = md5(ha1 + ":" + credentials.getNonce() + ":" + ha2);
-    } else {
-      digest = md5(ha1 + ":" + credentials.getNonce() + ":" + credentials.getNc() + ":" + credentials.getCnonce() + ":" + credentials.getQop() + ":" + ha2);
-    }
-
-    if (digest.equals(credentials.getResponse())) {
-      resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", credential.username).put("realm", credential.realm))));
-    } else {
-      resultHandler.handle(Future.failedFuture("Bad response"));
+      if (digest.equals(authInfo.getResponse())) {
+        resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", credential.username).put("realm", credential.realm))));
+      } else {
+        resultHandler.handle(Future.failedFuture("Bad response"));
+      }
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
     }
   }
 

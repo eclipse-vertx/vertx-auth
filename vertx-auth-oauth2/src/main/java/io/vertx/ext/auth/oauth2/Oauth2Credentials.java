@@ -17,10 +17,10 @@ package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Credentials specific to the {@link OAuth2Auth} provider
@@ -28,28 +28,19 @@ import java.util.Objects;
  * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
 @DataObject
-public class Oauth2Credentials extends UsernamePasswordCredentials {
+public class Oauth2Credentials implements Credentials {
 
-  private String accessToken;
   private String code;
   private String redirectUri;
   // tokens can include other kind of generic data
   private JsonObject extra;
 
   public Oauth2Credentials() {
-    super();
   }
 
   public Oauth2Credentials(JsonObject jsonObject) {
-    super(jsonObject);
-
     for (Map.Entry<String, Object> member : jsonObject) {
       switch (member.getKey()) {
-        case "access_token":
-          if (member.getValue() instanceof String) {
-            setAccessToken((String) member.getValue());
-          }
-          break;
         case "code":
           if (member.getValue() instanceof String) {
             setCode((String) member.getValue());
@@ -69,34 +60,12 @@ public class Oauth2Credentials extends UsernamePasswordCredentials {
     }
   }
 
-  @Override
-  public Oauth2Credentials setPassword(String password) {
-    super.setPassword(password);
-    return this;
-  }
-
-  @Override
-  public Oauth2Credentials setUsername(String username) {
-    super.setUsername(username);
-    return this;
-  }
-
-
-  public String getAccessToken() {
-    return accessToken;
-  }
-
-  public Oauth2Credentials setAccessToken(String accessToken) {
-    this.accessToken = Objects.requireNonNull(accessToken);
-    return this;
-  }
-
   public String getCode() {
     return code;
   }
 
   public Oauth2Credentials setCode(String code) {
-    this.code = Objects.requireNonNull(code);
+    this.code = code;
     return this;
   }
 
@@ -105,7 +74,7 @@ public class Oauth2Credentials extends UsernamePasswordCredentials {
   }
 
   public Oauth2Credentials setRedirectUri(String redirectUri) {
-    this.redirectUri = Objects.requireNonNull(redirectUri);
+    this.redirectUri = redirectUri;
     return this;
   }
 
@@ -114,15 +83,13 @@ public class Oauth2Credentials extends UsernamePasswordCredentials {
   }
 
   public Oauth2Credentials setExtra(JsonObject extra) {
-    this.extra = Objects.requireNonNull(extra);
+    this.extra = extra;
     return this;
   }
 
   public JsonObject toJson() {
-    JsonObject json = super.toJson();
-    if (getAccessToken() != null) {
-      json.put("access_token", getAccessToken());
-    }
+    JsonObject json = new JsonObject();
+
     if (getCode() != null) {
       json.put("code", getCode());
     }
@@ -133,6 +100,22 @@ public class Oauth2Credentials extends UsernamePasswordCredentials {
       json.mergeIn(extra);
     }
     return json;
+  }
+
+  @Override
+  public <V> void checkValid(V arg) throws CredentialValidationException {
+    OAuth2FlowType flow = (OAuth2FlowType) arg;
+    // when there's no access token, validation shall be performed according to each flow
+    switch (flow) {
+      case AUTH_CODE:
+        if (code == null || code.length() == 0) {
+          throw new CredentialValidationException("code cannot be null or empty");
+        }
+        if (redirectUri == null || redirectUri.length() == 0) {
+          throw new CredentialValidationException("redirectUri cannot be null or empty");
+        }
+        break;
+    }
   }
 
   @Override

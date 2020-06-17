@@ -83,11 +83,8 @@ Set the provider userInfo resource path
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[accessToken]]`@accessToken`|`String`|-
 |[[code]]`@code`|`String`|-
 |[[extra]]`@extra`|`Json object`|-
-|[[password]]`@password`|`String`|-
 |[[redirectUri]]`@redirectUri`|`String`|-
-|[[username]]`@username`|`String`|-
 |===
 

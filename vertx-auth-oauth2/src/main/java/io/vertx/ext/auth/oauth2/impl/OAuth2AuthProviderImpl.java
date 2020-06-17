@@ -27,6 +27,10 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
@@ -128,75 +132,152 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    if (authInfo.containsKey("access_token")) {
+      authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
+      return;
+    }
+    if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
+      authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
+      return;
+    }
     authenticate(new Oauth2Credentials(authInfo), handler);
   }
 
   @Override
-  public void authenticate(Oauth2Credentials authInfo, Handler<AsyncResult<User>> handler) {
-    // if the authInfo object already contains a token validate it to confirm that it
-    // can be reused, otherwise, based on the configured flow, request a new token
-    // from the authority provider
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
+    try {
+      // if the authInfo object already contains a token validate it to confirm that it
+      // can be reused, otherwise, based on the configured flow, request a new token
+      // from the authority provider
 
-    if (
-      // authInfo contains a non null token
-      authInfo.getAccessToken() != null) {
+      if (credentials instanceof TokenCredentials) {
+        // authInfo contains a non null token
+        TokenCredentials tokenCredentials = (TokenCredentials) credentials;
+        tokenCredentials.checkValid(null);
 
-      // this validation can be done in 2 different ways:
-      // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
-      // 2) the token is an opaque string and we need to introspect it
+        // this validation can be done in 2 different ways:
+        // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
+        // 2) the token is an opaque string and we need to introspect it
 
-      // if the JWT library is working in unsecure mode, local validation is not to be trusted
+        // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
-      final User user = createUser(authInfo.toJson(), false);
+        final User user = createUser(new JsonObject().put("access_token", tokenCredentials.getToken()), false);
 
-      // the token is not a JWT or there are no loaded keys to validate
-      if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
-        // the token is not in JWT format or this auth provider is not configured for secure JWTs
-        // in this case we must rely on token introspection in order to know more about its state
-        // attempt to create a token object from the given string representation
+        // the token is not a JWT or there are no loaded keys to validate
+        if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
+          // the token is not in JWT format or this auth provider is not configured for secure JWTs
+          // in this case we must rely on token introspection in order to know more about its state
+          // attempt to create a token object from the given string representation
 
-        // Not all providers support this so we need to check if the call is possible
-        if (config.getIntrospectionPath() == null) {
-          // this provider doesn't allow introspection, this means we are not able to perform
-          // any authentication,
-          if (user.attributes().containsKey("missing-kid")) {
-            handler.handle(Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid"))));
-          } else {
-            handler.handle(Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection"));
+          // Not all providers support this so we need to check if the call is possible
+          if (config.getIntrospectionPath() == null) {
+            // this provider doesn't allow introspection, this means we are not able to perform
+            // any authentication,
+            if (user.attributes().containsKey("missing-kid")) {
+              handler.handle(Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid"))));
+            } else {
+              handler.handle(Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection"));
+            }
+            return;
           }
-          return;
-        }
 
-        // perform the introspection
-        api
-          .tokenIntrospection("access_token", user.principal().getString("access_token"), res -> {
-            if (res.failed()) {
-              handler.handle(Future.failedFuture(res.cause()));
-              return;
-            }
-
-            final JsonObject json = res.result();
-
-            // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
-            if (json.containsKey("active") && !json.getBoolean("active", false)) {
-              handler.handle(Future.failedFuture("Inactive Token"));
-              return;
-            }
-
-            // OPTIONALS
-
-            // validate client id
-            if (json.containsKey("client_id")) {
-              // response included a client id. Match against config client id
-              if (!config.getClientID().equals(json.getString("client_id"))) {
-                // Client identifier for the OAuth 2.0 client that requested this token.
-                handler.handle(Future.failedFuture("Wrong client_id"));
+          // perform the introspection
+          api
+            .tokenIntrospection("access_token", user.principal().getString("access_token"), res -> {
+              if (res.failed()) {
+                handler.handle(Future.failedFuture(res.cause()));
                 return;
               }
-            }
+
+              final JsonObject json = res.result();
+
+              // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
+              if (json.containsKey("active") && !json.getBoolean("active", false)) {
+                handler.handle(Future.failedFuture("Inactive Token"));
+                return;
+              }
+
+              // OPTIONALS
+
+              // validate client id
+              if (json.containsKey("client_id")) {
+                // response included a client id. Match against config client id
+                if (!config.getClientID().equals(json.getString("client_id"))) {
+                  // Client identifier for the OAuth 2.0 client that requested this token.
+                  handler.handle(Future.failedFuture("Wrong client_id"));
+                  return;
+                }
+              }
+
+              // attempt to create a user from the json object
+              final User newUser = createUser(json, user.attributes().containsKey("missing-kid"));
+
+              // final step, verify if the user is not expired
+              // this may happen if the user tokens have been issued for future use for example
+              if (newUser.expired(config.getJWTOptions().getLeeway())) {
+                handler.handle(Future.failedFuture("Used is expired."));
+              } else {
+                // basic validation passed, the token is not expired,
+                // the spec mandates that that a few extra checks are performed
+                validateUser(newUser, handler);
+              }
+            });
+
+        } else {
+          final JWTOptions jwtOptions = config.getJWTOptions();
+          // a valid JWT token should have the access token value decoded
+          // the token might be valid, but expired
+          if (user.expired(jwtOptions.getLeeway())) {
+            handler.handle(Future.failedFuture("Expired Token"));
+          } else {
+            // basic validation passed, the token is not expired,
+            // the spec mandates that that a few extra checks are performed
+            validateUser(user, handler);
+          }
+        }
+
+      } else {
+        // the authInfo object does not contain a token, so rely on the
+        // configured flow to retrieve a token for the user
+        // depending on the flow type the authentication will behave in different ways
+        final JsonObject params = new JsonObject();
+        switch (config.getFlow()) {
+          case PASSWORD:
+            UsernamePasswordCredentials usernamePasswordCredentials = (UsernamePasswordCredentials) credentials;
+            usernamePasswordCredentials.checkValid(config.getFlow());
+
+            params
+              .put("username", usernamePasswordCredentials.getUsername())
+              .put("password", usernamePasswordCredentials.getPassword());
+            break;
+          case AUTH_CODE:
+          case CLIENT:
+            Oauth2Credentials oauth2Credentials = (Oauth2Credentials) credentials;
+            oauth2Credentials.checkValid(config.getFlow());
+
+            params.mergeIn(oauth2Credentials.toJson());
+            break;
+          case AUTH_JWT:
+            Oauth2Credentials oauth2OnBehalfOfCredentials = (Oauth2Credentials) credentials;
+            oauth2OnBehalfOfCredentials.checkValid(config.getFlow());
+
+            final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
+            params.mergeIn(token);
+            params
+              .put("assertion", jwt.sign(token, config.getJWTOptions()));
+            break;
+          default:
+            handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
+            return;
+        }
+
+        api.token(config.getFlow().getGrantType(), params, getToken -> {
+          if (getToken.failed()) {
+            handler.handle(Future.failedFuture(getToken.cause()));
+          } else {
 
             // attempt to create a user from the json object
-            final User newUser = createUser(json, user.attributes().containsKey("missing-kid"));
+            final User newUser = createUser(getToken.result(), false);
 
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
@@ -207,81 +288,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
               // the spec mandates that that a few extra checks are performed
               validateUser(newUser, handler);
             }
-          });
-
-      } else {
-        final JWTOptions jwtOptions = config.getJWTOptions();
-        // a valid JWT token should have the access token value decoded
-        // the token might be valid, but expired
-        if (user.expired(jwtOptions.getLeeway())) {
-          handler.handle(Future.failedFuture("Expired Token"));
-        } else {
-          // basic validation passed, the token is not expired,
-          // the spec mandates that that a few extra checks are performed
-          validateUser(user, handler);
-        }
+          }
+        });
       }
-
-    } else {
-      // the authInfo object does not contain a token, so rely on the
-      // configured flow to retrieve a token for the user
-      // depending on the flow type the authentication will behave in different ways
-      final JsonObject params = new JsonObject();
-      switch (config.getFlow()) {
-        case PASSWORD:
-          if (authInfo.getUsername() != null && authInfo.getPassword() != null) {
-            params
-              .put("username", authInfo.getUsername())
-              .put("password", authInfo.getPassword());
-          } else {
-            // the auth info object is incomplete, we can't proceed from here
-            handler.handle(Future.failedFuture("PASSWORD flow requires {username, password}"));
-            return;
-          }
-          break;
-        case AUTH_CODE:
-          if (authInfo.getCode() != null && authInfo.getRedirectUri() != null) {
-            params.mergeIn(authInfo.toJson());
-          } else {
-            // the auth info object is incomplete, we can't proceed from here
-            handler.handle(Future.failedFuture("AUTH_CODE flow requires {code, redirect_uri}"));
-            return;
-          }
-          break;
-        case CLIENT:
-          params.mergeIn(authInfo.toJson());
-          break;
-        case AUTH_JWT:
-          final JsonObject credentials = authInfo.toJson();
-
-          params.mergeIn(credentials);
-          params
-            .put("assertion", jwt.sign(credentials, config.getJWTOptions()));
-          break;
-        default:
-          handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
-          return;
-      }
-
-      api.token(config.getFlow().getGrantType(), params, getToken -> {
-        if (getToken.failed()) {
-          handler.handle(Future.failedFuture(getToken.cause()));
-        } else {
-
-          // attempt to create a user from the json object
-          final User newUser = createUser(getToken.result(), false);
-
-          // final step, verify if the user is not expired
-          // this may happen if the user tokens have been issued for future use for example
-          if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            handler.handle(Future.failedFuture("Used is expired."));
-          } else {
-            // basic validation passed, the token is not expired,
-            // the spec mandates that that a few extra checks are performed
-            validateUser(newUser, handler);
-          }
-        }
-      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      handler.handle(Future.failedFuture(e));
     }
   }
 

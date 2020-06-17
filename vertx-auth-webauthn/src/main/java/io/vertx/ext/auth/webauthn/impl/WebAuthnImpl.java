@@ -28,6 +28,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
@@ -268,138 +270,140 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public void authenticate(WebAuthnCredentials authInfo, Handler<AsyncResult<User>> handler) {
-    //    {
-    //      "rawId": "base64url",
-    //      "id": "base64url",
-    //      "response": {
-    //        "attestationObject": "base64url",
-    //        "clientDataJSON": "base64url"
-    //      },
-    //      "getClientExtensionResults": {},
-    //      "type": "public-key"
-    //    }
-    final JsonObject webauthnResp = authInfo.getWebauthn();
+  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    authenticate(new WebAuthnCredentials(authInfo), handler);
+  }
 
-    if (webauthnResp == null) {
-      handler.handle(Future.failedFuture("webauthn can't be null!"));
-      return;
-    }
+  @Override
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
+    try {
+      // cast
+      WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
+      // check
+      authInfo.checkValid(null);
 
-    // response can't be null
-    final JsonObject response = webauthnResp.getJsonObject("response");
+      //    {
+      //      "rawId": "base64url",
+      //      "id": "base64url",
+      //      "response": {
+      //        "attestationObject": "base64url",
+      //        "clientDataJSON": "base64url"
+      //      },
+      //      "getClientExtensionResults": {},
+      //      "type": "public-key"
+      //    }
+      final JsonObject webauthnResp = authInfo.getWebauthn();
+      final JsonObject response = webauthnResp.getJsonObject("response");
 
-    if (response == null) {
-      handler.handle(Future.failedFuture("wenauthn response can't be null!"));
-      return;
-    }
+      byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
+      JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
 
-    byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
-    JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
-
-    // Verify challenge is match with session
-    if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
-      handler.handle(Future.failedFuture("Challenges don't match!"));
-      return;
-    }
-
-    // STEP 9 Verify origin is match with session
-    if (!clientData.getString("origin").equals(options.getOrigin())) {
-      handler.handle(Future.failedFuture("Origins don't match!"));
-      return;
-    }
-
-    final String username = authInfo.getUsername();
-
-    switch (clientData.getString("type")) {
-      case "webauthn.create":
-        // we always need a username to register
-        if (username == null) {
-          handler.handle(Future.failedFuture("username can't be null!"));
-          return;
-        }
-
-        try {
-          final JsonObject authrInfo = verifyWebAuthNCreate(webauthnResp, clientDataJSON, clientData);
-          // the principal for vertx-auth
-          JsonObject principal = new JsonObject()
-            .put("credID", authrInfo.getString("credID"))
-            .put("publicKey", authrInfo.getString("publicKey"))
-            .put("counter", authrInfo.getLong("counter", 0L));
-
-          // by default the store can upsert if a credential is missing, the user has been verified so it is valid
-          // the store however might dissallow this operation
-          JsonObject storeItem = new JsonObject()
-            .mergeIn(principal)
-            .put("username", username);
-
-          store.updateUserCredential(authrInfo.getString("credID"), storeItem, true, updateUserCredential -> {
-            if (updateUserCredential.failed()) {
-              handler.handle(Future.failedFuture(updateUserCredential.cause()));
-            } else {
-              handler.handle(Future.succeededFuture(new UserImpl(principal)));
-            }
-          });
-        } catch (RuntimeException | IOException e) {
-          handler.handle(Future.failedFuture(e));
-        }
+      // Verify challenge is match with session
+      if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
+        handler.handle(Future.failedFuture("Challenges don't match!"));
         return;
-      case "webauthn.get":
+      }
 
-        final Handler<AsyncResult<List<JsonObject>>> onGetUserCredentialsByAny = getUserCredentials -> {
-          if (getUserCredentials.failed()) {
-            handler.handle(Future.failedFuture(getUserCredentials.cause()));
-          } else {
-            List<JsonObject> authenticators = getUserCredentials.result();
-            if (authenticators == null) {
-              authenticators = Collections.emptyList();
-            }
+      // STEP 9 Verify origin is match with session
+      if (!clientData.getString("origin").equals(options.getOrigin())) {
+        handler.handle(Future.failedFuture("Origins don't match!"));
+        return;
+      }
 
-            // STEP 24 Query public key base on user ID
-            Optional<JsonObject> authenticator = authenticators.stream()
-              .filter(authr -> webauthnResp.getString("id").equals(authr.getValue("credID")))
-              .findFirst();
+      final String username = authInfo.getUsername();
 
-            if (!authenticator.isPresent()) {
-              handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthnResp.getString("rawId")));
-              return;
-            }
-
-            try {
-              final JsonObject json = authenticator.get();
-              final long counter = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, json);
-              // update the counter on the authenticator
-              json.put("counter", counter);
-              // update the credential (the important here is to update the counter)
-              store.updateUserCredential(webauthnResp.getString("rawId"), json, false, updateUserCredential -> {
-                if (updateUserCredential.failed()) {
-                  handler.handle(Future.failedFuture(updateUserCredential.cause()));
-                  return;
-                }
-                handler.handle(Future.succeededFuture(new UserImpl(json)));
-              });
-            } catch (RuntimeException | IOException e) {
-              handler.handle(Future.failedFuture(e));
-            }
-          }
-        };
-
-        if (options.getRequireResidentKey() != null && options.getRequireResidentKey()) {
-          // username are not provided (RK) we now need to lookup by rawId
-          store.getUserCredentialsById(webauthnResp.getString("rawId"), onGetUserCredentialsByAny);
-
-        } else {
-          // username can't be null
+      switch (clientData.getString("type")) {
+        case "webauthn.create":
+          // we always need a username to register
           if (username == null) {
             handler.handle(Future.failedFuture("username can't be null!"));
             return;
           }
-          store.getUserCredentialsByName(username, onGetUserCredentialsByAny);
-        }
 
-        return;
-      default:
-        handler.handle(Future.failedFuture("Can not determine type of response!"));
+          try {
+            final JsonObject authrInfo = verifyWebAuthNCreate(webauthnResp, clientDataJSON, clientData);
+            // the principal for vertx-auth
+            JsonObject principal = new JsonObject()
+              .put("credID", authrInfo.getString("credID"))
+              .put("publicKey", authrInfo.getString("publicKey"))
+              .put("counter", authrInfo.getLong("counter", 0L));
+
+            // by default the store can upsert if a credential is missing, the user has been verified so it is valid
+            // the store however might dissallow this operation
+            JsonObject storeItem = new JsonObject()
+              .mergeIn(principal)
+              .put("username", username);
+
+            store.updateUserCredential(authrInfo.getString("credID"), storeItem, true, updateUserCredential -> {
+              if (updateUserCredential.failed()) {
+                handler.handle(Future.failedFuture(updateUserCredential.cause()));
+              } else {
+                handler.handle(Future.succeededFuture(new UserImpl(principal)));
+              }
+            });
+          } catch (RuntimeException | IOException e) {
+            handler.handle(Future.failedFuture(e));
+          }
+          return;
+        case "webauthn.get":
+
+          final Handler<AsyncResult<List<JsonObject>>> onGetUserCredentialsByAny = getUserCredentials -> {
+            if (getUserCredentials.failed()) {
+              handler.handle(Future.failedFuture(getUserCredentials.cause()));
+            } else {
+              List<JsonObject> authenticators = getUserCredentials.result();
+              if (authenticators == null) {
+                authenticators = Collections.emptyList();
+              }
+
+              // STEP 24 Query public key base on user ID
+              Optional<JsonObject> authenticator = authenticators.stream()
+                .filter(authr -> webauthnResp.getString("id").equals(authr.getValue("credID")))
+                .findFirst();
+
+              if (!authenticator.isPresent()) {
+                handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthnResp.getString("rawId")));
+                return;
+              }
+
+              try {
+                final JsonObject json = authenticator.get();
+                final long counter = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, json);
+                // update the counter on the authenticator
+                json.put("counter", counter);
+                // update the credential (the important here is to update the counter)
+                store.updateUserCredential(webauthnResp.getString("rawId"), json, false, updateUserCredential -> {
+                  if (updateUserCredential.failed()) {
+                    handler.handle(Future.failedFuture(updateUserCredential.cause()));
+                    return;
+                  }
+                  handler.handle(Future.succeededFuture(new UserImpl(json)));
+                });
+              } catch (RuntimeException | IOException e) {
+                handler.handle(Future.failedFuture(e));
+              }
+            }
+          };
+
+          if (options.getRequireResidentKey() != null && options.getRequireResidentKey()) {
+            // username are not provided (RK) we now need to lookup by rawId
+            store.getUserCredentialsById(webauthnResp.getString("rawId"), onGetUserCredentialsByAny);
+
+          } else {
+            // username can't be null
+            if (username == null) {
+              handler.handle(Future.failedFuture("username can't be null!"));
+              return;
+            }
+            store.getUserCredentialsByName(username, onGetUserCredentialsByAny);
+          }
+
+          return;
+        default:
+          handler.handle(Future.failedFuture("Can not determine type of response!"));
+      }
+    } catch (ClassCastException | CredentialValidationException e) {
+      handler.handle(Future.failedFuture(e));
     }
   }
 

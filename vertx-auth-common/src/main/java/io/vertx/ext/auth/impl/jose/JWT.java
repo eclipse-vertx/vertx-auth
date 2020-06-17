@@ -24,7 +24,6 @@ import io.vertx.ext.auth.NoSuchKeyIdException;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -56,21 +55,6 @@ public final class JWT {
     // Spec requires "none" to always be available
     SIGN.put("none", Collections.singletonList(new CryptoNone()));
     VERIFY.put("none", Collections.singletonList(new CryptoNone()));
-  }
-
-  /**
-   * Loads all keys from a keystore.
-   * @deprecated Use {@link JWK#load(KeyStore, String, Map)} instead.
-   * @param keyStore the keystore to load
-   * @param keyStorePassword the keystore password
-   */
-  @Deprecated
-  public JWT(final KeyStore keyStore, final char[] keyStorePassword) {
-    this();
-    // delegate to the JWK loader
-    for (JWK key : JWK.load(keyStore, new String(keyStorePassword), null)) {
-      addJWK(key);
-    }
   }
 
   /**

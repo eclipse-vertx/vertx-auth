@@ -81,4 +81,41 @@ public interface AuthenticationProvider {
     authenticate(credentials, promise);
     return promise.future();
   }
+
+  /**
+   * Authenticate a user.
+   * <p>
+   * The first argument is a Credentials object containing information for authenticating the user.
+   * What this actually contains depends on the specific implementation.
+   *
+   * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
+   * The user object can then be used for authorisation.
+   *
+   * @param credentials  The credentials
+   * @param resultHandler  The result handler
+   */
+  default void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    try {
+      credentials.checkValid(null);
+      authenticate(credentials.toJson(), resultHandler);
+    } catch (CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
+  }
+
+  /**
+   * Authenticate a user.
+   * <p>
+   * The first argument is a Credentials object containing information for authenticating the user.
+   * What this actually contains depends on the specific implementation.
+   *
+   * @see AuthenticationProvider#authenticate(Credentials, Handler)
+   * @param credentials  The credentials
+   * @return The result future
+   */
+  default Future<User> authenticate(Credentials credentials) {
+    Promise<User> promise = Promise.promise();
+    authenticate(credentials, promise);
+    return promise.future();
+  }
 }

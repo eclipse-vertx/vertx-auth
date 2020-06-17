@@ -22,7 +22,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.User;
 
 /**
  * Factory interface for creating JWT based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
@@ -41,26 +40,6 @@ public interface JWTAuth extends AuthenticationProvider {
    */
   static JWTAuth create(Vertx vertx, JWTAuthOptions config) {
     return new JWTAuthProviderImpl(vertx, config);
-  }
-
-  /**
-   * Authenticate a User using the specified {@link JWTCredentials}
-   *
-   * @param credentials the credentials to use.
-   * @param handler the callback
-   */
-  void authenticate(JWTCredentials credentials, Handler<AsyncResult<User>> handler);
-
-  /**
-   * Authenticate a User using the specified {@link JWTCredentials}
-   *
-   * @param credentials to use
-   * @return future result
-   */
-  default Future<User> authenticate(JWTCredentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
   }
 
   /**

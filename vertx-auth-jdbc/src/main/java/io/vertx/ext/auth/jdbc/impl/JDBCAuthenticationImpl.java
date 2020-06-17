@@ -26,6 +26,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
@@ -61,52 +63,51 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
     authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
   }
-  
-  @Override
-  public void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> resultHandler) {
 
-    if (credentials.getUsername() == null) {
-      resultHandler.handle(Future.failedFuture("authInfo must contain username in 'username' field"));
-      return;
-    }
-    if (credentials.getPassword() == null) {
-      resultHandler.handle(Future.failedFuture("authInfo must contain password in 'password' field"));
-      return;
-    }
-    executeQuery(options.getAuthenticationQuery(), new JsonArray().add(credentials.getUsername()), queryResponse -> {
-      if (queryResponse.succeeded()) {
-        ResultSet rs = queryResponse.result();
-        switch (rs.getNumRows()) {
-          case 0: {
-            // Unknown user/password
-            resultHandler.handle(Future.failedFuture("Invalid username/password"));
-            break;
-          }
-          case 1: {
-            JsonArray row = rs.getResults().get(0);
-            try {
-              if (verify(row, credentials.getPassword())) {
-                User user = new UserImpl(new JsonObject().put("username", credentials.getUsername()));
-                resultHandler.handle(Future.succeededFuture(user));
-              } else {
-                resultHandler.handle(Future.failedFuture("Invalid username/password"));
-              }
-            } catch (RuntimeException e) {
-              resultHandler.handle(Future.failedFuture(e));
+  @Override
+  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+
+    try {
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+
+      executeQuery(options.getAuthenticationQuery(), new JsonArray().add(authInfo.getUsername()), queryResponse -> {
+        if (queryResponse.succeeded()) {
+          ResultSet rs = queryResponse.result();
+          switch (rs.getNumRows()) {
+            case 0: {
+              // Unknown user/password
+              resultHandler.handle(Future.failedFuture("Invalid username/password"));
+              break;
             }
-            break;
-          }
-          default: {
-            // More than one row returned!
-            resultHandler.handle(Future.failedFuture("Failure in authentication"));
-            break;
+            case 1: {
+              JsonArray row = rs.getResults().get(0);
+              try {
+                if (verify(row, authInfo.getPassword())) {
+                  User user = new UserImpl(new JsonObject().put("username", authInfo.getUsername()));
+                  resultHandler.handle(Future.succeededFuture(user));
+                } else {
+                  resultHandler.handle(Future.failedFuture("Invalid username/password"));
+                }
+              } catch (RuntimeException e) {
+                resultHandler.handle(Future.failedFuture(e));
+              }
+              break;
+            }
+            default: {
+              // More than one row returned!
+              resultHandler.handle(Future.failedFuture("Failure in authentication"));
+              break;
+            }
           }
         }
-      }
-      else {
-        resultHandler.handle(Future.failedFuture(queryResponse.cause()));
-      }
-    });
+        else {
+          resultHandler.handle(Future.failedFuture(queryResponse.cause()));
+        }
+      });
+    } catch (ClassCastException | CredentialValidationException e) {
+      resultHandler.handle(Future.failedFuture(e));
+    }
   }
 
   private boolean verify(JsonArray row, String password) {

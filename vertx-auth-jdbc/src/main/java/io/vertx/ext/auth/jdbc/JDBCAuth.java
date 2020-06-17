@@ -19,16 +19,9 @@ package io.vertx.ext.auth.jdbc;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.impl.JDBCAuthImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
@@ -166,25 +159,4 @@ public interface JDBCAuth extends AuthProvider {
    */
   @Fluent
   JDBCAuth setNonces(JsonArray nonces);
-   
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   * 
-   * @param credentials
-   * @param handler
-   */
-  void authenticate(UsernamePasswordCredentials credentials, Handler<AsyncResult<User>> handler);
-  
-  /**
-   * Authenticate a User using the specified {@link UsernamePasswordCredentials}
-   * 
-   * @param credential
-   * @param handler
-   */
-  default Future<User> authenticate(UsernamePasswordCredentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
-  }
-  
 }
