@@ -823,7 +823,7 @@ public final class JWK implements Crypto {
 
   private int createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
     mac = Mac.getInstance(alias);
-    mac.init(new SecretKeySpec(json.getString("k").getBytes(UTF8), alias));
+    mac.init(new SecretKeySpec(json.getBinary("k"), alias));
     return USE_SIG + USE_ENC;
   }
 
