@@ -109,7 +109,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
     if (config.containsKey("realm-public-key")) {
       options.addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("RS256")
-        .setPublicKey(config.getString("realm-public-key")));
+        .setBuffer(config.getString("realm-public-key")));
     }
 
     return OAuth2Auth
