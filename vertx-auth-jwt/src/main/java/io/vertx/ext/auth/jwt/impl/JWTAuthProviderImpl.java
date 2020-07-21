@@ -154,7 +154,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
       resultHandler.handle(Future.succeededFuture(User.create(payload)));
 
-    } catch (CredentialValidationException | RuntimeException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }

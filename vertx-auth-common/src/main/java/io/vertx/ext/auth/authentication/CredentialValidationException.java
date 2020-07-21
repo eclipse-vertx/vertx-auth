@@ -20,7 +20,7 @@ package io.vertx.ext.auth.authentication;
  *
  * @author Paulo Lopes
  */
-public class CredentialValidationException extends Exception {
+public class CredentialValidationException extends RuntimeException {
 
   public CredentialValidationException(String message) {
     super(message);
