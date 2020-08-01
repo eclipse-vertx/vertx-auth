@@ -12,6 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
@@ -79,20 +80,13 @@ public class RoleBasedAuthorizationTest {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertTrue(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(0, "localhost", listen -> {
-      if (listen.failed()) {
-        should.fail(listen.cause());
-        return;
-      }
-
-      rule.vertx().createHttpClient().get(listen.result().actualPort(), "localhost", "/?variable1=r1", res -> {
-        if (res.failed()) {
-          should.fail(res.cause());
-          return;
-        }
-        server.close(close -> test.complete());
-      });
-    });
+    }).listen(0, "localhost", should.asyncAssertSuccess(s -> {
+      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1", should.asyncAssertSuccess(req -> {
+        req.send(should.asyncAssertSuccess(res -> {
+          server.close(close -> test.complete());
+        }));
+      }));
+    }));
   }
 
   @Test
@@ -106,20 +100,13 @@ public class RoleBasedAuthorizationTest {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertFalse(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(0, "localhost", listen -> {
-      if (listen.failed()) {
-        should.fail(listen.cause());
-        return;
-      }
-
-      rule.vertx().createHttpClient().get(listen.result().actualPort(), "localhost", "/?variable1=r2", res -> {
-        if (res.failed()) {
-          should.fail(res.cause());
-          return;
-        }
-        server.close(close -> test.complete());
-      });
-    });
+    }).listen(0, "localhost", should.asyncAssertSuccess(s -> {
+      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2", should.asyncAssertSuccess(req -> {
+        req.send(should.asyncAssertSuccess(res -> {
+          server.close(close -> test.complete());
+        }));
+      }));
+    }));
   }
 
 }

@@ -579,30 +579,23 @@ public class OAuth2API {
   }
 
   public void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<OAuth2Response>> callback) {
-    client.send(options, payload, ar1 -> {
-      if (ar1.succeeded()) {
-        HttpClientResponse resp = ar1.result();
-        resp.body(ar2 -> {
-          if (ar2.succeeded()) {
-            Buffer body = ar2.result();
-            if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
-              if (body == null || body.length() == 0) {
-                callback.handle(Future.failedFuture(resp.statusMessage()));
-              } else {
-                callback.handle(Future.failedFuture(resp.statusMessage() + ": " + body.toString()));
-              }
-            } else {
-              callback.handle(Future.succeededFuture(new OAuth2Response(resp.statusCode(), resp.headers(), body)));
-            }
-          } else {
-            client.close();
-            callback.handle(ar2.mapEmpty());
-          }
-        });
+    client.request(options).compose(req -> {
+      Future<HttpClientResponse> fut;
+      if (payload != null) {
+        fut = req.send(payload);
       } else {
-        callback.handle(Future.failedFuture(ar1.cause()));
+        fut = req.send();
       }
-    });
+      return fut.compose(resp -> {
+        if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
+          return Future.succeededFuture();
+        } else {
+          return resp
+            .body()
+            .map(body -> new OAuth2Response(resp.statusCode(), resp.headers(), body));
+        }
+      });
+    }).onComplete(callback);
   }
 
   public static String stringify(JsonObject json) {
