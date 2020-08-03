@@ -19,6 +19,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.impl.jose.JWT;
 
@@ -99,8 +100,6 @@ public class AndroidSafetynetAttestation implements Attestation {
 
       for (int i = 0; i < x5c.size(); i++) {
         final X509Certificate c = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(i))));
-        // verify the certificate chain
-        c.checkValidity();
         certChain.add(c);
       }
 
@@ -108,7 +107,9 @@ public class AndroidSafetynetAttestation implements Attestation {
         throw new AttestationException("The common name is not set to 'attest.android.com'!");
       }
 
-      validateCertificatePath(certChain);
+      // validate the chain
+      CertificateHelper.checkValidity(certChain);
+
       /* ----- Verify header ENDS ----- */
 
       /* ----- Verify signature ----- */
@@ -119,28 +120,6 @@ public class AndroidSafetynetAttestation implements Attestation {
 
     } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException e) {
       throw new AttestationException(e);
-    }
-  }
-
-  private void validateCertificatePath(List<X509Certificate> certificates) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
-
-    for (int i = 0; i < certificates.size(); i++) {
-      X509Certificate subjectCert = certificates.get(i);
-      X509Certificate issuerCert;
-
-      if (i + 1 >= certificates.size()) {
-        issuerCert = subjectCert;
-      } else {
-        issuerCert = certificates.get(i + 1);
-      }
-
-      // verify that the issuer matches the next one in the list
-      if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
-        throw new CertificateException("Failed to validate certificate path! Issuers dont match!");
-      }
-
-      // verify the certificate against the issuer
-      subjectCert.verify(issuerCert.getPublicKey());
     }
   }
 

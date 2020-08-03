@@ -19,6 +19,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.impl.jose.JWK;
 
@@ -28,7 +29,9 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 public class PackedAttestation implements Attestation {
 
@@ -73,7 +76,17 @@ public class PackedAttestation implements Attestation {
         /* ----- Verify FULL attestation ----- */
         JsonArray x5c = attStmt.getJsonArray("x5c");
 
-        final X509Certificate x509Certificate = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(0))));
+        List<X509Certificate> certChain = new ArrayList<>();
+
+        for (int i = 0; i < x5c.size(); i++) {
+          final X509Certificate c = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(i))));
+          certChain.add(c);
+        }
+
+        // validate the chain
+        CertificateHelper.checkValidity(certChain);
+
+        final X509Certificate x509Certificate = certChain.get(0);
         // check the certificate
         x509Certificate.checkValidity();
         // certificate valid lets verify the principal
@@ -138,7 +151,7 @@ public class PackedAttestation implements Attestation {
       if (!signatureValid) {
         throw new AttestationException("Failed to verify the signature!");
       }
-    } catch (CertificateException | InvalidKeyException | SignatureException e) {
+    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }
   }

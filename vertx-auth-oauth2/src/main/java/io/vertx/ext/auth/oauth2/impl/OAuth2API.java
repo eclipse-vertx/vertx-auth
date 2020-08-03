@@ -579,23 +579,48 @@ public class OAuth2API {
   }
 
   public void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<OAuth2Response>> callback) {
-    client.request(options).compose(req -> {
-      Future<HttpClientResponse> fut;
-      if (payload != null) {
-        fut = req.send(payload);
-      } else {
-        fut = req.send();
+    client.request(options, request -> {
+      if (request.failed()) {
+        callback.handle(Future.failedFuture(request.cause()));
+        return;
       }
-      return fut.compose(resp -> {
-        if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
-          return Future.succeededFuture();
-        } else {
-          return resp
-            .body()
-            .map(body -> new OAuth2Response(resp.statusCode(), resp.headers(), body));
+
+      final HttpClientRequest req = request.result();
+
+      final Handler<AsyncResult<HttpClientResponse>> resultHandler = send -> {
+        if (send.failed()) {
+          callback.handle(Future.failedFuture(send.cause()));
+          return;
         }
-      });
-    }).onComplete(callback);
+
+        final HttpClientResponse res = send.result();
+
+        // read the body regardless
+        res.body(body -> {
+          if (body.succeeded()) {
+            Buffer value = body.result();
+            if (res.statusCode() < 200 || res.statusCode() >= 300) {
+              if (value == null || value.length() == 0) {
+                callback.handle(Future.failedFuture(res.statusMessage()));
+              } else {
+                callback.handle(Future.failedFuture(res.statusMessage() + ": " + value.toString()));
+              }
+            } else {
+              callback.handle(Future.succeededFuture(new OAuth2Response(res.statusCode(), res.headers(), value)));
+            }
+          } else {
+            callback.handle(Future.failedFuture(body.cause()));
+          }
+        });
+      };
+
+      // send
+      if (payload != null) {
+        req.send(payload, resultHandler);
+      } else {
+        req.send(resultHandler);
+      }
+    });
   }
 
   public static String stringify(JsonObject json) {

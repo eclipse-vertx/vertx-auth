@@ -152,7 +152,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         return;
       }
 
-      resultHandler.handle(Future.succeededFuture(User.create(payload)));
+      resultHandler.handle(Future.succeededFuture(createUser(payload, permissionsClaimKey)));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
@@ -178,6 +178,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
     return jwtToken.getJsonArray(permissionsClaimKey, null);
   }
 
+  @Deprecated
   private User createUser(JsonObject jwtToken, String permissionsClaimKey) {
     User result = User.create(jwtToken);
     JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);

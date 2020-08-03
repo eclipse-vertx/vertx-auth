@@ -25,8 +25,8 @@ import java.util.Map;
 public class COSE {
 
   private static class NV {
-    private String name;
-    private Map<String, String> values;
+    private final String name;
+    private final Map<String, String> values;
 
     NV(String name) {
       this.name = name;

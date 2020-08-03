@@ -6,6 +6,7 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.impl.CertificateHelper;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -639,12 +640,12 @@ public final class JWK implements Crypto {
 
       label = kid != null ? kid : alg + "#" + json.hashCode();
 
-    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException | NoSuchProviderException | SignatureException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private int createRSA(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException {
+  private int createRSA(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException, SignatureException {
     int use = 0;
 
     // public key
@@ -679,26 +680,17 @@ public final class JWK implements Crypto {
       JsonArray x5c = json.getJsonArray("x5c");
 
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
-      final X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
-      // verify the leaf certificate
-      certificate.checkValidity();
 
-      try {
-        if (x5c.size() > 1) {
-          List<X509Certificate> certChain = new ArrayList<>();
-          certChain.add(certificate);
-          for (int i = 1; i < x5c.size(); i++) {
-            final X509Certificate c = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(i)).getBytes(UTF8)));
-            // verify the leaf certificate
-            c.checkValidity();
-            certChain.add(c);
-          }
-          // validate the chain
-          validateCertificatePath(certChain);
-        }
-      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException e) {
-        throw new RuntimeException(e);
+      List<X509Certificate> certChain = new ArrayList<>();
+      for (int i = 0; i < x5c.size(); i++) {
+        final X509Certificate c = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(i)).getBytes(UTF8)));
+        certChain.add(c);
       }
+
+      // validate the chain
+      CertificateHelper.checkValidity(certChain);
+
+      final X509Certificate certificate = certChain.get(0);
 
       // extract the public key
       publicKey = certificate.getPublicKey();
@@ -744,28 +736,6 @@ public final class JWK implements Crypto {
     }
 
     return use;
-  }
-
-  public static void validateCertificatePath(List<X509Certificate> certificates) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
-
-    for (int i = 0; i < certificates.size(); i++) {
-      X509Certificate subjectCert = certificates.get(i);
-      X509Certificate issuerCert;
-
-      if (i + 1 >= certificates.size()) {
-        issuerCert = subjectCert;
-      } else {
-        issuerCert = certificates.get(i + 1);
-      }
-
-      // verify that the issuer matches the next one in the list
-      if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
-        throw new CertificateException("Failed to validate certificate path! Issuers dont match!");
-      }
-
-      // verify the certificate against the issuer
-      subjectCert.verify(issuerCert.getPublicKey());
-    }
   }
 
   private String addBoundaries(final String certificate) {
