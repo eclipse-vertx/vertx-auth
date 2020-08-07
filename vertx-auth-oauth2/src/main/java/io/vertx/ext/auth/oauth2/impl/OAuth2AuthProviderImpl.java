@@ -132,12 +132,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+    final OAuth2FlowType flow = config.getFlow();
+
     if (authInfo.containsKey("access_token")) {
-      authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
+      if (flow != OAuth2FlowType.AUTH_JWT && flow != OAuth2FlowType.IMPLICIT) {
+        authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
+      } else {
+        handler.handle(Future.failedFuture("access_token provided but provider is not configured for AUTH_CODE"));
+      }
       return;
     }
     if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
-      authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
+      if (flow == OAuth2FlowType.PASSWORD) {
+        authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
+      } else {
+        handler.handle(Future.failedFuture("username/password provided but provider is not configured for PASSWORD"));
+      }
       return;
     }
     authenticate(new Oauth2Credentials(authInfo), handler);
@@ -262,7 +272,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             oauth2OnBehalfOfCredentials.checkValid(config.getFlow());
 
             final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
-            params.mergeIn(token);
             params
               .put("assertion", jwt.sign(token, config.getJWTOptions()));
             break;
