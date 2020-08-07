@@ -159,13 +159,13 @@ public final class JWT {
 
     List<Crypto> cryptos = VERIFY.get(alg);
 
-    if (cryptos == null || cryptos.size() == 0) {
-      throw new NoSuchKeyIdException(alg);
-    }
-
     // if we only allow secure alg, then none is not a valid option
     if (!unsecure && "none".equals(alg)) {
       throw new IllegalStateException("Algorithm \"none\" not allowed");
+    }
+
+    if (cryptos == null || cryptos.size() == 0) {
+      throw new NoSuchKeyIdException(alg);
     }
 
     // verify signature. `sign` will return base64 string.

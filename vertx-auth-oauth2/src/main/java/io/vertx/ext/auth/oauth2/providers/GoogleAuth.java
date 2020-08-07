@@ -138,6 +138,7 @@ public interface GoogleAuth extends OpenIDConnectAuth {
         .setTokenPath(serviceAccountJson.getString("token_uri"))
         .addPubSecKey(new PubSecKeyOptions()
           .setAlgorithm("RS256")
+          .setId(serviceAccountJson.getString("private_key_id"))
           .setBuffer(serviceAccountJson.getString("private_key")))
         .setJWTOptions(new JWTOptions()
           .setAlgorithm("RS256")
