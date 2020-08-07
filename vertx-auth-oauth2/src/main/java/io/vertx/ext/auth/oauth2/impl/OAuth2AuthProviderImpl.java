@@ -135,7 +135,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     final OAuth2FlowType flow = config.getFlow();
 
     if (authInfo.containsKey("access_token")) {
-      if (flow == OAuth2FlowType.AUTH_CODE) {
+      if (flow != OAuth2FlowType.AUTH_JWT && flow != OAuth2FlowType.IMPLICIT) {
         authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
       } else {
         handler.handle(Future.failedFuture("access_token provided but provider is not configured for AUTH_CODE"));
