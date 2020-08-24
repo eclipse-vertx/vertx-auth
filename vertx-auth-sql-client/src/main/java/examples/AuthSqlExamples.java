@@ -79,7 +79,7 @@ public class AuthSqlExamples {
   public void example9(SqlAuthentication jdbcAuth, SqlClient sqlClient) {
 
     String hash = jdbcAuth.hash(
-      "pkdbf2", // hashing algorithm (OWASP recommended)
+      "pbkdf2", // hashing algorithm (OWASP recommended)
       VertxContextPRNG.current().nextString(32), // secure random salt
       "sausages" // password
     );
