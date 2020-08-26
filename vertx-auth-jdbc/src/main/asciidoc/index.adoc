@@ -75,7 +75,7 @@ ALTER TABLE user_roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFEREN
 
 == Hashing Strategy
 
-The provider uses the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a> to
+The provider uses the https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md[PHC string format] to
 hash password. In the past releases this wasn't the rule. In order to keep backward compatibility a authentication
 provider can be created with a legacy hashing strategy. It is highly recommended to avoid this, and upgrade the user
 hashes to the new format (by requesting the user to renew the password for example).
