@@ -59,6 +59,7 @@ public final class HashString {
     switch (parts.length) {
       case 2:
         id = parts[1];
+        break;
       case 3:
         id = parts[1];
         hash = parts[2];

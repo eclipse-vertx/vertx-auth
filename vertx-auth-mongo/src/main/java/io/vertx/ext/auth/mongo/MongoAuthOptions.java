@@ -27,6 +27,7 @@ import io.vertx.ext.mongo.MongoClient;
  * @deprecated This class has been replaced by the class {@link io.vertx.ext.auth.mongo.MongoAuthenticationOptions} for authentication and {@link io.vertx.ext.auth.mongo.MongoAuthorizationOptions} for authorization
  */
 @DataObject(generateConverter = true)
+@Deprecated
 public class MongoAuthOptions implements io.vertx.ext.auth.AuthOptions {
 
   private boolean shared;

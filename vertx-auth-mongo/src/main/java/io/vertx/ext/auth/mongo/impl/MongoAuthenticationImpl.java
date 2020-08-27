@@ -83,14 +83,15 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   @Override
   public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     try {
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
-      authInfo.checkValid(null);
-
       // Null username is invalid
       if (credentials == null) {
         resultHandler.handle((Future.failedFuture("Credentials must be set for authentication.")));
         return;
       }
+
+      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+
       AuthToken token = new AuthToken(authInfo.getUsername(), authInfo.getPassword());
 
       JsonObject query = createQuery(authInfo.getUsername());
