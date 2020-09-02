@@ -111,8 +111,8 @@ public class Oauth2Credentials implements Credentials {
         if (code == null || code.length() == 0) {
           throw new CredentialValidationException("code cannot be null or empty");
         }
-        if (redirectUri == null || redirectUri.length() == 0) {
-          throw new CredentialValidationException("redirectUri cannot be null or empty");
+        if (redirectUri != null && redirectUri.length() == 0) {
+          throw new CredentialValidationException("redirectUri cannot be empty");
         }
         break;
     }
