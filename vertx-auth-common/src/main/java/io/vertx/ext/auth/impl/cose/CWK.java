@@ -14,68 +14,71 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.webauthn.impl;
+package io.vertx.ext.auth.impl.cose;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWK;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class COSE {
+/**
+ * CBOR Object Signing and Encryption (COSE)
+ *
+ * Concise Binary Object Representation (CBOR) is a data format designed
+ * for small code size and small message size.  There is a need for the
+ * ability to have basic security services defined for this data format.
+ * This document defines the CBOR Object Signing and Encryption (COSE)
+ * protocol.  This specification describes how to create and process
+ * signatures, message authentication codes, and encryption using CBOR
+ * for serialization.  This specification additionally describes how to
+ * represent cryptographic keys using CBOR.
+ *
+ * This class allows converting a COSE KEY to a JOSE KEY for ease of use.
+ *
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ */
+public final class CWK {
 
   private static class NV {
     private final String name;
     private final Map<String, String> values;
 
-    NV(String name) {
+    private NV(String name, String... pairs) {
       this.name = name;
-      this.values = new HashMap<>();
-    }
-
-    NV add(String key, String value) {
-      values.put(key, value);
-      return this;
+      if (pairs == null || pairs.length == 0) {
+        this.values = Collections.emptyMap();
+      } else {
+        Map<String, String> tmp = new HashMap<>();
+        for (int i = 0; i < pairs.length; i += 2) {
+          tmp.put(pairs[i], pairs[i + 1]);
+        }
+        this.values = Collections.unmodifiableMap(tmp);
+      }
     }
   }
 
   // main COSE labels
   // defined here: https://tools.ietf.org/html/rfc8152#section-7.1
-  private static final Map<String, NV> COSE_LABELS = new HashMap<String, NV>() {{
+  private static final Map<String, NV> COSE_LABELS = Collections.unmodifiableMap(new HashMap<String, NV>() {{
     put("1",
-      new NV("kty")
-        .add("2", "EC")
-        .add("3", "RSA"));
+      new NV("kty", "1", "OKP", "2", "EC", "3", "RSA"));
     put("2",
       new NV("kid"));
     put("3",
-      new NV("alg")
-        .add("-7", "ES256")
-        .add("-8", "EdDSA")
-        .add("-35", "ES384")
-        .add("-36", "ES512")
-        .add("-257", "RS256")
-        .add("-258", "RS384")
-        .add("-259", "RS512")
-        .add("-65535", "RS1"));
+      new NV("alg", "-7", "ES256", "-8", "EdDSA", "-35", "ES384", "-36", "ES512", "-37", "PS256", "-38", "PS384", "-39", "PS512", "-257", "RS256", "-258", "RS384", "-259", "RS512", "-65535", "RS1"));
     put("4",
       new NV("key_ops"));
     put("5",
       new NV("base_iv"));
-  }};
+  }});
 
   // ECDSA key parameters
   // defined here: https://tools.ietf.org/html/rfc8152#section-13.1.1
-  private static final Map<String, NV> EC_KEY_PARAMS = new HashMap<String, NV>() {{
+  private static final Map<String, NV> EC_KEY_PARAMS = Collections.unmodifiableMap(new HashMap<String, NV>() {{
     put("-1",
-      new NV("crv")
-        .add("1", "P-256")
-        .add("2", "P-384")
-        .add("3", "P-521")
-        .add("4", "X25519")
-        .add("5", "X448")
-        .add("6", "Ed25519")
-        .add("7", "Ed448")
+      new NV("crv", "1", "P-256", "2", "P-384", "3", "P-521", "4", "X25519", "5", "X448", "6", "Ed25519", "7", "Ed448")
     );
     put("-2",
       new NV("x"));
@@ -83,11 +86,23 @@ public class COSE {
       new NV("y"));
     put("-4",
       new NV("d"));
-  }};
+  }});
+
+  // EdDSA key parameters
+  // defined here: https://tools.ietf.org/html/rfc8152#section-13.1.1
+  private static final Map<String, NV> OKP_KEY_PARAMS = Collections.unmodifiableMap(new HashMap<String, NV>() {{
+    put("-1",
+      new NV("crv", "1", "P-256", "2", "P-384", "3", "P-521", "4", "X25519", "5", "X448", "6", "Ed25519", "7", "Ed448")
+    );
+    put("-2",
+      new NV("x"));
+    put("-4",
+      new NV("d"));
+  }});
 
   // RSA key parameters
   // defined here: https://tools.ietf.org/html/rfc8230#section-4
-  private static final Map<String, NV> RSA_KEY_PARAMS = new HashMap<String, NV>() {{
+  private static final Map<String, NV> RSA_KEY_PARAMS = Collections.unmodifiableMap(new HashMap<String, NV>() {{
     put("-1",
       new NV("n"));
     put("-2",
@@ -112,19 +127,20 @@ public class COSE {
       new NV("d_i"));
     put("-12",
       new NV("t_i"));
-  }};
+  }});
 
-  private static final Map<String, Map<String, NV>> KEY_PARAMS = new HashMap<String, Map<String, NV>>() {{
+  private static final Map<String, Map<String, NV>> KEY_PARAMS = Collections.unmodifiableMap(new HashMap<String, Map<String, NV>>() {{
+    put("OKP", OKP_KEY_PARAMS);
     put("EC", EC_KEY_PARAMS);
     put("RSA", RSA_KEY_PARAMS);
-  }};
+  }});
 
-  public static JWK toJWK(Map<String, Object> coseMap) {
+  public static JWK toJWK(Iterable<Map.Entry<String, Object>> coseMap) {
     JsonObject retKey = new JsonObject();
     Map<String, String> extraMap = new HashMap<>();
 
     // parse main COSE labels
-    for (Map.Entry<String, Object> kv : coseMap.entrySet()) {
+    for (Map.Entry<String, Object> kv : coseMap) {
       String key = kv.getKey();
       String value = kv.getValue().toString();
 

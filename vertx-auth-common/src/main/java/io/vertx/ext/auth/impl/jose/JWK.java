@@ -51,6 +51,7 @@ public final class JWK implements Crypto {
   // JSON JWK properties
   private final String kid;
   private final String alg;
+  private final String kty;
 
   // the label is a synthetic id that allows comparing 2 keys
   // that are expected to replace each other but are not necessarely
@@ -177,6 +178,7 @@ public final class JWK implements Crypto {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
+        kty = "oct";
         len = 256;
         asn1 = false;
         // this is a symmetric key
@@ -190,6 +192,7 @@ public final class JWK implements Crypto {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
+        kty = "oct";
         len = 384;
         asn1 = false;
         // this is a symmetric key
@@ -203,6 +206,7 @@ public final class JWK implements Crypto {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
+        kty = "oct";
         len = 512;
         asn1 = false;
         // this is a symmetric key
@@ -218,6 +222,7 @@ public final class JWK implements Crypto {
     try {
       switch (alg) {
         case "RS256":
+          kty = "RSA";
           asn1 = false;
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
           signature = Signature.getInstance("SHA256withRSA");
@@ -228,6 +233,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "RS384":
+          kty = "RSA";
           asn1 = false;
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
           signature = Signature.getInstance("SHA384withRSA");
@@ -238,6 +244,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "RS512":
+          kty = "RSA";
           asn1 = false;
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
           signature = Signature.getInstance("SHA512withRSA");
@@ -248,6 +255,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "PS256":
+          kty = "RSASSA";
           asn1 = false;
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
           signature = Signature.getInstance("RSASSA-PSS");
@@ -259,6 +267,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "PS384":
+          kty = "RSASSA";
           asn1 = false;
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
           signature = Signature.getInstance("RSASSA-PSS");
@@ -270,6 +279,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "PS512":
+          kty = "RSASSA";
           asn1 = false;
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
           signature = Signature.getInstance("RSASSA-PSS");
@@ -281,18 +291,21 @@ public final class JWK implements Crypto {
           }
           break;
         case "ES256":
+          kty = "EC";
           asn1 = true;
           len = 64;
           use = parsePEM(KeyFactory.getInstance("EC"), pem);
           signature = Signature.getInstance("SHA256withECDSA");
           break;
         case "ES384":
+          kty = "EC";
           asn1 = true;
           len = 96;
           use = parsePEM(KeyFactory.getInstance("EC"), pem);
           signature = Signature.getInstance("SHA384withECDSA");
           break;
         case "ES512":
+          kty = "EC";
           asn1 = true;
           len = 132;
           use = parsePEM(KeyFactory.getInstance("EC"), pem);
@@ -374,6 +387,7 @@ public final class JWK implements Crypto {
 
     switch (alg) {
       case "HS256":
+        kty = "oct";
         len = 256;
         asn1 = false;
         if (!"HMacSHA256".equalsIgnoreCase(macAlg)) {
@@ -382,6 +396,7 @@ public final class JWK implements Crypto {
         this.mac = mac;
         break;
       case "HS384":
+        kty = "oct";
         len = 384;
         asn1 = false;
         if (!"HMacSHA384".equalsIgnoreCase(macAlg)) {
@@ -390,6 +405,7 @@ public final class JWK implements Crypto {
         this.mac = mac;
         break;
       case "HS512":
+        kty = "oct";
         len = 512;
         asn1 = false;
         if (!"HMacSHA512".equalsIgnoreCase(macAlg)) {
@@ -421,6 +437,7 @@ public final class JWK implements Crypto {
 
     switch (algorithm) {
       case "RS256":
+        kty = "RSA";
         asn1 = false;
         signature = Signature.getInstance("SHA256withRSA");
         if (publicKey != null && publicKey instanceof RSAKey) {
@@ -430,6 +447,7 @@ public final class JWK implements Crypto {
         }
         break;
       case "RS384":
+        kty = "RSA";
         asn1 = false;
         signature = Signature.getInstance("SHA384withRSA");
         if (publicKey != null && publicKey instanceof RSAKey) {
@@ -439,6 +457,7 @@ public final class JWK implements Crypto {
         }
         break;
       case "RS512":
+        kty = "RSA";
         asn1 = false;
         signature = Signature.getInstance("SHA512withRSA");
         if (publicKey != null && publicKey instanceof RSAKey) {
@@ -448,6 +467,7 @@ public final class JWK implements Crypto {
         }
         break;
       case "PS256":
+        kty = "RSASSA";
         asn1 = false;
         signature = Signature.getInstance("RSASSA-PSS");
         signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
@@ -458,6 +478,7 @@ public final class JWK implements Crypto {
         }
         break;
       case "PS384":
+        kty = "RSASSA";
         asn1 = false;
         signature = Signature.getInstance("RSASSA-PSS");
         signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
@@ -468,6 +489,7 @@ public final class JWK implements Crypto {
         }
         break;
       case "PS512":
+        kty = "RSASSA";
         asn1 = false;
         signature = Signature.getInstance("RSASSA-PSS");
         signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
@@ -478,16 +500,19 @@ public final class JWK implements Crypto {
         }
         break;
       case "ES256":
+        kty = "EC";
         asn1 = true;
         len = 64;
         signature = Signature.getInstance("SHA256withECDSA");
         break;
       case "ES384":
+        kty = "EC";
         asn1 = true;
         len = 96;
         signature = Signature.getInstance("SHA384withECDSA");
         break;
       case "ES512":
+        kty = "EC";
         asn1 = true;
         len = 132;
         signature = Signature.getInstance("SHA512withECDSA");
@@ -504,6 +529,7 @@ public final class JWK implements Crypto {
       switch (json.getString("kty")) {
         case "RSA":
         case "RSASSA":
+          kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "RS256");
           symmetric = false;
@@ -578,6 +604,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "EC":
+          kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "ES256");
           symmetric = false;
@@ -609,6 +636,7 @@ public final class JWK implements Crypto {
           }
           break;
         case "oct":
+          kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "HS256");
           symmetric = true;
@@ -930,5 +958,42 @@ public final class JWK implements Crypto {
   @Override
   public String getLabel() {
     return label;
+  }
+
+  public String getType() {
+    return kty;
+  }
+
+  public String getHash() {
+    switch (alg) {
+      case "RS265":
+      case "EC265":
+      case "PS265":
+        return "SHA-256";
+      case "RS384":
+      case "EC384":
+      case "PS384":
+        return "SHA-384";
+      case "RS512":
+      case "EC512":
+      case "PS512":
+        return "SHA-512";
+      case "RS1":
+        return "SHA-1";
+      default:
+        return null;
+    }
+  }
+
+  public Signature getSignature() {
+    return signature;
+  }
+
+  public Cipher getCipher() {
+    return cipher;
+  }
+
+  public Mac getMac() {
+    return mac;
   }
 }
