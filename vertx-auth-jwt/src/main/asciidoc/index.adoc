@@ -170,7 +170,7 @@ configuration.
 
 ==== Using EC keys
 
-Elliptic Curse keys are also supported, however the default JDK has some limitations on the features that can be used.
+Elliptic Curve keys are also supported, however the default JDK has some limitations on the features that can be used.
 
 The usage is very similar to RSA, first you create a private key:
 
