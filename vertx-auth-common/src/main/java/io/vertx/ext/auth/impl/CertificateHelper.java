@@ -63,7 +63,8 @@ public final class CertificateHelper {
     }
   }
 
-  private CertificateHelper() {}
+  private CertificateHelper() {
+  }
 
   public static void checkValidity(List<X509Certificate> certificates) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
 
@@ -92,6 +93,10 @@ public final class CertificateHelper {
       // verify the certificate against the issuer
       subjectCert.verify(issuerCert.getPublicKey());
     }
+
+    // the last certificate should be self signed
+    X509Certificate root = certificates.get(certificates.size() - 1);
+    root.verify(root.getPublicKey());
   }
 
   public static CertInfo getCertInfo(X509Certificate cert) {
