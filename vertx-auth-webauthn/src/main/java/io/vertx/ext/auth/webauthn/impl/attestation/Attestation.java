@@ -82,35 +82,6 @@ public interface Attestation {
   }
 
   /**
-   * Verify if the data provider matches the signature based of the given certificate.
-   *
-   * @param publicKey - origin publicKey
-   * @param signature - received signature
-   * @param data      - data to verify
-   * @return true if the signature matches the data
-   */
-  static boolean verifySignature(String digest, PublicKey publicKey, byte[] signature, byte[] data) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
-    String algName;
-
-    switch (publicKey.getAlgorithm()) {
-      case "EC":
-        algName = digest + "withECDSA";
-        break;
-      case "RSA":
-        algName = digest + "withRSA";
-        break;
-      default:
-        algName = publicKey.getAlgorithm();
-    }
-
-    final Signature sig = Signature.getInstance(algName);
-
-    sig.initVerify(publicKey);
-    sig.update(data);
-    return sig.verify(signature);
-  }
-
-  /**
    * Parses a JsonArray of certificates to a X509Certificate list
    * @param factory the factory that will parse the certificate base64 data
    * @param x5c the json array

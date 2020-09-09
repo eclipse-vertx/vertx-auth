@@ -19,22 +19,19 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.CertInfo;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.PubArea;
 
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.OCTET_STRING;
-import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.SEQUENCE;
+import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.*;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
@@ -81,33 +78,29 @@ public class TPMAttestation implements Attestation {
   public static final int TPM_ALG_CFB = 0x0043;
   public static final int TPM_ALG_ECB = 0x0044;
 
-  public static final int TPM_ST_RSP_COMMAND = 0x00c4;
-  public static final int TPM_ST_NULL = 0x8000;
-  public static final int TPM_ST_NO_SESSIONS = 0x8001;
-  public static final int TPM_ST_SESSIONS = 0x8002;
-  public static final int TPM_ST_ATTEST_NV = 0x8014;
-  public static final int TPM_ST_ATTEST_COMMAND_AUDIT = 0x8015;
-  public static final int TPM_ST_ATTEST_SESSION_AUDIT = 0x8016;
   public static final int TPM_ST_ATTEST_CERTIFY = 0x8017;
-  public static final int TPM_ST_ATTEST_QUOTE = 0x8018;
-  public static final int TPM_ST_ATTEST_TIME = 0x8019;
-  public static final int TPM_ST_ATTEST_CREATION = 0x801a;
-  public static final int TPM_ST_CREATION = 0x8021;
-  public static final int TPM_ST_VERIFIED = 0x8022;
-  public static final int TPM_ST_AUTH_SECRET = 0x8023;
-  public static final int TPM_ST_HASHCHECK = 0x8024;
-  public static final int TPM_ST_AUTH_SIGNED = 0x8025;
-  public static final int TPM_ST_FU_MANIFEST = 0x8029;
 
-  public static final int TPM_ECC_NONE = 0x0000;
-  public static final int TPM_ECC_NIST_P192 = 0x0001;
-  public static final int TPM_ECC_NIST_P224 = 0x0002;
-  public static final int TPM_ECC_NIST_P256 = 0x0003;
-  public static final int TPM_ECC_NIST_P384 = 0x0004;
-  public static final int TPM_ECC_NIST_P521 = 0x0005;
-  public static final int TPM_ECC_BN_P256 = 0x0010;
-  public static final int TPM_ECC_BN_P638 = 0x0011;
-  public static final int TPM_ECC_SM2_P256 = 0x0020;
+  private static final List<String> TPM_MANUFACTURERS = Arrays.asList(
+    "id:414D4400", // AMD
+    "id:41544D4C", // Atmel
+    "id:4252434D", // Broadcom
+    "id:49424d00", // IBM
+    "id:49465800", // Infineon
+    "id:494E5443", // Intel
+    "id:4C454E00", // Lenovo
+    "id:4E534D20", // National Semiconductor
+    "id:4E545A00", // Nationz
+    "id:4E544300", // Nuvoton Technology
+    "id:51434F4D", // Qualcomm
+    "id:534D5343", // SMSC
+    "id:53544D20", // ST Microelectronics
+    "id:534D534E", // Samsung
+    "id:534E5300", // Sinosun
+    "id:54584E00", // Texas Instruments
+    "id:57454300", // Winbond
+    "id:524F4343", // Fuzhouk Rockchip
+    "id:FFFFF1D0" // FIDO Alliance
+  );
 
   private final CertificateFactory x509;
 
@@ -144,49 +137,66 @@ public class TPMAttestation implements Attestation {
 
       JsonObject attStmt = attestation.getJsonObject("attStmt");
 
+      // To verify attestation we need to do two things:
+      // verify structures and verify signature and chain
+
+      // Verifying structures
+      // 1. Check that "ver" is set to "2.0"
       if (!attStmt.getString("ver").equals("2.0")) {
         throw new AttestationException("expected TPM version 2.0");
       }
-
+      // 2. Parse "pubArea".
       PubArea pubArea = new PubArea(attStmt.getBinary("pubArea"));
-
-      // Verify that the public key specified by the parameters and unique fields of pubArea is
-      // identical to the credentialPublicKey in the attestedCredentialData in authenticatorData.
+      // 3. Verify that the public key specified by the parameters and unique fields of pubArea is
+      //    identical to the credentialPublicKey in the attestedCredentialData in authenticatorData.
       JsonObject cosePublicKey = authData.getCredentialPublicKeyJson();
-
       if (pubArea.getType() == TPM_ALG_RSA) {
+        // extract the RSA parameters from the COSE CBOR
         byte[] n = cosePublicKey.getBinary("-1");
         byte[] e = cosePublicKey.getBinary("-2");
-
-        if (!MessageDigest.isEqual(pubArea.getUnique(), n)) {
-          throw new AttestationException("PubArea unique is not same as credentialPublicKey");
-        }
-
         long exponent = pubArea.getExponent();
         // If `exponent` is equal to 0x00, then exponent is the default RSA exponent of 2^16+1 (65537)
         if (exponent == 0x00) {
           exponent = 65537;
         }
         // Do some bit shifting to get to an integer
-        long eSum = e[0] + (e[1] << 8) + (e[2] << 16);
-        if (exponent != eSum) {
-          throw new Error("Unexpected public key exp " + eSum + ", expected " + exponent);
+        if (exponent != e[0] + (e[1] << 8) + (e[2] << 16)) {
+          throw new AttestationException("Unexpected public key exp");
+        }
+        // 4. Check that pubArea.unique is set to the same public key,
+        //    as the one in “authData” struct.
+        if (!MessageDigest.isEqual(pubArea.getUnique(), n)) {
+          throw new AttestationException("PubArea unique is not same as credentialPublicKey");
+        }
+      } else if (pubArea.getType() == TPM_ALG_ECC) {
+        // extract the RSA parameters from the COSE CBOR
+        byte[] crv = cosePublicKey.getBinary("-1");
+        byte[] x = cosePublicKey.getBinary("-2");
+        byte[] y = cosePublicKey.getBinary("-3");
+        // Do some bit shifting to get to an integer
+        if (pubArea.getCurveID() != crv[0] + (crv[1] << 8)) {
+          throw new AttestationException("Unexpected public key crv");
+        }
+        // 4. Check that pubArea.unique is set to the same public key,
+        //    as the one in “authData” struct.
+        if (!MessageDigest.isEqual(pubArea.getUnique(), Buffer.buffer().appendBytes(x).appendBytes(y).getBytes())) {
+          throw new AttestationException("PubArea unique is not same as public key x and y");
         }
       } else {
-        throw new AttestationException("only RSA keys are currently supported");
+        throw new AttestationException("Unsupported pubArea.type" + pubArea.getType());
       }
 
-      // Validate that certInfo is valid:
-      //     Verify that magic is set to TPM_GENERATED_VALUE.
+      // 5. Parse “certInfo”.
       CertInfo certInfo = new CertInfo(attStmt.getBinary("certInfo"));
+      // 6. Check that certInfo.magic is set to TPM_GENERATED(0xFF544347).
       if (certInfo.getMagic() != CertInfo.TPM_GENERATED) {
         throw new AttestationException("certInfo had bad magic number");
       }
-      //     Verify that type is set to TPM_ST_ATTEST_CERTIFY.
+      // 7. Check that certInfo.type is set to TPM_ST_ATTEST_CERTIFY(0x8017).
       if (certInfo.getType() != TPM_ST_ATTEST_CERTIFY) {
         throw new AttestationException("Wrong type. expected 'TPM_ST_ATTEST_CERTIFY'");
       }
-      // Hash pubArea to create pubAreaHash using the nameAlg in attested
+      // 8. Hash pubArea to create pubAreaHash using the nameAlg in attested
       String alg;
       switch (pubArea.getNameAlg()) {
         case TPM_ALG_SHA1:
@@ -204,26 +214,24 @@ public class TPMAttestation implements Attestation {
         default:
           throw new AttestationException("Unsupported algorithm: " + pubArea.getNameAlg());
       }
-
       byte[] pubAreaHash = hash(alg, attStmt.getBinary("pubArea"));
-      // Concatenate attested.nameAlg and pubAreaHash to create attestedName.
+      // 9. Concatenate attested.nameAlg and pubAreaHash to create attestedName.
       byte[] attestedName = Buffer.buffer()
         .appendByte(certInfo.getAttestedName()[0])
         .appendByte(certInfo.getAttestedName()[1])
         .appendBytes(pubAreaHash)
         .getBytes();
-
-      // Check that certInfo.attested.name is equals to attestedName.
+      // 10. Check that certInfo.attested.name is equals to attestedName.
       if (!MessageDigest.isEqual(certInfo.getAttestedName(), attestedName)) {
         throw new AttestationException("Attested name comparison failed");
       }
-
-      // Concatenate authData with clientDataHash to create signatureBase
+      // 11. Concatenate authData with clientDataHash to create attToBeSigned
       byte[] attToBeSigned = Buffer.buffer()
         .appendBytes(authData.getRaw())
         .appendBytes(clientDataHash)
         .getBytes();
-
+      // 12. Hash attToBeSigned using the algorithm specified in attStmt.alg
+      //     to create attToBeSignedHash
       switch (attStmt.getInteger("alg")) {
         case -7:
         case -37:
@@ -246,39 +254,40 @@ public class TPMAttestation implements Attestation {
         default:
           throw new AttestationException("Unsupported algorithm: " + pubArea.getNameAlg());
       }
-
-      // Hash attToBeSigned using the algorithm specified in attStmt.alg to create attToBeSignedHash
       byte[] attToBeSignedHash = hash(alg, attToBeSigned);
-
-      // Check that certInfo.extraData is equals to attToBeSignedHash.
+      // 13. Check that certInfo.extraData is equals to attToBeSignedHash.
       if (!MessageDigest.isEqual(certInfo.getExtraData(), attToBeSignedHash)) {
         throw new AttestationException("CertInfo extra data did not equal hashed attestation");
       }
 
+      // The attestation structures are correct
       // Verify the signature
+
+      // 1. Pick a leaf AIK certificate of the x5c array and parse it.
       List<X509Certificate> x5c = parseX5c(x509, attStmt.getJsonArray("x5c"));
       if (x5c.size() == 0) {
         throw new AttestationException("no certificates in x5c field");
       }
-      // Pick a leaf AIK certificate of the x5c array and parse it.
       X509Certificate leafCert = x5c.get(0);
       CertificateHelper.CertInfo leafCertInfo = CertificateHelper.getCertInfo(leafCert);
-      // Check that attCert is of version 3(ASN1 INT 2)
+      // 2. Check that attCert is of version 3(ASN1 INT 2)
       if (leafCertInfo.version() != 3) {
         throw new AttestationException("Batch certificate version MUST be 3(ASN1 2)");
       }
-      // Check that attCert basic constraints for CA is set to -1
+      // 3. Check that attCert basic constraints for CA is set to -1
       if (leafCertInfo.basicConstraintsCA() != -1) {
         throw new AttestationException("Batch certificate basic constraints CA MUST be -1");
       }
-      // Check that Subject sequence is empty.
+      // 4. Check that Subject sequence is empty.
       if (!leafCertInfo.isEmpty()) {
         throw new AttestationException("Certificate subject was not empty");
       }
-      // Validity checks
+      // 5. Validity checks
       leafCert.checkValidity();
 
-      // parse the Certificate extensions
+      // 6. Check that certificate contains subjectAltName(2.5.29.17) extension,
+      //    and check that tcpaTpmManufacturer(2.23.133.2.1) field is set to the
+      //    existing manufacturer ID. You can find list of TPM_MANUFACTURERS.
       byte[] subjectAltName = leafCert.getExtensionValue("2.5.29.17");
       ASN1.ASN extension = ASN1.parseASN1(subjectAltName);
       //OCTET STRING (64 byte)
@@ -301,12 +310,12 @@ public class TPMAttestation implements Attestation {
         throw new AttestationException("2.5.29.17 Extension is not an ASN.1 OCTET_STRING");
       }
       ASN1.ASN root = ASN1.parseASN1(extension.binary(0));
+      // root should be of type SEQUENCE
       if (root.tag.type != SEQUENCE) {
         throw new AttestationException("2.5.29.17 Extension OCTET_STRING is not an ASN.1 SEQUENCE");
       }
-      // root should be of type SEQUENCE
       ASN1.ASN set = root
-        .object(0 /* [4] */)
+        .object(0, 164 /* [4] */)
         // SEQUENCE
         .object(0, ASN1.SEQUENCE)
         // SET
@@ -317,13 +326,15 @@ public class TPMAttestation implements Attestation {
         ASN1.ASN oid = el.object(0, ASN1.OBJECT_IDENTIFIER);
         ASN1.ASN val = el.object(1, ASN1.UTF8_STRING);
 
-        if (MessageDigest.isEqual(oid.binary(0), tcpaTpmManufacturer)) {
+        if (MessageDigest.isEqual(oid.binary(0), new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x01})) {
           if (!TPM_MANUFACTURERS.contains(new String(val.binary(0)))) {
             throw new AttestationException("Unkown Manufacturer id");
           }
         }
       }
 
+      // 7. Check that certificate contains extKeyUsage(2.5.29.37) extension
+      //    and it must contain tcg-kp-AIKCertificate (2.23.133.8.3) OID.
       byte[] extKeyUsage = leafCert.getExtensionValue("2.5.29.37");
       extension = ASN1.parseASN1(extKeyUsage);
       //OCTET STRING (9 byte)
@@ -334,72 +345,50 @@ public class TPMAttestation implements Attestation {
       if (extension.tag.type != OCTET_STRING) {
         throw new AttestationException("2.5.29.37 Extension is not an ASN.1 OCTET_STRING");
       }
+      // root should be of type SEQUENCE
       root = ASN1.parseASN1(extension.binary(0));
       if (root.tag.type != SEQUENCE) {
         throw new AttestationException("2.5.29.37 Extension OCTET_STRING is not an ASN.1 SEQUENCE");
       }
-
       boolean found = false;
-
       for (int i = 0; i < root.length(); i++) {
         ASN1.ASN el = root.object(i, ASN1.OBJECT_IDENTIFIER);
         // tcg-kp-AIKCertificate
-        if (MessageDigest.isEqual(el.binary(0), new byte[] {0x67, (byte) 0x81, 0x05, 0x08, 0x03})) {
+        if (MessageDigest.isEqual(el.binary(0), new byte[]{0x67, (byte) 0x81, 0x05, 0x08, 0x03})) {
           found = true;
           break;
         }
       }
-
       if (!found) {
         throw new AttestationException("2.5.29.37 Extension SEQUENCE does not contain OBJECT_IDENTIFIER 2.23.133.8.3");
       }
-
+      // 8. If certificate contains id-fido-gen-ce-aaguid(1.3.6.1.4.1.45724.1.1.4) extension,
+      // then check that its value set to the AAGUID returned by the authenticator in authData.
+      byte[] idFidoGenCeAaguid = leafCert.getExtensionValue("1.3.6.1.4.1.45724.1.1.4");
+      if (idFidoGenCeAaguid != null) {
+        extension = ASN1.parseASN1(idFidoGenCeAaguid);
+        if (extension.tag.type != OCTET_STRING) {
+          throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
+        }
+        // parse the octet as ASN.1 and expect it to se a sequence
+        extension = parseASN1(extension.binary(0));
+        if (extension.tag.type != OCTET_STRING) {
+          throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
+        }
+        // match check
+        if (!MessageDigest.isEqual(extension.binary(0), authData.getAaguid())) {
+          throw new AttestationException("Certificate id-fido-gen-ce-aaguid extension does not match authData");
+        }
+      }
+      // 9. Verify signature over certInfo with the public key extracted from AIK certificate.
       verifySignature(
-        alg,
-        leafCert.getPublicKey(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")).signature(),
+        leafCert,
         attStmt.getBinary("sig"),
         attStmt.getBinary("certInfo"));
 
-    } catch (NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException e) {
+    } catch (NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
-  }
-
-  private static final byte[] tcpaTpmVersion = new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x03};
-  private static final byte[] tcpaTpmModel = new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x02};
-  private static final byte[] tcpaTpmManufacturer = new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x01};
-
-  private static final List<String> TPM_MANUFACTURERS = Arrays.asList(
-    "id:414D4400", // AMD
-    "id:41544D4C", // Atmel
-    "id:4252434D", // Broadcom
-    "id:49424d00", // IBM
-    "id:49465800", // Infineon
-    "id:494E5443", // Intel
-    "id:4C454E00", // Lenovo
-    "id:4E534D20", // National Semiconductor
-    "id:4E545A00", // Nationz
-    "id:4E544300", // Nuvoton Technology
-    "id:51434F4D", // Qualcomm
-    "id:534D5343", // SMSC
-    "id:53544D20", // ST Microelectronics
-    "id:534D534E", // Samsung
-    "id:534E5300", // Sinosun
-    "id:54584E00", // Texas Instruments
-    "id:57454300", // Winbond
-    "id:524F4343", // Fuzhouk Rockchip
-    "id:FFFFF1D0" // FIDO Alliance
-  );
-
-  private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-
-  public static String bytesToHex(byte[] bytes) {
-    char[] hexChars = new char[bytes.length * 2];
-    for (int j = 0; j < bytes.length; j++) {
-      int v = bytes[j] & 0xFF;
-      hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-      hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-    }
-    return new String(hexChars);
   }
 }
