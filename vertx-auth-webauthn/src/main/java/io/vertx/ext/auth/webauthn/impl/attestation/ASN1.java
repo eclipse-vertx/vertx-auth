@@ -18,8 +18,8 @@ public class ASN1 {
   public final static int REAL = 0x09;
   public final static int ENUMERATED = 0x0a;
 
-  public final static int SEQUENCE = 0x10;
-  public final static int SET = 0x11;
+  public final static int SEQUENCE = 0x30;
+  public final static int SET = 0x31;
 
   public final static int NUMERIC_STRING = 0x12;
   public final static int PRINTABLE_STRING = 0x13;
@@ -53,6 +53,18 @@ public class ASN1 {
     public ASN object(int index) {
       return (ASN) value.get(index);
     }
+
+    public ASN object(int index, int type) {
+      ASN object = (ASN) value.get(index);
+      if (object.tag.type != type) {
+        throw new ClassCastException("Object at index(" + index + ") is not of type: " + type);
+      }
+      return object;
+    }
+
+    public int length() {
+      return value.size();
+    }
   }
 
   public static class ASNTag {
@@ -81,6 +93,10 @@ public class ASN1 {
     }
   }
 
+  public static ASN parseASN1(byte[] buffer) {
+    return parseASN1(Buffer.buffer(buffer), 0);
+  }
+
   public static ASN parseASN1(Buffer buffer) {
     return parseASN1(buffer, 0);
   }
@@ -100,7 +116,6 @@ public class ASN1 {
   private static ASNTag readTag(Buffer buffer, int startPos) {
     int pos = startPos;
     int firstByte = buffer.getUnsignedByte(pos++);
-    int tagClass = firstByte >>> 6;
     boolean tagConstructed = (firstByte & CONSTRUCTED_MASK) > 0;
     int tagNumber = 0;
     if ((firstByte & NUMBER_MASK) != NUMBER_MASK) {
@@ -115,7 +130,7 @@ public class ASN1 {
       }
     }
 
-    return new ASNTag(tagClass, tagConstructed, tagNumber, pos);
+    return new ASNTag(firstByte, tagConstructed, tagNumber, pos);
   }
 
   private static ASNLength readLength(Buffer buffer, int startPos) {

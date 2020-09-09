@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,8 +69,9 @@ public class DummyStore implements CredentialStore {
     database = new ArrayList<>();
   }
 
-  public DummyStore(List<StoreEntry> database) {
-    this.database = database;
+  public DummyStore(StoreEntry... database) {
+    this.database = new ArrayList<>();
+    this.database.addAll(Arrays.asList(database));
   }
 
   @Override

@@ -17,37 +17,38 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
-import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
 import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.impl.AuthData;
 
-import javax.security.auth.x500.X500Principal;
-import java.io.ByteArrayInputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
+import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.OCTET_STRING;
+import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.parseASN1;
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
+
+/**
+ * Implementation of the FIDO "packed" attestation check.
+ *
+ * @author <a href="mailto:pmlopes@gmail.com>Paulo Lopes</a>
+ */
 public class PackedAttestation implements Attestation {
 
-  // codecs
-  private static final Base64.Decoder b64dec = Base64.getUrlDecoder();
-
-  private final MessageDigest sha256;
   private final CertificateFactory x509;
-  private final Signature sig;
+  private final Set<String> ISO3166 = new HashSet<>();
 
   public PackedAttestation() {
     try {
-      sha256 = MessageDigest.getInstance("SHA-256");
       x509 = CertificateFactory.getInstance("X.509");
-      sig = Signature.getInstance("SHA256withECDSA");
-    } catch (NoSuchAlgorithmException | CertificateException e) {
+      // preload the country codes
+      ISO3166.addAll(Arrays.asList(Locale.getISOCountries()));
+    } catch (CertificateException e) {
       throw new AttestationException(e);
     }
   }
@@ -58,122 +59,128 @@ public class PackedAttestation implements Attestation {
   }
 
   @Override
-  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authDataStruct) throws AttestationException {
+  public void validate(JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     try {
-      byte[] clientDataHash = hash(clientDataJSON);
+      byte[] clientDataHash = hash("SHA-256", clientDataJSON);
 
-      byte[] signatureBase = Buffer.buffer()
-        .appendBytes(authDataStruct.getRaw())
-        .appendBytes(clientDataHash)
-        .getBytes();
-
-      JsonObject attStmt = ctapMakeCredResp.getJsonObject("attStmt");
-      byte[] signature = b64dec.decode(attStmt.getString("sig"));
-
-      boolean signatureValid;
+      // Check attStmt and it contains “x5c” then its a FULL attestation.
+      JsonObject attStmt = attestation.getJsonObject("attStmt");
+      byte[] signature = attStmt.getBinary("sig");
 
       if (attStmt.containsKey("x5c")) {
-        /* ----- Verify FULL attestation ----- */
-        JsonArray x5c = attStmt.getJsonArray("x5c");
+        // FULL basically means that it’s an attestation that chains to the manufacturer.
+        // It is signed by batch private key, who’s public key is in a batch certificate,
+        // that is chained to some attestation root certificate.
 
-        List<X509Certificate> certChain = new ArrayList<>();
+        List<X509Certificate> certChain = parseX5c(x509, attStmt.getJsonArray("x5c"));
 
-        for (int i = 0; i < x5c.size(); i++) {
-          final X509Certificate c = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(i))));
-          certChain.add(c);
+        if (certChain.size() == 0) {
+          throw new AttestationException("no certificates in x5c field");
         }
 
         // validate the chain
         CertificateHelper.checkValidity(certChain);
 
+        // Then check certificate and verify attestation:
+        // 1. Extract leaf cert from “x5c” as attCert
         final X509Certificate x509Certificate = certChain.get(0);
-        // check the certificate
-        x509Certificate.checkValidity();
-        // certificate valid lets verify the principal
-        String[] values = x509Certificate.getSubjectX500Principal().getName(X500Principal.RFC2253).split(",");
-        int count = 0;
-
-        for (String value : values) {
-          if (value.startsWith("OU=")) {
-            if (!value.equals("OU=Authenticator Attestation")) {
-              throw new AttestationException("Batch certificate OU MUST be set strictly to 'Authenticator Attestation'!");
-            }
-            count++;
-            continue;
+        final CertificateHelper.CertInfo certInfo = CertificateHelper.getCertInfo(certChain.get(0));
+        // 2. Check that attCert is of version 3(ASN1 INT 2)
+        if (certInfo.version() != 3) {
+          throw new AttestationException("Batch certificate version MUST be 3(ASN1 2)");
+        }
+        // 3. Check that attCert subject country (C) is set to a valid two character ISO 3166 code
+        if (!certInfo.subjectHas("C") || !ISO3166.contains(certInfo.subject("C"))) {
+          throw new AttestationException("Batch certificate C MUST be set to two character ISO 3166 code");
+        }
+        // 4. Check that attCert subject organisation (O) is not empty
+        if (!certInfo.subjectHas("O")) {
+          throw new AttestationException("Batch certificate CN MUST no be empty");
+        }
+        // 5. Check that attCert subject organisation unit (OU) is set to literal string “Authenticator Attestation”
+        if (!"Authenticator Attestation".equals(certInfo.subject("OU"))) {
+          throw new AttestationException("Batch certificate OU MUST be set strictly to 'Authenticator Attestation'");
+        }
+        // 6. Check that attCert subject common name(CN) is not empty.
+        if (!certInfo.subjectHas("CN")) {
+          throw new AttestationException("Batch certificate CN MUST no be empty");
+        }
+        // 7. Check that attCert basic constraints for CA is set to -1
+        if (certInfo.basicConstraintsCA() != -1) {
+          throw new AttestationException("Batch certificate basic constraints CA MUST be -1");
+        }
+        // 8. If certificate contains id-fido-gen-ce-aaguid(1.3.6.1.4.1.45724.1.1.4) extension,
+        // then check that its value set to the AAGUID returned by the authenticator in authData.
+        byte[] idFidoGenCeAaguid = x509Certificate.getExtensionValue("1.3.6.1.4.1.45724.1.1.4");
+        if (idFidoGenCeAaguid != null) {
+          ASN1.ASN extension = ASN1.parseASN1(idFidoGenCeAaguid);
+          if (extension.tag.type != OCTET_STRING) {
+            throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
           }
-          if (value.startsWith("CN=")) {
-            if (value.equals("CN=")) {
-              throw new AttestationException("Batch certificate CN MUST no be empty!");
-            }
-            count++;
-            continue;
+          // parse the octet as ASN.1 and expect it to se a sequence
+          extension = parseASN1(extension.binary(0));
+          if (extension.tag.type != OCTET_STRING) {
+            throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
           }
-          if (value.startsWith("O=")) {
-            if (value.equals("O=")) {
-              throw new AttestationException("Batch certificate O MUST no be empty!");
-            }
-            count++;
-            continue;
-          }
-          if (value.startsWith("C=")) {
-            if (value.length() != 4) {
-              throw new AttestationException("Batch certificate C MUST be set to two character ISO 3166 code!");
-            }
-            count++;
-            continue;
+          // match check
+          if (!MessageDigest.isEqual(extension.binary(0), authData.getAaguid())) {
+            throw new AttestationException("Certificate id-fido-gen-ce-aaguid extension does not match authData");
           }
         }
 
-        if (count != 4) {
-          throw new AttestationException("Batch certificate does not contain the required subject info!");
-        }
+        // Verify the attestation:
+        // 1. Concatenate authData with clientDataHash to create signatureBase
+        byte[] signatureBase = Buffer.buffer()
+          .appendBytes(authData.getRaw())
+          .appendBytes(clientDataHash)
+          .getBytes();
+        // 2. Verify signature “sig” over the signatureBase with the public key
+        // extracted from leaf attCert in “x5c”, using the algorithm “alg”
+        verifySignature(
+          PublicKeyCredential.valueOf(attStmt.getInteger("alg")).signature(),
+          x509Certificate,
+          signature,
+          signatureBase);
 
-
-        if (x509Certificate.getBasicConstraints() != -1) {
-          throw new AttestationException("Batch certificate basic constraints CA MUST be false!");
-        }
-
-        if (x509Certificate.getVersion() != 3) {
-          throw new AttestationException("Batch certificate version MUST be 3(ASN1 2)!");
-        }
-
-        signatureValid = verifySignature(signature, signatureBase, x509Certificate);
-        /* ----- Verify FULL attestation ENDS ----- */
       } else if (attStmt.containsKey("ecdaaKeyId")) {
         throw new AttestationException("ECDAA IS NOT SUPPORTED YET!");
       } else {
-        /* ----- Verify SURROGATE attestation ----- */
-        JWK key = authDataStruct.getCredentialJWK();
-        signatureValid = key.verify(signature, signatureBase);
-        /* ----- Verify SURROGATE attestation ENDS ----- */
-      }
+        // Self attestation is simple proof of key ownership,
+        // that is produced by signing attestation with user’s
+        // freshly generated private key.
+        //
+        // It used by the authenticators that don’t have memory
+        // to store batch certificate and key pair.
 
-      if (!signatureValid) {
-        throw new AttestationException("Failed to verify the signature!");
+        // Verifying attestation
+        // 1. Concatenate authData with clientDataHash to create signatureBase
+        byte[] signatureBase = Buffer.buffer()
+          .appendBytes(authData.getRaw())
+          .appendBytes(clientDataHash)
+          .getBytes();
+        // 2. Parse authData and extract COSE public key
+        JWK key = authData.getCredentialJWK();
+        // 3. Verify signature “sig” over the signatureBase with the previously extracted public key.
+        switch (key.getType()) {
+          case "EC":
+          case "OKP":
+            byte[] signatureBaseHash = hash(key.getHash(), signatureBase);
+            if (!key.verify(signatureBaseHash, signature)) {
+              throw new AttestationException("Failed to verify the signature!");
+            }
+            break;
+          case "RSA":
+          case "RSASSA":
+            if (!key.verify(signature, signatureBase)) {
+              throw new AttestationException("Failed to verify the signature!");
+            }
+            break;
+          default:
+            throw new AttestationException("Unsupported kty: " + key.getType());
+        }
       }
-    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
+    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
-    }
-  }
-
-  /**
-   * Returns SHA-256 digest of the given data.
-   *
-   * @param data - data to hash
-   * @return the hash
-   */
-  private byte[] hash(byte[] data) {
-    synchronized (sha256) {
-      sha256.update(data);
-      return sha256.digest();
-    }
-  }
-
-  private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) throws InvalidKeyException, SignatureException {
-    synchronized (sig) {
-      sig.initVerify(certificate);
-      sig.update(data);
-      return sig.verify(signature);
     }
   }
 }

@@ -26,38 +26,38 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.UserImpl;
+import io.vertx.ext.auth.impl.cose.CWK;
+import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
-import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
+
 public class WebAuthnImpl implements WebAuthn {
 
-  private static final Logger LOG = LoggerFactory.getLogger(WebAuthnImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WebAuthn.class);
 
-  // codecs
-  private final Base64.Encoder b64enc = Base64.getUrlEncoder().withoutPadding();
-  private final Base64.Decoder b64dec = Base64.getUrlDecoder();
-
-  private final MessageDigest sha256;
-  private final PRNG random;
+  private final VertxContextPRNG random;
   private final WebAuthnOptions options;
   private final CredentialStore store;
 
   private final Map<String, Attestation> attestations = new HashMap<>();
 
   public WebAuthnImpl(Vertx vertx, WebAuthnOptions options, CredentialStore store) {
-    random = new PRNG(vertx);
+    random = VertxContextPRNG.current(vertx);
+
     this.options = options;
     this.store = store;
 
@@ -70,17 +70,28 @@ public class WebAuthnImpl implements WebAuthn {
     for (Attestation att : attestationServiceLoader) {
       attestations.put(att.fmt(), att);
     }
-    try {
-      sha256 = MessageDigest.getInstance("SHA-256");
-    } catch (NoSuchAlgorithmException nsae) {
-      throw new IllegalStateException("SHA-256 is not available", nsae);
-    }
   }
 
-  private String randomBase64URLBuffer(int length) {
+  private byte[] randomBase64URLBuffer(int length) {
     final byte[] buff = new byte[length];
     random.nextBytes(buff);
-    return b64enc.encodeToString(buff);
+    return buff;
+  }
+
+  private void putOpt(JsonObject json, String key, Object value) {
+    if (value != null) {
+      if (value instanceof Enum<?>) {
+        json.put(key, value.toString());
+        return;
+      }
+      if (value instanceof Number) {
+        if (((Number) value).intValue() != 0) {
+          json.put(key, value.toString());
+        }
+        return;
+      }
+      json.put(key, value);
+    }
   }
 
   @Override
@@ -100,53 +111,8 @@ public class WebAuthnImpl implements WebAuthn {
 
         final JsonArray pubKeyCredParams = new JsonArray();
 
-        for (String pubKeyCredParam : options.getPubKeyCredParams()) {
-          switch (pubKeyCredParam) {
-            case "ES256":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -7));
-              break;
-            case "ES384":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -35));
-              break;
-            case "ES512":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -36));
-              break;
-            case "RS256":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -257));
-              break;
-            case "RS384":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -258));
-              break;
-            case "RS512":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -259));
-              break;
-            case "RS1":
-              pubKeyCredParams.add(
-                new JsonObject()
-                  .put("type", "public-key")
-                  .put("alg", -65535));
-              break;
-            default:
-              LOG.warn("Unsupported algorithm: " + pubKeyCredParam);
-          }
+        for (PublicKeyCredential pubKeyCredParam : options.getPubKeyCredParams()) {
+          pubKeyCredParams.add(pubKeyCredParam.toJson());
         }
 
         // user configuration
@@ -159,29 +125,8 @@ public class WebAuthnImpl implements WebAuthn {
           _user.put("icon", user.getString("icon"));
         }
 
-        final JsonObject authenticatorSelection;
         // authenticatorSelection configuration
-        if (options.getAuthenticatorAttachment() != null) {
-          // server config takes precedence
-          authenticatorSelection = options.getAuthenticatorSelection();
-        } else {
-          switch (user.getString("type")) {
-            case "cross-platform":
-            case "platform":
-              authenticatorSelection = new JsonObject()
-                  .put("authenticatorAttachment", user.getString("type"));
-
-              if (options.getRequireResidentKey() != null) {
-                authenticatorSelection.put("requireResidentKey", options.getRequireResidentKey());
-              }
-              if (options.getUserVerification() != null) {
-                authenticatorSelection.put("userVerification", options.getUserVerification().toString());
-              }
-              break;
-            default:
-              authenticatorSelection = null;
-          }
-        }
+        final JsonObject authenticatorSelection = options.getAuthenticatorSelection();
 
         // final assembly
         final JsonObject publicKey = new JsonObject()
@@ -215,7 +160,7 @@ public class WebAuthnImpl implements WebAuthn {
 
     // we allow Resident Credentials or (RK) requests
     // this means that username is not required
-    if (options.getRequireResidentKey() != null && options.getRequireResidentKey()) {
+    if (options.getRequireResidentKey()) {
       if (username == null) {
         handler.handle(Future.succeededFuture(
           new JsonObject()
@@ -243,8 +188,8 @@ public class WebAuthnImpl implements WebAuthn {
 
       JsonArray transports = new JsonArray();
 
-      for (String transport : options.getTransports()) {
-        transports.add(transport);
+      for (AuthenticatorTransport transport : options.getTransports()) {
+        transports.add(transport.toString());
       }
 
       // STEP 19 Return allow credential ID
@@ -281,36 +226,58 @@ public class WebAuthnImpl implements WebAuthn {
       WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
       // check
       authInfo.checkValid(null);
-
+      // The basic data supplied with any kind of validation is:
       //    {
       //      "rawId": "base64url",
       //      "id": "base64url",
       //      "response": {
-      //        "attestationObject": "base64url",
       //        "clientDataJSON": "base64url"
-      //      },
-      //      "getClientExtensionResults": {},
-      //      "type": "public-key"
+      //      }
       //    }
-      final JsonObject webauthnResp = authInfo.getWebauthn();
-      final JsonObject response = webauthnResp.getJsonObject("response");
+      final JsonObject webauthn = authInfo.getWebauthn();
 
-      byte[] clientDataJSON = b64dec.decode(response.getString("clientDataJSON"));
+      // verifying the webauthn response starts here:
+
+      // regardless of the request the first 6 steps are always executed:
+
+      // 1. Decode ClientDataJSON
+      // 2. Check that challenge is set to the challenge you’ve sent
+      // 3. Check that origin is set to the the origin of your website. If it’s not raise the alarm, and log the event, because someone tried to phish your user
+      // 4. Check that type is set to either “webauthn.create” or “webauthn.get”.
+      // 5. Parse authData or authenticatorData.
+      // 6. Check that flags have UV or UP flags set.
+
+      // STEP #1
+      // The client data (or session) is a base64 url encoded JSON
+      // we specifically keep track of the binary representation as it will be
+      // used later on during validation to verify signatures for tampering
+      final byte[] clientDataJSON = webauthn.getJsonObject("response").getBinary("clientDataJSON");
       JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
 
+      // Step #2
       // Verify challenge is match with session
       if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
         handler.handle(Future.failedFuture("Challenges don't match!"));
         return;
       }
 
-      // STEP 9 Verify origin is match with session
-      if (!clientData.getString("origin").equals(options.getOrigin())) {
-        handler.handle(Future.failedFuture("Origins don't match!"));
-        return;
+      // Step #3
+      // If the auth info object contains an Origin we can verify it:
+      if (authInfo.getOrigin() != null) {
+        if (!clientData.getString("origin").equals(authInfo.getOrigin())) {
+          handler.handle(Future.failedFuture("Origins don't match!"));
+          return;
+        }
       }
 
       final String username = authInfo.getUsername();
+
+      // Step #4
+      // Verify that the type is valid and that is "webauthn.create" or "webauthn.get"
+      if (!clientData.containsKey("type")) {
+        handler.handle(Future.failedFuture("Missing type on client data"));
+        return;
+      }
 
       switch (clientData.getString("type")) {
         case "webauthn.create":
@@ -321,7 +288,7 @@ public class WebAuthnImpl implements WebAuthn {
           }
 
           try {
-            final JsonObject authrInfo = verifyWebAuthNCreate(webauthnResp, clientDataJSON, clientData);
+            final JsonObject authrInfo = verifyWebAuthNCreate(authInfo, clientDataJSON);
             // the principal for vertx-auth
             JsonObject principal = new JsonObject()
               .put("credID", authrInfo.getString("credID"))
@@ -341,7 +308,7 @@ public class WebAuthnImpl implements WebAuthn {
                 handler.handle(Future.succeededFuture(new UserImpl(principal)));
               }
             });
-          } catch (RuntimeException | IOException e) {
+          } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
             handler.handle(Future.failedFuture(e));
           }
           return;
@@ -358,36 +325,36 @@ public class WebAuthnImpl implements WebAuthn {
 
               // STEP 24 Query public key base on user ID
               Optional<JsonObject> authenticator = authenticators.stream()
-                .filter(authr -> webauthnResp.getString("id").equals(authr.getValue("credID")))
+                .filter(authr -> webauthn.getString("id").equals(authr.getValue("credID")))
                 .findFirst();
 
               if (!authenticator.isPresent()) {
-                handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthnResp.getString("rawId")));
+                handler.handle(Future.failedFuture("Cannot find an authenticator with id: " + webauthn.getString("rawId")));
                 return;
               }
 
               try {
                 final JsonObject json = authenticator.get();
-                final long counter = verifyWebAuthNGet(webauthnResp, clientDataJSON, clientData, json);
+                final long counter = verifyWebAuthNGet(webauthn, clientDataJSON, clientData, json);
                 // update the counter on the authenticator
                 json.put("counter", counter);
                 // update the credential (the important here is to update the counter)
-                store.updateUserCredential(webauthnResp.getString("rawId"), json, false, updateUserCredential -> {
+                store.updateUserCredential(webauthn.getString("rawId"), json, false, updateUserCredential -> {
                   if (updateUserCredential.failed()) {
                     handler.handle(Future.failedFuture(updateUserCredential.cause()));
                     return;
                   }
                   handler.handle(Future.succeededFuture(new UserImpl(json)));
                 });
-              } catch (RuntimeException | IOException e) {
+              } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
                 handler.handle(Future.failedFuture(e));
               }
             }
           };
 
-          if (options.getRequireResidentKey() != null && options.getRequireResidentKey()) {
+          if (options.getRequireResidentKey()) {
             // username are not provided (RK) we now need to lookup by rawId
-            store.getUserCredentialsById(webauthnResp.getString("rawId"), onGetUserCredentialsByAny);
+            store.getUserCredentialsById(webauthn.getString("rawId"), onGetUserCredentialsByAny);
 
           } else {
             // username can't be null
@@ -408,104 +375,137 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   /**
-   * Verify creadentials from client
+   * Verify credentials creation from client
    *
-   * @param webAuthnResponse - Data from navigator.credentials.create
+   * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
+   * @param clientDataJSON - Binary session data
    */
-  private JsonObject verifyWebAuthNCreate(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData) throws AttestationException, IOException {
-    JsonObject response = webAuthnResponse.getJsonObject("response");
-    // STEP 11 Extract attestation Object
+  private JsonObject verifyWebAuthNCreate(WebAuthnCredentials request, byte[] clientDataJSON) throws AttestationException, IOException, NoSuchAlgorithmException {
+    JsonObject response = request.getWebauthn().getJsonObject("response");
+    // Extract attestation Object
     try (JsonParser parser = CBOR.cborParser(response.getString("attestationObject"))) {
       //      {
-      //        "fmt": "fido-u2f",
+      //        "fmt": "string",
       //        "authData": "cbor",
       //        "attStmt": {
-      //          "sig": "cbor",
+      //          "sig": "base64",
       //          "x5c": [
-      //            "cbor"
+      //            "base64"
       //          ]
       //        }
       //      }
-      JsonObject ctapMakeCredResp = new JsonObject(CBOR.<Map>parse(parser));
-      // STEP 12 Extract auth data
-      AuthenticatorData authrDataStruct = new AuthenticatorData(ctapMakeCredResp.getString("authData"));
-      // STEP 13 Extract public key
-      byte[] publicKey = authrDataStruct.getCredentialPublicKey();
+      JsonObject attestation = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
 
-      final String fmt = ctapMakeCredResp.getString("fmt");
+      // Step #5
+      // Extract and parse auth data
+      AuthData authData = new AuthData(attestation.getBinary("authData"));
+
+      // Step #6
+      // check that the user was either validated or present
+      if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
+        throw new AttestationException("User was either not verified or present during credentials creation");
+      }
+
+      // STEP 13 Extract public key
+      byte[] publicKey = authData.getCredentialPublicKey();
+
+      final String fmt = attestation.getString("fmt");
 
       // STEP 14 Verify attestation based on type of device
-      final Attestation attestation = attestations.get(fmt);
+      final Attestation verifier = attestations.get(fmt);
 
-      if (attestation == null) {
+      if (verifier == null) {
         throw new AttestationException("Unknown attestation fmt: " + fmt);
       } else {
         // perform the verification
-        attestation.verify(webAuthnResponse, clientDataJSON, ctapMakeCredResp, authrDataStruct);
+        if (!authData.is(AuthData.ATTESTATION_DATA)) {
+          throw new AttestationException("WebAuthn response does not contain attestation data!");
+        }
+
+        if (request.getDomain() != null) {
+          if (!MessageDigest.isEqual(authData.getRpIdHash(), hash("SHA-256", request.getDomain().getBytes(StandardCharsets.UTF_8)))) {
+            throw new AttestationException("WebAuthn rpIdHash invalid (the domain does not match the AuthData)");
+          }
+        }
+
+        verifier
+          .validate(request.getWebauthn(), clientDataJSON, attestation, authData);
       }
 
       // STEP 15 Create data for save to database
       return new JsonObject()
-          .put("fmt", fmt)
-          .put("publicKey", b64enc.encodeToString(publicKey))
-          .put("counter", authrDataStruct.getSignCounter())
-          .put("credID", b64enc.encodeToString(authrDataStruct.getCredentialId()));
+        .put("fmt", fmt)
+        .put("publicKey", publicKey)
+        .put("counter", authData.getSignCounter())
+        .put("credID", authData.getCredentialId());
     }
   }
 
   /**
-   * @param webAuthnResponse - Data from navigator.credentials.get
-   * @param authr            - Credential from Database
+   * Verify navigator.credentials.get response
+   *
+   * @param webauthn   - Data from navigator.credentials.get
+   * @param credential - Credential from Database
    */
-  private long verifyWebAuthNGet(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject clientData, JsonObject authr) throws IOException, AttestationException {
+  private long verifyWebAuthNGet(JsonObject webauthn, byte[] clientDataJSON, JsonObject clientData, JsonObject credential) throws IOException, AttestationException, NoSuchAlgorithmException {
 
-    JsonObject response = webAuthnResponse.getJsonObject("response");
+    JsonObject response = webauthn.getJsonObject("response");
 
-    // STEP 25 parse auth data
-    byte[] authenticatorData = b64dec.decode(response.getString("authenticatorData"));
-    AuthenticatorData authrDataStruct = new AuthenticatorData(authenticatorData);
+    // Step #5
+    // parse auth data
+    byte[] authenticatorData = response.getBinary("authenticatorData");
+    AuthData authData = new AuthData(authenticatorData);
 
-    if (!authrDataStruct.is(AuthenticatorData.USER_PRESENT)) {
-      throw new RuntimeException("User was NOT present durring authentication!");
+    // Step #6
+    // check that the user was either validated or present
+    if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
+      throw new AttestationException("User was either not verified or present during credentials creation");
     }
 
-    // TODO: assert the algorithm to be SHA-256 clientData.getString("hashAlgorithm") ?
+    // From here we start the validation that is specific for webauthn.get
 
-    // STEP 26 hash clientDataJSON with sha256
-    byte[] clientDataHash = hash(clientDataJSON);
-    // STEP 27 create signature base by concat authenticatorData and clientDataHash
+    // Step webauthn.get#1
+    // hash clientDataJSON with SHA-256
+    byte[] clientDataHash = hash("SHA-256", clientDataJSON);
+
+    // Step webauthn.get#2
+    // concat authenticatorData and clientDataHash
     Buffer signatureBase = Buffer.buffer()
       .appendBytes(authenticatorData)
       .appendBytes(clientDataHash);
 
-    // STEP 28 format public key
-    try (JsonParser parser = CBOR.cborParser(authr.getString("publicKey"))) {
+    // Step webauthn.get#3
+    // Using previously saved public key, verify signature over signatureBase.
+    try (JsonParser parser = CBOR.cborParser(credential.getString("publicKey"))) {
       // the decoded credential primary as a JWK
-      JWK publicKey = COSE.toJWK(CBOR.parse(parser));
-
-      // STEP 29 convert signature to buffer
-      byte[] signature = b64dec.decode(response.getString("signature"));
-
-      // STEP 30 verify signature
-      boolean verified = publicKey.verify(signature, signatureBase.getBytes());
-
-      if (!verified) {
+      JWK publicKey = CWK.toJWK(new JsonObject(CBOR.<Map<String, Object>>parse(parser)));
+      // convert signature to buffer
+      byte[] signature = response.getBinary("signature");
+      // verify signature
+      if (!publicKey.verify(signature, signatureBase.getBytes())) {
+        // Step webauthn.get#4
+        // If you can’t verify signature multiple times, potentially raise the
+        // alarm as phishing attempt most likely is occurring.
+        LOG.warn("Failed to verify signature for key: " + credential.getString("publicKey"));
         throw new AttestationException("Failed to verify the signature!");
       }
 
-      if (authrDataStruct.getSignCounter() <= authr.getLong("counter")) {
-        throw new AttestationException("Authr counter did not increase!");
+      // Step webauthn.get#5
+      // If counter in DB is 0, and response counter is 0, then authData does not support counter,
+      // and this step should be skipped
+      if (authData.getSignCounter() != 0 || credential.getLong("counter") != 0) {
+        // Step webauthn.get#6
+        // If response counter is not 0, check that it’s bigger than stored counter.
+        // If it’s not, potentially raise the alarm as replay attack may have occurred.
+        if (authData.getSignCounter() != 0 && authData.getSignCounter() < credential.getLong("counter")) {
+          throw new AttestationException("Authenticator counter did not increase!");
+        }
       }
 
+      // Step webauthn.get#7
+      // Update counter value in database
       // return the counter so it can be updated on the store
-      return authrDataStruct.getSignCounter();
-    }
-  }
-
-  private byte[] hash(byte[] data) {
-    synchronized (sha256) {
-      sha256.update(data);
-      return sha256.digest();
+      return authData.getSignCounter();
     }
   }
 }

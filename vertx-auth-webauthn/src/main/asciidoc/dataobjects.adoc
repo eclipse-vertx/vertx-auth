@@ -22,6 +22,8 @@
 |===
 ^|Name | Type ^| Description
 |[[challenge]]`@challenge`|`String`|-
+|[[domain]]`@domain`|`String`|-
+|[[origin]]`@origin`|`String`|-
 |[[username]]`@username`|`String`|-
 |[[webauthn]]`@webauthn`|`Json object`|-
 |===
@@ -38,11 +40,11 @@
 |[[authenticatorAttachment]]`@authenticatorAttachment`|`link:enums.html#AuthenticatorAttachment[AuthenticatorAttachment]`|-
 |[[authenticatorSelection]]`@authenticatorSelection`|`Json object`|-
 |[[challengeLength]]`@challengeLength`|`Number (int)`|-
-|[[origin]]`@origin`|`String`|-
-|[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of String`|-
+|[[extensions]]`@extensions`|`Json object`|-
+|[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of link:enums.html#PublicKeyCredential[PublicKeyCredential]`|-
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
-|[[timeout]]`@timeout`|`Number (int)`|-
-|[[transports]]`@transports`|`Array of String`|-
-|[[userVerification]]`@userVerification`|`link:enums.html#UserVerification[UserVerification]`|-
+|[[timeout]]`@timeout`|`Number (Integer)`|-
+|[[transports]]`@transports`|`Array of link:enums.html#AuthenticatorTransport[AuthenticatorTransport]`|-
+|[[userVerification]]`@userVerification`|`link:enums.html#UserVerificationRequirement[UserVerificationRequirement]`|-
 |===
 

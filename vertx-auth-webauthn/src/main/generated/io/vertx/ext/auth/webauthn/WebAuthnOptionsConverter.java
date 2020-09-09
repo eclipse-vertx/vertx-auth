@@ -32,17 +32,17 @@ public class WebAuthnOptionsConverter {
             obj.setChallengeLength(((Number)member.getValue()).intValue());
           }
           break;
-        case "origin":
-          if (member.getValue() instanceof String) {
-            obj.setOrigin((String)member.getValue());
+        case "extensions":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setExtensions(((JsonObject)member.getValue()).copy());
           }
           break;
         case "pubKeyCredParams":
           if (member.getValue() instanceof JsonArray) {
-            java.util.LinkedHashSet<java.lang.String> list =  new java.util.LinkedHashSet<>();
+            java.util.ArrayList<io.vertx.ext.auth.webauthn.PublicKeyCredential> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof String)
-                list.add((String)item);
+                list.add(io.vertx.ext.auth.webauthn.PublicKeyCredential.valueOf((String)item));
             });
             obj.setPubKeyCredParams(list);
           }
@@ -64,17 +64,17 @@ public class WebAuthnOptionsConverter {
           break;
         case "transports":
           if (member.getValue() instanceof JsonArray) {
-            java.util.LinkedHashSet<java.lang.String> list =  new java.util.LinkedHashSet<>();
+            java.util.ArrayList<io.vertx.ext.auth.webauthn.AuthenticatorTransport> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof String)
-                list.add((String)item);
+                list.add(io.vertx.ext.auth.webauthn.AuthenticatorTransport.valueOf((String)item));
             });
             obj.setTransports(list);
           }
           break;
         case "userVerification":
           if (member.getValue() instanceof String) {
-            obj.setUserVerification(io.vertx.ext.auth.webauthn.UserVerification.valueOf((String)member.getValue()));
+            obj.setUserVerification(io.vertx.ext.auth.webauthn.UserVerificationRequirement.valueOf((String)member.getValue()));
           }
           break;
       }
@@ -96,24 +96,24 @@ public class WebAuthnOptionsConverter {
       json.put("authenticatorSelection", obj.getAuthenticatorSelection());
     }
     json.put("challengeLength", obj.getChallengeLength());
-    if (obj.getOrigin() != null) {
-      json.put("origin", obj.getOrigin());
+    if (obj.getExtensions() != null) {
+      json.put("extensions", obj.getExtensions());
     }
     if (obj.getPubKeyCredParams() != null) {
       JsonArray array = new JsonArray();
-      obj.getPubKeyCredParams().forEach(item -> array.add(item));
+      obj.getPubKeyCredParams().forEach(item -> array.add(item.name()));
       json.put("pubKeyCredParams", array);
     }
     if (obj.getRelayParty() != null) {
       json.put("relayParty", obj.getRelayParty().toJson());
     }
-    if (obj.getRequireResidentKey() != null) {
-      json.put("requireResidentKey", obj.getRequireResidentKey());
+    json.put("requireResidentKey", obj.getRequireResidentKey());
+    if (obj.getTimeout() != null) {
+      json.put("timeout", obj.getTimeout());
     }
-    json.put("timeout", obj.getTimeout());
     if (obj.getTransports() != null) {
       JsonArray array = new JsonArray();
-      obj.getTransports().forEach(item -> array.add(item));
+      obj.getTransports().forEach(item -> array.add(item.name()));
       json.put("transports", array);
     }
     if (obj.getUserVerification() != null) {
