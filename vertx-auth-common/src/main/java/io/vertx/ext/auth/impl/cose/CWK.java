@@ -96,6 +96,8 @@ public final class CWK {
     );
     put("-2",
       new NV("x"));
+    put("-3",
+      new NV("y"));
     put("-4",
       new NV("d"));
   }});

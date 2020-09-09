@@ -61,6 +61,14 @@ public final class CertificateHelper {
     public int basicConstraintsCA() {
       return basicConstraintsCA;
     }
+
+    public boolean isEmpty() {
+      if (subject != null) {
+        return subject.isEmpty();
+      } else {
+        return true;
+      }
+    }
   }
 
   private CertificateHelper() {
@@ -104,7 +112,7 @@ public final class CertificateHelper {
     final String subject = cert.getSubjectX500Principal().getName(X500Principal.RFC2253);
     Map<String, String> sub = null;
 
-    if (subject != null) {
+    if (subject != null && !"".equals(subject))  {
       String[] values = subject.split(",");
 
       sub = new HashMap<>();
