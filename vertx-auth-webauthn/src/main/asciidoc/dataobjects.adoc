@@ -1,7 +1,22 @@
 = Cheatsheets
 
-[[RelayParty]]
-== RelayParty
+[[Authenticator]]
+== Authenticator
+
+
+[cols=">25%,25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[counter]]`@counter`|`Number (long)`|-
+|[[credID]]`@credID`|`String`|-
+|[[publicKey]]`@publicKey`|`String`|-
+|[[type]]`@type`|`String`|-
+|[[userName]]`@userName`|`String`|-
+|===
+
+[[RelyingParty]]
+== RelyingParty
 
 
 [cols=">25%,25%,50%"]
@@ -38,12 +53,11 @@
 ^|Name | Type ^| Description
 |[[attestation]]`@attestation`|`link:enums.html#Attestation[Attestation]`|-
 |[[authenticatorAttachment]]`@authenticatorAttachment`|`link:enums.html#AuthenticatorAttachment[AuthenticatorAttachment]`|-
-|[[authenticatorSelection]]`@authenticatorSelection`|`Json object`|-
 |[[challengeLength]]`@challengeLength`|`Number (int)`|-
 |[[extensions]]`@extensions`|`Json object`|-
 |[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of link:enums.html#PublicKeyCredential[PublicKeyCredential]`|-
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
-|[[timeout]]`@timeout`|`Number (Integer)`|-
+|[[timeout]]`@timeout`|`Number (Long)`|-
 |[[transports]]`@transports`|`Array of link:enums.html#AuthenticatorTransport[AuthenticatorTransport]`|-
 |[[userVerification]]`@userVerification`|`link:enums.html#UserVerificationRequirement[UserVerificationRequirement]`|-
 |===

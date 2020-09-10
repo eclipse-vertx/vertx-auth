@@ -107,7 +107,6 @@ public class WebAuthnCredentials implements Credentials {
     }
 
     // Username may be null once the system has stored it once.
-
   }
 
   public JsonObject toJson() {

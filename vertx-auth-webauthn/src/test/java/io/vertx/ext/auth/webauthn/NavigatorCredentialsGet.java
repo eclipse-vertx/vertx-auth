@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.webauthn.store.Authenticator;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -10,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 public class NavigatorCredentialsGet {
@@ -24,10 +24,10 @@ public class NavigatorCredentialsGet {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("ACME Corporation")),
-      new DummyStore(
-          new DummyStore.StoreEntry()
-            .setUsername("paulo")
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      .setAuthenticatorStore(new DummyStore(
+          new Authenticator()
+            .setUserName("paulo")
             .setCredID("O3ZJlAdXvra6PwvL4I9AP99dS1_v3DDRuB_SwTAHFbUfMtvWTOFycCeb6CkXZXiPWi9Nr0ptUnlnHP3U40ptEA")
             .setPublicKey("pQECAyYgASFYIBl0C67nFN_OwbODu_iE0hI5nM0ppUkqjhU9NhQvBaiLIlggffUTx8E6OM85huU3DcadeuaBBh8kGI8vdm3zesf3YRc")
             .setCounter(2)
@@ -53,10 +53,10 @@ public class NavigatorCredentialsGet {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("ACME Corporation")),
-      new DummyStore(
-          new DummyStore.StoreEntry()
-            .setUsername("paulo")
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      .setAuthenticatorStore(new DummyStore(
+          new Authenticator()
+            .setUserName("paulo")
             .setCredID("rYLaf9xagyA2YnO-W3CZDW8udSg8VeMMm25nenU7nCSxUqy1pEzOdb9oFrDxZZDmrp3odfuTPuONQCiSMH-Tyg")
             .setPublicKey("pQECAyYgASFYILBNcdWmiMsmjA1QkNpG91GpEbhMIOqWLieDP6mLnGETIlggGMiqXz8BuSiPa0ovGVxxxbdUbJVm6THKNhUCifFhJCE")
             .setCounter(4)

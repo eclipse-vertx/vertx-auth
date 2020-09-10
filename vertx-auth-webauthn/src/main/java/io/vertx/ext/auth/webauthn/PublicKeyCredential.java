@@ -1,16 +1,12 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.json.JsonObject;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * PublicKeyCredential
@@ -31,16 +27,10 @@ public enum PublicKeyCredential {
   // EdDSA(-8)
   ;
 
-  private final JsonObject json;
+  private final int coseId;
 
   PublicKeyCredential(int coseId) {
-
-    Map<String, Object> baseMap = new HashMap<>();
-    baseMap.put("alg", coseId);
-    baseMap.put("type", "public-key");
-
-    // ensure it's immutable
-    this.json = new JsonObject(Collections.unmodifiableMap(baseMap));
+    this.coseId = coseId;
   }
 
   public static PublicKeyCredential valueOf(int coseId) {
@@ -103,7 +93,7 @@ public enum PublicKeyCredential {
         throw new NoSuchAlgorithmException();
     }
   }
-  public JsonObject toJson() {
-    return json;
+  public int coseId() {
+    return coseId;
   }
 }

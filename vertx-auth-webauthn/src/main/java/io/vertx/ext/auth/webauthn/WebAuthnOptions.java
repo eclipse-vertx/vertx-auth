@@ -29,16 +29,15 @@ import static io.vertx.ext.auth.webauthn.UserVerificationRequirement.*;
 @DataObject(generateConverter = true)
 public class WebAuthnOptions {
 
-  private String origin;
   private List<AuthenticatorTransport> transports;
 
-  private RelayParty relayParty;
+  private RelyingParty relyingParty;
 
   private AuthenticatorAttachment authenticatorAttachment;
   private boolean requireResidentKey;
   private UserVerificationRequirement userVerificationRequirement;
 
-  private Integer timeout;
+  private Long timeout;
   private Attestation attestation;
 
   // Needs to be a list, order is important
@@ -63,7 +62,7 @@ public class WebAuthnOptions {
     extensions = new JsonObject()
       .put("txAuthSimple", "");
 
-    timeout = 60_000;
+    timeout = 60_000L;
     challengeLength = 64;
     // Support FIDO2 devices, MACOSX, default
     addPubKeyCredParam(ES256);
@@ -76,16 +75,16 @@ public class WebAuthnOptions {
     addTransport(INTERNAL);
   }
 
-  public RelayParty getRelayParty() {
-    return relayParty;
+  public RelyingParty getRelyingParty() {
+    return relyingParty;
   }
 
-  public WebAuthnOptions setRelayParty(RelayParty relayParty) {
-    if (relayParty.getName() == null) {
-      throw new IllegalArgumentException("RelayParty name cannot be null");
+  public WebAuthnOptions setRelyingParty(RelyingParty relyingParty) {
+    if (relyingParty.getName() == null) {
+      throw new IllegalArgumentException("RelyingParty name cannot be null");
     }
 
-    this.relayParty = relayParty;
+    this.relyingParty = relyingParty;
     return this;
   }
 
@@ -165,11 +164,11 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public Integer getTimeout() {
+  public Long getTimeout() {
     return timeout;
   }
 
-  public WebAuthnOptions setTimeout(Integer timeout) {
+  public WebAuthnOptions setTimeout(Long timeout) {
     if (timeout != null) {
       if (timeout < 0) {
         throw new IllegalArgumentException("Timeout must be >= 0");
@@ -177,20 +176,6 @@ public class WebAuthnOptions {
     }
     this.timeout = timeout;
     return this;
-  }
-
-  public JsonObject getAuthenticatorSelection() {
-    JsonObject json = new JsonObject()
-      .put("requireResidentKey", requireResidentKey);
-
-    if (authenticatorAttachment != null) {
-      json.put("authenticatorAttachment", authenticatorAttachment.toString());
-    }
-    if (userVerificationRequirement != null) {
-      json.put("userVerification", userVerificationRequirement.toString());
-    }
-
-    return json;
   }
 
   public int getChallengeLength() {

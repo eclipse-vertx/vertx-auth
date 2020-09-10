@@ -23,8 +23,8 @@ public class NavigatorCredentialsCreate {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("ACME Corporation")),
-      new DummyStore());
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      .setAuthenticatorStore(new DummyStore());
 
     // Dummy user
     JsonObject user = new JsonObject()
@@ -57,8 +57,8 @@ public class NavigatorCredentialsCreate {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("ACME Corporation")),
-      new DummyStore());
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      .setAuthenticatorStore(new DummyStore());
 
     // dummy request
     JsonObject request = new JsonObject()

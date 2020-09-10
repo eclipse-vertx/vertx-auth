@@ -4,19 +4,19 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject(generateConverter = true)
-public class RelayParty {
+public class RelyingParty {
   private String id;
   private String name;
   private String icon;
 
-  public RelayParty() {
+  public RelyingParty() {
   }
 
-  public RelayParty(JsonObject json) {
-    RelayPartyConverter.fromJson(json, this);
+  public RelyingParty(JsonObject json) {
+    RelyingPartyConverter.fromJson(json, this);
   }
 
-  public RelayParty(RelayParty other) {
+  public RelyingParty(RelyingParty other) {
     this.id = other.id;
     this.name = other.name;
     this.icon = other.icon;
@@ -26,7 +26,7 @@ public class RelayParty {
     return id;
   }
 
-  public RelayParty setId(String id) {
+  public RelyingParty setId(String id) {
     this.id = id;
     return this;
   }
@@ -35,7 +35,7 @@ public class RelayParty {
     return name;
   }
 
-  public RelayParty setName(String name) {
+  public RelyingParty setName(String name) {
     this.name = name;
     return this;
   }
@@ -44,7 +44,7 @@ public class RelayParty {
     return icon;
   }
 
-  public RelayParty setIcon(String icon) {
+  public RelyingParty setIcon(String icon) {
     this.icon = icon;
     return this;
   }
@@ -56,7 +56,7 @@ public class RelayParty {
 
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
-    RelayPartyConverter.toJson(this, json);
+    RelyingPartyConverter.toJson(this, json);
     return json;
   }
 }

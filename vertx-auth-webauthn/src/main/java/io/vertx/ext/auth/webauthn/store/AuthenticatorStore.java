@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.webauthn;
+package io.vertx.ext.auth.webauthn.store;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
@@ -21,7 +21,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +33,7 @@ import java.util.UUID;
  * @author Paulo Lopes
  */
 @VertxGen
-public interface CredentialStore {
+public interface AuthenticatorStore {
 
   /**
    * Generates a unique ID that doesn't contain any user identifiable information. By default it generates a random UUID.
@@ -51,22 +50,22 @@ public interface CredentialStore {
    * Retrieves the user credentials from a backend given the user unique identifier.
    * It may return more than 1 result, for example when a user can be identified using different modalities.
    *
-   * @param username user unique name.
+   * @param name user unique name.
    * @param handler the handler for the result callback.
    * @return fluent self.
    */
   @Fluent
-  default CredentialStore getUserCredentialsByName(String username, Handler<AsyncResult<List<JsonObject>>> handler) {
-    handler.handle(Future.failedFuture("getUserCredentials not supported"));
+  default AuthenticatorStore getAuthenticatorsByUserName(String name, Handler<AsyncResult<List<Authenticator>>> handler) {
+    handler.handle(Future.failedFuture("getAuthenticatorsByUserName not supported"));
     return this;
   }
 
   /**
-   * Same as {@link #getUserCredentialsByName(String, Handler)} but using a Future.
+   * Same as {@link #getAuthenticatorsByUserName(String, Handler)} but using a Future.
    */
-  default Future<List<JsonObject>> getUserCredentialsByName(String username) {
-    Promise<List<JsonObject>> promise = Promise.promise();
-    getUserCredentialsByName(username, promise);
+  default Future<List<Authenticator>> getAuthenticatorsByUserName(String username) {
+    Promise<List<Authenticator>> promise = Promise.promise();
+    getAuthenticatorsByUserName(username, promise);
     return promise.future();
   }
 
@@ -74,46 +73,45 @@ public interface CredentialStore {
    * Retrieves the user credentials from a backend given the user unique identifier.
    * It may return more than 1 result, for example when a user can be identified using different modalities.
    *
-   * @param rawId user unique rawId.
+   * @param id user unique rawId.
    * @param handler the handler for the result callback.
    * @return fluent self.
    */
   @Fluent
-  default CredentialStore getUserCredentialsById(String rawId, Handler<AsyncResult<List<JsonObject>>> handler) {
-    handler.handle(Future.failedFuture("getUserCredentials not supported"));
+  default AuthenticatorStore getAuthenticatorsByCredId(String id, Handler<AsyncResult<List<Authenticator>>> handler) {
+    handler.handle(Future.failedFuture("getAuthenticatorsByCredId not supported"));
     return this;
   }
 
   /**
-   * Same as {@link #getUserCredentialsById(String, Handler)} but using a Future.
+   * Same as {@link #getAuthenticatorsByCredId(String, Handler)} but using a Future.
    */
-  default Future<List<JsonObject>> getUserCredentialsById(String rawId) {
-    Promise<List<JsonObject>> promise = Promise.promise();
-    getUserCredentialsById(rawId, promise);
+  default Future<List<Authenticator>> getAuthenticatorsByCredId(String rawId) {
+    Promise<List<Authenticator>> promise = Promise.promise();
+    getAuthenticatorsByCredId(rawId, promise);
     return promise.future();
   }
 
   /**
    * Update the user credential.
    *
-   * @param id the unique user identifier.
-   * @param data the data to update.
+   * @param authenticator authenticator data to update.
    * @param upsert insert if not present.
    * @param handler the handler for the result callback.
    * @return fluent self.
    */
   @Fluent
-  default CredentialStore updateUserCredential(String id, JsonObject data, boolean upsert, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture("updateUserCredentials not supported"));
+  default AuthenticatorStore update(Authenticator authenticator, boolean upsert, Handler<AsyncResult<Void>> handler) {
+    handler.handle(Future.failedFuture("update not supported"));
     return this;
   }
 
   /**
-   * Same as {@link #updateUserCredential(String, JsonObject, boolean, Handler)} but using a Future.
+   * Same as {@link #update(Authenticator, boolean, Handler)} but using a Future.
    */
-  default Future<Void> updateUserCredential(String id, JsonObject data, boolean upsert) {
+  default Future<Void> update(Authenticator authenticator, boolean upsert) {
     Promise<Void> promise = Promise.promise();
-    updateUserCredential(id, data, upsert, promise);
+    update(authenticator, upsert, promise);
     return promise.future();
   }
 }

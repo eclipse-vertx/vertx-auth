@@ -156,7 +156,7 @@
         })
       })
       .then(res => {
-        if (res.status === 201) {
+        if (res.status >= 200 && res.status < 300) {
           return res;
         }
         throw new Error(res.statusText);
@@ -214,7 +214,7 @@
         })
       })
       .then(res => {
-        if (res.status === 200) {
+        if (res.status >= 200 && res.status < 300) {
           return res;
         }
         throw new Error(res.statusText);

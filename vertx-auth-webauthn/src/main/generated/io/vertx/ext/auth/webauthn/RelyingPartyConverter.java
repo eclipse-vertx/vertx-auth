@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.webauthn.RelayParty}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.RelayParty} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.webauthn.RelyingParty}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.RelyingParty} original class using Vert.x codegen.
  */
-public class RelayPartyConverter {
+public class RelyingPartyConverter {
 
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, RelayParty obj) {
+  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, RelyingParty obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "icon":
@@ -34,11 +34,11 @@ public class RelayPartyConverter {
     }
   }
 
-  public static void toJson(RelayParty obj, JsonObject json) {
+  public static void toJson(RelyingParty obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(RelayParty obj, java.util.Map<String, Object> json) {
+  public static void toJson(RelyingParty obj, java.util.Map<String, Object> json) {
     if (obj.getIcon() != null) {
       json.put("icon", obj.getIcon());
     }

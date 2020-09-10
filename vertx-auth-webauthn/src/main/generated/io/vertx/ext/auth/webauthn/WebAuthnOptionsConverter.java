@@ -25,8 +25,6 @@ public class WebAuthnOptionsConverter {
             obj.setAuthenticatorAttachment(io.vertx.ext.auth.webauthn.AuthenticatorAttachment.valueOf((String)member.getValue()));
           }
           break;
-        case "authenticatorSelection":
-          break;
         case "challengeLength":
           if (member.getValue() instanceof Number) {
             obj.setChallengeLength(((Number)member.getValue()).intValue());
@@ -47,9 +45,9 @@ public class WebAuthnOptionsConverter {
             obj.setPubKeyCredParams(list);
           }
           break;
-        case "relayParty":
+        case "relyingParty":
           if (member.getValue() instanceof JsonObject) {
-            obj.setRelayParty(new io.vertx.ext.auth.webauthn.RelayParty((io.vertx.core.json.JsonObject)member.getValue()));
+            obj.setRelyingParty(new io.vertx.ext.auth.webauthn.RelyingParty((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "requireResidentKey":
@@ -59,7 +57,7 @@ public class WebAuthnOptionsConverter {
           break;
         case "timeout":
           if (member.getValue() instanceof Number) {
-            obj.setTimeout(((Number)member.getValue()).intValue());
+            obj.setTimeout(((Number)member.getValue()).longValue());
           }
           break;
         case "transports":
@@ -92,9 +90,6 @@ public class WebAuthnOptionsConverter {
     if (obj.getAuthenticatorAttachment() != null) {
       json.put("authenticatorAttachment", obj.getAuthenticatorAttachment().name());
     }
-    if (obj.getAuthenticatorSelection() != null) {
-      json.put("authenticatorSelection", obj.getAuthenticatorSelection());
-    }
     json.put("challengeLength", obj.getChallengeLength());
     if (obj.getExtensions() != null) {
       json.put("extensions", obj.getExtensions());
@@ -104,8 +99,8 @@ public class WebAuthnOptionsConverter {
       obj.getPubKeyCredParams().forEach(item -> array.add(item.name()));
       json.put("pubKeyCredParams", array);
     }
-    if (obj.getRelayParty() != null) {
-      json.put("relayParty", obj.getRelayParty().toJson());
+    if (obj.getRelyingParty() != null) {
+      json.put("relyingParty", obj.getRelyingParty().toJson());
     }
     json.put("requireResidentKey", obj.getRequireResidentKey());
     if (obj.getTimeout() != null) {
