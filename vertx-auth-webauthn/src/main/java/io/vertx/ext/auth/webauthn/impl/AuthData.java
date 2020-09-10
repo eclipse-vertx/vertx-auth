@@ -18,20 +18,19 @@ package io.vertx.ext.auth.webauthn.impl;
 
 import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Map;
 
 /**
- * FIDO2 User Info.
+ * FIDO2 Authenticator Data
  * This class decodes the buffer into a parsable object
  */
-public class AuthenticatorData {
-
-  private static final Base64.Decoder B64DEC = Base64.getUrlDecoder();
+public class AuthData {
 
   public static final int USER_PRESENT = 0x01;
   public static final int USER_VERIFIED = 0x04;
@@ -56,7 +55,7 @@ public class AuthenticatorData {
    * the hash of the rpId which is basically the effective domain or host.
    * For example: “https://example.com” effective domain is “example.com”
    */
-  private byte[] rpIdHash;
+  private final byte[] rpIdHash;
   /**
    * 8bit flag that defines the state of the authenticator during the authentication.
    * Bits 0 and 2 are User Presence and User Verification flags.
@@ -64,16 +63,16 @@ public class AuthenticatorData {
    * Must be set when attestedCredentialData is presented.
    * Bit 7 must be set if extension data is presented.
    */
-  private byte flags;
+  private final byte flags;
   /**
    * Signature counter unsigned 32 bits.
    */
-  private long signCounter;
+  private final long signCounter;
   /**
    * authenticator attestation identifier — a unique identifier of authenticator model
    */
   private byte[] aaguid;
-  private String aaguidString;
+  private String aaguidString = "00000000-0000-0000-0000-000000000000";
 
   /**
    * Credential Identifier. The length is defined by credIdLen. Must be the same as id/rawId.
@@ -85,17 +84,13 @@ public class AuthenticatorData {
    * Its length depends on the length of the credential ID and credential public key being attested.
    */
   private byte[] credentialPublicKey;
-
+  private JsonObject credentialPublicKeyJson;
   private JWK credentialJWK;
 
   private byte[] extensions;
   private JsonObject extensionsData;
 
-  public AuthenticatorData(String base64) {
-    this(B64DEC.decode(base64));
-  }
-
-  public AuthenticatorData(byte[] data) {
+  public AuthData(byte[] data) {
     this.raw = data;
 
     Buffer buffer = Buffer.buffer(data);
@@ -138,7 +133,8 @@ public class AuthenticatorData {
 
       try (JsonParser parser = CBOR.cborParser(bytes)) {
         // the decoded credential primary as a JWK
-        this.credentialJWK = COSE.toJWK(CBOR.parse(parser));
+        this.credentialPublicKeyJson = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
+        this.credentialJWK = CWK.toJWK(credentialPublicKeyJson);
         int credentialPublicKeyLen = (int) parser.getCurrentLocation().getByteOffset();
         this.credentialPublicKey = buffer.getBytes(pos, pos + credentialPublicKeyLen);
         pos += credentialPublicKeyLen;
@@ -153,17 +149,17 @@ public class AuthenticatorData {
 
       try (JsonParser parser = CBOR.cborParser(bytes)) {
         // the decoded credential primary as a JWK
-        this.extensionsData = new JsonObject(CBOR.<Map>parse(parser));
+        this.extensionsData = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
         int extensionsDataLen = (int) parser.getCurrentLocation().getByteOffset();
         this.extensions = buffer.getBytes(pos, pos + extensionsDataLen);
         pos += extensionsDataLen;
       } catch (IOException e) {
-        throw new IllegalArgumentException("Invalid CBOR message");
+        throw new DecodeException("Invalid CBOR message");
       }
     }
 
     if(buffer.length() > pos) {
-      throw new IllegalArgumentException("Failed to decode authData! Leftover bytes been detected!");
+      throw new DecodeException("Failed to decode authData! Leftover bytes been detected!");
     }
   }
 
@@ -203,11 +199,19 @@ public class AuthenticatorData {
     return credentialPublicKey;
   }
 
+  public JsonObject getCredentialPublicKeyJson() {
+    return credentialPublicKeyJson;
+  }
+
   public JWK getCredentialJWK() {
     return credentialJWK;
   }
 
   public byte[] getExtensions() {
     return extensions;
+  }
+
+  public JsonObject getExtensionsData() {
+    return extensionsData;
   }
 }

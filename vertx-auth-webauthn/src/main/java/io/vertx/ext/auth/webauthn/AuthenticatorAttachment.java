@@ -18,10 +18,14 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.VertxGen;
 
+/**
+ * AuthenticatorAttachment
+ * https://www.w3.org/TR/webauthn/#enumdef-authenticatorattachment
+ */
 @VertxGen
 public enum AuthenticatorAttachment {
-  CROSS_PLATFORM("cross-platform"),
-  PLATFORM("platform");
+  PLATFORM("platform"),
+  CROSS_PLATFORM("cross-platform");
 
   private final String value;
 

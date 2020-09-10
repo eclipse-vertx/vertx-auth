@@ -27,6 +27,8 @@ public class WebAuthnCredentials implements Credentials {
   private String challenge;
   private JsonObject webauthn;
   private String username;
+  private String origin;
+  private String domain;
 
   public WebAuthnCredentials() {}
 
@@ -61,24 +63,50 @@ public class WebAuthnCredentials implements Credentials {
     return this;
   }
 
+  public String getOrigin() {
+    return origin;
+  }
+
+  public WebAuthnCredentials setOrigin(String origin) {
+    this.origin = origin;
+    return this;
+  }
+
+  public String getDomain() {
+    return domain;
+  }
+
+  public WebAuthnCredentials setDomain(String domain) {
+    this.domain = domain;
+    return this;
+  }
+
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
     if (challenge == null || challenge.length() == 0) {
-      throw new CredentialValidationException("challenge cannot be null or empty");
+      throw new CredentialValidationException("Challenge cannot be null or empty");
     }
 
     if (webauthn == null) {
       throw new CredentialValidationException("webauthn cannot be null");
     }
 
-    Object response = webauthn.getValue("response");
+    if (!webauthn.containsKey("id") || !webauthn.containsKey("rawId") || !webauthn.containsKey("response")) {
+      throw new CredentialValidationException("Invalid webauthn JSON, missing one of {id, rawId, response}");
+    }
 
-    if (!(response instanceof JsonObject)) {
+    try {
+      JsonObject response = webauthn.getJsonObject("response");
+      // response.clientDataJSON must be always present
+      if (!response.containsKey("clientDataJSON")) {
+        throw new CredentialValidationException("Missing webauthn.response.clientDataJSON");
+      }
+
+    } catch (ClassCastException e) {
       throw new CredentialValidationException("webauthn.response must be JSON");
     }
 
     // Username may be null once the system has stored it once.
-
   }
 
   public JsonObject toJson() {

@@ -23,6 +23,7 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
+import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
 
 /**
  * Factory interface for creating WebAuthN based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
@@ -36,11 +37,10 @@ public interface WebAuthn extends AuthenticationProvider {
    * Create a WebAuthN auth provider
    *
    * @param vertx the Vertx instance.
-   * @param store the user store used to load credentials.
    * @return the auth provider.
    */
-  static WebAuthn create(Vertx vertx, CredentialStore store) {
-    return create(vertx, new WebAuthnOptions(), store);
+  static WebAuthn create(Vertx vertx) {
+    return create(vertx, new WebAuthnOptions());
   }
 
   /**
@@ -48,17 +48,27 @@ public interface WebAuthn extends AuthenticationProvider {
    *
    * @param vertx the Vertx instance.
    * @param options the custom options to the provider.
-   * @param store the user store used to load credentials.
    * @return the auth provider.
    */
-  static WebAuthn create(Vertx vertx, WebAuthnOptions options, CredentialStore store) {
-    return new WebAuthnImpl(vertx, options, store);
+  static WebAuthn create(Vertx vertx, WebAuthnOptions options) {
+    return new WebAuthnImpl(vertx, options);
   }
 
   /**
-   * Generates makeCredentials request
+   * Set's the authenticator store. The store implementation should be responsible to load the required data
+   * from a database.
    *
-   * @param user    - the user object with username, displayName
+   * @param store the user store used to load credentials.
+   * @return fluent self
+   */
+  @Fluent
+  WebAuthn setAuthenticatorStore(AuthenticatorStore store);
+
+  /**
+   * Gets a challenge and any other parameters for the {@code navigator.credentials.create()} call.
+   *
+   * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
+   * @param user    - the user object with name and optionally displayName and icon
    * @param handler server encoded make credentials request
    * @return fluent self
    */
@@ -75,15 +85,18 @@ public interface WebAuthn extends AuthenticationProvider {
   }
 
   /**
-   * Generates getAssertion request. If the auth provider is configured with {@code RequireResidentKey} and
-   * the username is null then the generated assertion will be a RK assertion (Usernameless).
+   * Creates an assertion challenge and any other parameters for the {@code navigator.credentials.get()} call.
+   * If the auth provider is configured with {@code RequireResidentKey} and the username is null then the
+   * generated assertion will be a RK assertion (Usernameless).
    *
-   * @param username the unique user identified
+   * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
+   *
+   * @param name the unique user identified
    * @param handler server encoded get assertion request
    * @return fluent self.
    */
   @Fluent
-  WebAuthn getCredentialsOptions(@Nullable String username, Handler<AsyncResult<JsonObject>> handler);
+  WebAuthn getCredentialsOptions(@Nullable String name, Handler<AsyncResult<JsonObject>> handler);
 
   /**
    * Same as {@link #getCredentialsOptions(String, Handler)} but returning a Future.

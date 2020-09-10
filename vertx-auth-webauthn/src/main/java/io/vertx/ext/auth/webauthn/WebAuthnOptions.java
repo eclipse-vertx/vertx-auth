@@ -19,35 +19,32 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.vertx.ext.auth.webauthn.AuthenticatorTransport.*;
+import static io.vertx.ext.auth.webauthn.PublicKeyCredential.*;
+import static io.vertx.ext.auth.webauthn.UserVerificationRequirement.*;
 
 @DataObject(generateConverter = true)
 public class WebAuthnOptions {
 
-  private String origin;
-  private Set<String> transports;
+  private List<AuthenticatorTransport> transports;
 
-  private RelayParty relayParty;
+  private RelyingParty relyingParty;
 
   private AuthenticatorAttachment authenticatorAttachment;
-  private Boolean requireResidentKey;
-  private UserVerification userVerification;
+  private boolean requireResidentKey;
+  private UserVerificationRequirement userVerificationRequirement;
 
-  private int timeout;
+  private Long timeout;
   private Attestation attestation;
 
-  private Set<String> pubKeyCredParams;
+  // Needs to be a list, order is important
+  private List<PublicKeyCredential> pubKeyCredParams;
 
-  public int getChallengeLength() {
-    return challengeLength;
-  }
-
-  public void setChallengeLength(int challengeLength) {
-    this.challengeLength = challengeLength;
-  }
-
-  private int challengeLength = 32;
+  private int challengeLength;
+  private JsonObject extensions;
 
   public WebAuthnOptions() {
     init();
@@ -60,45 +57,49 @@ public class WebAuthnOptions {
 
   // sensible defaults
   private void init() {
-    timeout = -1;
-    addPubKeyCredParam("ES256");
-    addPubKeyCredParam("RS256");
-    addTransport("usb");
-    addTransport("nfc");
-    addTransport("ble");
-    addTransport("internal");
+    userVerificationRequirement = DISCOURAGED;
+    requireResidentKey = false;
+    extensions = new JsonObject()
+      .put("txAuthSimple", "");
+
+    timeout = 60_000L;
+    challengeLength = 64;
+    // Support FIDO2 devices, MACOSX, default
+    addPubKeyCredParam(ES256);
+    // Support Windows devices (Hello)
+    addPubKeyCredParam(RS256);
+    // all known transports
+    addTransport(USB);
+    addTransport(NFC);
+    addTransport(BLE);
+    addTransport(INTERNAL);
   }
 
-  public RelayParty getRelayParty() {
-    return relayParty;
+  public RelyingParty getRelyingParty() {
+    return relyingParty;
   }
 
-  public WebAuthnOptions setRelayParty(RelayParty relayParty) {
-    this.relayParty = relayParty;
+  public WebAuthnOptions setRelyingParty(RelyingParty relyingParty) {
+    if (relyingParty.getName() == null) {
+      throw new IllegalArgumentException("RelyingParty name cannot be null");
+    }
+
+    this.relyingParty = relyingParty;
     return this;
   }
 
-  public String getOrigin() {
-    return origin;
-  }
-
-  public WebAuthnOptions setOrigin(String origin) {
-    this.origin = origin;
-    return this;
-  }
-
-  public Set<String> getTransports() {
+  public List<AuthenticatorTransport> getTransports() {
     return transports;
   }
 
-  public WebAuthnOptions setTransports(Set<String> transports) {
+  public WebAuthnOptions setTransports(List<AuthenticatorTransport> transports) {
     this.transports = transports;
     return this;
   }
 
-  public WebAuthnOptions addTransport(String transport) {
+  public WebAuthnOptions addTransport(AuthenticatorTransport transport) {
     if (transports == null) {
-      transports = new HashSet<>();
+      transports = new ArrayList<>();
     }
 
     this.transports.add(transport);
@@ -114,19 +115,24 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public Set<String> getPubKeyCredParams() {
+  public List<PublicKeyCredential> getPubKeyCredParams() {
     return pubKeyCredParams;
   }
 
-  public WebAuthnOptions addPubKeyCredParam(String pubKeyCredParam) {
-    if (this.pubKeyCredParams == null) {
-      this.pubKeyCredParams = new HashSet<>();
+  public WebAuthnOptions addPubKeyCredParam(PublicKeyCredential pubKeyCredParam) {
+    if (pubKeyCredParams == null) {
+      pubKeyCredParams = new ArrayList<>();
     }
-    this.pubKeyCredParams.add(pubKeyCredParam);
+    if (!pubKeyCredParams.contains(pubKeyCredParam)) {
+      pubKeyCredParams.add(pubKeyCredParam);
+    }
     return this;
   }
 
-  public WebAuthnOptions setPubKeyCredParams(Set<String> pubKeyCredParams) {
+  public WebAuthnOptions setPubKeyCredParams(List<PublicKeyCredential> pubKeyCredParams) {
+    if (pubKeyCredParams.size() == 0) {
+      throw new IllegalArgumentException("PubKeyCredParams must have at least 1 element");
+    }
     this.pubKeyCredParams = pubKeyCredParams;
     return this;
   }
@@ -140,53 +146,57 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public Boolean getRequireResidentKey() {
+  public boolean getRequireResidentKey() {
     return requireResidentKey;
   }
 
-  public WebAuthnOptions setRequireResidentKey(Boolean requireResidentKey) {
+  public WebAuthnOptions setRequireResidentKey(boolean requireResidentKey) {
     this.requireResidentKey = requireResidentKey;
     return this;
   }
 
-  public UserVerification getUserVerification() {
-    return userVerification;
+  public UserVerificationRequirement getUserVerification() {
+    return userVerificationRequirement;
   }
 
-  public WebAuthnOptions setUserVerification(UserVerification userVerification) {
-    this.userVerification = userVerification;
+  public WebAuthnOptions setUserVerification(UserVerificationRequirement userVerificationRequirement) {
+    this.userVerificationRequirement = userVerificationRequirement;
     return this;
   }
 
-  public int getTimeout() {
+  public Long getTimeout() {
     return timeout;
   }
 
-  public WebAuthnOptions setTimeout(int timeout) {
+  public WebAuthnOptions setTimeout(Long timeout) {
+    if (timeout != null) {
+      if (timeout < 0) {
+        throw new IllegalArgumentException("Timeout must be >= 0");
+      }
+    }
     this.timeout = timeout;
     return this;
   }
 
-  public JsonObject getAuthenticatorSelection() {
-    JsonObject json = null;
-    if (authenticatorAttachment != null) {
-      json = new JsonObject()
-        .put("authenticatorAttachment", authenticatorAttachment.toString());
-    }
-    if (requireResidentKey != null) {
-      if (json == null) {
-        json = new JsonObject();
-      }
-      json.put("requireResidentKey", requireResidentKey);
-    }
-    if (userVerification != null) {
-      if (json == null) {
-        json = new JsonObject();
-      }
-      json.put("userVerification", userVerification.toString());
-    }
+  public int getChallengeLength() {
+    return challengeLength;
+  }
 
-    return json;
+  public WebAuthnOptions setChallengeLength(int challengeLength) {
+    if (challengeLength < 32) {
+      throw new IllegalArgumentException("Challenge length must be >= 32");
+    }
+    this.challengeLength = challengeLength;
+    return this;
+  }
+
+  public JsonObject getExtensions() {
+    return extensions;
+  }
+
+  public WebAuthnOptions setExtensions(JsonObject extensions) {
+    this.extensions = extensions;
+    return this;
   }
 
   public JsonObject toJson() {

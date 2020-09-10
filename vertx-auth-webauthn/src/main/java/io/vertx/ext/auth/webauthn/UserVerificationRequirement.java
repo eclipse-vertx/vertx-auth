@@ -18,15 +18,19 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.VertxGen;
 
+/**
+ * UserVerificationRequirement
+ * https://www.w3.org/TR/webauthn/#enumdef-userverificationrequirement
+ */
 @VertxGen
-public enum UserVerification {
+public enum UserVerificationRequirement {
   REQUIRED("required"),
   PREFERRED("preferred"),
   DISCOURAGED("discouraged");
 
   private final String value;
 
-  UserVerification(String value) {
+  UserVerificationRequirement(String value) {
     this.value = value;
   }
 

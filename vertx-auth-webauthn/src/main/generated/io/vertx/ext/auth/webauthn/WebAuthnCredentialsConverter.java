@@ -20,6 +20,16 @@ public class WebAuthnCredentialsConverter {
             obj.setChallenge((String)member.getValue());
           }
           break;
+        case "domain":
+          if (member.getValue() instanceof String) {
+            obj.setDomain((String)member.getValue());
+          }
+          break;
+        case "origin":
+          if (member.getValue() instanceof String) {
+            obj.setOrigin((String)member.getValue());
+          }
+          break;
         case "username":
           if (member.getValue() instanceof String) {
             obj.setUsername((String)member.getValue());
@@ -41,6 +51,12 @@ public class WebAuthnCredentialsConverter {
   public static void toJson(WebAuthnCredentials obj, java.util.Map<String, Object> json) {
     if (obj.getChallenge() != null) {
       json.put("challenge", obj.getChallenge());
+    }
+    if (obj.getDomain() != null) {
+      json.put("domain", obj.getDomain());
+    }
+    if (obj.getOrigin() != null) {
+      json.put("origin", obj.getOrigin());
     }
     if (obj.getUsername() != null) {
       json.put("username", obj.getUsername());

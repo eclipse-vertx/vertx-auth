@@ -18,11 +18,15 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.VertxGen;
 
+/**
+ * AttestationConveyancePreference
+ * https://www.w3.org/TR/webauthn/#attestation-convey
+ */
 @VertxGen
 public enum Attestation {
   NONE("none"),
-  DIRECT("direct"),
-  INDIRECT("indirect");
+  INDIRECT("indirect"),
+  DIRECT("direct");
 
   private final String value;
 

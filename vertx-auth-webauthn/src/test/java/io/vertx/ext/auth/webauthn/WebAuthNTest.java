@@ -2,9 +2,10 @@ package io.vertx.ext.auth.webauthn;
 
 import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.impl.CBOR;
-import io.vertx.ext.auth.webauthn.impl.COSE;
+import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.webauthn.impl.CBOR;
+import io.vertx.ext.auth.webauthn.store.Authenticator;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -15,8 +16,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Base64;
+import java.util.Map;
 
 @RunWith(VertxUnitRunner.class)
 public class WebAuthNTest {
@@ -30,14 +31,13 @@ public class WebAuthNTest {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("http://localhost:3000"),
-      new DummyStore(
-        Arrays.asList(
-          new DummyStore.StoreEntry()
-            .setCredID("vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ")
-            .setPublicKey("pQECAyYgASFYINE091XO4J5juKbQMyeu9X2oZYFvAq6oIgp_3z1hXhG3Ilgg_cCyBgk8U8Zm3umoX2ELm6Is1k-2PLtwWmCkmul07cQ")
-            .setCounter(0)
-        )));
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .setAuthenticatorStore(new DummyStore(
+        new Authenticator()
+          .setCredID("vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ")
+          .setPublicKey("pQECAyYgASFYINE091XO4J5juKbQMyeu9X2oZYFvAq6oIgp_3z1hXhG3Ilgg_cCyBgk8U8Zm3umoX2ELm6Is1k-2PLtwWmCkmul07cQ")
+          .setCounter(0)
+      ));
 
     final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ\",\"response\":{\"attestationObject\":\"o2NmbXRoZmlkby11MmZnYXR0U3RtdKJjc2lnWEcwRQIhAOOPecQ34VN0QW-cmj-Sft9aCahqgTlFQzbQH1LpEgrTAiBWW6KoqlKbLMtGd1Y_VcQML8eugYZcrmSSCS0of2T-M2N4NWOBWQIyMIICLjCCARigAwIBAgIECmML_zALBgkqhkiG9w0BAQswLjEsMCoGA1UEAxMjWXViaWNvIFUyRiBSb290IENBIFNlcmlhbCA0NTcyMDA2MzEwIBcNMTQwODAxMDAwMDAwWhgPMjA1MDA5MDQwMDAwMDBaMCkxJzAlBgNVBAMMHll1YmljbyBVMkYgRUUgU2VyaWFsIDE3NDI2MzI5NTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKQjZF26iyPtbNnl5IuTKs_fRWTHVzHxz1IHRRBrSbqWD60PCqUJPe4zkIRFqBa4NnzdhVcS80nlZuY3ANQm0J-jJjAkMCIGCSsGAQQBgsQKAgQVMS4zLjYuMS40LjEuNDE0ODIuMS4yMAsGCSqGSIb3DQEBCwOCAQEAZTmwMqHPxEjSB64Umwq2tGDKplAcEzrwmg6kgS8KPkJKXKSu9T1H6XBM9-LAE9cN48oUirFFmDIlTbZRXU2Vm2qO9OdrSVFY-qdbF9oti8CKAmPHuJZSW6ii7qNE59dHKUaP4lDYpnhRDqttWSUalh2LPDJQUpO9bsJPkgNZAhBUQMYZXL_MQZLRYkX-ld7llTNOX5u7n_4Y5EMr-lqOyVVC9lQ6JP6xoa9q6Zp9-Y9ZmLCecrrcuH6-pLDgAzPcc8qxhC2OR1B0ZSpI9RBgcT0KqnVE0tq1KEDeokPqF3MgmDRkJ--_a2pV0wAYfPC3tC57BtBdH_UXEB8xZVFhtGhhdXRoRGF0YVjESZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NBAAAAAAAAAAAAAAAAAAAAAAAAAAAAQL6enL6EoL01kshaZ5naZtXcIrkRL7JviqsNCbdGND0H4x7BIShPNiqJqVF6hLeckCEJfWSo-i9fu9NCxmlVDKGlAQIDJiABIVgg0TT3Vc7gnmO4ptAzJ671fahlgW8CrqgiCn_fPWFeEbciWCD9wLIGCTxTxmbe6ahfYQuboizWT7Y8u3BaYKSa6XTtxA\",\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiJQZXlodVVYaVQzeG55V1pqZWNaU1NxaFVTdUttYmZPV0dGREN0OGZDUXYwIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmNyZWF0ZSJ9\"},\"id\":\"vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ\",\"type\":\"public-unwrap\"}");
 
@@ -46,6 +46,7 @@ public class WebAuthNTest {
         .put("webauthn", webauthn)
         .put("challenge", "PeyhuUXiT3xnyWZjecZSSqhUSuKmbfOWGFDCt8fCQv0")
         .put("username", "paulo")
+        .put("origin", "http://localhost:3000")
       , fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
@@ -57,20 +58,21 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("http://localhost:3000").setRequireResidentKey(true),
-      new DummyStore(
-        Arrays.asList(
-          new DummyStore.StoreEntry()
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")).setRequireResidentKey(true))
+      .setAuthenticatorStore(
+        new DummyStore(
+          new Authenticator()
             .setCredID("-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw")
             .setPublicKey("pQECAyYgASFYIB4QBsdBFyVm79aQFrgdhAFsV0bD0-UfzsRRihvSU8bnIlggdBaaNC3nGWGcZd1msfoD0vMt0Ydg9InOFKkz6PKUEf8")
             .setCounter(0)
-        )));
+        ));
 
     final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"response\":{\"authenticatorData\":\"SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAAFA\",\"signature\":\"MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8\",\"userHandle\":null,\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiI2b2pkb19LS0c0a1hvWjVKRF9BbHY2Q2hyVXRPT3o3dXFlaWlvRmxCc3pvIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmdldCJ9\"},\"id\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"type\":\"public-unwrap\"}");
 
     webAuthN.authenticate(
       new JsonObject()
         .put("webauthn", webauthn)
+        .put("origin", "http://localhost:3000")
         .put("challenge", "6ojdo_KKG4kXoZ5JD_Alv6ChrUtOOz7uqeiioFlBszo")
       , fn -> {
         should.assertTrue(fn.succeeded());
@@ -82,7 +84,8 @@ public class WebAuthNTest {
   @Ignore("test data contains an expired certificate")
   public void testPAckedFull(TestContext should) {
     final Async test = should.async();
-    WebAuthn webAuthN = WebAuthn.create(rule.vertx(), new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("https://webauthn.org"), new DummyStore());
+    WebAuthn webAuthN = WebAuthn.create(rule.vertx(), new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .setAuthenticatorStore(new DummyStore());
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"wsLryOAxXMU54s2fCSWPzWjXHOBKPploN-UHftj4_rpIu6BZxNXppm82f7Y6iX9FEOKKeS5-N2TALeyzLnJfAA\",\n" +
@@ -96,6 +99,7 @@ public class WebAuthNTest {
     webAuthN.authenticate(
       new JsonObject()
         .put("webauthn", webauthn)
+        .put("origin", "https://webauthn.org")
         .put("challenge", "YMWETf-P79iMb-BqdTkySNReOva7nK2iVC9fiC8iGvYypunEOCZGZ6-Y5OV1rvMiDgAjWfFi6UC0WyKGsjA-gA")
         .put("username", "paulo")
       , fn -> {
@@ -109,14 +113,14 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("http://localhost:3000"),
-      new DummyStore(
-        Arrays.asList(
-          new DummyStore.StoreEntry()
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .setAuthenticatorStore(
+        new DummyStore(
+          new Authenticator()
             .setCredID("H6X2BnnjgOzu_Oj87vpRnwMJeJYVzwM3wtY1lhAfQ14")
             .setPublicKey("pAEDAzn__iBZAQDAIqzybPPmgeL5OR6JKq9bWDiENJlN_LePQEnf1_sgOm4FJ9kBTbOTtWplfoMXg40A7meMppiRqP72A3tmILwZ5xKIyY7V8Y2t8X1ilYJol2nCKOpAEqGLTRJjF64GQxen0uFpi1tA6l6N-ZboPxjky4aidBdUP22YZuEPCO8-9ZTha8qwvTgZwMHhZ40TUPEJGGWOnHNlYmqnfFfk0P-UOZokI0rqtqqQGMwzV2RrH2kjKTZGfyskAQnrqf9PoJkye4KUjWkWnZzhkZbrDoLyTEX2oWvTTflnR5tAVMQch4UGgEHSZ00G5SFoc19nGx_UJcqezx5cLZsny-qQYDRjIUMBAAE")
             .setCounter(0)
-        )));
+        ));
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"id\": \"H6X2BnnjgOzu_Oj87vpRnwMJeJYVzwM3wtY1lhAfQ14\",\n" +
@@ -131,6 +135,7 @@ public class WebAuthNTest {
     webAuthN.authenticate(
       new JsonObject()
         .put("webauthn", webauthn)
+        .put("origin", "http://localhost:3000")
         .put("challenge", "AXkXWXPP3gLx8OLlpkJ3aRRhFWntnSENggnjDpBql1ngKol7xWwevUYvrpBDP3LEvdr2EOStOFpGGxnMvXk-Vw")
         .put("username", "paulo")
       , fn -> {
@@ -142,7 +147,7 @@ public class WebAuthNTest {
   @Test
   public void testVerify() throws IOException {
     try (JsonParser parser = CBOR.cborParser(Base64.getDecoder().decode("pQECAyYgASFYIB4QBsdBFyVm79aQFrgdhAFsV0bD0+UfzsRRihvSU8bnIlggdBaaNC3nGWGcZd1msfoD0vMt0Ydg9InOFKkz6PKUEf8="))) {
-      JWK key = COSE.toJWK(CBOR.parse(parser));
+      JWK key = CWK.toJWK(new JsonObject(CBOR.<Map<String, Object>>parse(parser)));
       System.out.println(key.verify(
         Base64.getUrlDecoder().decode("MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8"),
         Base64.getDecoder().decode("SZYN5YgOjGh0NBcPZHZgW4/krrmihjLHmVzzuoMdl2MBAAAAFF/+s2iT3LHeLABfvFkPvdiAp+mysYMYk94fUEZu//oj")
@@ -155,14 +160,14 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("https://webauthn.org"),
-      new DummyStore(
-        Arrays.asList(
-          new DummyStore.StoreEntry()
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .setAuthenticatorStore(
+        new DummyStore(
+          new Authenticator()
             .setCredID("AVUvAmX241vMKYd7ZBdmkNWaYcNYhoSZCJjFRGmROb6I4ygQUVmH6k9IMwcbZGeAQ4v4WMNphORudwje5h7ty9A")
             .setPublicKey("pQECAyYgASFYIDhJog_eJsNLAIg5GlgneD3_k4gLFlQIiq369XollUmhIlggdDxLUkXPJoXPkQVDZ81Pr7lITnBZNlEBH8DcznYhxo8")
             .setCounter(0)
-        )));
+        ));
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"AZD7huwZVx7aW1efRa6Uq3JTQNorj3qA9yrLINXEcgvCQYtWiSQa1eOIVrXfCmip6MzP8KaITOvRLjy3TUHO7_c\",\n" +
@@ -177,6 +182,7 @@ public class WebAuthNTest {
     webAuthN.authenticate(
       new JsonObject()
         .put("webauthn", webauthn)
+        .put("origin", "https://webauthn.org")
         .put("challenge", "Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
         .put("username", "paulo")
       , fn -> {
@@ -191,14 +197,14 @@ public class WebAuthNTest {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelayParty(new RelayParty().setName("FIDO Examples Corporation")).setOrigin("https://webauthn.org"),
-      new DummyStore(
-        Arrays.asList(
-          new DummyStore.StoreEntry()
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .setAuthenticatorStore(
+        new DummyStore(
+          new Authenticator()
             .setCredID("AVUvAmX241vMKYd7ZBdmkNWaYcNYhoSZCJjFRGmROb6I4ygQUVmH6k9IMwcbZGeAQ4v4WMNphORudwje5h7ty9A")
             .setPublicKey("pQECAyYgASFYIDhJog_eJsNLAIg5GlgneD3_k4gLFlQIiq369XollUmhIlggdDxLUkXPJoXPkQVDZ81Pr7lITnBZNlEBH8DcznYhxo8")
             .setCounter(0)
-        )));
+        ));
 
     final JsonObject webauthn = new JsonObject("{\n" +
       "    \"rawId\": \"AZD7huwZVx7aW1efRa6Uq3JTQNorj3qA9yrLINXEcgvCQYtWiSQa1eOIVrXfCmip6MzP8KaITOvRLjy3TUHO7_c\",\n" +
@@ -212,6 +218,7 @@ public class WebAuthNTest {
     webAuthN.authenticate(
       new JsonObject()
         .put("webauthn", webauthn)
+        .put("origin", "https://webauthn.org")
         .put("challenge", "Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
         .put("username", "paulo")
       , fn -> {

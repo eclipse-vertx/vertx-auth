@@ -18,37 +18,39 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.impl.AuthenticatorData;
+import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
-import static io.vertx.ext.auth.webauthn.impl.AuthenticatorData.USER_PRESENT;
+import static io.vertx.ext.auth.webauthn.impl.AuthData.USER_PRESENT;
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
+/**
+ * Implementation of the "fido-u2f" attestation check.
+ * <p>
+ * This attestation verifies the hardware for fido-u2f hardware tokens such
+ * as the yubikey.
+ *
+ * @author <a href="mailto:pmlopes@gmail.com>Paulo Lopes</a>
+ */
 public class FidoU2fAttestation implements Attestation {
 
-  // codecs
-  private static final Base64.Decoder b64dec = Base64.getUrlDecoder();
-
-  private final MessageDigest sha256;
   private final CertificateFactory x509;
-  private final Signature sig;
 
   public FidoU2fAttestation() {
     try {
-      sha256 = MessageDigest.getInstance("SHA-256");
       x509 = CertificateFactory.getInstance("X.509");
-      sig = Signature.getInstance("SHA256withECDSA");
-    } catch (NoSuchAlgorithmException | CertificateException e) {
+    } catch (CertificateException e) {
       throw new AttestationException(e);
     }
   }
@@ -59,58 +61,58 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public void verify(JsonObject webAuthnResponse, byte[] clientDataJSON, JsonObject ctapMakeCredResp, AuthenticatorData authr) {
+  public void validate(JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) {
+    // the attestation object should have the following structure:
+    //{
+    //    "fmt": "fido-u2f",
+    //    "authData": "base64",
+    //    "attStmt": {
+    //        "sig": "base64",
+    //        "x5c": [
+    //            "base64"
+    //        ]
+    //    }
+    //}
+
     try {
-      if (!authr.is(USER_PRESENT)) {
+      if (!authData.is(USER_PRESENT)) {
         throw new AttestationException("User was NOT present during authentication!");
       }
 
-      byte[] clientDataHash = hash(clientDataJSON);
+      byte[] clientDataHash = hash("SHA-256", clientDataJSON);
 
-      byte[] publicKey = COSEECDHAtoPKCS(authr.getCredentialPublicKey());
+      // FIDO stores public keys in ANSI format
+      byte[] publicKey = COSEECDHAtoPKCS(authData.getCredentialPublicKey());
+
+      // in order to verify signature we need to reconstruct
+      // the original signatureBase buffer. To do that we need:
       Buffer signatureBase = Buffer.buffer()
         .appendByte((byte) 0x00) // reserved byte
-        .appendBytes(authr.getRpIdHash())
+        .appendBytes(authData.getRpIdHash())
         .appendBytes(clientDataHash)
-        .appendBytes(authr.getCredentialId())
+        .appendBytes(authData.getCredentialId())
         .appendBytes(publicKey);
 
-      JsonObject attStmt = ctapMakeCredResp.getJsonObject("attStmt");
-      JsonArray x5c = attStmt.getJsonArray("x5c");
+      JsonObject attStmt = attestation.getJsonObject("attStmt");
 
-      final X509Certificate x509Certificate = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(0))));
-      // check the certificate
-      x509Certificate.checkValidity();
-      // certificate valid lets verify signatures
-      byte[] signature = b64dec.decode(attStmt.getString("sig"));
-
-      if (!verifySignature(signature, signatureBase.getBytes(), x509Certificate)) {
-        throw new AttestationException("Failed to verify signature");
+      List<X509Certificate> certChain = parseX5c(x509, attStmt.getJsonArray("x5c"));
+      if (certChain.size() == 0) {
+        throw new AttestationException("no certificates in x5c field");
       }
-    } catch (CertificateException | IOException | InvalidKeyException | SignatureException e) {
+
+      // validate the chain
+      CertificateHelper.checkValidity(certChain);
+
+      // certificate valid lets verify signatures
+      verifySignature(
+        Signature.getInstance("SHA256WithECDSA"),
+        certChain.get(0),
+        attStmt.getBinary("sig"),
+        signatureBase.getBytes());
+
+    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }
-  }
-
-  /**
-   * Returns SHA-256 digest of the given data.
-   *
-   * @param data - data to hash
-   * @return the hash
-   */
-  private byte[] hash(byte[] data) {
-    synchronized (sha256) {
-      sha256.update(data);
-      return sha256.digest();
-    }
-  }
-
-  private boolean verifySignature(byte[] signature, byte[] data, X509Certificate certificate) throws InvalidKeyException, SignatureException {
-      synchronized (sig) {
-        sig.initVerify(certificate);
-        sig.update(data);
-        return sig.verify(signature);
-      }
   }
 
   /**
@@ -119,7 +121,7 @@ public class FidoU2fAttestation implements Attestation {
    * @param cosePublicKey - COSE encoded public key
    * @return - RAW PKCS encoded public key
    */
-  private static byte[] COSEECDHAtoPKCS(byte[] cosePublicKey) throws IOException {
+  private static byte[] COSEECDHAtoPKCS(byte[] cosePublicKey) {
       /*
          +------+-------+-------+---------+----------------------------------+
          | name | key   | label | type    | description                      |
@@ -136,14 +138,16 @@ public class FidoU2fAttestation implements Attestation {
          | d    | 2     | -4    | bstr    | Private key                      |
          +------+-------+-------+---------+----------------------------------+
       */
-      try (JsonParser parser = CBOR.cborParser(cosePublicKey)) {
-        Map key = CBOR.parse(parser);
+    try (JsonParser parser = CBOR.cborParser(cosePublicKey)) {
+      JsonObject key = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
 
-        return Buffer.buffer()
-          .appendByte((byte) 0x04)
-          .appendBytes(b64dec.decode((String) key.get("-2")))
-          .appendBytes(b64dec.decode((String) key.get("-3")))
-          .getBytes();
-      }
+      return Buffer.buffer()
+        .appendByte((byte) 0x04)
+        .appendBytes(key.getBinary("-2"))
+        .appendBytes(key.getBinary("-3"))
+        .getBytes();
+    } catch (IOException e) {
+      throw new DecodeException(e.getMessage());
+    }
   }
 }

@@ -3,31 +3,90 @@
 [[Attestation]]
 == Attestation
 
+++++
+ AttestationConveyancePreference
+ https://www.w3.org/TR/webauthn/#attestation-convey
+++++
+'''
 
 [cols=">25%,75%"]
 [frame="topbot"]
 |===
 ^|Name | Description
 |[[NONE]]`NONE`|-
-|[[DIRECT]]`DIRECT`|-
 |[[INDIRECT]]`INDIRECT`|-
+|[[DIRECT]]`DIRECT`|-
 |===
 
 [[AuthenticatorAttachment]]
 == AuthenticatorAttachment
 
+++++
+ AuthenticatorAttachment
+ https://www.w3.org/TR/webauthn/#enumdef-authenticatorattachment
+++++
+'''
 
 [cols=">25%,75%"]
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[CROSS_PLATFORM]]`CROSS_PLATFORM`|-
 |[[PLATFORM]]`PLATFORM`|-
+|[[CROSS_PLATFORM]]`CROSS_PLATFORM`|-
 |===
 
-[[UserVerification]]
-== UserVerification
+[[AuthenticatorTransport]]
+== AuthenticatorTransport
 
+++++
+ AuthenticatorTransport
+ https://www.w3.org/TR/webauthn/#enumdef-authenticatortransport
+++++
+'''
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[USB]]`USB`|-
+|[[NFC]]`NFC`|-
+|[[BLE]]`BLE`|-
+|[[INTERNAL]]`INTERNAL`|-
+|===
+
+[[PublicKeyCredential]]
+== PublicKeyCredential
+
+++++
+ PublicKeyCredential
+ https://www.iana.org/assignments/cose/cose.xhtml#algorithms
+++++
+'''
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[ES256]]`ES256`|-
+|[[ES384]]`ES384`|-
+|[[ES512]]`ES512`|-
+|[[PS256]]`PS256`|-
+|[[PS384]]`PS384`|-
+|[[PS512]]`PS512`|-
+|[[RS256]]`RS256`|-
+|[[RS384]]`RS384`|-
+|[[RS512]]`RS512`|-
+|[[RS1]]`RS1`|-
+|===
+
+[[UserVerificationRequirement]]
+== UserVerificationRequirement
+
+++++
+ UserVerificationRequirement
+ https://www.w3.org/TR/webauthn/#enumdef-userverificationrequirement
+++++
+'''
 
 [cols=">25%,75%"]
 [frame="topbot"]
