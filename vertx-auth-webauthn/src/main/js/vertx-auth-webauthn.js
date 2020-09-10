@@ -95,16 +95,23 @@
    */
 
   function WebAuthn(options) {
-    this.registrationPath = (options || {}).registrationPath || '/registration';
-    this.loginPath = (options || {}).loginPath || '/login';
-    this.callbackPath = (options || {}).callbackPath || '/callback';
+    this.registerPath = options.registerPath;
+    this.loginPath = options.loginPath;
+    this.callbackPath = options.callbackPath;
+    // validation
+    if (!this.callbackPath) {
+      throw new Error('Callback path is missing!');
+    }
   }
 
   WebAuthn.constructor = WebAuthn;
 
   WebAuthn.prototype.register = function (user) {
     const self = this;
-    return fetch(self.registrationPath, {
+    if (!self.registerPath) {
+      return Promise.reject('Register path missing form the initial configuration!');
+    }
+    return fetch(self.registerPath, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -158,6 +165,9 @@
 
   WebAuthn.prototype.login = function (user) {
     const self = this;
+    if (!self.loginPath) {
+      return Promise.reject('Login path missing from the initial configuration!');
+    }
     return fetch(self.loginPath, {
       method: 'POST',
       headers: {
