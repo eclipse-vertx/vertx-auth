@@ -360,7 +360,8 @@ public class WebAuthnImpl implements WebAuthn {
             // by default the store can upsert if a credential is missing, the user has been verified so it is valid
             // the store however might disallow this operation
             Authenticator storeItem = new Authenticator(authrInfo).setUserName(username);
-
+            // the create challenge is complete we can finally safe this
+            // new authenticator to the storage
             store.update(storeItem, true, update -> {
               if (update.failed()) {
                 handler.handle(Future.failedFuture(update.cause()));
@@ -383,33 +384,31 @@ public class WebAuthnImpl implements WebAuthn {
               if (authenticators == null) {
                 authenticators = Collections.emptyList();
               }
-
-              // STEP 24 Query public key base on user ID
-              Optional<Authenticator> authenticator = authenticators.stream()
-                .filter(authr -> webauthn.getString("id").equals(authr.getCredID()))
-                .findFirst();
-
-              if (!authenticator.isPresent()) {
-                handler.handle(Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("rawId")));
-                return;
-              }
-
-              try {
-                final Authenticator descriptor = authenticator.get();
-                final long counter = verifyWebAuthNGet(webauthn, clientDataJSON, clientData, descriptor.toJson());
-                // update the counter on the authenticator
-                descriptor.setCounter(counter);
-                // update the credential (the important here is to update the counter)
-                store.update(descriptor, false, update -> {
-                  if (update.failed()) {
-                    handler.handle(Future.failedFuture(update.cause()));
-                    return;
+              // As we can get here with or without a username the size of the authenticator
+              // list is unbounded.
+              // This means that we **must** lookup the list for the right authenticator
+              for (Authenticator authenticator : authenticators) {
+                if (webauthn.getString("rawId").equals(authenticator.getCredID())) {
+                  try {
+                    final long counter = verifyWebAuthNGet(authInfo, clientDataJSON, authenticator.toJson());
+                    // update the counter on the authenticator
+                    authenticator.setCounter(counter);
+                    // update the credential (the important here is to update the counter)
+                    store.update(authenticator, false, update -> {
+                      if (update.failed()) {
+                        handler.handle(Future.failedFuture(update.cause()));
+                        return;
+                      }
+                      handler.handle(Future.succeededFuture(User.create(authenticator.toJson())));
+                    });
+                  } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
+                    handler.handle(Future.failedFuture(e));
                   }
-                  handler.handle(Future.succeededFuture(User.create(descriptor.toJson())));
-                });
-              } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
-                handler.handle(Future.failedFuture(e));
+                  return;
+                }
               }
+              // No valid authenticator was found
+              handler.handle(Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("rawId")));
             }
           };
 
@@ -460,6 +459,12 @@ public class WebAuthnImpl implements WebAuthn {
       // Step #5
       // Extract and parse auth data
       AuthData authData = new AuthData(attestation.getBinary("authData"));
+      // One extra check, we can verify that the relying party id is for the given domain
+      if (request.getDomain() != null) {
+        if (!MessageDigest.isEqual(authData.getRpIdHash(), hash("SHA-256", request.getDomain().getBytes(StandardCharsets.UTF_8)))) {
+          throw new AttestationException("WebAuthn rpIdHash invalid (the domain does not match the AuthData)");
+        }
+      }
 
       // Step #6
       // check that the user was either validated or present
@@ -467,36 +472,41 @@ public class WebAuthnImpl implements WebAuthn {
         throw new AttestationException("User was either not verified or present during credentials creation");
       }
 
-      // STEP 13 Extract public key
-      byte[] publicKey = authData.getCredentialPublicKey();
+      // From here we start really verifying the create challenge:
 
+      // STEP webauthn.create#1
+      // Verify attestation:
+      // the "fmt" informs what kind of attestation is present
       final String fmt = attestation.getString("fmt");
-
-      // STEP 14 Verify attestation based on type of device
+      // we lookup the loaded attestations at creation of this object
+      // we don't look everytime to avoid a performance penalty
       final Attestation verifier = attestations.get(fmt);
-
+      // If there's no verifier then a extra implementation is required...
       if (verifier == null) {
         throw new AttestationException("Unknown attestation fmt: " + fmt);
       } else {
-        // perform the verification
+        // If the authenticator data has no attestation data,
+        // the we can't really attest anything
         if (!authData.is(AuthData.ATTESTATION_DATA)) {
           throw new AttestationException("WebAuthn response does not contain attestation data!");
         }
-
-        if (request.getDomain() != null) {
-          if (!MessageDigest.isEqual(authData.getRpIdHash(), hash("SHA-256", request.getDomain().getBytes(StandardCharsets.UTF_8)))) {
-            throw new AttestationException("WebAuthn rpIdHash invalid (the domain does not match the AuthData)");
-          }
-        }
-
+        // invoke the right verifier
+        // well known verifiers are:
+        // * none
+        // * fido-u2f
+        // * android-safetynet
+        // * android-key
+        // * packed
+        // * tpm
         verifier
           .validate(request.getWebauthn(), clientDataJSON, attestation, authData);
       }
 
-      // STEP 15 Create data for save to database
+      // STEP webauthn.create#2
+      // Create new authenticator record and store counter, credId and publicKey in the DB
       return new JsonObject()
         .put("fmt", fmt)
-        .put("publicKey", publicKey)
+        .put("publicKey", authData.getCredentialPublicKey())
         .put("counter", authData.getSignCounter())
         .put("credID", authData.getCredentialId());
     }
@@ -505,17 +515,24 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Verify navigator.credentials.get response
    *
-   * @param webauthn   - Data from navigator.credentials.get
-   * @param credential - Credential from Database
+   * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
+   * @param clientDataJSON - The extracted clientDataJSON
+   * @param credential     - Credential from Database
    */
-  private long verifyWebAuthNGet(JsonObject webauthn, byte[] clientDataJSON, JsonObject clientData, JsonObject credential) throws IOException, AttestationException, NoSuchAlgorithmException {
+  private long verifyWebAuthNGet(WebAuthnCredentials request, byte[] clientDataJSON, JsonObject credential) throws IOException, AttestationException, NoSuchAlgorithmException {
 
-    JsonObject response = webauthn.getJsonObject("response");
+    JsonObject response = request.getWebauthn().getJsonObject("response");
 
     // Step #5
     // parse auth data
     byte[] authenticatorData = response.getBinary("authenticatorData");
     AuthData authData = new AuthData(authenticatorData);
+    // One extra check, we can verify that the relying party id is for the given domain
+    if (request.getDomain() != null) {
+      if (!MessageDigest.isEqual(authData.getRpIdHash(), hash("SHA-256", request.getDomain().getBytes(StandardCharsets.UTF_8)))) {
+        throw new AttestationException("WebAuthn rpIdHash invalid (the domain does not match the AuthData)");
+      }
+    }
 
     // Step #6
     // check that the user was either validated or present

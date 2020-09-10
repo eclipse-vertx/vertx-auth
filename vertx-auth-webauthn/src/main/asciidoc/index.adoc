@@ -21,21 +21,143 @@ dependency to the _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-auth-webauthn:${maven.version}'
 ----
 
-WebAuthn is the JavaScript API of the FIDO2 protocol by the FIDO alliance. FIDO2 is a "passwordless" authentication
-mechanism and the JavaScript API is more known as WebAuthn.
+https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API[WebAuthn (Web Authentication)] is a web standard
+for authenticating users to web-based applications using public/private key cryptography. Strictly speaking, WebAuthn is
+just the name of the browser API and is part of https://fidoalliance.org/fido2/[FIDO2]. FIDO2 is the overarching term of
+a set of specifications, including WebAuthn and CTAP. FIDO2 is the successor of the FIDO Universal 2nd Factor (U2F)
+legacy protocol.
 
-WebAuthn allows users to authenticate using a secure device or token and no passwords are exchange between the browser
-and the server (also known as Relay Party).
+As an application developer, we don't deal with CTAP (Client-to-Authenticator Protocol), which is the protocol that the
+browser uses to speak with an authenticator like a FIDO security key.
 
-The current implementation supports both authentication and device attestation.
+FIDO2 works with public/private keys. The user has an authenticator, which creates public/private key pairs. These key
+pairs are different for each site. The public key is transferred to the server and stored in the user's account. The
+private key never leaves the authenticator. To login, the server first creates a random challenge (a random sequence of
+bytes), sends it to the authenticator. The authenticator signs the challenge with his private key and sends the
+signature back to the server. The server verifies the signature with the stored public key and grants access if the
+signature is valid.
 
-Device attestation is a verification of the device itself. Currently the following attestations are implemented:
+Traditionally this technology needs a hardware security token like a https://www.yubico.com/products/[Yubico key] or a
+key from https://www.ftsafe.com/Products/FIDO[Feitian] to name two brands.
 
-* U2F (FIDO-U2F tokens, e.g.: Yubikey's)
-* Packed
-* Android Key
-* Android Safetynet
+FIDO2 still supports these hardware keys, but the technology also supports alternatives. If you have an Android 7+ phone
+or a Windows 10 system, you don't need to buy a FIDO2 security key if you want to play with WebAuthn.
 
-Still not implemented are:
+In https://fidoalliance.org/news-your-google-android-7-phone-is-now-a-fido2-security-key/[April 2019, Google announced]
+that any phone running Android 7+ can function as a FIDO2 security key. In
+https://www.microsoft.com/en-us/microsoft-365/blog/2018/11/20/sign-in-to-your-microsoft-account-without-a-password-using-windows-hello-or-a-security-key/[November 2018, Microsoft announced]
+that you can use Windows Hello as a security key for FIDO2. In https://developer.apple.com/videos/play/wwdc2020/10670/[June 2020 Apple announced]
+that you can use iOS FaceID and TouchID for the web by adopting webauthn standard.
 
-* TPM
+WebAuthn is implemented in Edge, Firefox, Chrome, and Safari. Visit https://caniuse.com to check out the current state
+of implementations: https://caniuse.com/#search=webauthn
+
+=== WebAuthn API
+
+The https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API[Web Authentication API] is an extension of
+the https://developer.mozilla.org/en-US/docs/Web/API/Credential_Management_API[Credential Management API].
+
+WebAuthn extends the two functions from the Credential Management API https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create[navigator.credentials.create()]
+and https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/get[navigator.credentials.get()] so they
+accept a publicKey parameter.
+
+To simplify the usage of the API a simple JavaScript client application is provided here:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-webauthn</artifactId>
+  <classifier>client</classifier>
+  <type>js</type>
+  <version>${maven.version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-webauthn:${maven.version}:client@js'
+----
+
+The script should be used in cooperation with vertx-web as it handles the API interaction between the web layer and the
+auth code in this library.
+
+=== Registration
+
+Registration is the process of enrolling a new authenticator to the database and associate with the user.
+
+The process takes 2 steps:
+
+1. A call to generate a {@link io.vertx.ext.auth.webauthn.WebAuthn#createCredentialsOptions(JsonObject)}
+2. A call with the solution to the challenge to the normal `authenticate` API method.
+
+If the solution is correct, the new authenticator should be added to the storage and be usable for login purposes.
+
+=== Login
+
+Like the registration, login is a 2 step process:
+
+1. A call to generate a {@link io.vertx.ext.auth.webauthn.WebAuthn#getCredentialsOptions(String)}
+2. A call with the solution to the challenge to the normal `authenticate` API method.
+
+When the challenge is correctly solved, the user is considered logged in.
+
+=== Device Attestation
+
+When an authenticator registers a new key pair with a service, the authenticator signs the public key with an
+attestation certificate. The attestation certificate is built into the authenticator during manufacturing time and is
+specific to a device model. That is, all "Samsung Galaxy S8" phones, manufactured at a specific time or particular
+manufacturing run, have the same attestation certificate.
+
+Different devices have different attestation formats. The pre-defined attestation formats in WebAuthn are:
+
+* `Packed` - a generic attestation format that is commonly used by devices whose sole function is as a WebAuthn authenticator, such as security keys.
+* `TPM` - the Trusted Platform Module (TPM) is a set of specifications from the Trusted Platform Group (TPG). This attestation format is commonly found in desktop computers and is used by Windows Hello as its preferred attestation format.
+* `Android Key Attestation` - one of the features added in Android O was Android Key Attestation, which enables the Android operating system to attest to keys.
+* `Android SafetyNet` - prior to Android Key Attestation, the only option for Android devices was to create Android SafetyNet attestations
+* `FIDO U2F` - security keys that implement the FIDO U2F standard use this format
+* `none` - browsers may prompt users whether they want a site to be allowed to see their attestation data and/or may remove attestation data from the authenticator's response if the `attestation` parameter in `navigator.credentials.create()` is set to `none`
+
+The purpose of attestation is to cryptographically prove that a newly generated key pair came from a specific device.
+This provides a root of trust for a newly generated key pair as well as being able to identify the attributes of a
+device being used (how the private key is protected; if / what kind of biometric is being used; whether a device has
+been certified; etc.).
+
+It should be noted that while attestation provides the capability for a root of trust, validating the root of trust is
+frequently not necessary. When registering an authenticator for a new account, typically a Trust On First Use (TOFU)
+model applies; and when adding an authenticator to an existing account, a user has already been authenticated and has
+established a secure session.
+
+=== A simple example
+
+==== Create a Registration request
+
+[source,$lang]
+----
+{@link examples.WebAuthNExamples#example1}
+----
+
+==== Verify the registration request
+
+[source,$lang]
+----
+{@link examples.WebAuthNExamples#example2}
+----
+
+==== Create a Login request
+
+[source,$lang]
+----
+{@link examples.WebAuthNExamples#example3}
+----
+
+==== Verify the Login request
+
+[source,$lang]
+----
+{@link examples.WebAuthNExamples#example4}
+----
