@@ -217,6 +217,7 @@ public class WebAuthnImpl implements WebAuthn {
     JsonObject json = new JsonObject()
       .put("challenge", randomBase64URLBuffer(options.getChallengeLength()));
     putOpt(json, "timeout", options.getTimeout());
+    putOpt(json, "rpId", options.getRelyingParty().getId());
     putOpt(json, "userVerification", options.getUserVerification());
     putOpt(json, "extensions", options.getExtensions());
 
