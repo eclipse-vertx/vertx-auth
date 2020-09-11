@@ -34,43 +34,35 @@ public class AuthCommonExamples {
     JsonObject authInfo = new JsonObject()
       .put("username", "tim").put("password", "mypassword");
 
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-
-        User user = res.result();
-
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> {
         System.out.println("User " + user.principal() + " is now authenticated");
-
-      } else {
-        res.cause().printStackTrace();
-      }
-    });
+      })
+      .onFailure(Throwable::printStackTrace);
   }
 
   public void example2(User user, AuthorizationProvider authorizationProvider) {
     // load the authorization for the given user:
-    authorizationProvider.getAuthorizations(user, res -> {
-      if (res.succeeded()) {
-        // cache is populated, perform query
-        if (PermissionBasedAuthorization.create("printer1234").match(user)) {
-          System.out.println("User has the authority");
-        } else {
-          System.out.println("User does not have the authority");
-        }
+    authorizationProvider.getAuthorizations(user)
+      .onSuccess(done -> {
+      // cache is populated, perform query
+      if (PermissionBasedAuthorization.create("printer1234").match(user)) {
+        System.out.println("User has the authority");
+      } else {
+        System.out.println("User does not have the authority");
       }
     });
   }
 
   public void example3(User user, AuthorizationProvider authorizationProvider) {
     // load the authorization for the given user:
-    authorizationProvider.getAuthorizations(user, res -> {
-      if (res.succeeded()) {
-        // cache is populated, perform query
-        if (RoleBasedAuthorization.create("admin").match(user)) {
-          System.out.println("User has the authority");
-        } else {
-          System.out.println("User does not have the authority");
-        }
+    authorizationProvider.getAuthorizations(user)
+      .onSuccess(done -> {
+      // cache is populated, perform query
+      if (RoleBasedAuthorization.create("admin").match(user)) {
+        System.out.println("User has the authority");
+      } else {
+        System.out.println("User does not have the authority");
       }
     });
   }
