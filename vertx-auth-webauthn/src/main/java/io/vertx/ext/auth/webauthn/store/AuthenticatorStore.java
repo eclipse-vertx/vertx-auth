@@ -15,12 +15,8 @@
  */
 package io.vertx.ext.auth.webauthn.store;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,71 +43,36 @@ public interface AuthenticatorStore {
   }
 
   /**
-   * Retrieves the user credentials from a backend given the user unique identifier.
-   * It may return more than 1 result, for example when a user can be identified using different modalities.
+   * Retrieves the {@link Authenticator}s from a backend given the incomplete {@link Authenticator}.
    *
-   * @param name user unique name.
-   * @param handler the handler for the result callback.
-   * @return fluent self.
-   */
-  @Fluent
-  default AuthenticatorStore getAuthenticatorsByUserName(String name, Handler<AsyncResult<List<Authenticator>>> handler) {
-    handler.handle(Future.failedFuture("getAuthenticatorsByUserName not supported"));
-    return this;
-  }
-
-  /**
-   * Same as {@link #getAuthenticatorsByUserName(String, Handler)} but using a Future.
-   */
-  default Future<List<Authenticator>> getAuthenticatorsByUserName(String username) {
-    Promise<List<Authenticator>> promise = Promise.promise();
-    getAuthenticatorsByUserName(username, promise);
-    return promise.future();
-  }
-
-  /**
-   * Retrieves the user credentials from a backend given the user unique identifier.
-   * It may return more than 1 result, for example when a user can be identified using different modalities.
+   * The implementation must consider the following fields <strong>exclusively</strong>, while performing the lookup:
+   * <ul>
+   *   <li>{@link Authenticator#getUserName()}</li>
+   *   <li>{@link Authenticator#getCredID()} ()}</li>
+   * </ul>
    *
-   * @param id user unique rawId.
-   * @param handler the handler for the result callback.
-   * @return fluent self.
+   * It may return more than 1 result, for example when a user can be identified using different modalities.
+   * To signal that a user is not allowed/present on the system, a failure should be returned, not {@code null}.
+   *
+   * @param authenticator the incomplete authenticator data to lookup.
+   * @return Future async result with a list of authenticators.
    */
-  @Fluent
-  default AuthenticatorStore getAuthenticatorsByCredId(String id, Handler<AsyncResult<List<Authenticator>>> handler) {
-    handler.handle(Future.failedFuture("getAuthenticatorsByCredId not supported"));
-    return this;
+  default Future<List<Authenticator>> fetch(Authenticator authenticator) {
+    return Future.failedFuture("AuthenticatorStore#fetch() not available");
   }
 
   /**
-   * Same as {@link #getAuthenticatorsByCredId(String, Handler)} but using a Future.
-   */
-  default Future<List<Authenticator>> getAuthenticatorsByCredId(String rawId) {
-    Promise<List<Authenticator>> promise = Promise.promise();
-    getAuthenticatorsByCredId(rawId, promise);
-    return promise.future();
-  }
-
-  /**
-   * Update the user credential.
+   * Store a given authenticator to some persistence storage.
+   *
+   * When an authenticator is already present, this method <strong>must</strong> at least update
+   * {@link Authenticator#getCounter()}, and is not required to perform any other update.
+   *
+   * For new authenticators, the whole object data <strong>must</strong> be persisted.
    *
    * @param authenticator authenticator data to update.
-   * @param upsert insert if not present.
-   * @param handler the handler for the result callback.
-   * @return fluent self.
+   * @return Future async result with success status.
    */
-  @Fluent
-  default AuthenticatorStore update(Authenticator authenticator, boolean upsert, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture("update not supported"));
-    return this;
-  }
-
-  /**
-   * Same as {@link #update(Authenticator, boolean, Handler)} but using a Future.
-   */
-  default Future<Void> update(Authenticator authenticator, boolean upsert) {
-    Promise<Void> promise = Promise.promise();
-    update(authenticator, upsert, promise);
-    return promise.future();
+  default Future<Void> store(Authenticator authenticator) {
+    return Future.failedFuture("AuthenticatorStore#store() not available");
   }
 }

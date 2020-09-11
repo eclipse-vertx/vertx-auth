@@ -42,7 +42,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
 
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 
@@ -141,73 +144,68 @@ public class WebAuthnImpl implements WebAuthn {
       return this;
     }
 
-    store.getAuthenticatorsByUserName(user.getString("name"), getCredentialsByName -> {
-      if (getCredentialsByName.failed()) {
-        handler.handle(Future.failedFuture(getCredentialsByName.cause()));
-        return;
-      }
+    store.fetch(new Authenticator().setUserName(user.getString("name")))
+      .onFailure(err -> handler.handle(Future.failedFuture(err)))
+      .onSuccess(authenticators -> {
+        // empty structure with all required fields
+        JsonObject json = new JsonObject()
+          .put("rp", new JsonObject())
+          .put("user", new JsonObject())
+          .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
+          .put("pubKeyCredParams", new JsonArray())
+          .put("authenticatorSelection", new JsonObject());
 
-      List<Authenticator> authenticators = getCredentialsByName.result();
-
-      // empty structure with all required fields
-      JsonObject json = new JsonObject()
-        .put("rp", new JsonObject())
-        .put("user", new JsonObject())
-        .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
-        .put("pubKeyCredParams", new JsonArray())
-        .put("authenticatorSelection", new JsonObject());
-
-      // put non null values for RelyingParty
-      putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
-      putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
-      putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
-      // put non null values for User
-      putOpt(json.getJsonObject("user"), "id", store.generateId());
-      putOpt(json.getJsonObject("user"), "name", user.getString("name"));
-      putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
-      putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
-      // put the public key credentials parameters
-      for (PublicKeyCredential pubKeyCredParam : options.getPubKeyCredParams()) {
-        addOpt(
-          json.getJsonArray("pubKeyCredParams"),
-          new JsonObject()
-            .put("alg", pubKeyCredParam.coseId())
-            .put("type", "public-key"));
-      }
-      // optional timeout
-      putOpt(json, "timeout", options.getTimeout());
-      // optional excluded credentials
-      if (!authenticators.isEmpty()) {
-        JsonArray transports = new JsonArray();
-
-        for (AuthenticatorTransport transport : options.getTransports()) {
-          addOpt(transports, transport.toString());
+        // put non null values for RelyingParty
+        putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
+        putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
+        putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
+        // put non null values for User
+        putOpt(json.getJsonObject("user"), "id", store.generateId());
+        putOpt(json.getJsonObject("user"), "name", user.getString("name"));
+        putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
+        putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
+        // put the public key credentials parameters
+        for (PublicKeyCredential pubKeyCredParam : options.getPubKeyCredParams()) {
+          addOpt(
+            json.getJsonArray("pubKeyCredParams"),
+            new JsonObject()
+              .put("alg", pubKeyCredParam.coseId())
+              .put("type", "public-key"));
         }
+        // optional timeout
+        putOpt(json, "timeout", options.getTimeout());
+        // optional excluded credentials
+        if (!authenticators.isEmpty()) {
+          JsonArray transports = new JsonArray();
 
-        JsonArray excludeCredentials = new JsonArray();
-        for (Authenticator key : authenticators) {
-          JsonObject credentialDescriptor = new JsonObject()
-            .put("type", key.getType())
-            .put("id", key.getCredID());
-          // add optional transports to the descriptor
-          putOpt(credentialDescriptor, "transports", transports);
-          // add to the excludeCredentials list
-          addOpt(excludeCredentials, credentialDescriptor);
+          for (AuthenticatorTransport transport : options.getTransports()) {
+            addOpt(transports, transport.toString());
+          }
+
+          JsonArray excludeCredentials = new JsonArray();
+          for (Authenticator key : authenticators) {
+            JsonObject credentialDescriptor = new JsonObject()
+              .put("type", key.getType())
+              .put("id", key.getCredID());
+            // add optional transports to the descriptor
+            putOpt(credentialDescriptor, "transports", transports);
+            // add to the excludeCredentials list
+            addOpt(excludeCredentials, credentialDescriptor);
+          }
+          // add the the response json
+          putOpt(json, "excludeCredentials", excludeCredentials);
         }
-        // add the the response json
-        putOpt(json, "excludeCredentials", excludeCredentials);
-      }
-      // optional authenticator selection
-      putOpt(json.getJsonObject("authenticatorSelection"), "requireResidentKey", options.getRequireResidentKey());
-      putOpt(json.getJsonObject("authenticatorSelection"), "authenticatorAttachment", options.getAuthenticatorAttachment());
-      putOpt(json.getJsonObject("authenticatorSelection"), "userVerification", options.getUserVerification());
-      // optional attestation
-      putOpt(json, "attestation", options.getAttestation());
-      // optional extensions
-      putOpt(json, "extensions", options.getExtensions());
+        // optional authenticator selection
+        putOpt(json.getJsonObject("authenticatorSelection"), "requireResidentKey", options.getRequireResidentKey());
+        putOpt(json.getJsonObject("authenticatorSelection"), "authenticatorAttachment", options.getAuthenticatorAttachment());
+        putOpt(json.getJsonObject("authenticatorSelection"), "userVerification", options.getUserVerification());
+        // optional attestation
+        putOpt(json, "attestation", options.getAttestation());
+        // optional extensions
+        putOpt(json, "extensions", options.getExtensions());
 
-      handler.handle(Future.succeededFuture(json));
-    });
+        handler.handle(Future.succeededFuture(json));
+      });
 
     return this;
   }
@@ -215,13 +213,18 @@ public class WebAuthnImpl implements WebAuthn {
   @Override
   public WebAuthn getCredentialsOptions(String name, Handler<AsyncResult<JsonObject>> handler) {
 
+    // https://w3c.github.io/webauthn/#dictionary-assertion-options
+    JsonObject json = new JsonObject()
+      .put("challenge", randomBase64URLBuffer(options.getChallengeLength()));
+    putOpt(json, "timeout", options.getTimeout());
+    putOpt(json, "userVerification", options.getUserVerification());
+    putOpt(json, "extensions", options.getExtensions());
+
     // we allow Resident Credentials or (RK) requests
     // this means that name is not required
     if (options.getRequireResidentKey()) {
       if (name == null) {
-        handler.handle(Future.succeededFuture(
-          new JsonObject()
-            .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))));
+        handler.handle(Future.succeededFuture(json));
         return this;
       }
     }
@@ -232,46 +235,38 @@ public class WebAuthnImpl implements WebAuthn {
       return this;
     }
 
-    store.getAuthenticatorsByUserName(name, getUserByName -> {
-      if (getUserByName.failed()) {
-        handler.handle(Future.failedFuture(getUserByName.cause()));
-        return;
-      }
-
-      final List<Authenticator> authenticators = getUserByName.result();
-
-      if (authenticators.isEmpty()) {
-        // fail as we don't know this user
-        handler.handle(Future.failedFuture("User not found: " + name));
-        return;
-      }
-
-      JsonArray allowCredentials = new JsonArray();
-
-      JsonArray transports = new JsonArray();
-
-      for (AuthenticatorTransport transport : options.getTransports()) {
-        transports.add(transport.toString());
-      }
-
-      // STEP 19 Return allow credential ID
-      for (Authenticator key : authenticators) {
-        String credId = key.getCredID();
-        if (credId != null) {
-          allowCredentials
-            .add(new JsonObject()
-              .put("type", "public-key")
-              .put("id", credId)
-              .put("transports", transports));
+    store.fetch(new Authenticator().setUserName(name))
+      .onFailure(err -> handler.handle(Future.failedFuture(err)))
+      .onSuccess(authenticators -> {
+        if (authenticators.isEmpty()) {
+          // fail as the user has never register an authenticator
+          handler.handle(Future.failedFuture("No authenticators registered for user: " + name));
+          return;
         }
-      }
 
-      handler.handle(Future.succeededFuture(
-        new JsonObject()
-          .put("challenge", randomBase64URLBuffer(options.getChallengeLength()))
-          .put("allowCredentials", allowCredentials)
-      ));
-    });
+        JsonArray allowCredentials = new JsonArray();
+
+        JsonArray transports = new JsonArray();
+        if (options.getTransports() != null) {
+          for (AuthenticatorTransport transport : options.getTransports()) {
+            transports.add(transport.toString());
+          }
+        }
+
+        for (Authenticator key : authenticators) {
+          String credId = key.getCredID();
+          if (credId != null) {
+            JsonObject credential = new JsonObject()
+              .put("type", "public-key")
+              .put("id", credId);
+            putOpt(credential, "transports", transports);
+
+            allowCredentials.add(credential);
+          }
+        }
+        putOpt(json, "allowCredentials", allowCredentials);
+        handler.handle(Future.succeededFuture(json));
+      });
 
     return this;
   }
@@ -362,25 +357,31 @@ public class WebAuthnImpl implements WebAuthn {
             Authenticator storeItem = new Authenticator(authrInfo).setUserName(username);
             // the create challenge is complete we can finally safe this
             // new authenticator to the storage
-            store.update(storeItem, true, update -> {
-              if (update.failed()) {
-                handler.handle(Future.failedFuture(update.cause()));
-              } else {
-                handler.handle(Future.succeededFuture(User.create(storeItem.toJson())));
-              }
-            });
+            store.store(storeItem)
+              .onFailure(err -> handler.handle(Future.failedFuture(err)))
+              .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(storeItem.toJson()))));
+
           } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
             handler.handle(Future.failedFuture(e));
           }
           return;
         case "webauthn.get":
+          Authenticator query = new Authenticator();
+          if (options.getRequireResidentKey()) {
+            // username are not provided (RK) we now need to lookup by rawId
+            query.setCredID(webauthn.getString("rawId"));
+          } else {
+            // username can't be null
+            if (username == null) {
+              handler.handle(Future.failedFuture("username can't be null!"));
+              return;
+            }
+            query.setUserName(username);
+          }
 
-          final Handler<AsyncResult<List<Authenticator>>> onGetAuthenticators = getAuthenticators -> {
-            if (getAuthenticators.failed()) {
-              handler.handle(Future.failedFuture(getAuthenticators.cause()));
-            } else {
-              List<Authenticator> authenticators = getAuthenticators.result();
-
+          store.fetch(query)
+            .onFailure(err -> handler.handle(Future.failedFuture(err)))
+            .onSuccess(authenticators -> {
               if (authenticators == null) {
                 authenticators = Collections.emptyList();
               }
@@ -394,13 +395,10 @@ public class WebAuthnImpl implements WebAuthn {
                     // update the counter on the authenticator
                     authenticator.setCounter(counter);
                     // update the credential (the important here is to update the counter)
-                    store.update(authenticator, false, update -> {
-                      if (update.failed()) {
-                        handler.handle(Future.failedFuture(update.cause()));
-                        return;
-                      }
-                      handler.handle(Future.succeededFuture(User.create(authenticator.toJson())));
-                    });
+                    store.store(authenticator)
+                      .onFailure(err -> handler.handle(Future.failedFuture(err)))
+                      .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authenticator.toJson()))));
+
                   } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
                     handler.handle(Future.failedFuture(e));
                   }
@@ -409,21 +407,7 @@ public class WebAuthnImpl implements WebAuthn {
               }
               // No valid authenticator was found
               handler.handle(Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("rawId")));
-            }
-          };
-
-          if (options.getRequireResidentKey()) {
-            // username are not provided (RK) we now need to lookup by rawId
-            store.getAuthenticatorsByCredId(webauthn.getString("rawId"), onGetAuthenticators);
-
-          } else {
-            // username can't be null
-            if (username == null) {
-              handler.handle(Future.failedFuture("username can't be null!"));
-              return;
-            }
-            store.getAuthenticatorsByUserName(username, onGetAuthenticators);
-          }
+            });
 
           return;
         default:
