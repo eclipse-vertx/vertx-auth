@@ -9,6 +9,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,8 +18,15 @@ import org.junit.runner.RunWith;
 @RunWith(VertxUnitRunner.class)
 public class AttestationTest {
 
+  private final DummyStore database = new DummyStore();
+
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
+
+  @Before
+  public void resetDatabase() {
+    database.clear();
+  }
 
   @Test
   public void testPackedFullAttestation(TestContext should) {
@@ -27,8 +35,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "wsLryOAxXMU54s2fCSWPzWjXHOBKPploN-UHftj4_rpIu6BZxNXppm82f7Y6iX9FEOKKeS5-N2TALeyzLnJfAA")
@@ -54,8 +62,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "AAii3V6sGoaozW7TbNaYlJaJ5br8TrBfRXnofZO6l2suc3a5tt_XFuFkFA_5eabU80S1PW0m4IZ79BS2kQO7Zcuy2vf0ESg18GTLG1mo5YSkIdqL2J44egt-6rcj7NedSEwxa_uuxUYBtHNnSQqDmtoUAfM9LSWLl65BjKVZNGUp9ao33mMSdVfQQ0bHze69JVQvLBf8OTiZUqJsOuKmpqUc")
@@ -85,8 +93,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "Bo-VjHOkJZy8DjnCJnIc0Oxt9QAz5upMdSJxNbd-GyAo6MNIvPBb9YsUlE0ZJaaWXtWH5FQyPS6bT_e698IirQ==")
@@ -116,8 +124,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "HRiuOZKJ6yNnBrSnocnFuGgsjcAZICl4-0uEDAQHCIXncWQCkYUBvvUzZQovrxmeB9Qm23hmj6PnzWyoiWtt8w")
@@ -147,8 +155,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "sL39APyTmisrjh11vghaqNfuruLQmCfR0c1ryKtaQ81jkEhNa5u9xLTnkibvXC9YpzBLFwWEZ3k9CR_sxzm_pWYbBOtKxeZu9z2GT8b6QW4iQvRlyumCT3oENx_8401r")
@@ -178,8 +186,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "hWzdFiPbOMQ5KNBsMhs-Zeh8F0iTHrH63YKkrxJFgjQ")
@@ -208,8 +216,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "SErwRhxIzjPowcnM3e-D-u89EQXLUe1NYewpshd7Mc0")
@@ -240,8 +248,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "qCXEfJ-dEoBlWqIl0iq2p_gj13HSg7r_MA7xOcOiO8RkCrYNmQHIjV9yhZVASr87cUsflo7DNuuvGsnrlTl1ig")
@@ -270,8 +278,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "AAhH7cnPRBkcukjnc2G2GM1H5dkVs9P1q2VErhD57pkzKVjBbixdsufjXhUOfiD27D0VA-fPKUVYNGE2XYcjhihtYODQv-xEarplsa7Ix6hK13FA6uyRxMgHC3PhTbx-rbq_RMUbaJ-HoGVt-c820ifdoagkFR02Van8Vr9q67Bn6zHNDT_DNrQbtpIUqqX_Rg2p5o6F7bVO3uOJG9hUNgUb")
@@ -303,8 +311,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "AwVUFfSwuMV1DRHfYmNry1IUGW03wEw9aTAR7kJM1nw")
@@ -336,8 +344,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "wsLryOAxXMU54s2fCSWPzWjXHOBKPploN-UHftj4_rpIu6BZxNXppm82f7Y6iX9FEOKKeS5-N2TALeyzLnJfAA")
@@ -366,8 +374,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "H6X2BnnjgOzu_Oj87vpRnwMJeJYVzwM3wtY1lhAfQ14")
@@ -397,8 +405,8 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
-      .setAuthenticatorStore(
-        new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
       .put("rawId", "AZD7huwZVx7aW1efRa6Uq3JTQNorj3qA9yrLINXEcgvCQYtWiSQa1eOIVrXfCmip6MzP8KaITOvRLjy3TUHO7_c")

@@ -24,7 +24,7 @@ import java.util.List;
 
 import static io.vertx.ext.auth.webauthn.AuthenticatorTransport.*;
 import static io.vertx.ext.auth.webauthn.PublicKeyCredential.*;
-import static io.vertx.ext.auth.webauthn.UserVerificationRequirement.*;
+import static io.vertx.ext.auth.webauthn.UserVerification.*;
 
 @DataObject(generateConverter = true)
 public class WebAuthnOptions {
@@ -35,7 +35,7 @@ public class WebAuthnOptions {
 
   private AuthenticatorAttachment authenticatorAttachment;
   private boolean requireResidentKey;
-  private UserVerificationRequirement userVerificationRequirement;
+  private UserVerification userVerification;
 
   private Long timeout;
   private Attestation attestation;
@@ -57,7 +57,7 @@ public class WebAuthnOptions {
 
   // sensible defaults
   private void init() {
-    userVerificationRequirement = DISCOURAGED;
+    userVerification = DISCOURAGED;
     requireResidentKey = false;
     extensions = new JsonObject()
       .put("txAuthSimple", "");
@@ -155,12 +155,12 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public UserVerificationRequirement getUserVerification() {
-    return userVerificationRequirement;
+  public UserVerification getUserVerification() {
+    return userVerification;
   }
 
-  public WebAuthnOptions setUserVerification(UserVerificationRequirement userVerificationRequirement) {
-    this.userVerificationRequirement = userVerificationRequirement;
+  public WebAuthnOptions setUserVerification(UserVerification userVerification) {
+    this.userVerification = userVerification;
     return this;
   }
 

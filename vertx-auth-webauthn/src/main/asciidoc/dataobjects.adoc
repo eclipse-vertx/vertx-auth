@@ -59,6 +59,6 @@
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
 |[[timeout]]`@timeout`|`Number (Long)`|-
 |[[transports]]`@transports`|`Array of link:enums.html#AuthenticatorTransport[AuthenticatorTransport]`|-
-|[[userVerification]]`@userVerification`|`link:enums.html#UserVerificationRequirement[UserVerificationRequirement]`|-
+|[[userVerification]]`@userVerification`|`link:enums.html#UserVerification[UserVerification]`|-
 |===
 

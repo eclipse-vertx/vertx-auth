@@ -15,24 +15,37 @@
  */
 package examples;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.RelyingParty;
 import io.vertx.ext.auth.webauthn.WebAuthn;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.store.Authenticator;
 import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
+
+import java.util.List;
 
 /**
  * @author Paulo Lopes
  */
 public class WebAuthNExamples {
 
-  public void example1(Vertx vertx, AuthenticatorStore store) {
+  public void example1(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
       vertx,
       new WebAuthnOptions()
         .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-      .setAuthenticatorStore(store);
+      .authenticatorFetcher(query -> {
+        // function that fetches some authenticators from a
+        // persistence storage
+        return Future.succeededFuture(authenticators);
+      })
+      .authenticatorUpdater(authenticator -> {
+        // function that updates an authenticator to a
+        // persistence storage
+        return Future.succeededFuture();
+      });
 
     // some user
     JsonObject user = new JsonObject()
@@ -52,12 +65,21 @@ public class WebAuthNExamples {
       });
   }
 
-  public void example2(Vertx vertx, AuthenticatorStore store) {
+  public void example2(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
       vertx,
       new WebAuthnOptions()
         .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-      .setAuthenticatorStore(store);
+      .authenticatorFetcher(query -> {
+        // function that fetches some authenticators from a
+        // persistence storage
+        return Future.succeededFuture(authenticators);
+      })
+      .authenticatorUpdater(authenticator -> {
+        // function that updates an authenticator to a
+        // persistence storage
+        return Future.succeededFuture();
+      });
 
     // the response received from the browser
     JsonObject request = new JsonObject()
@@ -85,12 +107,21 @@ public class WebAuthNExamples {
       });
   }
 
-  public void example3(Vertx vertx, AuthenticatorStore store) {
+  public void example3(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
       vertx,
       new WebAuthnOptions()
         .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-      .setAuthenticatorStore(store);
+      .authenticatorFetcher(query -> {
+        // function that fetches some authenticators from a
+        // persistence storage
+        return Future.succeededFuture(authenticators);
+      })
+      .authenticatorUpdater(authenticator -> {
+        // function that updates an authenticator to a
+        // persistence storage
+        return Future.succeededFuture();
+      });
 
     // Login only requires the username and can even be set to null if
     // resident keys are supported, in this case the authenticator remembers
@@ -102,12 +133,21 @@ public class WebAuthNExamples {
       });
   }
 
-  public void example4(Vertx vertx, AuthenticatorStore store) {
+  public void example4(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
       vertx,
       new WebAuthnOptions()
         .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-      .setAuthenticatorStore(store);
+      .authenticatorFetcher(query -> {
+        // function that fetches some authenticators from a
+        // persistence storage
+        return Future.succeededFuture(authenticators);
+      })
+      .authenticatorUpdater(authenticator -> {
+        // function that updates an authenticator to a
+        // persistence storage
+        return Future.succeededFuture();
+      });
 
     // The response from the login challenge request
     JsonObject body = new JsonObject()

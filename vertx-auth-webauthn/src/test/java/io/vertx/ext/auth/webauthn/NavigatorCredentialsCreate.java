@@ -5,6 +5,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,8 +15,15 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(VertxUnitRunner.class)
 public class NavigatorCredentialsCreate {
 
+  private final DummyStore database = new DummyStore();
+
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
+
+  @Before
+  public void resetDatabase() {
+    database.clear();
+  }
 
   @Test
   public void testRequestRegister(TestContext should) {
@@ -24,7 +32,8 @@ public class NavigatorCredentialsCreate {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-      .setAuthenticatorStore(new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     // Dummy user
     JsonObject user = new JsonObject()
@@ -58,7 +67,8 @@ public class NavigatorCredentialsCreate {
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-      .setAuthenticatorStore(new DummyStore());
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     // dummy request
     JsonObject request = new JsonObject()

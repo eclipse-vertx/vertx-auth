@@ -5,7 +5,6 @@ import io.vertx.ext.auth.webauthn.store.Authenticator;
 import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,9 +16,13 @@ public class DummyStore implements AuthenticatorStore {
     database = new ArrayList<>();
   }
 
-  public DummyStore(Authenticator... database) {
-    this.database = new ArrayList<>();
-    this.database.addAll(Arrays.asList(database));
+  public DummyStore add(Authenticator authenticator) {
+    this.database.add(authenticator);
+    return this;
+  }
+
+  public void clear() {
+    database.clear();
   }
 
   @Override

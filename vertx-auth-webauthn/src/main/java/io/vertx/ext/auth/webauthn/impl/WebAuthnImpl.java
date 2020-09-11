@@ -36,16 +36,13 @@ import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 import io.vertx.ext.auth.webauthn.store.Authenticator;
-import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
+import java.util.function.Function;
 
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 
@@ -54,10 +51,12 @@ public class WebAuthnImpl implements WebAuthn {
   private static final Logger LOG = LoggerFactory.getLogger(WebAuthn.class);
 
   private final Map<String, Attestation> attestations = new HashMap<>();
+
   private final VertxContextPRNG random;
   private final WebAuthnOptions options;
 
-  private AuthenticatorStore store;
+  private Function<Authenticator, Future<List<Authenticator>>> fetcher = authr -> Future.failedFuture("Fetcher function not available");
+  private Function<Authenticator, Future<Void>> updater = authr -> Future.failedFuture("Updater function not available");
 
   public WebAuthnImpl(Vertx vertx, WebAuthnOptions options) {
     random = VertxContextPRNG.current(vertx);
@@ -128,23 +127,27 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public WebAuthn setAuthenticatorStore(AuthenticatorStore store) {
-    if (store == null) {
-      throw new IllegalArgumentException("Store cannot be null");
+  public WebAuthn authenticatorFetcher(Function<Authenticator, Future<List<Authenticator>>> fetcher) {
+    if (fetcher == null) {
+      throw new IllegalArgumentException("Function cannot be null");
     }
-    this.store = store;
+    this.fetcher = fetcher;
+    return this;
+  }
+
+  @Override
+  public WebAuthn authenticatorUpdater(Function<Authenticator, Future<Void>> updater) {
+    if (updater == null) {
+      throw new IllegalArgumentException("Function cannot be null");
+    }
+    this.updater = updater;
     return this;
   }
 
   @Override
   public WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
 
-    if (store == null) {
-      handler.handle(Future.failedFuture("No authenticator store available"));
-      return this;
-    }
-
-    store.fetch(new Authenticator().setUserName(user.getString("name")))
+    fetcher.apply(new Authenticator().setUserName(user.getString("name")))
       .onFailure(err -> handler.handle(Future.failedFuture(err)))
       .onSuccess(authenticators -> {
         // empty structure with all required fields
@@ -160,7 +163,7 @@ public class WebAuthnImpl implements WebAuthn {
         putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
         putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
         // put non null values for User
-        putOpt(json.getJsonObject("user"), "id", store.generateId());
+        putOpt(json.getJsonObject("user"), "id", UUID.randomUUID().toString());
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
@@ -231,12 +234,7 @@ public class WebAuthnImpl implements WebAuthn {
     }
 
     // fallback to non RK requests
-    if (store == null) {
-      handler.handle(Future.failedFuture("No authenticator store available"));
-      return this;
-    }
-
-    store.fetch(new Authenticator().setUserName(name))
+    fetcher.apply(new Authenticator().setUserName(name))
       .onFailure(err -> handler.handle(Future.failedFuture(err)))
       .onSuccess(authenticators -> {
         if (authenticators.isEmpty()) {
@@ -279,12 +277,6 @@ public class WebAuthnImpl implements WebAuthn {
 
   @Override
   public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
-
-    if (store == null) {
-      handler.handle(Future.failedFuture("No authenticator store available"));
-      return;
-    }
-
     try {
       // cast
       WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
@@ -358,7 +350,7 @@ public class WebAuthnImpl implements WebAuthn {
             Authenticator storeItem = new Authenticator(authrInfo).setUserName(username);
             // the create challenge is complete we can finally safe this
             // new authenticator to the storage
-            store.store(storeItem)
+            updater.apply(storeItem)
               .onFailure(err -> handler.handle(Future.failedFuture(err)))
               .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(storeItem.toJson()))));
 
@@ -380,7 +372,7 @@ public class WebAuthnImpl implements WebAuthn {
             query.setUserName(username);
           }
 
-          store.fetch(query)
+          fetcher.apply(query)
             .onFailure(err -> handler.handle(Future.failedFuture(err)))
             .onSuccess(authenticators -> {
               if (authenticators == null) {
@@ -396,7 +388,7 @@ public class WebAuthnImpl implements WebAuthn {
                     // update the counter on the authenticator
                     authenticator.setCounter(counter);
                     // update the credential (the important here is to update the counter)
-                    store.store(authenticator)
+                    updater.apply(authenticator)
                       .onFailure(err -> handler.handle(Future.failedFuture(err)))
                       .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authenticator.toJson()))));
 
