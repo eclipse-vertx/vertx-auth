@@ -13,7 +13,6 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
@@ -26,6 +25,11 @@ import static io.vertx.ext.auth.webauthn.AuthenticatorTransport.*;
 import static io.vertx.ext.auth.webauthn.PublicKeyCredential.*;
 import static io.vertx.ext.auth.webauthn.UserVerification.*;
 
+/**
+ * Configuration for the webauthn object
+ *
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ */
 @DataObject(generateConverter = true)
 public class WebAuthnOptions {
 

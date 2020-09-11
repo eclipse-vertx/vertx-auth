@@ -13,7 +13,6 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.Fluent;
@@ -23,7 +22,6 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
-import io.vertx.ext.auth.webauthn.store.Authenticator;
 
 import java.util.List;
 import java.util.function.Function;

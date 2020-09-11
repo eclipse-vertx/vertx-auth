@@ -3,6 +3,10 @@
 [[Authenticator]]
 == Authenticator
 
+++++
+ Data Object representing an authenticator at rest.
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]
@@ -18,6 +22,10 @@
 [[RelyingParty]]
 == RelyingParty
 
+++++
+ Data object representing a Relying party (your server)
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]
@@ -46,6 +54,10 @@
 [[WebAuthnOptions]]
 == WebAuthnOptions
 
+++++
+ Configuration for the webauthn object
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]

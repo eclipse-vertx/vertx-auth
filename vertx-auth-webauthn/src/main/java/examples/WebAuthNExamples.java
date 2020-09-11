@@ -21,8 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.RelyingParty;
 import io.vertx.ext.auth.webauthn.WebAuthn;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
-import io.vertx.ext.auth.webauthn.store.Authenticator;
-import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
+import io.vertx.ext.auth.webauthn.Authenticator;
 
 import java.util.List;
 

@@ -35,7 +35,7 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
-import io.vertx.ext.auth.webauthn.store.Authenticator;
+import io.vertx.ext.auth.webauthn.Authenticator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
