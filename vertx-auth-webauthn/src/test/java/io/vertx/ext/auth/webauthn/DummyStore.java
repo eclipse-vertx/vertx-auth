@@ -1,28 +1,24 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.core.Future;
-import io.vertx.ext.auth.webauthn.store.Authenticator;
-import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DummyStore implements AuthenticatorStore {
+public class DummyStore {
 
-  private final List<Authenticator> database;
+  private final List<Authenticator> database = new ArrayList<>();
 
-  public DummyStore() {
-    database = new ArrayList<>();
+  public DummyStore add(Authenticator authenticator) {
+    this.database.add(authenticator);
+    return this;
   }
 
-  public DummyStore(Authenticator... database) {
-    this.database = new ArrayList<>();
-    this.database.addAll(Arrays.asList(database));
+  public void clear() {
+    database.clear();
   }
 
-  @Override
   public Future<List<Authenticator>> fetch(Authenticator query) {
     return Future.succeededFuture(
       database.stream()
@@ -40,7 +36,6 @@ public class DummyStore implements AuthenticatorStore {
     );
   }
 
-  @Override
   public Future<Void> store(Authenticator authenticator) {
 
     long updated = database.stream()

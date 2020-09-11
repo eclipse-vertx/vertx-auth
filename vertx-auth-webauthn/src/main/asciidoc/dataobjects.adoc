@@ -3,6 +3,10 @@
 [[Authenticator]]
 == Authenticator
 
+++++
+ Data Object representing an authenticator at rest.
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]
@@ -18,6 +22,10 @@
 [[RelyingParty]]
 == RelyingParty
 
+++++
+ Data object representing a Relying party (your server)
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]
@@ -46,6 +54,10 @@
 [[WebAuthnOptions]]
 == WebAuthnOptions
 
+++++
+ Configuration for the webauthn object
+++++
+'''
 
 [cols=">25%,25%,50%"]
 [frame="topbot"]
@@ -59,6 +71,6 @@
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
 |[[timeout]]`@timeout`|`Number (Long)`|-
 |[[transports]]`@transports`|`Array of link:enums.html#AuthenticatorTransport[AuthenticatorTransport]`|-
-|[[userVerification]]`@userVerification`|`link:enums.html#UserVerificationRequirement[UserVerificationRequirement]`|-
+|[[userVerification]]`@userVerification`|`link:enums.html#UserVerification[UserVerification]`|-
 |===
 

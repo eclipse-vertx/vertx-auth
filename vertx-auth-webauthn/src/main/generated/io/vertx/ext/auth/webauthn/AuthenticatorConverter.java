@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.webauthn.store;
+package io.vertx.ext.auth.webauthn;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
@@ -6,8 +6,8 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.webauthn.store.Authenticator}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.store.Authenticator} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.webauthn.Authenticator}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.webauthn.Authenticator} original class using Vert.x codegen.
  */
 public class AuthenticatorConverter {
 

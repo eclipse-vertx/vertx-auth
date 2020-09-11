@@ -72,7 +72,7 @@ public class WebAuthnOptionsConverter {
           break;
         case "userVerification":
           if (member.getValue() instanceof String) {
-            obj.setUserVerification(io.vertx.ext.auth.webauthn.UserVerificationRequirement.valueOf((String)member.getValue()));
+            obj.setUserVerification(io.vertx.ext.auth.webauthn.UserVerification.valueOf((String)member.getValue()));
           }
           break;
       }

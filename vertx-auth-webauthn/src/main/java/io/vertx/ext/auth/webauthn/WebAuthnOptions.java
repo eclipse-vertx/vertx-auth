@@ -13,7 +13,6 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
@@ -24,8 +23,13 @@ import java.util.List;
 
 import static io.vertx.ext.auth.webauthn.AuthenticatorTransport.*;
 import static io.vertx.ext.auth.webauthn.PublicKeyCredential.*;
-import static io.vertx.ext.auth.webauthn.UserVerificationRequirement.*;
+import static io.vertx.ext.auth.webauthn.UserVerification.*;
 
+/**
+ * Configuration for the webauthn object
+ *
+ * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ */
 @DataObject(generateConverter = true)
 public class WebAuthnOptions {
 
@@ -35,7 +39,7 @@ public class WebAuthnOptions {
 
   private AuthenticatorAttachment authenticatorAttachment;
   private boolean requireResidentKey;
-  private UserVerificationRequirement userVerificationRequirement;
+  private UserVerification userVerification;
 
   private Long timeout;
   private Attestation attestation;
@@ -57,7 +61,7 @@ public class WebAuthnOptions {
 
   // sensible defaults
   private void init() {
-    userVerificationRequirement = DISCOURAGED;
+    userVerification = DISCOURAGED;
     requireResidentKey = false;
     extensions = new JsonObject()
       .put("txAuthSimple", "");
@@ -155,12 +159,12 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public UserVerificationRequirement getUserVerification() {
-    return userVerificationRequirement;
+  public UserVerification getUserVerification() {
+    return userVerification;
   }
 
-  public WebAuthnOptions setUserVerification(UserVerificationRequirement userVerificationRequirement) {
-    this.userVerificationRequirement = userVerificationRequirement;
+  public WebAuthnOptions setUserVerification(UserVerification userVerification) {
+    this.userVerification = userVerification;
     return this;
   }
 

@@ -13,7 +13,6 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.Fluent;
@@ -23,7 +22,9 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
-import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
+
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Factory interface for creating WebAuthN based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
@@ -53,16 +54,6 @@ public interface WebAuthn extends AuthenticationProvider {
   static WebAuthn create(Vertx vertx, WebAuthnOptions options) {
     return new WebAuthnImpl(vertx, options);
   }
-
-  /**
-   * Set's the authenticator store. The store implementation should be responsible to load the required data
-   * from a database.
-   *
-   * @param store the user store used to load credentials.
-   * @return fluent self
-   */
-  @Fluent
-  WebAuthn setAuthenticatorStore(AuthenticatorStore store);
 
   /**
    * Gets a challenge and any other parameters for the {@code navigator.credentials.create()} call.
@@ -106,4 +97,56 @@ public interface WebAuthn extends AuthenticationProvider {
     getCredentialsOptions(username, promise);
     return promise.future();
   }
+
+  /**
+   * Provide a {@link Function} that can fetch {@link Authenticator}s from a backend given the incomplete
+   * {@link Authenticator} argument.
+   *
+   * The implementation must consider the following fields <strong>exclusively</strong>, while performing the lookup:
+   * <ul>
+   *   <li>{@link Authenticator#getUserName()}</li>
+   *   <li>{@link Authenticator#getCredID()} ()}</li>
+   * </ul>
+   *
+   * It may return more than 1 result, for example when a user can be identified using different modalities.
+   * To signal that a user is not allowed/present on the system, a failure should be returned, not {@code null}.
+   *
+   * The function signature is as follows:
+   *
+   * {@code (Authenticator) -> Future<List<Authenticator>>>}
+   *
+   * <ul>
+   *   <li>{@link Authenticator} the incomplete authenticator data to lookup.</li>
+   *   <li>{@link Future}async result with a list of authenticators.</li>
+   * </ul>
+   *
+   * @param fetcher fetcher function.
+   * @return fluent self.
+   */
+  @Fluent
+  WebAuthn authenticatorFetcher(Function<Authenticator, Future<List<Authenticator>>> fetcher);
+
+  /**
+   * Provide a {@link Function} that can update or insert a {@link Authenticator}.
+   * The function <strong>should</strong> store a given authenticator to a persistence storage.
+   *
+   * When an authenticator is already present, this method <strong>must</strong> at least update
+   * {@link Authenticator#getCounter()}, and is not required to perform any other update.
+   *
+   * For new authenticators, the whole object data <strong>must</strong> be persisted.
+   *
+   * The function signature is as follows:
+   *
+   * {@code (Authenticator) -> Future<Void>}
+   *
+   * <ul>
+   *   <li>{@link Authenticator} the authenticator data to update.</li>
+   *   <li>{@link Future}async result of the operation.</li>
+   * </ul>
+   *
+   * @param updater updater function.
+   * @return fluent self.
+   */
+  @Fluent
+  WebAuthn authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
 }

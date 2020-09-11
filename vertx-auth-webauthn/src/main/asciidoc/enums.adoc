@@ -79,8 +79,8 @@
 |[[RS1]]`RS1`|-
 |===
 
-[[UserVerificationRequirement]]
-== UserVerificationRequirement
+[[UserVerification]]
+== UserVerification
 
 ++++
  UserVerificationRequirement
