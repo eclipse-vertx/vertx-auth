@@ -1,8 +1,6 @@
 package io.vertx.ext.auth.webauthn;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.webauthn.store.Authenticator;
 import io.vertx.ext.auth.webauthn.store.AuthenticatorStore;
 
@@ -25,27 +23,25 @@ public class DummyStore implements AuthenticatorStore {
   }
 
   @Override
-  public AuthenticatorStore getAuthenticatorsByUserName(String name, Handler<AsyncResult<List<Authenticator>>> handler) {
-    handler.handle(Future.succeededFuture(
+  public Future<List<Authenticator>> fetch(Authenticator query) {
+    return Future.succeededFuture(
       database.stream()
-        .filter(entry -> name.equals(entry.getUserName()))
+        .filter(entry -> {
+          if (query.getUserName() != null) {
+            return query.getUserName().equals(entry.getUserName());
+          }
+          if (query.getCredID() != null) {
+            return query.getCredID().equals(entry.getCredID());
+          }
+          // This is a bad query! both username and credID are null
+          return false;
+        })
         .collect(Collectors.toList())
-    ));
-    return this;
+    );
   }
 
   @Override
-  public AuthenticatorStore getAuthenticatorsByCredId(String credId, Handler<AsyncResult<List<Authenticator>>> handler) {
-    handler.handle(Future.succeededFuture(
-      database.stream()
-        .filter(entry -> credId.equals(entry.getCredID()))
-        .collect(Collectors.toList())
-    ));
-    return this;
-  }
-
-  @Override
-  public AuthenticatorStore update(Authenticator authenticator, boolean upsert, Handler<AsyncResult<Void>> handler) {
+  public Future<Void> store(Authenticator authenticator) {
 
     long updated = database.stream()
       .filter(entry -> authenticator.getCredID().equals(entry.getCredID()))
@@ -55,15 +51,10 @@ public class DummyStore implements AuthenticatorStore {
       }).count();
 
     if (updated > 0) {
-      handler.handle(Future.succeededFuture());
+      return Future.succeededFuture();
     } else {
-      if (upsert) {
-        database.add(authenticator);
-        handler.handle(Future.succeededFuture());
-      } else {
-        handler.handle(Future.failedFuture("Nothing updated!"));
-      }
+      database.add(authenticator);
+      return Future.succeededFuture();
     }
-    return this;
   }
 }
