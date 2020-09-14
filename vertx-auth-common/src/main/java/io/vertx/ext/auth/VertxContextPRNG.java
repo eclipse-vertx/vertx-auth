@@ -118,20 +118,13 @@ public interface VertxContextPRNG {
   void nextBytes(byte[] bytes);
 
   /**
-   * Returns a Base64 mime encoded String of random data with the given length. The length parameter refers to the length
+   * Returns a Base64 url encoded String of random data with the given length. The length parameter refers to the length
    * of the String before the encoding step.
    *
    * @param length the desired string length before Base64 encoding.
    * @return A base 64 encoded string.
    */
-  default String nextString(int length) {
-    // create buffer
-    final byte[] data = new byte[length];
-    // fill with random data
-    nextBytes(data);
-    // encode
-    return Base64.getMimeEncoder().encodeToString(data);
-  }
+  String nextString(int length);
 
   /**
    * Returns a secure random int
