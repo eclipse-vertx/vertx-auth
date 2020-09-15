@@ -24,7 +24,6 @@ import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWT;
 
-import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -73,8 +72,6 @@ public class AndroidSafetynetAttestation implements Attestation {
     "wAG4RefnEFYPQJmpD+Wh8BJwBgtm2drTale/T6NBwmwnEFunfaMfMX3g6IBrx7VKnxIkJh/3p190" +
     "WveLKgl9n7i5SWce/4woPimEn9WfEQWRvp6wKhaCKFjuCMuulEZusoOUJ4LfJnXxcuQTgIrSnwI7" +
     "KfSSjsd42w3lX1fbgJp7vPmLM6OBRvAXuYRKTFqMAWbb7OaGIEE+cbxY6PDepnva";
-
-  private static final X500Principal ATTEST_ANDROID_COM = new X500Principal("CN=attest.android.com, O=Google LLC, L=Mountain View, ST=California, C=US");
 
   private final CertificateFactory x509;
 
@@ -140,7 +137,7 @@ public class AndroidSafetynetAttestation implements Attestation {
 
       // 1. Get leaf certificate of x5c certificate chain, decode it,
       // and check that it was issued for “attest.android.com”
-      if (!ATTEST_ANDROID_COM.equals(certChain.get(0).getSubjectX500Principal())) {
+      if (!"attest.android.com".equals(CertificateHelper.getCertInfo(certChain.get(0)).subject("CN"))) {
         throw new AttestationException("The common name is not set to 'attest.android.com'!");
       }
       // 2. Use the “GlobalSign Root CA — R2” from Google PKI directory.

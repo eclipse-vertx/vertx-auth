@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.webauthn;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -36,5 +37,15 @@ public enum Attestation {
   @Override
   public String toString() {
     return value;
+  }
+
+  @GenIgnore
+  public static Attestation of(String string) {
+    for (Attestation el : values()) {
+      if (el.toString().equals(string)) {
+        return el;
+      }
+    }
+    return null;
   }
 }

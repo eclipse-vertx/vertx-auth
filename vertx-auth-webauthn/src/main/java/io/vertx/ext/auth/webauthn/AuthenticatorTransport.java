@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.webauthn;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -38,5 +39,15 @@ public enum AuthenticatorTransport {
   @Override
   public String toString() {
     return value;
+  }
+
+  @GenIgnore
+  public static AuthenticatorTransport of(String string) {
+    for (AuthenticatorTransport el : values()) {
+      if (el.toString().equals(string)) {
+        return el;
+      }
+    }
+    return null;
   }
 }

@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.vertx.ext.auth.webauthn.Attestation.*;
 import static io.vertx.ext.auth.webauthn.AuthenticatorTransport.*;
 import static io.vertx.ext.auth.webauthn.PublicKeyCredential.*;
 import static io.vertx.ext.auth.webauthn.UserVerification.*;
@@ -62,6 +63,7 @@ public class WebAuthnOptions {
   // sensible defaults
   private void init() {
     userVerification = DISCOURAGED;
+    attestation = NONE;
     requireResidentKey = false;
     extensions = new JsonObject()
       .put("txAuthSimple", "");

@@ -31,7 +31,8 @@ public class NavigatorCredentialsCreate {
 
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation"))
+    .setAttestation(Attestation.of("direct")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 

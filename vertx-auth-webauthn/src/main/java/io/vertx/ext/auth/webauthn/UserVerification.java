@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.webauthn;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -36,5 +37,15 @@ public enum UserVerification {
   @Override
   public String toString() {
     return value;
+  }
+
+  @GenIgnore
+  public static UserVerification of(String string) {
+    for (UserVerification el : values()) {
+      if (el.toString().equals(string)) {
+        return el;
+      }
+    }
+    return null;
   }
 }

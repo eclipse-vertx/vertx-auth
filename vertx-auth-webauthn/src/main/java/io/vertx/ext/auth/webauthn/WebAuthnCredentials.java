@@ -94,6 +94,10 @@ public class WebAuthnCredentials implements Credentials {
       throw new CredentialValidationException("Invalid webauthn JSON, missing one of {id, rawId, response}");
     }
 
+    if (!webauthn.getString("id").equals(webauthn.getString("rawId"))) {
+      throw new CredentialValidationException("Invalid webauthn {id} not base64url encoded");
+    }
+
     try {
       JsonObject response = webauthn.getJsonObject("response");
       // response.clientDataJSON must be always present

@@ -16,7 +16,11 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+
+import java.util.Base64;
+import java.util.UUID;
 
 /**
  * Data Object representing an authenticator at rest.
@@ -105,6 +109,14 @@ public class Authenticator {
     JsonObject json = new JsonObject();
     AuthenticatorConverter.toJson(this, json);
     return json;
+  }
+
+  public static UUID toUUID(String string) {
+    if (string == null) {
+      return null;
+    }
+    Buffer buffer = Buffer.buffer(Base64.getUrlDecoder().decode(string));
+    return new UUID(buffer.getLong(0), buffer.getLong(8));
   }
 
   @Override

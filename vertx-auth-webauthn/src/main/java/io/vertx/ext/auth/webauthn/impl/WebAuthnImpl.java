@@ -86,12 +86,6 @@ public class WebAuthnImpl implements WebAuthn {
         json.put(key, value.toString());
         return;
       }
-      if (value instanceof Number) {
-        if (((Number) value).intValue() != 0) {
-          json.put(key, value.toString());
-        }
-        return;
-      }
       if (value instanceof JsonObject) {
         if (((JsonObject) value).isEmpty()) {
           return;
@@ -124,6 +118,13 @@ public class WebAuthnImpl implements WebAuthn {
       }
       json.add(value);
     }
+  }
+
+  private static Buffer UUIDtoBuffer(UUID uuid) {
+    Buffer buffer = Buffer.buffer(16);
+    buffer.setLong(0, uuid.getMostSignificantBits());
+    buffer.setLong(8, uuid.getLeastSignificantBits());
+    return buffer;
   }
 
   @Override
@@ -163,7 +164,7 @@ public class WebAuthnImpl implements WebAuthn {
         putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
         putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
         // put non null values for User
-        putOpt(json.getJsonObject("user"), "id", UUID.randomUUID().toString());
+        putOpt(json.getJsonObject("user"), "id", UUIDtoBuffer(UUID.randomUUID()));
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
@@ -326,6 +327,22 @@ public class WebAuthnImpl implements WebAuthn {
         }
       }
 
+      // optional data
+      if (clientData.containsKey("tokenBinding")) {
+        JsonObject tokenBinding = clientData.getJsonObject("tokenBinding");
+        // in this case we need to check the status
+        switch (tokenBinding.getString("status")) {
+          case "present":
+          case "supported":
+          case "not-supported":
+            // OK
+            break;
+          default:
+            handler.handle(Future.failedFuture("Invalid clientDataJSON.tokenBinding.status"));
+            return;
+        }
+      }
+
       final String username = authInfo.getUsername();
 
       // Step #4
@@ -361,8 +378,8 @@ public class WebAuthnImpl implements WebAuthn {
         case "webauthn.get":
           Authenticator query = new Authenticator();
           if (options.getRequireResidentKey()) {
-            // username are not provided (RK) we now need to lookup by rawId
-            query.setCredID(webauthn.getString("rawId"));
+            // username are not provided (RK) we now need to lookup by id
+            query.setCredID(webauthn.getString("id"));
           } else {
             // username can't be null
             if (username == null) {
@@ -382,7 +399,7 @@ public class WebAuthnImpl implements WebAuthn {
               // list is unbounded.
               // This means that we **must** lookup the list for the right authenticator
               for (Authenticator authenticator : authenticators) {
-                if (webauthn.getString("rawId").equals(authenticator.getCredID())) {
+                if (webauthn.getString("id").equals(authenticator.getCredID())) {
                   try {
                     final long counter = verifyWebAuthNGet(authInfo, clientDataJSON, authenticator.toJson());
                     // update the counter on the authenticator
@@ -399,7 +416,7 @@ public class WebAuthnImpl implements WebAuthn {
                 }
               }
               // No valid authenticator was found
-              handler.handle(Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("rawId")));
+              handler.handle(Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("id")));
             });
 
           return;
