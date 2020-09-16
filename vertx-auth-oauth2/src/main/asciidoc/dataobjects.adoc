@@ -139,6 +139,7 @@ Set the provider userInfo resource path
 +++
 |[[validateIssuer]]`@validateIssuer`|`Boolean`|-
 |[[verifyHost]]`@verifyHost`|`Boolean`|-
+|[[webSocketClosingTimeout]]`@webSocketClosingTimeout`|`Number (int)`|-
 |[[webSocketCompressionAllowClientNoContext]]`@webSocketCompressionAllowClientNoContext`|`Boolean`|-
 |[[webSocketCompressionLevel]]`@webSocketCompressionLevel`|`Number (int)`|-
 |[[webSocketCompressionRequestServerNoContext]]`@webSocketCompressionRequestServerNoContext`|`Boolean`|-
