@@ -95,7 +95,7 @@ public final class CertificateHelper {
 
       // verify that the issuer matches the next one in the list
       if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
-        throw new CertificateException("Failed to validate certificate path! Issuers dont match!");
+        throw new CertificateException("Certificate path issuers dont match: [" + subjectCert.getIssuerX500Principal() + "] != [" + issuerCert.getSubjectX500Principal() + "]");
       }
 
       // verify the certificate against the issuer

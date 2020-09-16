@@ -20,6 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.impl.jose.SignatureHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWK;
@@ -109,7 +110,7 @@ public class AndroidKeyAttestation implements Attestation {
       final X509Certificate leafCert = certChain.get(0);
       // verify the signature
       verifySignature(
-        PublicKeyCredential.valueOf(attStmt.getInteger("alg")).signature(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
         leafCert,
         signature,
         signatureBase);

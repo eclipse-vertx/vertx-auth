@@ -179,11 +179,6 @@ public final class CWK {
       retKey.put(name, value);
     }
 
-    if ("EC".equals(retKey.getString("kty"))) {
-      // JWK will assume ASN.1 signature encoding for EC which isn't valid for COSE
-      retKey.put("asn1", false);
-    }
-
     return new JWK(retKey);
   }
 }

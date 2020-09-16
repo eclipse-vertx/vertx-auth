@@ -174,7 +174,7 @@ class CryptoKeyPair implements Crypto {
       sig.initVerify(publicKey);
       sig.update(payload);
       if (ecdsa) {
-        return sig.verify(SignatureHelper.toDER(signature));
+        return sig.verify(SignatureHelper.toASN1(signature));
       } else {
         return sig.verify(signature);
       }
@@ -222,7 +222,7 @@ class CryptoSignature extends CryptoKeyPair {
       sig.initVerify(certificate);
       sig.update(payload);
       if (ecdsa) {
-        return sig.verify(SignatureHelper.toDER(signature));
+        return sig.verify(SignatureHelper.toASN1(signature));
       } else {
         return sig.verify(signature);
       }

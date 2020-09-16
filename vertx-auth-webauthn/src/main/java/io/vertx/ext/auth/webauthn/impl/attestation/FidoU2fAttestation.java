@@ -21,6 +21,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
 
@@ -32,7 +33,6 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
-import static io.vertx.ext.auth.webauthn.impl.AuthData.USER_PRESENT;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
@@ -75,8 +75,9 @@ public class FidoU2fAttestation implements Attestation {
     //}
 
     try {
-      if (!authData.is(USER_PRESENT)) {
-        throw new AttestationException("User was NOT present during authentication!");
+      // AAGUID must be null
+      if (!"00000000-0000-0000-0000-000000000000".equals(authData.getAaguidString())) {
+        throw new AttestationException("AAGUID is not 00000000-0000-0000-0000-000000000000!");
       }
 
       byte[] clientDataHash = hash("SHA-256", clientDataJSON);
@@ -99,18 +100,16 @@ public class FidoU2fAttestation implements Attestation {
       if (certChain.size() == 0) {
         throw new AttestationException("no certificates in x5c field");
       }
-
       // validate the chain
       CertificateHelper.checkValidity(certChain);
-
       // certificate valid lets verify signatures
       verifySignature(
-        Signature.getInstance("SHA256WithECDSA"),
+        PublicKeyCredential.ES256,
         certChain.get(0),
         attStmt.getBinary("sig"),
         signatureBase.getBytes());
 
-    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
+    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
   }

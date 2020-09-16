@@ -382,7 +382,7 @@ public class TPMAttestation implements Attestation {
       }
       // 9. Verify signature over certInfo with the public key extracted from AIK certificate.
       verifySignature(
-        PublicKeyCredential.valueOf(attStmt.getInteger("alg")).signature(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
         leafCert,
         attStmt.getBinary("sig"),
         attStmt.getBinary("certInfo"));

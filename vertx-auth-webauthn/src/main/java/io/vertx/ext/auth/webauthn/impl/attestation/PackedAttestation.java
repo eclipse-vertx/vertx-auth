@@ -137,7 +137,7 @@ public class PackedAttestation implements Attestation {
         // 2. Verify signature “sig” over the signatureBase with the public key
         // extracted from leaf attCert in “x5c”, using the algorithm “alg”
         verifySignature(
-          PublicKeyCredential.valueOf(attStmt.getInteger("alg")).signature(),
+          PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
           x509Certificate,
           signature,
           signatureBase);
@@ -163,12 +163,6 @@ public class PackedAttestation implements Attestation {
         // 3. Verify signature “sig” over the signatureBase with the previously extracted public key.
         switch (key.getType()) {
           case "EC":
-          case "OKP":
-            byte[] signatureBaseHash = hash(key.getHash(), signatureBase);
-            if (!key.verify(signatureBaseHash, signature)) {
-              throw new AttestationException("Failed to verify the signature!");
-            }
-            break;
           case "RSA":
           case "RSASSA":
             if (!key.verify(signature, signatureBase)) {

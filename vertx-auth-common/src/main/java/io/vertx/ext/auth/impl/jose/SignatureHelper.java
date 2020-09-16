@@ -90,7 +90,7 @@ public final class SignatureHelper {
    * @return The ASN.1/DER encoded signature.
    * @throws RuntimeException If the ECDSA JWS signature format is invalid.
    */
-  public static byte[] toDER(byte[] jwsSignature) {
+  public static byte[] toASN1(byte[] jwsSignature) {
 
     int rawLen = jwsSignature.length / 2;
 
@@ -154,4 +154,74 @@ public final class SignatureHelper {
     return derSignature;
   }
 
+  /**
+   * A signature in ASN1 format is a sequence of 2 values.
+   * This method verifies that the content contains the right markers and length.
+   */
+  public static boolean isASN1(byte[] sig) {
+    // need at least 8 bytes
+    if (sig.length < 8) {
+      return false;
+    }
+
+    try {
+      // seq
+      if (sig[0] != 48) {
+        return false;
+      }
+
+      int offset;
+
+      if (sig.length < 128) {
+        offset = 0;
+      } else {
+        // handle extended
+        if (sig[1] != (byte) 0x81) {
+          return false;
+        }
+        offset = 1;
+      }
+
+      // sequence
+
+      // verify the sequence byte length
+      if (sig[offset + 1] + 2 != sig.length) {
+        return false;
+      }
+
+      // element [0]
+      offset = offset + 2;
+
+      // check if the tag is 2 (integer)
+      if (sig[offset] != 2) {
+        return false;
+      }
+      // verify the sequence[0] byte length
+      if (offset + sig[offset + 1] + 2 > sig.length) {
+        return false;
+      }
+
+      // element [1]
+      offset = offset + sig[offset + 1] + 2;
+
+      // check if the tag is 2 (integer)
+      if (sig[offset] != 2) {
+        return false;
+      }
+      // verify the sequence[1] byte length
+      if (offset + sig[offset + 1] + 2 > sig.length) {
+        return false;
+      }
+
+      offset = offset + sig[offset + 1] + 2;
+
+      if (offset != sig.length) {
+        return false;
+      }
+
+      return true;
+    } catch (IndexOutOfBoundsException e) {
+      return false;
+    }
+  }
 }

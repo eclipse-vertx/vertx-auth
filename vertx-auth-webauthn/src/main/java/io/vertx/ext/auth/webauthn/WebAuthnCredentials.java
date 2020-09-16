@@ -104,7 +104,12 @@ public class WebAuthnCredentials implements Credentials {
       if (!response.containsKey("clientDataJSON")) {
         throw new CredentialValidationException("Missing webauthn.response.clientDataJSON");
       }
-
+      // if response.userHandle is present it should be a String
+      if (response.containsKey("userHandle")) {
+        if (!(response.getValue("userHandle") instanceof String)) {
+          throw new CredentialValidationException("webauthn.response.userHandle must be String");
+        }
+      }
     } catch (ClassCastException e) {
       throw new CredentialValidationException("webauthn.response must be JSON");
     }

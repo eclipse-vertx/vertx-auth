@@ -35,7 +35,6 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
-import io.vertx.ext.auth.webauthn.Authenticator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -462,8 +461,22 @@ public class WebAuthnImpl implements WebAuthn {
 
       // Step #6
       // check that the user was either validated or present
-      if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
-        throw new AttestationException("User was either not verified or present during credentials creation");
+      switch (options.getUserVerification()) {
+        case REQUIRED:
+          if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
+            throw new AttestationException("User was either not verified or present during credentials creation");
+          }
+          break;
+        case PREFERRED:
+          if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
+            LOG.warn("User was either not verified or present during credentials creation");
+          }
+          break;
+        case DISCOURAGED:
+          if (authData.is(AuthData.USER_VERIFIED) || authData.is(AuthData.USER_PRESENT)) {
+            LOG.warn("User was either verified or present during credentials creation");
+          }
+          break;
       }
 
       // From here we start really verifying the create challenge:
@@ -530,8 +543,22 @@ public class WebAuthnImpl implements WebAuthn {
 
     // Step #6
     // check that the user was either validated or present
-    if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
-      throw new AttestationException("User was either not verified or present during credentials creation");
+    switch (options.getUserVerification()) {
+      case REQUIRED:
+        if (!authData.is(AuthData.USER_VERIFIED) || !authData.is(AuthData.USER_PRESENT)) {
+          throw new AttestationException("User was either not verified or not present during credentials creation");
+        }
+        break;
+      case PREFERRED:
+        if (!authData.is(AuthData.USER_VERIFIED) && !authData.is(AuthData.USER_PRESENT)) {
+          LOG.warn("User was either not verified or present during credentials creation");
+        }
+        break;
+      case DISCOURAGED:
+        if (authData.is(AuthData.USER_VERIFIED) || authData.is(AuthData.USER_PRESENT)) {
+          LOG.warn("User was either verified or present during credentials creation");
+        }
+        break;
     }
 
     // From here we start the validation that is specific for webauthn.get
@@ -569,7 +596,7 @@ public class WebAuthnImpl implements WebAuthn {
         // Step webauthn.get#6
         // If response counter is not 0, check that it’s bigger than stored counter.
         // If it’s not, potentially raise the alarm as replay attack may have occurred.
-        if (authData.getSignCounter() != 0 && authData.getSignCounter() < credential.getLong("counter")) {
+        if (authData.getSignCounter() != 0 && authData.getSignCounter() <= credential.getLong("counter", 0L)) {
           throw new AttestationException("Authenticator counter did not increase!");
         }
       }

@@ -99,11 +99,19 @@ public class WebAuthnOptions {
   }
 
   public WebAuthnOptions setTransports(List<AuthenticatorTransport> transports) {
+    if (transports == null) {
+      throw new IllegalArgumentException("transports cannot be null");
+    }
+
     this.transports = transports;
     return this;
   }
 
   public WebAuthnOptions addTransport(AuthenticatorTransport transport) {
+    if (transport == null) {
+      throw new IllegalArgumentException("transport cannot be null");
+    }
+
     if (transports == null) {
       transports = new ArrayList<>();
     }
@@ -117,6 +125,9 @@ public class WebAuthnOptions {
   }
 
   public WebAuthnOptions setAttestation(Attestation attestation) {
+    if (userVerification == null) {
+      throw new IllegalArgumentException("userVerification cannot be null");
+    }
     this.attestation = attestation;
     return this;
   }
@@ -126,6 +137,10 @@ public class WebAuthnOptions {
   }
 
   public WebAuthnOptions addPubKeyCredParam(PublicKeyCredential pubKeyCredParam) {
+    if (pubKeyCredParam == null) {
+      throw new IllegalArgumentException("pubKeyCredParam cannot be null");
+    }
+
     if (pubKeyCredParams == null) {
       pubKeyCredParams = new ArrayList<>();
     }
@@ -166,6 +181,9 @@ public class WebAuthnOptions {
   }
 
   public WebAuthnOptions setUserVerification(UserVerification userVerification) {
+    if (userVerification == null) {
+      throw new IllegalArgumentException("userVerification cannot be null");
+    }
     this.userVerification = userVerification;
     return this;
   }

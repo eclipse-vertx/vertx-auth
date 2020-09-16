@@ -18,6 +18,8 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.jose.SignatureHelper;
+import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 
 import java.io.ByteArrayInputStream;
@@ -72,7 +74,21 @@ public interface Attestation {
    * @param signature   - received signature
    * @param data        - data to verify
    */
-  static void verifySignature(Signature sig, X509Certificate certificate, byte[] signature, byte[] data) throws InvalidKeyException, SignatureException {
+  static void verifySignature(PublicKeyCredential publicKeyCredential, X509Certificate certificate, byte[] signature, byte[] data) throws InvalidKeyException, SignatureException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+
+    switch (publicKeyCredential) {
+      case ES256:
+      case ES384:
+      case ES512:
+        // JCA requires ASN1 encoded signatures!
+        if (!SignatureHelper.isASN1(signature)) {
+          signature = SignatureHelper.toASN1(signature);
+        }
+        break;
+    }
+
+    Signature sig = publicKeyCredential.signature();
+
     sig.initVerify(certificate);
     sig.update(data);
 

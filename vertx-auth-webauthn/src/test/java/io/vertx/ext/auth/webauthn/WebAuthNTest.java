@@ -79,7 +79,7 @@ public class WebAuthNTest {
         .setCounter(0)
     );
 
-    final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"response\":{\"authenticatorData\":\"SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAAFA\",\"signature\":\"MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8\",\"userHandle\":null,\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiI2b2pkb19LS0c0a1hvWjVKRF9BbHY2Q2hyVXRPT3o3dXFlaWlvRmxCc3pvIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmdldCJ9\"},\"id\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"type\":\"public-unwrap\"}");
+    final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"response\":{\"authenticatorData\":\"SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAAFA\",\"signature\":\"MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8\",\"userHandle\":\"null\",\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiI2b2pkb19LS0c0a1hvWjVKRF9BbHY2Q2hyVXRPT3o3dXFlaWlvRmxCc3pvIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmdldCJ9\"},\"id\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"type\":\"public-unwrap\"}");
 
     webAuthN.authenticate(
       new JsonObject()

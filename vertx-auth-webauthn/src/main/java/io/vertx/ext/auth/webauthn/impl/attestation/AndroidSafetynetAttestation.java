@@ -148,10 +148,10 @@ public class AndroidSafetynetAttestation implements Attestation {
 
       // Verify the signature
       verifySignature(
-        PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")).signature(),
+        PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")),
         certChain.get(0),
         token.getBinary("signature"),
-        token.getString("signatureBase").getBytes());
+        token.getBinary("signatureBase"));
 
     } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
