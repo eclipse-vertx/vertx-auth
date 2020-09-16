@@ -919,7 +919,7 @@ public final class JWK implements Crypto {
           }
         }
       } catch (SignatureException | InvalidKeyException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeException("Failed to verify signature", e);
       }
     }
   }
@@ -962,27 +962,6 @@ public final class JWK implements Crypto {
 
   public String getType() {
     return kty;
-  }
-
-  public String getHash() {
-    switch (alg) {
-      case "RS265":
-      case "EC265":
-      case "PS265":
-        return "SHA-256";
-      case "RS384":
-      case "EC384":
-      case "PS384":
-        return "SHA-384";
-      case "RS512":
-      case "EC512":
-      case "PS512":
-        return "SHA-512";
-      case "RS1":
-        return "SHA-1";
-      default:
-        return null;
-    }
   }
 
   public Signature getSignature() {
