@@ -67,7 +67,7 @@ public final class CWK {
     put("2",
       new NV("kid"));
     put("3",
-      new NV("alg", "-7", "ES256", "-8", "EdDSA", "-35", "ES384", "-36", "ES512", "-37", "PS256", "-38", "PS384", "-39", "PS512", "-257", "RS256", "-258", "RS384", "-259", "RS512", "-65535", "RS1"));
+      new NV("alg", "-7", "ES256", "-8", "EdDSA", "-35", "ES384", "-36", "ES512", "-37", "PS256", "-38", "PS384", "-39", "PS512", "-47", "ES256K", "-257", "RS256", "-258", "RS384", "-259", "RS512", "-65535", "RS1"));
     put("4",
       new NV("key_ops"));
     put("5",
@@ -78,7 +78,7 @@ public final class CWK {
   // defined here: https://tools.ietf.org/html/rfc8152#section-13.1.1
   private static final Map<String, NV> EC_KEY_PARAMS = Collections.unmodifiableMap(new HashMap<String, NV>() {{
     put("-1",
-      new NV("crv", "1", "P-256", "2", "P-384", "3", "P-521", "4", "X25519", "5", "X448", "6", "Ed25519", "7", "Ed448")
+      new NV("crv", "1", "P-256", "2", "P-384", "3", "P-521", "8", "secp256k1")
     );
     put("-2",
       new NV("x"));
@@ -92,7 +92,7 @@ public final class CWK {
   // defined here: https://tools.ietf.org/html/rfc8152#section-13.1.1
   private static final Map<String, NV> OKP_KEY_PARAMS = Collections.unmodifiableMap(new HashMap<String, NV>() {{
     put("-1",
-      new NV("crv", "1", "P-256", "2", "P-384", "3", "P-521", "4", "X25519", "5", "X448", "6", "Ed25519", "7", "Ed448")
+      new NV("crv", "4", "X25519", "5", "X448", "6", "Ed25519", "7", "Ed448")
     );
     put("-2",
       new NV("x"));

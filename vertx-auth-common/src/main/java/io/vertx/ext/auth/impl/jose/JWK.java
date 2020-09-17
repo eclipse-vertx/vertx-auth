@@ -576,6 +576,7 @@ public final class JWK implements Crypto {
 
           switch (alg) {
             case "ES256":
+            case "ES256K":
               len = 64;
               use = createEC("SHA256withECDSA", json);
               break;
@@ -591,6 +592,12 @@ public final class JWK implements Crypto {
               throw new NoSuchAlgorithmException(alg);
           }
           break;
+//        case "OKP":
+//          kty = json.getString("kty");
+//          // get the alias for the algorithm
+//          alg = json.getString("alg", "EdDSA");
+//          symmetric = false;
+//          break;
         case "oct":
           kty = json.getString("kty");
           // get the alias for the algorithm
@@ -751,13 +758,7 @@ public final class JWK implements Crypto {
 
     switch (json.getString("use", "sig")) {
       case "sig":
-        try {
-          // use default
-          signature = Signature.getInstance(alias);
-        } catch (NoSuchAlgorithmException e) {
-          // error
-          throw new RuntimeException(e);
-        }
+        signature = Signature.getInstance(alias);
         if (json.containsKey("use")) {
           if ((use & USE_SIG) == 0) {
             use += USE_SIG;
@@ -765,8 +766,13 @@ public final class JWK implements Crypto {
         }
         break;
       case "enc":
-      default:
-        throw new RuntimeException("EC Encryption not supported");
+        cipher = Cipher.getInstance("EC");
+        if (json.containsKey("use")) {
+          if ((use & USE_ENC) == 0) {
+            use += USE_ENC;
+          }
+        }
+        break;
     }
 
     return use;
@@ -897,6 +903,8 @@ public final class JWK implements Crypto {
         return "secp384r1";
       case "P-521":
         return "secp521r1";
+      case "secp256k1":
+        return "secp256k1";
       default:
         throw new IllegalArgumentException("Unsupported {crv}: " + crv);
     }

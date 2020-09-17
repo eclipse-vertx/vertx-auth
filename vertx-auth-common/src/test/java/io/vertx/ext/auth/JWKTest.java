@@ -163,4 +163,17 @@ public class JWKTest {
     new JWK(jwk);
     // eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg
   }
+
+  @Test
+  public void publicECK() {
+    JsonObject jwk = new JsonObject()
+      .put("kty", "EC")
+      .put("crv", "secp256k1")
+      .put("x", "ELZhvOXbbuPdoPq0H1dTq1rvR4v6ddu00sewn6fw-ow")
+      .put("y", "nY56UtXSG-G2wbCzByDlVezHiPj_D8j-7xq1qFhZ_Bs")
+//      .put("use", "enc")
+      .put("kid", "1");
+
+    new JWK(jwk);
+  }
 }
