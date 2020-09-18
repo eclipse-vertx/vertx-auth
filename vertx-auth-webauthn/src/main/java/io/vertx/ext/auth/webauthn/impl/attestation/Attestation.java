@@ -18,14 +18,12 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.jose.SignatureHelper;
+import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 
-import java.io.ByteArrayInputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +55,8 @@ public interface Attestation {
    * @return the hash
    */
   static byte[] hash(final String algorithm, byte[] data) throws NoSuchAlgorithmException {
-    if (algorithm == null) {
-      throw new NullPointerException("algorithm is null");
+    if (algorithm == null || data == null) {
+      throw new AttestationException("Cannot hash one of {algorithm, data} is null");
     }
 
     final MessageDigest md = MessageDigest.getInstance(algorithm);
@@ -75,37 +73,17 @@ public interface Attestation {
    * @param data        - data to verify
    */
   static void verifySignature(PublicKeyCredential publicKeyCredential, X509Certificate certificate, byte[] signature, byte[] data) throws InvalidKeyException, SignatureException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-
-    switch (publicKeyCredential) {
-      case ES256:
-      case ES384:
-      case ES512:
-        // JCA requires ASN1 encoded signatures!
-        if (!SignatureHelper.isASN1(signature)) {
-          signature = SignatureHelper.toASN1(signature);
-        }
-        break;
-    }
-
-    Signature sig = publicKeyCredential.signature();
-
-    sig.initVerify(certificate);
-    sig.update(data);
-
-    if (!sig.verify(signature)) {
+    if (!JWS.verifySignature(publicKeyCredential.name(), certificate, signature, data)) {
       throw new AttestationException("Failed to verify signature");
     }
   }
 
   /**
    * Parses a JsonArray of certificates to a X509Certificate list
-   * @param factory the factory that will parse the certificate base64 data
    * @param x5c the json array
    * @return list of X509Certificates
-
-   * @throws CertificateException
    */
-  static List<X509Certificate> parseX5c(CertificateFactory factory, JsonArray x5c) throws CertificateException {
+  static List<X509Certificate> parseX5c(JsonArray x5c) throws CertificateException {
     List<X509Certificate> certChain = new ArrayList<>();
 
     if (x5c == null || x5c.size() == 0) {
@@ -113,22 +91,9 @@ public interface Attestation {
     }
 
     for (int i = 0; i < x5c.size(); i++) {
-      certChain.add(parseX5c(factory, x5c.getBinary(i)));
+      certChain.add(JWS.parseX5c(x5c.getBinary(i)));
     }
 
     return certChain;
-  }
-
-  /**
-   * Parses a JsonArray of certificates to a X509Certificate list
-   * @param factory the factory that will parse the certificate base64 data
-   * @param base64 the base64 string
-   * @return list of X509Certificates
-
-   * @throws CertificateException
-   */
-  static X509Certificate parseX5c(CertificateFactory factory, byte[] base64) throws CertificateException {
-    return (X509Certificate) factory
-          .generateCertificate(new ByteArrayInputStream(base64));
   }
 }

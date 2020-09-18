@@ -17,12 +17,6 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.VertxGen;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
-
 /**
  * PublicKeyCredential
  * https://www.iana.org/assignments/cose/cose.xhtml#algorithms
@@ -35,6 +29,7 @@ public enum PublicKeyCredential {
   PS256(-37),
   PS384(-38),
   PS512(-39),
+  ES256K(-47),
   RS256(-257),
   RS384(-258),
   RS512(-259),
@@ -62,6 +57,8 @@ public enum PublicKeyCredential {
         return PS384;
       case -39:
         return PS512;
+      case -47:
+        return ES256K;
       case -257:
         return RS256;
       case -258:
@@ -75,39 +72,6 @@ public enum PublicKeyCredential {
     }
   }
 
-  public Signature signature() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-    Signature sig;
-    switch (this) {
-      case ES256:
-        return Signature.getInstance("SHA256withECDSA");
-      case ES384:
-        return Signature.getInstance("SHA384withECDSA");
-      case ES512:
-        return Signature.getInstance("SHA512withECDSA");
-      case RS256:
-        return Signature.getInstance("SHA256withRSA");
-      case RS384:
-        return Signature.getInstance("SHA384withRSA");
-      case RS512:
-        return Signature.getInstance("SHA512withRSA");
-      case RS1:
-        return Signature.getInstance("SHA1withRSA");
-      case PS256:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-        return sig;
-      case PS384:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-        return sig;
-      case PS512:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-        return sig;
-      default:
-        throw new NoSuchAlgorithmException();
-    }
-  }
   public int coseId() {
     return coseId;
   }

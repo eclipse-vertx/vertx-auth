@@ -28,7 +28,7 @@ public final class SignatureHelper {
    * Transcodes the JCA ASN.1/DER-encoded signature into the concatenated
    * R + S format expected by ECDSA JWS.
    *
-   * @param derSignature The ASN1./DER-encoded. Must not be {@code null}.
+   * @param derSignature    The ASN1./DER-encoded. Must not be {@code null}.
    * @param signatureLength The length for the JWS signature.
    * @return The ECDSA JWS encoded signature.
    * @throws RuntimeException If the ASN.1/DER signature format is invalid.
@@ -154,74 +154,74 @@ public final class SignatureHelper {
     return derSignature;
   }
 
+  private static boolean byteAtIndexIs(byte[] data, int idx, int expected) {
+    if (data == null) {
+      return false;
+    }
+    if (data.length <= idx) {
+      return false;
+    }
+    return data[idx] == expected;
+  }
+
+  private static boolean byteAtIndexLte(byte[] data, int idx, int expected) {
+    if (data == null) {
+      return false;
+    }
+    if (data.length <= idx) {
+      return false;
+    }
+    if (data[idx] <= 0) {
+      return false;
+    }
+    return data[idx] <= expected;
+  }
+
   /**
    * A signature in ASN1 format is a sequence of 2 values.
    * This method verifies that the content contains the right markers and length.
    */
   public static boolean isASN1(byte[] sig) {
-    // need at least 8 bytes
-    if (sig.length < 8) {
+    // seq
+    if (!byteAtIndexIs(sig, 0, 48)) {
       return false;
     }
 
-    try {
-      // seq
-      if (sig[0] != 48) {
+    int offset;
+
+    if (sig.length < 128) {
+      offset = 0;
+    } else {
+      // handle extended
+      if (!byteAtIndexIs(sig, 1, (byte) 0x81)) {
         return false;
       }
+      offset = 1;
+    }
 
-      int offset;
+    // sequence
 
-      if (sig.length < 128) {
-        offset = 0;
-      } else {
-        // handle extended
-        if (sig[1] != (byte) 0x81) {
-          return false;
-        }
-        offset = 1;
-      }
+    // verify the sequence byte length
+    if (!byteAtIndexIs(sig, offset + 1, sig.length - 2)) {
+      return false;
+    }
 
-      // sequence
+    offset = offset + 2;
 
-      // verify the sequence byte length
-      if (sig[offset + 1] + 2 != sig.length) {
-        return false;
-      }
-
+    for (int i = 0; i < 2; i++) {
       // element [0]
-      offset = offset + 2;
-
       // check if the tag is 2 (integer)
-      if (sig[offset] != 2) {
+      if (!byteAtIndexIs(sig, offset, 2)) {
         return false;
       }
       // verify the sequence[0] byte length
-      if (offset + sig[offset + 1] + 2 > sig.length) {
+      if (!byteAtIndexLte(sig, offset + 1, sig.length - offset - 2)) {
         return false;
       }
-
       // element [1]
       offset = offset + sig[offset + 1] + 2;
-
-      // check if the tag is 2 (integer)
-      if (sig[offset] != 2) {
-        return false;
-      }
-      // verify the sequence[1] byte length
-      if (offset + sig[offset + 1] + 2 > sig.length) {
-        return false;
-      }
-
-      offset = offset + sig[offset + 1] + 2;
-
-      if (offset != sig.length) {
-        return false;
-      }
-
-      return true;
-    } catch (IndexOutOfBoundsException e) {
-      return false;
     }
+
+    return offset == sig.length;
   }
 }

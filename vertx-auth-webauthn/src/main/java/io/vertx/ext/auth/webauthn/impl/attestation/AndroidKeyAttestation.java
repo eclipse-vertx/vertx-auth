@@ -17,18 +17,14 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
-import io.vertx.ext.auth.impl.jose.SignatureHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWK;
 
-import java.io.ByteArrayInputStream;
 import java.security.*;
 import java.security.cert.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
@@ -54,16 +50,6 @@ public class AndroidKeyAttestation implements Attestation {
    * This needs to be checked to ensure that malicious party wont generate fake attestations
    */
   private static final String ANDROID_KEYSTORE_ROOT = "MIICizCCAjKgAwIBAgIJAKIFntEOQ1tXMAoGCCqGSM49BAMCMIGYMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEVMBMGA1UECgwMR29vZ2xlLCBJbmMuMRAwDgYDVQQLDAdBbmRyb2lkMTMwMQYDVQQDDCpBbmRyb2lkIEtleXN0b3JlIFNvZnR3YXJlIEF0dGVzdGF0aW9uIFJvb3QwHhcNMTYwMTExMDA0MzUwWhcNMzYwMTA2MDA0MzUwWjCBmDELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxFTATBgNVBAoMDEdvb2dsZSwgSW5jLjEQMA4GA1UECwwHQW5kcm9pZDEzMDEGA1UEAwwqQW5kcm9pZCBLZXlzdG9yZSBTb2Z0d2FyZSBBdHRlc3RhdGlvbiBSb290MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7l1ex-HA220Dpn7mthvsTWpdamguD_9_SQ59dx9EIm29sa_6FsvHrcV30lacqrewLVQBXT5DKyqO107sSHVBpKNjMGEwHQYDVR0OBBYEFMit6XdMRcOjzw0WEOR5QzohWjDPMB8GA1UdIwQYMBaAFMit6XdMRcOjzw0WEOR5QzohWjDPMA8GA1UdEwEB_wQFMAMBAf8wDgYDVR0PAQH_BAQDAgKEMAoGCCqGSM49BAMCA0cAMEQCIDUho--LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBNC_NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw";
-
-  private final CertificateFactory x509;
-
-  public AndroidKeyAttestation() {
-    try {
-      x509 = CertificateFactory.getInstance("X.509");
-    } catch (CertificateException e) {
-      throw new AttestationException(e);
-    }
-  }
 
   @Override
   public String fmt() {
@@ -100,7 +86,7 @@ public class AndroidKeyAttestation implements Attestation {
       //    public key extracted from leaf certificate in x5c
       JsonObject attStmt = attestation.getJsonObject("attStmt");
       byte[] signature = attStmt.getBinary("sig");
-      List<X509Certificate> certChain = parseX5c(x509, attStmt.getJsonArray("x5c"));
+      List<X509Certificate> certChain = parseX5c(attStmt.getJsonArray("x5c"));
       if (certChain.size() == 0) {
         throw new AttestationException("Invalid certificate chain");
       }

@@ -1,10 +1,15 @@
 package io.vertx.ext.auth;
 
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Assume;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +24,11 @@ import static org.junit.Assert.*;
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
+@RunWith(VertxUnitRunner.class)
 public class JWTTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void createPublicKey() {
@@ -185,5 +194,15 @@ public class JWTTest {
 
     jwt.decode("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJQZXRlciBQYW4vTz1OZXZlcmxhbmQiLCJpc3MiOiJUaGUgRGVtbyBXaXp6YXJkIiwicGVybWlzc2lvbnMiOlsidXNlciJdLCJhdWQiOiJEb21pbm8iLCJleHBTZWNvbmRzIjozMDAsImlhdCI6MTU4OTQyNzA5MSwiZXhwIjoxNTg5NDI3MzkxfQ.ES_fyEk6nrvplP2kegQ3Ipt1UmmwYMvDz3Y99I9_8K_yCsVuNQ8RTgXGbX0y3sE3WEadXkWdByp2xdVB6MLFas6b3vGCBvCEArAV_M_NI6CFCzMEMcwQUrXyEHePVQLVPr9Ll4HWnDSNl5zE0f0b3TrvGyuvQ-podSTBafsp4VuB7mNFM7CZyzceRmD_t4DPS1nKvAxcAZBVulZm1niylL4lo-jXsbbEXTQFUxQKWkejYRovZfSmEuQ1j5Hz9JoA1rsrMI0XJOLwInBTu0n07ZubsSV83CvtcJY84UNospQxiwGFEzQHxj3RJxEmeCl-Hxfr-pQqTN2vgbyI9JKlBI9VsMLIL-73_6sfArJFWDOGZyCvatJ84CYqnaFfmsUbIaloKzprm8DO6b9uTuRnwOPvFU89Swl128V0mzLlwKLgH5vkFMX5lbgymMH3xjM2nUNbz4y_dzf8kOSNQPFg2FGQIaIfz1EruJouEPsWZ3Urw4TQPOXaPOjWqp0DKiOdRCtwKa83I-FcTcrJv5na4UTDbLbWxssj1bJTxN6sjtpIneSijRcj3fjbAGyBKvoCOZbjBWx9aB1j0DJBxQv6-3E_QntwIC6Vq6BWXue2jDe2N2vwO4R6HKMRzpiddtme-DVdTsK91mMnQCc5ZzMBmiw9PhHKapnSg1wTf3YgSgI");
     jwt.decode("eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ6djQ1RXJmby1ISjlQb1VBaHBEWjRMdklITGRUYXBvcUFPRUJ2ODFxWFJzIn0.eyJqdGkiOiJlNTkwZTlkNS1mMGE1LTQ2ZGEtOGVkOS00MjdkNTFlNTM2ZTUiLCJleHAiOjE1ODkzOTA4ODYsIm5iZiI6MCwiaWF0IjoxNTg5MzkwMjg2LCJpc3MiOiJodHRwczovL2xjYXV0bzMuY254LmN3cC5wbnAtaGNsLmNvbS9hdXRoL3JlYWxtcy9wb29scmVhbG0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMzliNjAzN2UtYTU1Ni00Y2I0LThmNTUtM2JmZmY0Yzc1YjZkIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY29ubi1ydGUiLCJhdXRoX3RpbWUiOjE1ODkzOTAyODYsInNlc3Npb25fc3RhdGUiOiIyMmE1M2UwYi1hZmMxLTQ5M2YtODQxZS1jYzhjYzQzMjNhNmIiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJzdWIiOiJDTj1mdXlpIGxpL089SENMTEFCUyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicmVhbG1OYW1lIjoicG9vbCIsIm5hbWUiOiJmdXlpMiB0ZXN0MiIsInByZWZlcnJlZF91c2VybmFtZSI6ImZ1eWl0ZXN0MiIsImdpdmVuX25hbWUiOiJmdXlpMiIsImZhbWlseV9uYW1lIjoidGVzdDIiLCJlbWFpbCI6ImZ1eWkyQHRlc3QuY29tIn0.fU1zlS8TSoNwkZbhlahs-SsMtPjAsS72NXbfJYBOrwOopxGskxo7682FxcGQAh7fqktjn93KJFhSHq8pFc-i2QnBjfAQHBA5TdG9iMYHxbyW-feMOsLzolwOdfWZUmCeIEHDf8MVjuII--Rqo4xgcKSwRLtQgU4mT5ZiIiQ-q8Bv1qdgLWbwex02tjXpmgABUkguSrwaN5e8nkKcVqnkMDvMrQRKSp-dqirnhyW8M0fjHZzs5kjcZU2IpzKrrCQNpOOorICd3gkEU0HefjzI9aHSvjq8ML5Kspa118Zk-j5VAC_BVDeNUAWsB3QBdSNN2wNRptRHX4gU3MCb6hPqhw");
+  }
+
+  @Test
+  public void testJWTWithX5c() {
+    JWT jwt = new JWT();
+
+    Buffer buffer = rule.vertx().fileSystem().readFileBlocking("toc.jwt");
+
+    jwt.decode(buffer.toString());
+
   }
 }

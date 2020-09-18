@@ -45,16 +45,6 @@ import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
  */
 public class FidoU2fAttestation implements Attestation {
 
-  private final CertificateFactory x509;
-
-  public FidoU2fAttestation() {
-    try {
-      x509 = CertificateFactory.getInstance("X.509");
-    } catch (CertificateException e) {
-      throw new AttestationException(e);
-    }
-  }
-
   @Override
   public String fmt() {
     return "fido-u2f";
@@ -96,7 +86,7 @@ public class FidoU2fAttestation implements Attestation {
 
       JsonObject attStmt = attestation.getJsonObject("attStmt");
 
-      List<X509Certificate> certChain = parseX5c(x509, attStmt.getJsonArray("x5c"));
+      List<X509Certificate> certChain = parseX5c(attStmt.getJsonArray("x5c"));
       if (certChain.size() == 0) {
         throw new AttestationException("no certificates in x5c field");
       }

@@ -75,6 +75,14 @@ public final class CertificateHelper {
   }
 
   public static void checkValidity(List<X509Certificate> certificates) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
+    checkValidity(certificates, true);
+  }
+
+  public static void checkValidity(List<X509Certificate> certificates, boolean withRootCA) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
+
+    if (certificates == null || certificates.size() == 0) {
+      throw new CertificateException("empty chain");
+    }
 
     for (int i = 0; i < certificates.size(); i++) {
       final X509Certificate subjectCert = certificates.get(i);
@@ -87,24 +95,22 @@ public final class CertificateHelper {
 
       final X509Certificate issuerCert;
 
-      if (i + 1 >= certificates.size()) {
-        issuerCert = subjectCert;
-      } else {
+      if (i + 1 < certificates.size()) {
         issuerCert = certificates.get(i + 1);
-      }
-
       // verify that the issuer matches the next one in the list
       if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
         throw new CertificateException("Certificate path issuers dont match: [" + subjectCert.getIssuerX500Principal() + "] != [" + issuerCert.getSubjectX500Principal() + "]");
       }
-
       // verify the certificate against the issuer
       subjectCert.verify(issuerCert.getPublicKey());
+      }
     }
 
-    // the last certificate should be self signed
-    X509Certificate root = certificates.get(certificates.size() - 1);
-    root.verify(root.getPublicKey());
+    if (withRootCA) {
+      // the last certificate should be self signed
+      X509Certificate root = certificates.get(certificates.size() - 1);
+      root.verify(root.getPublicKey());
+    }
   }
 
   public static CertInfo getCertInfo(X509Certificate cert) {

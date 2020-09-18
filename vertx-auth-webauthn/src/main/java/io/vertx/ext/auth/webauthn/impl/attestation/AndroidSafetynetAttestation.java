@@ -20,14 +20,13 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWT;
 
-import java.io.ByteArrayInputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -72,16 +71,6 @@ public class AndroidSafetynetAttestation implements Attestation {
     "wAG4RefnEFYPQJmpD+Wh8BJwBgtm2drTale/T6NBwmwnEFunfaMfMX3g6IBrx7VKnxIkJh/3p190" +
     "WveLKgl9n7i5SWce/4woPimEn9WfEQWRvp6wKhaCKFjuCMuulEZusoOUJ4LfJnXxcuQTgIrSnwI7" +
     "KfSSjsd42w3lX1fbgJp7vPmLM6OBRvAXuYRKTFqMAWbb7OaGIEE+cbxY6PDepnva";
-
-  private final CertificateFactory x509;
-
-  public AndroidSafetynetAttestation() {
-    try {
-      x509 = CertificateFactory.getInstance("X.509");
-    } catch (CertificateException e) {
-      throw new AttestationException(e);
-    }
-  }
 
   @Override
   public String fmt() {
@@ -131,8 +120,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       List<X509Certificate> certChain = new ArrayList<>();
 
       for (int i = 0; i < x5c.size(); i++) {
-        final X509Certificate c = (X509Certificate) x509.generateCertificate(new ByteArrayInputStream(b64dec.decode(x5c.getString(i))));
-        certChain.add(c);
+        certChain.add(JWS.parseX5c(b64dec.decode(x5c.getString(i))));
       }
 
       // 1. Get leaf certificate of x5c certificate chain, decode it,
@@ -142,7 +130,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       }
       // 2. Use the “GlobalSign Root CA — R2” from Google PKI directory.
       // Attach it to the end of header.x5c and try to verify it
-      certChain.add(parseX5c(x509, b64dec.decode(ANDROID_SAFETYNET_ROOT)));
+      certChain.add(JWS.parseX5c((b64dec.decode(ANDROID_SAFETYNET_ROOT))));
       // validate the chain
       CertificateHelper.checkValidity(certChain);
 

@@ -25,7 +25,6 @@ import io.vertx.ext.auth.webauthn.impl.AuthData;
 
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -40,17 +39,11 @@ import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
  */
 public class PackedAttestation implements Attestation {
 
-  private final CertificateFactory x509;
   private final Set<String> ISO3166 = new HashSet<>();
 
   public PackedAttestation() {
-    try {
-      x509 = CertificateFactory.getInstance("X.509");
-      // preload the country codes
-      ISO3166.addAll(Arrays.asList(Locale.getISOCountries()));
-    } catch (CertificateException e) {
-      throw new AttestationException(e);
-    }
+    // preload the country codes
+    ISO3166.addAll(Arrays.asList(Locale.getISOCountries()));
   }
 
   @Override
@@ -72,7 +65,7 @@ public class PackedAttestation implements Attestation {
         // It is signed by batch private key, who’s public key is in a batch certificate,
         // that is chained to some attestation root certificate.
 
-        List<X509Certificate> certChain = parseX5c(x509, attStmt.getJsonArray("x5c"));
+        List<X509Certificate> certChain = parseX5c(attStmt.getJsonArray("x5c"));
 
         if (certChain.size() == 0) {
           throw new AttestationException("no certificates in x5c field");
@@ -161,16 +154,8 @@ public class PackedAttestation implements Attestation {
         // 2. Parse authData and extract COSE public key
         JWK key = authData.getCredentialJWK();
         // 3. Verify signature “sig” over the signatureBase with the previously extracted public key.
-        switch (key.getType()) {
-          case "EC":
-          case "RSA":
-          case "RSASSA":
-            if (!key.verify(signature, signatureBase)) {
-              throw new AttestationException("Failed to verify the signature!");
-            }
-            break;
-          default:
-            throw new AttestationException("Unsupported kty: " + key.getType());
+        if (!key.verify(signature, signatureBase)) {
+          throw new AttestationException("Failed to verify the signature!");
         }
       }
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {

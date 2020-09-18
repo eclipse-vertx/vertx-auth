@@ -26,7 +26,6 @@ import io.vertx.ext.auth.webauthn.impl.attestation.tpm.PubArea;
 
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
@@ -101,16 +100,6 @@ public class TPMAttestation implements Attestation {
     "id:524F4343", // Fuzhouk Rockchip
     "id:FFFFF1D0" // FIDO Alliance
   );
-
-  private final CertificateFactory x509;
-
-  public TPMAttestation() {
-    try {
-      x509 = CertificateFactory.getInstance("X.509");
-    } catch (CertificateException e) {
-      throw new AttestationException(e);
-    }
-  }
 
   @Override
   public String fmt() {
@@ -235,6 +224,7 @@ public class TPMAttestation implements Attestation {
       switch (attStmt.getInteger("alg")) {
         case -7:
         case -37:
+        case -47:
         case -257:
           alg = "SHA-256";
           break;
@@ -252,7 +242,7 @@ public class TPMAttestation implements Attestation {
           alg = "SHA1";
           break;
         default:
-          throw new AttestationException("Unsupported algorithm: " + pubArea.getNameAlg());
+          throw new AttestationException("Unsupported algorithm: " + attStmt.getInteger("alg"));
       }
       byte[] attToBeSignedHash = hash(alg, attToBeSigned);
       // 13. Check that certInfo.extraData is equals to attToBeSignedHash.
@@ -264,7 +254,7 @@ public class TPMAttestation implements Attestation {
       // Verify the signature
 
       // 1. Pick a leaf AIK certificate of the x5c array and parse it.
-      List<X509Certificate> x5c = parseX5c(x509, attStmt.getJsonArray("x5c"));
+      List<X509Certificate> x5c = parseX5c(attStmt.getJsonArray("x5c"));
       if (x5c.size() == 0) {
         throw new AttestationException("no certificates in x5c field");
       }

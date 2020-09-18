@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
 package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.core.buffer.Buffer;
@@ -16,7 +31,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
-import java.security.interfaces.RSAKey;
 import java.security.spec.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,7 +41,7 @@ import java.util.regex.Pattern;
  * <p>
  * In a nutshell a JWK is a Key(Pair) encoded as JSON. This implementation follows the spec with some limitations:
  * <p>
- * * Supported algorithms are: "PS256", "PS384", "PS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512"
+ * * Supported algorithms are: "PS256", "PS384", "PS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "HS256", "HS384", "HS512"
  * <p>
  * When working with COSE, then "RS1" is also a valid algorithm.
  * <p>
@@ -71,7 +85,7 @@ public final class JWK implements Crypto {
   // verify/sign mode
   private final int use;
 
-  // the cryptography objects, not all will not initialized
+  // the cryptography objects, not all will be initialized
   private PrivateKey privateKey;
   private PublicKey publicKey;
   private Signature signature;
@@ -215,85 +229,29 @@ public final class JWK implements Crypto {
     try {
       switch (alg) {
         case "RS256":
-          kty = "RSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), pem);
-          signature = Signature.getInstance("SHA256withRSA");
-          if (publicKey != null && publicKey instanceof RSAKey) {
-            len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-          } else {
-            len = 256;
-          }
-          break;
         case "RS384":
-          kty = "RSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), pem);
-          signature = Signature.getInstance("SHA384withRSA");
-          if (publicKey != null && publicKey instanceof RSAKey) {
-            len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-          } else {
-            len = 384;
-          }
-          break;
         case "RS512":
           kty = "RSA";
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
-          signature = Signature.getInstance("SHA512withRSA");
-          if (publicKey != null && publicKey instanceof RSAKey) {
-            len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-          } else {
-            len = 512;
-          }
+          signature = JWS.getSignature(alg);
+          len = JWS.getSignatureLength(alg, publicKey);
           break;
         case "PS256":
-          kty = "RSASSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), pem);
-          signature = Signature.getInstance("RSASSA-PSS");
-          signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-          if (publicKey != null && publicKey instanceof RSAKey) {
-            len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-          } else {
-            len = 256;
-          }
-          break;
         case "PS384":
-          kty = "RSASSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), pem);
-          signature = Signature.getInstance("RSASSA-PSS");
-          signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-          if (publicKey != null && publicKey instanceof RSAKey) {
-            len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-          } else {
-            len = 384;
-          }
-          break;
         case "PS512":
           kty = "RSASSA";
           use = parsePEM(KeyFactory.getInstance("RSA"), pem);
-          signature = Signature.getInstance("RSASSA-PSS");
-          signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-          if (publicKey != null && publicKey instanceof RSAKey) {
-            len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-          } else {
-            len = 512;
-          }
+          signature = JWS.getSignature(alg);
+          len = JWS.getSignatureLength(alg, publicKey);
           break;
         case "ES256":
-          kty = "EC";
-          len = 64;
-          use = parsePEM(KeyFactory.getInstance("EC"), pem);
-          signature = Signature.getInstance("SHA256withECDSA");
-          break;
         case "ES384":
-          kty = "EC";
-          len = 96;
-          use = parsePEM(KeyFactory.getInstance("EC"), pem);
-          signature = Signature.getInstance("SHA384withECDSA");
-          break;
         case "ES512":
+        case "ES256K":
           kty = "EC";
-          len = 132;
+          len = JWS.getSignatureLength(alg, publicKey);
           use = parsePEM(KeyFactory.getInstance("EC"), pem);
-          signature = Signature.getInstance("SHA512withECDSA");
+          signature = JWS.getSignature(alg);
           break;
         default:
           throw new IllegalArgumentException("Unknown algorithm: " + alg);
@@ -418,76 +376,26 @@ public final class JWK implements Crypto {
 
     switch (algorithm) {
       case "RS256":
-        kty = "RSA";
-        signature = Signature.getInstance("SHA256withRSA");
-        if (publicKey != null && publicKey instanceof RSAKey) {
-          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-        } else {
-          len = 256;
-        }
-        break;
       case "RS384":
-        kty = "RSA";
-        signature = Signature.getInstance("SHA384withRSA");
-        if (publicKey != null && publicKey instanceof RSAKey) {
-          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-        } else {
-          len = 384;
-        }
-        break;
       case "RS512":
         kty = "RSA";
-        signature = Signature.getInstance("SHA512withRSA");
-        if (publicKey != null && publicKey instanceof RSAKey) {
-          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-        } else {
-          len = 512;
-        }
+        signature = JWS.getSignature(alg);
+        len = JWS.getSignatureLength(alg, publicKey);
         break;
       case "PS256":
-        kty = "RSASSA";
-        signature = Signature.getInstance("RSASSA-PSS");
-        signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-        if (publicKey != null && publicKey instanceof RSAKey) {
-          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-        } else {
-          len = 256;
-        }
-        break;
       case "PS384":
-        kty = "RSASSA";
-        signature = Signature.getInstance("RSASSA-PSS");
-        signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-        if (publicKey != null && publicKey instanceof RSAKey) {
-          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-        } else {
-          len = 384;
-        }
-        break;
       case "PS512":
         kty = "RSASSA";
-        signature = Signature.getInstance("RSASSA-PSS");
-        signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-        if (publicKey != null && publicKey instanceof RSAKey) {
-          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-        } else {
-          len = 512;
-        }
+        signature = JWS.getSignature(alg);
+        len = JWS.getSignatureLength(alg, publicKey);
         break;
       case "ES256":
-        kty = "EC";
-        len = 64;
-        signature = Signature.getInstance("SHA256withECDSA");
-        break;
       case "ES384":
-        kty = "EC";
-        len = 96;
-        signature = Signature.getInstance("SHA384withECDSA");
-        break;
       case "ES512":
+      case "ES256K":
         kty = "EC";
-        len = 132;
-        signature = Signature.getInstance("SHA512withECDSA");
+        len = JWS.getSignatureLength(alg, publicKey);
+        signature = JWS.getSignature(alg);
         break;
       default:
         throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
@@ -509,60 +417,14 @@ public final class JWK implements Crypto {
           switch (alg) {
             case "RS1":
               // special case for COSE
-              use = createRSA("SHA1withRSA", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 256;
-              }
-              break;
             case "RS256":
-              use = createRSA("SHA256withRSA", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 256;
-              }
-              break;
             case "RS384":
-              use = createRSA("SHA384withRSA", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 384;
-              }
-              break;
             case "RS512":
-              use = createRSA("SHA512withRSA", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 512;
-              }
-              break;
             case "PS256":
-              use = createRSA("RSASSA-PSS", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 256;
-              }
-              break;
             case "PS384":
-              use = createRSA("RSASSA-PSS", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 384;
-              }
-              break;
             case "PS512":
-              use = createRSA("RSASSA-PSS", json);
-              if (publicKey != null && publicKey instanceof RSAKey) {
-                len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
-              } else {
-                len = 512;
-              }
+              use = createRSA(json);
+              len = JWS.getSignatureLength(alg, publicKey);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
@@ -577,16 +439,10 @@ public final class JWK implements Crypto {
           switch (alg) {
             case "ES256":
             case "ES256K":
-              len = 64;
-              use = createEC("SHA256withECDSA", json);
-              break;
-            case "ES384":
-              len = 96;
-              use = createEC("SHA384withECDSA", json);
-              break;
             case "ES512":
-              len = 132;
-              use = createEC("SHA512withECDSA", json);
+            case "ES384":
+              len = JWS.getSignatureLength(alg, publicKey);
+              use = createEC(json);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
@@ -628,12 +484,12 @@ public final class JWK implements Crypto {
 
       label = kid != null ? kid : alg + "#" + json.hashCode();
 
-    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException | NoSuchProviderException | SignatureException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException | NoSuchProviderException | SignatureException | InvalidAlgorithmParameterException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private int createRSA(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException, SignatureException {
+  private int createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException, SignatureException {
     int use = 0;
 
     // public key
@@ -667,16 +523,13 @@ public final class JWK implements Crypto {
     if (json.containsKey("x5c")) {
       JsonArray x5c = json.getJsonArray("x5c");
 
-      CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
       List<X509Certificate> certChain = new ArrayList<>();
       for (int i = 0; i < x5c.size(); i++) {
-        final X509Certificate c = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(i)).getBytes(UTF8)));
-        certChain.add(c);
+        certChain.add(JWS.parseX5c(addBoundaries(x5c.getString(i)).getBytes(UTF8)));
       }
 
-      // validate the chain
-      CertificateHelper.checkValidity(certChain);
+      // validate the chain (don't assume the chain includes the root CA certificate
+      CertificateHelper.checkValidity(certChain, false);
 
       final X509Certificate certificate = certChain.get(0);
 
@@ -691,19 +544,7 @@ public final class JWK implements Crypto {
       case "sig":
         try {
           // use default
-          signature = Signature.getInstance(alias);
-          // signature extras
-          switch (alg) {
-            case "PS256":
-              signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-              break;
-            case "PS384":
-              signature.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-              break;
-            case "PS512":
-              signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-              break;
-          }
+          signature = JWS.getSignature(alg);
           if (json.containsKey("use")) {
             if ((use & USE_SIG) == 0) {
               use += USE_SIG;
@@ -730,7 +571,7 @@ public final class JWK implements Crypto {
     return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----\n";
   }
 
-  private int createEC(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException {
+  private int createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
     int use = 0;
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
     parameters.init(new ECGenParameterSpec(translate(json.getString("crv"))));
@@ -745,7 +586,7 @@ public final class JWK implements Crypto {
       }
     }
 
-    // public key
+    // private key
     if (jsonHasProperties(json, "x", "y", "d")) {
       final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
       final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
@@ -758,7 +599,7 @@ public final class JWK implements Crypto {
 
     switch (json.getString("use", "sig")) {
       case "sig":
-        signature = Signature.getInstance(alias);
+        signature = JWS.getSignature(alg);
         if (json.containsKey("use")) {
           if ((use & USE_SIG) == 0) {
             use += USE_SIG;

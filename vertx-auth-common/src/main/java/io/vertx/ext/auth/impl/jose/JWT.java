@@ -15,15 +15,20 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.NoSuchKeyIdException;
+import io.vertx.ext.auth.impl.CertificateHelper;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -44,8 +49,9 @@ public final class JWT {
   private static final Charset UTF8 = StandardCharsets.UTF_8;
 
   // as described in the terminology section: https://tools.ietf.org/html/rfc7515#section-2
-  private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-  private static final Base64.Decoder decoder = Base64.getUrlDecoder();
+  private static final Base64.Encoder urlEncoder = Base64.getUrlEncoder().withoutPadding();
+  private static final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
+  private static final Base64.Decoder decoder = Base64.getDecoder();
 
   // keep 2 maps (1 for encode, 1 for decode)
   private final Map<String, List<Crypto>> SIGN = new ConcurrentHashMap<>();
@@ -108,7 +114,7 @@ public final class JWT {
   public static JsonObject parse(final String token) {
     String[] segments = token.split("\\.");
     if (segments.length < 2 || segments.length > 3) {
-      throw new RuntimeException("Not enough or too many segments");
+      throw new RuntimeException("Not enough or too many segments [" + segments.length + "]");
     }
 
     // All segment should be base64
@@ -129,11 +135,34 @@ public final class JWT {
 
   public JsonObject decode(final String token) {
     // lock the secure state
-    final boolean unsecure = isUnsecure();
     String[] segments = token.split("\\.");
 
+    if (segments.length < 2) {
+      throw new IllegalStateException("Invalid format for JWT");
+    }
+
+    // All segment should be base64
+    String headerSeg = segments[0];
+    String payloadSeg = segments[1];
+    String signatureSeg = segments.length == 3 ? segments[2] : null;
+
+    // empty signature is never allowed
+    if ("".equals(signatureSeg)) {
+      throw new IllegalStateException("Signature is required");
+    }
+
+    // base64 decode and parse JSON
+    JsonObject header = new JsonObject(Buffer.buffer(base64urlDecode(headerSeg)));
+
+    final boolean unsecure = isUnsecure();
+    final boolean x5c = header.containsKey("x5c");
+
     if (unsecure) {
-      if (segments.length != 2) {
+      // if there isn't a certificate chain in the header, we are dealing with a strictly
+      // unsecure mode validation. In this case the number of segments must be 2
+      // if there is a certificate chain, we allow it to proceed and later we will assert
+      // against this chain
+      if (!x5c && segments.length != 2) {
         throw new IllegalStateException("JWT is in unsecured mode but token is signed.");
       }
     } else {
@@ -142,27 +171,53 @@ public final class JWT {
       }
     }
 
-    // All segment should be base64
-    String headerSeg = segments[0];
-    String payloadSeg = segments[1];
-    String signatureSeg = unsecure ? null : segments[2];
-
-    if ("".equals(signatureSeg)) {
-      throw new IllegalStateException("Signature is required");
-    }
-
-    // base64 decode and parse JSON
-    JsonObject header = new JsonObject(new String(base64urlDecode(headerSeg), UTF8));
-    JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
+    JsonObject payload = new JsonObject(Buffer.buffer(base64urlDecode(payloadSeg)));
 
     String alg = header.getString("alg");
-
-    List<Crypto> cryptos = VERIFY.get(alg);
 
     // if we only allow secure alg, then none is not a valid option
     if (!unsecure && "none".equals(alg)) {
       throw new IllegalStateException("Algorithm \"none\" not allowed");
     }
+
+    // handle the x5c case
+    if (x5c) {
+       // if signatureSeg is null fail
+      if (signatureSeg == null) {
+        throw new IllegalStateException("missing signature segment");
+      }
+
+      try {
+        JsonArray chain = header.getJsonArray("x5c");
+        List<X509Certificate> certChain = new ArrayList<>();
+
+        if (chain == null || chain.size() == 0) {
+          throw new IllegalStateException("x5c chain is null or empty");
+        }
+
+        for (int i = 0; i < chain.size(); i++) {
+          // "x5c" (X.509 Certificate Chain) Header Parameter
+          // https://tools.ietf.org/html/rfc7515#section-4.1.6
+          // states:
+          // Each string in the array is a base64-encoded (Section 4 of [RFC4648] -- not base64url-encoded) DER
+          // [ITU.X690.2008] PKIX certificate value.
+          certChain.add(JWS.parseX5c(decoder.decode(chain.getString(i).getBytes(UTF8))));
+        }
+
+        CertificateHelper.checkValidity(certChain, false);
+
+        if (JWS.verifySignature(alg, certChain.get(0), base64urlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {
+          // ok
+          return payload;
+        } else {
+          throw new RuntimeException("Signature verification failed");
+        }
+      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+        throw new RuntimeException("Signature verification failed", e);
+      }
+    }
+
+    List<Crypto> cryptos = VERIFY.get(alg);
 
     if (cryptos == null || cryptos.size() == 0) {
       throw new NoSuchKeyIdException(alg);
@@ -357,7 +412,7 @@ public final class JWT {
   }
 
   private static byte[] base64urlDecode(String str) {
-    return decoder.decode(str.getBytes(UTF8));
+    return urlDecoder.decode(str.getBytes(UTF8));
   }
 
   private static String base64urlEncode(String str) {
@@ -365,7 +420,7 @@ public final class JWT {
   }
 
   private static String base64urlEncode(byte[] bytes) {
-    return encoder.encodeToString(bytes);
+    return urlEncoder.encodeToString(bytes);
   }
 
   public boolean isUnsecure() {
