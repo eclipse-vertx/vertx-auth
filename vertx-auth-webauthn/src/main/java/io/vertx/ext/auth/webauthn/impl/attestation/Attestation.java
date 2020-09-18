@@ -13,7 +13,6 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonArray;
@@ -39,6 +38,7 @@ public interface Attestation {
   /**
    * The implementation of the Attestation verification.
    *
+   * @param metadata the Metadata holder to perform MDS queries
    * @param webauthn the JSON request received from the client
    * @param clientDataJSON the binary client data json
    * @param attestation the JSON representation of the attestation
@@ -46,7 +46,7 @@ public interface Attestation {
    *
    * @throws AttestationException if the validation fails
    */
-  void validate(JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
+  void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
 
   /**
    * Returns SHA-256 digest of the given data.

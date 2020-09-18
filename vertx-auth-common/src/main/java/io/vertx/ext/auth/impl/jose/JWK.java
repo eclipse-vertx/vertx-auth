@@ -101,6 +101,7 @@ public final class JWK implements Crypto {
       put("RS256", "SHA256withRSA");
       put("RS384", "SHA384withRSA");
       put("RS512", "SHA512withRSA");
+      put("ES256K", "SHA256withECDSA");
       put("ES256", "SHA256withECDSA");
       put("ES384", "SHA384withECDSA");
       put("ES512", "SHA512withECDSA");
@@ -134,7 +135,7 @@ public final class JWK implements Crypto {
       }
     }
 
-    for (String alias : Arrays.asList("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")) {
+    for (String alias : Arrays.asList("RS256", "RS384", "RS512", "ES256K", "ES256", "ES384", "ES512")) {
       try {
         // Key pairs on keystores are stored with a certificate, so we use it to load a key pair
         X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
@@ -305,9 +306,11 @@ public final class JWK implements Crypto {
         publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes())).getPublicKey();
         return USE_ENC;
       case "PUBLIC KEY":
+      case "PUBLIC RSA KEY":
         publicKey = kf.generatePublic(new X509EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
         return USE_ENC;
       case "PRIVATE KEY":
+      case "PRIVATE RSA KEY":
         privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
         return USE_SIG;
       default:
@@ -686,7 +689,7 @@ public final class JWK implements Crypto {
         byte[] sig = signature.sign();
         switch (kty) {
           case "EC":
-            return SignatureHelper.toJWS(sig, len);
+            return JWS.toJWS(sig, len);
           default:
             return sig;
         }
@@ -717,8 +720,8 @@ public final class JWK implements Crypto {
             // JCA EC signatures expect ASN1 formatted signatures
             // while JWS uses it's own format, while this will be true
             // for all JWS, it may not be true for COSE keys
-            if (!SignatureHelper.isASN1(expected)) {
-              expected = SignatureHelper.toASN1(expected);
+            if (!JWS.isASN1(expected)) {
+              expected = JWS.toASN1(expected);
             }
             break;
         }

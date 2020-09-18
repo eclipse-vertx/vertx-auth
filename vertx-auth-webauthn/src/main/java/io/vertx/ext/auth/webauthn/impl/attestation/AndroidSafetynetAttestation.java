@@ -78,7 +78,7 @@ public class AndroidSafetynetAttestation implements Attestation {
   }
 
   @Override
-  public void validate(JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // attestation format:
     //{
     //    "fmt": "android-safetynet",

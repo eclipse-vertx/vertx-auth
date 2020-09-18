@@ -51,7 +51,7 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public void validate(JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) {
+  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) {
     // the attestation object should have the following structure:
     //{
     //    "fmt": "fido-u2f",

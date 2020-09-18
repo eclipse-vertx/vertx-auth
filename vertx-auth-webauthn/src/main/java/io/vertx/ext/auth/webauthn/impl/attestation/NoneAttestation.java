@@ -37,7 +37,7 @@ public class NoneAttestation implements Attestation {
   }
 
   @Override
-  public void validate(JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // AAGUID must be null
     if (!"00000000-0000-0000-0000-000000000000".equals(authData.getAaguidString())) {
       throw new AttestationException("AAGUID is not 00000000-0000-0000-0000-000000000000!");
