@@ -25,6 +25,7 @@ import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWT;
 
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -90,6 +91,10 @@ public class AndroidSafetynetAttestation implements Attestation {
     //}
     try {
       JsonObject attStmt = attestation.getJsonObject("attStmt");
+      // for compliance ver is required to be a String
+      if (!attStmt.containsKey("ver") || attStmt.getString("ver") == null || attStmt.getString("ver").length() == 0) {
+        throw new AttestationException("Missing {ver} in attStmt");
+      }
       // response is a JWT
       JsonObject token = JWT.parse(attStmt.getBinary("response"));
 
@@ -110,6 +115,13 @@ public class AndroidSafetynetAttestation implements Attestation {
       if (!token.getJsonObject("payload").getBoolean("ctsProfileMatch")) {
         throw new AttestationException("JWS ctsProfileMatch is false!");
       }
+      // 6. Verify the timestamp
+      long timestampMs = token.getJsonObject("payload").getLong("timestampMs", 0L);
+      long now = System.currentTimeMillis();
+      if (timestampMs > now || (timestampMs + 60_000L) < now) {
+        throw new AttestationException("timestampMs is invalid!");
+      }
+
 
       // Verify the header
       JsonArray x5c = token.getJsonObject("header").getJsonArray("x5c");
@@ -128,18 +140,45 @@ public class AndroidSafetynetAttestation implements Attestation {
       if (!"attest.android.com".equals(CertificateHelper.getCertInfo(certChain.get(0)).subject("CN"))) {
         throw new AttestationException("The common name is not set to 'attest.android.com'!");
       }
-      // 2. Use the “GlobalSign Root CA — R2” from Google PKI directory.
-      // Attach it to the end of header.x5c and try to verify it
-      certChain.add(JWS.parseX5c((b64dec.decode(ANDROID_SAFETYNET_ROOT))));
-      // validate the chain
-      CertificateHelper.checkValidity(certChain);
+
+      // If available, validate attestation alg and x5c with info in the metadata statement
+      JsonObject statement = metadata.getStatement(authData.getAaguidString());
+      if (statement != null) {
+        // Using MDS or Metadata Statements, for each attestationRoot in attestationRootCertificates:
+        // append attestation root to the end of the header.x5c, and try verifying certificate chain.
+        // If none succeed, throw an error
+        boolean chainValid = false;
+        JsonArray attestationRootCertificates = statement.getJsonArray("attestationRootCertificates");
+        for (int i = 0; i < attestationRootCertificates.size(); i++) {
+          try {
+            // add the metadata root certificate
+            certChain.add(JWS.parseX5c(attestationRootCertificates.getString(i)));
+            CertificateHelper.checkValidity(certChain);
+            chainValid = true;
+            break;
+          } catch (CertificateException e) {
+            // remove the previously added certificate
+            certChain.remove(certChain.size() - 1);
+            // continue
+          }
+        }
+        if (!chainValid) {
+          throw new AttestationException("Certificate Chain with metadata invalid");
+        }
+      } else {
+        // 3. Use the “GlobalSign Root CA — R2” from Google PKI directory.
+        // Attach it to the end of header.x5c and try to verify it
+        certChain.add(JWS.parseX5c(ANDROID_SAFETYNET_ROOT));
+        // validate the chain
+        CertificateHelper.checkValidity(certChain);
+      }
 
       // Verify the signature
       verifySignature(
         PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")),
         certChain.get(0),
         token.getBinary("signature"),
-        token.getBinary("signatureBase"));
+        token.getString("signatureBase").getBytes(StandardCharsets.UTF_8));
 
     } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

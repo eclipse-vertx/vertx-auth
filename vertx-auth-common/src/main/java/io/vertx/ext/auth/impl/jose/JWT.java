@@ -180,8 +180,8 @@ public final class JWT {
       throw new IllegalStateException("Algorithm \"none\" not allowed");
     }
 
-    // handle the x5c case
-    if (x5c) {
+    // handle the x5c case, only in unsecure mode
+    if (unsecure && x5c) {
        // if signatureSeg is null fail
       if (signatureSeg == null) {
         throw new IllegalStateException("missing signature segment");

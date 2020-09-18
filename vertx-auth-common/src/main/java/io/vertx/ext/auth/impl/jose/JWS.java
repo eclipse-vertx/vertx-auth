@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.impl.jose;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -152,6 +153,12 @@ public final class JWS {
           throw new NoSuchAlgorithmException();
       }
     }
+  }
+
+  public static X509Certificate parseX5c(String data) throws CertificateException {
+    return (X509Certificate) X509
+      .generateCertificate(
+        new ByteArrayInputStream(addBoundaries(data).getBytes(StandardCharsets.UTF_8)));
   }
 
   public static X509Certificate parseX5c(byte[] data) throws CertificateException {
@@ -358,4 +365,9 @@ public final class JWS {
 
     return derSignature;
   }
+
+  private static String addBoundaries(final String certificate) {
+    return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----\n";
+  }
+
 }

@@ -27,8 +27,6 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.spec.*;
@@ -59,7 +57,6 @@ public final class JWK implements Crypto {
   public static final int USE_SIG = 1;
   public static final int USE_ENC = 2;
 
-  private static final Charset UTF8 = StandardCharsets.UTF_8;
   private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
 
   // JSON JWK properties
@@ -528,7 +525,7 @@ public final class JWK implements Crypto {
 
       List<X509Certificate> certChain = new ArrayList<>();
       for (int i = 0; i < x5c.size(); i++) {
-        certChain.add(JWS.parseX5c(addBoundaries(x5c.getString(i)).getBytes(UTF8)));
+        certChain.add(JWS.parseX5c(x5c.getString(i)));
       }
 
       // validate the chain (don't assume the chain includes the root CA certificate
@@ -568,10 +565,6 @@ public final class JWK implements Crypto {
     }
 
     return use;
-  }
-
-  private String addBoundaries(final String certificate) {
-    return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----\n";
   }
 
   private int createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
