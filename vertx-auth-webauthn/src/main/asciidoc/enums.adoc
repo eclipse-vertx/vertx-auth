@@ -78,6 +78,7 @@
 |[[RS384]]`RS384`|-
 |[[RS512]]`RS512`|-
 |[[RS1]]`RS1`|-
+|[[EdDSA]]`EdDSA`|-
 |===
 
 [[UserVerification]]

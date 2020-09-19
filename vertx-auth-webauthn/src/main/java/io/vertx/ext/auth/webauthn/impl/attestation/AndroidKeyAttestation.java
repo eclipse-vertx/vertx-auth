@@ -155,11 +155,12 @@ public class AndroidKeyAttestation implements Attestation {
           }
         }
       }
-//      // 5. Check that root certificate(last in the chain) is set to the root certificate
-//      // Google does not publish this certificate, so this was extracted from one of the attestations.
-//      if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
-//        throw new AttestationException("Root certificate is invalid!");
-//      }
+      // 5. Check that root certificate(last in the chain) is set to the root certificate
+      // Google does not publish this certificate, so this was extracted from one of the attestations.
+      if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
+        System.out.println("android cert: " + attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1));
+        //throw new AttestationException("Root certificate is invalid!");
+      }
 
       // meta data check
       metadata.verifyMetadata(

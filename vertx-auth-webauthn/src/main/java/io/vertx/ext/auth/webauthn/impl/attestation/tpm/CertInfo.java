@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.webauthn.impl.attestation.tpm;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 
 public class CertInfo {
 
@@ -46,6 +47,11 @@ public class CertInfo {
   private final byte[] attestedName;
 
   /**
+   * Synthetic value from the first 2 bytes from attestedName
+   */
+  private final int nameAlg;
+
+  /**
    * Ignore
    */
   private final byte[] qualifiedName;
@@ -83,6 +89,7 @@ public class CertInfo {
     len = certBuffer.getUnsignedShort(pos);
     pos += 2;
     attestedName = certBuffer.getBytes(pos, pos + len);
+    nameAlg = certBuffer.getUnsignedShort(pos);
     pos += len;
     // Attested qualified name, can be ignored
     len = certBuffer.getUnsignedShort(pos);
@@ -120,5 +127,9 @@ public class CertInfo {
 
   public byte[] getQualifiedName() {
     return qualifiedName;
+  }
+
+  public int getNameAlg() {
+    return nameAlg;
   }
 }

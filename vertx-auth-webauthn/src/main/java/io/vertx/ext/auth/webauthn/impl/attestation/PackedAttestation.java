@@ -127,8 +127,8 @@ public class PackedAttestation implements Attestation {
         if (statement != null) {
           // The presence of x5c means this is a full attestation. Check to see if attestationTypes
           // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION__ECDAA)) {
-            throw new AttestationException("Metadata does not indicate support for ecdaa attestations");
+          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION_BASIC_FULL)) {
+            throw new AttestationException("Metadata does not indicate support for full attestations");
           }
         } else {
           // no statement found, assume the chain is complete
@@ -159,7 +159,7 @@ public class PackedAttestation implements Attestation {
         if (statement != null) {
           // The presence of x5c means this is a full attestation. Check to see if attestationTypes
           // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION__ECDAA)) {
+          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION_ECDAA)) {
             throw new AttestationException("Metadata does not indicate support for ecdaa attestations");
           }
         }
@@ -175,7 +175,7 @@ public class PackedAttestation implements Attestation {
           // The presence of x5c means this is a full attestation. Check to see if attestationTypes
           // includes packed attestations.
           if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION_BASIC_SURROGATE)) {
-            throw new AttestationException("Metadata does not indicate support for full attestations");
+            throw new AttestationException("Metadata does not indicate support for surrogate attestations");
           }
         }
 

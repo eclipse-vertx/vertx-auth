@@ -69,7 +69,7 @@ public class Metadata {
    */
   public static final int ATTESTATION_BASIC_FULL = 0x3E07;
   public static final int ATTESTATION_BASIC_SURROGATE = 0x3E08;
-  public static final int ATTESTATION__ECDAA = 0x3E09;
+  public static final int ATTESTATION_ECDAA = 0x3E09;
   public static final int ATTESTATION_ATTCA = 0x3E0A;
 
   private final LocalMap<String, JsonObject> store;
