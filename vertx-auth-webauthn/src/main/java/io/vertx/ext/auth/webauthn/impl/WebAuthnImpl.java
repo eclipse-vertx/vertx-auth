@@ -610,4 +610,12 @@ public class WebAuthnImpl implements WebAuthn {
       return authData.getSignCounter();
     }
   }
+
+  /**
+   * Internal API not fully ready for prime time
+   */
+  public WebAuthn addMetadataStatement(JsonObject statement) {
+    metadata.loadMetadata(statement);
+    return this;
+  }
 }

@@ -17,11 +17,9 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWK;
-import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 
@@ -30,7 +28,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.*;
+import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.OCTET_STRING;
+import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.parseASN1;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
@@ -120,33 +119,19 @@ public class PackedAttestation implements Attestation {
         }
 
         // If available, validate attestation alg and x5c with info in the metadata statement
-        JsonObject statement = metadata.getStatement(authData.getAaguidString());
+        JsonObject statement = metadata.verifyMetadata(
+          authData.getAaguidString(),
+          PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+          certChain);
+
         if (statement != null) {
           // The presence of x5c means this is a full attestation. Check to see if attestationTypes
           // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(Metadata.BASIC_FULL)) {
-            throw new AttestationException("Metadata does not indicate support for full attestations");
+          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION__ECDAA)) {
+            throw new AttestationException("Metadata does not indicate support for ecdaa attestations");
           }
-          boolean chainValid = false;
-          JsonArray attestationRootCertificates = statement.getJsonArray("attestationRootCertificates");
-          for (int i = 0; i < attestationRootCertificates.size(); i++) {
-            try {
-              // add the metadata root certificate
-              certChain.add(JWS.parseX5c(attestationRootCertificates.getString(i)));
-              CertificateHelper.checkValidity(certChain);
-              chainValid = true;
-              break;
-            } catch (CertificateException e) {
-              // remove the previously added certificate
-              certChain.remove(certChain.size() - 1);
-              // continue
-            }
-          }
-          if (!chainValid) {
-            throw new AttestationException("Certificate Chain with metadata invalid");
-          }
-          // TODO: check the public key algorithm against metadata
         } else {
+          // no statement found, assume the chain is complete
           CertificateHelper.checkValidity(certChain);
         }
 
@@ -166,25 +151,32 @@ public class PackedAttestation implements Attestation {
 
       } else if (attStmt.containsKey("ecdaaKeyId")) {
         // If available, validate attestation alg and x5c with info in the metadata statement
-        JsonObject statement = metadata.getStatement(authData.getAaguidString());
+        JsonObject statement = metadata.verifyMetadata(
+          authData.getAaguidString(),
+          PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+          null);
+
         if (statement != null) {
           // The presence of x5c means this is a full attestation. Check to see if attestationTypes
           // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(Metadata.BASIC_ECDAA)) {
+          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION__ECDAA)) {
             throw new AttestationException("Metadata does not indicate support for ecdaa attestations");
           }
         }
         throw new AttestationException("ECDAA IS NOT SUPPORTED YET!");
       } else {
         // If available, validate attestation alg and x5c with info in the metadata statement
-        JsonObject statement = metadata.getStatement(authData.getAaguidString());
+        JsonObject statement = metadata.verifyMetadata(
+          authData.getAaguidString(),
+          PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+          null);
+
         if (statement != null) {
           // The presence of x5c means this is a full attestation. Check to see if attestationTypes
           // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(Metadata.BASIC_SURROGATE)) {
+          if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION_BASIC_SURROGATE)) {
             throw new AttestationException("Metadata does not indicate support for full attestations");
           }
-          // TODO: check the public key algorithm against metadata
         }
 
         // Self attestation is simple proof of key ownership,

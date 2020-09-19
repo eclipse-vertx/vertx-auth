@@ -370,6 +370,13 @@ public class TPMAttestation implements Attestation {
           throw new AttestationException("Certificate id-fido-gen-ce-aaguid extension does not match authData");
         }
       }
+
+      // If available, validate attestation alg and x5c with info in the metadata statement
+      metadata.verifyMetadata(
+        authData.getAaguidString(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        x5c);
+
       // 9. Verify signature over certInfo with the public key extracted from AIK certificate.
       verifySignature(
         PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
@@ -377,7 +384,7 @@ public class TPMAttestation implements Attestation {
         attStmt.getBinary("sig"),
         attStmt.getBinary("certInfo"));
 
-    } catch (NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException e) {
+    } catch (NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }
   }

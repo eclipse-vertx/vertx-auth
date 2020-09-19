@@ -63,7 +63,7 @@ public class AndroidKeyAttestation implements Attestation {
       "BBYEFMit6XdMRcOjzw0WEOR5QzohWjDPMB8GA1UdIwQYMBaAFMit6XdMRcOjzw0W" +
       "EOR5QzohWjDPMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgKEMAoGCCqG" +
       "SM49BAMCA0cAMEQCIDUho++LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBN" +
-      "C/NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw==";
+      "C/NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw";
 
   @Override
   public String fmt() {
@@ -108,12 +108,6 @@ public class AndroidKeyAttestation implements Attestation {
       CertificateHelper.checkValidity(certChain);
 
       final X509Certificate leafCert = certChain.get(0);
-      // verify the signature
-      verifySignature(
-        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
-        leafCert,
-        signature,
-        signatureBase);
 
       // Verifying attestation certificate
       // 1. Check that authData publicKey matches the public key in the attestation certificate
@@ -161,11 +155,24 @@ public class AndroidKeyAttestation implements Attestation {
           }
         }
       }
-      // 5. Check that root certificate(last in the chain) is set to the root certificate
-      // Google does not publish this certificate, so this was extracted from one of the attestations.
-      if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
-        throw new AttestationException("Root certificate is invalid!");
-      }
+//      // 5. Check that root certificate(last in the chain) is set to the root certificate
+//      // Google does not publish this certificate, so this was extracted from one of the attestations.
+//      if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
+//        throw new AttestationException("Root certificate is invalid!");
+//      }
+
+      // meta data check
+      metadata.verifyMetadata(
+        authData.getAaguidString(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        certChain);
+
+      // verify the signature
+      verifySignature(
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        leafCert,
+        signature,
+        signatureBase);
 
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

@@ -34,7 +34,7 @@ public enum PublicKeyCredential {
   RS384(-258),
   RS512(-259),
   RS1(-65535),
-  // EdDSA(-8)
+  EdDSA(-8)
   ;
 
   private final int coseId;
@@ -67,6 +67,8 @@ public enum PublicKeyCredential {
         return RS512;
       case -65535:
         return RS1;
+      case -8:
+        return EdDSA;
       default:
         throw new IllegalArgumentException("Unknown cose-id: " + coseId);
     }

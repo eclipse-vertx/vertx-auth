@@ -142,30 +142,12 @@ public class AndroidSafetynetAttestation implements Attestation {
       }
 
       // If available, validate attestation alg and x5c with info in the metadata statement
-      JsonObject statement = metadata.getStatement(authData.getAaguidString());
-      if (statement != null) {
-        // Using MDS or Metadata Statements, for each attestationRoot in attestationRootCertificates:
-        // append attestation root to the end of the header.x5c, and try verifying certificate chain.
-        // If none succeed, throw an error
-        boolean chainValid = false;
-        JsonArray attestationRootCertificates = statement.getJsonArray("attestationRootCertificates");
-        for (int i = 0; i < attestationRootCertificates.size(); i++) {
-          try {
-            // add the metadata root certificate
-            certChain.add(JWS.parseX5c(attestationRootCertificates.getString(i)));
-            CertificateHelper.checkValidity(certChain);
-            chainValid = true;
-            break;
-          } catch (CertificateException e) {
-            // remove the previously added certificate
-            certChain.remove(certChain.size() - 1);
-            // continue
-          }
-        }
-        if (!chainValid) {
-          throw new AttestationException("Certificate Chain with metadata invalid");
-        }
-      } else {
+      JsonObject statement = metadata.verifyMetadata(
+        authData.getAaguidString(),
+        PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")),
+        certChain);
+
+      if (statement == null) {
         // 3. Use the “GlobalSign Root CA — R2” from Google PKI directory.
         // Attach it to the end of header.x5c and try to verify it
         certChain.add(JWS.parseX5c(ANDROID_SAFETYNET_ROOT));
