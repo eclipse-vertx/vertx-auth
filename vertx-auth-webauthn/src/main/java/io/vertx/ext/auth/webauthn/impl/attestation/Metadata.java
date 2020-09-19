@@ -40,12 +40,6 @@ public class Metadata {
   public Metadata(Vertx vertx) {
     store = vertx.sharedData()
       .getLocalMap(Metadata.class.getName());
-
-    FileSystem fs = vertx.fileSystem();
-
-    for (String f : fs.readDirBlocking("metadataStatements")) {
-      loadMetadata(new JsonObject(fs.readFileBlocking(f)));
-    }
   }
 
   public JsonObject getStatement(String aaguid) throws AttestationException {
