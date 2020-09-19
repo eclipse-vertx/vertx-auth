@@ -135,11 +135,6 @@ public class TPMAttestation implements Attestation {
         throw new AttestationException("expected TPM version 2.0");
       }
 
-//      final JsonObject statement = metadata.verifyMetadata(
-//        authData.getAaguidString(),
-//        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
-//        null);
-
       // 2. Parse "pubArea".
       PubArea pubArea = new PubArea(attStmt.getBinary("pubArea"));
       // 3. Verify that the public key specified by the parameters and unique fields of pubArea is

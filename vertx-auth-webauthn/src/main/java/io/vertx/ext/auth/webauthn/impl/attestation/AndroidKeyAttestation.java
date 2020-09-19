@@ -58,12 +58,12 @@ public class AndroidKeyAttestation implements Attestation {
       "EzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxFTAT" +
       "BgNVBAoMDEdvb2dsZSwgSW5jLjEQMA4GA1UECwwHQW5kcm9pZDEzMDEGA1UEAwwq" +
       "QW5kcm9pZCBLZXlzdG9yZSBTb2Z0d2FyZSBBdHRlc3RhdGlvbiBSb290MFkwEwYH" +
-      "KoZIzj0CAQYIKoZIzj0DAQcDQgAE7l1ex+HA220Dpn7mthvsTWpdamguD/9/SQ59" +
-      "dx9EIm29sa/6FsvHrcV30lacqrewLVQBXT5DKyqO107sSHVBpKNjMGEwHQYDVR0O" +
+      "KoZIzj0CAQYIKoZIzj0DAQcDQgAE7l1ex-HA220Dpn7mthvsTWpdamguD_9_SQ59" +
+      "dx9EIm29sa_6FsvHrcV30lacqrewLVQBXT5DKyqO107sSHVBpKNjMGEwHQYDVR0O" +
       "BBYEFMit6XdMRcOjzw0WEOR5QzohWjDPMB8GA1UdIwQYMBaAFMit6XdMRcOjzw0W" +
-      "EOR5QzohWjDPMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgKEMAoGCCqG" +
-      "SM49BAMCA0cAMEQCIDUho++LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBN" +
-      "C/NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw";
+      "EOR5QzohWjDPMA8GA1UdEwEB_wQFMAMBAf8wDgYDVR0PAQH_BAQDAgKEMAoGCCqG" +
+      "SM49BAMCA0cAMEQCIDUho--LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBN" +
+      "C_NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw";
 
   @Override
   public String fmt() {
@@ -104,10 +104,26 @@ public class AndroidKeyAttestation implements Attestation {
       if (certChain.size() == 0) {
         throw new AttestationException("Invalid certificate chain");
       }
-      // validate the chain
-      CertificateHelper.checkValidity(certChain);
 
       final X509Certificate leafCert = certChain.get(0);
+
+      // verify the signature
+      verifySignature(
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        leafCert,
+        signature,
+        signatureBase);
+
+      // meta data check
+      JsonObject statement = metadata.verifyMetadata(
+        authData.getAaguidString(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        certChain);
+
+      if (statement == null) {
+        // validate the chain assuming it's complete
+        CertificateHelper.checkValidity(certChain);
+      }
 
       // Verifying attestation certificate
       // 1. Check that authData publicKey matches the public key in the attestation certificate
@@ -155,25 +171,14 @@ public class AndroidKeyAttestation implements Attestation {
           }
         }
       }
-      // 5. Check that root certificate(last in the chain) is set to the root certificate
-      // Google does not publish this certificate, so this was extracted from one of the attestations.
-      if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
-        System.out.println("android cert: " + attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1));
-        //throw new AttestationException("Root certificate is invalid!");
+
+      if (statement == null) {
+        // 5. Check that root certificate(last in the chain) is set to the root certificate
+        // Google does not publish this certificate, so this was extracted from one of the attestations.
+        if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
+          throw new AttestationException("Root certificate is invalid!");
+        }
       }
-
-      // meta data check
-      metadata.verifyMetadata(
-        authData.getAaguidString(),
-        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
-        certChain);
-
-      // verify the signature
-      verifySignature(
-        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
-        leafCert,
-        signature,
-        signatureBase);
 
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
