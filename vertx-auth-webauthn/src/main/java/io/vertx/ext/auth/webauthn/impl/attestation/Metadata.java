@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class will hold the Fido2 Metadata.
+ * This class will hold the Fido2 Metadata Records.
  */
 public class Metadata {
 
@@ -118,7 +118,19 @@ public class Metadata {
     return store.get(aaguid);
   }
 
-  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+    return verifyMetadata(aaguid, alg, x5c, null, true);
+  }
+
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, boolean includesRoot) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+    return verifyMetadata(aaguid, alg, x5c, null, includesRoot);
+  }
+
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+    return verifyMetadata(aaguid, alg, x5c, rootCert, true);
+  }
+
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert, boolean includesRoot) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     // If available, validate attestation alg and x5c with info in the metadata statement
     JsonObject statement = getStatement(aaguid);
     if (statement != null) {
@@ -134,24 +146,42 @@ public class Metadata {
         // Using MDS or Metadata Statements, for each attestationRoot in attestationRootCertificates:
         // append attestation root to the end of the header.x5c, and try verifying certificate chain.
         // If none succeed, throw an error
-        boolean chainValid = false;
         JsonArray attestationRootCertificates = statement.getJsonArray("attestationRootCertificates");
-        for (int i = 0; i < attestationRootCertificates.size(); i++) {
-          try {
-            // add the metadata root certificate
-            x5c.add(JWS.parseX5c(attestationRootCertificates.getString(i)));
-            CertificateHelper.checkValidity(x5c);
-            chainValid = true;
-            break;
-          } catch (CertificateException e) {
-            // remove the previously added certificate
-            x5c.remove(x5c.size() - 1);
-            // continue
+
+        if (attestationRootCertificates == null || attestationRootCertificates.size() == 0) {
+          if (rootCert != null) {
+            x5c.add(rootCert);
+          }
+          CertificateHelper.checkValidity(x5c, includesRoot);
+        } else {
+          boolean chainValid = false;
+          for (int i = 0; i < attestationRootCertificates.size(); i++) {
+            try {
+              // add the metadata root certificate
+              x5c.add(JWS.parseX5c(attestationRootCertificates.getString(i)));
+              CertificateHelper.checkValidity(x5c);
+              chainValid = true;
+              break;
+            } catch (CertificateException e) {
+              // remove the previously added certificate
+              x5c.remove(x5c.size() - 1);
+              // continue
+            }
+          }
+          if (!chainValid) {
+            throw new AttestationException("Certificate Chain not valid for metadata");
           }
         }
-        if (!chainValid) {
-          throw new AttestationException("Certificate Chain not valid for metadata");
+      }
+    } else {
+      if (x5c != null) {
+        // make a copy before we start
+        x5c = new ArrayList<>(x5c);
+
+        if (rootCert != null) {
+          x5c.add(rootCert);
         }
+        CertificateHelper.checkValidity(x5c, includesRoot);
       }
     }
 

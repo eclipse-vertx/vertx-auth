@@ -376,7 +376,8 @@ public class TPMAttestation implements Attestation {
       metadata.verifyMetadata(
         authData.getAaguidString(),
         PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
-        x5c);
+        x5c,
+        false);
 
       // 9. Verify signature over certInfo with the public key extracted from AIK certificate.
       verifySignature(

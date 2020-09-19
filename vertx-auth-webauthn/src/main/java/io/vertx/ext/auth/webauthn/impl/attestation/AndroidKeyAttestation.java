@@ -17,14 +17,15 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.security.*;
 import java.security.cert.*;
+import java.util.Collections;
 import java.util.List;
 
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
@@ -64,6 +65,8 @@ public class AndroidKeyAttestation implements Attestation {
       "EOR5QzohWjDPMA8GA1UdEwEB_wQFMAMBAf8wDgYDVR0PAQH_BAQDAgKEMAoGCCqG" +
       "SM49BAMCA0cAMEQCIDUho--LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBN" +
       "C_NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw";
+
+  private static final JsonArray EMPTY = new JsonArray(Collections.emptyList());
 
   @Override
   public String fmt() {
@@ -120,11 +123,6 @@ public class AndroidKeyAttestation implements Attestation {
         PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
         certChain);
 
-      if (statement == null) {
-        // validate the chain assuming it's complete
-        CertificateHelper.checkValidity(certChain);
-      }
-
       // Verifying attestation certificate
       // 1. Check that authData publicKey matches the public key in the attestation certificate
       JWK coseKey = authData.getCredentialJWK();
@@ -172,7 +170,7 @@ public class AndroidKeyAttestation implements Attestation {
         }
       }
 
-      if (statement == null) {
+      if (statement == null || statement.getJsonArray("attestationRootCertificates", EMPTY).size() == 0) {
         // 5. Check that root certificate(last in the chain) is set to the root certificate
         // Google does not publish this certificate, so this was extracted from one of the attestations.
         if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {

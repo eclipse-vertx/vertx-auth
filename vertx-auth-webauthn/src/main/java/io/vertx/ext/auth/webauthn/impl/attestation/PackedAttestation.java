@@ -130,9 +130,6 @@ public class PackedAttestation implements Attestation {
           if (!statement.getJsonArray("attestationTypes").contains(Metadata.ATTESTATION_BASIC_FULL)) {
             throw new AttestationException("Metadata does not indicate support for full attestations");
           }
-        } else {
-          // no statement found, assume the chain is complete
-          CertificateHelper.checkValidity(certChain);
         }
 
         // Verify the attestation:
