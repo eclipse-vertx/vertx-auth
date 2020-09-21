@@ -4,6 +4,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -78,7 +79,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
           try {
             JsonObject expectedRequest = config;
 
-            assertEquals(expectedRequest, queryToJSON(buffer.toString()));
+            assertEquals(expectedRequest, SimpleHttpClient.queryToJson(buffer));
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }
@@ -89,7 +90,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
           //Revoke does not pass auth details
           JsonObject expectedRequest = removeAuthDetails(config);
           try {
-            assertEquals(expectedRequest, queryToJSON(buffer.toString()));
+            assertEquals(expectedRequest, SimpleHttpClient.queryToJson(buffer));
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }
@@ -98,7 +99,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       } else if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, queryToJSON(buffer.toString()));
+            assertEquals(config, SimpleHttpClient.queryToJson(buffer));
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }

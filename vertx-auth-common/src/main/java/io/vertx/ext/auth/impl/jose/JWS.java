@@ -104,7 +104,7 @@ public final class JWS {
   public static boolean verifySignature(String alg, X509Certificate certificate, byte[] signature, byte[] data) throws InvalidKeyException, SignatureException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
 
     if (alg == null || certificate == null || signature == null || data == null) {
-      throw new SignatureException("Cannot validate signature one of {alg, certificate, signature, data} is null");
+      throw new SignatureException("Cannot validate signature, one of {alg, certificate, signature, data} is null");
     }
 
     switch (alg) {

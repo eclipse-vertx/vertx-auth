@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.auth.JWTOptions;
@@ -14,8 +15,6 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
-
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 
 public class Oauth2TokenScopeTest extends VertxTestBase {
 
@@ -57,7 +56,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
           req.setExpectMultipart(true).bodyHandler(buffer -> {
             try {
-              JsonObject body = queryToJSON(buffer.toString());
+              JsonObject body = SimpleHttpClient.queryToJson(buffer);
               assertEquals(config.getString("token"), body.getString("token"));
               // conditional test for token_type_hint
               if (config.containsKey("token_type_hint")) {

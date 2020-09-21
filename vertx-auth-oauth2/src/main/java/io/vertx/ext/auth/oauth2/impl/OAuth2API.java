@@ -21,16 +21,14 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +146,7 @@ public class OAuth2API {
     final String path = config.getAuthorizationPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
-    return url + '?' + stringify(query);
+    return url + '?' + SimpleHttpClient.jsonToQuery(query).toString();
   }
 
   /**
@@ -190,7 +188,7 @@ public class OAuth2API {
     }
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
+    final Buffer payload = SimpleHttpClient.jsonToQuery(form);
 
     // specify preferred accepted content type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
@@ -224,7 +222,7 @@ public class OAuth2API {
           }
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
-            json = queryToJSON(reply.body().toString());
+            json = SimpleHttpClient.queryToJson(reply.body());
           } catch (UnsupportedEncodingException | RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -273,7 +271,7 @@ public class OAuth2API {
       .put("token_type_hint", tokenType);
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
+    final Buffer payload = SimpleHttpClient.jsonToQuery(form);
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
@@ -306,7 +304,7 @@ public class OAuth2API {
           }
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
-            json = queryToJSON(reply.body().toString());
+            json = SimpleHttpClient.queryToJson(reply.body());
           } catch (UnsupportedEncodingException | RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -361,7 +359,7 @@ public class OAuth2API {
       .put("token_type_hint", tokenType);
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
+    final Buffer payload = SimpleHttpClient.jsonToQuery(form);
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
@@ -403,7 +401,7 @@ public class OAuth2API {
     }
 
     if (extraParams != null) {
-      path += "?" + stringify(extraParams);
+      path += "?" + SimpleHttpClient.jsonToQuery(extraParams).toString();
     }
 
     headers.put("Authorization", "Bearer " + accessToken);
@@ -436,7 +434,7 @@ public class OAuth2API {
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
             // attempt to convert url encoded string to json
-            userInfo = queryToJSON(reply.body().toString());
+            userInfo = SimpleHttpClient.queryToJson(reply.body());
           } catch (RuntimeException | UnsupportedEncodingException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -472,7 +470,7 @@ public class OAuth2API {
 
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
-    return url + '?' + stringify(query);
+    return url + '?' + SimpleHttpClient.jsonToQuery(query).toString();
   }
 
   /**
@@ -504,7 +502,7 @@ public class OAuth2API {
     }
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = Buffer.buffer(stringify(form));
+    final Buffer payload = SimpleHttpClient.jsonToQuery(form);
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
@@ -578,7 +576,7 @@ public class OAuth2API {
     makeRequest(options, payload, callback);
   }
 
-  public void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<OAuth2Response>> callback) {
+  private void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<OAuth2Response>> callback) {
     client.request(options, request -> {
       if (request.failed()) {
         callback.handle(Future.failedFuture(request.cause()));
@@ -621,60 +619,6 @@ public class OAuth2API {
         req.send(resultHandler);
       }
     });
-  }
-
-  public static String stringify(JsonObject json) {
-    StringBuilder sb = new StringBuilder();
-    try {
-      for (Map.Entry<String, ?> kv : json) {
-        sb.append(URLEncoder.encode(kv.getKey(), "UTF-8"));
-        sb.append('=');
-        Object v = kv.getValue();
-        if (v != null) {
-          sb.append(URLEncoder.encode(v.toString(), "UTF-8"));
-        }
-        sb.append('&');
-      }
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
-
-    // exclude the last amp
-    if (sb.length() > 0) {
-      sb.setLength(sb.length() - 1);
-    }
-
-    return sb.toString();
-  }
-
-  public static JsonObject queryToJSON(String query) throws UnsupportedEncodingException {
-    final JsonObject json = new JsonObject();
-    final String[] pairs = query.split("&");
-    for (String pair : pairs) {
-      final int idx = pair.indexOf("=");
-      final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
-      final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
-      if (!json.containsKey(key)) {
-        json.put(key, value);
-      } else {
-        Object oldValue = json.getValue(key);
-        JsonArray array;
-        if (oldValue instanceof JsonArray) {
-          array = (JsonArray) oldValue;
-        } else {
-          array = new JsonArray();
-          array.add(oldValue);
-          json.put(key, array);
-        }
-        if (value == null) {
-          array.addNull();
-        } else {
-          array.add(value);
-        }
-      }
-    }
-
-    return json;
   }
 
   public static void processNonStandardHeaders(JsonObject json, OAuth2Response reply, String sep) {

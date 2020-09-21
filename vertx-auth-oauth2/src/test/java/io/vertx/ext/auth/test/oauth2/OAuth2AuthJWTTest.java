@@ -4,6 +4,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
 import io.vertx.test.core.VertxTestBase;
@@ -11,8 +12,6 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
-
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 
 public class OAuth2AuthJWTTest extends VertxTestBase {
 
@@ -48,7 +47,7 @@ public class OAuth2AuthJWTTest extends VertxTestBase {
       if (req.method() == HttpMethod.POST && "/oauth2/v4/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            JsonObject payload = queryToJSON(buffer.toString());
+            JsonObject payload = SimpleHttpClient.queryToJson(buffer);
             assertEquals("urn:ietf:params:oauth:grant-type:jwt-bearer", payload.getString("grant_type"));
             assertNotNull(payload.getValue("assertion"));
           } catch (UnsupportedEncodingException e) {

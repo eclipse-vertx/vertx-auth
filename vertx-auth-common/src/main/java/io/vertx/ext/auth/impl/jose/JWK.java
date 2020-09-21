@@ -63,6 +63,7 @@ public final class JWK implements Crypto {
   private final String kid;
   private final String alg;
   private final String kty;
+  private final int use;
 
   // the label is a synthetic id that allows comparing 2 keys
   // that are expected to replace each other but are not necessarely
@@ -79,14 +80,10 @@ public final class JWK implements Crypto {
   // if a key is marked as symmetric it can be used interchangeably
   private final boolean symmetric;
 
-  // verify/sign mode
-  private final int use;
-
   // the cryptography objects, not all will be initialized
   private PrivateKey privateKey;
   private PublicKey publicKey;
   private Signature signature;
-  private Cipher cipher;
   private Mac mac;
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
@@ -489,33 +486,31 @@ public final class JWK implements Crypto {
     }
   }
 
-  private int createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException, SignatureException {
+  private int createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, InvalidAlgorithmParameterException {
     int use = 0;
 
     // public key
     if (jsonHasProperties(json, "n", "e")) {
-      final BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("n")));
-      final BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("e")));
+      final BigInteger n = new BigInteger(1, json.getBinary("n"));
+      final BigInteger e = new BigInteger(1, json.getBinary("e"));
       publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
       if ((use & USE_ENC) == 0) {
         use += USE_ENC;
       }
-    }
 
-    // private key
-    if (jsonHasProperties(json, "n", "e", "d", "p", "q", "dp", "dq", "qi")) {
-      final BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("n")));
-      final BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("e")));
-      final BigInteger d = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("d")));
-      final BigInteger p = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("p")));
-      final BigInteger q = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("q")));
-      final BigInteger dp = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("dp")));
-      final BigInteger dq = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("dq")));
-      final BigInteger qi = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("qi")));
+      // private key
+      if (jsonHasProperties(json, "d", "p", "q", "dp", "dq", "qi")) {
+        final BigInteger d = new BigInteger(1, json.getBinary("d"));
+        final BigInteger p = new BigInteger(1, json.getBinary("p"));
+        final BigInteger q = new BigInteger(1, json.getBinary("q"));
+        final BigInteger dp = new BigInteger(1, json.getBinary("dp"));
+        final BigInteger dq = new BigInteger(1, json.getBinary("dq"));
+        final BigInteger qi = new BigInteger(1, json.getBinary("qi"));
 
-      privateKey = KeyFactory.getInstance("RSA").generatePrivate(new RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, qi));
-      if ((use & USE_SIG) == 0) {
-        use += USE_SIG;
+        privateKey = KeyFactory.getInstance("RSA").generatePrivate(new RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, qi));
+        if ((use & USE_SIG) == 0) {
+          use += USE_SIG;
+        }
       }
     }
 
@@ -542,25 +537,15 @@ public final class JWK implements Crypto {
 
     switch (json.getString("use", "sig")) {
       case "sig":
-        try {
-          // use default
-          signature = JWS.getSignature(alg);
-          if (json.containsKey("use")) {
-            if ((use & USE_SIG) == 0) {
-              use += USE_SIG;
-            }
-          }
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-          // error
-          throw new RuntimeException(e);
+        // use default
+        signature = JWS.getSignature(alg);
+        if ((use & USE_SIG) == 0) {
+          use += USE_SIG;
         }
         break;
       case "enc":
-        cipher = Cipher.getInstance("RSA");
-        if (json.containsKey("use")) {
-          if ((use & USE_ENC) == 0) {
-            use += USE_ENC;
-          }
+        if ((use & USE_ENC) == 0) {
+          use += USE_ENC;
         }
     }
 
@@ -570,44 +555,37 @@ public final class JWK implements Crypto {
   private int createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
     int use = 0;
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
-    parameters.init(new ECGenParameterSpec(translate(json.getString("crv"))));
+    parameters.init(new ECGenParameterSpec(translateECCrv(json.getString("crv"))));
 
     // public key
     if (jsonHasProperties(json, "x", "y")) {
-      final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
-      final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
+      final BigInteger x = new BigInteger(1, json.getBinary("x"));
+      final BigInteger y = new BigInteger(1, json.getBinary("y"));
       publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(new ECPoint(x, y), parameters.getParameterSpec(ECParameterSpec.class)));
       if ((use & USE_ENC) == 0) {
         use += USE_ENC;
       }
-    }
 
-    // private key
-    if (jsonHasProperties(json, "x", "y", "d")) {
-      final BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("x")));
-      final BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("y")));
-      final BigInteger d = new BigInteger(1, Base64.getUrlDecoder().decode(json.getString("d")));
-      privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
-      if ((use & USE_SIG) == 0) {
-        use += USE_SIG;
+      // private key
+      if (jsonHasProperties(json, "d")) {
+        final BigInteger d = new BigInteger(1, json.getBinary("d"));
+        privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
+        if ((use & USE_SIG) == 0) {
+          use += USE_SIG;
+        }
       }
     }
 
     switch (json.getString("use", "sig")) {
       case "sig":
         signature = JWS.getSignature(alg);
-        if (json.containsKey("use")) {
-          if ((use & USE_SIG) == 0) {
-            use += USE_SIG;
-          }
+        if ((use & USE_SIG) == 0) {
+          use += USE_SIG;
         }
         break;
       case "enc":
-        cipher = Cipher.getInstance("EC");
-        if (json.containsKey("use")) {
-          if ((use & USE_ENC) == 0) {
-            use += USE_ENC;
-          }
+        if ((use & USE_ENC) == 0) {
+          use += USE_ENC;
         }
         break;
     }
@@ -627,44 +605,6 @@ public final class JWK implements Crypto {
 
   public String getId() {
     return kid;
-  }
-
-  public Key unwrap() {
-    if (privateKey != null) {
-      return privateKey;
-    }
-    if (publicKey != null) {
-      return publicKey;
-    }
-    return null;
-  }
-
-  public synchronized byte[] encrypt(byte[] payload) {
-    if (cipher == null) {
-      throw new RuntimeException("Key use is not 'enc'");
-    }
-
-    try {
-      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-      cipher.update(payload);
-      return cipher.doFinal();
-    } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public synchronized byte[] decrypt(byte[] payload) {
-    if (cipher == null) {
-      throw new RuntimeException("Key use is not 'enc'");
-    }
-
-    try {
-      cipher.init(Cipher.DECRYPT_MODE, privateKey);
-      cipher.update(payload);
-      return cipher.doFinal();
-    } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -732,7 +672,7 @@ public final class JWK implements Crypto {
     }
   }
 
-  private static String translate(String crv) {
+  private static String translateECCrv(String crv) {
     switch (crv) {
       case "P-256":
         return "secp256r1";
@@ -778,11 +718,15 @@ public final class JWK implements Crypto {
     return signature;
   }
 
-  public Cipher getCipher() {
-    return cipher;
-  }
-
   public Mac getMac() {
     return mac;
+  }
+
+  public PublicKey getPublicKey() {
+    return publicKey;
+  }
+
+  public PrivateKey getPrivateKey() {
+    return privateKey;
   }
 }

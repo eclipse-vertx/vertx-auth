@@ -3,6 +3,7 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -11,8 +12,6 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
-
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.queryToJSON;
 
 public class OAuth2AuthCodeErrorTest extends VertxTestBase {
 
@@ -57,7 +56,7 @@ public class OAuth2AuthCodeErrorTest extends VertxTestBase {
         assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, queryToJSON(buffer.toString()));
+            assertEquals(config, SimpleHttpClient.queryToJson(buffer));
           } catch (UnsupportedEncodingException e) {
             fail(e);
           }

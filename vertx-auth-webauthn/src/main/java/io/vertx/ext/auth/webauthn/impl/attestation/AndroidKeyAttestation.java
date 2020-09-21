@@ -126,7 +126,7 @@ public class AndroidKeyAttestation implements Attestation {
       // Verifying attestation certificate
       // 1. Check that authData publicKey matches the public key in the attestation certificate
       JWK coseKey = authData.getCredentialJWK();
-      if (!leafCert.getPublicKey().equals(coseKey.unwrap())) {
+      if (!leafCert.getPublicKey().equals(coseKey.getPublicKey())) {
         throw new AttestationException("Certificate public key does not match public key in authData!");
       }
       // 2. Find Android KeyStore Extension with OID “1.3.6.1.4.1.11129.2.1.17” in certificate extensions.
