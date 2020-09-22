@@ -152,7 +152,10 @@ public class JWTTest {
   @Test
   public void testPSS() {
     String version = System.getProperty("java.version");
-    version = version.substring(0, version.indexOf('.'));
+    int firstDot = version.indexOf('.');
+    if (firstDot != -1) {
+      version = version.substring(0, firstDot);
+    }
 
     // RSASSA-PSS is only available on >=11
     Assume.assumeTrue(Integer.parseInt(version) >= 11);
@@ -198,7 +201,7 @@ public class JWTTest {
 
   @Test
   public void testJWTWithX5c() {
-    JWT jwt = new JWT();
+    JWT jwt = new JWT().allowEmbeddedKey(true);
 
     Buffer buffer = rule.vertx().fileSystem().readFileBlocking("toc.jwt");
 

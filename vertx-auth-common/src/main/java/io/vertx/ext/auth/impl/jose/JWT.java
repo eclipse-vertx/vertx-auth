@@ -53,6 +53,8 @@ public final class JWT {
   private static final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
   private static final Base64.Decoder decoder = Base64.getDecoder();
 
+  private boolean allowEmbeddedKey = false;
+
   // keep 2 maps (1 for encode, 1 for decode)
   private final Map<String, List<Crypto>> SIGN = new ConcurrentHashMap<>();
   private final Map<String, List<Crypto>> VERIFY = new ConcurrentHashMap<>();
@@ -87,6 +89,24 @@ public final class JWT {
       throw new IllegalStateException("unknown JWK use: " + jwk.getUse());
     }
 
+    return this;
+  }
+
+  /**
+   * Enable/Disable support for embedded keys. Default {@code false}.
+   *
+   * By default this is disabled as it could be used as an attack vector to the application. A malicious user could
+   * generate a self signed certificate and embed the public certificate on the token, which would always pass the
+   * validation.
+   *
+   * Users of this feature should regardless of the validation status, ensure that the chain is valid by adding a
+   * well known root certificate (that has been previously agreed with the server).
+   *
+   * @param allowEmbeddedKey when true embedded keys are used to check the signature.
+   * @return fluent self.
+   */
+  public JWT allowEmbeddedKey(boolean allowEmbeddedKey) {
+    this.allowEmbeddedKey = allowEmbeddedKey;
     return this;
   }
 
@@ -155,18 +175,16 @@ public final class JWT {
     JsonObject header = new JsonObject(Buffer.buffer(base64urlDecode(headerSeg)));
 
     final boolean unsecure = isUnsecure();
-    final boolean x5c = header.containsKey("x5c");
-
     if (unsecure) {
       // if there isn't a certificate chain in the header, we are dealing with a strictly
       // unsecure mode validation. In this case the number of segments must be 2
       // if there is a certificate chain, we allow it to proceed and later we will assert
       // against this chain
-      if (!x5c && segments.length != 2) {
+      if (!allowEmbeddedKey && segments.length != 2) {
         throw new IllegalStateException("JWT is in unsecured mode but token is signed.");
       }
     } else {
-      if (segments.length != 3) {
+      if (!allowEmbeddedKey && segments.length != 3) {
         throw new IllegalStateException("JWT is in secure mode but token is not signed.");
       }
     }
@@ -180,8 +198,8 @@ public final class JWT {
       throw new IllegalStateException("Algorithm \"none\" not allowed");
     }
 
-    // handle the x5c case, only in unsecure mode
-    if (unsecure && x5c) {
+    // handle the x5c case, only in allowEmbeddedKey mode
+    if (allowEmbeddedKey && header.containsKey("x5c")) {
        // if signatureSeg is null fail
       if (signatureSeg == null) {
         throw new IllegalStateException("missing signature segment");
@@ -225,6 +243,10 @@ public final class JWT {
 
     // verify signature. `sign` will return base64 string.
     if (!unsecure) {
+      // if signatureSeg is null fail
+      if (signatureSeg == null) {
+        throw new IllegalStateException("missing signature segment");
+      }
       byte[] payloadInput = base64urlDecode(signatureSeg);
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
