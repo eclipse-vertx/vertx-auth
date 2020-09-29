@@ -1,4 +1,4 @@
-== The WebAuthn auth provider
+= WebAuthn auth provider
 
 This component contains an out of the box a WebAuthn implementation. To use this project, add the following
 dependency to the _dependencies_ section of your build descriptor:
@@ -52,7 +52,7 @@ that you can use iOS FaceID and TouchID for the web by adopting webauthn standar
 WebAuthn is implemented in Edge, Firefox, Chrome, and Safari. Visit https://caniuse.com to check out the current state
 of implementations: https://caniuse.com/#search=webauthn
 
-=== WebAuthn API
+== WebAuthn API
 
 The https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API[Web Authentication API] is an extension of
 the https://developer.mozilla.org/en-US/docs/Web/API/Credential_Management_API[Credential Management API].
@@ -86,7 +86,7 @@ compile 'io.vertx:vertx-auth-webauthn:${maven.version}:client@js'
 The script should be used in cooperation with vertx-web as it handles the API interaction between the web layer and the
 auth code in this library.
 
-=== Registration
+== Registration
 
 Registration is the process of enrolling a new authenticator to the database and associate with the user.
 
@@ -97,7 +97,7 @@ The process takes 2 steps:
 
 If the solution is correct, the new authenticator should be added to the storage and be usable for login purposes.
 
-=== Login
+== Login
 
 Like the registration, login is a 2 step process:
 
@@ -106,7 +106,7 @@ Like the registration, login is a 2 step process:
 
 When the challenge is correctly solved, the user is considered logged in.
 
-=== Device Attestation
+== Device Attestation
 
 When an authenticator registers a new key pair with a service, the authenticator signs the public key with an
 attestation certificate. The attestation certificate is built into the authenticator during manufacturing time and is
@@ -132,32 +132,38 @@ frequently not necessary. When registering an authenticator for a new account, t
 model applies; and when adding an authenticator to an existing account, a user has already been authenticated and has
 established a secure session.
 
-=== A simple example
+== A simple example
 
-==== Create a Registration request
+=== Create a Registration request
 
 [source,$lang]
 ----
 {@link examples.WebAuthNExamples#example1}
 ----
 
-==== Verify the registration request
+=== Verify the registration request
 
 [source,$lang]
 ----
 {@link examples.WebAuthNExamples#example2}
 ----
 
-==== Create a Login request
+=== Create a Login request
 
 [source,$lang]
 ----
 {@link examples.WebAuthNExamples#example3}
 ----
 
-==== Verify the Login request
+=== Verify the Login request
 
 [source,$lang]
 ----
 {@link examples.WebAuthNExamples#example4}
 ----
+
+== Completeness
+
+The current module passes all FIDO2 compliance tests except the use of the yet to be final FIDO2 Metadata Service API.
+This means that we follow the spec but this handler cannot **yet** detect tokens that have been marked as not trustable
+by the token vendor. For example, when a security bug allowed a private key to be extracted from a token.

@@ -1,4 +1,4 @@
-= Vert.x Auth - Authentication and Authorization
+= Common Authentication and Authorization
 
 This Vert.x component provides interfaces for authentication and authorization that can be used from
 your Vert.x applications and can be backed by different providers.
@@ -35,7 +35,7 @@ To support many models and keep things very flexible, all authorization operatio
 {@link io.vertx.ext.auth.authorization.Authorization}.
 
 In some case, an authorization might represent a permission, for example the authorization to access all printers,
-or a specific printer. In others cases, an authorization might be a role (ie: `admin', 'manager', etc.) 
+or a specific printer. In others cases, an authorization might be a role (ie: `admin', 'manager', etc.)
 In order to provide a small set of implementation the following factories
 are available:
 

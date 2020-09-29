@@ -1,4 +1,4 @@
-== The OAuth2 auth provider
+= OAuth2 auth provider
 
 This component contains an out of the box OAuth2 (and to some extent OpenID Connect) relying party implementation.
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
@@ -34,7 +34,7 @@ The same code will work with OpenID Connect https://openid.net/connect/ servers 
 as specified in http://openid.net/specs/openid-connect-discovery-1_0.html .
 
 
-=== Authorization Code Flow
+== Authorization Code Flow
 
 The authorization code grant type is used to obtain both access tokens and refresh tokens and is optimized for
 confidential clients. As a redirection-based flow, the client must be capable of interacting with the resource
@@ -43,7 +43,7 @@ authorization server.
 
 For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1[Oauth2 specification, section 4.1].
 
-=== Password Credentials Flow
+== Password Credentials Flow
 
 The resource owner password credentials grant type is suitable in cases where the resource owner has a trust
 relationship with the client, such as the device operating system or a highly privileged application. The
@@ -56,7 +56,7 @@ schemes such as HTTP Basic or Digest authentication to OAuth by converting the s
 
 For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.3[Oauth2 specification, section 4.3].
 
-=== Client Credentials Flow
+== Client Credentials Flow
 
 The client can request an access token using only its client credentials (or other supported means of authentication)
 when the client is requesting access to the protected resources under its control, or those of another resource owner
@@ -67,15 +67,15 @@ The client credentials grant type MUST only be used by confidential clients.
 
 For more details see http://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.4[Oauth2 specification, section 4.4].
 
-=== JWT (on behalf of) Flow
+== JWT (on behalf of) Flow
 
 The client can request an access token using JWTs also known as "on-behalf-of".
 
-=== Extensions
+== Extensions
 
 The provider supports RFC7523 an extension to allow server to server authorization based on JWT.
 
-=== Getting Started
+== Getting Started
 
 An example on how to use this provider and authenticate with GitHub can be implemented as:
 
@@ -84,7 +84,7 @@ An example on how to use this provider and authenticate with GitHub can be imple
 {@link examples.AuthOAuth2Examples#example1}
 ----
 
-==== Authorization Code flow
+=== Authorization Code flow
 
 The Authorization Code flow is made up from two parts. At first your application asks to the user the permission to
 access their data. If the user approves the OAuth2 server sends to the client an authorization code. In the second
@@ -96,7 +96,7 @@ access token.
 {@link examples.AuthOAuth2Examples#example2}
 ----
 
-==== Password Credentials Flow
+=== Password Credentials Flow
 
 This flow is suitable when the resource owner has a trust relationship with the client, such as its computer
 operating system or a highly privileged application. Use this flow only when other flows are not viable or when you
@@ -107,7 +107,7 @@ need a fast way to test your application.
 {@link examples.AuthOAuth2Examples#example3}
 ----
 
-==== Client Credentials Flow
+=== Client Credentials Flow
 
 This flow is suitable when client is requesting access to the protected resources under its control.
 
@@ -116,7 +116,7 @@ This flow is suitable when client is requesting access to the protected resource
 {@link examples.AuthOAuth2Examples#example4}
 ----
 
-=== OpenID Connect Discovery
+== OpenID Connect Discovery
 
 There is limited support for OpenID Discovery servers. Using OIDC Discovery will simplify the configuration of your
 auth module into a single line of code, for example, consider setting up your auth using Google:
@@ -152,7 +152,7 @@ For these well known providers a shortcut is provided:
 ----
 
 
-=== User object
+== User object
 
 When a token expires we need to refresh it. OAuth2 offers the AccessToken class that add a couple of useful methods
 to refresh the access token when it is expired.
@@ -169,7 +169,7 @@ When you've done with the token or you want to log out, you can revoke the acces
 {@link examples.AuthOAuth2Examples#example6}
 ----
 
-=== Example configuration for common OAuth2 providers
+== Example configuration for common OAuth2 providers
 
 For convenience there are several helpers to assist your with your configuration. Currently we provide:
 
@@ -192,7 +192,7 @@ For convenience there are several helpers to assist your with your configuration
 * IBM Cloud {@link io.vertx.ext.auth.oauth2.providers.IBMCloudAuth}
 * Amazon Cognito {@link io.vertx.ext.auth.oauth2.providers.AmazonCognitoAuth}
 
-==== JBoss Keycloak
+=== JBoss Keycloak
 
 When using this Keycloak the provider has knowledge on how to parse access tokens and extract grants from inside.
 This information is quite valuable since it allows to do authorization at the API level, for example:
@@ -220,12 +220,12 @@ Please remember that Keycloak **does** implement OpenID Connect, so you can conf
 Since you can deploy your Keycloak server anywhere, just replace `server:port` with the correct value and the `your_realm`
 value with your application realm.
 
-==== Google Server to Server
+=== Google Server to Server
 
 The provider also supports Server to Server or the RFC7523 extension. This is a feature present on Google with their
 service account.
 
-=== Token Introspection
+== Token Introspection
 
 Tokens can be introspected in order to assert that they are still valid. Although there is RFC7662 for this purpose
 not many providers implement it. Instead there are variations also known as `TokenInfo` end points. The OAuth2
@@ -240,7 +240,7 @@ the User level:
 {@link examples.AuthOAuth2Examples#example15}
 ----
 
-=== Verifying JWT tokens
+== Verifying JWT tokens
 
 We've just covered how to introspect a token however when dealing with JWT tokens one can reduce the amount of trips
 to the provider server thus enhancing your overall response times. In this case tokens will be verified using the

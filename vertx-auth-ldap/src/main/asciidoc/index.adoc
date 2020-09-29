@@ -1,8 +1,8 @@
-== The LDAP auth provider implementation
+= LDAP Auth provider
 
-This is an auth provider implementation that authenticates via LDAP. 
+This is an auth provider implementation that authenticates via LDAP.
 
-=== Getting started
+== Getting started
 
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
@@ -25,11 +25,11 @@ compile 'io.vertx:vertx-auth-ldap:${maven.version}'
 ----
 
 
-=== Instantiation
+== Instantiation
 
 To create an instance of the Ldap auth provider, use {@link io.vertx.ext.auth.ldap.LdapAuthentication#create(io.vertx.core.Vertx, io.vertx.ext.auth.ldap.LdapAuthenticationOptions)} as follows:
 
-=== Configuration
+== Configuration
 
 The class {@link io.vertx.ext.auth.ldap.LdapAuthenticationOptions} is used to configure the Ldap authentication provider:
 
@@ -44,7 +44,6 @@ An example is `ldap://myldapserver.mycompany.com:10389`
 `referral`:: Sets the LDAP referral behavior when creating a connection.  Defaults to `follow`.  See the Sun/Oracle LDAP
 referral documentation for more: http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html
 
-=== Notes
+== Notes
 
 Note that when authenticating using this implementation, it assumes `username` and `password` fields are present in the authentication info
-

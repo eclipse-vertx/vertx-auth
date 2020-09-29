@@ -1,4 +1,4 @@
-== JDBC Auth Provider implementation
+= JDBC Auth Provider
 
 We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} as well as
 {@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.ext.jdbc.JDBCClient}

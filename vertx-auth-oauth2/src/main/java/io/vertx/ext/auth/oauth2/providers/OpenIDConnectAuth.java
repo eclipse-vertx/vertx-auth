@@ -18,7 +18,6 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.impl.http.SimpleHttpResponse;
@@ -61,12 +60,6 @@ public interface OpenIDConnectAuth {
 
     // the response follows the OpenID Connect provider metadata spec:
     // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
-
-    RequestOptions options = new RequestOptions()
-      .setMethod(HttpMethod.GET)
-      .setAbsoluteURI(config.getSite() + "/.well-known/openid-configuration")
-      .addHeader("Accept", "application/json");
-
     httpClient.fetch(
       HttpMethod.GET,
       config.getSite() + "/.well-known/openid-configuration",

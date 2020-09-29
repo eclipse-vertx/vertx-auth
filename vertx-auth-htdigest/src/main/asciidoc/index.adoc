@@ -1,4 +1,4 @@
-== .htdigest Auth Provider implementation
+= .htdigest Auth Provider
 
 We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the `.digest` file format
 to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
@@ -50,7 +50,7 @@ object which we refer from now on as authentication info:
 
 == Provider internal behavior
 
-The provider will load the specified .htdigest file at start time and will not watch for modifications. If you
+The provider will load the specified `.htdigest` file at start time and will not watch for modifications. If you
 require dynamic reloads, you will need to restart the provider.
 
 The implementation does not have any other state than the digest file itself, this means that validation and

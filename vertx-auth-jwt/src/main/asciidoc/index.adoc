@@ -1,4 +1,4 @@
-== The JWT auth provider
+= JWT Auth provider
 
 This component contains an out of the box a JWT implementation. To use this project, add the following
 dependency to the _dependencies_ section of your build descriptor:
@@ -82,7 +82,6 @@ assume that the secret is: `keyboard cat` then you can configure your Auth as:
 
 In this case the secret is configured as a public key, as it is a token that is known to both parties and you configure
 your PubSec key as being symmetric.
-
 
 ==== Using RSA keys
 

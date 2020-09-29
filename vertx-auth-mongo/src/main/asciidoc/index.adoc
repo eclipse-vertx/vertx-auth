@@ -1,4 +1,4 @@
-== Mongo Auth Provider implementation
+= Mongo Auth Provider
 
 We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the Vert.x {@link io.vertx.ext.mongo.MongoClient}
 to perform authentication and authorisation against a MongoDb.
