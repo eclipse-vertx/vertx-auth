@@ -180,6 +180,7 @@ For convenience there are several helpers to assist your with your configuration
 * Foursquare {@link io.vertx.ext.auth.oauth2.providers.FoursquareAuth}
 * Github {@link io.vertx.ext.auth.oauth2.providers.GithubAuth}
 * Google {@link io.vertx.ext.auth.oauth2.providers.GoogleAuth}
+* GitLab {@link io.vertx.ext.auth.oauth2.providers.GitLabAuth}
 * Instagram {@link io.vertx.ext.auth.oauth2.providers.InstagramAuth}
 * Keycloak {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth}
 * LinkedIn {@link io.vertx.ext.auth.oauth2.providers.LinkedInAuth}
