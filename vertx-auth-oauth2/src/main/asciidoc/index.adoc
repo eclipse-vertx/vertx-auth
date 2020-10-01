@@ -173,24 +173,28 @@ When you've done with the token or you want to log out, you can revoke the acces
 
 For convenience there are several helpers to assist your with your configuration. Currently we provide:
 
+* Amazon Cognito {@link io.vertx.ext.auth.oauth2.providers.AmazonCognitoAuth}
 * Azure Active Directory {@link io.vertx.ext.auth.oauth2.providers.AzureADAuth}
 * Box.com {@link io.vertx.ext.auth.oauth2.providers.BoxAuth}
+* CloudFoundry {@link io.vertx.ext.auth.oauth2.providers.CloudFoundryAuth}
 * Dropbox {@link io.vertx.ext.auth.oauth2.providers.DropboxAuth}
 * Facebook {@link io.vertx.ext.auth.oauth2.providers.FacebookAuth}
 * Foursquare {@link io.vertx.ext.auth.oauth2.providers.FoursquareAuth}
 * Github {@link io.vertx.ext.auth.oauth2.providers.GithubAuth}
 * Google {@link io.vertx.ext.auth.oauth2.providers.GoogleAuth}
+* Heroku {@link io.vertx.ext.auth.oauth2.providers.HerokuAuth}
+* IBM Cloud {@link io.vertx.ext.auth.oauth2.providers.IBMCloudAuth}
 * Instagram {@link io.vertx.ext.auth.oauth2.providers.InstagramAuth}
 * Keycloak {@link io.vertx.ext.auth.oauth2.providers.KeycloakAuth}
 * LinkedIn {@link io.vertx.ext.auth.oauth2.providers.LinkedInAuth}
+* Live.com {@link io.vertx.ext.auth.oauth2.providers.LiveAuth}
 * Mailchimp {@link io.vertx.ext.auth.oauth2.providers.MailchimpAuth}
+* OpenIDConnect {@link io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth}
 * Salesforce {@link io.vertx.ext.auth.oauth2.providers.SalesforceAuth}
 * Shopify {@link io.vertx.ext.auth.oauth2.providers.ShopifyAuth}
 * Soundcloud {@link io.vertx.ext.auth.oauth2.providers.SoundcloudAuth}
 * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
 * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
-* IBM Cloud {@link io.vertx.ext.auth.oauth2.providers.IBMCloudAuth}
-* Amazon Cognito {@link io.vertx.ext.auth.oauth2.providers.AmazonCognitoAuth}
 
 === JBoss Keycloak
 
