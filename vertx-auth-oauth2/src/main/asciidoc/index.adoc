@@ -181,6 +181,7 @@ For convenience there are several helpers to assist your with your configuration
 * Facebook {@link io.vertx.ext.auth.oauth2.providers.FacebookAuth}
 * Foursquare {@link io.vertx.ext.auth.oauth2.providers.FoursquareAuth}
 * Github {@link io.vertx.ext.auth.oauth2.providers.GithubAuth}
+* GitLab {@link io.vertx.ext.auth.oauth2.providers.GitLabAuth}
 * Google {@link io.vertx.ext.auth.oauth2.providers.GoogleAuth}
 * Heroku {@link io.vertx.ext.auth.oauth2.providers.HerokuAuth}
 * IBM Cloud {@link io.vertx.ext.auth.oauth2.providers.IBMCloudAuth}
