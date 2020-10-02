@@ -26,39 +26,53 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 /**
  * Simplified factory to create an {@link OAuth2Auth} for GitLab.com.
  *
- * https://gitlab.com/help/api/oauth2.md
+ * <a href="https://gitlab.com/help/api/oauth2.md">https://gitlab.com/help/api/oauth2.md</a>
  */
 @VertxGen
 public interface GitLabAuth {
 
   /**
-   * Create a OAuth2Auth provider for GitLab
+   * Create a OAuth2Auth provider for GitLab.com.
    *
    * @param clientId the client id given to you by GitLab
    * @param clientSecret the client secret given to you by GitLab
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret) {
-    return create(vertx, clientId, clientSecret, new HttpClientOptions());
+    return create(vertx, "https://gitlab.com", clientId, clientSecret, new HttpClientOptions());
   }
 
   /**
-   * Create a OAuth2Auth provider for GitLab
+   * Create a OAuth2Auth provider for GitLab.
    *
+   * This method allows to specify custom GitLab domain.
+   *
+   * @param site root URL for the provider without trailing slashes, eg. https://gitlab.com
+   * @param clientId the client id given to you by GitLab
+   * @param clientSecret the client secret given to you by GitLab
+   */
+  static OAuth2Auth create(Vertx vertx, String site, String clientId, String clientSecret) {
+    return create(vertx, site, clientId, clientSecret, new HttpClientOptions());
+  }
+
+  /**
+   * Create a OAuth2Auth provider for GitLab.
+   *
+   * @param site root URL for the provider without trailing slashes, eg. https://gitlab.com
    * @param clientId the client id given to you by GitLab
    * @param clientSecret the client secret given to you by GitLab
    * @param httpClientOptions custom http client options
    */
-  static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
+  static OAuth2Auth create(Vertx vertx, String site, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientID(clientId)
         .setClientSecret(clientSecret)
-        .setSite("https://gitlab.com")
+        .setSite(site)
         .setTokenPath("/oauth/token")
         .setAuthorizationPath("/oauth/authorize")
-        .setUserInfoPath("https://gitlab.com/api/v4/user")
+        .setUserInfoPath("/api/v4/user")
         .setScopeSeparator(" ")
         .setHeaders(new JsonObject()
           .put("User-Agent", "vertx-auth-oauth2")));
