@@ -24,25 +24,26 @@ import java.util.Map;
 
 /**
  * Options describing how an JWT KeyStore should behave.
+ * This is an extended version core's {@link io.vertx.core.net.KeyStoreOptions}.
+ *
+ * This extension sets the default type to the runtime keystore type (for compatibility, reasons)
+ * plus it allows the configuration of password per key using {@link #setPasswordProtection(Map)}.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @DataObject(generateConverter = true)
-public class KeyStoreOptions {
+public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
 
   // Defaults
-  private static final String TYPE = KeyStore.getDefaultType();
+  private static final String DEFAULT_TYPE = KeyStore.getDefaultType();
 
-  private String type;
-  private String path;
-  private String password;
   private Map<String, String> passwordProtection;
 
   /**
    * Default constructor
    */
   public KeyStoreOptions() {
-    init();
+    setType(DEFAULT_TYPE);
   }
 
   /**
@@ -51,14 +52,9 @@ public class KeyStoreOptions {
    * @param other the options to copy
    */
   public KeyStoreOptions(KeyStoreOptions other) {
-    type = other.getType();
-    path = other.getPath();
-    password = other.getPassword();
+    super(other);
+    setType(DEFAULT_TYPE);
     passwordProtection = other.getPasswordProtection();
-  }
-
-  private void init() {
-    type = TYPE;
   }
 
   /**
@@ -67,34 +63,24 @@ public class KeyStoreOptions {
    * @param json the JSON
    */
   public KeyStoreOptions(JsonObject json) {
-    init();
     KeyStoreOptionsConverter.fromJson(json, this);
   }
 
-  public String getType() {
-    return type;
-  }
-
+  @Override
   public KeyStoreOptions setType(String type) {
-    this.type = type;
+    super.setType(type);
     return this;
   }
 
-  public String getPath() {
-    return path;
-  }
-
+  @Override
   public KeyStoreOptions setPath(String path) {
-    this.path = path;
+    super.setPath(path);
     return this;
   }
 
-  public String getPassword() {
-    return password;
-  }
-
+  @Override
   public KeyStoreOptions setPassword(String password) {
-    this.password = password;
+    super.setPassword(password);
     return this;
   }
 

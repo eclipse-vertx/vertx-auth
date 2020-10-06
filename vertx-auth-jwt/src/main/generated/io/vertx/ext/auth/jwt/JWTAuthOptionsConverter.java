@@ -31,11 +31,6 @@ public class JWTAuthOptionsConverter {
             obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
-        case "keyStore":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((io.vertx.core.json.JsonObject)member.getValue()));
-          }
-          break;
         case "permissionsClaimKey":
           if (member.getValue() instanceof String) {
             obj.setPermissionsClaimKey((String)member.getValue());
