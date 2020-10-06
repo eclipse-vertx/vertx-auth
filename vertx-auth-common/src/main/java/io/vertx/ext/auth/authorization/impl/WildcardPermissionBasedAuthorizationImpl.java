@@ -22,9 +22,9 @@ import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermissionBasedAuthorization {
 
-  private String permission;
+  private final String permission;
   private VariableAwareExpression resource;
-  private transient WildcardExpression wildcardPermission;
+  private final WildcardExpression wildcardPermission;
 
   public WildcardPermissionBasedAuthorizationImpl(String permission) {
     this.permission = Objects.requireNonNull(permission);
