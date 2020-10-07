@@ -120,6 +120,7 @@ Different devices have different attestation formats. The pre-defined attestatio
 * `Android Key Attestation` - one of the features added in Android O was Android Key Attestation, which enables the Android operating system to attest to keys.
 * `Android SafetyNet` - prior to Android Key Attestation, the only option for Android devices was to create Android SafetyNet attestations
 * `FIDO U2F` - security keys that implement the FIDO U2F standard use this format
+* `Apple` - Verifies the Annonymous Apple device attestation.
 * `none` - browsers may prompt users whether they want a site to be allowed to see their attestation data and/or may remove attestation data from the authenticator's response if the `attestation` parameter in `navigator.credentials.create()` is set to `none`
 
 The purpose of attestation is to cryptographically prove that a newly generated key pair came from a specific device.

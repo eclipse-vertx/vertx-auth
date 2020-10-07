@@ -17,5 +17,6 @@ Device attestation is a verification of the device itself. Currently the followi
 * Android Key
 * Android Safetynet
 * TPM
+* Apple
 
 

@@ -20,6 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWS;
+import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 
 import java.security.*;
@@ -118,6 +119,13 @@ public class AppleAttestation implements Attestation {
       if (!credCert.getPublicKey().equals(authData.getCredentialJWK().getPublicKey())) {
         throw new AttestationException("credCert public key does not equal authData public key");
       }
+
+      // meta data check
+      metadata.verifyMetadata(
+        authData.getAaguidString(),
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        certChain);
+
 
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new AttestationException(e);
