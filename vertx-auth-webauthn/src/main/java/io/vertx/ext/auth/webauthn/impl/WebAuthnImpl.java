@@ -477,7 +477,7 @@ public class WebAuthnImpl implements WebAuthn {
           break;
         case DISCOURAGED:
           if (authData.is(AuthData.USER_VERIFIED) || authData.is(AuthData.USER_PRESENT)) {
-            LOG.warn("User was either verified or present during credentials creation");
+            LOG.info("User was either verified or present during credentials creation");
           }
           break;
       }
@@ -559,7 +559,7 @@ public class WebAuthnImpl implements WebAuthn {
         break;
       case DISCOURAGED:
         if (authData.is(AuthData.USER_VERIFIED) || authData.is(AuthData.USER_PRESENT)) {
-          LOG.warn("User was either verified or present during credentials creation");
+          LOG.info("User was either verified or present during credentials creation");
         }
         break;
     }

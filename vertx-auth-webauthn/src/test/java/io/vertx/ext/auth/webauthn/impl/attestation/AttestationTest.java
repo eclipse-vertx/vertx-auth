@@ -460,6 +460,7 @@ public class AttestationTest {
   }
 
   @Test
+  @Ignore("Certificate expired")
   public void testAppleAttestation2(TestContext should) {
     final Async test = should.async();
 
