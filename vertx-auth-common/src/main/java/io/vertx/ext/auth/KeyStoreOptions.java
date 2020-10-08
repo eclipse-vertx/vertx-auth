@@ -25,18 +25,21 @@ import java.util.Map;
 /**
  * Options describing how an JWT KeyStore should behave.
  * This is an extended version core's {@link io.vertx.core.net.KeyStoreOptions}.
- *
+ * <p>
  * This extension sets the default type to the runtime keystore type (for compatibility, reasons)
  * plus it allows the configuration of password per key using {@link #setPasswordProtection(Map)}.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @DataObject(generateConverter = true)
-public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
+public class KeyStoreOptions {
 
   // Defaults
   private static final String DEFAULT_TYPE = KeyStore.getDefaultType();
 
+  private String type;
+  private String path;
+  private String password;
   private Map<String, String> passwordProtection;
 
   /**
@@ -52,8 +55,10 @@ public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
    * @param other the options to copy
    */
   public KeyStoreOptions(KeyStoreOptions other) {
-    super(other);
     setType(DEFAULT_TYPE);
+    type = other.getType();
+    path = other.getPath();
+    password = other.getPassword();
     passwordProtection = other.getPasswordProtection();
   }
 
@@ -66,21 +71,30 @@ public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
     KeyStoreOptionsConverter.fromJson(json, this);
   }
 
-  @Override
+  public String getType() {
+    return type;
+  }
+
   public KeyStoreOptions setType(String type) {
-    super.setType(type);
+    this.type = type;
     return this;
   }
 
-  @Override
+  public String getPath() {
+    return path;
+  }
+
   public KeyStoreOptions setPath(String path) {
-    super.setPath(path);
+    this.path = path;
     return this;
   }
 
-  @Override
+  public String getPassword() {
+    return password;
+  }
+
   public KeyStoreOptions setPassword(String password) {
-    super.setPassword(password);
+    this.password = password;
     return this;
   }
 

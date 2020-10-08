@@ -34,7 +34,7 @@ import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.net.KeyStoreOptions;
+import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
@@ -78,14 +78,8 @@ public class JWTAuthProviderImpl implements JWTAuth {
           }
         }
         // load all available keys in the keystore
-        if (keyStore instanceof io.vertx.ext.auth.KeyStoreOptions) {
-          for (JWK key : JWK.load(ks, keyStore.getPassword(), ((io.vertx.ext.auth.KeyStoreOptions) keyStore).getPasswordProtection())) {
-            jwt.addJWK(key);
-          }
-        } else {
-          for (JWK key : JWK.load(ks, keyStore.getPassword(), null)) {
-            jwt.addJWK(key);
-          }
+        for (JWK key : JWK.load(ks, keyStore.getPassword(), keyStore.getPasswordProtection())) {
+          jwt.addJWK(key);
         }
       }
       // attempt to load pem keys

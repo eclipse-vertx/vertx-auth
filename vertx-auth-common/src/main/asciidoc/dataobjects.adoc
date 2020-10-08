@@ -49,6 +49,10 @@ The permissions of this token.
 
 ++++
  Options describing how an JWT KeyStore should behave.
+ This is an extended version core's link.
+ <p>
+ This extension sets the default type to the runtime keystore type (for compatibility, reasons)
+ plus it allows the configuration of password per key using link.
 ++++
 '''
 
@@ -60,7 +64,6 @@ The permissions of this token.
 |[[passwordProtection]]`@passwordProtection`|`String`|-
 |[[path]]`@path`|`String`|-
 |[[type]]`@type`|`String`|-
-|[[value]]`@value`|`Buffer`|-
 |===
 
 [[PubSecKeyOptions]]
