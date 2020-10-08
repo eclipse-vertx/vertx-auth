@@ -151,8 +151,8 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
-      assertTrue(res.principal().containsKey("exp"));
-      assertFalse(res.principal().containsKey("iat"));
+      assertTrue(res.attributes().getJsonObject("accessToken").containsKey("exp"));
+      assertFalse(res.attributes().getJsonObject("accessToken").containsKey("iat"));
       testComplete();
     }));
 
@@ -170,7 +170,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     TokenCredentials authInfo = new TokenCredentials(token);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
-      assertTrue(res.principal().containsKey("iat"));
+      assertTrue(res.attributes().getJsonObject("accessToken").containsKey("iat"));
       testComplete();
     }));
     await();

@@ -151,7 +151,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         return;
       }
 
-      resultHandler.handle(Future.succeededFuture(createUser(payload, permissionsClaimKey)));
+      resultHandler.handle(Future.succeededFuture(createUser(authInfo.getToken(), payload, permissionsClaimKey)));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
@@ -178,8 +178,31 @@ public class JWTAuthProviderImpl implements JWTAuth {
   }
 
   @Deprecated
-  private User createUser(JsonObject jwtToken, String permissionsClaimKey) {
-    User result = User.create(jwtToken);
+  private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
+    User result = User.create(new JsonObject().put("access_token", accessToken));
+
+    // update the attributes
+    result.attributes()
+      .put("accessToken", jwtToken);
+
+    try {
+      // re-compute expires at if not present and access token has been successfully decoded from JWT
+      if (!result.attributes().containsKey("exp")) {
+        Long exp = jwtToken.getLong("exp");
+
+        if (exp != null) {
+          result.attributes()
+            .put("exp", exp);
+        }
+      }
+    } catch (ClassCastException e) {
+      // ignore
+    }
+
+    // root claim meta data for JWT AuthZ
+    result.attributes()
+      .put("rootClaim", permissionsClaimKey);
+
     JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
     if (jsonPermissions != null) {
       for (Object item : jsonPermissions) {
@@ -210,5 +233,4 @@ public class JWTAuthProviderImpl implements JWTAuth {
     }
     return null;
   }
-
 }

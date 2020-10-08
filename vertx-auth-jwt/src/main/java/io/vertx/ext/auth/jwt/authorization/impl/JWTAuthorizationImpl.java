@@ -49,14 +49,14 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
 
     if (rootClaim.contains("/")) {
       try {
-        roles = getNestedJsonValue(user.principal(), rootClaim);
+        roles = getNestedJsonValue(user.attributes().getJsonObject("accessToken"), rootClaim);
       } catch (RuntimeException e) {
         handler.handle(Future.failedFuture(e));
         return;
       }
     } else {
       try {
-        roles = user.principal().getJsonArray(rootClaim);
+        roles = user.attributes().getJsonObject("accessToken").getJsonArray(rootClaim);
       } catch (RuntimeException e) {
         handler.handle(Future.failedFuture(e));
         return;

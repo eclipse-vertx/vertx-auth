@@ -43,8 +43,8 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
     final String rootClaim = user.attributes().getString("rootClaim");
     final JsonObject accessToken =
       rootClaim == null ?
-        user.principal() :
-        user.attributes().getJsonObject(rootClaim);
+        user.attributes().getJsonObject("accessToken") :
+        user.attributes().getJsonObject("accessToken").getJsonObject(rootClaim);
 
     if (accessToken == null) {
       handler.handle(Future.failedFuture("User doesn't contain a decoded Token"));
