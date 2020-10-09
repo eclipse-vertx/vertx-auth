@@ -178,7 +178,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
         if (userResult.succeeded()) {
           User propertyUser = userResult.result();
           if (Objects.equals(propertyUser.password, authInfo.getPassword())) {
-            resultHandler.handle(Future.succeededFuture(io.vertx.ext.auth.User.create(new JsonObject().put("username", propertyUser.name))));
+            resultHandler.handle(Future.succeededFuture(io.vertx.ext.auth.User.create("username", propertyUser.name)));
           } else {
             resultHandler.handle(Future.failedFuture("invalid username/password"));
           }

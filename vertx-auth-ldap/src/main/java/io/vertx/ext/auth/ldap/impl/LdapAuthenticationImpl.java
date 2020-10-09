@@ -61,7 +61,7 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
       String ldapPrincipal = getLdapPrincipal(authInfo.getUsername());
       createLdapContext(ldapPrincipal, authInfo.getPassword(), contextResponse -> {
         if (contextResponse.succeeded()) {
-          User user = User.create(new JsonObject().put("username", authInfo.getUsername()));
+          User user = User.create("username", authInfo.getUsername());
           resultHandler.handle(Future.succeededFuture(user));
         } else {
           resultHandler.handle(Future.failedFuture(contextResponse.cause()));

@@ -15,16 +15,6 @@
  */
 package io.vertx.ext.auth.jwt.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.Collections;
-import java.util.List;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -34,17 +24,27 @@ import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
-import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Paulo Lopes
@@ -120,11 +120,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
       final JsonObject payload = jwt.decode(authInfo.getToken());
 
-      if (jwt.isExpired(payload, jwtOptions)) {
-        resultHandler.handle(Future.failedFuture("Expired JWT token."));
-        return;
-      }
-
       if (jwtOptions.getAudience() != null) {
         JsonArray target;
         if (payload.getValue("aud") instanceof String) {
@@ -134,7 +129,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
 
         if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT audient. expected: " + Json.encode(jwtOptions.getAudience())));
+          resultHandler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
           return;
         }
       }
@@ -146,12 +141,21 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
 
-      if(!jwt.isScopeGranted(payload, jwtOptions)) {
+      if (!jwt.isScopeGranted(payload, jwtOptions)) {
         resultHandler.handle(Future.failedFuture("Invalid JWT token: missing required scopes."));
         return;
       }
 
-      resultHandler.handle(Future.succeededFuture(createUser(authInfo.getToken(), payload, permissionsClaimKey)));
+      final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
+
+      if (user.expired(jwtOptions.getLeeway())) {
+        if (!jwtOptions.isIgnoreExpiration()) {
+          resultHandler.handle(Future.failedFuture("Invalid JWT token: missing required scopes."));
+          return;
+        }
+      }
+
+      resultHandler.handle(Future.succeededFuture(user));
 
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
@@ -179,25 +183,14 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   @Deprecated
   private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
-    User result = User.create(new JsonObject().put("access_token", accessToken));
+    User result = User.create("access_token", accessToken);
 
     // update the attributes
     result.attributes()
       .put("accessToken", jwtToken);
 
-    try {
-      // re-compute expires at if not present and access token has been successfully decoded from JWT
-      if (!result.attributes().containsKey("exp")) {
-        Long exp = jwtToken.getLong("exp");
-
-        if (exp != null) {
-          result.attributes()
-            .put("exp", exp);
-        }
-      }
-    } catch (ClassCastException e) {
-      // ignore
-    }
+    // copy the expiration check properties to the root + sub
+    copyProperties(jwtToken, result.attributes(), "exp", "iat", "nbf", "sub");
 
     // root claim meta data for JWT AuthZ
     result.attributes()
@@ -213,6 +206,16 @@ public class JWTAuthProviderImpl implements JWTAuth {
       }
     }
     return result;
+  }
+
+  private static void copyProperties(JsonObject source, JsonObject target, String... keys) {
+    if (source != null && target != null) {
+      for (String key : keys) {
+        if (source.containsKey(key) && !target.containsKey(key)) {
+          target.put(key, source.getValue(key));
+        }
+      }
+    }
   }
 
   private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
