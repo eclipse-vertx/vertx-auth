@@ -13,18 +13,43 @@
 package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Credentials specific to the {@link HtdigestAuth} authentication provider
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- *
  */
 @DataObject(generateConverter = true, publicConverter = false)
 public class HtdigestCredentials implements Credentials {
+
+  private static final Pattern PARSER = Pattern.compile("(\\w+)=[\"]?([^\"]*)[\"]?$");
+  private static final Pattern SPLITTER = Pattern.compile(",(?=(?:[^\"]|\"[^\"]*\")*$)");
+
+  private static final MessageDigest MD5;
+
+  static {
+    try {
+      MD5 = MessageDigest.getInstance("MD5");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static int NC = 0;
+
+  private VertxContextPRNG random;
 
   private String algorithm;
   private String cnonce;
@@ -37,8 +62,55 @@ public class HtdigestCredentials implements Credentials {
   private String response;
   private String uri;
   private String username;
+  private String password;
+  private String path;
 
   public HtdigestCredentials() {
+  }
+
+  public HtdigestCredentials(Vertx vertx, String wwwAuthenticate, String method, String path, String username, String password) {
+
+    this.random = VertxContextPRNG.current(vertx);
+    this.method = method;
+    this.path = path;
+    this.username = username;
+    this.password = password;
+
+    String scheme = wwwAuthenticate.substring(0, 7);
+    if (!"Digest ".equalsIgnoreCase(scheme)) {
+      throw new IllegalArgumentException("WWW-Authenticate scheme is not 'Digest'");
+    }
+
+    final String authenticate = wwwAuthenticate.substring(7);
+
+    // Split the parameters by comma.
+    String[] tokens = SPLITTER.split(authenticate);
+    // Parse parameters.
+    int i = 0;
+    int len = tokens.length;
+
+    while (i < len) {
+      // Strip quotes and whitespace.
+      Matcher m = PARSER.matcher(tokens[i]);
+      if (m.find()) {
+        switch (m.group(1)) {
+          case "nonce":
+            nonce = m.group(2);
+            break;
+          case "opaque":
+            opaque = m.group(2);
+            break;
+          case "qop":
+            qop = m.group(2);
+            break;
+          case "realm":
+            realm = m.group(2);
+            break;
+        }
+      }
+
+      ++i;
+    }
   }
 
   public HtdigestCredentials(JsonObject jsonObject) {
@@ -171,5 +243,82 @@ public class HtdigestCredentials implements Credentials {
   @Override
   public String toString() {
     return toJson().encode();
+  }
+
+  @Override
+  public synchronized String toHttpHeader() {
+    byte[] ha1 = MD5.digest(String.join(":", username, realm, password).getBytes(StandardCharsets.UTF_8));
+    byte[] ha2 = MD5.digest(String.join(":", method, path).getBytes(StandardCharsets.UTF_8));
+
+    String cnonce;
+    String nc;
+
+    if (qop == null || "auth".equals(qop)) {
+      cnonce = random.nextString(8);
+      nc = this.updateNC();
+    } else {
+      throw new IllegalArgumentException(qop + " qop is not supported");
+    }
+
+    // Generate response hash
+    Buffer response = Buffer.buffer()
+      .appendString(bytesToHex(ha1))
+      .appendByte((byte) ':')
+      .appendString(nonce);
+
+    if (qop != null) {
+      response
+        .appendByte((byte) ':')
+        .appendString(nc)
+        .appendByte((byte) ':')
+        .appendString(cnonce);
+    }
+
+
+    response
+      .appendByte((byte) ':')
+      .appendString(qop)
+      .appendByte((byte) ':')
+      .appendString(bytesToHex(ha2));
+
+    Buffer header = Buffer.buffer("Digest ");
+
+    header
+      .appendString("username=").appendString(username)
+      .appendString("realm=").appendString(realm)
+      .appendString("nonce=").appendString(nonce)
+      .appendString("uri=").appendString(path)
+      .appendString("response=").appendString(bytesToHex(response.getBytes()))
+      .appendString("opaque=").appendString(opaque);
+
+    if (qop != null) {
+      header
+        .appendString("qop=").appendString(qop)
+        .appendString("nc=").appendString(nc)
+        .appendString("cnonce=").appendString(cnonce);
+    }
+
+    return header.toString();
+  }
+
+  private final static char[] hexArray = "0123456789abcdef".toCharArray();
+
+  private static String bytesToHex(byte[] bytes) {
+    char[] hexChars = new char[bytes.length * 2];
+    for (int j = 0; j < bytes.length; j++) {
+      int v = bytes[j] & 0xFF;
+      hexChars[j * 2] = hexArray[v >>> 4];
+      hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+    }
+    return new String(hexChars);
+  }
+
+  private String updateNC() {
+    NC++;
+    if (NC > 99999999) {
+      NC = 1;
+    }
+    String nc = Integer.toString(NC);
+    return "00000000".substring(0, 8 - nc.length()) + nc;
   }
 }

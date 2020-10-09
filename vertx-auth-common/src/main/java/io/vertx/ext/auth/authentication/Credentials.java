@@ -44,4 +44,14 @@ public interface Credentials {
    * @return JSON representation of this credential.
    */
   JsonObject toJson();
+
+  /**
+   * Encodes this credential as an HTTP Authorization header.
+   *
+   * @throws UnsupportedOperationException when the the credential object cannot be converted to a HTTP Authorization.
+   * @return HTTP header including scheme.
+   */
+  default String toHttpHeader() throws UnsupportedOperationException {
+    throw new UnsupportedOperationException(getClass().getName() + " cannot be converted to a HTTP Authorization header");
+  }
 }

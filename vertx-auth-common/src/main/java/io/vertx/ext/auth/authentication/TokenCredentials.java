@@ -63,4 +63,9 @@ public class TokenCredentials implements Credentials {
   public String toString() {
     return toJson().encode();
   }
+
+  @Override
+  public String toHttpHeader() {
+    return "Bearer " + token;
+  }
 }

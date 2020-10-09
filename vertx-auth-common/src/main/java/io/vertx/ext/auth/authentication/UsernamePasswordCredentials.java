@@ -15,11 +15,12 @@ package io.vertx.ext.auth.authentication;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Base64;
+
 /**
  * Credentials used by any {@link AuthenticationProvider} that requires tokens, for example JWT, Oauth2, OpenId Connect
  *
  * @author Paulo Lopes
- *
  */
 @DataObject(generateConverter = true, publicConverter = false)
 public class UsernamePasswordCredentials implements Credentials {
@@ -27,7 +28,8 @@ public class UsernamePasswordCredentials implements Credentials {
   private String password;
   private String username;
 
-  protected UsernamePasswordCredentials() {}
+  protected UsernamePasswordCredentials() {
+  }
 
   public UsernamePasswordCredentials(String username, String password) {
     setUsername(username);
@@ -78,4 +80,15 @@ public class UsernamePasswordCredentials implements Credentials {
   public String toString() {
     return toJson().encode();
   }
+
+  @Override
+  public String toHttpHeader() {
+    String credentials =
+      (username == null ? "" : username) +
+        ":" +
+        (password == null ? "" : password);
+
+    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+  }
+
 }
