@@ -84,7 +84,7 @@ public class UsernamePasswordCredentials implements Credentials {
   }
 
   @Override
-  public UsernamePasswordCredentials applyHttpChallenge(String challenge) throws CredentialValidationException {
+  public UsernamePasswordCredentials applyHttpChallenge(String challenge, HttpMethod method, String uri, Integer nc, String cnonce) throws CredentialValidationException {
     if (challenge != null) {
       int spc = challenge.indexOf(' ');
 
@@ -92,11 +92,13 @@ public class UsernamePasswordCredentials implements Credentials {
         throw new IllegalArgumentException("Only 'Basic' auth-scheme is supported");
       }
     }
+    // validate
+    checkValid(null);
     return this;
   }
 
   @Override
-  public String toHttpAuthorization(Vertx vertx, HttpMethod method, String uri, int nc) {
+  public String toHttpAuthorization() {
 
     String credentials =
       (username == null ? "" : username) +

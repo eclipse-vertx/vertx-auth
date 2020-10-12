@@ -13,11 +13,9 @@
 package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
@@ -187,6 +185,25 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
       if (opaque == null) {
         throw new CredentialValidationException("opaque cannot be null");
       }
+      if (method == null) {
+        throw new CredentialValidationException("method cannot be null");
+      }
+      if (uri == null) {
+        throw new CredentialValidationException("uri cannot be null");
+      }
+      if (qop != null && !"auth".equals(qop)) {
+        throw new CredentialValidationException(qop + " qop is not supported");
+      }
+
+      if (qop != null) {
+        if (nc == null) {
+          throw new CredentialValidationException("nc cannot be null");
+        }
+        if (cnonce == null) {
+          throw new CredentialValidationException("cnonce cannot be null");
+        }
+      }
+
     } else {
       // server validation
       if (response == null) {
@@ -210,7 +227,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
   }
 
   @Override
-  public HtdigestCredentials applyHttpChallenge(String challenge) throws CredentialValidationException {
+  public HtdigestCredentials applyHttpChallenge(String challenge, HttpMethod method, String uri, Integer nc, String cnonce) throws CredentialValidationException {
     if (challenge == null) {
       throw new IllegalArgumentException("Digest auth requires a challenge");
     }
@@ -251,13 +268,20 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
       ++i;
     }
 
+    // apply the remaining properties
+    this.method = method != null ? method.name() : null;
+    this.uri = uri;
+    this.nc = nc != null ? nc.toString() : null;
+    this.cnonce = cnonce;
+
+    // validate
+    checkValid(true);
+
     return this;
   }
 
   @Override
-  public String toHttpAuthorization(Vertx vertx, HttpMethod method, String uri, int nc) {
-    final VertxContextPRNG prng = VertxContextPRNG.current(vertx);
-
+  public String toHttpAuthorization() {
     // start assembling the response
 
     final MessageDigest MD5;
@@ -269,7 +293,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
     }
 
     byte[] ha1 = MD5.digest(String.join(":", getUsername(), realm, getPassword()).getBytes(StandardCharsets.UTF_8));
-    byte[] ha2 = MD5.digest(String.join(":", method.name(), uri).getBytes(StandardCharsets.UTF_8));
+    byte[] ha2 = MD5.digest(String.join(":", method, uri).getBytes(StandardCharsets.UTF_8));
 
     if (qop != null && !"auth".equals(qop)) {
       throw new IllegalArgumentException(qop + " qop is not supported");
@@ -281,14 +305,10 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
       .appendByte((byte) ':')
       .appendString(nonce);
 
-    String cnonce = null;
-
     if (qop != null) {
-      cnonce = prng.nextString(8);
-
       response
         .appendByte((byte) ':')
-        .appendString(Integer.toString(nc))
+        .appendString(nc)
         .appendByte((byte) ':')
         .appendString(cnonce);
     }
@@ -313,7 +333,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
     if (qop != null) {
       header
         .appendString("qop=").appendString(qop)
-        .appendString("nc=").appendString(Integer.toString(nc))
+        .appendString("nc=").appendString(nc)
         .appendString("cnonce=").appendString(cnonce);
     }
 
