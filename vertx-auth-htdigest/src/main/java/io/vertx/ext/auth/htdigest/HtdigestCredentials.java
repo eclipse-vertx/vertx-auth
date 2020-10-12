@@ -191,11 +191,20 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
       if (uri == null) {
         throw new CredentialValidationException("uri cannot be null");
       }
-      if (qop != null && !"auth".equals(qop)) {
-        throw new CredentialValidationException(qop + " qop is not supported");
-      }
 
       if (qop != null) {
+        String[] qops = qop.split(",");
+        boolean found = false;
+        for (String q : qops) {
+          if ("auth".equals(q)) {
+            qop = "auth";
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          throw new CredentialValidationException(qop + " qop is not supported");
+        }
         if (nc == null) {
           throw new CredentialValidationException("nc cannot be null");
         }
@@ -259,6 +268,9 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
           case "qop":
             qop = m.group(2);
             break;
+          case "algorithm":
+            algorithm = m.group(2);
+            break;
           case "realm":
             realm = m.group(2);
             break;
@@ -293,11 +305,19 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
     }
 
     byte[] ha1 = MD5.digest(String.join(":", getUsername(), realm, getPassword()).getBytes(StandardCharsets.UTF_8));
-    byte[] ha2 = MD5.digest(String.join(":", method, uri).getBytes(StandardCharsets.UTF_8));
 
-    if (qop != null && !"auth".equals(qop)) {
-      throw new IllegalArgumentException(qop + " qop is not supported");
+    if ("MD5-sess".equals(algorithm)) {
+      ha1 = MD5.digest(
+        Buffer.buffer()
+          .appendBytes(ha1)
+          .appendByte((byte) ':')
+          .appendString(nonce)
+          .appendByte((byte) ':')
+          .appendString(cnonce)
+          .getBytes());
     }
+
+    byte[] ha2 = MD5.digest(String.join(":", method, uri).getBytes(StandardCharsets.UTF_8));
 
     // Generate response hash
     Buffer response = Buffer.buffer()
@@ -310,32 +330,34 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
         .appendByte((byte) ':')
         .appendString(nc)
         .appendByte((byte) ':')
-        .appendString(cnonce);
+        .appendString(cnonce)
+        .appendByte((byte) ':')
+        .appendString(qop);
     }
 
-
     response
-      .appendByte((byte) ':')
-      .appendString(qop)
       .appendByte((byte) ':')
       .appendString(bytesToHex(ha2));
 
     Buffer header = Buffer.buffer("Digest ");
 
     header
-      .appendString("username=").appendString(getUsername())
-      .appendString("realm=").appendString(realm)
-      .appendString("nonce=").appendString(nonce)
-      .appendString("uri=").appendString(uri)
-      .appendString("response=").appendString(bytesToHex(response.getBytes()))
-      .appendString("opaque=").appendString(opaque);
+      .appendString("username=\"").appendString(getUsername().replaceAll("\"", "\\\""))
+      .appendString("\", realm=\"").appendString(realm)
+      .appendString("\", nonce=\"").appendString(nonce)
+      .appendString("\", uri=\"").appendString(uri);
 
     if (qop != null) {
       header
-        .appendString("qop=").appendString(qop)
-        .appendString("nc=").appendString(nc)
-        .appendString("cnonce=").appendString(cnonce);
+        .appendString("\", qop=").appendString(qop)
+        .appendString(", nc=").appendString(nc)
+        .appendString(", cnonce=\"").appendString(cnonce.replaceAll("\"", "\\\""));
     }
+
+    header
+      .appendString("\", response=\"").appendString(bytesToHex(MD5.digest(response.getBytes())))
+      .appendString("\", opaque=\"").appendString(opaque)
+      .appendString("\"");
 
     return header.toString();
   }
