@@ -30,7 +30,7 @@ public class TestUtils {
   }
 
   public static AuthorizationContext getTestAuthorizationContext() {
-    return getTestAuthorizationContext(User.create("username", "dummy user"));
+    return getTestAuthorizationContext(User.fromName("dummy user"));
   }
 
   public static AuthorizationContext getTestAuthorizationContext(User user) {

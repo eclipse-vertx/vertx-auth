@@ -44,18 +44,26 @@ public interface User {
    * Factory for user instances that are single string. The credentials will be added to the principal
    * of this instance. As nothing can be said about the credentials no validation will be done.
    *
-   * The kind will be used a the property key name on the principal to store the value. For example:
+   * Will create a principal with a property {@code "username"} with the name as value.
    *
-   * {@code create("access_token", jwt)}
-   *
-   * Will create a principal with a property {@code "access_token"} with the jwt as value.
-   *
-   * @param kind the credential kind e.g.: {@code access_token} or {@code username}
-   * @param value the value for this token
+   * @param username the value for this user
    * @return user instance
    */
-  static User create(String kind, String value) {
-    return create(new JsonObject().put(kind, value));
+  static User fromName(String username) {
+    return create(new JsonObject().put("username", username));
+  }
+
+  /**
+   * Factory for user instances that are single string. The credentials will be added to the principal
+   * of this instance. As nothing can be said about the credentials no validation will be done.
+   *
+   * Will create a principal with a property {@code "access_token"} with the name as value.
+   *
+   * @param token the value for this user
+   * @return user instance
+   */
+  static User fromToken(String token) {
+    return create(new JsonObject().put("access_token", token));
   }
 
   /**

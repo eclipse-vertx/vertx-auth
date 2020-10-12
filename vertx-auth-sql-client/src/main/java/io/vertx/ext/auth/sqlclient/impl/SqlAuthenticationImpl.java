@@ -73,7 +73,7 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
               Row row = rows.iterator().next();
               String hashedStoredPwd = row.getString(0);
               if (strategy.verify(hashedStoredPwd, authInfo.getPassword())) {
-                resultHandler.handle(Future.succeededFuture(User.create("username", authInfo.getUsername())));
+                resultHandler.handle(Future.succeededFuture(User.fromName(authInfo.getUsername())));
               } else {
                 resultHandler.handle(Future.failedFuture("Invalid username/password"));
               }

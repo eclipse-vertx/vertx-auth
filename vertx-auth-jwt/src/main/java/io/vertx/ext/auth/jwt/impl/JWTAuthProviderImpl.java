@@ -183,7 +183,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   @Deprecated
   private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
-    User result = User.create("access_token", accessToken);
+    User result = User.fromToken(accessToken);
 
     // update the attributes
     result.attributes()
