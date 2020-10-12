@@ -66,11 +66,6 @@ public class HtdigestCredentialsConverter {
             obj.setUri((String)member.getValue());
           }
           break;
-        case "username":
-          if (member.getValue() instanceof String) {
-            obj.setUsername((String)member.getValue());
-          }
-          break;
       }
     }
   }
@@ -109,9 +104,6 @@ public class HtdigestCredentialsConverter {
     }
     if (obj.getUri() != null) {
       json.put("uri", obj.getUri());
-    }
-    if (obj.getUsername() != null) {
-      json.put("username", obj.getUsername());
     }
   }
 }

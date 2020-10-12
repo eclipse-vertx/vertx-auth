@@ -15,7 +15,10 @@
  */
 package io.vertx.ext.auth.authentication;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -46,12 +49,39 @@ public interface Credentials {
   JsonObject toJson();
 
   /**
-   * Encodes this credential as an HTTP Authorization header.
+   * Applies the HTTP Authorization challenge to this Credential instance. The internal state can change to reflect
+   * the extra properties the challenge conveys.
+   *
+   * See <a href="https://tools.ietf.org/html/rfc7235">https://tools.ietf.org/html/rfc7235</a> for more information.
+   *
+   * @param challenge the challenge is the {@code WWW-Authenticate} header response from a 401 request.
+   *                  Null challenges are allowed, and in this case, no verification will be performed, however it is
+   *                  up to the implementation to permit this.
+
+   * @return fluent self.
+   * @throws CredentialValidationException if the challenge cannot be applicable.
+   */
+  @Fluent
+  default Credentials applyHttpChallenge(String challenge) throws CredentialValidationException {
+    if (challenge != null) {
+      throw new CredentialValidationException("This implementation can't check the challenge: " + challenge);
+    }
+
+    return this;
+  }
+
+  /**
+   * Encodes this credential as an HTTP Authorization <a href="https://tools.ietf.org/html/rfc7235">https://tools.ietf.org/html/rfc7235</a>.
+   *
+   * @param method The http method this response is responding.
+   * @param uri The http uri this response is responding.
+   * @param nc The client internal counter.
+   * @param vertx The vertx instance.
    *
    * @throws UnsupportedOperationException when the the credential object cannot be converted to a HTTP Authorization.
    * @return HTTP header including scheme.
    */
-  default String toHttpHeader() throws UnsupportedOperationException {
+  default String toHttpAuthorization(Vertx vertx, HttpMethod method, String uri, int nc) {
     throw new UnsupportedOperationException(getClass().getName() + " cannot be converted to a HTTP Authorization header");
   }
 }
