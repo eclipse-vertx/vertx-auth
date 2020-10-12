@@ -39,6 +39,7 @@ import io.vertx.ext.auth.impl.UserImpl;
  */
 @VertxGen
 public interface User {
+
   /**
    * Factory for user instances that are single string. The credentials will be added to the principal
    * of this instance. As nothing can be said about the credentials no validation will be done.
@@ -271,23 +272,4 @@ public interface User {
    */
   @Deprecated
   void setAuthProvider(AuthProvider authProvider);
-
-  /**
-   *
-   * @param key
-   * @return
-   */
-  default boolean hasValue(String key) {
-    return principal().containsKey(key) || attributes().containsKey(key);
-  }
-
-  default <T> T getValue(String key) {
-    if (principal().containsKey(key)) {
-      return (T) principal().getValue(key);
-    }
-    if (attributes().containsKey(key)) {
-      return (T) attributes().getValue(key);
-    }
-    return null;
-  }
 }
