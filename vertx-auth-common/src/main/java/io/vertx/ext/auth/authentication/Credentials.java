@@ -15,7 +15,9 @@
  */
 package io.vertx.ext.auth.authentication;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -44,4 +46,80 @@ public interface Credentials {
    * @return JSON representation of this credential.
    */
   JsonObject toJson();
+
+  /**
+   * Applies the HTTP Authorization challenge to this Credential instance. The internal state can change to reflect
+   * the extra properties the challenge conveys.
+   *
+   * See <a href="https://tools.ietf.org/html/rfc7235">https://tools.ietf.org/html/rfc7235</a> for more information.
+   *
+   * @param challenge the challenge is the {@code WWW-Authenticate} header response from a 401 request.
+   *                  Null challenges are allowed, and in this case, no verification will be performed, however it is
+   *                  up to the implementation to permit this.
+   * @param method The http method this response is responding.
+   * @param uri The http uri this response is responding.
+   * @param nc The client internal counter (optional).
+   * @param cnonce The client internal nonce (optional).
+   *
+   * @return fluent self.
+   * @throws CredentialValidationException if the challenge cannot be applicable.
+   */
+  @Fluent
+  default Credentials applyHttpChallenge(String challenge, HttpMethod method, String uri, Integer nc, String cnonce) throws CredentialValidationException {
+    if (challenge != null) {
+      throw new CredentialValidationException("This implementation can't handle HTTP Authentication");
+    }
+
+    return this;
+  }
+
+  /**
+   * Applies the HTTP Authorization challenge to this Credential instance. The internal state can change to reflect
+   * the extra properties the challenge conveys.
+   *
+   * See <a href="https://tools.ietf.org/html/rfc7235">https://tools.ietf.org/html/rfc7235</a> for more information.
+   *
+   * @param challenge the challenge is the {@code WWW-Authenticate} header response from a 401 request.
+   *                  Null challenges are allowed, and in this case, no verification will be performed, however it is
+   *                  up to the implementation to permit this.
+   * @param method The http method this response is responding.
+   * @param uri The http uri this response is responding.
+   *
+   * @return fluent self.
+   * @throws CredentialValidationException if the challenge cannot be applicable.
+   */
+  default Credentials applyHttpChallenge(String challenge, HttpMethod method, String uri) throws CredentialValidationException {
+    return applyHttpChallenge(challenge, method, uri, null, null);
+  }
+
+  /**
+   * Applies the HTTP Authorization challenge to this Credential instance. The internal state can change to reflect
+   * the extra properties the challenge conveys.
+   *
+   * See <a href="https://tools.ietf.org/html/rfc7235">https://tools.ietf.org/html/rfc7235</a> for more information.
+   *
+   * @param challenge the challenge is the {@code WWW-Authenticate} header response from a 401 request.
+   *                  Null challenges are allowed, and in this case, no verification will be performed, however it is
+   *                  up to the implementation to permit this.
+   *
+   * @return fluent self.
+   * @throws CredentialValidationException if the challenge cannot be applicable.
+   */
+  default Credentials applyHttpChallenge(String challenge) throws CredentialValidationException {
+    return applyHttpChallenge(challenge, null, null, null, null);
+  }
+
+  /**
+   * Encodes this credential as an HTTP Authorization <a href="https://tools.ietf.org/html/rfc7235">https://tools.ietf.org/html/rfc7235</a>.
+   *
+   * Calls to this method, expect that {@link #applyHttpChallenge(String, HttpMethod, String, Integer, String)} has
+   * been prior executed. For some Authentication schemes, this isn't a requirement but doing so ensures that the
+   * object is on the right state.
+   *
+   * @throws UnsupportedOperationException when the the credential object cannot be converted to a HTTP Authorization.
+   * @return HTTP header including scheme.
+   */
+  default String toHttpAuthorization() {
+    throw new UnsupportedOperationException(getClass().getName() + " cannot be converted to a HTTP Authorization");
+  }
 }

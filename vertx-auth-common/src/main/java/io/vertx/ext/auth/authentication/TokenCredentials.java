@@ -13,6 +13,7 @@
 package io.vertx.ext.auth.authentication;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -62,5 +63,25 @@ public class TokenCredentials implements Credentials {
   @Override
   public String toString() {
     return toJson().encode();
+  }
+
+  @Override
+  public TokenCredentials applyHttpChallenge(String challenge, HttpMethod method, String uri, Integer nc, String cnonce) throws CredentialValidationException {
+    if (challenge != null) {
+      int spc = challenge.indexOf(' ');
+
+      if (!"Bearer".equalsIgnoreCase(challenge.substring(0, spc))) {
+        throw new IllegalArgumentException("Only 'Bearer' auth-scheme is supported");
+      }
+    }
+
+    // validate
+    checkValid(null);
+    return this;
+  }
+
+  @Override
+  public String toHttpAuthorization() {
+    return "Bearer " + token;
   }
 }

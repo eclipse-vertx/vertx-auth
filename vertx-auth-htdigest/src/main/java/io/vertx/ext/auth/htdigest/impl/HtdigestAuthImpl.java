@@ -28,7 +28,6 @@ import io.vertx.ext.auth.htdigest.HtdigestAuth;
 import io.vertx.ext.auth.htdigest.HtdigestCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -119,16 +118,16 @@ public class HtdigestAuthImpl implements HtdigestAuth {
       // calculate ha1
       final String ha1;
       if ("MD5-sess".equals(authInfo.getAlgorithm())) {
-        ha1=md5(credential.password + ":" + authInfo.getNonce() + ":" + authInfo.getCnonce());
+        ha1 = md5(credential.password + ":" + authInfo.getNonce() + ":" + authInfo.getCnonce());
       } else {
         ha1 = credential.password;
       }
 
       // calculate ha2
       final String ha2;
-      if (authInfo.getQop()==null || "auth".equals(authInfo.getQop())) {
+      if (authInfo.getQop() == null || "auth".equals(authInfo.getQop())) {
         ha2 = md5(authInfo.getMethod() + ":" + authInfo.getUri());
-      } else if ("auth-int".equals(authInfo.getQop())){
+      } else if ("auth-int".equals(authInfo.getQop())) {
         resultHandler.handle((Future.failedFuture("qop: auth-int not supported.")));
         return;
       } else {
@@ -138,7 +137,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
 
       // calculate request digest
       final String digest;
-      if (authInfo.getQop()==null) {
+      if (authInfo.getQop() == null) {
         // For RFC 2069 compatibility
         digest = md5(ha1 + ":" + authInfo.getNonce() + ":" + ha2);
       } else {
@@ -159,7 +158,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
 
   private static String bytesToHex(byte[] bytes) {
     char[] hexChars = new char[bytes.length * 2];
-    for ( int j = 0; j < bytes.length; j++ ) {
+    for (int j = 0; j < bytes.length; j++) {
       int v = bytes[j] & 0xFF;
       hexChars[j * 2] = hexArray[v >>> 4];
       hexChars[j * 2 + 1] = hexArray[v & 0x0F];
