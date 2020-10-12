@@ -21,21 +21,21 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.NoSuchKeyIdException;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.NoSuchKeyIdException;
+import io.vertx.ext.auth.oauth2.*;
 
 import java.util.Collections;
 
@@ -50,7 +50,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   private final OAuth2Options config;
   private final OAuth2API api;
 
-  private JWT jwt = new JWT();
+  // avoid caching, as it may swap,
+  // old references are still valid though
+  private volatile JWT jwt = new JWT();
   private long updateTimerId = -1;
   private Handler<String> missingKeyHandler;
 
@@ -344,17 +346,34 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
-    api.userInfo(user.principal().getString("access_token"), handler);
+    api.userInfo(user.principal().getString("access_token"), jwt, userInfo -> {
+      if (userInfo.succeeded()) {
+        JsonObject json = userInfo.result();
+        // validation (the subject must match)
+        String userSub = user.principal().getString("sub", user.attributes().getString("sub"));
+        String userInfoSub = json.getString("sub");
+        if (userSub != null || userInfoSub != null) {
+          if (userSub != null) {
+            if (userInfoSub != null) {
+              if (!userSub.equals(userInfoSub)) {
+                handler.handle(Future.failedFuture("Used 'sub' does not match UserInfo 'sub'."));
+                return;
+              }
+            }
+          }
+        }
+        // copy basic properties to the attributes
+        copyProperties(json, user.attributes(), true, "sub", "name", "email", "picture");
+      }
+      // complete
+      handler.handle(userInfo);
+    });
     return this;
   }
 
   @Override
   public String endSessionURL(User user, JsonObject params) {
     return api.endSessionURL(user.principal().getString("id_token"), params);
-  }
-
-  OAuth2API api() {
-    return api;
   }
 
   /**
@@ -391,16 +410,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           user.attributes()
             .put("accessToken", jwt.decode(json.getString("access_token")));
 
-          // re-compute expires at if not present and access token has been successfully decoded from JWT
-          if (!user.attributes().containsKey("exp")) {
-            Long exp = user.attributes()
-              .getJsonObject("accessToken").getLong("exp");
-
-            if (exp != null) {
-              user.attributes()
-                .put("exp", exp);
-            }
-          }
+          // copy the expiration check properties to the root
+          // + sub
+          copyProperties(user.attributes().getJsonObject("accessToken"), user.attributes(), true, "exp", "iat", "nbf", "sub");
 
           // root claim meta data for JWT AuthZ
           user.attributes()
@@ -437,17 +449,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         try {
           user.attributes()
             .put("idToken", jwt.decode(json.getString("id_token")));
-
-          // re-compute expires at if not present and id token has been successfully decoded from JWT
-          if (!user.attributes().containsKey("exp")) {
-            Long exp = user.attributes()
-              .getJsonObject("idToken").getLong("exp");
-
-            if (exp != null) {
-              user.attributes()
-                .put("exp", exp);
-            }
-          }
+          // copy the userInfo basic properties to the root
+          copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false,"sub", "name", "email", "picture");
         } catch (NoSuchKeyIdException e) {
           if (!skipMissingKeyNotify) {
             // we haven't notified this id yet
@@ -467,7 +470,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             }
           }
         } catch (DecodeException | IllegalStateException e) {
-          // explicity catch and log. The exception here is a valid case
+          // explicitly catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
           // or invalid JWT key setup, in that case we fall back to opaque token
           // which is the default operational mode for OAuth2.
@@ -610,7 +613,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           LOG.trace("Cannot decode access token:", e);
         }
       } catch (DecodeException | IllegalStateException e) {
-        // explicity catch and log as trace. exception here is a valid case
+        // explicitly catch and log as trace. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
         // which is the default operational mode for OAuth2.
@@ -632,7 +635,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           LOG.trace("Cannot decode access token:", e);
         }
       } catch (DecodeException | IllegalStateException e) {
-        // explicity catch and log as trace. exception here is a valid case
+        // explicitly catch and log as trace. exception here is a valid case
         // the reason is that it can be for several factors, such as bad token
         // or invalid JWT key setup, in that case we fall back to opaque token
         // which is the default operational mode for OAuth2.
@@ -641,5 +644,17 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
 
     return user;
+  }
+
+  private static void copyProperties(JsonObject source, JsonObject target, boolean overwrite, String... keys) {
+    if (source != null && target != null) {
+      for (String key : keys) {
+        if (source.containsKey(key)) {
+          if (!target.containsKey(key) || overwrite) {
+            target.put(key, source.getValue(key));
+          }
+        }
+      }
+    }
   }
 }

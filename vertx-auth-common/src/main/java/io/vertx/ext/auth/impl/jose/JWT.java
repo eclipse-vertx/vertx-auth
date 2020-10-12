@@ -275,51 +275,6 @@ public final class JWT {
     return payload;
   }
 
-  public boolean isExpired(JsonObject jwt, JWTOptions options) {
-
-    if (jwt == null) {
-      return false;
-    }
-
-    // All dates in JWT are of type NumericDate
-    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
-    // the specified UTC date/time, ignoring leap seconds
-    final long now = (System.currentTimeMillis() / 1000);
-
-    if (jwt.containsKey("exp") && !options.isIgnoreExpiration()) {
-      if (now - options.getLeeway() >= jwt.getLong("exp")) {
-        if (logger.isTraceEnabled()) {
-          logger.trace(String.format("Expired JWT token: exp[%d] <= (now[%d] - leeway[%d])", jwt.getLong("exp"), now, options.getLeeway()));
-        }
-        return true;
-      }
-    }
-
-    if (jwt.containsKey("iat")) {
-      Long iat = jwt.getLong("iat");
-      // issue at must be in the past
-      if (iat > now + options.getLeeway()) {
-        if (logger.isTraceEnabled()) {
-          logger.trace(String.format("Invalid JWT token: iat[%d] > now[%d] + leeway[%d]", iat, now, options.getLeeway()));
-        }
-        return true;
-      }
-    }
-
-    if (jwt.containsKey("nbf")) {
-      Long nbf = jwt.getLong("nbf");
-      // not before must be after now
-      if (nbf > now + options.getLeeway()) {
-        if (logger.isTraceEnabled()) {
-          logger.trace(String.format("Invalid JWT token: nbf[%d] > now[%d] + leeway[%d]", nbf, now, options.getLeeway()));
-        }
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   /**
    * Scope claim are used to grant access to a specific resource.
    * They are included into the JWT when the user consent access to the resource,

@@ -40,10 +40,51 @@ import io.vertx.ext.auth.impl.UserImpl;
 @VertxGen
 public interface User {
 
+  /**
+   * Factory for user instances that are single string. The credentials will be added to the principal
+   * of this instance. As nothing can be said about the credentials no validation will be done.
+   *
+   * Will create a principal with a property {@code "username"} with the name as value.
+   *
+   * @param username the value for this user
+   * @return user instance
+   */
+  static User fromName(String username) {
+    return create(new JsonObject().put("username", username));
+  }
+
+  /**
+   * Factory for user instances that are single string. The credentials will be added to the principal
+   * of this instance. As nothing can be said about the credentials no validation will be done.
+   *
+   * Will create a principal with a property {@code "access_token"} with the name as value.
+   *
+   * @param token the value for this user
+   * @return user instance
+   */
+  static User fromToken(String token) {
+    return create(new JsonObject().put("access_token", token));
+  }
+
+  /**
+   * Factory for user instances that are free form. The credentials will be added to the principal
+   * of this instance. As nothing can be said about the credentials no validation will be done.
+   *
+   * @param principal the free form json principal
+   * @return user instance
+   */
   static User create(JsonObject principal) {
     return create(principal, new JsonObject());
   }
 
+  /**
+   * Factory for user instances that are free form. The credentials will be added to the principal
+   * of this instance. As nothing can be said about the credentials no validation will be done.
+   *
+   * @param principal the free form json principal
+   * @param attributes the free form json attributes that further describe the principal
+   * @return user instance
+   */
   static User create(JsonObject principal, JsonObject attributes) {
     return new UserImpl(principal, attributes);
   }

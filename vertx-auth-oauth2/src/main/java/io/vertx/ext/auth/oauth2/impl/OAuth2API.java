@@ -25,10 +25,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
+import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -390,7 +392,7 @@ public class OAuth2API {
    *
    * see: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
    */
-  public void userInfo(String accessToken, Handler<AsyncResult<JsonObject>> handler) {
+  public void userInfo(String accessToken, JWT jwt, Handler<AsyncResult<JsonObject>> handler) {
     final JsonObject headers = new JsonObject();
     final JsonObject extraParams = config.getUserInfoParameters();
     String path = config.getUserInfoPath();
@@ -406,7 +408,7 @@ public class OAuth2API {
 
     headers.put("Authorization", "Bearer " + accessToken);
     // specify preferred accepted accessToken type
-    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+    headers.put("Accept", "application/json,application/jwt,application/x-www-form-urlencoded;q=0.9");
 
     fetch(
       HttpMethod.GET,
@@ -427,6 +429,14 @@ public class OAuth2API {
           try {
             // userInfo is expected to be an object
             userInfo = new JsonObject(reply.body());
+          } catch (RuntimeException e) {
+            handler.handle(Future.failedFuture(e));
+            return;
+          }
+        } else if (reply.is("application/jwt")) {
+          try {
+            // userInfo is expected to be a JWT
+            userInfo = jwt.decode(reply.body().toString(StandardCharsets.UTF_8));
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
