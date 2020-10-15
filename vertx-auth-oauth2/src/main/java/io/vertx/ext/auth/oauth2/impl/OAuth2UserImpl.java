@@ -247,6 +247,8 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
    */
   @Override
   public boolean expired() {
+    int leeway = 0;
+
     if (principal == null) {
       return true;
     }
@@ -255,6 +257,7 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
       // delegate to the JWT lib
       final JWT jwt = provider.getJWT();
       final JWTOptions options = provider.getConfig().getJWTOptions();
+      leeway = options.getLeeway() * 1000;
       try {
         jwt.isExpired(accessToken, options);
       } catch (RuntimeException e) {
@@ -266,7 +269,7 @@ public abstract class OAuth2UserImpl extends AbstractUser implements AccessToken
 
     long now = System.currentTimeMillis();
     // expires_at is a computed field always in millis
-    if (principal.containsKey("expires_at") && principal.getLong("expires_at", 0L) < now) {
+    if (principal.containsKey("expires_at") && principal.getLong("expires_at", 0L) < now - leeway) {
       return true;
     }
 
