@@ -123,8 +123,14 @@ public class MetaDataServiceImpl implements MetaDataService {
   }
 
   @Override
-  public MetaDataServiceImpl addStatement(JsonObject statement) {
+  public MetaDataService addStatement(JsonObject statement) {
     metadata.loadMetadata(statement);
+    return this;
+  }
+
+  @Override
+  public MetaDataService flush() {
+    metadata.clear();
     return this;
   }
 

@@ -80,6 +80,11 @@ public class Metadata {
       .getLocalMap(Metadata.class.getName());
   }
 
+  public Metadata clear() {
+    store.clear();
+    return this;
+  }
+
   public PublicKeyCredential toJOSEAlg(int fido2AlgSign) {
     switch (fido2AlgSign) {
       case ALG_SIGN_SECP256R1_ECDSA_SHA256_RAW:

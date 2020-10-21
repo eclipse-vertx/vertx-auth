@@ -122,4 +122,13 @@ public interface MetaDataService {
    */
   @Fluent
   MetaDataService addStatement(JsonObject statement);
+
+  /**
+   * Clears all loaded statements, both from the TOC and manually inserted.
+   * The flush operation will not cancel any in-flight TOC download/processing.
+   *
+   * @return fluent self
+   */
+  @Fluent
+  MetaDataService flush();
 }
