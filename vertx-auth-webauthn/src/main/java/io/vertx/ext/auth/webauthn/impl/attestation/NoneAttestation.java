@@ -18,6 +18,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.Metadata;
 
 /**
  * Implementation of the "none" attestation check.

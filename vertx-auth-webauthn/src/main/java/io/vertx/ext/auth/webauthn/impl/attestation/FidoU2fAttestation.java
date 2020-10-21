@@ -24,11 +24,11 @@ import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
+import io.vertx.ext.auth.webauthn.impl.Metadata;
 
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;

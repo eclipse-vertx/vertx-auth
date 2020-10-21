@@ -154,6 +154,10 @@ public final class JWT {
   }
 
   public JsonObject decode(final String token) {
+    return decode(token, false);
+  }
+
+  public JsonObject decode(final String token, boolean full) {
     // lock the secure state
     String[] segments = token.split("\\.");
 
@@ -226,7 +230,7 @@ public final class JWT {
 
         if (JWS.verifySignature(alg, certChain.get(0), base64urlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {
           // ok
-          return payload;
+          return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
         } else {
           throw new RuntimeException("Signature verification failed");
         }
@@ -261,7 +265,7 @@ public final class JWT {
         // signal that this object crypto's list has the required key
         hasKey = true;
         if (c.verify(payloadInput, signingInput)) {
-          return payload;
+          return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
         }
       }
 
@@ -272,7 +276,7 @@ public final class JWT {
       }
     }
 
-    return payload;
+    return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
   }
 
   /**

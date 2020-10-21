@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.webauthn.impl.attestation;
+package io.vertx.ext.auth.webauthn.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -22,6 +22,7 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

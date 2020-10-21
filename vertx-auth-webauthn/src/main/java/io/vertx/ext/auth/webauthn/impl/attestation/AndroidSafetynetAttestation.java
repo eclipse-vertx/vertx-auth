@@ -24,6 +24,7 @@ import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.Metadata;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;

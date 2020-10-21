@@ -35,7 +35,6 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
-import io.vertx.ext.auth.webauthn.impl.attestation.Metadata;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -54,14 +53,14 @@ public class WebAuthnImpl implements WebAuthn {
 
   private final VertxContextPRNG random;
   private final WebAuthnOptions options;
-  private final Metadata metadata;
+  private final MetaDataServiceImpl mds;
 
   private Function<Authenticator, Future<List<Authenticator>>> fetcher = authr -> Future.failedFuture("Fetcher function not available");
   private Function<Authenticator, Future<Void>> updater = authr -> Future.failedFuture("Updater function not available");
 
   public WebAuthnImpl(Vertx vertx, WebAuthnOptions options) {
     random = VertxContextPRNG.current(vertx);
-    this.metadata = new Metadata(vertx);
+    this.mds = new MetaDataServiceImpl(vertx);
 
     this.options = options;
 
@@ -508,8 +507,9 @@ public class WebAuthnImpl implements WebAuthn {
         // * android-key
         // * packed
         // * tpm
+        // * apple
         verifier
-          .validate(metadata, request.getWebauthn(), clientDataJSON, attestation, authData);
+          .validate(mds.metadata(), request.getWebauthn(), clientDataJSON, attestation, authData);
       }
 
       // STEP webauthn.create#2
@@ -614,8 +614,8 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Internal API not fully ready for prime time
    */
-  public WebAuthn addMetadataStatement(JsonObject statement) {
-    metadata.loadMetadata(statement);
-    return this;
+  @Override
+  public MetaDataService metaDataService() {
+    return mds;
   }
 }

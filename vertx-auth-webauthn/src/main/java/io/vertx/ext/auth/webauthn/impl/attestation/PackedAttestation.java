@@ -22,6 +22,7 @@ import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.Metadata;
 
 import java.security.*;
 import java.security.cert.CertificateException;

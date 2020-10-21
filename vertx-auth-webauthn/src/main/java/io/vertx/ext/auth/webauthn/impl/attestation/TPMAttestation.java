@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.Metadata;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.CertInfo;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.PubArea;
 

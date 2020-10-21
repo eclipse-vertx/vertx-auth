@@ -2,6 +2,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.webauthn.impl.Metadata;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
