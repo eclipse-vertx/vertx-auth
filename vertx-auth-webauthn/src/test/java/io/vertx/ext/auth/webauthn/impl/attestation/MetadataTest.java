@@ -2,7 +2,8 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.impl.Metadata;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataEntry;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
@@ -20,10 +21,10 @@ public class MetadataTest {
     FileSystem fs = rule.vertx()
       .fileSystem();
 
-    Metadata metadata = new Metadata(rule.vertx());
+    MetaData metadata = new MetaData(rule.vertx());
 
     for (String f : fs.readDirBlocking("metadataStatements")) {
-      metadata.loadMetadata(new JsonObject(fs.readFileBlocking(f)));
+      metadata.loadMetadata(new MetaDataEntry(new JsonObject(fs.readFileBlocking(f))));
     }
   }
 }

@@ -24,7 +24,8 @@ import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
-import io.vertx.ext.auth.webauthn.impl.Metadata;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -81,7 +82,7 @@ public class AndroidSafetynetAttestation implements Attestation {
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(MetaData metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // attestation format:
     //{
     //    "fmt": "android-safetynet",
@@ -160,7 +161,7 @@ public class AndroidSafetynetAttestation implements Attestation {
         token.getBinary("signature"),
         token.getString("signatureBase").getBytes(StandardCharsets.UTF_8));
 
-    } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+    } catch (MetaDataException | CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
   }

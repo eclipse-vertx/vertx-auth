@@ -35,6 +35,7 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataServiceImpl;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -372,7 +373,7 @@ public class WebAuthnImpl implements WebAuthn {
               .onFailure(err -> handler.handle(Future.failedFuture(err)))
               .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(storeItem.toJson()))));
 
-          } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
+          } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
             handler.handle(Future.failedFuture(e));
           }
           return;
@@ -410,7 +411,7 @@ public class WebAuthnImpl implements WebAuthn {
                       .onFailure(err -> handler.handle(Future.failedFuture(err)))
                       .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authenticator.toJson()))));
 
-                  } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
+                  } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
                     handler.handle(Future.failedFuture(e));
                   }
                   return;

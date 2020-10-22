@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.webauthn.impl;
+package io.vertx.ext.auth.webauthn.impl.metadata;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * This class will hold the Fido2 Metadata Records.
  */
-public class Metadata {
+public final class MetaData {
 
   /**
    * A mapping of ALG_SIGN hex values (as unsigned shorts) to COSE curve values. Keys should appear as
@@ -73,16 +73,20 @@ public class Metadata {
   public static final int ATTESTATION_ECDAA = 0x3E09;
   public static final int ATTESTATION_ATTCA = 0x3E0A;
 
-  private final LocalMap<String, JsonObject> store;
+  private final LocalMap<String, MetaDataEntry> store;
 
-  public Metadata(Vertx vertx) {
+  public MetaData(Vertx vertx) {
     store = vertx.sharedData()
-      .getLocalMap(Metadata.class.getName());
+      .getLocalMap(MetaData.class.getName());
   }
 
-  public Metadata clear() {
+  public MetaData clear() {
     store.clear();
     return this;
+  }
+
+  public int size() {
+    return store.size();
   }
 
   public PublicKeyCredential toJOSEAlg(int fido2AlgSign) {
@@ -119,29 +123,26 @@ public class Metadata {
     }
   }
 
-  public JsonObject getStatement(String aaguid) throws AttestationException {
-    // locate a statement
-    return store.get(aaguid);
-  }
-
-  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c) throws MetaDataException, AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     return verifyMetadata(aaguid, alg, x5c, null, true);
   }
 
-  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, boolean includesRoot) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, boolean includesRoot) throws MetaDataException, AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     return verifyMetadata(aaguid, alg, x5c, null, includesRoot);
   }
 
-  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert) throws MetaDataException, AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     return verifyMetadata(aaguid, alg, x5c, rootCert, true);
   }
 
-  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert, boolean includesRoot) throws AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
+  public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert, boolean includesRoot) throws MetaDataException, AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     // If available, validate attestation alg and x5c with info in the metadata statement
-    JsonObject statement = getStatement(aaguid);
-    if (statement != null) {
+    MetaDataEntry entry = store.get(aaguid);
+    if (entry != null) {
+      entry.checkValid();
+
       // Make sure the alg in the attestation statement matches the one specified in the metadata
-      if (alg != toJOSEAlg(statement.getInteger("authenticationAlgorithm"))) {
+      if (alg != toJOSEAlg(entry.statement().getInteger("authenticationAlgorithm"))) {
         throw new AttestationException("Attestation alg did not match metadata auth alg");
       }
 
@@ -152,7 +153,7 @@ public class Metadata {
         // Using MDS or Metadata Statements, for each attestationRoot in attestationRootCertificates:
         // append attestation root to the end of the header.x5c, and try verifying certificate chain.
         // If none succeed, throw an error
-        JsonArray attestationRootCertificates = statement.getJsonArray("attestationRootCertificates");
+        JsonArray attestationRootCertificates = entry.statement().getJsonArray("attestationRootCertificates");
 
         if (attestationRootCertificates == null || attestationRootCertificates.size() == 0) {
           if (rootCert != null) {
@@ -179,29 +180,31 @@ public class Metadata {
           }
         }
       }
-    } else {
-      if (x5c != null) {
-        // make a copy before we start
-        x5c = new ArrayList<>(x5c);
 
-        if (rootCert != null) {
-          x5c.add(rootCert);
-        }
-        CertificateHelper.checkValidity(x5c, includesRoot);
-      }
+      return entry.statement();
     }
 
-    return statement;
+    if (x5c != null) {
+      // make a copy before we start
+      x5c = new ArrayList<>(x5c);
+
+      if (rootCert != null) {
+        x5c.add(rootCert);
+      }
+      CertificateHelper.checkValidity(x5c, includesRoot);
+    }
+    return null;
   }
 
-  public Metadata loadMetadata(JsonObject json) {
+  public MetaData loadMetadata(MetaDataEntry entry) {
+    JsonObject json = entry.statement();
     String aaguid = json.getString("aaguid");
     if ("fido2".equals(json.getString("protocolFamily"))) {
       if (aaguid == null) {
         throw new IllegalArgumentException("Statement doesn't contain {aaguid}");
       }
 
-      store.put(aaguid, json);
+      store.put(aaguid, entry);
     }
     return this;
   }

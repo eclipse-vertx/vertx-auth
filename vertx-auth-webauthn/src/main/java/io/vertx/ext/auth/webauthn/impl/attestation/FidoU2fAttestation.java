@@ -24,7 +24,7 @@ import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
-import io.vertx.ext.auth.webauthn.impl.Metadata;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 
 import java.io.IOException;
 import java.security.*;
@@ -51,7 +51,7 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) {
+  public void validate(MetaData metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // the attestation object should have the following structure:
     //{
     //    "fmt": "fido-u2f",

@@ -22,7 +22,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWK;
-import io.vertx.ext.auth.webauthn.impl.Metadata;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
 import java.security.*;
 import java.security.cert.*;
@@ -75,7 +76,7 @@ public class AndroidKeyAttestation implements Attestation {
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(MetaData metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // Typical attestation object
     //{
     //    "fmt": "android-key",
@@ -179,7 +180,7 @@ public class AndroidKeyAttestation implements Attestation {
         }
       }
 
-    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+    } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
   }

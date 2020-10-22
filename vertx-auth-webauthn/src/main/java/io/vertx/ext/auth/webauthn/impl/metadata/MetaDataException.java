@@ -14,14 +14,14 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.auth.webauthn.impl.attestation;
+package io.vertx.ext.auth.webauthn.impl.metadata;
 
-public class AttestationException extends Exception {
-  public AttestationException(String msg) {
+public class MetaDataException extends Exception {
+  public MetaDataException(String msg) {
     super(msg);
   }
 
-  public AttestationException(Throwable cause) {
+  public MetaDataException(Throwable cause) {
     super(cause);
   }
 }
