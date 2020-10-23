@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.webauthn.impl.attestation;
+package io.vertx.ext.auth.webauthn.impl;
 
 import io.vertx.core.buffer.Buffer;
 

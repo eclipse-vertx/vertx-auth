@@ -15,6 +15,7 @@ import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.webauthn.MetaDataService;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -29,20 +30,23 @@ public class MetaDataServiceImpl implements MetaDataService {
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
   private final VertxInternal vertx;
+  private final WebAuthnOptions options;
   private final SimpleHttpClient httpClient;
   private final JWT jwt;
 
   private final MetaData metadata;
 
-  public MetaDataServiceImpl(Vertx vertx) {
+  public MetaDataServiceImpl(Vertx vertx, WebAuthnOptions options) {
     this.vertx = (VertxInternal) vertx;
+    this.options = options;
     this.httpClient = new SimpleHttpClient(vertx, "vertx-auth", new HttpClientOptions());
     this.jwt = new JWT().allowEmbeddedKey(true);
-    this.metadata = new MetaData(vertx);
+    this.metadata = new MetaData(vertx, options);
   }
 
   @Override
-  public Future<Boolean> fetchTOC(String toc, String rootCertificate) {
+  public Future<Boolean> fetchTOC(String toc) {
+
     final Promise<Boolean> promise = vertx.promise();
     httpClient.fetch(HttpMethod.GET, toc, null, null)
       .onFailure(promise::fail)
@@ -67,8 +71,8 @@ public class MetaDataServiceImpl implements MetaDataService {
             certChain.add(JWS.parseX5c(BASE64DEC.decode(chain.getString(i).getBytes(StandardCharsets.UTF_8))));
           }
           // add the root certificate
-          certChain.add(JWS.parseX5c(rootCertificate));
-          CertificateHelper.checkValidity(certChain);
+          certChain.add(options.getRootCertificate("mds"));
+          CertificateHelper.checkValidity(certChain, options.getRootCrls());
 
           payload = json.getJsonObject("payload");
 

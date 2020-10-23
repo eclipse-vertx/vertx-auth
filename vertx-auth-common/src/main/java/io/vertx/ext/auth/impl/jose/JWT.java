@@ -226,7 +226,7 @@ public final class JWT {
           certChain.add(JWS.parseX5c(decoder.decode(chain.getString(i).getBytes(UTF8))));
         }
 
-        CertificateHelper.checkValidity(certChain, false);
+        CertificateHelper.checkValidity(certChain, false, null);
 
         if (JWS.verifySignature(alg, certChain.get(0), base64urlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {
           // ok

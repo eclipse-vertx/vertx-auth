@@ -61,14 +61,13 @@ public class WebAuthnImpl implements WebAuthn {
 
   public WebAuthnImpl(Vertx vertx, WebAuthnOptions options) {
     random = VertxContextPRNG.current(vertx);
-    this.mds = new MetaDataServiceImpl(vertx);
-
     this.options = options;
 
     if (options == null) {
       throw new IllegalArgumentException("options cannot be null!");
     }
 
+    this.mds = new MetaDataServiceImpl(vertx, options);
     ServiceLoader<Attestation> attestationServiceLoader = ServiceLoader.load(Attestation.class);
 
     for (Attestation att : attestationServiceLoader) {
@@ -510,7 +509,7 @@ public class WebAuthnImpl implements WebAuthn {
         // * tpm
         // * apple
         verifier
-          .validate(mds.metadata(), request.getWebauthn(), clientDataJSON, attestation, authData);
+          .validate(options, mds.metadata(), clientDataJSON, attestation, authData);
       }
 
       // STEP webauthn.create#2

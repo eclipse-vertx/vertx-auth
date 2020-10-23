@@ -18,9 +18,7 @@ package io.vertx.ext.auth.impl.jose;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.security.interfaces.RSAKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
@@ -158,11 +156,21 @@ public final class JWS {
   public static X509Certificate parseX5c(String data) throws CertificateException {
     return (X509Certificate) X509
       .generateCertificate(
-        new ByteArrayInputStream(addBoundaries(data).getBytes(StandardCharsets.UTF_8)));
+        new ByteArrayInputStream(addBoundaries(data, "CERTIFICATE").getBytes(StandardCharsets.UTF_8)));
   }
 
   public static X509Certificate parseX5c(byte[] data) throws CertificateException {
     return (X509Certificate) X509.generateCertificate(new ByteArrayInputStream(data));
+  }
+
+  public static X509CRL parseX5crl(String data) throws CRLException {
+    return (X509CRL) X509
+      .generateCRL(
+        new ByteArrayInputStream(addBoundaries(data, "X509 CRL").getBytes(StandardCharsets.UTF_8)));
+  }
+
+  public static X509CRL parseX5crl(byte[] data) throws CRLException {
+    return (X509CRL) X509.generateCRL(new ByteArrayInputStream(data));
   }
 
   private static boolean byteAtIndexIs(byte[] data, int idx, int expected) {
@@ -366,8 +374,20 @@ public final class JWS {
     return derSignature;
   }
 
-  private static String addBoundaries(final String certificate) {
-    return "-----BEGIN CERTIFICATE-----\n" + certificate + "\n-----END CERTIFICATE-----\n";
+
+  private static String addBoundaries(final String certificate, final String boundary) {
+    final String CERT_BOUNDARY_BEGIN = "-----BEGIN " + boundary + "-----\n";
+    final String CERT_BOUNDARY_END = "\n-----END " + boundary + "-----\n";
+
+    if (certificate.contains(CERT_BOUNDARY_BEGIN) && certificate.contains(CERT_BOUNDARY_END)) {
+      // already done
+      return certificate;
+    }
+
+    return
+      CERT_BOUNDARY_BEGIN +
+        certificate +
+      CERT_BOUNDARY_END;
   }
 
 }

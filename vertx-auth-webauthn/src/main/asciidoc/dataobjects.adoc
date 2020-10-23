@@ -69,6 +69,8 @@
 |[[extensions]]`@extensions`|`Json object`|-
 |[[pubKeyCredParams]]`@pubKeyCredParams`|`Array of link:enums.html#PublicKeyCredential[PublicKeyCredential]`|-
 |[[requireResidentKey]]`@requireResidentKey`|`Boolean`|-
+|[[rootCertificates]]`@rootCertificates`|`String`|-
+|[[rootCrls]]`@rootCrls`|`Array of String`|-
 |[[timeout]]`@timeout`|`Number (Long)`|-
 |[[transports]]`@transports`|`Array of link:enums.html#AuthenticatorTransport[AuthenticatorTransport]`|-
 |[[userVerification]]`@userVerification`|`link:enums.html#UserVerification[UserVerification]`|-

@@ -19,8 +19,9 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
-import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.impl.ASN1;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
@@ -30,7 +31,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.*;
+import static io.vertx.ext.auth.webauthn.impl.ASN1.*;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
@@ -40,37 +41,13 @@ import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
  */
 public class AppleAttestation implements Attestation {
 
-  /**
-   * Apple WebAuthn Root CA PEM
-   *
-   * Downloaded from https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem
-   *
-   * Valid until 03/14/2045 @ 5:00 PM PST
-   */
-  private static final String APPLE_WEBAUTHN_ROOT_CA =
-      "MIICEjCCAZmgAwIBAgIQaB0BbHo84wIlpQGUKEdXcTAKBggqhkjOPQQDAzBLMR8w" +
-      "HQYDVQQDDBZBcHBsZSBXZWJBdXRobiBSb290IENBMRMwEQYDVQQKDApBcHBsZSBJ" +
-      "bmMuMRMwEQYDVQQIDApDYWxpZm9ybmlhMB4XDTIwMDMxODE4MjEzMloXDTQ1MDMx" +
-      "NTAwMDAwMFowSzEfMB0GA1UEAwwWQXBwbGUgV2ViQXV0aG4gUm9vdCBDQTETMBEG" +
-      "A1UECgwKQXBwbGUgSW5jLjETMBEGA1UECAwKQ2FsaWZvcm5pYTB2MBAGByqGSM49" +
-      "AgEGBSuBBAAiA2IABCJCQ2pTVhzjl4Wo6IhHtMSAzO2cv+H9DQKev3//fG59G11k" +
-      "xu9eI0/7o6V5uShBpe1u6l6mS19S1FEh6yGljnZAJ+2GNP1mi/YK2kSXIuTHjxA/" +
-      "pcoRf7XkOtO4o1qlcaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUJtdk" +
-      "2cV4wlpn0afeaxLQG2PxxtcwDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMDA2cA" +
-      "MGQCMFrZ+9DsJ1PW9hfNdBywZDsWDbWFp28it1d/5w2RPkRX3Bbn/UbDTNLx7Jr3" +
-      "jAGGiQIwHFj+dJZYUJR786osByBelJYsVZd2GbHQu209b5RCmGQ21gpSAk9QZW4B" +
-      "1bWeT0vT";
-
-  public AppleAttestation() {
-  }
-
   @Override
   public String fmt() {
     return "apple";
   }
 
   @Override
-  public void validate(MetaData metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     try {
       byte[] clientDataHash = hash("SHA-256", clientDataJSON);
 
@@ -87,10 +64,10 @@ public class AppleAttestation implements Attestation {
         throw new AttestationException("no certificates in x5c field");
       }
 
-      certChain.add(JWS.parseX5c(APPLE_WEBAUTHN_ROOT_CA));
+      certChain.add(options.getRootCertificate(fmt()));
 
       // 1. Verify |x5c| is a valid certificate chain starting from the |credCert| to the Apple WebAuthn root certificate.
-      CertificateHelper.checkValidity(certChain, true);
+      CertificateHelper.checkValidity(certChain, true, options.getRootCrls());
 
       // 2. Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash|.
       byte[] nonceToHash = Buffer.buffer()

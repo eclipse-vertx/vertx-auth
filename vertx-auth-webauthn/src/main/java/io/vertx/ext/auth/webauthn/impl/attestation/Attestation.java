@@ -19,6 +19,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 
@@ -39,15 +40,15 @@ public interface Attestation {
   /**
    * The implementation of the Attestation verification.
    *
+   * @param options the runtime configuration options
    * @param metadata the Metadata holder to perform MDS queries
-   * @param webauthn the JSON request received from the client
    * @param clientDataJSON the binary client data json
    * @param attestation the JSON representation of the attestation
    * @param authData the authenticator data
    *
    * @throws AttestationException if the validation fails
    */
-  void validate(MetaData metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
+  void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
 
   /**
    * Returns SHA-256 digest of the given data.

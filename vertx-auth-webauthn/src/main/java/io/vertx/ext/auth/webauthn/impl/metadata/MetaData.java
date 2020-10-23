@@ -22,6 +22,7 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 
 import java.security.InvalidKeyException;
@@ -74,10 +75,12 @@ public final class MetaData {
   public static final int ATTESTATION_ATTCA = 0x3E0A;
 
   private final LocalMap<String, MetaDataEntry> store;
+  private final WebAuthnOptions options;
 
-  public MetaData(Vertx vertx) {
-    store = vertx.sharedData()
+  public MetaData(Vertx vertx, WebAuthnOptions options) {
+    this.store = vertx.sharedData()
       .getLocalMap(MetaData.class.getName());
+    this.options = options;
   }
 
   public MetaData clear() {
@@ -159,14 +162,14 @@ public final class MetaData {
           if (rootCert != null) {
             x5c.add(rootCert);
           }
-          CertificateHelper.checkValidity(x5c, includesRoot);
+          CertificateHelper.checkValidity(x5c, includesRoot, options.getRootCrls());
         } else {
           boolean chainValid = false;
           for (int i = 0; i < attestationRootCertificates.size(); i++) {
             try {
               // add the metadata root certificate
               x5c.add(JWS.parseX5c(attestationRootCertificates.getString(i)));
-              CertificateHelper.checkValidity(x5c);
+              CertificateHelper.checkValidity(x5c, options.getRootCrls());
               chainValid = true;
               break;
             } catch (CertificateException e) {
@@ -191,7 +194,7 @@ public final class MetaData {
       if (rootCert != null) {
         x5c.add(rootCert);
       }
-      CertificateHelper.checkValidity(x5c, includesRoot);
+      CertificateHelper.checkValidity(x5c, includesRoot, options.getRootCrls());
     }
     return null;
   }
