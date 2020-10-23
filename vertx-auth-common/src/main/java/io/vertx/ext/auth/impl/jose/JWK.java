@@ -524,7 +524,7 @@ public final class JWK implements Crypto {
       }
 
       // validate the chain (don't assume the chain includes the root CA certificate
-      CertificateHelper.checkValidity(certChain, false);
+      CertificateHelper.checkValidity(certChain, false, null);
 
       final X509Certificate certificate = certChain.get(0);
 

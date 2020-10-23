@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
@@ -74,11 +75,11 @@ public final class CertificateHelper {
   private CertificateHelper() {
   }
 
-  public static void checkValidity(List<X509Certificate> certificates) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
-    checkValidity(certificates, true);
+  public static void checkValidity(List<X509Certificate> certificates, List<X509CRL> crls) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
+    checkValidity(certificates, true, crls);
   }
 
-  public static void checkValidity(List<X509Certificate> certificates, boolean withRootCA) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
+  public static void checkValidity(List<X509Certificate> certificates, boolean withRootCA, List<X509CRL> crls) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
 
     if (certificates == null || certificates.size() == 0) {
       throw new CertificateException("empty chain");
@@ -87,6 +88,14 @@ public final class CertificateHelper {
     for (int i = 0; i < certificates.size(); i++) {
       final X509Certificate subjectCert = certificates.get(i);
       subjectCert.checkValidity();
+      // check if the certificate is revoked
+      if (crls != null) {
+        for (X509CRL crl : crls) {
+          if (crl.isRevoked(subjectCert)) {
+            throw new CertificateException("Certificate is revoked");
+          }
+        }
+      }
 
       // single certificate nothing else to be checked
       if (certificates.size() == 1) {
@@ -97,12 +106,12 @@ public final class CertificateHelper {
 
       if (i + 1 < certificates.size()) {
         issuerCert = certificates.get(i + 1);
-      // verify that the issuer matches the next one in the list
-      if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
-        throw new CertificateException("Certificate path issuers dont match: [" + subjectCert.getIssuerX500Principal() + "] != [" + issuerCert.getSubjectX500Principal() + "]");
-      }
-      // verify the certificate against the issuer
-      subjectCert.verify(issuerCert.getPublicKey());
+        // verify that the issuer matches the next one in the list
+        if (!subjectCert.getIssuerX500Principal().equals(issuerCert.getSubjectX500Principal())) {
+          throw new CertificateException("Certificate path issuers dont match: [" + subjectCert.getIssuerX500Principal() + "] != [" + issuerCert.getSubjectX500Principal() + "]");
+        }
+        // verify the certificate against the issuer
+        subjectCert.verify(issuerCert.getPublicKey());
       }
     }
 
@@ -118,7 +127,7 @@ public final class CertificateHelper {
     final String subject = cert.getSubjectX500Principal().getName(X500Principal.RFC2253);
     Map<String, String> sub = null;
 
-    if (subject != null && !"".equals(subject))  {
+    if (subject != null && !"".equals(subject)) {
       String[] values = subject.split(",");
 
       sub = new HashMap<>();

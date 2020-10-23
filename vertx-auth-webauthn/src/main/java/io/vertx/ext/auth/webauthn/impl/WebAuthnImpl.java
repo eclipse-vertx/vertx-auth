@@ -35,7 +35,7 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
-import io.vertx.ext.auth.webauthn.impl.attestation.Metadata;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataServiceImpl;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -54,21 +54,20 @@ public class WebAuthnImpl implements WebAuthn {
 
   private final VertxContextPRNG random;
   private final WebAuthnOptions options;
-  private final Metadata metadata;
+  private final MetaDataServiceImpl mds;
 
   private Function<Authenticator, Future<List<Authenticator>>> fetcher = authr -> Future.failedFuture("Fetcher function not available");
   private Function<Authenticator, Future<Void>> updater = authr -> Future.failedFuture("Updater function not available");
 
   public WebAuthnImpl(Vertx vertx, WebAuthnOptions options) {
     random = VertxContextPRNG.current(vertx);
-    this.metadata = new Metadata(vertx);
-
     this.options = options;
 
     if (options == null) {
       throw new IllegalArgumentException("options cannot be null!");
     }
 
+    this.mds = new MetaDataServiceImpl(vertx, options);
     ServiceLoader<Attestation> attestationServiceLoader = ServiceLoader.load(Attestation.class);
 
     for (Attestation att : attestationServiceLoader) {
@@ -373,7 +372,7 @@ public class WebAuthnImpl implements WebAuthn {
               .onFailure(err -> handler.handle(Future.failedFuture(err)))
               .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(storeItem.toJson()))));
 
-          } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
+          } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
             handler.handle(Future.failedFuture(e));
           }
           return;
@@ -411,7 +410,7 @@ public class WebAuthnImpl implements WebAuthn {
                       .onFailure(err -> handler.handle(Future.failedFuture(err)))
                       .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authenticator.toJson()))));
 
-                  } catch (RuntimeException | IOException | NoSuchAlgorithmException e) {
+                  } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
                     handler.handle(Future.failedFuture(e));
                   }
                   return;
@@ -508,8 +507,9 @@ public class WebAuthnImpl implements WebAuthn {
         // * android-key
         // * packed
         // * tpm
+        // * apple
         verifier
-          .validate(metadata, request.getWebauthn(), clientDataJSON, attestation, authData);
+          .validate(options, mds.metadata(), clientDataJSON, attestation, authData);
       }
 
       // STEP webauthn.create#2
@@ -614,8 +614,8 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Internal API not fully ready for prime time
    */
-  public WebAuthn addMetadataStatement(JsonObject statement) {
-    metadata.loadMetadata(statement);
-    return this;
+  @Override
+  public MetaDataService metaDataService() {
+    return mds;
   }
 }

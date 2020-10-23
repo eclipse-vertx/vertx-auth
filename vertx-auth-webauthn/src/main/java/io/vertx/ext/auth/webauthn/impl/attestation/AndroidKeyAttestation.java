@@ -20,8 +20,11 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
 import java.security.*;
 import java.security.cert.*;
@@ -29,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
-import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.*;
+import static io.vertx.ext.auth.webauthn.impl.ASN1.*;
 
 /**
  * Implementation of the "android-key" attestation check.
@@ -45,27 +48,6 @@ import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.*;
  */
 public class AndroidKeyAttestation implements Attestation {
 
-  /* Android Keystore Root is not published anywhere.
-   * This certificate was extracted from one of the attestations
-   * The last certificate in x5c must match this certificate
-   * This needs to be checked to ensure that malicious party wont generate fake attestations
-   */
-  private static final String ANDROID_KEYSTORE_ROOT =
-    "MIICizCCAjKgAwIBAgIJAKIFntEOQ1tXMAoGCCqGSM49BAMCMIGYMQswCQYDVQQG" +
-      "EwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmll" +
-      "dzEVMBMGA1UECgwMR29vZ2xlLCBJbmMuMRAwDgYDVQQLDAdBbmRyb2lkMTMwMQYD" +
-      "VQQDDCpBbmRyb2lkIEtleXN0b3JlIFNvZnR3YXJlIEF0dGVzdGF0aW9uIFJvb3Qw" +
-      "HhcNMTYwMTExMDA0MzUwWhcNMzYwMTA2MDA0MzUwWjCBmDELMAkGA1UEBhMCVVMx" +
-      "EzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxFTAT" +
-      "BgNVBAoMDEdvb2dsZSwgSW5jLjEQMA4GA1UECwwHQW5kcm9pZDEzMDEGA1UEAwwq" +
-      "QW5kcm9pZCBLZXlzdG9yZSBTb2Z0d2FyZSBBdHRlc3RhdGlvbiBSb290MFkwEwYH" +
-      "KoZIzj0CAQYIKoZIzj0DAQcDQgAE7l1ex-HA220Dpn7mthvsTWpdamguD_9_SQ59" +
-      "dx9EIm29sa_6FsvHrcV30lacqrewLVQBXT5DKyqO107sSHVBpKNjMGEwHQYDVR0O" +
-      "BBYEFMit6XdMRcOjzw0WEOR5QzohWjDPMB8GA1UdIwQYMBaAFMit6XdMRcOjzw0W" +
-      "EOR5QzohWjDPMA8GA1UdEwEB_wQFMAMBAf8wDgYDVR0PAQH_BAQDAgKEMAoGCCqG" +
-      "SM49BAMCA0cAMEQCIDUho--LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBN" +
-      "C_NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw";
-
   private static final JsonArray EMPTY = new JsonArray(Collections.emptyList());
 
   @Override
@@ -74,7 +56,7 @@ public class AndroidKeyAttestation implements Attestation {
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // Typical attestation object
     //{
     //    "fmt": "android-key",
@@ -173,12 +155,13 @@ public class AndroidKeyAttestation implements Attestation {
       if (statement == null || statement.getJsonArray("attestationRootCertificates", EMPTY).size() == 0) {
         // 5. Check that root certificate(last in the chain) is set to the root certificate
         // Google does not publish this certificate, so this was extracted from one of the attestations.
-        if (!ANDROID_KEYSTORE_ROOT.equals(attStmt.getJsonArray("x5c").getString(attStmt.getJsonArray("x5c").size() - 1))) {
+        final JsonArray x5c = attStmt.getJsonArray("x5c");
+        if (!MessageDigest.isEqual(options.getRootCertificate(fmt()).getEncoded(), x5c.getBinary(x5c.size() - 1))) {
           throw new AttestationException("Root certificate is invalid!");
         }
       }
 
-    } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+    } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
   }

@@ -19,7 +19,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -38,15 +40,15 @@ public interface Attestation {
   /**
    * The implementation of the Attestation verification.
    *
+   * @param options the runtime configuration options
    * @param metadata the Metadata holder to perform MDS queries
-   * @param webauthn the JSON request received from the client
    * @param clientDataJSON the binary client data json
    * @param attestation the JSON representation of the attestation
    * @param authData the authenticator data
    *
    * @throws AttestationException if the validation fails
    */
-  void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
+  void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
 
   /**
    * Returns SHA-256 digest of the given data.
@@ -54,7 +56,7 @@ public interface Attestation {
    * @param data - data to hash
    * @return the hash
    */
-  static byte[] hash(final String algorithm, byte[] data) throws NoSuchAlgorithmException {
+  static byte[] hash(final String algorithm, byte[] data) throws AttestationException, NoSuchAlgorithmException {
     if (algorithm == null || data == null) {
       throw new AttestationException("Cannot hash one of {algorithm, data} is null");
     }
@@ -72,7 +74,7 @@ public interface Attestation {
    * @param signature   - received signature
    * @param data        - data to verify
    */
-  static void verifySignature(PublicKeyCredential publicKeyCredential, X509Certificate certificate, byte[] signature, byte[] data) throws InvalidKeyException, SignatureException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+  static void verifySignature(PublicKeyCredential publicKeyCredential, X509Certificate certificate, byte[] signature, byte[] data) throws AttestationException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
     if (!JWS.verifySignature(publicKeyCredential.name(), certificate, signature, data)) {
       throw new AttestationException("Failed to verify signature");
     }

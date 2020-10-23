@@ -56,6 +56,26 @@ public class WebAuthnOptionsConverter {
             obj.setRequireResidentKey((Boolean)member.getValue());
           }
           break;
+        case "rootCertificates":
+          if (member.getValue() instanceof JsonObject) {
+            java.util.Map<String, java.lang.String> map = new java.util.LinkedHashMap<>();
+            ((Iterable<java.util.Map.Entry<String, Object>>)member.getValue()).forEach(entry -> {
+              if (entry.getValue() instanceof String)
+                map.put(entry.getKey(), (String)entry.getValue());
+            });
+            obj.setRootCertificates(map);
+          }
+          break;
+        case "rootCrls":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setRootCrls(list);
+          }
+          break;
         case "timeout":
           if (member.getValue() instanceof Number) {
             obj.setTimeout(((Number)member.getValue()).longValue());

@@ -149,4 +149,10 @@ public interface WebAuthn extends AuthenticationProvider {
    */
   @Fluent
   WebAuthn authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
+
+  /**
+   * Getter to the instance FIDO2 Meta Data Service.
+   * @return the MDS instance.
+   */
+  MetaDataService metaDataService();
 }

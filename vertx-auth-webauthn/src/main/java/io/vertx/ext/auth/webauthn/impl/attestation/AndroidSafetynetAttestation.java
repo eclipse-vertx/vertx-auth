@@ -23,7 +23,10 @@ import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -50,37 +53,13 @@ public class AndroidSafetynetAttestation implements Attestation {
   // codecs
   private static final Base64.Decoder b64dec = Base64.getDecoder();
 
-  // https://pki.goog/repository/
-  //  Name 	gsr2
-  //  Public Key 	RSA
-  //  Fingerprint (SHA1) 	69:e2:d0:6c:30:f3:66:16:61:65:e9:1d:68:d1:ce:e5:cc:47:58:4a:80:22:7e:76:66:60:86:c0:10:72:41:eb
-  //  Valid Until 	2021-12-15
-  private static final String ANDROID_SAFETYNET_ROOT =
-    "MIIDvDCCAqSgAwIBAgINAgPk9GHsmdnVeWbKejANBgkqhkiG9w0BAQUFADBMMSAwHgYDVQQLExdH" +
-      "bG9iYWxTaWduIFJvb3QgQ0EgLSBSMjETMBEGA1UEChMKR2xvYmFsU2lnbjETMBEGA1UEAxMKR2xv" +
-      "YmFsU2lnbjAeFw0wNjEyMTUwODAwMDBaFw0yMTEyMTUwODAwMDBaMEwxIDAeBgNVBAsTF0dsb2Jh" +
-      "bFNpZ24gUm9vdCBDQSAtIFIyMRMwEQYDVQQKEwpHbG9iYWxTaWduMRMwEQYDVQQDEwpHbG9iYWxT" +
-      "aWduMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAps8kDr4ubyiZRULEqz4hVJsL03+E" +
-      "cPoSs8u/h1/Gf4bTsjBc1v2t8Xvc5fhglgmSEPXQU977e35ziKxSiHtKpspJpl6op4xaEbx6guu+" +
-      "jOmzrJYlB5dKmSoHL7Qed7+KD7UCfBuWuMW5Oiy81hK561l94tAGhl9eSWq1OV6INOy8eAwImIRs" +
-      "qM1LtKB9DHlN8LgtyyHK1WxbfeGgKYSh+dOUScskYpEgvN0L1dnM+eonCitzkcadG6zIy+jgoPQv" +
-      "kItN+7A2G/YZeoXgbfJhE4hcn+CTClGXilrOr6vV96oJqmC93Nlf33KpYBNeAAHJSvo/pOoHAyEC" +
-      "joLKA8KbjwIDAQABo4GcMIGZMA4GA1UdDwEB/wQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud" +
-      "DgQWBBSb4gdXZxwewGoG3lm0mi3f3BmGLjAfBgNVHSMEGDAWgBSb4gdXZxwewGoG3lm0mi3f3BmG" +
-      "LjA2BgNVHR8ELzAtMCugKaAnhiVodHRwOi8vY3JsLmdsb2JhbHNpZ24ubmV0L3Jvb3QtcjIuY3Js" +
-      "MA0GCSqGSIb3DQEBBQUAA4IBAQANeX81Z1YqDIs4EaLjG0qPOxIzaJI/y4kiRj3a+y3KOx74clIk" +
-      "LuMgi/9/5iv/n+1LyhGU9g7174slbzJOPbSpp1eT19ST2mYbdgTLx/hm3tTLoHIY/w4ZbnQYwfnP" +
-      "wAG4RefnEFYPQJmpD+Wh8BJwBgtm2drTale/T6NBwmwnEFunfaMfMX3g6IBrx7VKnxIkJh/3p190" +
-      "WveLKgl9n7i5SWce/4woPimEn9WfEQWRvp6wKhaCKFjuCMuulEZusoOUJ4LfJnXxcuQTgIrSnwI7" +
-      "KfSSjsd42w3lX1fbgJp7vPmLM6OBRvAXuYRKTFqMAWbb7OaGIEE+cbxY6PDepnva";
-
   @Override
   public String fmt() {
     return "android-safetynet";
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // attestation format:
     //{
     //    "fmt": "android-safetynet",
@@ -149,7 +128,7 @@ public class AndroidSafetynetAttestation implements Attestation {
         certChain,
         // 3. Use the “GlobalSign Root CA — R2” from Google PKI directory.
         // Attach it to the end of header.x5c and try to verify it
-        JWS.parseX5c(ANDROID_SAFETYNET_ROOT)
+        options.getRootCertificate(fmt())
       );
 
       // Verify the signature
@@ -159,7 +138,7 @@ public class AndroidSafetynetAttestation implements Attestation {
         token.getBinary("signature"),
         token.getString("signatureBase").getBytes(StandardCharsets.UTF_8));
 
-    } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+    } catch (MetaDataException | CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
   }

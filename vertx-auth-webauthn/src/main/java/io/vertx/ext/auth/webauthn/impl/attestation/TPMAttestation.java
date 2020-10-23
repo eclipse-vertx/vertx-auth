@@ -20,9 +20,13 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.impl.ASN1;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.CertInfo;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.PubArea;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -30,7 +34,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.vertx.ext.auth.webauthn.impl.attestation.ASN1.*;
+import static io.vertx.ext.auth.webauthn.impl.ASN1.*;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
@@ -107,7 +111,7 @@ public class TPMAttestation implements Attestation {
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // typical attestation object:
     //{
     //	"fmt": "tpm",
@@ -386,7 +390,7 @@ public class TPMAttestation implements Attestation {
         attStmt.getBinary("sig"),
         attStmt.getBinary("certInfo"));
 
-    } catch (NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+    } catch (MetaDataException | NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }
   }

@@ -22,13 +22,14 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
+import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
+import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public void validate(Metadata metadata, JsonObject webauthn, byte[] clientDataJSON, JsonObject attestation, AuthData authData) {
+  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // the attestation object should have the following structure:
     //{
     //    "fmt": "fido-u2f",
@@ -91,7 +92,7 @@ public class FidoU2fAttestation implements Attestation {
         throw new AttestationException("no certificates in x5c field");
       }
       // validate the chain
-      CertificateHelper.checkValidity(certChain);
+      CertificateHelper.checkValidity(certChain, options.getRootCrls());
       // certificate valid lets verify signatures
       verifySignature(
         PublicKeyCredential.ES256,

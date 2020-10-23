@@ -18,6 +18,7 @@ package io.vertx.ext.auth.impl.http;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -36,19 +37,22 @@ import java.util.Map;
  */
 public final class SimpleHttpClient {
 
+  private final VertxInternal vertx;
   private final HttpClient client;
   private final String userAgent;
 
   public SimpleHttpClient(Vertx vertx, String userAgent, HttpClientOptions options) {
+    this.vertx = (VertxInternal) vertx;
     this.client = vertx.createHttpClient(options);
     this.userAgent = userAgent;
   }
 
-  public SimpleHttpClient fetch(HttpMethod method, String url, JsonObject headers, Buffer payload, Handler<AsyncResult<SimpleHttpResponse>> callback) {
+  public Future<SimpleHttpResponse> fetch(HttpMethod method, String url, JsonObject headers, Buffer payload) {
+    final Promise<SimpleHttpResponse> promise = vertx.promise();
 
     if (url == null || url.length() == 0) {
-      callback.handle(Future.failedFuture("Invalid url"));
-      return this;
+      promise.fail("Invalid url");
+      return promise.future();
     }
 
     RequestOptions options = new RequestOptions()
@@ -72,14 +76,13 @@ public final class SimpleHttpClient {
     }
 
     // create a request
-    makeRequest(options, payload, callback);
-    return this;
+    makeRequest(options, payload, promise);
+    return promise.future();
   }
 
-  public Future<SimpleHttpResponse> fetch(HttpMethod method, String url, JsonObject headers, Buffer payload) {
-    Promise<SimpleHttpResponse> promise = Promise.promise();
-    fetch(method, url, headers, payload, promise);
-    return promise.future();
+  public SimpleHttpClient fetch(HttpMethod method, String url, JsonObject headers, Buffer payload, Handler<AsyncResult<SimpleHttpResponse>> callback) {
+    fetch(method, url, headers, payload).onComplete(callback);
+    return this;
   }
 
   public static Buffer jsonToQuery(JsonObject json) {
