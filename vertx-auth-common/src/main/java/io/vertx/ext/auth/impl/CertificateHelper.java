@@ -15,6 +15,9 @@
  */
 package io.vertx.ext.auth.impl;
 
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
+
 import javax.security.auth.x500.X500Principal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class CertificateHelper {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CertificateHelper.class);
 
   public final static class CertInfo {
 
@@ -85,12 +90,17 @@ public final class CertificateHelper {
       throw new CertificateException("empty chain");
     }
 
+    final long now = System.currentTimeMillis();
+
     for (int i = 0; i < certificates.size(); i++) {
       final X509Certificate subjectCert = certificates.get(i);
       subjectCert.checkValidity();
       // check if the certificate is revoked
       if (crls != null) {
         for (X509CRL crl : crls) {
+          if (crl.getNextUpdate().getTime() < now) {
+            LOG.warn("CRL is out of date nextUpdate < now");
+          }
           if (crl.isRevoked(subjectCert)) {
             throw new CertificateException("Certificate is revoked");
           }

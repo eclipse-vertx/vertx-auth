@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(VertxUnitRunner.class)
-public class MetaDataServiceTest {
+public class MetaDataServiceIT {
 
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
