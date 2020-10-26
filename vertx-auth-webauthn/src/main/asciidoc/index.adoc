@@ -1,7 +1,8 @@
 = WebAuthn auth provider
 
-This component contains an out of the box a WebAuthn implementation. To use this project, add the following
-dependency to the _dependencies_ section of your build descriptor:
+This component contains an out of the box a https://github.com/herrjemand/awesome-webauthn#server-libs[FIDO CONFORMANT]
+WebAuthn implementation. To use this project, add the following dependency to the _dependencies_ section of your build
+descriptor:
 
 * Maven (in your `pom.xml`):
 
@@ -120,7 +121,7 @@ Different devices have different attestation formats. The pre-defined attestatio
 * `Android Key Attestation` - one of the features added in Android O was Android Key Attestation, which enables the Android operating system to attest to keys.
 * `Android SafetyNet` - prior to Android Key Attestation, the only option for Android devices was to create Android SafetyNet attestations
 * `FIDO U2F` - security keys that implement the FIDO U2F standard use this format
-* `Apple` - Verifies the Annonymous Apple device attestation.
+* `Apple` - Verifies the Anonymous Apple device attestation.
 * `none` - browsers may prompt users whether they want a site to be allowed to see their attestation data and/or may remove attestation data from the authenticator's response if the `attestation` parameter in `navigator.credentials.create()` is set to `none`
 
 The purpose of attestation is to cryptographically prove that a newly generated key pair came from a specific device.
@@ -163,8 +164,44 @@ established a secure session.
 {@link examples.WebAuthNExamples#example4}
 ----
 
-== Completeness
+== Metadata Service
 
-The current module passes all FIDO2 compliance tests except the use of the yet to be final FIDO2 Metadata Service API.
-This means that we follow the spec but this handler cannot **yet** detect tokens that have been marked as not trustable
+The current module passes all FIDO2 compliance tests **including** the yet to be final FIDO2 Metadata Service API.
+This means that we follow the spec and this handler **can** detect tokens that have been marked as not trustable
 by the token vendor. For example, when a security bug allowed a private key to be extracted from a token.
+
+In order to support the Metadata Service API, as a user you need to register yourself or your application at:
+https://fidoalliance.org/metadata/[https://fidoalliance.org/metadata]
+
+With this the `APIKey` given to you you can configure the application as:
+
+[source,$lang]
+----
+{@link examples.WebAuthNExamples#example5}
+----
+
+== Updating Certificates
+
+Almost all device attestations are based on `X509` Certificate checks. This means that certificates can and will expire
+at some point in time. By default, the current "Active" certificates are hardcoded on the `WebAuthnOptions` object.
+
+However if your application needs to update a certificate on it's own, say for example, use a more up to date one, or
+another with a different cypher, then you can replace the default `root` certificates for each attestation by calling:
+`WebAuthnOptions.putRootCertificate(String, String)`, where the first parameter is the attestation name or "mds" for
+FIDO MetaData Service:
+
+* none
+* u2f
+* packed
+* android-key
+* android-safetynet
+* tpm
+* apple
+* mds
+
+And the second the PEM formatted X509 Certificate (Boundaries are not required).
+
+[source,$lang]
+----
+{@link examples.WebAuthNExamples#example6}
+----

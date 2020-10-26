@@ -18,10 +18,10 @@ package examples;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.webauthn.Authenticator;
 import io.vertx.ext.auth.webauthn.RelyingParty;
 import io.vertx.ext.auth.webauthn.WebAuthn;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
-import io.vertx.ext.auth.webauthn.Authenticator;
 
 import java.util.List;
 
@@ -172,5 +172,40 @@ public class WebAuthNExamples {
       .onSuccess(user -> {
         // success!
       });
+  }
+
+  public void example5(Vertx vertx) {
+    // fido2 MDS config
+    final WebAuthnOptions webAuthnOptions = new WebAuthnOptions()
+      // in order to fully trust the MDS tokens we should load the CRLs as
+      // described on https://fidoalliance.org/metadata/
+
+      // here the content of: http://mds.fidoalliance.org/Root.crl
+      .addRootCrl(
+        "MIIB1jCCAV0CAQEwCg...")
+      // here the content of: http://mds.fidoalliance.org/CA-1.crl
+      .addRootCrl(
+        "MIIB5DCCAYoCAQEwCg...");
+
+    // create the webauthn security object like before
+    final WebAuthn webAuthN = WebAuthn.create(vertx, webAuthnOptions);
+
+    webAuthN.metaDataService()
+      .fetchTOC("https://mds2.fidoalliance.org/?token=your-access-token-string")
+      .onSuccess(allOk -> {
+        // if all metadata was downloaded and parsed correctly allOk is true
+        // the processing will not stop if a entry is corrupt, in that case that
+        // specific entry is skipped and the flag is false. That also means that
+        // that entry will be tagged and "not trustable" as we can't make any
+        // valid decision.
+      });
+  }
+
+  public void example6(Vertx vertx) {
+    final WebAuthnOptions webAuthnOptions = new WebAuthnOptions()
+      // fido2 MDS custom ROOT certificate
+      .putRootCertificate("mds", "MIIB1jCCAV0CAQEwCg...")
+      // updated google root certificate from (https://pki.goog/repository/)
+      .putRootCertificate("android-safetynet", "MIIDvDCCAqSgAwIBAgINAgPk9GHs...");
   }
 }

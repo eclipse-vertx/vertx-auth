@@ -1,6 +1,7 @@
 = Vert.x WebAuthN Auth
 
-This module contains contains an experimental Vert.x auth implementation which uses WebAuthN.
+This module contains contains a https://github.com/herrjemand/awesome-webauthn#server-libs[FIDO CONFORMANT] Vert.x
+auth implementation for FIDO2 WebAuthn.
 
 FIDO2 is a "passwordless" authentication mechanism and the JavaScript API is more known as WebAuthN.
 
