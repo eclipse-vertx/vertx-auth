@@ -18,6 +18,8 @@ package io.vertx.ext.auth.impl;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
 import javax.security.auth.x500.X500Principal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -138,17 +140,20 @@ public final class CertificateHelper {
     Map<String, String> sub = null;
 
     if (subject != null && !"".equals(subject)) {
-      String[] values = subject.split(",");
-
-      sub = new HashMap<>();
-
-      for (String value : values) {
-        int idx = value.indexOf('=');
-        if (idx != -1) {
-          sub.put(value.substring(0, idx), value.substring(idx + 1));
-        } else {
-          sub.put(value, null);
+      try {
+        LdapName rfc2253 = new LdapName(subject);
+        sub = new HashMap<>();
+        for (int i = 0; i < rfc2253.size(); i++) {
+          String value = rfc2253.get(i);
+          int idx = value.indexOf('=');
+          if (idx != -1) {
+            sub.put(value.substring(0, idx), value.substring(idx + 1));
+          } else {
+            sub.put(value, null);
+          }
         }
+      } catch (InvalidNameException e) {
+        // this isn't parseable, so ignore
       }
     }
 
