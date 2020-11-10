@@ -43,6 +43,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -181,6 +183,13 @@ public class JWTAuthProviderImpl implements JWTAuth {
     return jwtToken.getJsonArray(permissionsClaimKey, null);
   }
 
+  private static final Collection<String> SPECIAL_KEYS = Arrays.asList("access_token", "exp", "iat", "nbf");
+
+  /**
+   * @deprecated This method is deprecated as it introduces an exception to the internal representation of {@link User}
+   * object data.
+   * In the future a simple call to User.create() should be used
+   */
   @Deprecated
   private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
     User result = User.fromToken(accessToken);
@@ -189,8 +198,15 @@ public class JWTAuthProviderImpl implements JWTAuth {
     result.attributes()
       .put("accessToken", jwtToken);
 
-    // copy the expiration check properties to the root + sub
+    // copy the expiration check properties + sub to the attributes root
     copyProperties(jwtToken, result.attributes(), "exp", "iat", "nbf", "sub");
+    // as the token is immutable, the decoded values will be added to the principal
+    // with the exception of the above ones
+    for (String key : jwtToken.fieldNames()) {
+      if (!SPECIAL_KEYS.contains(key)) {
+        result.principal().put(key, jwtToken.getValue(key));
+      }
+    }
 
     // root claim meta data for JWT AuthZ
     result.attributes()

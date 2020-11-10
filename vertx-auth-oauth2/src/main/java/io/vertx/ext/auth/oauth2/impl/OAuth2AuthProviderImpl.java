@@ -410,8 +410,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           user.attributes()
             .put("accessToken", jwt.decode(json.getString("access_token")));
 
-          // copy the expiration check properties to the root
-          // + sub
+          // copy the expiration check properties + sub to the root
           copyProperties(user.attributes().getJsonObject("accessToken"), user.attributes(), true, "exp", "iat", "nbf", "sub");
 
           // root claim meta data for JWT AuthZ

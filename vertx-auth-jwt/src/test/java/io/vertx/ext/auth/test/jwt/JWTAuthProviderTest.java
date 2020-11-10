@@ -61,6 +61,11 @@ public class JWTAuthProviderTest extends VertxTestBase {
     TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
     authProvider.authenticate(authInfo, onSuccess(res -> {
       assertNotNull(res);
+      // assert that the content of the principal is not empty
+      assertNotNull(res.principal().getString("sub"));
+      assertNotNull(res.principal().getValue("permissions"));
+      assertNotNull(res.principal().getValue("roles"));
+
       testComplete();
     }));
     await();
