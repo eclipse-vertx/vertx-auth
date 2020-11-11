@@ -110,9 +110,7 @@ public interface OpenIDConnectAuth {
         config.setRevocationPath(json.getString("revocation_endpoint"));
         config.setUserInfoPath(json.getString("userinfo_endpoint"));
         config.setJwkPath(json.getString("jwks_uri"));
-        config.setIntrospectionPath(json.getString("introspection_endpoint",
-            // legacy systems that are older than the RFC used this key
-            json.getString("token_introspection_endpoint")));
+        config.setIntrospectionPath(json.getString("introspection_endpoint"));
 
         try {
           // the constructor might fail if the configuration is incomplete

@@ -106,6 +106,43 @@ public class OAuth2KeycloakIT {
   }
 
   @Test
+  public void shouldIntrospectAccessTokenInactive(TestContext should) {
+    final Async test = should.async();
+
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
+
+      // generate a access token from the user
+      User token = authn.result();
+
+      OAuth2Options options = new OAuth2Options()
+        .setFlow(OAuth2FlowType.PASSWORD)
+        .setClientID("confidential-client")
+        .setTenant("vertx-test")
+        .setSite(site + "/auth/realms/{realm}")
+        .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e");
+
+      options.getHttpClientOptions().setTrustAll(true);
+
+      // get a auth handler for the confidential client
+      KeycloakAuth.discover(
+        rule.vertx(),
+        options,
+        discover -> {
+          should.assertTrue(discover.succeeded());
+          OAuth2Auth confidential = discover.result();
+          try { Thread.sleep(5000L); } catch (InterruptedException e) {}
+          confidential.authenticate(token.principal(), introspect -> {
+            should.assertTrue(introspect.failed());
+            should.assertEquals("Inactive Token", introspect.cause().getMessage());
+            test.complete();
+          });
+        });
+    });
+  }
+
+  @Test
   public void shouldIntrospectAccessToken(TestContext should) {
     final Async test = should.async();
 
@@ -132,7 +169,6 @@ public class OAuth2KeycloakIT {
         discover -> {
           should.assertTrue(discover.succeeded());
           OAuth2Auth confidential = discover.result();
-
           confidential.authenticate(token.principal(), introspect -> {
             should.assertTrue(introspect.succeeded());
             test.complete();

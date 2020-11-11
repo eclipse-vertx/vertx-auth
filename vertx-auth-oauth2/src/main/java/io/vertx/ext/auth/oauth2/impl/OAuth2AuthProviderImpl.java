@@ -175,78 +175,75 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
         final User user = createUser(new JsonObject().put("access_token", tokenCredentials.getToken()), false);
 
-        // the token is not a JWT or there are no loaded keys to validate
-        if (!user.attributes().containsKey("accessToken") || jwt.isUnsecure()) {
-          // the token is not in JWT format or this auth provider is not configured for secure JWTs
-          // in this case we must rely on token introspection in order to know more about its state
-          // attempt to create a token object from the given string representation
-
-          // Not all providers support this so we need to check if the call is possible
-          if (config.getIntrospectionPath() == null) {
-            // this provider doesn't allow introspection, this means we are not able to perform
-            // any authentication,
-            if (user.attributes().containsKey("missing-kid")) {
-              handler.handle(Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid"))));
-            } else {
-              handler.handle(Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection"));
-            }
-            return;
-          }
-
-          // perform the introspection
-          api
-            .tokenIntrospection("access_token", user.principal().getString("access_token"), res -> {
-              if (res.failed()) {
-                handler.handle(Future.failedFuture(res.cause()));
-                return;
-              }
-
-              final JsonObject json = res.result();
-
-              // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
-              if (json.containsKey("active") && !json.getBoolean("active", false)) {
-                handler.handle(Future.failedFuture("Inactive Token"));
-                return;
-              }
-
-              // OPTIONALS
-
-              // validate client id
-              if (json.containsKey("client_id")) {
-                // response included a client id. Match against config client id
-                if (!config.getClientID().equals(json.getString("client_id"))) {
-                  // Client identifier for the OAuth 2.0 client that requested this token.
-                  handler.handle(Future.failedFuture("Wrong client_id"));
-                  return;
-                }
-              }
-
-              // attempt to create a user from the json object
-              final User newUser = createUser(json, user.attributes().containsKey("missing-kid"));
-
-              // final step, verify if the user is not expired
-              // this may happen if the user tokens have been issued for future use for example
-              if (newUser.expired(config.getJWTOptions().getLeeway())) {
-                handler.handle(Future.failedFuture("Used is expired."));
-              } else {
-                // basic validation passed, the token is not expired,
-                // the spec mandates that that a few extra checks are performed
-                validateUser(newUser, handler);
-              }
-            });
-
-        } else {
+        if (user.attributes().containsKey("accessToken") && !jwt.isUnsecure()) {
           final JWTOptions jwtOptions = config.getJWTOptions();
           // a valid JWT token should have the access token value decoded
           // the token might be valid, but expired
-          if (user.expired(jwtOptions.getLeeway())) {
-            handler.handle(Future.failedFuture("Expired Token"));
-          } else {
+          if (!user.expired(jwtOptions.getLeeway())) {
             // basic validation passed, the token is not expired,
             // the spec mandates that that a few extra checks are performed
             validateUser(user, handler);
+            return;
           }
         }
+
+        // the token is not in JWT format or this auth provider is not configured for secure JWTs
+        // in this case we must rely on token introspection in order to know more about its state
+        // attempt to create a token object from the given string representation
+
+        // Not all providers support this so we need to check if the call is possible
+        if (config.getIntrospectionPath() == null) {
+          // this provider doesn't allow introspection, this means we are not able to perform
+          // any authentication,
+          if (user.attributes().containsKey("missing-kid")) {
+            handler.handle(Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid"))));
+          } else {
+            handler.handle(Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection"));
+          }
+          return;
+        }
+
+        // perform the introspection
+        api
+          .tokenIntrospection("access_token", user.principal().getString("access_token"), res -> {
+            if (res.failed()) {
+              handler.handle(Future.failedFuture(res.cause()));
+              return;
+            }
+
+            final JsonObject json = res.result();
+
+            // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
+            if (json.containsKey("active") && !json.getBoolean("active", false)) {
+              handler.handle(Future.failedFuture("Inactive Token"));
+              return;
+            }
+
+            // OPTIONALS
+
+            // validate client id
+            if (json.containsKey("client_id")) {
+              // response included a client id. Match against config client id
+              if (!config.getClientID().equals(json.getString("client_id"))) {
+                // Client identifier for the OAuth 2.0 client that requested this token.
+                handler.handle(Future.failedFuture("Wrong client_id"));
+                return;
+              }
+            }
+
+            // attempt to create a user from the json object
+            final User newUser = createUser(json, user.attributes().containsKey("missing-kid"));
+
+            // final step, verify if the user is not expired
+            // this may happen if the user tokens have been issued for future use for example
+            if (newUser.expired(config.getJWTOptions().getLeeway())) {
+              handler.handle(Future.failedFuture("Used is expired."));
+            } else {
+              // basic validation passed, the token is not expired,
+              // the spec mandates that that a few extra checks are performed
+              validateUser(newUser, handler);
+            }
+          });
 
       } else {
         // the authInfo object does not contain a token, so rely on the
@@ -449,7 +446,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           user.attributes()
             .put("idToken", jwt.decode(json.getString("id_token")));
           // copy the userInfo basic properties to the root
-          copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false,"sub", "name", "email", "picture");
+          copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false, "sub", "name", "email", "picture");
         } catch (NoSuchKeyIdException e) {
           if (!skipMissingKeyNotify) {
             // we haven't notified this id yet
