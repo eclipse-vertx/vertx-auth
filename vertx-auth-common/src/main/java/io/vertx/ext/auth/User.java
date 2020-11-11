@@ -116,8 +116,8 @@ public interface User {
    *   <li>{@code nbf} "not before" in seconds.</li>
    * </ol>
    * A User is considered expired if it contains any of the above and
-   * the current clock time does not agree with the parameter value. If the {@link #principal()} do not contain a key
-   * then {@link #attributes()} are checked.
+   * the current clock time does not agree with the parameter value. If the {@link #attributes()} do not contain a key
+   * then {@link #principal()} properties are checked.
    * <p>
    * If all of the properties are not available the user will not expire.
    * <p>
@@ -133,22 +133,22 @@ public interface User {
     // the specified UTC date/time, ignoring leap seconds
     final long now = (System.currentTimeMillis() / 1000);
 
-    if (principal().containsKey("exp") || attributes().containsKey("exp")) {
-      if (now - leeway >= principal().getLong("exp", attributes().getLong("exp"))) {
+    if (containsKey("exp")) {
+      if (now - leeway >= attributes().getLong("exp", principal().getLong("exp"))) {
         return true;
       }
     }
 
-    if (principal().containsKey("iat") || attributes().containsKey("iat")) {
-      Long iat = principal().getLong("iat", attributes().getLong("iat"));
+    if (containsKey("iat")) {
+      Long iat = attributes().getLong("iat", principal().getLong("iat"));
       // issue at must be in the past
       if (iat > now + leeway) {
         return true;
       }
     }
 
-    if (principal().containsKey("nbf") || attributes().containsKey("nbf")) {
-      Long nbf = principal().getLong("nbf", attributes().getLong("nbf"));
+    if (containsKey("nbf")) {
+      Long nbf = attributes().getLong("nbf", principal().getLong("nbf"));
       // not before must be after now
       if (nbf > now + leeway) {
         return true;
@@ -156,6 +156,20 @@ public interface User {
     }
 
     return false;
+  }
+
+  default <T> T get(String key) {
+    if (attributes().containsKey(key)) {
+      return (T) attributes().getValue(key);
+    }
+    if (principal().containsKey(key)) {
+      return (T) principal().getValue(key);
+    }
+    return null;
+  }
+
+  default boolean containsKey(String key) {
+    return attributes().containsKey(key) || principal().containsKey(key);
   }
 
   /**

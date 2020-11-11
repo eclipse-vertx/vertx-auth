@@ -117,11 +117,21 @@ will result in avoiding one more IO operation to the underlying authorization pr
 
 In order to clear the list of authorizations you can use {@link io.vertx.ext.auth.authorization.Authorizations#clear()}.
 
-=== The User Principal
+=== The User Principal and Attributes
 
 You can get the Principal corresponding to the authenticated user with {@link io.vertx.ext.auth.User#principal()}.
 
-What this returns depends on the underlying implementation.
+What this returns depends on the underlying implementation. The principal map is the source data that was used to create
+the user instance. The attributes are extra properties, that were **not** provided during the creation of the of the
+instance but are the result of the processing of the user data. The distinction is there to ensure that processing of
+the principal will not tamper or over write existing data.
+
+In order to simplify the usage, two helper methods can be used to lookup and read values on both sources:
+
+[source,$lang]
+----
+{@link examples.AuthCommonExamples#example9}
+----
 
 == Creating your own authentication or authorization provider implementation
 

@@ -106,4 +106,18 @@ public class AuthCommonExamples {
       .add(ldapAuthProvider)
       .add(propertiesAuthProvider);
   }
+
+  public void example9(User user) {
+
+    // check if user has a well known property
+    if (user.containsKey("sub")) {
+      // the check will first assert that the attributes contain
+      // the given key and if not assert that the principal contains
+      // the given key
+
+      // just like the check before the get will follow the same
+      // rules to retrieve the data, first "attributes" then "principal"
+      String sub = user.get("sub");
+    }
+  }
 }

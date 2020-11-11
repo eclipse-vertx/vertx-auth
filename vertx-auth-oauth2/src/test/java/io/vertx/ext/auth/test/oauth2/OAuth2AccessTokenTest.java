@@ -172,7 +172,7 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       } else {
         User token = res.result();
         // hack the token to set the exp (to yesterday)
-        token.principal().put("exp", System.currentTimeMillis() / 1000 - 24 * 60 * 60);
+        token.attributes().put("exp", System.currentTimeMillis() / 1000 - 24 * 60 * 60);
         assertTrue(token.expired());
         testComplete();
       }

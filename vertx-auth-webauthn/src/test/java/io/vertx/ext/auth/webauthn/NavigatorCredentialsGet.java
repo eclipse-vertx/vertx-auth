@@ -47,7 +47,6 @@ public class NavigatorCredentialsGet {
       .onFailure(should::fail)
       .onSuccess(challengeResponse -> {
         assertNotNull(challengeResponse);
-        System.out.println(challengeResponse.encodePrettily());
         // important fields to be present
         assertNotNull(challengeResponse.getString("challenge"));
         assertNotNull(challengeResponse.getJsonArray("allowCredentials"));
