@@ -16,6 +16,8 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.Fluent;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 import java.security.KeyStore;
@@ -32,20 +34,18 @@ import java.util.Map;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @DataObject(generateConverter = true)
-public class KeyStoreOptions {
+public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
 
   // Defaults
   private static final String DEFAULT_TYPE = KeyStore.getDefaultType();
 
-  private String type;
-  private String path;
-  private String password;
   private Map<String, String> passwordProtection;
 
   /**
    * Default constructor
    */
   public KeyStoreOptions() {
+    super();
     setType(DEFAULT_TYPE);
   }
 
@@ -55,10 +55,10 @@ public class KeyStoreOptions {
    * @param other the options to copy
    */
   public KeyStoreOptions(KeyStoreOptions other) {
-    setType(DEFAULT_TYPE);
-    type = other.getType();
-    path = other.getPath();
-    password = other.getPassword();
+    super(other);
+    if (getType() == null) {
+      setType(DEFAULT_TYPE);
+    }
     passwordProtection = other.getPasswordProtection();
   }
 
@@ -71,30 +71,36 @@ public class KeyStoreOptions {
     KeyStoreOptionsConverter.fromJson(json, this);
   }
 
+  @Override
   public String getType() {
-    return type;
+    return super.getType();
   }
 
+  @Fluent
+  @Override
   public KeyStoreOptions setType(String type) {
-    this.type = type;
+    super.setType(type);
     return this;
   }
 
-  public String getPath() {
-    return path;
-  }
-
-  public KeyStoreOptions setPath(String path) {
-    this.path = path;
-    return this;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
+  @Fluent
+  @Override
   public KeyStoreOptions setPassword(String password) {
-    this.password = password;
+    super.setPassword(password);
+    return this;
+  }
+
+  @Fluent
+  @Override
+  public KeyStoreOptions setPath(String path) {
+    super.setPath(path);
+    return this;
+  }
+
+  @Fluent
+  @Override
+  public KeyStoreOptions setValue(Buffer value) {
+    super.setValue(value);
     return this;
   }
 
@@ -102,6 +108,7 @@ public class KeyStoreOptions {
     return passwordProtection;
   }
 
+  @Fluent
   public KeyStoreOptions setPasswordProtection(Map<String, String> passwordProtection) {
     this.passwordProtection = passwordProtection;
     return this;
