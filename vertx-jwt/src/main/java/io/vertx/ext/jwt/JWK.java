@@ -2,6 +2,7 @@ package io.vertx.ext.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.jwt.impl.SignatureHelper;
 
 import javax.crypto.*;
@@ -29,7 +30,7 @@ import java.util.*;
  * The constructor takes a single JWK (the the KeySet) or a PEM encoded pair (used by Google and useful for importing
  * standard PEM files from OpenSSL).
  *
- * * Certificate chains (x5c) only allow a single element chain, certificate urls and fingerprints are not considered.
+ * * Certificate chains (x5c) are allowed and verified, certificate urls and fingerprints are not considered.
  *
  * @author Paulo Lopes
  */
@@ -178,7 +179,7 @@ public final class JWK implements Crypto {
     label = kid == null ? UUID.randomUUID().toString() : kid;
 
     try {
-      switch (json.getString("kty")) {
+      switch (json.getString("kty", "RSA")) {
         case "RSA":
           createRSA(json);
           break;
@@ -192,12 +193,12 @@ public final class JWK implements Crypto {
         default:
           throw new RuntimeException("Unsupported key type: " + json.getString("kty"));
       }
-    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException | NoSuchProviderException | SignatureException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException {
+  private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, NoSuchPaddingException, InvalidKeyException, NoSuchProviderException, SignatureException {
     final Map<String, String> alias = new HashMap<String, String>() {{
       put("RS256", "SHA256withRSA");
       put("RS384", "SHA384withRSA");
@@ -236,15 +237,20 @@ public final class JWK implements Crypto {
     // certificate chain
     if (json.containsKey("x5c")) {
       JsonArray x5c = json.getJsonArray("x5c");
-
-      if (x5c.size() > 1) {
-        // TODO: handle more than 1 value
-        throw new RuntimeException("Certificate Chain length > 1 is not supported");
-      }
-
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-      certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(addBoundaries(x5c.getString(0)).getBytes(UTF8)));
+      List<X509Certificate> certChain = new ArrayList<>();
+      for (int i = 0; i < x5c.size(); i++) {
+        certChain.add(
+          (X509Certificate) cf
+            .generateCertificate(
+              new ByteArrayInputStream(
+                addBoundaries(x5c.getString(i)).getBytes(StandardCharsets.UTF_8))));
+      }
+
+      // validate the chain (don't assume the chain includes the root CA certificate
+      CertificateHelper.checkValidity(certChain, false, null);
+      certificate = certChain.get(0);
     }
 
     switch (json.getString("use", "sig")) {
