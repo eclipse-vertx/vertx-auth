@@ -1,16 +1,21 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 
 import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
@@ -68,7 +73,7 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, oauthConfig);
+    oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, new OAuth2ClientOptions(oauthConfig));
 
     final CountDownLatch latch = new CountDownLatch(1);
 
@@ -225,5 +230,44 @@ public class OAuth2IntrospectTest extends VertxTestBase {
       }
     });
     await();
+  }
+
+  @Test
+  public void introspectExpiredAccessToken() {
+    fixture = fixtureKeycloak;
+    oauth2.introspectToken(justExpiredToken(), res -> {
+      if (res.failed()) {
+        assertEquals("Expired token", res.cause().getMessage());
+        testComplete();
+      } else {
+        fail();
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void introspectExpiredAccessTokenWithLeeway() {
+    fixture = fixtureIntrospect;
+    ((OAuth2AuthProviderImpl) oauth2).getConfig().setJWTOptions(new JWTOptions().setLeeway(10));
+    oauth2.introspectToken(justExpiredToken(), res -> {
+      if (res.failed()) {
+        fail(res.cause());
+      } else {
+        testComplete();
+      }
+    });
+    await();
+  }
+
+  private String justExpiredToken() {
+    String[] segments = token.split("\\.");
+    JsonObject payload = new JsonObject(Buffer.buffer(Base64.getUrlDecoder().decode(segments[1])));
+    payload.put("exp", (System.currentTimeMillis() / 1000) - 1);
+    segments[1] = Base64.getUrlEncoder().encodeToString(payload.encode().getBytes(StandardCharsets.UTF_8));
+    String newToken = String.join(".", segments);
+    config = new JsonObject();
+    config.put("token", newToken);
+    return newToken;
   }
 }
