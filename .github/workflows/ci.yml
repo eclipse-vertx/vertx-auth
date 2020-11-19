@@ -18,6 +18,8 @@ jobs:
         os: [ubuntu-latest]
         jdk: [ 8, 11 ]
     runs-on: ${{ matrix.os }}
+    env:
+      CI: true
     steps:
       - uses: actions/cache@v2
         with:
