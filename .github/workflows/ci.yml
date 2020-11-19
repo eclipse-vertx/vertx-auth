@@ -18,8 +18,6 @@ jobs:
         os: [ubuntu-latest]
         jdk: [ 8, 11 ]
     runs-on: ${{ matrix.os }}
-    env:
-      CI: true
     steps:
       - uses: actions/cache@v2
         with:
@@ -36,7 +34,7 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
       - name: Run tests
-        run: mvn -q clean verify -B
+        run: mvn -PIT -q clean verify -B
       - name: Publish Unit Test Results
         uses: scacap/action-surefire-report@v1
         if: ${{ always() }}
