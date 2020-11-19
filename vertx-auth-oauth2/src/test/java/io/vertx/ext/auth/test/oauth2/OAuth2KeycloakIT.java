@@ -39,9 +39,6 @@ public class OAuth2KeycloakIT {
     .withExposedPorts(8080, 8443)
     .withClasspathResourceMapping("vertx-test-realm.json", "/tmp/vertx-test-realm.json", BindMode.READ_ONLY)
     .withCommand("-b", "0.0.0.0", "-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.file=/tmp/vertx-test-realm.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
-    .withLogConsumer(frame -> {
-      System.out.println(frame.getUtf8String());
-    })
     .waitingFor(Wait.forLogMessage(".*Keycloak.*started.*", 1));
 
 
