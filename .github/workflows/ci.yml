@@ -34,7 +34,9 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
       - name: Run tests
-        run: mvn -PIT -q clean verify -B
+        run: mvn -q clean verify -B
+        env:
+          CI: 'true'
       - name: Publish Unit Test Results
         uses: scacap/action-surefire-report@v1
         if: ${{ always() }}
