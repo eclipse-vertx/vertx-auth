@@ -1,6 +1,6 @@
 = Vert.x Auth
 
-image:https://travis-ci.org/vert-x3/vertx-auth.svg?branch=master["Build Status", link="https://travis-ci.org/vert-x3/vertx-auth"]
+image:https://github.com/vert-x3/vertx-auth/workflows/CI/badge.svg?branch=master["Build Status", link="https://github.com/vert-x3/vertx-auth/actions?query=workflow%3ACI"]
 
 This module contains auth implementations for Vert.x and common auth interfaces
 
