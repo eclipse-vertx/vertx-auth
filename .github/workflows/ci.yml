@@ -25,10 +25,6 @@ jobs:
           key: maven-java-${{ matrix.jdk }}
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Docker build
-        run: docker build -t vertx-test-keycloak vertx-auth-oauth2/src/test/fixtures
-      - name: Docker run
-        run: docker run -d -p 8888:8080 -p 9443:8443 vertx-test-keycloak
       - name: Install JDK
         uses: joschi/setup-jdk@v2
         with:
