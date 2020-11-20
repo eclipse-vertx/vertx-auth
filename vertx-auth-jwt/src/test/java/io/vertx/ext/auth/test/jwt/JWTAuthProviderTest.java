@@ -17,13 +17,13 @@ package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
-import io.vertx.ext.auth.JWTOptions;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -647,11 +647,11 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions().addJwk(
       new JsonObject()
-      .put("kty", "RSA")
-      .put("n", "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw")
-      .put("e", "AQAB")
-      .put("alg", "RS256")
-      .put("kid", "2011-04-29")));
+        .put("kty", "RSA")
+        .put("n", "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw")
+        .put("e", "AQAB")
+        .put("alg", "RS256")
+        .put("kid", "2011-04-29")));
 
   }
 
@@ -683,4 +683,32 @@ public class JWTAuthProviderTest extends VertxTestBase {
     }));
     await();
   }
+
+  @Test
+  public void testGenerateClaimsAndCheck() {
+
+    JsonObject payload = new JsonObject()
+      .put("sub", "Paulo");
+
+    String token = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
+
+    TokenCredentials authInfo = new TokenCredentials(token);
+
+    authProvider.authenticate(authInfo, onSuccess(res -> {
+      assertNotNull(res);
+      // the permission has been properly decoded from the legacy token
+      assertTrue(PermissionBasedAuthorization.create("user").match(res));
+
+      res.clearCache();
+
+      // overwrite with the JWT decoder
+      JWTAuthorization.create("permissions").getAuthorizations(res, permissions -> {
+        assertTrue(permissions.succeeded());
+        assertTrue(PermissionBasedAuthorization.create("user").match(res));
+        testComplete();
+      });
+    }));
+    await();
+  }
+
 }

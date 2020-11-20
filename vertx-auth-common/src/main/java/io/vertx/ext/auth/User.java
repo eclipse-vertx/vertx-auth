@@ -158,7 +158,32 @@ public interface User {
     return false;
   }
 
+  /**
+   * Get a value from the user object. This method will perform lookups on several places before returning a value.
+   * <ol>
+   *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
+   *   <li>If exists the value will be returned from the {@link #attributes()}</li>
+   *   <li>If exists the value will be returned from the {@link #principal()}</li>
+   *   <li>Otherwise it will be {@code null}</li>
+   * </ol>
+   * @param key the key to look up
+   * @param <T> the expected type
+   * @return the value or null if missing
+   * @throws ClassCastException if the value cannot be casted to {@code T}
+   */
   default <T> T get(String key) {
+    if (attributes().containsKey("rootClaim")) {
+      JsonObject rootClaim;
+      try {
+        rootClaim = attributes().getJsonObject(attributes().getString("rootClaim"));
+      } catch (ClassCastException e) {
+        // ignore
+        rootClaim = null;
+      }
+      if (rootClaim != null && rootClaim.containsKey(key)) {
+        return (T) rootClaim.getValue(key);
+      }
+    }
     if (attributes().containsKey(key)) {
       return (T) attributes().getValue(key);
     }
@@ -168,7 +193,30 @@ public interface User {
     return null;
   }
 
+  /**
+   * Checks if a value exists on the user object. This method will perform lookups on several places before returning.
+   * <ol>
+   *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
+   *   <li>If exists the value will be returned from the {@link #attributes()}</li>
+   *   <li>If exists the value will be returned from the {@link #principal()}</li>
+   *   <li>Otherwise it will be {@code null}</li>
+   * </ol>
+   * @param key the key to look up
+   * @return the value or null if missing
+   */
   default boolean containsKey(String key) {
+    if (attributes().containsKey("rootClaim")) {
+      JsonObject rootClaim;
+      try {
+        rootClaim = attributes().getJsonObject(attributes().getString("rootClaim"));
+      } catch (ClassCastException e) {
+        // ignore
+        rootClaim = null;
+      }
+      if (rootClaim != null && rootClaim.containsKey(key)) {
+        return true;
+      }
+    }
     return attributes().containsKey(key) || principal().containsKey(key);
   }
 

@@ -27,18 +27,19 @@ public class MicroProfileTest {
 
     User user = User.create(
       new JsonObject().put("access_token", "jwt"),
-      new JsonObject().put("accessToken",
-        new JsonObject(
-          "{\n" +
-            "      \"iss\": \"https://server.example.com\",\n" +
-            "      \"aud\": \"s6BhdRkqt3\",\n" +
-            "      \"jti\": \"a-123\",\n" +
-            "      \"exp\": 999999999999,\n" +
-            "      \"iat\": 1311280970,\n" +
-            "      \"sub\": \"24400320\",\n" +
-            "      \"upn\": \"jdoe@server.example.com\",\n" +
-            "      \"groups\": [\"red-group\", \"green-group\", \"admin-group\", \"admin\"]\n" +
-            "}")));
+      new JsonObject()
+        .put("accessToken",
+          new JsonObject(
+            "{\n" +
+              "      \"iss\": \"https://server.example.com\",\n" +
+              "      \"aud\": \"s6BhdRkqt3\",\n" +
+              "      \"jti\": \"a-123\",\n" +
+              "      \"exp\": 999999999999,\n" +
+              "      \"iat\": 1311280970,\n" +
+              "      \"sub\": \"24400320\",\n" +
+              "      \"upn\": \"jdoe@server.example.com\",\n" +
+              "      \"groups\": [\"red-group\", \"green-group\", \"admin-group\", \"admin\"]\n" +
+              "}")));
 
 
     // assert that the user has the following roles:

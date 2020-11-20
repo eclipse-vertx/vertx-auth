@@ -12,12 +12,16 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.authorization.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.UserConverter;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class UserTest {
 
@@ -83,4 +87,27 @@ public class UserTest {
     Assert.assertEquals(2, user.authorizations().get("providerId").size());
   }
 
+  @Test
+  public void simpleGet() {
+    User user = User.create(
+      new JsonObject().put("access_token", "jwt"),
+      new JsonObject()
+        .put("rootClaim", "accessToken")
+        .put("accessToken",
+          new JsonObject(
+            "{\n" +
+              "      \"iss\": \"https://server.example.com\",\n" +
+              "      \"aud\": \"s6BhdRkqt3\",\n" +
+              "      \"jti\": \"a-123\",\n" +
+              "      \"exp\": 999999999999,\n" +
+              "      \"iat\": 1311280970,\n" +
+              "      \"sub\": \"24400320\",\n" +
+              "      \"upn\": \"jdoe@server.example.com\",\n" +
+              "      \"groups\": [\"red-group\", \"green-group\", \"admin-group\", \"admin\"]\n" +
+              "}")));
+
+    assertNotNull(user.get("groups"));
+    JsonArray groups = user.get("groups");
+    assertEquals(4, groups.size());
+  }
 }

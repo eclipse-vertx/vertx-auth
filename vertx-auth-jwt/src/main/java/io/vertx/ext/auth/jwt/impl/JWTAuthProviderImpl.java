@@ -210,7 +210,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
     // root claim meta data for JWT AuthZ
     result.attributes()
-      .put("rootClaim", permissionsClaimKey);
+      .put("rootClaim", "accessToken");
 
     JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
     if (jsonPermissions != null) {
