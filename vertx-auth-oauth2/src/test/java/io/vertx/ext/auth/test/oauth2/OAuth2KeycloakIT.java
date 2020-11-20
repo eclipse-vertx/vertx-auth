@@ -15,10 +15,14 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunnerWithParametersFactory;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,24 +31,49 @@ import java.util.List;
 @Parameterized.UseParametersRunnerFactory(VertxUnitRunnerWithParametersFactory.class)
 public class OAuth2KeycloakIT {
 
+  @ClassRule
+  public static GenericContainer<?> container = new GenericContainer<>("jboss/keycloak:6.0.0")
+    .withEnv("KEYCLOAK_USER", "user")
+    .withEnv("KEYCLOAK_PASSWORD", "password")
+    .withEnv("DB_VENDOR", "H2")
+    .withExposedPorts(8080, 8443)
+    .withClasspathResourceMapping("vertx-test-realm.json", "/tmp/vertx-test-realm.json", BindMode.READ_ONLY)
+    .withCommand("-b", "0.0.0.0", "-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.file=/tmp/vertx-test-realm.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
+    .waitingFor(Wait.forLogMessage(".*Keycloak.*started.*", 1));
+
+
   @Parameterized.Parameters
   public static List<String> sites() {
-    return Arrays.asList("http://localhost:8888", "https://localhost:9443");
+    return Arrays.asList("http", "https");
   }
 
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
 
+  private final String proto;
   private OAuth2Auth keycloak;
-  private final String site;
+  private String site;
 
-  public OAuth2KeycloakIT(String site) {
-    this.site = site;
+  public OAuth2KeycloakIT(String proto) {
+    this.proto = proto;
   }
 
   @Before
   public void setUp(TestContext should) {
     final Async test = should.async();
+
+    switch (proto) {
+      case "http":
+        site = proto + "://" + container.getContainerIpAddress() + ":" + container.getMappedPort(8080);
+        break;
+      case "https":
+        site = proto + "://" + container.getContainerIpAddress() + ":" + container.getMappedPort(8443);
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid proto: " + proto);
+    }
+
+    System.out.println(site);
 
     OAuth2Options options = new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
