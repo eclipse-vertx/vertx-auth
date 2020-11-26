@@ -33,13 +33,6 @@ jobs:
         run: mvn -q clean verify -B
         env:
           CI: 'true'
-      - name: Publish Unit Test Results
-        uses: scacap/action-surefire-report@v1
-        if: ${{ always() }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: '**/surefire-reports/*.xml'
-          report_individual_runs: true
   Deploy:
     name: Deploy to OSSRH
     if: ${{ github.repository_owner == 'vert-x3' && github.event_name == 'push' }}
