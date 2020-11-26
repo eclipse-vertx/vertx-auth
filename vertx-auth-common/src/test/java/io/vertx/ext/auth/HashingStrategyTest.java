@@ -2,6 +2,7 @@ package io.vertx.ext.auth;
 
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static org.junit.Assert.*;
@@ -10,7 +11,7 @@ public class HashingStrategyTest {
 
   Base64.Encoder B64ENC = Base64.getEncoder();
 
-  String salt = B64ENC.encodeToString("keyboard.cat".getBytes());
+  String salt = B64ENC.encodeToString("keyboard.cat".getBytes(StandardCharsets.UTF_8));
 
   @Test
   public void testHashSimple() {

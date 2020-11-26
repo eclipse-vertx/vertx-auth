@@ -169,7 +169,7 @@ public class OAuth2API {
 
     if (confidentialClient) {
       String basic = config.getClientID() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
     JsonObject tmp = config.getHeaders();
@@ -259,7 +259,7 @@ public class OAuth2API {
 
     if (confidentialClient) {
       String basic = config.getClientID() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
     JsonObject tmp = config.getHeaders();
@@ -346,7 +346,7 @@ public class OAuth2API {
 
     if (confidentialClient) {
       String basic = config.getClientID() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes()));
+      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
     final JsonObject tmp = config.getHeaders();

@@ -465,7 +465,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addJwk(new JsonObject()
         .put("kty", "oct")
-        .put("k", Base64.getUrlEncoder().encodeToString("a bad secret".getBytes())))
+        .put("k", Base64.getUrlEncoder().encodeToString("a bad secret".getBytes(StandardCharsets.UTF_8))))
     );
     TokenCredentials authInfo = new TokenCredentials(token);
     authProvider.authenticate(authInfo, onFailure(res -> {
@@ -481,7 +481,7 @@ public class JWTAuthProviderTest extends VertxTestBase {
     authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
       .addJwk(new JsonObject()
         .put("kty", "oct")
-        .put("k", Base64.getUrlEncoder().encodeToString("notasecret".getBytes())))
+        .put("k", Base64.getUrlEncoder().encodeToString("notasecret".getBytes(StandardCharsets.UTF_8))))
     );
     TokenCredentials authInfo = new TokenCredentials(token);
     authProvider.authenticate(authInfo, onSuccess(res -> {

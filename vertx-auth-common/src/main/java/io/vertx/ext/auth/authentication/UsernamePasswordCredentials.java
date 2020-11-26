@@ -17,6 +17,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -105,7 +106,7 @@ public class UsernamePasswordCredentials implements Credentials {
         ":" +
         (password == null ? "" : password);
 
-    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
   }
 
 }

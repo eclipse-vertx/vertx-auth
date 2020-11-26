@@ -28,6 +28,7 @@ import io.vertx.ext.auth.htdigest.HtdigestAuth;
 import io.vertx.ext.auth.htdigest.HtdigestCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -168,6 +169,6 @@ public class HtdigestAuthImpl implements HtdigestAuth {
 
   private static synchronized String md5(String payload) {
     MD5.reset();
-    return bytesToHex(MD5.digest(payload.getBytes()));
+    return bytesToHex(MD5.digest(payload.getBytes(StandardCharsets.UTF_8)));
   }
 }

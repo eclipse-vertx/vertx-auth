@@ -27,6 +27,7 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.spec.*;
@@ -179,7 +180,7 @@ public final class JWK implements Crypto {
       case "HS256":
         try {
           mac = Mac.getInstance("HMacSHA256");
-          mac.init(new SecretKeySpec(pem.getBytes(), "HMacSHA256"));
+          mac.init(new SecretKeySpec(pem.getBytes(StandardCharsets.US_ASCII), "HMacSHA256"));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -192,7 +193,7 @@ public final class JWK implements Crypto {
       case "HS384":
         try {
           mac = Mac.getInstance("HMacSHA384");
-          mac.init(new SecretKeySpec(pem.getBytes(), "HMacSHA384"));
+          mac.init(new SecretKeySpec(pem.getBytes(StandardCharsets.US_ASCII), "HMacSHA384"));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -205,7 +206,7 @@ public final class JWK implements Crypto {
       case "HS512":
         try {
           mac = Mac.getInstance("HMacSHA512");
-          mac.init(new SecretKeySpec(pem.getBytes(), "HMacSHA512"));
+          mac.init(new SecretKeySpec(pem.getBytes(StandardCharsets.US_ASCII), "HMacSHA512"));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -297,7 +298,7 @@ public final class JWK implements Crypto {
     switch (kind) {
       case "CERTIFICATE":
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes())).getPublicKey();
+        publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.US_ASCII))).getPublicKey();
         return USE_ENC;
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
