@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.authentication;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -94,6 +95,7 @@ public interface AuthenticationProvider {
    * @param credentials  The credentials
    * @param resultHandler  The result handler
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   default void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     try {
       credentials.checkValid(null);
@@ -113,6 +115,7 @@ public interface AuthenticationProvider {
    * @param credentials  The credentials
    * @return The result future
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   default Future<User> authenticate(Credentials credentials) {
     Promise<User> promise = Promise.promise();
     authenticate(credentials, promise);

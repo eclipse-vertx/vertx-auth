@@ -15,8 +15,6 @@
  */
 package io.vertx.ext.auth.authentication;
 
-import io.vertx.codegen.annotations.Fluent;
-import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
@@ -26,7 +24,6 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Paulo Lopes
  */
-@VertxGen(concrete = false)
 public interface Credentials {
   /**
    * Implementors should override this method to perform validation. An argument is allowed to
@@ -64,7 +61,6 @@ public interface Credentials {
    * @return fluent self.
    * @throws CredentialValidationException if the challenge cannot be applicable.
    */
-  @Fluent
   default Credentials applyHttpChallenge(String challenge, HttpMethod method, String uri, Integer nc, String cnonce) throws CredentialValidationException {
     if (challenge != null) {
       throw new CredentialValidationException("This implementation can't handle HTTP Authentication");
