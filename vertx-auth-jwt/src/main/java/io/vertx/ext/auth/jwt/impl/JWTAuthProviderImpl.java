@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,7 +70,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
     // attempt to load a Key file
     try {
       if (keyStore != null) {
-        KeyStore ks = KeyStore.getInstance(keyStore.getType());
+        final KeyStore ks;
+        if (keyStore.getProvider() == null) {
+          ks = KeyStore.getInstance(keyStore.getType());
+        } else {
+          ks = KeyStore.getInstance(keyStore.getType(), keyStore.getProvider());
+        }
 
         // synchronize on the class to avoid the case where multiple file accesses will overlap
         synchronized (JWTAuthProviderImpl.class) {
@@ -102,7 +108,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
 
-    } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException e) {
+    } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new RuntimeException(e);
     }
   }

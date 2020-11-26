@@ -41,7 +41,7 @@ public class OAuth2Options {
   private static final OAuth2FlowType FLOW = OAuth2FlowType.AUTH_CODE;
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
-  private static final String REVOKATION_PATH = "/oauth/revoke";
+  private static final String REVOCATION_PATH = "/oauth/revoke";
   private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
   private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
@@ -148,7 +148,7 @@ public class OAuth2Options {
     validateIssuer = VALIDATE_ISSUER;
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
-    revocationPath = REVOKATION_PATH;
+    revocationPath = REVOCATION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
     useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
     clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;

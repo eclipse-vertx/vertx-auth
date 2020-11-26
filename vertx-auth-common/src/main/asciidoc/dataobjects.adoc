@@ -63,6 +63,7 @@ The permissions of this token.
 |[[password]]`@password`|`String`|-
 |[[passwordProtection]]`@passwordProtection`|`String`|-
 |[[path]]`@path`|`String`|-
+|[[provider]]`@provider`|`String`|-
 |[[type]]`@type`|`String`|-
 |[[value]]`@value`|`Buffer`|-
 |===

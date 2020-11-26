@@ -34,19 +34,23 @@ import java.util.Map;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @DataObject(generateConverter = true)
-public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
+public class KeyStoreOptions {
 
   // Defaults
   private static final String DEFAULT_TYPE = KeyStore.getDefaultType();
 
+  private String type;
+  private String provider;
+  private String password;
+  private String path;
+  private Buffer value;
   private Map<String, String> passwordProtection;
 
   /**
    * Default constructor
    */
   public KeyStoreOptions() {
-    super();
-    setType(DEFAULT_TYPE);
+    type = DEFAULT_TYPE;
   }
 
   /**
@@ -55,10 +59,13 @@ public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
    * @param other the options to copy
    */
   public KeyStoreOptions(KeyStoreOptions other) {
-    super(other);
-    if (getType() == null) {
-      setType(DEFAULT_TYPE);
+    type = other.getType();
+    if (type == null) {
+      type = DEFAULT_TYPE;
     }
+    password = other.getPassword();
+    path = other.getPath();
+    value = other.getValue();
     passwordProtection = other.getPasswordProtection();
   }
 
@@ -71,47 +78,65 @@ public class KeyStoreOptions extends io.vertx.core.net.KeyStoreOptions {
     KeyStoreOptionsConverter.fromJson(json, this);
   }
 
-  @Override
-  public String getType() {
-    return super.getType();
-  }
-
   @Fluent
-  @Override
   public KeyStoreOptions setType(String type) {
-    super.setType(type);
+    this.type = type;
     return this;
   }
 
   @Fluent
-  @Override
+  public KeyStoreOptions setProvider(String provider) {
+    this.provider = provider;
+    return this;
+  }
+
+  @Fluent
   public KeyStoreOptions setPassword(String password) {
-    super.setPassword(password);
+    this.password = password;
     return this;
   }
 
   @Fluent
-  @Override
   public KeyStoreOptions setPath(String path) {
-    super.setPath(path);
+    this.path = path;
     return this;
   }
 
   @Fluent
-  @Override
   public KeyStoreOptions setValue(Buffer value) {
-    super.setValue(value);
+    this.value = value;
     return this;
-  }
-
-  public Map<String, String> getPasswordProtection() {
-    return passwordProtection;
   }
 
   @Fluent
   public KeyStoreOptions setPasswordProtection(Map<String, String> passwordProtection) {
     this.passwordProtection = passwordProtection;
     return this;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getProvider() {
+    return provider;
+  }
+
+  @Fluent
+  public String getPassword() {
+    return password;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public Buffer getValue() {
+    return value;
+  }
+
+  public Map<String, String> getPasswordProtection() {
+    return passwordProtection;
   }
 
   public KeyStoreOptions putPasswordProtection(String alias, String password) {
