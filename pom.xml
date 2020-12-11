@@ -38,12 +38,12 @@
   </parent>
 
   <artifactId>vertx-auth</artifactId>
-  <version>3.9.5-SNAPSHOT</version>
+  <version>3.9.5</version>
 
   <name>Vert.x Auth</name>
 
   <properties>
-    <stack.version>3.9.5-SNAPSHOT</stack.version>
+    <stack.version>3.9.5</stack.version>
     <doc.skip>true</doc.skip>
   </properties>
 
