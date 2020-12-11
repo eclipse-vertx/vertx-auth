@@ -50,6 +50,9 @@ public final class CWK {
       if (pairs == null || pairs.length == 0) {
         this.values = Collections.emptyMap();
       } else {
+        if (pairs.length % 2 != 0) {
+          throw new IllegalArgumentException("pairs must have even length");
+        }
         Map<String, String> tmp = new HashMap<>();
         for (int i = 0; i < pairs.length; i += 2) {
           tmp.put(pairs[i], pairs[i + 1]);
