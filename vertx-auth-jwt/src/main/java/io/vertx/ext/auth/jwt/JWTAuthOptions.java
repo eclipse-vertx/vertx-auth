@@ -77,12 +77,19 @@ public class JWTAuthOptions {
     JWTAuthOptionsConverter.fromJson(json, this);
   }
 
-
+  /**
+   * @deprecated AuthN and AuthZ have been split in vert.x 4.0.0 in order to specify where
+   * authorization will happen see {@link io.vertx.ext.auth.jwt.authorization.JWTAuthorization}.
+   */
   @Deprecated
   public String getPermissionsClaimKey() {
     return permissionsClaimKey;
   }
 
+  /**
+   * @deprecated AuthN and AuthZ have been split in vert.x 4.0.0 in order to specify where
+   * authorization will happen see {@link io.vertx.ext.auth.jwt.authorization.JWTAuthorization}.
+   */
   @Deprecated
   public JWTAuthOptions setPermissionsClaimKey(String permissionsClaimKey) {
     this.permissionsClaimKey = permissionsClaimKey;
