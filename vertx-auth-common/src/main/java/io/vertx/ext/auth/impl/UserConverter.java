@@ -24,6 +24,7 @@ public class UserConverter {
 
   private final static String FIELD_PRINCIPAL = "principal";
   private final static String FIELD_AUTHORIZATIONS = "authorizations";
+  private final static String FIELD_ATTRIBUTES = "attributes";
 
   public static JsonObject encode(User value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
@@ -39,6 +40,7 @@ public class UserConverter {
       }
     }
     json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
+    json.put(FIELD_ATTRIBUTES, value.attributes());
     return json;
   }
 
@@ -56,6 +58,7 @@ public class UserConverter {
         user.authorizations().add(fieldName, AuthorizationConverter.decode(jsonAuthorization));
       }
     }
+    user.attributes().mergeIn(json.getJsonObject(FIELD_ATTRIBUTES, new JsonObject()));
     return user;
   }
 

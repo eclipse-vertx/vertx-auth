@@ -32,7 +32,10 @@ public class UserTest {
   }
 
   public User createTestUser() {
-    return User.create(new JsonObject().put("principal1", "value principal 1").put("principal2", "value principal 2"));
+    return User.create(
+      new JsonObject().put("principal1", "value principal 1").put("principal2", "value principal 2"),
+      new JsonObject().put("attribute1", "value attribute 1").put("attribute2", "value attribute 2")
+    );
   }
 
   @Test
