@@ -172,11 +172,6 @@ public class OAuth2API {
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
-    JsonObject tmp = config.getHeaders();
-    if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
-
     // Enable the system to send authorization params in the body (for example github does not require to be in the header)
     final JsonObject form = params.copy();
     if (config.getExtraParameters() != null) {
@@ -262,11 +257,6 @@ public class OAuth2API {
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
-    JsonObject tmp = config.getHeaders();
-    if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
-
     final JsonObject form = new JsonObject()
       .put("token", token)
       // optional param from RFC7662
@@ -347,11 +337,6 @@ public class OAuth2API {
     if (confidentialClient) {
       String basic = config.getClientID() + ":" + config.getClientSecret();
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    final JsonObject tmp = config.getHeaders();
-    if (tmp != null) {
-      headers.mergeIn(tmp);
     }
 
     final JsonObject form = new JsonObject();
@@ -492,12 +477,6 @@ public class OAuth2API {
     final JsonObject headers = new JsonObject();
 
     headers.put("Authorization", "Bearer " + accessToken);
-
-    JsonObject tmp = config.getHeaders();
-
-    if (tmp != null) {
-      headers.mergeIn(tmp);
-    }
 
     final JsonObject form = new JsonObject();
 

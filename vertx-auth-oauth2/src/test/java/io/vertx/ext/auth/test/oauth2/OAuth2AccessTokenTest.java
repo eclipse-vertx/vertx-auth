@@ -68,11 +68,13 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
       .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientID("client-id")
       .setClientSecret("client-secret")
-      .setSite("http://localhost:8080"));
+      .setSite("http://localhost:8080")
+      .setHeaders(new JsonObject().put("x-foo", "bar")));
 
     final CountDownLatch latch = new CountDownLatch(1);
 
     server = vertx.createHttpServer().requestHandler(req -> {
+      assertEquals("bar", req.getHeader("x-foo"));
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
