@@ -158,7 +158,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
       if (user.expired(jwtOptions.getLeeway())) {
         if (!jwtOptions.isIgnoreExpiration()) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT token: missing required scopes."));
+          resultHandler.handle(Future.failedFuture("Invalid JWT token: token expired."));
           return;
         }
       }
