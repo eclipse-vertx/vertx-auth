@@ -43,7 +43,7 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    String scopes = user.principal().getString("scope");
+    String scopes = user.get("scope");
 
     final Set<Authorization> authorizations = new HashSet<>();
 
