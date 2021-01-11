@@ -170,9 +170,9 @@ public final class JWK implements Crypto {
     alg = options.getAlgorithm();
     kid = options.getId();
 
-    final String pem = Objects.requireNonNull(options.getBuffer());
+    final String secret = Objects.requireNonNull(options.getBuffer());
 
-    label = kid == null ? alg + "#" + pem.hashCode() : kid;
+    label = kid == null ? alg + "#" + secret.hashCode() : kid;
 
     // Handle Mac keys
 
@@ -180,7 +180,7 @@ public final class JWK implements Crypto {
       case "HS256":
         try {
           mac = Mac.getInstance("HMacSHA256");
-          mac.init(new SecretKeySpec(pem.getBytes(StandardCharsets.US_ASCII), "HMacSHA256"));
+          mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HMacSHA256"));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -193,7 +193,7 @@ public final class JWK implements Crypto {
       case "HS384":
         try {
           mac = Mac.getInstance("HMacSHA384");
-          mac.init(new SecretKeySpec(pem.getBytes(StandardCharsets.US_ASCII), "HMacSHA384"));
+          mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HMacSHA384"));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -206,7 +206,7 @@ public final class JWK implements Crypto {
       case "HS512":
         try {
           mac = Mac.getInstance("HMacSHA512");
-          mac.init(new SecretKeySpec(pem.getBytes(StandardCharsets.US_ASCII), "HMacSHA512"));
+          mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HMacSHA512"));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
           throw new RuntimeException(e);
         }
@@ -228,7 +228,7 @@ public final class JWK implements Crypto {
         case "RS384":
         case "RS512":
           kty = "RSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), pem);
+          use = parsePEM(KeyFactory.getInstance("RSA"), secret);
           signature = JWS.getSignature(alg);
           len = JWS.getSignatureLength(alg, publicKey);
           break;
@@ -236,7 +236,7 @@ public final class JWK implements Crypto {
         case "PS384":
         case "PS512":
           kty = "RSASSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), pem);
+          use = parsePEM(KeyFactory.getInstance("RSA"), secret);
           signature = JWS.getSignature(alg);
           len = JWS.getSignatureLength(alg, publicKey);
           break;
@@ -246,7 +246,7 @@ public final class JWK implements Crypto {
         case "ES256K":
           kty = "EC";
           len = JWS.getSignatureLength(alg, publicKey);
-          use = parsePEM(KeyFactory.getInstance("EC"), pem);
+          use = parsePEM(KeyFactory.getInstance("EC"), secret);
           signature = JWS.getSignature(alg);
           break;
         default:
