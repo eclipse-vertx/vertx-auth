@@ -1,6 +1,8 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -12,7 +14,7 @@ import io.vertx.core.json.JsonObject;
 public class PubSecKeyOptions {
 
   private String algorithm;
-  private String buffer;
+  private Buffer buffer;
   private String id;
 
   private boolean certificate;
@@ -72,7 +74,7 @@ public class PubSecKeyOptions {
    *
    * @return the buffer.
    */
-  public String getBuffer() {
+  public Buffer getBuffer() {
     return buffer;
   }
 
@@ -82,7 +84,19 @@ public class PubSecKeyOptions {
    * payload.
    * @return self.
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   public PubSecKeyOptions setBuffer(String buffer) {
+    this.buffer = Buffer.buffer(buffer, "UTF-8");
+    return this;
+  }
+
+  /**
+   * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
+   * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
+   * payload.
+   * @return self.
+   */
+  public PubSecKeyOptions setBuffer(Buffer buffer) {
     this.buffer = buffer;
     return this;
   }
