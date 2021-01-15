@@ -1,5 +1,7 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.providers.*;
 import io.vertx.test.core.VertxTestBase;
@@ -78,6 +80,35 @@ public class OpenIDCDiscoveryTest extends VertxTestBase {
         // will fail as there is no application config, but the parsing should have happened
         testComplete();
       });
+    await();
+  }
+
+  @Test
+  public void testAzureAD() {
+
+    String clientId = "client-id";
+    String clientSecret = "client-secret";
+    String resource = "c1061658-0240-4cbc-8da5-165a9caa30a3";
+    String token = "header.body.signature";
+
+    AzureADAuth.discover(
+      vertx,
+      new OAuth2Options()
+        .setSite("https://sts.windows.net/{tenant}")
+        .setClientID(clientId)
+        .setClientSecret(clientSecret)
+        .setTenant(resource)
+        // to enable on-behalf-of we need to switch to JWT flow
+        .setFlow(OAuth2FlowType.AUTH_JWT))
+      .onFailure(this::fail)
+      .onSuccess(oauth2 ->
+        oauth2.authenticate(new TokenCredentials(token))
+          .onFailure(this::fail)
+          .onSuccess(user -> {
+            System.out.println(user);
+            testComplete();
+          }));
+
     await();
   }
 }

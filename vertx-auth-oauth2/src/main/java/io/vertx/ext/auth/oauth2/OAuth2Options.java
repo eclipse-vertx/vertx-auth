@@ -580,10 +580,13 @@ public class OAuth2Options {
         break;
       case AUTH_JWT:
         throwIfNull("clientId", clientID);
-        throwIfNull("pubSecKeys", pubSecKeys);
-        // keys can't be empty
-        if (pubSecKeys.size() == 0) {
-          throw new IllegalStateException("Configuration missing. You need to specify [pubSecKeys]");
+        // if there is a jwks path, keys are loaded asynchronously
+        if (jwkPath == null) {
+          throwIfNull("pubSecKeys", pubSecKeys);
+          // keys can't be empty
+          if (pubSecKeys.size() == 0) {
+            throw new IllegalStateException("Configuration missing. You need to specify [pubSecKeys]");
+          }
         }
         break;
     }
