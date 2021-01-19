@@ -99,10 +99,17 @@ public class AppleAttestation implements Attestation {
         throw new AttestationException("credCert public key does not equal authData public key");
       }
 
+      // https://w3c.github.io/webauthn/#sctn-apple-anonymous-attestation
+      // the spec doesn't list "alg" yet devices do send it in some cases.
+      // the "alg" is important to support metadata in the future if a device gets blacklisted.
+      final PublicKeyCredential alg = attStmt.containsKey("alg") ?
+        PublicKeyCredential.valueOf(attStmt.getInteger("alg")) :
+        null;
+
       // meta data check
       metadata.verifyMetadata(
         authData.getAaguidString(),
-        PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
+        alg,
         certChain);
 
 
