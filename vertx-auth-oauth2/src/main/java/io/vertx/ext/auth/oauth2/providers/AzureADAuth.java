@@ -63,6 +63,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setSite("https://login.windows.net/{tenant}")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
+        .setJwkPath("/../common/discovery/keys")
         .setScopeSeparator(",")
         .setExtraParameters(
           new JsonObject().put("resource", "{tenant}")));

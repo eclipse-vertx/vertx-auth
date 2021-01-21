@@ -576,15 +576,11 @@ public class OAuth2Options {
     }
     switch (flow) {
       case AUTH_CODE:
-        throwIfNull("clientId", clientID);
-        break;
       case AUTH_JWT:
         throwIfNull("clientId", clientID);
-        throwIfNull("pubSecKeys", pubSecKeys);
-        // keys can't be empty
-        if (pubSecKeys.size() == 0) {
-          throw new IllegalStateException("Configuration missing. You need to specify [pubSecKeys]");
-        }
+        break;
+      case PASSWORD:
+        throwIfNull("clientSecret", clientSecret);
         break;
     }
   }
