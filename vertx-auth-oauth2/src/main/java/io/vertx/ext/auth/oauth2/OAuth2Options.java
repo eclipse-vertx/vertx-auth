@@ -574,20 +574,15 @@ public class OAuth2Options {
     if (flow == null) {
       throw new IllegalStateException("Missing OAuth2 flow [e.g.: AUTH_CODE]");
     }
+
     switch (flow) {
       case AUTH_CODE:
       case AUTH_JWT:
-        throwIfNull("clientId", clientID);
-        break;
       case PASSWORD:
-        throwIfNull("clientSecret", clientSecret);
+        if (clientID == null) {
+          throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
+        }
         break;
-    }
-  }
-
-  private static void throwIfNull(String key, Object value) throws IllegalStateException {
-    if (value == null) {
-      throw new IllegalStateException("Configuration missing. You need to specify [" + key + "]");
     }
   }
 
