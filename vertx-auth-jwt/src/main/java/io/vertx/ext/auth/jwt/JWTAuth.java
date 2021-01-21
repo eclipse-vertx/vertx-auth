@@ -61,7 +61,5 @@ public interface JWTAuth extends AuthenticationProvider {
    *
    * @return JWT encoded token
    */
-  default String generateToken(JsonObject claims) {
-    return generateToken(claims, new JWTOptions());
-  }
+  String generateToken(JsonObject claims);
 }

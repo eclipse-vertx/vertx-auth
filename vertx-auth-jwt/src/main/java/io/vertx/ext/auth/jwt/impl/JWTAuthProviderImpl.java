@@ -182,6 +182,11 @@ public class JWTAuthProviderImpl implements JWTAuth {
     return jwt.sign(_claims, options);
   }
 
+  @Override
+  public String generateToken(JsonObject claims) {
+    return generateToken(claims, jwtOptions);
+  }
+
   private static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
     if (permissionsClaimKey.contains("/")) {
       return getNestedJsonValue(jwtToken, permissionsClaimKey);
