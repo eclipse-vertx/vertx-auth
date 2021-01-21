@@ -294,7 +294,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
             params.mergeIn(token);
             // if there is already an assertion but no keys loaded, accept it as is.
-            if (!params.containsKey("assertion") || !jwt.isUnsecure()) {
+            if (!params.containsKey("assertion")) {
               params
                 .put("assertion", jwt.sign(token, config.getJWTOptions()));
             }
