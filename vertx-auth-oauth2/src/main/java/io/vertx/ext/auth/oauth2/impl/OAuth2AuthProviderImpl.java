@@ -38,6 +38,7 @@ import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.oauth2.*;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Paulo Lopes
@@ -527,20 +528,31 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       return;
     }
 
-    if (jwtOptions.getAudience() != null) {
+    // validate the audience
+    if (payload.containsKey("aud")) {
       JsonArray target;
       if (payload.getValue("aud") instanceof String) {
-        target = new JsonArray().add(payload.getValue("aud", ""));
+        target = new JsonArray().add(payload.getValue("aud"));
       } else {
-        target = payload.getJsonArray("aud", new JsonArray());
+        target = payload.getJsonArray("aud");
       }
 
-      if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-        handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
-        return;
+      if (target != null && target.size() > 0) {
+        List<String> aud;
+        if (jwtOptions.getAudience() != null) {
+          aud = jwtOptions.getAudience();
+        } else {
+          aud = Collections.singletonList(config.getClientID());
+        }
+
+        if (Collections.disjoint(aud, target.getList())) {
+          handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(aud)));
+          return;
+        }
       }
     }
 
+    // validate issuer
     if (jwtOptions.getIssuer() != null) {
       if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
         handler.handle(Future.failedFuture("Invalid JWT issuer"));
@@ -548,7 +560,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       }
     }
 
-    // azp (authorised party)
+    // validate authorised party
     if (payload.containsKey("azp")) {
       if (!config.getClientID().equals(payload.getString("azp"))) {
         handler.handle(Future.failedFuture("Invalid authorised party != config.clientID"));
