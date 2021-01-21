@@ -18,22 +18,25 @@ package io.vertx.ext.auth.oauth2.authorization.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class ScopeAuthorizationImpl implements ScopeAuthorization {
 
-  private final String scopeSeparator;
+  private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
 
-  public ScopeAuthorizationImpl(String scopeSeparator) {
-    this.scopeSeparator = scopeSeparator;
+  private final String scopeSeparator;
+  private final String claimKey;
+
+  public ScopeAuthorizationImpl(String scopeSeparator, String claimKey) {
+    this.scopeSeparator = Objects.requireNonNull(scopeSeparator);
+    this.claimKey = claimKey;
   }
 
   @Override
@@ -43,7 +46,10 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
 
   @Override
   public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    String scopes = user.principal().getString("scope");
+    String scopes =
+      claimKey == null ?
+        user.principal().getString("scope") :
+        user.attributes().getJsonObject("accessToken", EMPTY).getString(claimKey);
 
     final Set<Authorization> authorizations = new HashSet<>();
 
@@ -62,6 +68,11 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
   @Override
   public String separator() {
     return scopeSeparator;
+  }
+
+  @Override
+  public String claimKey() {
+    return claimKey;
   }
 
   @Override

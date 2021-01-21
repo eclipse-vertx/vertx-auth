@@ -115,10 +115,10 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
-   * @param vertx   the vertx instance
-   * @param config  the initial config
+   * @param vertx  the vertx instance
+   * @param config the initial config
    * @return future with instantiated Oauth2 provider instance handler
+   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     Promise<OAuth2Auth> promise = Promise.promise();

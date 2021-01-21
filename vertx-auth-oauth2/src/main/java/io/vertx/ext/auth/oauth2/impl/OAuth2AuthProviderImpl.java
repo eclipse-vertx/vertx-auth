@@ -168,10 +168,31 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         tokenCredentials.checkValid(null);
 
         // this validation can be done in 3 different ways:
-        // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
-        // 2) the token is an opaque string and we need to introspect it **UNLESS**
-        // 3) this object flow is JWT and there's no keys loaded, in that case we need to request a new token
-        //    On-Behalf-Of the original token
+        // 1) this object flow is JWT, in that case we need to request a new token On-Behalf-Of the original token
+        // 2) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
+        // 3) the token is an opaque string and we need to introspect it
+
+        // JWT flow must be checked first. The reason is that IdP could share the same jwks (like Azure) and tokens be
+        // valid and the flow would be ignored.
+
+        if (config.getFlow() == OAuth2FlowType.AUTH_JWT) {
+          // this provider is expected to be working in OBO mode, yet there are no keys loaded or the loaded keys aren't
+          // usable with the received token. In this case we need to fetch a new token
+          final JsonObject obo = config.getExtraParameters() != null ? config.getExtraParameters().copy() : new JsonObject();
+
+          obo
+            .put("assertion", tokenCredentials.getToken())
+            .put("requested_token_use", "on_behalf_of");
+
+          if (tokenCredentials.getScopes() != null && tokenCredentials.getScopes().size() > 0) {
+            // scopes have been passed as a list so the provider must generate the correct string for it
+            obo
+              .put("scope", String.join(config.getScopeSeparator(), tokenCredentials.getScopes()));
+          }
+
+          authenticate(new Oauth2Credentials(obo), handler);
+          return;
+        }
 
         // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
@@ -192,25 +213,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         // the token is not in JWT format or this auth provider is not configured for secure JWTs
         // in this case we must rely on token introspection in order to know more about its state
         // attempt to create a token object from the given string representation
-
-        if (config.getFlow() == OAuth2FlowType.AUTH_JWT) {
-          // this provider is expected to be working in OBO mode, yet there are no keys loaded or the loaded keys aren't
-          // usable with the received token. In this case we need to fetch a new token
-          final JsonObject obo = config.getExtraParameters() != null ? config.getExtraParameters().copy() : new JsonObject();
-
-          obo
-            .put("assertion", tokenCredentials.getToken())
-            .put("requested_token_use", "on_behalf_of");
-
-          if (tokenCredentials.getScopes() != null && tokenCredentials.getScopes().size() > 0) {
-            // scopes have been passed as a list so the provider must generate the correct string for it
-            obo
-              .put("scope", String.join(config.getScopeSeparator(), tokenCredentials.getScopes()));
-          }
-
-          authenticate(new Oauth2Credentials(obo), handler);
-          return;
-        }
 
         // Not all providers support this so we need to check if the call is possible
         if (config.getIntrospectionPath() == null) {
@@ -542,6 +544,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     if (jwtOptions.getIssuer() != null) {
       if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
         handler.handle(Future.failedFuture("Invalid JWT issuer"));
+        return;
+      }
+    }
+
+    // azp (authorised party)
+    if (payload.containsKey("azp")) {
+      if (!config.getClientID().equals(payload.getString("azp"))) {
+        handler.handle(Future.failedFuture("Invalid authorised party != config.clientID"));
         return;
       }
     }

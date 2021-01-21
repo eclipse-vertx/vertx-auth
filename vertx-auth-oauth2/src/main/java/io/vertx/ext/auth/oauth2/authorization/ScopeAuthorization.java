@@ -41,11 +41,24 @@ public interface ScopeAuthorization extends AuthorizationProvider {
 
   /**
    * Factory method to create a Authorization provider for Oauth 2.0 scopes.
+   *
    * @param scopeSeparator the scope separator e.g.: {@code " "}, {@code ","}, {@code "+"}
    * @return a AuthorizationProvider
    */
   static ScopeAuthorization create(String scopeSeparator) {
-    return new ScopeAuthorizationImpl(scopeSeparator);
+    return new ScopeAuthorizationImpl(scopeSeparator, null);
+  }
+
+  /**
+   * Factory method to create a Authorization provider for OpenID Connect scopes. The claim key will be used to locate
+   * the scopes from a decoded JWT.
+   *
+   * @param scopeSeparator the scope separator e.g.: {@code " "}, {@code ","}, {@code "+"}
+   * @param claimKey the scope claim key e.g.: {@code "scp"}, {@code "scope"}
+   * @return a AuthorizationProvider
+   */
+  static ScopeAuthorization create(String scopeSeparator, String claimKey) {
+    return new ScopeAuthorizationImpl(scopeSeparator, claimKey);
   }
 
   /**
@@ -54,6 +67,13 @@ public interface ScopeAuthorization extends AuthorizationProvider {
    * @return the separator.
    */
   String separator();
+
+  /**
+   * Returns the configured claim key.
+   *
+   * @return the claim key.
+   */
+  String claimKey();
 
   /**
    * Returns a String with the given scopes concatenated with the given separator.
