@@ -273,6 +273,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .put("token", JWT);
 
     oauthConfig
+      .setJWTOptions(new JWTOptions())
       .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true));
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);

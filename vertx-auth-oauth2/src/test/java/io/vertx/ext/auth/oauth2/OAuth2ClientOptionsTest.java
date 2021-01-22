@@ -43,7 +43,7 @@ public class OAuth2ClientOptionsTest {
 
     OAuth2Options config = auth.getConfig();
 
-    assertEquals("https://login.windows.net/guid", config.getSite());
+    assertEquals("https://login.microsoftonline.com/guid", config.getSite());
     assertEquals("guid", config.getExtraParameters().getString("resource"));
   }
 

@@ -19,6 +19,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -60,13 +61,15 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setClientID(clientId)
         .setClientSecret(clientSecret)
         .setTenant(guid)
-        .setSite("https://login.windows.net/{tenant}")
+        .setSite("https://login.microsoftonline.com/{tenant}")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setJwkPath("/../common/discovery/keys")
-        .setScopeSeparator(",")
+        .setScopeSeparator(" ")
+        .setJWTOptions(new JWTOptions()
+          .addAudience(clientId))
         .setExtraParameters(
-          new JsonObject().put("resource", "{tenant}")));
+          new JsonObject().put("resource", guid)));
   }
 
   /**
@@ -87,7 +90,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     // don't override if already set
-    final String site = config.getSite() == null ? "https://login.windows.net/common" : config.getSite();
+    final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
 
     final JsonObject extraParameters = new JsonObject().put("resource", "{tenant}");
 
@@ -102,7 +105,9 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
-        .setScopeSeparator(",")
+        .setScopeSeparator(" ")
+        .setJWTOptions(new JWTOptions()
+          .addAudience(config.getClientID()))
         .setExtraParameters(extraParameters),
       handler);
   }

@@ -19,6 +19,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.impl.http.SimpleHttpResponse;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -53,6 +54,15 @@ public interface OpenIDConnectAuth {
     // the paths and site are properly computed
     config.replaceVariables(false);
 
+    final String oidc_discovery_path = "/.well-known/openid-configuration";
+
+    // The site and issuer are used interchangeably here and can be confusing in some cases. A small replacement can
+    // happen at this time to ensure that the config is correct.
+    String issuer = config.getSite();
+    if (issuer.endsWith(oidc_discovery_path)) {
+      issuer = issuer.substring(0, issuer.length() - oidc_discovery_path.length());
+    }
+
     final SimpleHttpClient httpClient = new SimpleHttpClient(
       vertx,
       config.getUserAgent(),
@@ -62,7 +72,7 @@ public interface OpenIDConnectAuth {
     // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
     httpClient.fetch(
       HttpMethod.GET,
-      config.getSite() + "/.well-known/openid-configuration",
+      issuer + oidc_discovery_path,
       new JsonObject()
         .put("Accept", "application/json"),
       null,
@@ -111,6 +121,18 @@ public interface OpenIDConnectAuth {
         config.setUserInfoPath(json.getString("userinfo_endpoint"));
         config.setJwkPath(json.getString("jwks_uri"));
         config.setIntrospectionPath(json.getString("introspection_endpoint"));
+
+        if (json.containsKey("issuer")) {
+          // the discovery document includes the issuer, this means we can and should assert that source of all tokens
+          // when in JWT form
+          JWTOptions jwtOptions = config.getJWTOptions();
+          if (jwtOptions == null) {
+            jwtOptions = new JWTOptions();
+            config.setJWTOptions(jwtOptions);
+          }
+          // configure the issuer
+          jwtOptions.setIssuer(json.getString("issuer"));
+        }
 
         try {
           // the constructor might fail if the configuration is incomplete
