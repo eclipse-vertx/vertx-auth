@@ -16,6 +16,9 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Credentials used by any {@link AuthenticationProvider} that requires Tokens, such as OAuth2 or JWT
  * to perform its authentication
@@ -27,6 +30,7 @@ import io.vertx.core.json.JsonObject;
 public class TokenCredentials implements Credentials {
 
   private String token;
+  private List<String> scopes;
 
   protected TokenCredentials() {}
 
@@ -44,6 +48,23 @@ public class TokenCredentials implements Credentials {
 
   public TokenCredentials setToken(String token) {
     this.token = token;
+    return this;
+  }
+
+  public List<String> getScopes() {
+    return scopes;
+  }
+
+  public TokenCredentials setScopes(List<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public TokenCredentials addScope(String scope) {
+    if (scopes == null) {
+      scopes = new ArrayList<>();
+    }
+    scopes.add(scope);
     return this;
   }
 
