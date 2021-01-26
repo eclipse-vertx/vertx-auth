@@ -64,6 +64,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     this.config.replaceVariables(true);
     this.config.validate();
 
+    // set the nonce algorithm
+    jwt.nonceAlgorithm(this.config.getJWTOptions().getNonceAlgorithm());
+
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
         jwt.addJWK(new JWK(pubSecKey));
@@ -86,7 +89,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           vertx.cancelTimer(updateTimerId);
         }
         final JsonObject json = res.result();
-        JWT jwt = new JWT();
+        JWT jwt = new JWT()
+          // set the nonce algorithm
+          .nonceAlgorithm(config.getJWTOptions().getNonceAlgorithm());
+
         JsonArray keys = json.getJsonArray("keys");
         for (Object key : keys) {
           try {
@@ -202,9 +208,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           // a valid JWT token should have the access token value decoded
           // the token might be valid, but expired
           if (!user.expired(jwtOptions.getLeeway())) {
-            // basic validation passed, the token is not expired,
-            // the spec mandates that that a few extra checks are performed
-            validateUser(user, handler);
+            // basic validation passed, the token is not expired
+            handler.handle(Future.succeededFuture(user));
             return;
           }
         }
@@ -261,9 +266,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
               handler.handle(Future.failedFuture("Used is expired."));
             } else {
-              // basic validation passed, the token is not expired,
-              // the spec mandates that that a few extra checks are performed
-              validateUser(newUser, handler);
+              // basic validation passed, the token is not expired
+              handler.handle(Future.succeededFuture(newUser));
             }
           });
 
@@ -318,9 +322,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
               handler.handle(Future.failedFuture("Used is expired."));
             } else {
-              // basic validation passed, the token is not expired,
-              // the spec mandates that that a few extra checks are performed
-              validateUser(newUser, handler);
+              // basic validation passed, the token is not expired
+              handler.handle(Future.succeededFuture(newUser));
             }
           }
         });
@@ -352,9 +355,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
             handler.handle(Future.failedFuture("Used is expired."));
           } else {
-            // basic validation passed, the token is not expired,
-            // the spec mandates that that a few extra checks are performed
-            validateUser(newUser, handler);
+            // basic validation passed, the token is not expired
+            handler.handle(Future.succeededFuture(newUser));
           }
         }
       });
@@ -430,12 +432,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     if (!jwt.isUnsecure()) {
       if (json.containsKey("access_token")) {
         try {
+          final JsonObject token = jwt.decode(json.getString("access_token"));
+          // the OIDC validation will throw if the iss, aud do not match
           user.attributes()
-            .put("accessToken", jwt.decode(json.getString("access_token")));
-
+            .put("accessToken", validToken(token));
           // copy the expiration check properties + sub to the root
           copyProperties(user.attributes().getJsonObject("accessToken"), user.attributes(), true, "exp", "iat", "nbf", "sub");
-
           // root claim meta data for JWT AuthZ
           user.attributes()
             .put("rootClaim", "accessToken");
@@ -469,8 +471,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       if (json.containsKey("id_token")) {
         try {
+          final JsonObject token = jwt.decode(json.getString("id_token"));
+          // the OIDC validation will throw if the iss, aud do not match
           user.attributes()
-            .put("idToken", jwt.decode(json.getString("id_token")));
+            .put("idToken", validToken(token));
           // copy the userInfo basic properties to the root
           copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false, "sub", "name", "email", "picture");
         } catch (NoSuchKeyIdException e) {
@@ -504,73 +508,48 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return user;
   }
 
-  private void validateUser(User user, Handler<AsyncResult<User>> handler) {
+  private JsonObject validToken(JsonObject token) throws IllegalStateException {
+    // the user object is a JWT so we should validate it as mandated by OIDC
+    final JWTOptions jwtOptions = config.getJWTOptions();
 
-    for (String token : new String[] { "idToken", "accessToken" }) {
-      if (!user.attributes().containsKey(token)) {
-        // nothing else to do
-        continue;
-      }
-
-      // the user object is a JWT so we should validate it as mandated by OIDC
-      final JWTOptions jwtOptions = config.getJWTOptions();
-
-      // basic validation passed, the token is not expired,
-      // the spec mandates that that a few extra checks are performed
-      final JsonObject payload;
-
+    // validate the audience
+    if (jwtOptions.getAudience() != null && token.containsKey("aud")) {
+      JsonArray target;
       try {
-        payload = user.attributes().getJsonObject(token);
+        if (token.getValue("aud") instanceof String) {
+          target = new JsonArray().add(token.getValue("aud"));
+        } else {
+          target = token.getJsonArray("aud");
+        }
       } catch (RuntimeException e) {
-        handler.handle(Future.failedFuture("User accessToken isn't a JsonObject"));
-        return;
+        throw new IllegalStateException("User audience isn't a JsonArray or String");
       }
 
-      // validate the audience
-      if (payload.containsKey("aud")) {
-        JsonArray target;
-        try {
-          if (payload.getValue("aud") instanceof String) {
-            target = new JsonArray().add(payload.getValue("aud"));
-          } else {
-            target = payload.getJsonArray("aud");
+      if (target != null && target.size() > 0) {
+        final List<String> aud = jwtOptions.getAudience();
+        for (String el : aud) {
+          if (!target.contains(el)) {
+            throw new IllegalStateException("Invalid JWT audience. expected: " + el);
           }
-        } catch (RuntimeException e) {
-          handler.handle(Future.failedFuture("User audience isn't a JsonArray or String"));
-          return;
-        }
-
-        if (target != null && target.size() > 0) {
-          if (jwtOptions.getAudience() != null) {
-            final List<String> aud = jwtOptions.getAudience();
-            for (String el : aud) {
-              if (!target.contains(el)) {
-                handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + el));
-                return;
-              }
-            }
-          }
-        }
-      }
-
-      // validate issuer
-      if (jwtOptions.getIssuer() != null) {
-        if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
-          handler.handle(Future.failedFuture("Invalid JWT issuer"));
-          return;
-        }
-      }
-
-      // validate authorised party
-      if (payload.containsKey("azp")) {
-        if (!config.getClientID().equals(payload.getString("azp"))) {
-          handler.handle(Future.failedFuture("Invalid authorised party != config.clientID"));
-          return;
         }
       }
     }
 
-    handler.handle(Future.succeededFuture(user));
+    // validate issuer
+    if (jwtOptions.getIssuer() != null) {
+      if (!jwtOptions.getIssuer().equals(token.getString("iss"))) {
+        throw new IllegalStateException("Invalid JWT issuer");
+      }
+    }
+
+    // validate authorised party
+    if (token.containsKey("azp")) {
+      if (!config.getClientID().equals(token.getString("azp"))) {
+        throw new IllegalStateException("Invalid authorised party != config.clientID");
+      }
+    }
+
+    return token;
   }
 
   @Override

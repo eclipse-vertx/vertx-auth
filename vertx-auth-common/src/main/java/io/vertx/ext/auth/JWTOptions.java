@@ -25,6 +25,7 @@ public class JWTOptions {
   private List<String> permissions;
   private List<String> scopes;
   private String scopeDelimiter;
+  private String nonceAlgorithm;
 
   public JWTOptions() {
 
@@ -215,5 +216,14 @@ public class JWTOptions {
   @Deprecated
   public boolean hasScopeDelimiter() {
     return this.scopeDelimiter!=null;
+  }
+
+  public String getNonceAlgorithm() {
+    return nonceAlgorithm;
+  }
+
+  public JWTOptions setNonceAlgorithm(String nonceAlgorithm) {
+    this.nonceAlgorithm = nonceAlgorithm;
+    return this;
   }
 }

@@ -74,6 +74,11 @@ public class JWTOptionsConverter {
             obj.setNoTimestamp((Boolean)member.getValue());
           }
           break;
+        case "nonceAlgorithm":
+          if (member.getValue() instanceof String) {
+            obj.setNonceAlgorithm((String)member.getValue());
+          }
+          break;
         case "permissions":
           if (member.getValue() instanceof JsonArray) {
             java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
@@ -128,6 +133,9 @@ public class JWTOptionsConverter {
     }
     json.put("leeway", obj.getLeeway());
     json.put("noTimestamp", obj.isNoTimestamp());
+    if (obj.getNonceAlgorithm() != null) {
+      json.put("nonceAlgorithm", obj.getNonceAlgorithm());
+    }
     if (obj.getPermissions() != null) {
       JsonArray array = new JsonArray();
       obj.getPermissions().forEach(item -> array.add(item));

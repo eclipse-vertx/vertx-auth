@@ -67,9 +67,8 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setJwkPath("/../common/discovery/keys")
         .setScopeSeparator(" ")
         .setJWTOptions(new JWTOptions()
-          .addAudience(clientId))
-        .setExtraParameters(
-          new JsonObject().put("resource", guid)));
+          .setNonceAlgorithm("SHA-256")
+          .addAudience(clientId)));
   }
 
   /**
@@ -92,7 +91,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
     // don't override if already set
     final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
 
-    final JsonObject extraParameters = new JsonObject().put("resource", "{tenant}");
+    final JsonObject extraParameters = new JsonObject();
 
     if (config.getFlow() != null && AUTH_JWT == config.getFlow()) {
       // this is a "on behalf of" mode
@@ -107,6 +106,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setSite(site)
         .setScopeSeparator(" ")
         .setJWTOptions(new JWTOptions()
+          .setNonceAlgorithm("SHA-256")
           .addAudience(config.getClientID()))
         .setExtraParameters(extraParameters),
       handler);

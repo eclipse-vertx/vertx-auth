@@ -67,7 +67,6 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
                 assertEquals("urn:ietf:params:oauth:grant-type:jwt-bearer", payload.getString("grant_type"));
                 assertEquals("head.body.signature", payload.getValue("assertion"));
                 // client-id and client-secret are passed in the authorization header
-                assertEquals("common", payload.getValue("resource"));
                 assertEquals("on_behalf_of", payload.getValue("requested_token_use"));
                 assertEquals("a b", payload.getValue("scope"));
               } catch (UnsupportedEncodingException e) {
