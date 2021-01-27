@@ -57,7 +57,6 @@ public interface LinkedInAuth {
         .setSite("https://www.linkedin.com")
         .setTokenPath("/oauth/v2/accessToken")
         .setAuthorizationPath("/oauth/v2/authorization")
-        .setUserInfoPath("/people/~")
-        .setScopeSeparator(" "));
+        .setUserInfoPath("/people/~"));
   }
 }

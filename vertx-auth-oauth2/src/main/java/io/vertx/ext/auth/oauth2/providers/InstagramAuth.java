@@ -57,7 +57,6 @@ public interface InstagramAuth {
         .setSite("https://api.instagram.com")
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
-        .setUserInfoPath("/v1/users/self")
-        .setScopeSeparator(" "));
+        .setUserInfoPath("/v1/users/self"));
   }
 }

@@ -186,8 +186,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           final JsonObject obo = config.getExtraParameters() != null ? config.getExtraParameters().copy() : new JsonObject();
 
           obo
-            .put("assertion", tokenCredentials.getToken())
-            .put("requested_token_use", "on_behalf_of");
+            .put("assertion", tokenCredentials.getToken());
 
           if (tokenCredentials.getScopes() != null && tokenCredentials.getScopes().size() > 0) {
             // scopes have been passed as a list so the provider must generate the correct string for it
@@ -297,11 +296,14 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             oauth2OnBehalfOfCredentials.checkValid(config.getFlow());
 
             final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
-            params.mergeIn(token);
+            params
+              .put("requested_token_use", "on_behalf_of")
+              .mergeIn(token);
             // if there is already an assertion but no keys loaded, accept it as is.
             if (!params.containsKey("assertion")) {
               params
-                .put("assertion", jwt.sign(token, config.getJWTOptions()));
+                .put("assertion", jwt.sign(token, config.getJWTOptions()))
+                .put("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
             }
             break;
           default:

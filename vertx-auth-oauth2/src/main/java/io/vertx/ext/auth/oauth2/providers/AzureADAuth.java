@@ -24,8 +24,6 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
-import static io.vertx.ext.auth.oauth2.OAuth2FlowType.AUTH_JWT;
-
 /**
  * Simplified factory to create an {@link OAuth2Auth} for Azure AD.
  *
@@ -65,7 +63,6 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
         .setJwkPath("/../common/discovery/keys")
-        .setScopeSeparator(" ")
         .setJWTOptions(new JWTOptions()
           .setNonceAlgorithm("SHA-256")
           .addAudience(clientId)));
@@ -93,18 +90,12 @@ public interface AzureADAuth extends OpenIDConnectAuth {
 
     final JsonObject extraParameters = new JsonObject();
 
-    if (config.getFlow() != null && AUTH_JWT == config.getFlow()) {
-      // this is a "on behalf of" mode
-      extraParameters.put("requested_token_use", "on_behalf_of");
-    }
-
     OpenIDConnectAuth.discover(
       vertx,
       new OAuth2Options(config)
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
-        .setScopeSeparator(" ")
         .setJWTOptions(new JWTOptions()
           .setNonceAlgorithm("SHA-256")
           .addAudience(config.getClientID()))

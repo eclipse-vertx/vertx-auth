@@ -561,6 +561,10 @@ public class OAuth2API {
       payload = null;
     }
 
+//    System.out.println("Headers: " + options.getHeaders());
+//    System.out.println("Payload: " + payload);
+//    System.out.println("----");
+
     // create a request
     makeRequest(options, payload, callback);
   }
@@ -585,15 +589,31 @@ public class OAuth2API {
         // read the body regardless
         res.body(body -> {
           if (body.succeeded()) {
-            Buffer value = body.result();
+            final OAuth2Response oauth2res = new OAuth2Response(res.statusCode(), res.headers(), body.result());
             if (res.statusCode() < 200 || res.statusCode() >= 300) {
-              if (value == null || value.length() == 0) {
+              if (oauth2res.body() == null || oauth2res.body().length() == 0) {
                 callback.handle(Future.failedFuture(res.statusMessage()));
               } else {
-                callback.handle(Future.failedFuture(res.statusMessage() + ": " + value.toString()));
+                if (oauth2res.is("application/json")) {
+                  // if value is json, extract error, error_descriptions
+                  try {
+                    JsonObject error = oauth2res.jsonObject();
+                    if (error.containsKey("error")) {
+                      if (error.containsKey("error_description")) {
+                        callback.handle(Future.failedFuture(error.getString("error") + ": " + error.getString("error_description")));
+                      } else {
+                        callback.handle(Future.failedFuture(error.getString("error")));
+                      }
+                      return;
+                    }
+                  } catch (RuntimeException e) {
+                    // ignore, we can't parse the json
+                  }
+                }
+                callback.handle(Future.failedFuture(res.statusMessage() + ": " + oauth2res.body()));
               }
             } else {
-              callback.handle(Future.succeededFuture(new OAuth2Response(res.statusCode(), res.headers(), value)));
+              callback.handle(Future.succeededFuture(oauth2res));
             }
           } else {
             callback.handle(Future.failedFuture(body.cause()));

@@ -73,7 +73,6 @@ public interface GitLabAuth {
         .setTokenPath("/oauth/token")
         .setAuthorizationPath("/oauth/authorize")
         .setUserInfoPath("/api/v4/user")
-        .setScopeSeparator(" ")
         .setHeaders(new JsonObject()
           .put("User-Agent", "vertx-auth-oauth2")));
   }
