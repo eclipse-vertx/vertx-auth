@@ -457,7 +457,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           final JsonObject token = jwt.decode(json.getString("access_token"));
           // the OIDC validation will throw if the iss, aud do not match
           user.attributes()
-            .put("accessToken", validToken(token));
+            .put("accessToken", validToken(token, false));
           // copy the expiration check properties + sub to the root
           copyProperties(user.attributes().getJsonObject("accessToken"), user.attributes(), true, "exp", "iat", "nbf", "sub");
           // root claim meta data for JWT AuthZ
@@ -496,7 +496,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           final JsonObject token = jwt.decode(json.getString("id_token"));
           // the OIDC validation will throw if the iss, aud do not match
           user.attributes()
-            .put("idToken", validToken(token));
+            .put("idToken", validToken(token, true));
           // copy the userInfo basic properties to the root
           copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false, "sub", "name", "email", "picture");
         } catch (NoSuchKeyIdException e) {
@@ -530,7 +530,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return user;
   }
 
-  private JsonObject validToken(JsonObject token) throws IllegalStateException {
+  private JsonObject validToken(JsonObject token, boolean idToken) throws IllegalStateException {
     // the user object is a JWT so we should validate it as mandated by OIDC
     final JWTOptions jwtOptions = config.getJWTOptions();
 
@@ -565,9 +565,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
 
     // validate authorised party
-    if (token.containsKey("azp")) {
-      if (!config.getClientID().equals(token.getString("azp"))) {
-        throw new IllegalStateException("Invalid authorised party != config.clientID");
+    if (idToken) {
+      if (token.containsKey("azp")) {
+        if (!config.getClientID().equals(token.getString("azp"))) {
+          throw new IllegalStateException("Invalid authorised party != config.clientID");
+        }
       }
     }
 
