@@ -40,7 +40,7 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
     AzureADAuth.discover(
       vertx,
       new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_JWT)
+        .setFlow(OAuth2FlowType.AAD_OBO)
         .setClientID("client-id")
         .setClientSecret("client-secret")
         .setTenant("common")

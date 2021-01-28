@@ -76,7 +76,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    * <p>
-   * With this provider, if the given configuration is using the flow type {@link OAuth2FlowType#AUTH_JWT} then
+   * With this provider, if the given configuration is using the flow type {@link OAuth2FlowType#AAD_OBO} then
    * the extra parameters object will include {@code requested_token_use = on_behalf_of} as required by
    * <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-on-behalf-of-flow">https://docs.microsoft.com/en-us/azure/active-directory</a>.
    *

@@ -94,7 +94,7 @@ public enum OAuth2FlowType {
    * be used as an authorization grant when the authorization scope is
    * limited to the protected resources under the control of the client,
    * or to protected resources previously arranged with the authorization
-   * server.  Client credentials are used as an authorization grant
+   * server. Client credentials are used as an authorization grant
    * typically when the client is acting on its own behalf (the client is
    * also the resource owner) or is requesting access to protected
    * resources based on an authorization previously arranged with the
@@ -103,9 +103,16 @@ public enum OAuth2FlowType {
   CLIENT("client_credentials"),
 
   /**
-   * RFC7523
+   * RFC7523: JSON Web Token Bearer Token as a means for requesting an
+   * OAuth 2.0 access token as well as for client authentication.
    */
-  AUTH_JWT("urn:ietf:params:oauth:grant-type:jwt-bearer");
+  AUTH_JWT("urn:ietf:params:oauth:grant-type:jwt-bearer"),
+
+  /**
+   * Extension OAuth2 flows to perform  JSON Web Token Bearer Token
+   * authentication "On-Behalf-Of an existing user.
+   */
+  AAD_OBO("urn:ietf:params:oauth:grant-type:jwt-bearer");
 
   private final String grantType;
 

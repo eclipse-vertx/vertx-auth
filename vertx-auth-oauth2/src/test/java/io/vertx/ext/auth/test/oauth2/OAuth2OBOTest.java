@@ -32,7 +32,7 @@ public class OAuth2OBOTest extends VertxTestBase {
     super.setUp();
     // mock AzureAD
     oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_JWT)
+      .setFlow(OAuth2FlowType.AAD_OBO)
       .setClientID("client-id")
       .setClientSecret("client-secret")
       .setTenant("resource")

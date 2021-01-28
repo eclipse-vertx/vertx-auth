@@ -561,10 +561,6 @@ public class OAuth2API {
       payload = null;
     }
 
-//    System.out.println("Headers: " + options.getHeaders());
-//    System.out.println("Payload: " + payload);
-//    System.out.println("----");
-
     // create a request
     makeRequest(options, payload, callback);
   }

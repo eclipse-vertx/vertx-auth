@@ -578,6 +578,7 @@ public class OAuth2Options {
     switch (flow) {
       case AUTH_CODE:
       case AUTH_JWT:
+      case AAD_OBO:
       case PASSWORD:
         if (clientID == null) {
           throw new IllegalStateException("Configuration missing. You need to specify [clientId]");

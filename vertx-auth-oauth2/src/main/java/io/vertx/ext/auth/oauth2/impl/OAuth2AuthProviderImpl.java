@@ -142,18 +142,33 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     final OAuth2FlowType flow = config.getFlow();
 
     if (authInfo.containsKey("access_token")) {
-      if (flow != OAuth2FlowType.AUTH_JWT && flow != OAuth2FlowType.IMPLICIT) {
-        authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
-      } else {
-        handler.handle(Future.failedFuture("access_token provided but provider is not configured for AUTH_CODE"));
+      switch (flow) {
+        case AAD_OBO:
+        case AUTH_CODE:
+        case PASSWORD:
+        case CLIENT:
+          TokenCredentials cred = new TokenCredentials(authInfo.getString("access_token"));
+          if (authInfo.containsKey("scopes")) {
+            for (Object scope : authInfo.getJsonArray("scopes")) {
+              cred.addScope((String) scope);
+            }
+          }
+          authenticate(cred, handler);
+          break;
+        default:
+          handler.handle(Future.failedFuture("access_token provided but provider is not configured for: " + flow));
+          break;
       }
       return;
     }
     if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
-      if (flow == OAuth2FlowType.PASSWORD) {
-        authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
-      } else {
-        handler.handle(Future.failedFuture("username/password provided but provider is not configured for PASSWORD"));
+      switch (flow) {
+        case PASSWORD:
+          authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
+          break;
+        default:
+          handler.handle(Future.failedFuture("username/password provided but provider is not configured for PASSWORD"));
+          break;
       }
       return;
     }
@@ -180,22 +195,24 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         // JWT flow must be checked first. The reason is that IdP could share the same jwks (like Azure) and tokens be
         // valid and the flow would be ignored.
 
-        if (config.getFlow() == OAuth2FlowType.AUTH_JWT) {
-          // this provider is expected to be working in OBO mode, yet there are no keys loaded or the loaded keys aren't
-          // usable with the received token. In this case we need to fetch a new token
-          final JsonObject obo = config.getExtraParameters() != null ? config.getExtraParameters().copy() : new JsonObject();
+        switch (config.getFlow()) {
+          case AUTH_JWT:
+          case AAD_OBO:
+            // this provider is expected to be working in OBO mode, yet there are no keys loaded or the loaded keys aren't
+            // usable with the received token. In this case we need to fetch a new token
+            final JsonObject obo = config.getExtraParameters() != null ? config.getExtraParameters().copy() : new JsonObject();
 
-          obo
-            .put("assertion", tokenCredentials.getToken());
-
-          if (tokenCredentials.getScopes() != null && tokenCredentials.getScopes().size() > 0) {
-            // scopes have been passed as a list so the provider must generate the correct string for it
             obo
-              .put("scope", String.join(config.getScopeSeparator(), tokenCredentials.getScopes()));
-          }
+              .put("assertion", tokenCredentials.getToken());
 
-          authenticate(new Oauth2Credentials(obo), handler);
-          return;
+            if (tokenCredentials.getScopes() != null && tokenCredentials.getScopes().size() > 0) {
+              // scopes have been passed as a list so the provider must generate the correct string for it
+              obo
+                .put("scope", String.join(config.getScopeSeparator(), tokenCredentials.getScopes()));
+            }
+
+            authenticate(new Oauth2Credentials(obo), handler);
+            return;
         }
 
         // if the JWT library is working in unsecure mode, local validation is not to be trusted
@@ -292,19 +309,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             params.mergeIn(oauth2Credentials.toJson());
             break;
           case AUTH_JWT:
+            Oauth2Credentials oauth2JWT = (Oauth2Credentials) credentials;
+            oauth2JWT.checkValid(config.getFlow());
+
+            final JsonObject jwtToken = oauth2JWT.toJson();
+            params
+              .put("assertion", jwt.sign(jwtToken, config.getJWTOptions()))
+              .mergeIn(jwtToken);
+            break;
+          case AAD_OBO:
             Oauth2Credentials oauth2OnBehalfOfCredentials = (Oauth2Credentials) credentials;
             oauth2OnBehalfOfCredentials.checkValid(config.getFlow());
 
-            final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
+            final JsonObject oboToken = oauth2OnBehalfOfCredentials.toJson();
             params
               .put("requested_token_use", "on_behalf_of")
-              .mergeIn(token);
-            // if there is already an assertion but no keys loaded, accept it as is.
-            if (!params.containsKey("assertion")) {
-              params
-                .put("assertion", jwt.sign(token, config.getJWTOptions()))
-                .put("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
-            }
+              .mergeIn(oboToken);
             break;
           default:
             handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
