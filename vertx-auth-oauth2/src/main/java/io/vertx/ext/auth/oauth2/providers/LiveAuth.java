@@ -56,7 +56,6 @@ public interface LiveAuth {
         .setClientSecret(clientSecret)
         .setSite("https://login.live.com")
         .setTokenPath("/oauth20_token.srf")
-        .setAuthorizationPath("/oauth20_authorize.srf")
-        .setScopeSeparator(" "));
+        .setAuthorizationPath("/oauth20_authorize.srf"));
   }
 }

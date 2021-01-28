@@ -19,11 +19,10 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-
-import static io.vertx.ext.auth.oauth2.OAuth2FlowType.AUTH_JWT;
 
 /**
  * Simplified factory to create an {@link OAuth2Auth} for Azure AD.
@@ -60,12 +59,13 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setClientID(clientId)
         .setClientSecret(clientSecret)
         .setTenant(guid)
-        .setSite("https://login.windows.net/{tenant}")
+        .setSite("https://login.microsoftonline.com/{tenant}")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
-        .setScopeSeparator(",")
-        .setExtraParameters(
-          new JsonObject().put("resource", "{tenant}")));
+        .setJwkPath("/../common/discovery/keys")
+        .setJWTOptions(new JWTOptions()
+          .setNonceAlgorithm("SHA-256")
+          .addAudience(clientId)));
   }
 
   /**
@@ -76,7 +76,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    * <p>
-   * With this provider, if the given configuration is using the flow type {@link OAuth2FlowType#AUTH_JWT} then
+   * With this provider, if the given configuration is using the flow type {@link OAuth2FlowType#AAD_OBO} then
    * the extra parameters object will include {@code requested_token_use = on_behalf_of} as required by
    * <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-on-behalf-of-flow">https://docs.microsoft.com/en-us/azure/active-directory</a>.
    *
@@ -86,14 +86,9 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     // don't override if already set
-    final String site = config.getSite() == null ? "https://login.windows.net/common" : config.getSite();
+    final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
 
-    final JsonObject extraParameters = new JsonObject().put("resource", "{tenant}");
-
-    if (config.getFlow() != null && AUTH_JWT == config.getFlow()) {
-      // this is a "on behalf of" mode
-      extraParameters.put("requested_token_use", "on_behalf_of");
-    }
+    final JsonObject extraParameters = new JsonObject();
 
     OpenIDConnectAuth.discover(
       vertx,
@@ -101,7 +96,9 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
-        .setScopeSeparator(",")
+        .setJWTOptions(new JWTOptions()
+          .setNonceAlgorithm("SHA-256")
+          .addAudience(config.getClientID()))
         .setExtraParameters(extraParameters),
       handler);
   }
@@ -114,10 +111,10 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
-   * @param vertx   the vertx instance
-   * @param config  the initial config
+   * @param vertx  the vertx instance
+   * @param config the initial config
    * @return future with instantiated Oauth2 provider instance handler
+   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     Promise<OAuth2Auth> promise = Promise.promise();

@@ -22,7 +22,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
@@ -37,7 +36,7 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.oauth2.*;
 
-import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Paulo Lopes
@@ -65,6 +64,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     this.config.replaceVariables(true);
     this.config.validate();
 
+    // set the nonce algorithm
+    jwt.nonceAlgorithm(this.config.getJWTOptions().getNonceAlgorithm());
+
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
         jwt.addJWK(new JWK(pubSecKey));
@@ -87,7 +89,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           vertx.cancelTimer(updateTimerId);
         }
         final JsonObject json = res.result();
-        JWT jwt = new JWT();
+        JWT jwt = new JWT()
+          // set the nonce algorithm
+          .nonceAlgorithm(config.getJWTOptions().getNonceAlgorithm());
+
         JsonArray keys = json.getJsonArray("keys");
         for (Object key : keys) {
           try {
@@ -137,18 +142,33 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     final OAuth2FlowType flow = config.getFlow();
 
     if (authInfo.containsKey("access_token")) {
-      if (flow != OAuth2FlowType.AUTH_JWT && flow != OAuth2FlowType.IMPLICIT) {
-        authenticate(new TokenCredentials(authInfo.getString("access_token")), handler);
-      } else {
-        handler.handle(Future.failedFuture("access_token provided but provider is not configured for AUTH_CODE"));
+      switch (flow) {
+        case AAD_OBO:
+        case AUTH_CODE:
+        case PASSWORD:
+        case CLIENT:
+          TokenCredentials cred = new TokenCredentials(authInfo.getString("access_token"));
+          if (authInfo.containsKey("scopes")) {
+            for (Object scope : authInfo.getJsonArray("scopes")) {
+              cred.addScope((String) scope);
+            }
+          }
+          authenticate(cred, handler);
+          break;
+        default:
+          handler.handle(Future.failedFuture("access_token provided but provider is not configured for: " + flow));
+          break;
       }
       return;
     }
     if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
-      if (flow == OAuth2FlowType.PASSWORD) {
-        authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
-      } else {
-        handler.handle(Future.failedFuture("username/password provided but provider is not configured for PASSWORD"));
+      switch (flow) {
+        case PASSWORD:
+          authenticate(new UsernamePasswordCredentials(authInfo.getString("username"), authInfo.getString("password")), handler);
+          break;
+        default:
+          handler.handle(Future.failedFuture("username/password provided but provider is not configured for PASSWORD"));
+          break;
       }
       return;
     }
@@ -167,9 +187,33 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         TokenCredentials tokenCredentials = (TokenCredentials) credentials;
         tokenCredentials.checkValid(null);
 
-        // this validation can be done in 2 different ways:
-        // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
-        // 2) the token is an opaque string and we need to introspect it
+        // this validation can be done in 3 different ways:
+        // 1) this object flow is JWT, in that case we need to request a new token On-Behalf-Of the original token
+        // 2) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
+        // 3) the token is an opaque string and we need to introspect it
+
+        // JWT flow must be checked first. The reason is that IdP could share the same jwks (like Azure) and tokens be
+        // valid and the flow would be ignored.
+
+        switch (config.getFlow()) {
+          case AUTH_JWT:
+          case AAD_OBO:
+            // this provider is expected to be working in OBO mode, yet there are no keys loaded or the loaded keys aren't
+            // usable with the received token. In this case we need to fetch a new token
+            final JsonObject obo = config.getExtraParameters() != null ? config.getExtraParameters().copy() : new JsonObject();
+
+            obo
+              .put("assertion", tokenCredentials.getToken());
+
+            if (tokenCredentials.getScopes() != null && tokenCredentials.getScopes().size() > 0) {
+              // scopes have been passed as a list so the provider must generate the correct string for it
+              obo
+                .put("scope", String.join(config.getScopeSeparator(), tokenCredentials.getScopes()));
+            }
+
+            authenticate(new Oauth2Credentials(obo), handler);
+            return;
+        }
 
         // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
@@ -180,9 +224,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           // a valid JWT token should have the access token value decoded
           // the token might be valid, but expired
           if (!user.expired(jwtOptions.getLeeway())) {
-            // basic validation passed, the token is not expired,
-            // the spec mandates that that a few extra checks are performed
-            validateUser(user, handler);
+            // basic validation passed, the token is not expired
+            handler.handle(Future.succeededFuture(user));
             return;
           }
         }
@@ -239,9 +282,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
               handler.handle(Future.failedFuture("Used is expired."));
             } else {
-              // basic validation passed, the token is not expired,
-              // the spec mandates that that a few extra checks are performed
-              validateUser(newUser, handler);
+              // basic validation passed, the token is not expired
+              handler.handle(Future.succeededFuture(newUser));
             }
           });
 
@@ -267,12 +309,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             params.mergeIn(oauth2Credentials.toJson());
             break;
           case AUTH_JWT:
+            Oauth2Credentials oauth2JWT = (Oauth2Credentials) credentials;
+            oauth2JWT.checkValid(config.getFlow());
+
+            final JsonObject jwtToken = oauth2JWT.toJson();
+            params
+              .put("assertion", jwt.sign(jwtToken, config.getJWTOptions()))
+              .mergeIn(jwtToken);
+            break;
+          case AAD_OBO:
             Oauth2Credentials oauth2OnBehalfOfCredentials = (Oauth2Credentials) credentials;
             oauth2OnBehalfOfCredentials.checkValid(config.getFlow());
 
-            final JsonObject token = oauth2OnBehalfOfCredentials.toJson();
+            final JsonObject oboToken = oauth2OnBehalfOfCredentials.toJson();
             params
-              .put("assertion", jwt.sign(token, config.getJWTOptions()));
+              .put("requested_token_use", "on_behalf_of")
+              .mergeIn(oboToken);
             break;
           default:
             handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
@@ -292,9 +344,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
               handler.handle(Future.failedFuture("Used is expired."));
             } else {
-              // basic validation passed, the token is not expired,
-              // the spec mandates that that a few extra checks are performed
-              validateUser(newUser, handler);
+              // basic validation passed, the token is not expired
+              handler.handle(Future.succeededFuture(newUser));
             }
           }
         });
@@ -326,9 +377,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
             handler.handle(Future.failedFuture("Used is expired."));
           } else {
-            // basic validation passed, the token is not expired,
-            // the spec mandates that that a few extra checks are performed
-            validateUser(newUser, handler);
+            // basic validation passed, the token is not expired
+            handler.handle(Future.succeededFuture(newUser));
           }
         }
       });
@@ -404,12 +454,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     if (!jwt.isUnsecure()) {
       if (json.containsKey("access_token")) {
         try {
+          final JsonObject token = jwt.decode(json.getString("access_token"));
+          // the OIDC validation will throw if the iss, aud do not match
           user.attributes()
-            .put("accessToken", jwt.decode(json.getString("access_token")));
-
+            .put("accessToken", validToken(token));
           // copy the expiration check properties + sub to the root
           copyProperties(user.attributes().getJsonObject("accessToken"), user.attributes(), true, "exp", "iat", "nbf", "sub");
-
           // root claim meta data for JWT AuthZ
           user.attributes()
             .put("rootClaim", "accessToken");
@@ -443,8 +493,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       if (json.containsKey("id_token")) {
         try {
+          final JsonObject token = jwt.decode(json.getString("id_token"));
+          // the OIDC validation will throw if the iss, aud do not match
           user.attributes()
-            .put("idToken", jwt.decode(json.getString("id_token")));
+            .put("idToken", validToken(token));
           // copy the userInfo basic properties to the root
           copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false, "sub", "name", "email", "picture");
         } catch (NoSuchKeyIdException e) {
@@ -478,50 +530,48 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     return user;
   }
 
-  private void validateUser(User user, Handler<AsyncResult<User>> handler) {
-
-    if (!user.attributes().containsKey("accessToken")) {
-      // nothing else to do
-      handler.handle(Future.succeededFuture(user));
-      return;
-    }
-
+  private JsonObject validToken(JsonObject token) throws IllegalStateException {
     // the user object is a JWT so we should validate it as mandated by OIDC
     final JWTOptions jwtOptions = config.getJWTOptions();
 
-    // basic validation passed, the token is not expired,
-    // the spec mandates that that a few extra checks are performed
-    final JsonObject payload;
-
-    try {
-      payload = user.attributes().getJsonObject("accessToken");
-    } catch (RuntimeException e) {
-      handler.handle(Future.failedFuture("User accessToken isn't a JsonObject"));
-      return;
-    }
-
-    if (jwtOptions.getAudience() != null) {
+    // validate the audience
+    if (jwtOptions.getAudience() != null && token.containsKey("aud")) {
       JsonArray target;
-      if (payload.getValue("aud") instanceof String) {
-        target = new JsonArray().add(payload.getValue("aud", ""));
-      } else {
-        target = payload.getJsonArray("aud", new JsonArray());
+      try {
+        if (token.getValue("aud") instanceof String) {
+          target = new JsonArray().add(token.getValue("aud"));
+        } else {
+          target = token.getJsonArray("aud");
+        }
+      } catch (RuntimeException e) {
+        throw new IllegalStateException("User audience isn't a JsonArray or String");
       }
 
-      if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-        handler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
-        return;
+      if (target != null && target.size() > 0) {
+        final List<String> aud = jwtOptions.getAudience();
+        for (String el : aud) {
+          if (!target.contains(el)) {
+            throw new IllegalStateException("Invalid JWT audience. expected: " + el);
+          }
+        }
       }
     }
 
+    // validate issuer
     if (jwtOptions.getIssuer() != null) {
-      if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
-        handler.handle(Future.failedFuture("Invalid JWT issuer"));
-        return;
+      if (!jwtOptions.getIssuer().equals(token.getString("iss"))) {
+        throw new IllegalStateException("Invalid JWT issuer");
       }
     }
 
-    handler.handle(Future.succeededFuture(user));
+    // validate authorised party
+    if (token.containsKey("azp")) {
+      if (!config.getClientID().equals(token.getString("azp"))) {
+        throw new IllegalStateException("Invalid authorised party != config.clientID");
+      }
+    }
+
+    return token;
   }
 
   @Override

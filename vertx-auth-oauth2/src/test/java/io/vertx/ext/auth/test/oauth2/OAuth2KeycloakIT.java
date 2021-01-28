@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -77,9 +78,13 @@ public class OAuth2KeycloakIT {
 
     OAuth2Options options = new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
-      .setClientID("public-client")
+      .setClientID("confidential-client")
+      .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e")
       .setTenant("vertx-test")
-      .setSite(site + "/auth/realms/{tenant}");
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(
+        new JWTOptions()
+          .addAudience("account"));
 
     options.getHttpClientOptions().setTrustAll(true);
 

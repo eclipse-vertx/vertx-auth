@@ -1,11 +1,15 @@
 package io.vertx.ext.auth;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import static org.junit.Assert.*;
 
@@ -175,5 +179,23 @@ public class JWKTest {
       .put("kid", "1");
 
     new JWK(jwk);
+  }
+
+  @Test
+  public void loadAzure() {
+    Vertx vertx = Vertx.vertx();
+    JsonObject azure = new JsonObject(vertx.fileSystem()
+      .readFileBlocking("azure.json"));
+
+    JWK key = new JWK(azure.getJsonArray("keys").getJsonObject(1));
+
+    JWT jwt = new JWT()
+      .addJWK(key)
+      .nonceAlgorithm("SHA-256");
+
+
+    System.out.println(
+      jwt.decode("eyJ0eXAiOiJKV1QiLCJub25jZSI6InM5TzdaZ2F6WVJEd2VCZzZhbDNWVkhuZFFOQ0JHSVZZaDMxTDZRVFljTDAiLCJhbGciOiJSUzI1NiIsIng1dCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyIsImtpZCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9mY2FhZjcxMC03YzllLTRjYTAtOWNkYS02OTczOWZhZmJhNGIvIiwiaWF0IjoxNjExNjg3NDE1LCJuYmYiOjE2MTE2ODc0MTUsImV4cCI6MTYxMTY5MTMxNSwiYWNjdCI6MCwiYWNyIjoiMSIsImFjcnMiOlsidXJuOnVzZXI6cmVnaXN0ZXJzZWN1cml0eWluZm8iLCJ1cm46bWljcm9zb2Z0OnJlcTEiLCJ1cm46bWljcm9zb2Z0OnJlcTIiLCJ1cm46bWljcm9zb2Z0OnJlcTMiLCJjMSIsImMyIiwiYzMiLCJjNCIsImM1IiwiYzYiLCJjNyIsImM4IiwiYzkiLCJjMTAiLCJjMTEiLCJjMTIiLCJjMTMiLCJjMTQiLCJjMTUiLCJjMTYiLCJjMTciLCJjMTgiLCJjMTkiLCJjMjAiLCJjMjEiLCJjMjIiLCJjMjMiLCJjMjQiLCJjMjUiXSwiYWlvIjoiQVVRQXUvOFNBQUFBMFYwa0M4S25EM01RbUJ0WGk4OG9lT3NzT2xzU0JLZ1Rld1diQ1RnV2x0MEZ4dG9POVZtVjVjOGRLTStNckE1MXJoZW1Ebm9HMGJGUkRJWkpnM3Izb0E9PSIsImFtciI6WyJwd2QiLCJtZmEiXSwiYXBwX2Rpc3BsYXluYW1lIjoicG9iLXNlcnZlciIsImFwcGlkIjoiMTNjOWUxMTItYjE1OC00YjE5LThkNTctZTFmMzg4MWM0MzgzIiwiYXBwaWRhY3IiOiIxIiwiZmFtaWx5X25hbWUiOiJMb3BlcyIsImdpdmVuX25hbWUiOiJQYXVsbyIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjIxNy4xMDIuMTY1LjQ2IiwibmFtZSI6IkxhYiBQYXVsbyBMb3BlcyIsIm9pZCI6IjUyYmY4YWMyLTNlODMtNGNmNC04MTYxLTBiMTM1YWUwNjk4YiIsInBsYXRmIjoiMTQiLCJwdWlkIjoiMTAwMzIwMDEwRjQzQjcyRSIsInJoIjoiMC5BQUFBRVBlcV9KNThvRXljMm1sem42LTZTeExoeVJOWXNSbExqVmZoODRnY1E0TjVBRHMuIiwic2NwIjoiZW1haWwgb3BlbmlkIHByb2ZpbGUgVXNlci5SZWFkIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiWXltcTZLUmlLMHVUX1NVZ0JzYWUtaElIRE5VX0FLQVpvRG5TTWwxR3VpZyIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6ImZjYWFmNzEwLTdjOWUtNGNhMC05Y2RhLTY5NzM5ZmFmYmE0YiIsInVuaXF1ZV9uYW1lIjoicGF1bG9AbGFiLnRlbnRpeG8uY29tIiwidXBuIjoicGF1bG9AbGFiLnRlbnRpeG8uY29tIiwidXRpIjoiZGNzM1ZzMXk5VW1SOXBzV05JaUxBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiNjJlOTAzOTQtNjlmNS00MjM3LTkxOTAtMDEyMTc3MTQ1ZTEwIiwiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il0sInhtc19zdCI6eyJzdWIiOiJiNGRXNmVuWk9fRGhFLUMyZE1Qdks5Y1JXcW8zXy1FQVc5MVJ4WmRKNnNVIn0sInhtc190Y2R0IjoxNjEwOTEyOTM2fQ.M4dXPZszAsL_rnceagjZnmd8yzbbB3hou4L6vVLGzqAt4wVg8KwQKxcxIGqBqgDWRlBvLYqWs61dvt8vSa-9GaMJifHwmfWoXPvyVzdxhx3qrqgHdsz1HWX5WzcDlEbHrPXZGE8KM-0czE67rePMxEHK7vLf5TbmERLGJt4QDOGZxVHYvnplIrIM1eGjANIeWYTyW5g-YDx3VX6yVl5QHvP4CFdINhDV7i-L3bjmV4M8F6wYs7Xs7nIrKYEiyjTrpXGUL7u29eHXgzeGlSxfXeqTdYmgEt6lFOxx-fZzO0m92AhPGGAe6IB85FtqSi5T95Nif3pHPsouryhDco8y3g")
+    );
   }
 }

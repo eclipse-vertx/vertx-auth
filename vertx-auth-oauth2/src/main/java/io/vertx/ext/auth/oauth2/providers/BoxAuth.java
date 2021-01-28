@@ -57,7 +57,6 @@ public interface BoxAuth {
         .setSite("https://account.box.com")
         .setTokenPath("/api/oauth2/token")
         .setAuthorizationPath("/api/oauth2/authorize")
-        .setUserInfoPath("/users/me")
-        .setScopeSeparator(" "));
+        .setUserInfoPath("/users/me"));
   }
 }

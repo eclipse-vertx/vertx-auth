@@ -574,24 +574,16 @@ public class OAuth2Options {
     if (flow == null) {
       throw new IllegalStateException("Missing OAuth2 flow [e.g.: AUTH_CODE]");
     }
+
     switch (flow) {
       case AUTH_CODE:
-        throwIfNull("clientId", clientID);
-        break;
       case AUTH_JWT:
-        throwIfNull("clientId", clientID);
-        throwIfNull("pubSecKeys", pubSecKeys);
-        // keys can't be empty
-        if (pubSecKeys.size() == 0) {
-          throw new IllegalStateException("Configuration missing. You need to specify [pubSecKeys]");
+      case AAD_OBO:
+      case PASSWORD:
+        if (clientID == null) {
+          throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
         }
         break;
-    }
-  }
-
-  private static void throwIfNull(String key, Object value) throws IllegalStateException {
-    if (value == null) {
-      throw new IllegalStateException("Configuration missing. You need to specify [" + key + "]");
     }
   }
 

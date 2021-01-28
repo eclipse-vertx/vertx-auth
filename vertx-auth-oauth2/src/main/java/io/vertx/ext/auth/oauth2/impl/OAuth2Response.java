@@ -17,7 +17,7 @@ public class OAuth2Response implements io.vertx.ext.auth.oauth2.OAuth2Response {
 
 
   public OAuth2Response(int statusCode, MultiMap headers, Buffer body) {
-    LOG.debug("New response: statusCode: "+ statusCode );
+    LOG.debug("New response: statusCode: " + statusCode);
     this.headers = headers;
     this.body = body;
     this.statusCode = statusCode;
@@ -44,11 +44,17 @@ public class OAuth2Response implements io.vertx.ext.auth.oauth2.OAuth2Response {
 
   @Override
   public @Nullable JsonObject jsonObject() {
+    if (body == null) {
+      return null;
+    }
     return new JsonObject(body);
   }
 
   @Override
   public @Nullable JsonArray jsonArray() {
+    if (body == null) {
+      return null;
+    }
     return new JsonArray(body);
   }
 

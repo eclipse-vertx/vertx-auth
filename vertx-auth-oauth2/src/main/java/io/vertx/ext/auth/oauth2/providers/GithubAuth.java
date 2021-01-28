@@ -59,7 +59,6 @@ public interface GithubAuth {
         .setTokenPath("/oauth/access_token")
         .setAuthorizationPath("/oauth/authorize")
         .setUserInfoPath("https://api.github.com/user")
-        .setScopeSeparator(" ")
         .setHeaders(new JsonObject()
           .put("User-Agent", "vertx-auth-oauth2")));
   }

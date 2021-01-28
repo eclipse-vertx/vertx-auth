@@ -54,6 +54,7 @@ public final class JWT {
   private static final Base64.Decoder decoder = Base64.getDecoder();
 
   private boolean allowEmbeddedKey = false;
+  private MessageDigest nonceDigest;
 
   // keep 2 maps (1 for encode, 1 for decode)
   private final Map<String, List<Crypto>> SIGN = new ConcurrentHashMap<>();
@@ -107,6 +108,19 @@ public final class JWT {
    */
   public JWT allowEmbeddedKey(boolean allowEmbeddedKey) {
     this.allowEmbeddedKey = allowEmbeddedKey;
+    return this;
+  }
+
+  public JWT nonceAlgorithm(String alg) {
+    if (alg == null) {
+      nonceDigest = null;
+    } else {
+      try {
+        nonceDigest = MessageDigest.getInstance(alg);
+      } catch (NoSuchAlgorithmException e) {
+        throw new IllegalArgumentException(e);
+      }
+    }
     return this;
   }
 
@@ -252,6 +266,16 @@ public final class JWT {
         throw new IllegalStateException("missing signature segment");
       }
       byte[] payloadInput = base64urlDecode(signatureSeg);
+      if (nonceDigest != null && header.containsKey("nonce")) {
+        // this is an Azure Graph extension, a nonce is added to the token
+        // after the serialization. The original value is the digest of the
+        // post value.
+        synchronized (this) {
+          nonceDigest.reset();
+          header.put("nonce", nonceDigest.digest(header.getString("nonce").getBytes(StandardCharsets.UTF_8)));
+          headerSeg = urlEncoder.encodeToString(header.encode().getBytes(StandardCharsets.UTF_8));
+        }
+      }
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
 
       String kid = header.getString("kid");

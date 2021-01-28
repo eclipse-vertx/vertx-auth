@@ -58,7 +58,6 @@ public interface CloudFoundryAuth {
         .setClientSecret(clientSecret)
         .setSite(uuaURL)
         .setTokenPath("/oauth/token")
-        .setAuthorizationPath("/oauth/authorize")
-        .setScopeSeparator(" "));
+        .setAuthorizationPath("/oauth/authorize"));
   }
 }

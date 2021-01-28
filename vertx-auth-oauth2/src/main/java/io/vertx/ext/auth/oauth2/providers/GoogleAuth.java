@@ -65,8 +65,7 @@ public interface GoogleAuth extends OpenIDConnectAuth {
         .setJwkPath("https://www.googleapis.com/oauth2/v3/certs")
         .setRevocationPath("https://oauth2.googleapis.com/revoke")
         .setUserInfoParameters(new JsonObject()
-          .put("alt", "json"))
-        .setScopeSeparator(" "));
+          .put("alt", "json")));
   }
 
   /**
@@ -90,8 +89,7 @@ public interface GoogleAuth extends OpenIDConnectAuth {
       new OAuth2Options(config)
         .setSite(site)
         .setUserInfoParameters(new JsonObject()
-          .put("alt", "json"))
-        .setScopeSeparator(" "),
+          .put("alt", "json")),
       handler);
   }
 
