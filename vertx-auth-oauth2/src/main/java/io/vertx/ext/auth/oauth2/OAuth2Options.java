@@ -42,8 +42,6 @@ public class OAuth2Options {
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOCATION_PATH = "/oauth/revoke";
-  private static final boolean USE_BASIC_AUTHORIZATION_HEADER = true;
-  private static final String CLIENT_SECRET_PARAMETER_NAME = "client_secret";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
@@ -56,8 +54,6 @@ public class OAuth2Options {
   // this is an openid-connect extension
   private boolean validateIssuer;
   private String logoutPath;
-  private boolean useBasicAuthorizationHeader;
-  private String clientSecretParameterName;
   private String userInfoPath;
   // extra parameters to be added while requesting the user info
   private JsonObject userInfoParams;
@@ -108,8 +104,6 @@ public class OAuth2Options {
     userInfoPath = other.getUserInfoPath();
     introspectionPath = other.getIntrospectionPath();
     scopeSeparator = other.getScopeSeparator();
-    useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
-    clientSecretParameterName = other.getClientSecretParameterName();
     site = other.getSite();
     pubSecKeys = other.getPubSecKeys();
     jwtOptions = other.getJWTOptions();
@@ -150,8 +144,6 @@ public class OAuth2Options {
     tokenPath = TOKEN_PATH;
     revocationPath = REVOCATION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
-    useBasicAuthorizationHeader = USE_BASIC_AUTHORIZATION_HEADER;
-    clientSecretParameterName = CLIENT_SECRET_PARAMETER_NAME;
     jwtOptions = JWT_OPTIONS;
   }
 
@@ -208,49 +200,6 @@ public class OAuth2Options {
    */
   public OAuth2Options setRevocationPath(String revocationPath) {
     this.revocationPath = revocationPath;
-    return this;
-  }
-
-  /**
-   * Flag to use HTTP basic auth header with client id, client secret.
-   *
-   * @return boolean
-   * @deprecated this value is not considered.
-   */
-  @Deprecated
-  public boolean isUseBasicAuthorizationHeader() {
-    return useBasicAuthorizationHeader;
-  }
-
-  /**
-   * Flag to use HTTP basic auth header with client id, client secret.
-   *
-   * @return self
-   * @deprecated this value is not considered.
-   */
-  @Deprecated
-  public OAuth2Options setUseBasicAuthorizationHeader(boolean useBasicAuthorizationHeader) {
-    this.useBasicAuthorizationHeader = useBasicAuthorizationHeader;
-    return this;
-  }
-
-  /**
-   * When a provider uses a non standard HTTP form field name, the client secret can be overriden here.
-   *
-   * @return the provider form field name
-   */
-  public String getClientSecretParameterName() {
-    return clientSecretParameterName;
-  }
-
-  /**
-   * Override the HTTP form field name for client secret
-   *
-   * @param clientSecretParameterName the new nme
-   * @return self
-   */
-  public OAuth2Options setClientSecretParameterName(String clientSecretParameterName) {
-    this.clientSecretParameterName = clientSecretParameterName;
     return this;
   }
 

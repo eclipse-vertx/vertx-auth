@@ -482,8 +482,8 @@ public class OAuth2API {
 
     form.put("client_id", config.getClientID());
 
-    if (config.getClientSecretParameterName() != null && config.getClientSecret() != null) {
-      form.put(config.getClientSecretParameterName(), config.getClientSecret());
+    if (config.getClientSecret() != null) {
+      form.put("client_secret", config.getClientSecret());
     }
 
     if (refreshToken != null) {

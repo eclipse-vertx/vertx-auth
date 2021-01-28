@@ -88,10 +88,6 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
       options.setClientSecret(config.getJsonObject("credentials").getString("secret"));
     }
 
-    if (config.containsKey("public-client") && config.getBoolean("public-client", false)) {
-      options.setUseBasicAuthorizationHeader(true);
-    }
-
     if (config.containsKey("realm")) {
       final String realm = config.getString("realm");
 
