@@ -28,7 +28,8 @@ import io.vertx.ext.auth.jdbc.impl.SHA512Strategy;
  * You can implement this to provide a different hashing strategy to the default.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
- * @deprecated A P-H-C hashing strategy is available, this class should not be used anymore.
+ * @deprecated This strategy has been deprecated in favour of {@link io.vertx.ext.auth.HashingStrategy}. The new
+ * implementation is backend agnostic and follows a standard format that can be reused across different storages.
  */
 @VertxGen
 @Deprecated

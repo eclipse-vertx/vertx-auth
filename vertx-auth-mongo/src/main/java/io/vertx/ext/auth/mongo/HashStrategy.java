@@ -25,6 +25,8 @@ import io.vertx.ext.auth.User;
  * strategy to the default.
  *
  * @author mremme
+ * @deprecated This strategy has been deprecated in favour of {@link io.vertx.ext.auth.HashingStrategy}. The new
+ * implementation is backend agnostic and follows a standard format that can be reused across different storages.
  */
 @VertxGen
 @Deprecated
