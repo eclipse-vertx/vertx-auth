@@ -302,10 +302,12 @@ public final class JWK implements Crypto {
         return USE_ENC;
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
+      case "RSA PUBLIC KEY":
         publicKey = kf.generatePublic(new X509EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
         return USE_ENC;
       case "PRIVATE KEY":
       case "PRIVATE RSA KEY":
+      case "RSA PRIVATE KEY":
         privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
         return USE_SIG;
       default:
