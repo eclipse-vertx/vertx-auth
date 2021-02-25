@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -57,5 +58,15 @@ public class HashingStrategyTest {
     assertTrue(strategy.verify(hash, "SuperSecret$!"));
     // should be wrong
     assertFalse(strategy.verify(hash, "superSecret$!"));
+    HashMap<String, String> params = new HashMap<String, String>();
+    params.put("it", "100000");
+    String hashWithPararms = strategy.hash("pbkdf2", params, salt, "SuperSecret$!");
+    // should be different
+    assertNotEquals(hash, hashWithPararms);
+    // should be valid
+    assertTrue(strategy.verify(hash, "SuperSecret$!"));
+    // should be wrong
+    assertFalse(strategy.verify(hash, "superSecret$!"));
+
   }
 }

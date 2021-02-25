@@ -66,7 +66,7 @@ public class PBKDF2 implements HashingAlgorithm {
 
     try {
       if (hashString.params() != null) {
-        iterations = Integer.getInteger(hashString.params().get("it"));
+        iterations = Integer.parseInt(hashString.params().get("it"));
       } else {
         iterations = DEFAULT_ITERATIONS;
       }
