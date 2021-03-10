@@ -87,8 +87,14 @@ public interface AzureADAuth extends OpenIDConnectAuth {
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     // don't override if already set
     final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
-
-    final JsonObject extraParameters = new JsonObject();
+    final JWTOptions jwtOptions = config.getJWTOptions() == null ? new JWTOptions() : new JWTOptions(config.getJWTOptions());
+    // azure jwt options defaults
+    if (jwtOptions.getNonceAlgorithm() == null) {
+      jwtOptions.setNonceAlgorithm("SHA-256");
+    }
+    if (jwtOptions.getAudience() == null || jwtOptions.getAudience().size() == 0) {
+      jwtOptions.addAudience(config.getClientID());
+    }
 
     OpenIDConnectAuth.discover(
       vertx,
@@ -96,10 +102,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         // Azure OpenId does not return the same url where the request was sent to
         .setValidateIssuer(false)
         .setSite(site)
-        .setJWTOptions(new JWTOptions()
-          .setNonceAlgorithm("SHA-256")
-          .addAudience(config.getClientID()))
-        .setExtraParameters(extraParameters),
+        .setJWTOptions(jwtOptions),
       handler);
   }
 

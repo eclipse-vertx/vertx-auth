@@ -28,7 +28,22 @@ public class JWTOptions {
   private String nonceAlgorithm;
 
   public JWTOptions() {
+  }
 
+  public JWTOptions(JWTOptions other) {
+    this.leeway = other.leeway;
+    this.ignoreExpiration = other.ignoreExpiration;
+    this.algorithm = other.algorithm;
+    this.header = other.header;
+    this.noTimestamp = other.noTimestamp;
+    this.expiresInSeconds = other.expiresInSeconds;
+    this.audience = other.audience;
+    this.issuer = other.issuer;
+    this.subject = other.subject;
+    this.permissions = other.permissions;
+    this.scopes = other.scopes;
+    this.scopeDelimiter = other.scopeDelimiter;
+    this.nonceAlgorithm = other.nonceAlgorithm;
   }
 
   public JWTOptions(JsonObject json) {

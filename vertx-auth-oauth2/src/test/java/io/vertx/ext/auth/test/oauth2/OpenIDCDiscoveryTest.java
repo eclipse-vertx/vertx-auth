@@ -1,6 +1,9 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.*;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Ignore;
@@ -76,6 +79,31 @@ public class OpenIDCDiscoveryTest extends VertxTestBase {
         .setTenant("user-pool-id"),
       load -> {
         // will fail as there is no application config, but the parsing should have happened
+        testComplete();
+      });
+    await();
+  }
+
+  @Test
+  public void testAzureConfigOverride() {
+    AzureADAuth.discover(
+      vertx,
+      new OAuth2Options()
+        // force v2.0
+        .setSite("https://login.microsoftonline.com/{tenant}/v2.0")
+        .setClientID("client-id")
+        .setClientSecret("client-secret")
+        .setTenant("common")
+        // for extra security enforce the audience validation
+        .setJWTOptions(new JWTOptions()
+          .addAudience("api://client-id")), discovery -> {
+
+        assertTrue(discovery.succeeded());
+        OAuth2Options config = ((OAuth2AuthProviderImpl) discovery.result()).getConfig();
+        // should merge not override!
+        JWTOptions jwtOptions = config.getJWTOptions();
+        assertEquals("api://client-id", jwtOptions.getAudience().get(0));
+        System.out.println(jwtOptions.getAudience());
         testComplete();
       });
     await();
