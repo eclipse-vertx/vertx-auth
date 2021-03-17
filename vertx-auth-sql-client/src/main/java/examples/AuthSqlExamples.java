@@ -76,9 +76,9 @@ public class AuthSqlExamples {
       });
   }
 
-  public void example9(SqlAuthentication jdbcAuth, SqlClient sqlClient) {
+  public void example9(SqlAuthentication sqlAuth, SqlClient sqlClient) {
 
-    String hash = jdbcAuth.hash(
+    String hash = sqlAuth.hash(
       "pbkdf2", // hashing algorithm (OWASP recommended)
       VertxContextPRNG.current().nextString(32), // secure random salt
       "sausages" // password
@@ -86,7 +86,7 @@ public class AuthSqlExamples {
 
     // save to the database
     sqlClient
-      .preparedQuery("INSERT INTO user (username, password) VALUES (?, ?)")
+      .preparedQuery("INSERT INTO users (username, password) VALUES ($1, $2)")
       .execute(Tuple.of("tim", hash))
       .onSuccess(rowset -> {
         // password updated
