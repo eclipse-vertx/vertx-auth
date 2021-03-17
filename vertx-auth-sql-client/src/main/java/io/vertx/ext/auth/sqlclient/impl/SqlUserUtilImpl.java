@@ -65,7 +65,7 @@ public class SqlUserUtilImpl implements SqlUserUtil {
       username,
       strategy.hash("pbkdf2",
         null,
-        Base64.getMimeEncoder().encodeToString(salt),
+        Base64.getEncoder().encodeToString(salt),
         password),
       resultHandler
     );

@@ -20,8 +20,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 
-import java.util.Base64;
-
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**

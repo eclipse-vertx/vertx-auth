@@ -1,6 +1,10 @@
 package io.vertx.ext.auth;
 
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -8,7 +12,11 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
+@RunWith(VertxUnitRunner.class)
 public class HashingStrategyTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   Base64.Encoder B64ENC = Base64.getEncoder();
 
@@ -68,5 +76,19 @@ public class HashingStrategyTest {
     // should be wrong
     assertFalse(strategy.verify(hash, "superSecret$!"));
 
+  }
+
+
+  @Test
+  public void testHashBase64Verification() {
+    HashingStrategy strategy = HashingStrategy.load();
+
+    // base64 salts have _- characters instead pf /+
+    String salt = "QvcpO04_JYuwO-KvUhnCcPvcOvZp5oaJ9GFNfyHSYOA";
+
+    // should encode
+    String hash = strategy.hash("pbkdf2", null, salt, "SuperSecret$!");
+    // should be valid
+    assertTrue(strategy.verify(hash, "SuperSecret$!"));
   }
 }

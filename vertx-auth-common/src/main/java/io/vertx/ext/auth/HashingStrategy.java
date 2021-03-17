@@ -52,7 +52,7 @@ public interface HashingStrategy {
    * Hashes a password.
    *
    * @param id the algorithm id
-   * @param params the algorithm specific paramters
+   * @param params the algorithm specific parameters
    * @param salt the given salt
    * @param password the given password
    * @return the hashed string

@@ -27,9 +27,10 @@ public class HashingStrategyImpl implements HashingStrategy {
       throw new RuntimeException(id +  " algorithm is not available.");
     }
 
-    String hash = algorithm.hash(new HashString(id, params, salt), password);
-    // encode to the expected format
-    return HashString.encode(algorithm, params, salt, hash);
+    final HashString hashString = new HashString(id, params, salt);
+    final String hash = algorithm.hash(hashString, password);
+    // encode to the expected format (use the internal state instead)
+    return HashString.encode(algorithm, hashString.params(), hashString.salt(), hash);
   }
 
   @Override

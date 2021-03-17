@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public final class HashString {
 
-  private String id;
+  private final String id;
   private Map<String, String> params;
   private String salt;
   private String hash;
@@ -35,7 +35,12 @@ public final class HashString {
   public HashString(String id, Map<String, String> params, String salt) {
     this.id = id;
     this.params = params;
-    this.salt = salt;
+    if (salt != null) {
+      // nothing can be stated regarding the salt encoding, we shall adapt base64url to base64 if needed
+      this.salt = salt
+        .replace('_', '/')
+        .replace('-', '+');
+    }
   }
 
   public HashString(String encoded) {
