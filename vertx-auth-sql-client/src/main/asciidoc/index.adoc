@@ -71,8 +71,8 @@ ALTER TABLE users_roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFERE
 
 == Hashing Strategy
 
-The provider uses the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a> to
-hash password.
+The provider uses the https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md[phc sf spec] to
+hash passwords.
 
 WARNING: If you already have a running legacy application switching the strategies will break your existing
 passwords. The new format will not for suffer from this. In order to upgrade request users to reset their password and
@@ -82,13 +82,13 @@ WARNING: It is advised to always store your passwords as hashes in your database
 with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
 never to store your passwords as plain text.
 
-== Vertx Auth JDBC and GDPR
+== Vertx Auth SQL Client and GDPR
 
 GDPR is a regulation from the common European Union law. It overrides/supercedes national data protection laws and
 extents the previously existing directives. This section of the manual is by no means a thorough walkthrough of the
 regulation, it is just a small summary how this component adheres to the requirements. Companies not adhering to the
 requirements can be fined on 4% of the turnover or 20 million euro. Therefore we want to make sure that as a user of
-Vert.x Auth JDBC you're are on the good track to comply.
+Vert.x Auth SQL Client you're are on the good track to comply.
 
 The law defines certain terminology:
 
@@ -109,7 +109,7 @@ GDPR defines the following functionality:
 * Age checks
 * Data destruction - Data minimization principle
 
-This module complies to the GDPR law by not storing any identifiable information about a data subject. The only
+This module complies with the GDPR by not storing any identifiable information about a data subject. The only
 reference is the username which is not linked to any personal data.
 
 In order to add personal data to your application you should create your own data schema and use the username column
@@ -127,7 +127,7 @@ they can be replayed individually.
 
 == Hashing passwords
 
-Like any application there will be a time where you need to store new users into the database. Has you have learn
+Like any application there will be a time where you need to store new users into the database. As you might know,
 passwords are not stored in plain text but hashed according to the hashing strategy. The same strategy is required
 to hash new password before storing it to the database. Doing it is a 3 step task.
 
