@@ -25,7 +25,7 @@ public class OIDCTest extends VertxTestBase {
       vertx,
       new OAuth2Options()
         .setFlow(OAuth2FlowType.PASSWORD)
-        .setClientID("vertx")
+        .setClientId("vertx")
         .setSite("http://localhost:8080/auth/realms/master"),
       res -> {
         if (res.failed()) {
@@ -75,7 +75,7 @@ public class OIDCTest extends VertxTestBase {
     OpenIDConnectAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("vertx")
+        .setClientId("vertx")
         .setSite("http://localhost:8080/auth/realms/master"),
       res -> {
         if (res.failed()) {

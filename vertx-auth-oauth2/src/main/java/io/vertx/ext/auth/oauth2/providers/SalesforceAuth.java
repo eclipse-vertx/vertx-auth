@@ -52,7 +52,7 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://login.salesforce.com")
         .setTokenPath("/services/oauth2/token")

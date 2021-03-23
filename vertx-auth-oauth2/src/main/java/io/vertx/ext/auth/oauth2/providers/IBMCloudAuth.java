@@ -60,7 +60,7 @@ public interface IBMCloudAuth extends OpenIDConnectAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setTenant(guid)
         .setSite("https://" + region + ".appid.cloud.ibm.com/oauth/v4/{tenant}")

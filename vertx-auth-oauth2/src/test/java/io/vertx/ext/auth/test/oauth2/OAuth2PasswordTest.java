@@ -42,7 +42,7 @@ public class OAuth2PasswordTest extends VertxTestBase {
     super.setUp();
     oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setSite("http://localhost:8080"));
 

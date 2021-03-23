@@ -54,7 +54,7 @@ public interface ShopifyAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setTenant(shop)
         .setSite("https://{tenant}.myshopify.com")

@@ -143,7 +143,14 @@ public class OAuth2API {
     }
 
     query.put("response_type", "code");
-    query.put("client_id", config.getClientID());
+    String clientId = config.getClientId();
+    if (clientId != null) {
+      query.put("client_id", clientId);
+    } else {
+      query
+        .put("client_assertion_type", config.getClientAssertionType())
+        .put("client_assertion", config.getClientAssertion());
+    }
 
     final String path = config.getAuthorizationPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
@@ -165,10 +172,10 @@ public class OAuth2API {
 
     final JsonObject headers = new JsonObject();
 
-    final boolean confidentialClient = config.getClientID() != null && config.getClientSecret() != null;
+    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
 
     if (confidentialClient) {
-      String basic = config.getClientID() + ":" + config.getClientSecret();
+      String basic = config.getClientId() + ":" + config.getClientSecret();
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
@@ -181,7 +188,14 @@ public class OAuth2API {
     form.put("grant_type", grantType);
 
     if (!confidentialClient) {
-      form.put("client_id", config.getClientID());
+      String clientId = config.getClientId();
+      if (clientId != null) {
+        form.put("client_id", clientId);
+      } else {
+        form
+          .put("client_assertion_type", config.getClientAssertionType())
+          .put("client_assertion", config.getClientAssertion());
+      }
     }
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
@@ -250,10 +264,10 @@ public class OAuth2API {
   public void tokenIntrospection(String tokenType, String token, Handler<AsyncResult<JsonObject>> handler) {
     final JsonObject headers = new JsonObject();
 
-    final boolean confidentialClient = config.getClientID() != null && config.getClientSecret() != null;
+    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
 
     if (confidentialClient) {
-      String basic = config.getClientID() + ":" + config.getClientSecret();
+      String basic = config.getClientId() + ":" + config.getClientSecret();
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
@@ -332,10 +346,10 @@ public class OAuth2API {
 
     final JsonObject headers = new JsonObject();
 
-    final boolean confidentialClient = config.getClientID() != null && config.getClientSecret() != null;
+    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
 
     if (confidentialClient) {
-      String basic = config.getClientID() + ":" + config.getClientSecret();
+      String basic = config.getClientId() + ":" + config.getClientSecret();
       headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
@@ -480,7 +494,7 @@ public class OAuth2API {
 
     final JsonObject form = new JsonObject();
 
-    form.put("client_id", config.getClientID());
+    form.put("client_id", config.getClientId());
 
     if (config.getClientSecret() != null) {
       form.put("client_secret", config.getClientSecret());

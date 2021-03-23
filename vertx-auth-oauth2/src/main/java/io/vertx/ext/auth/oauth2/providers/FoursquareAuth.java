@@ -51,7 +51,7 @@ public interface FoursquareAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setFlow(OAuth2FlowType.AUTH_CODE)
         .setSite("https://foursquare.com")

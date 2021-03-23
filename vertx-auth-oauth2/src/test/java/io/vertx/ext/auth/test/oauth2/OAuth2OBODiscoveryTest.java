@@ -41,7 +41,7 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
       vertx,
       new OAuth2Options()
         .setFlow(OAuth2FlowType.AAD_OBO)
-        .setClientID("client-id")
+        .setClientId("client-id")
         .setClientSecret("client-secret")
         .setTenant("common")
         .setJWTOptions(

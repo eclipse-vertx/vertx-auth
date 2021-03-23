@@ -23,7 +23,7 @@ public class OAuth2FailureTest extends VertxTestBase {
 
   private static final JsonObject tokenConfig = new JsonObject()
     .put("code", "code")
-    .put("redirect_uri", "http://callback.com");
+    .put("redirectUri", "http://callback.com");
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
@@ -43,7 +43,7 @@ public class OAuth2FailureTest extends VertxTestBase {
     super.setUp();
     oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setSite("http://localhost:8080"));
 
@@ -123,7 +123,7 @@ public class OAuth2FailureTest extends VertxTestBase {
   public void unknownHost() {
     OAuth2Auth auth = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setSite("http://zlouklfoux.net.com.info.pimpo.molo"));
     auth.authenticate(tokenConfig, res -> {
