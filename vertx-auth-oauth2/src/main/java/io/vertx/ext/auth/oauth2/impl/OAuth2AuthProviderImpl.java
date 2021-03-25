@@ -102,11 +102,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           }
         }
         // swap
-        this.jwt = jwt;
+        synchronized (this) {
+          this.jwt = jwt;
+        }
         // compute the next update if the server told us too
         if (json.containsKey("maxAge")) {
+          // ensure that leeway is never negative
+          int leeway = Math.max(0, config.getJWTOptions().getLeeway());
           // delay is in ms, while cache max age is sec
-          final long delay = json.getLong("maxAge") * 1000;
+          final long delay = json.getLong("maxAge") * 1000 - leeway;
           // salesforce (for example) sometimes disables the max-age as setting it to 0
           // for these cases we just cancel
           if (delay > 0) {
@@ -269,8 +273,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
               // response included a client id. Match against config client id
               if (!config.getClientID().equals(json.getString("client_id"))) {
                 // Client identifier for the OAuth 2.0 client that requested this token.
-                handler.handle(Future.failedFuture("Wrong client_id"));
-                return;
+                LOG.info("Introspect client_id doesn't match configured client_id");
               }
             }
 
@@ -591,6 +594,13 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   @Deprecated
   public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
+    api.tokenIntrospection(tokenType, token, introspection -> {
+      if (introspection.failed()) {
+        handler.handle(Future.failedFuture(introspection.cause()));
+      } else {
+        handler.handle(Future.succeededFuture(createAccessToken(introspection.result())));
+      }
+    });
     return this;
   }
 

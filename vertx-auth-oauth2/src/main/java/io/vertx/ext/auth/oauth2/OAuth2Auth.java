@@ -62,6 +62,10 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * the max-age is reached. If the server does not return any cache headers it shall
    * be up to the end user to call this method to refresh.
    *
+   * To avoid the refresh to happen too late, this means that they keys will be invalid,
+   * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
+   * positive leeway, it will be used to request the refresh ahead of time.
+   *
    * @param handler the handler success/failure.
    * @return fluent self.
    */
@@ -89,7 +93,32 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * This method isn't generic for several reasons. The provider is not aware of the capabilities
    * of the backend IdP in terms of max allowed API calls. Some validation could be done at the
    * key id, which only the end user is aware of.
-
+   *
+   * A base implementation for this handler is:
+   *
+   * <pre>{@code
+   *   // are we already updating the jwks?
+   *   private final AtomicBoolean updating = new AtomicBoolean(false);
+   *
+   *   // default missing key handler, will try to reload with debounce
+   *   oauth2.missingKeyHandler(keyId -> {
+   *     if (updating.compareAndSet(false, true)) {
+   *       // Refreshing JWKs due missing key
+   *       jWKSet(done -> {
+   *         updating.compareAndSet(true, false);
+   *         if (done.failed()) {
+   *           done.cause().printStackTrace();
+   *         }
+   *       });
+   *     }
+   *   });
+   * }</pre>
+   *
+   * This handler will purely debounce calls and allow only a single request to {@link #jWKSet()}
+   * at a time. No special handling is done to avoid requests on wrong key ids or prevent to many
+   * requests to the IdP server. Users should probably also account for the number of errors to
+   * present DDoS the IdP.
+   *
    * @return Future result.
    * @see OAuth2Auth#missingKeyHandler(Handler)
    */
