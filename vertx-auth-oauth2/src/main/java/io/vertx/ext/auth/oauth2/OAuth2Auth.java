@@ -62,6 +62,10 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * the max-age is reached. If the server does not return any cache headers it shall
    * be up to the end user to call this method to refresh.
    *
+   * To avoid the refresh to happen too late, this means that they keys will be invalid,
+   * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
+   * positive leeway, it will be used to request the refresh ahead of time.
+   *
    * @param handler the handler success/failure.
    * @return fluent self.
    */
