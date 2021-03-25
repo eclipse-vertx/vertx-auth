@@ -591,6 +591,13 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   @Override
   @Deprecated
   public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
+    api.tokenIntrospection(tokenType, token, introspection -> {
+      if (introspection.failed()) {
+        handler.handle(Future.failedFuture(introspection.cause()));
+      } else {
+        handler.handle(Future.succeededFuture(createAccessToken(introspection.result())));
+      }
+    });
     return this;
   }
 
