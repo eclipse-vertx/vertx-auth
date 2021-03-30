@@ -89,7 +89,7 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
           resultHandler.handle(Future.failedFuture(preparedQuery.cause()));
         }
       });
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }
