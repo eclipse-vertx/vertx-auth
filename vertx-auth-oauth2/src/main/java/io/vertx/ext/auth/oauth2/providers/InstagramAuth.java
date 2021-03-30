@@ -52,7 +52,7 @@ public interface InstagramAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://api.instagram.com")
         .setTokenPath("/oauth/access_token")

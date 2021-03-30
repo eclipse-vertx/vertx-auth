@@ -52,7 +52,7 @@ public interface BoxAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://account.box.com")
         .setTokenPath("/api/oauth2/token")

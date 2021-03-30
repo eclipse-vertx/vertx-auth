@@ -21,9 +21,24 @@ public class OAuth2OptionsConverter {
             obj.setAuthorizationPath((String)member.getValue());
           }
           break;
+        case "clientAssertion":
+          if (member.getValue() instanceof String) {
+            obj.setClientAssertion((String)member.getValue());
+          }
+          break;
+        case "clientAssertionType":
+          if (member.getValue() instanceof String) {
+            obj.setClientAssertionType((String)member.getValue());
+          }
+          break;
         case "clientID":
           if (member.getValue() instanceof String) {
             obj.setClientID((String)member.getValue());
+          }
+          break;
+        case "clientId":
+          if (member.getValue() instanceof String) {
+            obj.setClientId((String)member.getValue());
           }
           break;
         case "clientSecret":
@@ -138,8 +153,17 @@ public class OAuth2OptionsConverter {
     if (obj.getAuthorizationPath() != null) {
       json.put("authorizationPath", obj.getAuthorizationPath());
     }
+    if (obj.getClientAssertion() != null) {
+      json.put("clientAssertion", obj.getClientAssertion());
+    }
+    if (obj.getClientAssertionType() != null) {
+      json.put("clientAssertionType", obj.getClientAssertionType());
+    }
     if (obj.getClientID() != null) {
       json.put("clientID", obj.getClientID());
+    }
+    if (obj.getClientId() != null) {
+      json.put("clientId", obj.getClientId());
     }
     if (obj.getClientSecret() != null) {
       json.put("clientSecret", obj.getClientSecret());

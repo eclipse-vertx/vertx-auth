@@ -44,7 +44,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauthConfig = new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setSite("http://localhost:8080");
 

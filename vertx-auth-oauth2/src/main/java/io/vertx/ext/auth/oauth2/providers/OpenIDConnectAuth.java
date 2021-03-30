@@ -18,6 +18,7 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
@@ -96,6 +97,13 @@ public interface OpenIDConnectAuth {
 
         final JsonObject json = response.jsonObject();
 
+        // some providers return errors as JSON too
+        if (json.containsKey("error")) {
+          // attempt to handle the error as a string
+          handler.handle(Future.failedFuture(json.getString("error_description", json.getString("error"))));
+          return;
+        }
+
         // issuer validation
         if (config.isValidateIssuer()) {
           String issuerEndpoint = json.getString("issuer");
@@ -132,6 +140,17 @@ public interface OpenIDConnectAuth {
           }
           // configure the issuer
           jwtOptions.setIssuer(json.getString("issuer"));
+        }
+
+        // optional config
+        JsonArray flows;
+
+        if (json.containsKey("grant_types_supported")) {
+          flows = json.getJsonArray("grant_types_supported");
+          if (!flows.contains(config.getFlow().getGrantType())) {
+            handler.handle(Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows.toString()));
+            return;
+          }
         }
 
         try {

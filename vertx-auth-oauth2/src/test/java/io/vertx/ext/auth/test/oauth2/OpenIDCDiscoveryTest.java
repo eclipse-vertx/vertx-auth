@@ -1,7 +1,6 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.*;
@@ -74,7 +73,7 @@ public class OpenIDCDiscoveryTest extends VertxTestBase {
       vertx,
       new OAuth2Options()
         .setSite("https://cognito-idp.eu-central-1.amazonaws.com/{tenant}")
-        .setClientID("the-client-id")
+        .setClientId("the-client-id")
         .setClientSecret("the-client-secret")
         .setTenant("user-pool-id"),
       load -> {
@@ -91,7 +90,7 @@ public class OpenIDCDiscoveryTest extends VertxTestBase {
       new OAuth2Options()
         // force v2.0
         .setSite("https://login.microsoftonline.com/{tenant}/v2.0")
-        .setClientID("client-id")
+        .setClientId("client-id")
         .setClientSecret("client-secret")
         .setTenant("common")
         // for extra security enforce the audience validation

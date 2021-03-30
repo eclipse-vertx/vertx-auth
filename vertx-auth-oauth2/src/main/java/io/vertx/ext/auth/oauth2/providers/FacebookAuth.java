@@ -52,7 +52,7 @@ public interface FacebookAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://www.facebook.com")
         .setTokenPath("https://graph.facebook.com/oauth/access_token")

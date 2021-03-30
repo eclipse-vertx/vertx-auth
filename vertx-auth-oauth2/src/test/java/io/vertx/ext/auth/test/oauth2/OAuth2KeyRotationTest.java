@@ -45,7 +45,7 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
     super.setUp();
     oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setJwkPath("/oauth/jwks")
       .setSite("http://localhost:8080"));

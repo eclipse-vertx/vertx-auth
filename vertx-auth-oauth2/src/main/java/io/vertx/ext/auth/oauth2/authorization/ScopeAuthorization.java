@@ -40,6 +40,15 @@ import java.util.List;
 public interface ScopeAuthorization extends AuthorizationProvider {
 
   /**
+   * Factory method to create a Authorization provider for Oauth 2.0 scopes using the default separator {@code " "}.
+   *
+   * @return a AuthorizationProvider
+   */
+  static ScopeAuthorization create() {
+    return new ScopeAuthorizationImpl(" ", null);
+  }
+
+  /**
    * Factory method to create a Authorization provider for Oauth 2.0 scopes.
    *
    * @param scopeSeparator the scope separator e.g.: {@code " "}, {@code ","}, {@code "+"}

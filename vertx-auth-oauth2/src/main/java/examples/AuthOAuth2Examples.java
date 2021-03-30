@@ -36,7 +36,7 @@ public class AuthOAuth2Examples {
 
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("YOUR_CLIENT_ID")
+      .setClientId("YOUR_CLIENT_ID")
       .setClientSecret("YOUR_CLIENT_SECRET")
       .setSite("https://github.com/login")
       .setTokenPath("/oauth/access_token")
@@ -77,7 +77,7 @@ public class AuthOAuth2Examples {
     // Set the client credentials and the OAuth2 server
     OAuth2Options credentials = new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("<client-id>")
+      .setClientId("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
 
@@ -145,7 +145,7 @@ public class AuthOAuth2Examples {
     // Set the client credentials and the OAuth2 server
     OAuth2Options credentials = new OAuth2Options()
       .setFlow(OAuth2FlowType.CLIENT)
-      .setClientID("<client-id>")
+      .setClientId("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
 
@@ -347,7 +347,7 @@ public class AuthOAuth2Examples {
     OpenIDConnectAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setClientSecret("clientSecret")
         .setSite("https://accounts.google.com"))
       .onSuccess(oauth2 -> {
@@ -365,7 +365,7 @@ public class AuthOAuth2Examples {
     KeycloakAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setClientSecret("clientSecret")
         .setSite("http://keycloakhost:keycloakport/auth/realms/{realm}")
         .setTenant("your-realm"))
@@ -377,7 +377,7 @@ public class AuthOAuth2Examples {
     GoogleAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setClientSecret("clientSecret"))
       .onSuccess(oauth2 -> {
         // ...
@@ -387,7 +387,7 @@ public class AuthOAuth2Examples {
     SalesforceAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setClientSecret("clientSecret"))
       .onSuccess(oauth2 -> {
         // ...
@@ -397,7 +397,7 @@ public class AuthOAuth2Examples {
     AzureADAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setClientSecret("clientSecret")
         .setTenant("your-app-guid"))
       .onSuccess(oauth2 -> {
@@ -408,7 +408,7 @@ public class AuthOAuth2Examples {
     IBMCloudAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setClientSecret("clientSecret")
         .setSite("https://<region-id>.appid.cloud.ibm.com/oauth/v4/{tenant}")
         .setTenant("your-tenant-id"))
@@ -422,7 +422,7 @@ public class AuthOAuth2Examples {
     OpenIDConnectAuth.discover(
       vertx,
       new OAuth2Options()
-        .setClientID("clientId")
+        .setClientId("clientId")
         .setTenant("your_realm")
         .setSite("http://server:port/auth/realms/{tenant}"))
       .onSuccess(oauth2 -> {

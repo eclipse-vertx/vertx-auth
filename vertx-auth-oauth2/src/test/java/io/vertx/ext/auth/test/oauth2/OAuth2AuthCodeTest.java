@@ -42,7 +42,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
 
   private static final JsonObject tokenConfig = new JsonObject()
     .put("code", "code")
-    .put("redirect_uri", "http://callback.com");
+    .put("redirectUri", "http://callback.com");
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
@@ -65,7 +65,7 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
     super.setUp();
     oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setJwkPath("/oauth/jwks")
       .setSite("http://localhost:8080"));

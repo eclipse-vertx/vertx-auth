@@ -20,44 +20,37 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Credentials specific to the {@link OAuth2Auth} provider
  *
  * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
-@DataObject
+@DataObject(generateConverter = true)
 public class Oauth2Credentials implements Credentials {
 
+  // swap code for token
   private String code;
   private String redirectUri;
+  private String codeVerifier;
+  // jwt-bearer
   // tokens can include other kind of generic data
-  private JsonObject extra;
+  private JsonObject jwt;
+  // or contain an assertion
+  private String assertion;
+  // password credentials
+  private String password;
+  private String username;
+  // control state
+  private List<String> scopes;
 
   public Oauth2Credentials() {
   }
 
-  public Oauth2Credentials(JsonObject jsonObject) {
-    for (Map.Entry<String, Object> member : jsonObject) {
-      switch (member.getKey()) {
-        case "code":
-          if (member.getValue() instanceof String) {
-            setCode((String) member.getValue());
-          }
-          break;
-        case "redirect_uri":
-          if (member.getValue() instanceof String) {
-            setRedirectUri((String) member.getValue());
-          }
-          break;
-        default:
-          if (extra == null) {
-            extra = new JsonObject();
-          }
-          extra.put(member.getKey(), member.getValue());
-      }
-    }
+  public Oauth2Credentials(JsonObject json) {
+    Oauth2CredentialsConverter.fromJson(json, this);
   }
 
   public String getCode() {
@@ -78,27 +71,72 @@ public class Oauth2Credentials implements Credentials {
     return this;
   }
 
-  public JsonObject getExtra() {
-    return extra;
+  public String getCodeVerifier() {
+    return codeVerifier;
   }
 
-  public Oauth2Credentials setExtra(JsonObject extra) {
-    this.extra = extra;
+  public Oauth2Credentials setCodeVerifier(String codeVerifier) {
+    this.codeVerifier = codeVerifier;
     return this;
   }
 
-  public JsonObject toJson() {
-    JsonObject json = new JsonObject();
+  public List<String> getScopes() {
+    return scopes;
+  }
 
-    if (getCode() != null) {
-      json.put("code", getCode());
+  public Oauth2Credentials addScope(String scope) {
+    if (this.scopes == null) {
+      this.scopes = new ArrayList<>();
     }
-    if (getRedirectUri() != null) {
-      json.put("redirect_uri", getRedirectUri());
-    }
-    if (extra != null) {
-      json.mergeIn(extra);
-    }
+    this.scopes.add(scope);
+    return this;
+  }
+
+  public Oauth2Credentials setScopes(List<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public JsonObject getJwt() {
+    return jwt;
+  }
+
+  public Oauth2Credentials setJwt(JsonObject jwt) {
+    this.jwt = jwt;
+    return this;
+  }
+
+  public String getAssertion() {
+    return assertion;
+  }
+
+  public Oauth2Credentials setAssertion(String assertion) {
+    this.assertion = assertion;
+    return this;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public Oauth2Credentials setPassword(String password) {
+    this.password = password;
+    return this;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public Oauth2Credentials setUsername(String username) {
+    this.username = username;
+    return this;
+  }
+
+  @Override
+  public JsonObject toJson() {
+    final JsonObject json = new JsonObject();
+    Oauth2CredentialsConverter.toJson(this, json);
     return json;
   }
 
@@ -107,12 +145,33 @@ public class Oauth2Credentials implements Credentials {
     OAuth2FlowType flow = (OAuth2FlowType) arg;
     // when there's no access token, validation shall be performed according to each flow
     switch (flow) {
+      case CLIENT:
+        // no fields are required
+        break;
       case AUTH_CODE:
         if (code == null || code.length() == 0) {
           throw new CredentialValidationException("code cannot be null or empty");
         }
         if (redirectUri != null && redirectUri.length() == 0) {
           throw new CredentialValidationException("redirectUri cannot be empty");
+        }
+        break;
+      case AUTH_JWT:
+        if (jwt == null) {
+          throw new CredentialValidationException("json cannot be null");
+        }
+        break;
+      case AAD_OBO:
+        if (assertion == null || assertion.length() == 0) {
+          throw new CredentialValidationException("assertion cannot be null or empty");
+        }
+        break;
+      case PASSWORD:
+        if (username == null || username.length() == 0) {
+          throw new CredentialValidationException("username cannot be null or empty");
+        }
+        if (password == null || password.length() == 0) {
+          throw new CredentialValidationException("password cannot be null or empty");
         }
         break;
     }

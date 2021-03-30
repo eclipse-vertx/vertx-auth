@@ -33,7 +33,7 @@ public class OAuth2OBOTest extends VertxTestBase {
     // mock AzureAD
     oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
       .setFlow(OAuth2FlowType.AAD_OBO)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setTenant("resource")
       .setTokenPath("http://localhost:8080/{tenant}/oauth2/token")

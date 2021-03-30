@@ -73,7 +73,7 @@ public class KeycloakRBACImpl implements OAuth2RBAC {
     String[] parts = authority.split(":");
 
     if (parts.length == 1) {
-      handler.handle(Future.succeededFuture(hasApplicationRole(accessToken, options.getClientID(), parts[0])));
+      handler.handle(Future.succeededFuture(hasApplicationRole(accessToken, options.getClientId(), parts[0])));
       return;
     }
 

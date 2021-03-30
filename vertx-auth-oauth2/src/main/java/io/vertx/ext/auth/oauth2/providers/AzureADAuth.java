@@ -56,7 +56,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
         .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientID(clientId)
+        .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setTenant(guid)
         .setSite("https://login.microsoftonline.com/{tenant}")
@@ -93,7 +93,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
       jwtOptions.setNonceAlgorithm("SHA-256");
     }
     if (jwtOptions.getAudience() == null || jwtOptions.getAudience().size() == 0) {
-      jwtOptions.addAudience(config.getClientID());
+      jwtOptions.addAudience(config.getClientId());
     }
 
     OpenIDConnectAuth.discover(

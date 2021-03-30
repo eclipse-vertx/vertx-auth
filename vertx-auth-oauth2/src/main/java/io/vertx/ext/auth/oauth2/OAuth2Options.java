@@ -65,8 +65,12 @@ public class OAuth2Options {
   private String tenant;
 
   private String site;
-  private String clientID;
+  private String clientId;
   private String clientSecret;
+  //https://tools.ietf.org/html/rfc7521
+  private String clientAssertionType;
+  private String clientAssertion;
+
   private String userAgent;
   private JsonObject headers;
   private List<PubSecKeyOptions> pubSecKeys;
@@ -94,8 +98,10 @@ public class OAuth2Options {
    */
   public OAuth2Options(OAuth2Options other) {
     tenant = other.getTenant();
-    clientID = other.getClientID();
+    clientId = other.getClientId();
     clientSecret = other.getClientSecret();
+    clientAssertionType = other.getClientAssertionType();
+    clientAssertion = other.getClientAssertion();
     validateIssuer = other.isValidateIssuer();
     flow = other.getFlow();
     authorizationPath = other.getAuthorizationPath();
@@ -214,20 +220,36 @@ public class OAuth2Options {
   }
 
   /**
+   * @deprecated see {@link #getClientId()}
+   */
+  @Deprecated
+  public String getClientID() {
+    return getClientId();
+  }
+
+  /**
+   * @deprecated see {@link #setClientId(String)}
+   */
+  @Deprecated
+  public OAuth2Options setClientID(String clientID) {
+    return setClientId(clientID);
+  }
+
+  /**
    * Get the provider client id
    * @return client id
    */
-  public String getClientID() {
-    return clientID;
+  public String getClientId() {
+    return clientId;
   }
 
   /**
    * Set the provider client id
-   * @param clientID client id
+   * @param clientId client id
    * @return self
    */
-  public OAuth2Options setClientID(String clientID) {
-    this.clientID = clientID;
+  public OAuth2Options setClientId(String clientId) {
+    this.clientId = clientId;
     return this;
   }
 
@@ -246,6 +268,24 @@ public class OAuth2Options {
    */
   public OAuth2Options setClientSecret(String clientSecret) {
     this.clientSecret = clientSecret;
+    return this;
+  }
+
+  public String getClientAssertionType() {
+    return clientAssertionType;
+  }
+
+  public OAuth2Options setClientAssertionType(String clientAssertionType) {
+    this.clientAssertionType = clientAssertionType;
+    return this;
+  }
+
+  public String getClientAssertion() {
+    return clientAssertion;
+  }
+
+  public OAuth2Options setClientAssertion(String clientAssertion) {
+    this.clientAssertion = clientAssertion;
     return this;
   }
 
@@ -529,8 +569,15 @@ public class OAuth2Options {
       case AUTH_JWT:
       case AAD_OBO:
       case PASSWORD:
-        if (clientID == null) {
-          throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
+        if (clientAssertion == null && clientAssertionType == null) {
+          // not using client assertions
+          if (clientId == null) {
+            throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
+          }
+        } else {
+          if (clientAssertion == null || clientAssertionType == null) {
+            throw new IllegalStateException("Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+          }
         }
         break;
     }
