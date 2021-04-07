@@ -103,8 +103,7 @@ public class FidoU2fAttestation implements Attestation {
 
       return new AttestationCertificates()
         .setAlg(PublicKeyCredential.ES256)
-        .setX5c(attStmt.getJsonArray("x5c"))
-        .setIncludesRoot(true);
+        .setX5c(attStmt.getJsonArray("x5c"));
 
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

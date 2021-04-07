@@ -51,7 +51,6 @@ public class NoneAttestation implements Attestation {
       throw new AttestationException("attStmt is present!");
     }
 
-    return new AttestationCertificates()
-      .setIncludesRoot(false);
+    return new AttestationCertificates();
   }
 }

@@ -143,8 +143,7 @@ public class AndroidSafetynetAttestation implements Attestation {
 
       return new AttestationCertificates()
         .setAlg(PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")))
-        .setX5c(x5c)
-        .setIncludesRoot(false);
+        .setX5c(x5c);
 
     } catch (MetaDataException | CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

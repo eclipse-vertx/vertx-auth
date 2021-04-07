@@ -11,9 +11,6 @@ import java.util.List;
 public class AttestationCertificates {
   private PublicKeyCredential alg;
   private List<String> x5c;
-  // by default it is assumed that the x5c includes
-  // a root certificate
-  private boolean includesRoot = true;
 
   public AttestationCertificates() {}
 
@@ -48,15 +45,6 @@ public class AttestationCertificates {
 
   public AttestationCertificates setX5c(List<String> x5c) {
     this.x5c = x5c;
-    return this;
-  }
-
-  public boolean isIncludesRoot() {
-    return includesRoot;
-  }
-
-  public AttestationCertificates setIncludesRoot(boolean includesRoot) {
-    this.includesRoot = includesRoot;
     return this;
   }
 

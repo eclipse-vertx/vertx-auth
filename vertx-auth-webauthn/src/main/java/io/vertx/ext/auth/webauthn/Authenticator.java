@@ -64,8 +64,7 @@ public class Authenticator {
    *     "alg": "string",
    *     "x5c": [
    *       "base64"
-   *     ],
-   *     "includesRoot": boolean
+   *     ]
    *   }
    * }</pre>
    */

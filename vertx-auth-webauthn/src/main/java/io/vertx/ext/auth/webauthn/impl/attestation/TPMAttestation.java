@@ -393,8 +393,7 @@ public class TPMAttestation implements Attestation {
 
       return new AttestationCertificates()
         .setAlg(PublicKeyCredential.valueOf(attStmt.getInteger("alg")))
-        .setX5c(attStmt.getJsonArray("x5c"))
-        .setIncludesRoot(false);
+        .setX5c(attStmt.getJsonArray("x5c"));
 
     } catch (MetaDataException | NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
       throw new AttestationException(e);

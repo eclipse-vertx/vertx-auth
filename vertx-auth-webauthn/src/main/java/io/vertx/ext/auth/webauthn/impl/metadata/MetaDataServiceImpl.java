@@ -156,11 +156,21 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Override
   public JsonObject verify(Authenticator authenticator) {
     try {
+      boolean includesRoot;
+      switch (authenticator.getFmt()) {
+        case "none":
+        case "android-safetynet":
+        case "tpm":
+          includesRoot = false;
+          break;
+        default:
+          includesRoot = true;
+      }
       return metadata.verifyMetadata(
         authenticator.getAaguid(),
         authenticator.getAttestationCertificates().getAlg(),
         parseX5c(authenticator.getAttestationCertificates().getX5c()),
-        authenticator.getAttestationCertificates().isIncludesRoot());
+        includesRoot);
     } catch (SignatureException | AttestationException | NoSuchAlgorithmException | CertificateException | MetaDataException | InvalidKeyException | NoSuchProviderException e) {
       throw new RuntimeException(e);
     }
