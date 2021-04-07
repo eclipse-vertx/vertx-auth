@@ -16,11 +16,14 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+
+import java.security.cert.CertificateException;
 
 /**
  * Factory interface for creating FIDO2 MetaDataService.
@@ -78,4 +81,18 @@ public interface MetaDataService {
    */
   @Fluent
   MetaDataService flush();
+
+  /**
+   * Verify the metadata for a given authenticator. The MDS will lookup the metadata by the AAGUID. If no AAGUID is
+   * known, the result will be {@code null}.
+   *
+   * When a statement is found, the statement will be used to verify the certificate chain. A failure during this
+   * verification will throw a {@link RuntimeException}.
+   *
+   * @param authenticator authenticator to verify
+   * @return an MDS statement for this authenticator or {@code null}.
+   * @throws RuntimeException if the verification fails.
+   */
+  @Nullable
+  JsonObject verify(Authenticator authenticator);
 }

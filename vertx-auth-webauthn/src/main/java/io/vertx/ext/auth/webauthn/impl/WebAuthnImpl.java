@@ -44,6 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 
+import static io.vertx.core.json.impl.JsonUtil.BASE64_ENCODER;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 
 public class WebAuthnImpl implements WebAuthn {
@@ -362,15 +363,16 @@ public class WebAuthnImpl implements WebAuthn {
           }
 
           try {
-            final JsonObject authrInfo = verifyWebAuthNCreate(authInfo, clientDataJSON);
+            final Authenticator authrInfo = verifyWebAuthNCreate(authInfo, clientDataJSON);
             // by default the store can upsert if a credential is missing, the user has been verified so it is valid
             // the store however might disallow this operation
-            Authenticator storeItem = new Authenticator(authrInfo).setUserName(username);
+            authrInfo.setUserName(username);
+
             // the create challenge is complete we can finally safe this
             // new authenticator to the storage
-            updater.apply(storeItem)
+            updater.apply(authrInfo)
               .onFailure(err -> handler.handle(Future.failedFuture(err)))
-              .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(storeItem.toJson()))));
+              .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authrInfo.toJson()))));
 
           } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
             handler.handle(Future.failedFuture(e));
@@ -435,7 +437,7 @@ public class WebAuthnImpl implements WebAuthn {
    * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
    * @param clientDataJSON - Binary session data
    */
-  private JsonObject verifyWebAuthNCreate(WebAuthnCredentials request, byte[] clientDataJSON) throws AttestationException, IOException, NoSuchAlgorithmException {
+  private Authenticator verifyWebAuthNCreate(WebAuthnCredentials request, byte[] clientDataJSON) throws AttestationException, IOException, NoSuchAlgorithmException {
     JsonObject response = request.getWebauthn().getJsonObject("response");
     // Extract attestation Object
     try (JsonParser parser = CBOR.cborParser(response.getString("attestationObject"))) {
@@ -490,6 +492,8 @@ public class WebAuthnImpl implements WebAuthn {
       // we lookup the loaded attestations at creation of this object
       // we don't look everytime to avoid a performance penalty
       final Attestation verifier = attestations.get(fmt);
+      final AttestationCertificates certificates;
+
       // If there's no verifier then a extra implementation is required...
       if (verifier == null) {
         throw new AttestationException("Unknown attestation fmt: " + fmt);
@@ -508,17 +512,19 @@ public class WebAuthnImpl implements WebAuthn {
         // * packed
         // * tpm
         // * apple
-        verifier
+        certificates = verifier
           .validate(options, mds.metadata(), clientDataJSON, attestation, authData);
       }
 
       // STEP webauthn.create#2
       // Create new authenticator record and store counter, credId and publicKey in the DB
-      return new JsonObject()
-        .put("fmt", fmt)
-        .put("publicKey", authData.getCredentialPublicKey())
-        .put("counter", authData.getSignCounter())
-        .put("credID", authData.getCredentialId());
+      return new Authenticator()
+        .setFmt(fmt)
+        .setAaguid(authData.getAaguidString())
+        .setPublicKey(BASE64_ENCODER.encodeToString(authData.getCredentialPublicKey()))
+        .setCounter(authData.getSignCounter())
+        .setCredID(BASE64_ENCODER.encodeToString(authData.getCredentialId()))
+        .setAttestationCertificates(certificates);
     }
   }
 

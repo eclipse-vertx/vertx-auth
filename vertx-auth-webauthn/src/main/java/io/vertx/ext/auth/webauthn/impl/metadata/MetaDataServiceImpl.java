@@ -14,8 +14,10 @@ import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.webauthn.Authenticator;
 import io.vertx.ext.auth.webauthn.MetaDataService;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -23,6 +25,8 @@ import java.security.cert.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.vertx.core.json.impl.JsonUtil.BASE64_DECODER;
 
 public class MetaDataServiceImpl implements MetaDataService {
 
@@ -148,6 +152,34 @@ public class MetaDataServiceImpl implements MetaDataService {
     metadata.clear();
     return this;
   }
+
+  @Override
+  public JsonObject verify(Authenticator authenticator) {
+    try {
+      return metadata.verifyMetadata(
+        authenticator.getAaguid(),
+        authenticator.getAttestationCertificates().getAlg(),
+        parseX5c(authenticator.getAttestationCertificates().getX5c()),
+        authenticator.getAttestationCertificates().isIncludesRoot());
+    } catch (SignatureException | AttestationException | NoSuchAlgorithmException | CertificateException | MetaDataException | InvalidKeyException | NoSuchProviderException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static List<X509Certificate> parseX5c(List<String> x5c) throws CertificateException {
+    List<X509Certificate> certChain = new ArrayList<>();
+
+    if (x5c == null || x5c.size() == 0) {
+      return certChain;
+    }
+
+    for (String s : x5c) {
+      certChain.add(JWS.parseX5c(BASE64_DECODER.decode(s)));
+    }
+
+    return certChain;
+  }
+
 
   public MetaData metadata() {
     return metadata;

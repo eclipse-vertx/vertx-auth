@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
@@ -39,7 +40,7 @@ public class NoneAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // AAGUID must be null
     if (!"00000000-0000-0000-0000-000000000000".equals(authData.getAaguidString())) {
       throw new AttestationException("AAGUID is not 00000000-0000-0000-0000-000000000000!");
@@ -49,5 +50,8 @@ public class NoneAttestation implements Attestation {
     if (attestation.containsKey("attStmt") && attestation.getJsonObject("attStmt").size() > 0) {
       throw new AttestationException("attStmt is present!");
     }
+
+    return new AttestationCertificates()
+      .setIncludesRoot(false);
   }
 }
