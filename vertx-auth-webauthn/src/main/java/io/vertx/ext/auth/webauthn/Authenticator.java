@@ -55,6 +55,22 @@ public class Authenticator {
    */
   private long counter;
 
+  private String aaguid;
+
+  /**
+   * The Authenticator attestation certificates object, a JSON like:
+   * <pre>{@code
+   *   {
+   *     "alg": "string",
+   *     "x5c": [
+   *       "base64"
+   *     ]
+   *   }
+   * }</pre>
+   */
+  private AttestationCertificates attestationCertificates;
+  private String fmt;
+
   public Authenticator() {}
   public Authenticator(JsonObject json) {
     AuthenticatorConverter.fromJson(json, this);
@@ -105,6 +121,15 @@ public class Authenticator {
     return this;
   }
 
+  public Authenticator setAttestationCertificates(AttestationCertificates attestationCertificates) {
+    this.attestationCertificates = attestationCertificates;
+    return this;
+  }
+
+  public AttestationCertificates getAttestationCertificates() {
+    return attestationCertificates;
+  }
+
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
     AuthenticatorConverter.toJson(this, json);
@@ -122,5 +147,23 @@ public class Authenticator {
   @Override
   public String toString() {
     return toJson().encode();
+  }
+
+  public Authenticator setFmt(String fmt) {
+    this.fmt = fmt;
+    return this;
+  }
+
+  public String getFmt() {
+    return fmt;
+  }
+
+  public Authenticator setAaguid(String aaguid) {
+    this.aaguid = aaguid;
+    return this;
+  }
+
+  public String getAaguid() {
+    return aaguid;
   }
 }

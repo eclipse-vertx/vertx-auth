@@ -16,6 +16,16 @@ public class AuthenticatorConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Authenticator obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
+        case "aaguid":
+          if (member.getValue() instanceof String) {
+            obj.setAaguid((String)member.getValue());
+          }
+          break;
+        case "attestationCertificates":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setAttestationCertificates(new io.vertx.ext.auth.webauthn.AttestationCertificates((io.vertx.core.json.JsonObject)member.getValue()));
+          }
+          break;
         case "counter":
           if (member.getValue() instanceof Number) {
             obj.setCounter(((Number)member.getValue()).longValue());
@@ -24,6 +34,11 @@ public class AuthenticatorConverter {
         case "credID":
           if (member.getValue() instanceof String) {
             obj.setCredID((String)member.getValue());
+          }
+          break;
+        case "fmt":
+          if (member.getValue() instanceof String) {
+            obj.setFmt((String)member.getValue());
           }
           break;
         case "publicKey":
@@ -50,9 +65,18 @@ public class AuthenticatorConverter {
   }
 
   public static void toJson(Authenticator obj, java.util.Map<String, Object> json) {
+    if (obj.getAaguid() != null) {
+      json.put("aaguid", obj.getAaguid());
+    }
+    if (obj.getAttestationCertificates() != null) {
+      json.put("attestationCertificates", obj.getAttestationCertificates().toJson());
+    }
     json.put("counter", obj.getCounter());
     if (obj.getCredID() != null) {
       json.put("credID", obj.getCredID());
+    }
+    if (obj.getFmt() != null) {
+      json.put("fmt", obj.getFmt());
     }
     if (obj.getPublicKey() != null) {
       json.put("publicKey", obj.getPublicKey());

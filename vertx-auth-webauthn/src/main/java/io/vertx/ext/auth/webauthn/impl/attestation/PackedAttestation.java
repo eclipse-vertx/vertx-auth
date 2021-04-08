@@ -20,6 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.ASN1;
@@ -56,7 +57,7 @@ public class PackedAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     try {
       byte[] clientDataHash = hash("SHA-256", clientDataJSON);
 
@@ -200,6 +201,11 @@ public class PackedAttestation implements Attestation {
           throw new AttestationException("Failed to verify the signature!");
         }
       }
+
+      return new AttestationCertificates()
+        .setAlg(PublicKeyCredential.valueOf(attStmt.getInteger("alg")))
+        .setX5c(attStmt.containsKey("x5c") ? attStmt.getJsonArray("x5c") : null);
+
     } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }

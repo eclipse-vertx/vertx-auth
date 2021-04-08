@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
@@ -59,7 +60,7 @@ public class AndroidSafetynetAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // attestation format:
     //{
     //    "fmt": "android-safetynet",
@@ -102,7 +103,6 @@ public class AndroidSafetynetAttestation implements Attestation {
         throw new AttestationException("timestampMs is invalid!");
       }
 
-
       // Verify the header
       JsonArray x5c = token.getJsonObject("header").getJsonArray("x5c");
       if (x5c == null || x5c.size() == 0) {
@@ -112,7 +112,10 @@ public class AndroidSafetynetAttestation implements Attestation {
       List<X509Certificate> certChain = new ArrayList<>();
 
       for (int i = 0; i < x5c.size(); i++) {
-        certChain.add(JWS.parseX5c(b64dec.decode(x5c.getString(i))));
+        final byte[] bytes = b64dec.decode(x5c.getString(i));
+        certChain.add(JWS.parseX5c(bytes));
+        // patch the x5c data to be base64url
+        x5c.set(i, bytes);
       }
 
       // 1. Get leaf certificate of x5c certificate chain, decode it,
@@ -137,6 +140,10 @@ public class AndroidSafetynetAttestation implements Attestation {
         certChain.get(0),
         token.getBinary("signature"),
         token.getString("signatureBase").getBytes(StandardCharsets.UTF_8));
+
+      return new AttestationCertificates()
+        .setAlg(PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")))
+        .setX5c(x5c);
 
     } catch (MetaDataException | CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

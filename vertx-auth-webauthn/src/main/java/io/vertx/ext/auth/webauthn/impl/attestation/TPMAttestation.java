@@ -19,6 +19,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.ASN1;
@@ -111,7 +112,7 @@ public class TPMAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // typical attestation object:
     //{
     //	"fmt": "tpm",
@@ -389,6 +390,10 @@ public class TPMAttestation implements Attestation {
         leafCert,
         attStmt.getBinary("sig"),
         attStmt.getBinary("certInfo"));
+
+      return new AttestationCertificates()
+        .setAlg(PublicKeyCredential.valueOf(attStmt.getInteger("alg")))
+        .setX5c(attStmt.getJsonArray("x5c"));
 
     } catch (MetaDataException | NoSuchAlgorithmException | CertificateException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
       throw new AttestationException(e);

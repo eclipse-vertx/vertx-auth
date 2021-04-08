@@ -37,6 +37,7 @@ public class DummyStore {
   }
 
   public Future<Void> store(Authenticator authenticator) {
+    System.out.println(authenticator);
 
     long updated = database.stream()
       .filter(entry -> authenticator.getCredID().equals(entry.getCredID()))

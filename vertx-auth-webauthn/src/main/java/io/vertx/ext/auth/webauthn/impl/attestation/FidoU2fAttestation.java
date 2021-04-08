@@ -21,6 +21,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
@@ -52,7 +53,7 @@ public class FidoU2fAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // the attestation object should have the following structure:
     //{
     //    "fmt": "fido-u2f",
@@ -99,6 +100,10 @@ public class FidoU2fAttestation implements Attestation {
         certChain.get(0),
         attStmt.getBinary("sig"),
         signatureBase.getBytes());
+
+      return new AttestationCertificates()
+        .setAlg(PublicKeyCredential.ES256)
+        .setX5c(attStmt.getJsonArray("x5c"));
 
     } catch (CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

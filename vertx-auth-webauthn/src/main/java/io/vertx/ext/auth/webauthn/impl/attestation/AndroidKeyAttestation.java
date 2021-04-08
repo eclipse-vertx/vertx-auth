@@ -19,6 +19,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
@@ -56,7 +57,7 @@ public class AndroidKeyAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     // Typical attestation object
     //{
     //    "fmt": "android-key",
@@ -160,6 +161,10 @@ public class AndroidKeyAttestation implements Attestation {
           throw new AttestationException("Root certificate is invalid!");
         }
       }
+
+      return new AttestationCertificates()
+        .setAlg(PublicKeyCredential.valueOf(attStmt.getInteger("alg")))
+        .setX5c(attStmt.getJsonArray("x5c"));
 
     } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);

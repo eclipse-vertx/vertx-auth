@@ -19,6 +19,7 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.ASN1;
@@ -47,7 +48,7 @@ public class AppleAttestation implements Attestation {
   }
 
   @Override
-  public void validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
+  public AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException {
     try {
       byte[] clientDataHash = hash("SHA-256", clientDataJSON);
 
@@ -112,6 +113,9 @@ public class AppleAttestation implements Attestation {
         alg,
         certChain);
 
+      return new AttestationCertificates()
+        .setAlg(alg)
+        .setX5c(attStmt.getJsonArray("x5c"));
 
     } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new AttestationException(e);
