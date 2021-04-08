@@ -78,9 +78,6 @@ public final class JWK implements Crypto {
   // the expected result
   private final int len;
 
-  // if a key is marked as symmetric it can be used interchangeably
-  private final boolean symmetric;
-
   // the cryptography objects, not all will be initialized
   private PrivateKey privateKey;
   private PublicKey publicKey;
@@ -186,8 +183,6 @@ public final class JWK implements Crypto {
         }
         kty = "oct";
         len = 256;
-        // this is a symmetric key
-        symmetric = true;
         use = USE_SIG + USE_ENC;
         return;
       case "HS384":
@@ -199,8 +194,6 @@ public final class JWK implements Crypto {
         }
         kty = "oct";
         len = 384;
-        // this is a symmetric key
-        symmetric = true;
         use = USE_SIG + USE_ENC;
         return;
       case "HS512":
@@ -212,16 +205,11 @@ public final class JWK implements Crypto {
         }
         kty = "oct";
         len = 512;
-        // this is a symmetric key
-        symmetric = true;
         use = USE_SIG + USE_ENC;
         return;
     }
 
     // Handle Pub-Sec Keys
-
-    symmetric = false;
-
     try {
       switch (alg) {
         case "RS256":
@@ -320,8 +308,6 @@ public final class JWK implements Crypto {
     alg = algorithm;
     kid = null;
     label = alg + "#" + mac.hashCode();
-    // this is a symmetric key
-    symmetric = true;
     use = USE_SIG + USE_ENC;
 
     // test the algorithm
@@ -362,7 +348,6 @@ public final class JWK implements Crypto {
     alg = algorithm;
     kid = null;
     label = privateKey != null ? algorithm + '#' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '#' + certificate.hashCode();
-    symmetric = false;
 
     this.publicKey = certificate.getPublicKey();
     this.privateKey = privateKey;
@@ -412,7 +397,6 @@ public final class JWK implements Crypto {
           kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "RS256");
-          symmetric = false;
 
           switch (alg) {
             case "RS1":
@@ -434,7 +418,6 @@ public final class JWK implements Crypto {
           kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "ES256");
-          symmetric = false;
 
           switch (alg) {
             case "ES256":
@@ -458,7 +441,6 @@ public final class JWK implements Crypto {
           kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "HS256");
-          symmetric = true;
 
           switch (alg) {
             case "HS256":
@@ -616,7 +598,7 @@ public final class JWK implements Crypto {
       throw new IllegalStateException("Key use is not 'sig'");
     }
 
-    if (symmetric) {
+    if (mac != null) {
       return mac.doFinal(payload);
     } else {
       try {
@@ -646,7 +628,7 @@ public final class JWK implements Crypto {
         throw new SignatureException("signature is missing");
       }
 
-      if (symmetric) {
+      if (mac != null) {
         return MessageDigest.isEqual(expected, sign(payload));
       } else {
         signature.initVerify(publicKey);
