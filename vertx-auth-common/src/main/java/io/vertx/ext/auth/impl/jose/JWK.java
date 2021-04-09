@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.impl.asn.ASN1;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -40,7 +41,7 @@ import java.util.regex.Pattern;
  * <p>
  * In a nutshell a JWK is a Key(Pair) encoded as JSON. This implementation follows the spec with some limitations:
  * <p>
- * * Supported algorithms are: "PS256", "PS384", "PS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "HS256", "HS384", "HS512"
+ * * Supported algorithms are: "PS256", "PS384", "PS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "HS256", "HS384", "HS512", "EdDSA"
  * <p>
  * When working with COSE, then "RS1" is also a valid algorithm.
  * <p>
@@ -237,6 +238,12 @@ public final class JWK implements Crypto {
           use = parsePEM(KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII));
           signature = JWS.getSignature(alg);
           break;
+        case "EdDSA":
+          kty = "EdDSA";
+          len = JWS.getSignatureLength(alg, publicKey);
+          use = parsePEM(KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signature = JWS.getSignature(alg);
+          break;
         default:
           throw new IllegalArgumentException("Unknown algorithm: " + alg);
       }
@@ -424,19 +431,20 @@ public final class JWK implements Crypto {
             case "ES256K":
             case "ES512":
             case "ES384":
-              len = JWS.getSignatureLength(alg, publicKey);
               use = createEC(json);
+              len = JWS.getSignatureLength(alg, publicKey);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
           }
           break;
-//        case "OKP":
-//          kty = json.getString("kty");
-//          // get the alias for the algorithm
-//          alg = json.getString("alg", "EdDSA");
-//          symmetric = false;
-//          break;
+        case "OKP":
+          kty = json.getString("kty");
+          // get the alias for the algorithm
+          alg = json.getString("alg", "EdDSA");
+          use = createOKP(json);
+          len = JWS.getSignatureLength(alg, publicKey);
+          break;
         case "oct":
           kty = json.getString("kty");
           // get the alias for the algorithm
@@ -550,14 +558,100 @@ public final class JWK implements Crypto {
       if ((use & USE_ENC) == 0) {
         use += USE_ENC;
       }
+    }
 
-      // private key
-      if (jsonHasProperties(json, "d")) {
-        final BigInteger d = new BigInteger(1, json.getBinary("d"));
-        privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
+    // private key
+    if (jsonHasProperties(json, "d")) {
+      final BigInteger d = new BigInteger(1, json.getBinary("d"));
+      privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
+      if ((use & USE_SIG) == 0) {
+        use += USE_SIG;
+      }
+    }
+
+    switch (json.getString("use", "sig")) {
+      case "sig":
+        signature = JWS.getSignature(alg);
         if ((use & USE_SIG) == 0) {
           use += USE_SIG;
         }
+        break;
+      case "enc":
+        if ((use & USE_ENC) == 0) {
+          use += USE_ENC;
+        }
+        break;
+    }
+
+    return use;
+  }
+
+  private int createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+    int use = 0;
+
+    // public key
+    if (jsonHasProperties(json, "x")) {
+      final byte[] key = json.getBinary("x");
+      final byte bitStringTag = (byte) 0x3;
+
+      //  SPKI ::= SEQUENCE {
+      //       algorithm   SEQUENCE {
+      //            oid = id-ecPublicKey {1 2 840 10045 2}
+      //            namedCurve = oid for algorithm
+      //       }
+      //       subjectPublicKey BIT STRING CONTAINS  key bytes
+      //  }
+
+      byte[] spki = ASN1.sequence(
+        Buffer.buffer()
+          .appendBytes(ASN1.sequence(oidCrv(json.getString("crv"))))
+          .appendByte(bitStringTag)
+          .appendBytes(ASN1.length(key.length + 1))
+          .appendByte((byte) 0x00)
+          .appendBytes(key)
+          .getBytes());
+
+      publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
+      if ((use & USE_ENC) == 0) {
+        use += USE_ENC;
+      }
+    }
+
+    // private key
+    if (jsonHasProperties(json, "d")) {
+      final byte[] key = json.getBinary("d");
+      final byte octetStringTag = (byte) 0x4;
+
+      byte[] asnKey = Buffer.buffer()
+        .appendByte(octetStringTag)
+        .appendBytes(ASN1.length(key.length))
+        .appendBytes(key)
+        .getBytes();
+
+      //  PKCS#8 ::= SEQUENCE {
+      //     version INTEGER {0}
+      //      privateKeyALgorithm SEQUENCE {
+      //           algorithm OID,
+      //           parameters ANY
+      //      }
+      //     privateKey ECPrivateKey,
+      //     attributes [0] IMPLICIT Attributes OPTIONAL
+      //     publicKey [1] IMPLICIT BIT STRING OPTIONAL
+      //   }
+
+      byte[] pkcs8 = ASN1.sequence(
+        Buffer.buffer()
+          .appendBytes(new byte[]{2, 1, 0})
+          .appendBytes(ASN1.sequence(oidCrv(json.getString("crv"))))
+          .appendByte(octetStringTag)
+          .appendBytes(ASN1.length(asnKey.length))
+          .appendBytes(asnKey)
+          .getBytes()
+      );
+
+      privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
+      if ((use & USE_SIG) == 0) {
+        use += USE_SIG;
       }
     }
 
@@ -671,6 +765,26 @@ public final class JWK implements Crypto {
         throw new IllegalArgumentException("Unsupported {crv}: " + crv);
     }
   }
+
+  private static byte[] oidCrv(String crv) {
+    switch (crv) {
+      case "Ed25519":
+        // 1.3.101.112
+        return new byte[]{0x6, 0x3, 0x2b, 101, 112};
+      case "Ed448":
+        // 1.3.101.113
+        return new byte[]{0x6, 0x3, 0x2b, 101, 113};
+      case "X25519":
+        // 1.3.101.110
+        return new byte[]{0x6, 3, 0x2b, 101, 110};
+      case "X448":
+        // 1.3.101.111
+        return new byte[]{0x6, 3, 0x2b, 101, 111};
+      default:
+        throw new IllegalArgumentException("Unsupported {crv}: " + crv);
+    }
+  }
+
 
   private static boolean jsonHasProperties(JsonObject json, String... properties) {
     for (String property : properties) {
