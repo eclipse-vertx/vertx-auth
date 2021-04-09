@@ -208,7 +208,7 @@ public class JWKTest {
   }
 
   @Test
-  public void publicOKP() {
+  public void testOKP() {
     assumeTrue("JVM doesn't support EdDSA", getVersion() >= 15);
     JsonObject jwk = new JsonObject()
       .put("kty", "OKP")
@@ -226,4 +226,27 @@ public class JWKTest {
     assertEquals("world", decoded.getString("hello"));
   }
 
+  @Test
+  public void testOKPInterop() {
+    assumeTrue("JVM doesn't support EdDSA", getVersion() >= 15);
+
+    // this key and token were generated from
+    // com.nimbusds.jose.*
+    JsonObject jwk = new JsonObject()
+      .put("kty", "OKP")
+      .put("alg", "EdDSA")
+      .put("crv", "Ed25519")
+      .put("x", "CIvYtKVA8ul314zLdxRJwwmWEyAj1j0rm6-7Ii6a74E")
+      .put("use", "sig")
+      .put("kid", "123");
+
+    JWT jwt = new JWT().addJWK(new JWK(jwk));
+
+    String token = "eyJraWQiOiIxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJhdWQiOiJ5b3UiLCJzdWIiOiJib2IiLCJpc3MiOiJtZSIsImV4cCI6MTYxNzk3Mjk1M30.diKQd6G1dA72XxHNqN9UaYWTgqcZxRaZh9sxN3eFfc7Tlkqk1APU9Qkj8X96gABZxnYx0Djf7nK6YJf6VpcBBA";
+    JsonObject decoded = jwt.decode(token);
+    assertEquals("you", decoded.getString("aud"));
+    assertEquals("bob", decoded.getString("sub"));
+    assertEquals("me", decoded.getString("iss"));
+    assertNotNull(decoded.getInteger("exp"));
+  }
 }
