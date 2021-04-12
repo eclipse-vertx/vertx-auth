@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
-import static io.vertx.ext.auth.webauthn.impl.ASN1.*;
+import static io.vertx.ext.auth.impl.asn.ASN1.*;
 
 /**
  * Implementation of the "android-key" attestation check.

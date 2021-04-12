@@ -22,7 +22,7 @@ import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
-import io.vertx.ext.auth.webauthn.impl.ASN1;
+import io.vertx.ext.auth.impl.asn.ASN1;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
@@ -32,7 +32,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static io.vertx.ext.auth.webauthn.impl.ASN1.*;
+import static io.vertx.ext.auth.impl.asn.ASN1.*;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
