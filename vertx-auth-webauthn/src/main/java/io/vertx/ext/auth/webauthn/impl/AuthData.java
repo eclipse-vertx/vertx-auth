@@ -112,9 +112,9 @@ public class AuthData {
 
     // Attested Data is present
     if ((flags & ATTESTATION_DATA) != 0) {
-      // 148 sum of all field lengths
-      if (buffer.length() < 148) {
-        throw new IllegalArgumentException("It seems as the Attestation Data flag is set, but the data is smaller than 148 bytes. You might have set AT flag for the assertion response.");
+      // 128 sum of all field lengths (small key)
+      if (buffer.length() < 128) {
+        throw new IllegalArgumentException("It seems as the Attestation Data flag is set, but the data is smaller than 128 bytes. You might have set AT flag for the assertion response.");
       }
 
       aaguid = buffer.getBytes(pos, pos + 16);

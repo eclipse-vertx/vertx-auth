@@ -30,6 +30,8 @@ import java.security.spec.PSSParameterSpec;
  */
 public final class JWS {
 
+  public static final String EdDSA = "EdDSA";
+
   public static final String ES256 = "ES256";
   public static final String ES384 = "ES384";
   public static final String ES512 = "ES512";
@@ -87,6 +89,8 @@ public final class JWS {
         sig = Signature.getInstance("RSASSA-PSS");
         sig.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
         return sig;
+      case EdDSA:
+        return Signature.getInstance("EdDSA");
       default:
         throw new NoSuchAlgorithmException();
     }
@@ -130,6 +134,7 @@ public final class JWS {
       return ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
     } else {
       switch (alg) {
+        case EdDSA:
         case ES256:
         case ES256K:
           return 64;

@@ -5,13 +5,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 public class JWKTest {
 
@@ -154,21 +151,6 @@ public class JWKTest {
 
 
   @Test
-  @Ignore("JDK only supports EdDSA in JDK 15")
-  public void publicEdDSA() {
-    JsonObject jwk = new JsonObject()
-      .put("kty", "OKP")
-      .put("crv", "Ed25519")
-      .put("d", "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A")
-      .put("x", "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo")
-      .put("use", "sig")
-      .put("alg", "EdDSA");
-
-    new JWK(jwk);
-    // eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg
-  }
-
-  @Test
   public void publicECK() {
     JsonObject jwk = new JsonObject()
       .put("kty", "EC")
@@ -197,5 +179,58 @@ public class JWKTest {
     System.out.println(
       jwt.decode("eyJ0eXAiOiJKV1QiLCJub25jZSI6InM5TzdaZ2F6WVJEd2VCZzZhbDNWVkhuZFFOQ0JHSVZZaDMxTDZRVFljTDAiLCJhbGciOiJSUzI1NiIsIng1dCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyIsImtpZCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9mY2FhZjcxMC03YzllLTRjYTAtOWNkYS02OTczOWZhZmJhNGIvIiwiaWF0IjoxNjExNjg3NDE1LCJuYmYiOjE2MTE2ODc0MTUsImV4cCI6MTYxMTY5MTMxNSwiYWNjdCI6MCwiYWNyIjoiMSIsImFjcnMiOlsidXJuOnVzZXI6cmVnaXN0ZXJzZWN1cml0eWluZm8iLCJ1cm46bWljcm9zb2Z0OnJlcTEiLCJ1cm46bWljcm9zb2Z0OnJlcTIiLCJ1cm46bWljcm9zb2Z0OnJlcTMiLCJjMSIsImMyIiwiYzMiLCJjNCIsImM1IiwiYzYiLCJjNyIsImM4IiwiYzkiLCJjMTAiLCJjMTEiLCJjMTIiLCJjMTMiLCJjMTQiLCJjMTUiLCJjMTYiLCJjMTciLCJjMTgiLCJjMTkiLCJjMjAiLCJjMjEiLCJjMjIiLCJjMjMiLCJjMjQiLCJjMjUiXSwiYWlvIjoiQVVRQXUvOFNBQUFBMFYwa0M4S25EM01RbUJ0WGk4OG9lT3NzT2xzU0JLZ1Rld1diQ1RnV2x0MEZ4dG9POVZtVjVjOGRLTStNckE1MXJoZW1Ebm9HMGJGUkRJWkpnM3Izb0E9PSIsImFtciI6WyJwd2QiLCJtZmEiXSwiYXBwX2Rpc3BsYXluYW1lIjoicG9iLXNlcnZlciIsImFwcGlkIjoiMTNjOWUxMTItYjE1OC00YjE5LThkNTctZTFmMzg4MWM0MzgzIiwiYXBwaWRhY3IiOiIxIiwiZmFtaWx5X25hbWUiOiJMb3BlcyIsImdpdmVuX25hbWUiOiJQYXVsbyIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjIxNy4xMDIuMTY1LjQ2IiwibmFtZSI6IkxhYiBQYXVsbyBMb3BlcyIsIm9pZCI6IjUyYmY4YWMyLTNlODMtNGNmNC04MTYxLTBiMTM1YWUwNjk4YiIsInBsYXRmIjoiMTQiLCJwdWlkIjoiMTAwMzIwMDEwRjQzQjcyRSIsInJoIjoiMC5BQUFBRVBlcV9KNThvRXljMm1sem42LTZTeExoeVJOWXNSbExqVmZoODRnY1E0TjVBRHMuIiwic2NwIjoiZW1haWwgb3BlbmlkIHByb2ZpbGUgVXNlci5SZWFkIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiWXltcTZLUmlLMHVUX1NVZ0JzYWUtaElIRE5VX0FLQVpvRG5TTWwxR3VpZyIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6ImZjYWFmNzEwLTdjOWUtNGNhMC05Y2RhLTY5NzM5ZmFmYmE0YiIsInVuaXF1ZV9uYW1lIjoicGF1bG9AbGFiLnRlbnRpeG8uY29tIiwidXBuIjoicGF1bG9AbGFiLnRlbnRpeG8uY29tIiwidXRpIjoiZGNzM1ZzMXk5VW1SOXBzV05JaUxBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiNjJlOTAzOTQtNjlmNS00MjM3LTkxOTAtMDEyMTc3MTQ1ZTEwIiwiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il0sInhtc19zdCI6eyJzdWIiOiJiNGRXNmVuWk9fRGhFLUMyZE1Qdks5Y1JXcW8zXy1FQVc5MVJ4WmRKNnNVIn0sInhtc190Y2R0IjoxNjEwOTEyOTM2fQ.M4dXPZszAsL_rnceagjZnmd8yzbbB3hou4L6vVLGzqAt4wVg8KwQKxcxIGqBqgDWRlBvLYqWs61dvt8vSa-9GaMJifHwmfWoXPvyVzdxhx3qrqgHdsz1HWX5WzcDlEbHrPXZGE8KM-0czE67rePMxEHK7vLf5TbmERLGJt4QDOGZxVHYvnplIrIM1eGjANIeWYTyW5g-YDx3VX6yVl5QHvP4CFdINhDV7i-L3bjmV4M8F6wYs7Xs7nIrKYEiyjTrpXGUL7u29eHXgzeGlSxfXeqTdYmgEt6lFOxx-fZzO0m92AhPGGAe6IB85FtqSi5T95Nif3pHPsouryhDco8y3g")
     );
+  }
+
+  private static int getVersion() {
+    String version = System.getProperty("java.version");
+    if(version.startsWith("1.")) {
+      version = version.substring(2, 3);
+    } else {
+      int dot = version.indexOf(".");
+      if(dot != -1) { version = version.substring(0, dot); }
+    } return Integer.parseInt(version);
+  }
+
+  @Test
+  public void testOKP() {
+    assumeTrue("JVM doesn't support EdDSA", getVersion() >= 15);
+    JsonObject jwk = new JsonObject()
+      .put("kty", "OKP")
+      .put("alg", "EdDSA")
+      .put("crv", "Ed25519")
+      .put("x", "UUFFMkomijuOugmzEIiRfEpV-iV78ELK9XNGorZMIl0")
+      .put("d", "Qmdi9hWKKno_Ml4pfvSzyEUYrRwvGom-J0EwKcACWPU")
+      .put("use", "sig")
+      .put("kid", "1");
+
+    JWT jwt = new JWT().addJWK(new JWK(jwk));
+
+    String token = jwt.sign(new JsonObject().put("hello", "world"), new JWTOptions().setAlgorithm("EdDSA"));
+    JsonObject decoded = jwt.decode(token);
+    assertEquals("world", decoded.getString("hello"));
+  }
+
+  @Test
+  public void testOKPInterop() {
+    assumeTrue("JVM doesn't support EdDSA", getVersion() >= 15);
+
+    // this key and token were generated from
+    // com.nimbusds.jose.*
+    JsonObject jwk = new JsonObject()
+      .put("kty", "OKP")
+      .put("alg", "EdDSA")
+      .put("crv", "Ed25519")
+      .put("x", "CIvYtKVA8ul314zLdxRJwwmWEyAj1j0rm6-7Ii6a74E")
+      .put("use", "sig")
+      .put("kid", "123");
+
+    JWT jwt = new JWT().addJWK(new JWK(jwk));
+
+    String token = "eyJraWQiOiIxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJhdWQiOiJ5b3UiLCJzdWIiOiJib2IiLCJpc3MiOiJtZSIsImV4cCI6MTYxNzk3Mjk1M30.diKQd6G1dA72XxHNqN9UaYWTgqcZxRaZh9sxN3eFfc7Tlkqk1APU9Qkj8X96gABZxnYx0Djf7nK6YJf6VpcBBA";
+    JsonObject decoded = jwt.decode(token);
+    assertEquals("you", decoded.getString("aud"));
+    assertEquals("bob", decoded.getString("sub"));
+    assertEquals("me", decoded.getString("iss"));
+    assertNotNull(decoded.getInteger("exp"));
   }
 }

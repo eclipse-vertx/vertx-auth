@@ -1,4 +1,19 @@
-package io.vertx.ext.auth.webauthn.impl;
+/*
+ * Copyright 2019 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
+package io.vertx.ext.auth.impl.asn;
 
 import io.vertx.core.buffer.Buffer;
 
@@ -34,6 +49,25 @@ public class ASN1 {
   public final static int BMP_STRING = 0x1E;
 
   public final static int UTC_TIME = 0x17;
+
+  public static byte[] length(int x) {
+    if (x <= 127) {
+      return new byte[]{(byte) x};
+    } else if (x < 256) {
+      return new byte[]{(byte) 0x81, (byte) x};
+    }
+    throw new IllegalArgumentException("length >= 256");
+  }
+
+  public static byte[] sequence(byte[] data) {
+    final byte sequenceTag = (byte) 0x30;
+
+    return Buffer.buffer()
+      .appendByte(sequenceTag)
+      .appendBytes(length(data.length))
+      .appendBytes(data)
+      .getBytes();
+  }
 
   public static class ASN {
     public final ASNTag tag;
