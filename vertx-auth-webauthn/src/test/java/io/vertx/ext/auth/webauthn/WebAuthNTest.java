@@ -167,7 +167,8 @@ public class WebAuthNTest {
   public void testVerify() throws IOException {
     try (JsonParser parser = CBOR.cborParser(Base64.getDecoder().decode("pQECAyYgASFYIB4QBsdBFyVm79aQFrgdhAFsV0bD0+UfzsRRihvSU8bnIlggdBaaNC3nGWGcZd1msfoD0vMt0Ydg9InOFKkz6PKUEf8="))) {
       JWK key = CWK.toJWK(new JsonObject(CBOR.<Map<String, Object>>parse(parser)));
-      System.out.println(key.verify(
+      JWS jws = new JWS(key);
+      System.out.println(jws.verify(
         Base64.getUrlDecoder().decode("MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8"),
         Base64.getDecoder().decode("SZYN5YgOjGh0NBcPZHZgW4/krrmihjLHmVzzuoMdl2MBAAAAFF/+s2iT3LHeLABfvFkPvdiAp+mysYMYk94fUEZu//oj")
       ));

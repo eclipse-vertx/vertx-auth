@@ -54,10 +54,7 @@ import java.util.regex.Pattern;
  *
  * @author Paulo Lopes
  */
-public final class JWK implements Crypto {
-
-  public static final int USE_SIG = 1;
-  public static final int USE_ENC = 2;
+public final class JWK {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
 
@@ -65,24 +62,18 @@ public final class JWK implements Crypto {
   private final String kid;
   private final String alg;
   private final String kty;
-  private final int use;
+  private final String use;
 
   // the label is a synthetic id that allows comparing 2 keys
-  // that are expected to replace each other but are not necessarely
+  // that are expected to replace each other but are not necessarily
   // the same key cryptographically speaking.
   // In most cases it should be the same as kid, or synthetically generated
   // when there's no kid.
   private final String label;
 
-  // the length of the signature. This is derived from the algorithm name
-  // this will help to cope with signatures that are longer (yet valid) than
-  // the expected result
-  private final int len;
-
   // the cryptography objects, not all will be initialized
   private PrivateKey privateKey;
   private PublicKey publicKey;
-  private Signature signature;
   private Mac mac;
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
@@ -167,6 +158,7 @@ public final class JWK implements Crypto {
 
     alg = options.getAlgorithm();
     kid = options.getId();
+    use = null;
 
     final Buffer buffer = Objects.requireNonNull(options.getBuffer());
 
@@ -183,8 +175,6 @@ public final class JWK implements Crypto {
           throw new RuntimeException(e);
         }
         kty = "oct";
-        len = 256;
-        use = USE_SIG + USE_ENC;
         return;
       case "HS384":
         try {
@@ -194,8 +184,6 @@ public final class JWK implements Crypto {
           throw new RuntimeException(e);
         }
         kty = "oct";
-        len = 384;
-        use = USE_SIG + USE_ENC;
         return;
       case "HS512":
         try {
@@ -205,8 +193,6 @@ public final class JWK implements Crypto {
           throw new RuntimeException(e);
         }
         kty = "oct";
-        len = 512;
-        use = USE_SIG + USE_ENC;
         return;
     }
 
@@ -217,43 +203,35 @@ public final class JWK implements Crypto {
         case "RS384":
         case "RS512":
           kty = "RSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
-          signature = JWS.getSignature(alg);
-          len = JWS.getSignatureLength(alg, publicKey);
+          parsePEM(KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         case "PS256":
         case "PS384":
         case "PS512":
           kty = "RSASSA";
-          use = parsePEM(KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
-          signature = JWS.getSignature(alg);
-          len = JWS.getSignatureLength(alg, publicKey);
+          parsePEM(KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         case "ES256":
         case "ES384":
         case "ES512":
         case "ES256K":
           kty = "EC";
-          len = JWS.getSignatureLength(alg, publicKey);
-          use = parsePEM(KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII));
-          signature = JWS.getSignature(alg);
+          parsePEM(KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         case "EdDSA":
           kty = "EdDSA";
-          len = JWS.getSignatureLength(alg, publicKey);
-          use = parsePEM(KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII));
-          signature = JWS.getSignature(alg);
+          parsePEM(KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         default:
           throw new IllegalArgumentException("Unknown algorithm: " + alg);
       }
-    } catch (InvalidKeySpecException | CertificateException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+    } catch (InvalidKeySpecException | CertificateException | NoSuchAlgorithmException e) {
       // error
       throw new RuntimeException(e);
     }
   }
 
-  private int parsePEM(KeyFactory kf, String pem) throws CertificateException, InvalidKeySpecException {
+  private void parsePEM(KeyFactory kf, String pem) throws CertificateException, InvalidKeySpecException {
     // extract the information from the pem
     String[] lines = pem.split("\r?\n");
     // A PEM PKCS#8 formatted string shall contain on the first line the kind of content
@@ -294,17 +272,17 @@ public final class JWK implements Crypto {
       case "CERTIFICATE":
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
         publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.US_ASCII))).getPublicKey();
-        return USE_ENC;
+        return;
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
       case "RSA PUBLIC KEY":
         publicKey = kf.generatePublic(new X509EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
-        return USE_ENC;
+        return;
       case "PRIVATE KEY":
       case "PRIVATE RSA KEY":
       case "RSA PRIVATE KEY":
         privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
-        return USE_SIG;
+        return;
       default:
         throw new IllegalStateException("Invalid PEM content: " + kind);
     }
@@ -315,7 +293,7 @@ public final class JWK implements Crypto {
     alg = algorithm;
     kid = null;
     label = alg + "#" + mac.hashCode();
-    use = USE_SIG + USE_ENC;
+    use = null;
 
     // test the algorithm
     String macAlg = mac.getAlgorithm();
@@ -323,7 +301,6 @@ public final class JWK implements Crypto {
     switch (alg) {
       case "HS256":
         kty = "oct";
-        len = 256;
         if (!"HMacSHA256".equalsIgnoreCase(macAlg)) {
           throw new IllegalArgumentException("The key algorithm does not match, expected: HMacSHA256");
         }
@@ -331,7 +308,6 @@ public final class JWK implements Crypto {
         break;
       case "HS384":
         kty = "oct";
-        len = 384;
         if (!"HMacSHA384".equalsIgnoreCase(macAlg)) {
           throw new IllegalArgumentException("The key algorithm does not match, expected: HMacSHA384");
         }
@@ -339,7 +315,6 @@ public final class JWK implements Crypto {
         break;
       case "HS512":
         kty = "oct";
-        len = 512;
         if (!"HMacSHA512".equalsIgnoreCase(macAlg)) {
           throw new IllegalArgumentException("The key algorithm does not match, expected: HMacSHA512");
         }
@@ -355,39 +330,27 @@ public final class JWK implements Crypto {
     alg = algorithm;
     kid = null;
     label = privateKey != null ? algorithm + '#' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '#' + certificate.hashCode();
+    use = null;
 
     this.publicKey = certificate.getPublicKey();
     this.privateKey = privateKey;
-
-    // this key does both because we have a certificate (public) + private key ?
-    if (privateKey != null) {
-      use = USE_ENC + USE_SIG;
-    } else {
-      use = USE_ENC;
-    }
 
     switch (algorithm) {
       case "RS256":
       case "RS384":
       case "RS512":
         kty = "RSA";
-        signature = JWS.getSignature(alg);
-        len = JWS.getSignatureLength(alg, publicKey);
         break;
       case "PS256":
       case "PS384":
       case "PS512":
         kty = "RSASSA";
-        signature = JWS.getSignature(alg);
-        len = JWS.getSignatureLength(alg, publicKey);
         break;
       case "ES256":
       case "ES384":
       case "ES512":
       case "ES256K":
         kty = "EC";
-        len = JWS.getSignatureLength(alg, publicKey);
-        signature = JWS.getSignature(alg);
         break;
       default:
         throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
@@ -396,6 +359,7 @@ public final class JWK implements Crypto {
 
   public JWK(JsonObject json) {
     kid = json.getString("kid");
+    use = json.getString("use");
 
     try {
       switch (json.getString("kty")) {
@@ -414,8 +378,7 @@ public final class JWK implements Crypto {
             case "PS256":
             case "PS384":
             case "PS512":
-              use = createRSA(json);
-              len = JWS.getSignatureLength(alg, publicKey);
+              createRSA(json);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
@@ -431,8 +394,7 @@ public final class JWK implements Crypto {
             case "ES256K":
             case "ES512":
             case "ES384":
-              use = createEC(json);
-              len = JWS.getSignatureLength(alg, publicKey);
+              createEC(json);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
@@ -442,8 +404,7 @@ public final class JWK implements Crypto {
           kty = json.getString("kty");
           // get the alias for the algorithm
           alg = json.getString("alg", "EdDSA");
-          use = createOKP(json);
-          len = JWS.getSignatureLength(alg, publicKey);
+          createOKP(json);
           break;
         case "oct":
           kty = json.getString("kty");
@@ -452,16 +413,13 @@ public final class JWK implements Crypto {
 
           switch (alg) {
             case "HS256":
-              len = 256;
-              use = createOCT("HMacSHA256", json);
+              createOCT("HMacSHA256", json);
               break;
             case "HS384":
-              len = 384;
-              use = createOCT("HMacSHA384", json);
+              createOCT("HMacSHA384", json);
               break;
             case "HS512":
-              len = 512;
-              use = createOCT("HMacSHA512", json);
+              createOCT("HMacSHA512", json);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
@@ -479,7 +437,7 @@ public final class JWK implements Crypto {
     }
   }
 
-  private int createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, InvalidAlgorithmParameterException {
+  private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, InvalidAlgorithmParameterException {
     int use = 0;
 
     // public key
@@ -487,10 +445,6 @@ public final class JWK implements Crypto {
       final BigInteger n = new BigInteger(1, json.getBinary("n"));
       final BigInteger e = new BigInteger(1, json.getBinary("e"));
       publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
-      if ((use & USE_ENC) == 0) {
-        use += USE_ENC;
-      }
-
       // private key
       if (jsonHasProperties(json, "d", "p", "q", "dp", "dq", "qi")) {
         final BigInteger d = new BigInteger(1, json.getBinary("d"));
@@ -501,9 +455,6 @@ public final class JWK implements Crypto {
         final BigInteger qi = new BigInteger(1, json.getBinary("qi"));
 
         privateKey = KeyFactory.getInstance("RSA").generatePrivate(new RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, qi));
-        if ((use & USE_SIG) == 0) {
-          use += USE_SIG;
-        }
       }
     }
 
@@ -523,30 +474,10 @@ public final class JWK implements Crypto {
 
       // extract the public key
       publicKey = certificate.getPublicKey();
-      if ((use & USE_ENC) == 0) {
-        use += USE_ENC;
-      }
     }
-
-    switch (json.getString("use", "sig")) {
-      case "sig":
-        // use default
-        signature = JWS.getSignature(alg);
-        if ((use & USE_SIG) == 0) {
-          use += USE_SIG;
-        }
-        break;
-      case "enc":
-        if ((use & USE_ENC) == 0) {
-          use += USE_ENC;
-        }
-    }
-
-    return use;
   }
 
-  private int createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
-    int use = 0;
+  private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
     parameters.init(new ECGenParameterSpec(translateECCrv(json.getString("crv"))));
 
@@ -555,40 +486,16 @@ public final class JWK implements Crypto {
       final BigInteger x = new BigInteger(1, json.getBinary("x"));
       final BigInteger y = new BigInteger(1, json.getBinary("y"));
       publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(new ECPoint(x, y), parameters.getParameterSpec(ECParameterSpec.class)));
-      if ((use & USE_ENC) == 0) {
-        use += USE_ENC;
-      }
     }
 
     // private key
     if (jsonHasProperties(json, "d")) {
       final BigInteger d = new BigInteger(1, json.getBinary("d"));
       privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
-      if ((use & USE_SIG) == 0) {
-        use += USE_SIG;
-      }
     }
-
-    switch (json.getString("use", "sig")) {
-      case "sig":
-        signature = JWS.getSignature(alg);
-        if ((use & USE_SIG) == 0) {
-          use += USE_SIG;
-        }
-        break;
-      case "enc":
-        if ((use & USE_ENC) == 0) {
-          use += USE_ENC;
-        }
-        break;
-    }
-
-    return use;
   }
 
-  private int createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
-    int use = 0;
-
+  private void createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
     // public key
     if (jsonHasProperties(json, "x")) {
       final byte[] key = json.getBinary("x");
@@ -612,9 +519,6 @@ public final class JWK implements Crypto {
           .getBytes());
 
       publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
-      if ((use & USE_ENC) == 0) {
-        use += USE_ENC;
-      }
     }
 
     // private key
@@ -650,32 +554,12 @@ public final class JWK implements Crypto {
       );
 
       privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
-      if ((use & USE_SIG) == 0) {
-        use += USE_SIG;
-      }
     }
-
-    switch (json.getString("use", "sig")) {
-      case "sig":
-        signature = JWS.getSignature(alg);
-        if ((use & USE_SIG) == 0) {
-          use += USE_SIG;
-        }
-        break;
-      case "enc":
-        if ((use & USE_ENC) == 0) {
-          use += USE_ENC;
-        }
-        break;
-    }
-
-    return use;
   }
 
-  private int createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
+  private void createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
     mac = Mac.getInstance(alias);
     mac.init(new SecretKeySpec(json.getBinary("k"), alias));
-    return USE_SIG + USE_ENC;
   }
 
   public String getAlgorithm() {
@@ -684,71 +568,6 @@ public final class JWK implements Crypto {
 
   public String getId() {
     return kid;
-  }
-
-  @Override
-  public synchronized byte[] sign(byte[] payload) {
-    if (!isFor(USE_SIG)) {
-      throw new IllegalStateException("Key use is not 'sig'");
-    }
-
-    if (mac != null) {
-      return mac.doFinal(payload);
-    } else {
-      try {
-        signature.initSign(privateKey);
-        signature.update(payload);
-        byte[] sig = signature.sign();
-        switch (kty) {
-          case "EC":
-            return JWS.toJWS(sig, len);
-          default:
-            return sig;
-        }
-      } catch (SignatureException | InvalidKeyException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  @Override
-  public synchronized boolean verify(byte[] expected, byte[] payload) {
-    if (!isFor(USE_ENC)) {
-      throw new IllegalStateException("Key use is not 'enc'");
-    }
-
-    try {
-      if (expected == null) {
-        throw new SignatureException("signature is missing");
-      }
-
-      if (mac != null) {
-        return MessageDigest.isEqual(expected, sign(payload));
-      } else {
-        signature.initVerify(publicKey);
-        signature.update(payload);
-        switch (kty) {
-          case "EC":
-            // JCA EC signatures expect ASN1 formatted signatures
-            // while JWS uses it's own format, while this will be true
-            // for all JWS, it may not be true for COSE keys
-            if (!JWS.isASN1(expected)) {
-              expected = JWS.toASN1(expected);
-            }
-            break;
-        }
-        if (expected.length < len) {
-          // need to adapt the expectation to make the RSA? engine happy
-          byte[] normalized = new byte[len];
-          System.arraycopy(expected, 0, normalized, 0, expected.length);
-          return signature.verify(normalized);
-        } else {
-          return signature.verify(expected);
-        }
-      }
-    } catch (SignatureException | InvalidKeyException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private static String translateECCrv(String crv) {
@@ -796,36 +615,27 @@ public final class JWK implements Crypto {
     return true;
   }
 
-  public boolean isFor(int use) {
-    return (this.use & use) != 0;
-  }
-
-  public int getUse() {
+  public String use() {
     return use;
   }
 
-  @Override
-  public String getLabel() {
+  public String label() {
     return label;
   }
 
-  public String getType() {
+  public String kty() {
     return kty;
   }
 
-  public Signature getSignature() {
-    return signature;
-  }
-
-  public Mac getMac() {
+  public Mac mac() {
     return mac;
   }
 
-  public PublicKey getPublicKey() {
+  public PublicKey publicKey() {
     return publicKey;
   }
 
-  public PrivateKey getPrivateKey() {
+  public PrivateKey privateKey() {
     return privateKey;
   }
 }

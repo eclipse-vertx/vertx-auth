@@ -41,7 +41,7 @@ import java.util.stream.Stream;
  */
 public final class JWT {
 
-  private final Logger logger = LoggerFactory.getLogger(JWT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JWT.class);
 
   // simple random as its value is just to create entropy
   private static final Random RND = new Random();
@@ -56,38 +56,30 @@ public final class JWT {
   private boolean allowEmbeddedKey = false;
   private MessageDigest nonceDigest;
 
-  // keep 2 maps (1 for encode, 1 for decode)
-  private final Map<String, List<Crypto>> SIGN = new ConcurrentHashMap<>();
-  private final Map<String, List<Crypto>> VERIFY = new ConcurrentHashMap<>();
-
-  public JWT() {
-    // Spec requires "none" to always be available
-    SIGN.put("none", Collections.singletonList(new CryptoNone()));
-    VERIFY.put("none", Collections.singletonList(new CryptoNone()));
-  }
+  // keep 2 maps (1 for sing, 1 for verify) this simplifies the lookups
+  private final Map<String, List<JWS>> SIGN = new ConcurrentHashMap<>();
+  private final Map<String, List<JWS>> VERIFY = new ConcurrentHashMap<>();
 
   /**
-   * Adds a JSON Web Key (rfc7517) to the crypto map.
+   * Adds a JSON Web Key (rfc7517) to the signature maps.
    *
    * @param jwk a JSON Web Key
    * @return self
    */
   public JWT addJWK(JWK jwk) {
 
-    List<Crypto> current = null;
-
-    if (jwk.isFor(JWK.USE_ENC)) {
-      current = VERIFY.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
-      addJWK(current, jwk);
-    }
-
-    if (jwk.isFor(JWK.USE_SIG)) {
-      current = SIGN.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
-      addJWK(current, jwk);
-    }
-
-    if (current == null) {
-      throw new IllegalStateException("unknown JWK use: " + jwk.getUse());
+    if (jwk.use() == null || "sig".equals(jwk.use())) {
+      List<JWS> current;
+      if (jwk.mac() != null || jwk.publicKey() != null) {
+        current = VERIFY.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+        addJWK(current, jwk);
+      }
+      if (jwk.mac() != null || jwk.privateKey() != null) {
+        current = SIGN.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+        addJWK(current, jwk);
+      }
+    } else {
+      LOG.warn("JWK skipped: use: sig != " + jwk.use());
     }
 
     return this;
@@ -124,12 +116,13 @@ public final class JWT {
     return this;
   }
 
-  private void addJWK(List<Crypto> current, JWK jwk) {
+  private void addJWK(List<JWS> current, JWK jwk) {
     boolean replaced = false;
     for (int i = 0; i < current.size(); i++) {
-      if (current.get(i).getLabel().equals(jwk.getLabel())) {
+      if (current.get(i).jwk().label().equals(jwk.label())) {
         // replace
-        current.set(i, jwk);
+        LOG.info("replacing JWK with label " + jwk.label());
+        current.set(i, new JWS(jwk));
         replaced = true;
         break;
       }
@@ -137,7 +130,7 @@ public final class JWT {
 
     if (!replaced) {
       // non existent, add it!
-      current.add(jwk);
+      current.add(new JWS(jwk));
     }
   }
 
@@ -253,14 +246,14 @@ public final class JWT {
       }
     }
 
-    List<Crypto> cryptos = VERIFY.get(alg);
-
-    if (cryptos == null || cryptos.size() == 0) {
-      throw new NoSuchKeyIdException(alg);
-    }
-
     // verify signature. `sign` will return base64 string.
     if (!unsecure) {
+      List<JWS> signatures = VERIFY.get(alg);
+
+      if (signatures == null || signatures.size() == 0) {
+        throw new NoSuchKeyIdException(alg);
+      }
+
       // if signatureSeg is null fail
       if (signatureSeg == null) {
         throw new IllegalStateException("missing signature segment");
@@ -281,14 +274,14 @@ public final class JWT {
       String kid = header.getString("kid");
       boolean hasKey = false;
 
-      for (Crypto c : cryptos) {
+      for (JWS jws : signatures) {
         // if a token has a kid and it doesn't match the crypto id skip it
-        if (kid != null && c.getId() != null && !kid.equals(c.getId())) {
+        if (kid != null && jws.jwk().getId() != null && !kid.equals(jws.jwk().getId())) {
           continue;
         }
         // signal that this object crypto's list has the required key
         hasKey = true;
-        if (c.verify(payloadInput, signingInput)) {
+        if (jws.verify(payloadInput, signingInput)) {
           return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
         }
       }
@@ -322,8 +315,8 @@ public final class JWT {
     }
 
     if(jwt.getValue("scope") == null) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Invalid JWT: scope claim is required");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Invalid JWT: scope claim is required");
       }
       return false;
     }
@@ -340,8 +333,8 @@ public final class JWT {
     }
 
     if(!target.getList().containsAll(options.getScopes())) {
-      if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Invalid JWT scopes expected[%s] actual[%s]", options.getScopes(), target.getList()));
+      if (LOG.isDebugEnabled()) {
+        LOG.debug(String.format("Invalid JWT scopes expected[%s] actual[%s]", options.getScopes(), target.getList()));
       }
       return false;
     }
@@ -350,16 +343,31 @@ public final class JWT {
   }
 
   public String sign(JsonObject payload, JWTOptions options) {
+    final boolean unsecure = isUnsecure();
     final String algorithm = options.getAlgorithm();
 
-    List<Crypto> cryptos = SIGN.get(algorithm);
-
-    if (cryptos == null || cryptos.size() == 0) {
-      throw new RuntimeException("Algorithm not supported: " + algorithm);
+    // if we only allow secure alg, then none is not a valid option
+    if (!unsecure && "none".equals(algorithm)) {
+      throw new IllegalStateException("Algorithm \"none\" not allowed");
     }
 
-    // lock the crypto implementation
-    final Crypto crypto = cryptos.get(RND.nextInt(cryptos.size()));
+    final JWS jws;
+    final String kid;
+
+    if (!unsecure) {
+      List<JWS> signatures = SIGN.get(algorithm);
+
+      if (signatures == null || signatures.size() == 0) {
+        throw new RuntimeException("Algorithm not supported/allowed: " + algorithm);
+      }
+
+      // lock the crypto implementation
+      jws = signatures.get(signatures.size() == 1 ? 0 : RND.nextInt(signatures.size()));
+      kid = jws.jwk().getId();
+    } else {
+      jws = null;
+      kid = null;
+    }
 
     // header, typ is fixed value.
     JsonObject header = new JsonObject()
@@ -368,8 +376,8 @@ public final class JWT {
       .put("alg", algorithm);
 
     // add kid if present
-    if (crypto.getId() != null) {
-      header.put("kid", crypto.getId());
+    if (kid != null) {
+      header.put("kid", kid);
     }
 
     // NumericDate is a number is seconds since 1st Jan 1970 in UTC
@@ -410,10 +418,14 @@ public final class JWT {
     // create segments, all segment should be base64 string
     String headerSegment = base64urlEncode(header.encode());
     String payloadSegment = base64urlEncode(payload.encode());
-    String signingInput = headerSegment + "." + payloadSegment;
-    String signSegment = base64urlEncode(crypto.sign(signingInput.getBytes(UTF8)));
 
-    return headerSegment + "." + payloadSegment + "." + signSegment;
+    if (!unsecure) {
+      String signingInput = headerSegment + "." + payloadSegment;
+      String signSegment = base64urlEncode(jws.sign(signingInput.getBytes(UTF8)));
+      return headerSegment + "." + payloadSegment + "." + signSegment;
+    } else {
+      return headerSegment + "." + payloadSegment;
+    }
   }
 
   private static byte[] base64urlDecode(String str) {
@@ -429,11 +441,13 @@ public final class JWT {
   }
 
   public boolean isUnsecure() {
-    return VERIFY.size() == 1 && SIGN.size() == 1;
+    return VERIFY.size() == 0 && SIGN.size() == 0;
   }
 
   public Collection<String> availableAlgorithms() {
     Set<String> algorithms = new HashSet<>();
+    // the spec requires none to be always available
+    algorithms.add("none");
 
     algorithms.addAll(VERIFY.keySet());
     algorithms.addAll(SIGN.keySet());
