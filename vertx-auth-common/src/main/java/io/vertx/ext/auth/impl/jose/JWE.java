@@ -19,47 +19,54 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 
 /**
- * Utilities to work with Json Web Encryption.
+ * Utilities to work with Json Web Encryption. This is not fully implemented according to the RFC/spec.
  *
  * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
 public final class JWE {
 
-  public static byte[] encrypt(JWK key, byte[] payload) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-    if (key.isFor(JWK.USE_ENC)) {
-      final PublicKey publicKey = key.getPublicKey();
-      if (publicKey == null) {
-        throw new IllegalStateException("Key doesn't contain a pubKey material");
-      }
+  private final Cipher cipher;
+  private final JWK jwk;
 
-      final Cipher cipher = Cipher.getInstance(key.getType());
-      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-      cipher.update(payload);
-      return cipher.doFinal();
-    } else {
-      throw new IllegalStateException("Key use is not 'enc'");
+  public JWE(JWK jwk) {
+    if (jwk.use() == null || "enc".equals(jwk.use())) {
+      throw new IllegalArgumentException("JWK isn't meant to perform JWE operations");
     }
+
+    try {
+      this.cipher = Cipher.getInstance(jwk.kty());
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+      throw new RuntimeException(e);
+    }
+    this.jwk = jwk;
   }
 
-  public static byte[] decrypt(JWK key, byte[] payload) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-    if (key.isFor(JWK.USE_ENC)) {
-      final PrivateKey privateKey = key.getPrivateKey();
+  public byte[] encrypt(byte[] payload) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    final PublicKey publicKey = jwk.publicKey();
+    if (publicKey == null) {
+      throw new IllegalStateException("Key doesn't contain a pubKey material");
+    }
+
+    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+    cipher.update(payload);
+    return cipher.doFinal();
+  }
+
+  public byte[] decrypt(byte[] payload) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+      final PrivateKey privateKey = jwk.privateKey();
       if (privateKey == null) {
-        throw new IllegalStateException("Key doesn't contain a privKey material");
+        throw new IllegalStateException("Key doesn't contain a secKey material");
       }
 
-      final Cipher cipher = Cipher.getInstance(key.getType());
       cipher.init(Cipher.DECRYPT_MODE, privateKey);
       cipher.update(payload);
       return cipher.doFinal();
-    } else {
-      throw new IllegalStateException("Key use is not 'enc'");
-    }
+  }
+
+  public String label() {
+    return jwk.label();
   }
 }

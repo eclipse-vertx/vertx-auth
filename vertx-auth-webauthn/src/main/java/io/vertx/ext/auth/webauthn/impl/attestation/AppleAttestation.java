@@ -96,7 +96,7 @@ public class AppleAttestation implements Attestation {
       }
 
       // 5. Verify credential public key matches the Subject Public Key of |credCert|.
-      if (!credCert.getPublicKey().equals(authData.getCredentialJWK().getPublicKey())) {
+      if (!credCert.getPublicKey().equals(authData.getCredentialJWK().publicKey())) {
         throw new AttestationException("credCert public key does not equal authData public key");
       }
 

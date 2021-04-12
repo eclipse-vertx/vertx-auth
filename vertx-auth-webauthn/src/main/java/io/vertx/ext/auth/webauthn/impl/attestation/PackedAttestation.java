@@ -20,6 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
@@ -197,7 +198,8 @@ public class PackedAttestation implements Attestation {
         // 2. Parse authData and extract COSE public key
         JWK key = authData.getCredentialJWK();
         // 3. Verify signature “sig” over the signatureBase with the previously extracted public key.
-        if (!key.verify(signature, signatureBase)) {
+        JWS jws = new JWS(key);
+        if (!jws.verify(signature, signatureBase)) {
           throw new AttestationException("Failed to verify the signature!");
         }
       }

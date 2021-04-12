@@ -24,8 +24,6 @@ import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
 /**
- * Unitary tests for the {@link Crypto} class.
- *
  * @author <a href="mailto:david@davidafsilva.pt">david</a>
  */
 public class CryptoTest {

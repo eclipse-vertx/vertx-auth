@@ -32,6 +32,7 @@ import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
@@ -590,7 +591,8 @@ public class WebAuthnImpl implements WebAuthn {
       // convert signature to buffer
       byte[] signature = response.getBinary("signature");
       // verify signature
-      if (!publicKey.verify(signature, signatureBase.getBytes())) {
+      JWS jws = new JWS(publicKey);
+      if (!jws.verify(signature, signatureBase.getBytes())) {
         // Step webauthn.get#4
         // If you can’t verify signature multiple times, potentially raise the
         // alarm as phishing attempt most likely is occurring.
