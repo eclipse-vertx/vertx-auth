@@ -1,0 +1,15 @@
+{
+  "name": "jwt-test",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "node-jose": "*",
+    "pem": "*"
+  },
+  "scripts": {
+    "start": "node index.mjs",
+    "preopenssl": "openssl genrsa -out private2048b.key 2048",
+    "openssl": "openssl req -new -key private2048b.key -out myrequest2048.csr",
+    "postopenssl": "openssl x509 -req -days 3650 -in myrequest2048.csr -signkey private2048b.key -out public2048b.crt"
+  }
+}
