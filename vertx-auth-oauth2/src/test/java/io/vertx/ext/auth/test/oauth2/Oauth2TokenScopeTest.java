@@ -5,6 +5,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.*;
@@ -45,8 +46,7 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
     oauthConfig = new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientId("client-id")
-      .setClientSecret("client-secret")
-      .setSite("http://localhost:8080");
+      .setClientSecret("client-secret");
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
@@ -70,9 +70,13 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       } else {
         req.response().setStatusCode(400).end();
       }
-    }).listen(8080, ready -> {
+    }).listen(0, ready -> {
       if (ready.failed()) {
         throw new RuntimeException(ready.cause());
+      } else {
+        int actualPort = ready.result().actualPort();
+        oauthConfig
+          .setSite("http://localhost:" + actualPort);
       }
       // ready
       latch.countDown();
@@ -100,12 +104,12 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .put("token", JWT);
 
     oauthConfig
-      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true))
-      .setJWTOptions(new JWTOptions().addScope("scopeA").addScope("scopeB"));
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"))
+      .setJWTOptions(new JWTOptions());
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
-    oauth2.authenticate(config, res -> {
+    oauth2.authenticate(new TokenCredentials(JWT), res -> {
       if (res.failed()) {
         fail(res.cause());
       } else {
@@ -132,11 +136,11 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauthConfig
       .setIntrospectionPath("/oauth/introspect")
-      .setJWTOptions(new JWTOptions().addScope("scopeA").addScope("scopeB"));
+      .setJWTOptions(new JWTOptions());
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
-    oauth2.authenticate(config, res -> {
+    oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
       if (res.failed()) {
         fail(res.cause());
       } else {
@@ -167,12 +171,12 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .put("token", JWT);
 
     oauthConfig
-      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true))
-      .setJWTOptions(new JWTOptions().addScope("scopeX").addScope("scopeB"));
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"))
+      .setJWTOptions(new JWTOptions());
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
-    oauth2.authenticate(config, res -> {
+    oauth2.authenticate(new TokenCredentials(JWT), res -> {
       assertTrue(res.succeeded());
       ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
         assertTrue(call.succeeded());
@@ -200,11 +204,11 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauthConfig
       .setIntrospectionPath("/oauth/introspect")
-      .setJWTOptions(new JWTOptions().addScope("scopeX").addScope("scopeB"));
+      .setJWTOptions(new JWTOptions());
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
-    oauth2.authenticate(config, res -> {
+    oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
       assertTrue(res.succeeded());
       ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
         assertTrue(call.succeeded());
@@ -245,11 +249,11 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauthConfig
       .setIntrospectionPath("/oauth/introspect")
-      .setJWTOptions(new JWTOptions().addScope("scopeX").addScope("scopeB"));
+      .setJWTOptions(new JWTOptions());
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
-    oauth2.authenticate(config, res -> {
+    oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
       if (res.failed()) {
         fail("Test should have not failed");
       } else {
@@ -274,15 +278,16 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
 
     oauthConfig
       .setJWTOptions(new JWTOptions())
-      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx").setSymmetric(true));
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"));
 
     oauth2 = OAuth2Auth.create(vertx, oauthConfig);
 
-    oauth2.authenticate(config, res -> {
+    oauth2.authenticate(new TokenCredentials(JWT), res -> {
       if (res.failed()) {
         fail("Test should have not failed");
       } else {
         User token = res.result();
+        assertNotNull(token);
         testComplete();
       }
     });

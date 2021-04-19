@@ -11,7 +11,6 @@ import java.util.List;
 public class JWTOptions {
 
   private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
-  private static final String DEFAULT_SCOPE_DELIMITER = " ";
 
   private int leeway = 0;
   private boolean ignoreExpiration;
@@ -23,8 +22,6 @@ public class JWTOptions {
   private String issuer;
   private String subject;
   private List<String> permissions;
-  private List<String> scopes;
-  private String scopeDelimiter;
   private String nonceAlgorithm;
 
   public JWTOptions() {
@@ -41,8 +38,6 @@ public class JWTOptions {
     this.issuer = other.issuer;
     this.subject = other.subject;
     this.permissions = other.permissions;
-    this.scopes = other.scopes;
-    this.scopeDelimiter = other.scopeDelimiter;
     this.nonceAlgorithm = other.nonceAlgorithm;
   }
 
@@ -151,22 +146,26 @@ public class JWTOptions {
   }
 
   /**
+   * @deprecated See {@code JWTAuthorization} for a correct way to handle permissions.
    * The permissions of this token.
    *
    * @param permissions the permissions for this token that will be used for AuthZ
    * @return fluent API
    */
+  @Deprecated
   public JWTOptions setPermissions(List<String> permissions) {
     this.permissions = permissions;
     return this;
   }
 
   /**
+   * @deprecated See {@code JWTAuthorization} for a correct way to handle permissions.
    * Add a permission to this token.
    *
    * @param permission permission for this token that will be used for AuthZ
    * @return fluent API
    */
+  @Deprecated
   public JWTOptions addPermission(String permission) {
     if (this.permissions == null) {
       this.permissions = new ArrayList<>();
@@ -175,62 +174,9 @@ public class JWTOptions {
     return this;
   }
 
+  @Deprecated
   public List<String> getPermissions() {
     return permissions;
-  }
-
-  /**
-   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-   */
-  @Deprecated
-  public JWTOptions setScopes(List<String> scopes) {
-    this.scopes = scopes;
-    return this;
-  }
-
-  /**
-   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-   */
-  @Deprecated
-  public JWTOptions addScope(String scope) {
-    if (this.scopes == null) {
-      this.scopes = new ArrayList<>();
-    }
-    this.scopes.add(scope);
-    return this;
-  }
-
-  /**
-   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-   */
-  @Deprecated
-  public List<String> getScopes() {
-    return scopes;
-  }
-
-  /**
-   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-   */
-  @Deprecated
-  public String getScopeDelimiter() {
-    return scopeDelimiter!=null?scopeDelimiter:DEFAULT_SCOPE_DELIMITER;
-  }
-
-  /**
-   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-   */
-  @Deprecated
-  public JWTOptions withScopeDelimiter(String scopeDelimiter) {
-    this.scopeDelimiter = scopeDelimiter;
-    return this;
-  }
-
-  /**
-   * @deprecated use the authorization api {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-   */
-  @Deprecated
-  public boolean hasScopeDelimiter() {
-    return this.scopeDelimiter!=null;
   }
 
   public String getNonceAlgorithm() {

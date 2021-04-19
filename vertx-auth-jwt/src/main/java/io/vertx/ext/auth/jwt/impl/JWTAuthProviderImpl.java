@@ -151,11 +151,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
 
-      if (!jwt.isScopeGranted(payload, jwtOptions)) {
-        resultHandler.handle(Future.failedFuture("Invalid JWT token: missing required scopes."));
-        return;
-      }
-
       final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
 
       if (user.expired(jwtOptions.getLeeway())) {

@@ -31,8 +31,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * JWT and JWS implementation draft-ietf-oauth-json-web-token-32.
@@ -54,6 +52,7 @@ public final class JWT {
   private static final Base64.Decoder decoder = Base64.getDecoder();
 
   private boolean allowEmbeddedKey = false;
+  private X509Certificate rootCA;
   private MessageDigest nonceDigest;
 
   // keep 2 maps (1 for sing, 1 for verify) this simplifies the lookups
@@ -100,6 +99,20 @@ public final class JWT {
    */
   public JWT allowEmbeddedKey(boolean allowEmbeddedKey) {
     this.allowEmbeddedKey = allowEmbeddedKey;
+    return this;
+  }
+
+  /**
+   * Set the root CA certificate for the embedded keys. When handling tokens with embedded keys, certificate chains
+   * shall be verified against the provided root CA to ensure a web of trust.
+   *
+   * @param rootCA base64-encoded (Section 4 of [RFC4648] -- not base64url-encoded) DER [ITU.X690.2008] PKIX
+   *               certificate value.
+   * @return fluent self.
+   */
+  public JWT embeddedKeyRootCA(String rootCA) throws CertificateException {
+    this.rootCA = JWS.parseX5c(decoder.decode(rootCA.getBytes(UTF8)));
+    this.allowEmbeddedKey = true;
     return this;
   }
 
@@ -233,7 +246,12 @@ public final class JWT {
           certChain.add(JWS.parseX5c(decoder.decode(chain.getString(i).getBytes(UTF8))));
         }
 
-        CertificateHelper.checkValidity(certChain, false, null);
+        if (rootCA != null) {
+          certChain.add(rootCA);
+          CertificateHelper.checkValidity(certChain, true,null);
+        } else {
+          CertificateHelper.checkValidity(certChain, false, null);
+        }
 
         if (JWS.verifySignature(alg, certChain.get(0), base64urlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {
           // ok
@@ -296,52 +314,6 @@ public final class JWT {
     return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
   }
 
-  /**
-   * Scope claim are used to grant access to a specific resource.
-   * They are included into the JWT when the user consent access to the resource,
-   * or sometimes without user consent (bypass approval).
-   * @param jwt JsonObject decoded json web token value.
-   * @param options JWTOptions coming from the provider.
-   * @return true if required scopes are into the JWT.
-   */
-  public boolean isScopeGranted(JsonObject jwt, JWTOptions options) {
-
-    if(jwt == null) {
-      return false;
-    }
-
-    if(options.getScopes() == null || options.getScopes().isEmpty()) {
-      return true; // no scopes to check
-    }
-
-    if(jwt.getValue("scope") == null) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Invalid JWT: scope claim is required");
-      }
-      return false;
-    }
-
-    JsonArray target;
-    if (jwt.getValue("scope") instanceof String) {
-      target = new JsonArray(
-        Stream.of(jwt.getString("scope")
-          .split(options.getScopeDelimiter()))
-          .collect(Collectors.toList())
-      );
-    } else {
-      target = jwt.getJsonArray("scope");
-    }
-
-    if(!target.getList().containsAll(options.getScopes())) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug(String.format("Invalid JWT scopes expected[%s] actual[%s]", options.getScopes(), target.getList()));
-      }
-      return false;
-    }
-
-    return true;
-  }
-
   public String sign(JsonObject payload, JWTOptions options) {
     final boolean unsecure = isUnsecure();
     final String algorithm = options.getAlgorithm();
@@ -396,14 +368,6 @@ public final class JWT {
         payload.put("aud", new JsonArray(options.getAudience()));
       } else {
         payload.put("aud", options.getAudience().get(0));
-      }
-    }
-
-    if(options.getScopes() != null && options.getScopes().size() >= 1) {
-      if(options.hasScopeDelimiter()) {
-        payload.put("scope", String.join(options.getScopeDelimiter(), options.getScopes()));
-      } else {
-        payload.put("scope", new JsonArray(options.getScopes()));
       }
     }
 
