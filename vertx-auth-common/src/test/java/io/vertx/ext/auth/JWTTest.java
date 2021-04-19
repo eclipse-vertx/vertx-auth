@@ -205,7 +205,7 @@ public class JWTTest {
 
     Buffer buffer = rule.vertx().fileSystem().readFileBlocking("toc.jwt");
 
-    jwt.decode(buffer.toString());
+    jwt.decode(buffer.toString().trim());
 
   }
 }
