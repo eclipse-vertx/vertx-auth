@@ -102,7 +102,7 @@ public class AppleAttestation implements Attestation {
 
       // https://w3c.github.io/webauthn/#sctn-apple-anonymous-attestation
       // the spec doesn't list "alg" yet devices do send it in some cases.
-      // the "alg" is important to support metadata in the future if a device gets blacklisted.
+      // the "alg" is important to support metadata in the future if a device gets compromised.
       final PublicKeyCredential alg = attStmt.containsKey("alg") ?
         PublicKeyCredential.valueOf(attStmt.getInteger("alg")) :
         null;
