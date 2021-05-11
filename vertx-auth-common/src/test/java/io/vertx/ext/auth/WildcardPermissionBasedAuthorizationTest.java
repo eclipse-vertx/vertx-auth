@@ -100,6 +100,8 @@ public class WildcardPermissionBasedAuthorizationTest {
   public void testVerifyPermisionAuthorization() {
     assertTrue(WildcardPermissionBasedAuthorization.create("p1").verify(PermissionBasedAuthorization.create("p1")));
     assertTrue(WildcardPermissionBasedAuthorization.create("p1.*").verify(PermissionBasedAuthorization.create("p1.*")));
+    assertTrue(WildcardPermissionBasedAuthorization.create("*").verify(PermissionBasedAuthorization.create("*")));
+    assertTrue(WildcardPermissionBasedAuthorization.create("*").verify(PermissionBasedAuthorization.create("test")));
   }
 
   @Test
