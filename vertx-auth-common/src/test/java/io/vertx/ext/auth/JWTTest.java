@@ -131,10 +131,28 @@ public class JWTTest {
         .setBuffer("-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQguQt7y3Vy2llRyEi6deLKm5ywIEnYReXYJfKXNtrvMFugCgYIKoZIzj0DAQehRANCAATCrjzWd3iN2S/BgJyToJoL6hvGuss50CsDbyI/GQrJHDrzsztYlkjg4acgzH3u5K4A00JvtKWWqgq9gmLH7Q4y\n-----END PRIVATE KEY-----")));
 
     String signed = sk.sign(new JsonObject().put("test", "test"), new JWTOptions().setAlgorithm("ES256"));
-
     JsonObject decoded = vk.decode(signed);
 
     assertEquals("test", decoded.getString("test"));
+  }
+
+  @Test(expected = NoSuchKeyIdException.class)
+  public void testECKeyPairWrongKid() {
+    JWT vk = new JWT()
+      .addJWK(new JWK(
+        new PubSecKeyOptions()
+          .setId("yourKey")
+          .setAlgorithm("ES256")
+          .setBuffer("-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEwq481nd4jdkvwYCck6CaC+obxrrLOdArA28iPxkKyRw687M7WJZI4OGnIMx97uSuANNCb7SllqoKvYJix+0OMg==\n-----END PUBLIC KEY-----")));
+    JWT sk = new JWT()
+      .addJWK(new JWK(new PubSecKeyOptions()
+        .setId("myKey")
+        .setAlgorithm("ES256")
+        .setBuffer("-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQguQt7y3Vy2llRyEi6deLKm5ywIEnYReXYJfKXNtrvMFugCgYIKoZIzj0DAQehRANCAATCrjzWd3iN2S/BgJyToJoL6hvGuss50CsDbyI/GQrJHDrzsztYlkjg4acgzH3u5K4A00JvtKWWqgq9gmLH7Q4y\n-----END PRIVATE KEY-----")));
+
+    String signed = sk.sign(new JsonObject().put("test", "test"), new JWTOptions().setAlgorithm("ES256"));
+    // will fail because the "kid" do not match
+    JsonObject decoded = vk.decode(signed);
   }
 
   @Test

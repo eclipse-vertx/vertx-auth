@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
