@@ -82,7 +82,7 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
     }
     else if (otherAuthorization instanceof PermissionBasedAuthorization) {
       PermissionBasedAuthorization otherPermission = (PermissionBasedAuthorization) otherAuthorization;
-      if (this.permission.equals(otherPermission.getPermission())) {
+      if (wildcardPermission.implies(otherPermission.getPermission())) {
         if (getResource() == null) {
           return true;
         }

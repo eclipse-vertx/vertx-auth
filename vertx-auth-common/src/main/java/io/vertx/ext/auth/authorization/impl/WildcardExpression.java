@@ -173,6 +173,18 @@ class WildcardExpression {
   |               M E T H O D S               |
   ============================================*/
 
+  public boolean implies(String p) {
+    if (p == null) {
+      return false;
+    }
+    // fast path by simply testing string equality
+    if (value.equals(p)) {
+      return true;
+    }
+    // slightly slower path where we've got to convert 'p' to a wildcard
+    return implies(new WildcardExpression(p));
+  }
+  
   public boolean implies(WildcardExpression p) {
     if (p == null) {
       return false;
