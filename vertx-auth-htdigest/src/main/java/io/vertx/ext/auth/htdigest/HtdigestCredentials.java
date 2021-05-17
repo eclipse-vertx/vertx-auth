@@ -57,6 +57,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
   }
 
   public HtdigestCredentials(JsonObject jsonObject) {
+    super(jsonObject);
     HtdigestCredentialsConverter.fromJson(jsonObject, this);
   }
 
@@ -225,7 +226,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
   }
 
   public JsonObject toJson() {
-    JsonObject result = new JsonObject();
+    JsonObject result = super.toJson();
     HtdigestCredentialsConverter.toJson(this, result);
     return result;
   }
