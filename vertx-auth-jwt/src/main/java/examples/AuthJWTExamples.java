@@ -79,7 +79,7 @@ public class AuthJWTExamples {
   public void example9(JWTAuth jwtAuth) {
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
-    jwtAuth.authenticate(new JsonObject().put("jwt", "BASE64-ENCODED-STRING"))
+    jwtAuth.authenticate(new JsonObject().put("token", "BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!
@@ -94,7 +94,7 @@ public class AuthJWTExamples {
     // In this case we are forcing the provider to ignore the `exp` field
     jwtAuth.authenticate(
       new JsonObject()
-        .put("jwt", "BASE64-ENCODED-STRING")
+        .put("token", "BASE64-ENCODED-STRING")
         .put("options", new JsonObject()
           .put("ignoreExpiration", true)))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
@@ -111,7 +111,7 @@ public class AuthJWTExamples {
     // In this case we are forcing the provider to verify the aud field
     jwtAuth.authenticate(
       new JsonObject()
-        .put("jwt", "BASE64-ENCODED-STRING")
+        .put("token", "BASE64-ENCODED-STRING")
         .put("options", new JsonObject()
           .put("audience", new JsonArray().add("paulo@server.com"))))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
@@ -128,7 +128,7 @@ public class AuthJWTExamples {
     // In this case we are forcing the provider to verify the issuer
     jwtAuth.authenticate(
       new JsonObject()
-        .put("jwt", "BASE64-ENCODED-STRING")
+        .put("token", "BASE64-ENCODED-STRING")
         .put("options", new JsonObject()
           .put("issuer", "mycorp.com")))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
