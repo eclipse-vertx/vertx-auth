@@ -163,9 +163,11 @@ public class WebAuthnImpl implements WebAuthn {
           .put("authenticatorSelection", new JsonObject());
 
         // put non null values for RelyingParty
-        putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
-        putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
-        putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
+        if (options.getRelyingParty() != null) {
+          putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
+          putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
+          putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
+        }
         // put non null values for User
         putOpt(json.getJsonObject("user"), "id", UUIDtoBuffer(UUID.randomUUID()));
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
