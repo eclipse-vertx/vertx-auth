@@ -324,7 +324,7 @@ public class TPMAttestation implements Attestation {
 
         if (MessageDigest.isEqual(oid.binary(0), new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x01})) {
           if (!TPM_MANUFACTURERS.contains(new String(val.binary(0)))) {
-            throw new AttestationException("Unkown Manufacturer id");
+            throw new AttestationException("Unknown Manufacturer id");
           }
         }
       }
