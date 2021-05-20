@@ -88,7 +88,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
       } else {
         resultHandler.handle(Future.failedFuture("Bad response"));
       }
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }

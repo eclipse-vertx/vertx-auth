@@ -19,12 +19,14 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.test.core.VertxTestBase;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -66,6 +68,16 @@ public class JWTAuthProviderTest extends VertxTestBase {
       assertNotNull(res.principal().getValue("permissions"));
       assertNotNull(res.principal().getValue("roles"));
 
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testInValidCredentials() {
+    authProvider.authenticate(new JsonObject().put("username", "username").put("password", "password"), onFailure(err -> {
+      assertNotNull(err);
+      Assert.assertTrue(err instanceof CredentialValidationException);
       testComplete();
     }));
     await();

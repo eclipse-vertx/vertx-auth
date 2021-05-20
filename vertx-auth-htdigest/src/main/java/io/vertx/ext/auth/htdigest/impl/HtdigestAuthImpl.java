@@ -150,7 +150,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
       } else {
         resultHandler.handle(Future.failedFuture("Bad response"));
       }
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }

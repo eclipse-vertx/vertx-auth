@@ -67,7 +67,7 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
           resultHandler.handle(Future.failedFuture(contextResponse.cause()));
         }
       });
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }

@@ -105,7 +105,7 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
           resultHandler.handle(Future.failedFuture(queryResponse.cause()));
         }
       });
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }

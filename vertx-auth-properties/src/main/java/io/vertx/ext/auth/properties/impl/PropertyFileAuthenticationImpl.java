@@ -187,7 +187,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
         }
       });
 
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }

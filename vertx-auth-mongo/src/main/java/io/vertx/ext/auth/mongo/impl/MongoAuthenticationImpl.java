@@ -110,7 +110,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
         }
 
       });
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }
