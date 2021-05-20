@@ -28,7 +28,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
@@ -67,6 +66,16 @@ public class WebAuthnImpl implements WebAuthn {
 
     if (options == null) {
       throw new IllegalArgumentException("options cannot be null!");
+    }
+
+    // verify that RP is not null
+    if (options.getRelyingParty() == null) {
+      throw new IllegalArgumentException("options.relyingParty cannot be null!");
+    }
+
+    // verify that RP.name is not null
+    if (options.getRelyingParty().getName() == null) {
+      throw new IllegalArgumentException("options.relyingParty.name cannot be null!");
     }
 
     this.mds = new MetaDataServiceImpl(vertx, options);
@@ -163,11 +172,10 @@ public class WebAuthnImpl implements WebAuthn {
           .put("authenticatorSelection", new JsonObject());
 
         // put non null values for RelyingParty
-        if (options.getRelyingParty() != null) {
-          putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
-          putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
-          putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
-        }
+        putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
+        putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
+        putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
+
         // put non null values for User
         putOpt(json.getJsonObject("user"), "id", UUIDtoBuffer(UUID.randomUUID()));
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
@@ -429,7 +437,7 @@ public class WebAuthnImpl implements WebAuthn {
         default:
           handler.handle(Future.failedFuture("Can not determine type of response!"));
       }
-    } catch (ClassCastException | CredentialValidationException e) {
+    } catch (RuntimeException e) {
       handler.handle(Future.failedFuture(e));
     }
   }
