@@ -63,7 +63,7 @@ public class AuthOAuth2Examples {
     oauth2.authenticate(
       new JsonObject()
         .put("code", code)
-        .put("redirect_uri", "http://localhost:8080/callback"))
+        .put("redirectUri", "http://localhost:8080/callback"))
       .onSuccess(user -> {
         // save the token and continue...
       })
@@ -98,7 +98,7 @@ public class AuthOAuth2Examples {
 
     JsonObject tokenConfig = new JsonObject()
       .put("code", "<code>")
-      .put("redirect_uri", "http://localhost:3000/callback");
+      .put("redirectUri", "http://localhost:3000/callback");
 
     // Callbacks
     // Save the access token
