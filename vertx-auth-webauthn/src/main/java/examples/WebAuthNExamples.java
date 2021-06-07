@@ -180,18 +180,15 @@ public class WebAuthNExamples {
       // in order to fully trust the MDS tokens we should load the CRLs as
       // described on https://fidoalliance.org/metadata/
 
-      // here the content of: http://mds.fidoalliance.org/Root.crl
+      // here the content of: http://crl.globalsign.net/Root.crl
       .addRootCrl(
-        "MIIB1jCCAV0CAQEwCg...")
-      // here the content of: http://mds.fidoalliance.org/CA-1.crl
-      .addRootCrl(
-        "MIIB5DCCAYoCAQEwCg...");
+        "MIIB1jCCAV0CAQEwCg...");
 
     // create the webauthn security object like before
     final WebAuthn webAuthN = WebAuthn.create(vertx, webAuthnOptions);
 
     webAuthN.metaDataService()
-      .fetchTOC("https://mds2.fidoalliance.org/?token=your-access-token-string")
+      .fetchTOC()
       .onSuccess(allOk -> {
         // if all metadata was downloaded and parsed correctly allOk is true
         // the processing will not stop if a entry is corrupt, in that case that

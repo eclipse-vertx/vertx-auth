@@ -16,6 +16,8 @@
 package io.vertx.ext.auth.webauthn.impl.metadata;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
@@ -32,13 +34,26 @@ import java.util.List;
 
 public class MetaDataEntry implements Shareable {
 
-  private static final Base64.Decoder BASE64DEC = Base64.getDecoder();
-  private static final List<String> INVALID_STATUS = Arrays.asList("USER_VERIFICATION_BYPASS", "ATTESTATION_KEY_COMPROMISE", "USER_KEY_REMOTE_COMPROMISE", "USER_KEY_PHYSICAL_COMPROMISE", "REVOKED");
+  private static final Logger LOG = LoggerFactory.getLogger(MetaDataEntry.class);
 
+  private static final Base64.Decoder BASE64DEC = Base64.getDecoder();
+  // https://fidoalliance.org/specs/mds/fido-metadata-service-v3.0-ps-20210518.html
+  private static final List<String> INVALID_STATUS = Arrays
+    .asList(
+      "USER_VERIFICATION_BYPASS",
+      "ATTESTATION_KEY_COMPROMISE",
+      "USER_KEY_REMOTE_COMPROMISE",
+      "USER_KEY_PHYSICAL_COMPROMISE",
+      "REVOKED");
+  private static final List<String> INFO_STATUS = Arrays
+    .asList(
+      "UPDATE_AVAILABLE"
+    );
+
+  private final int version;
   private final JsonObject entry;
   private final JsonObject statement;
   private final String error;
-
 
   public MetaDataEntry(JsonObject statement) {
     if (statement == null) {
@@ -47,6 +62,26 @@ public class MetaDataEntry implements Shareable {
     this.entry = null;
     this.statement = statement;
     this.error = null;
+    this.version = statement.getInteger("schema", 2);
+  }
+
+  public MetaDataEntry(JsonObject tocEntry, JsonObject statement, String error) throws NoSuchAlgorithmException {
+    if (tocEntry == null || statement == null) {
+      throw new IllegalArgumentException("toc and statement cannot be null");
+    }
+
+    this.entry = tocEntry;
+    this.error = error;
+    this.statement = statement;
+    this.version = statement.getInteger("schema", 2);
+
+    // convert status report effective date to a Instant
+    for (Object o : entry.getJsonArray("statusReports")) {
+      JsonObject statusReport = (JsonObject) o;
+      statusReport.put(
+        "effectiveDate",
+        LocalDate.parse(statusReport.getString("effectiveDate"), DateTimeFormatter.ISO_DATE).atStartOfDay().toInstant(ZoneOffset.UTC));
+    }
   }
 
   public MetaDataEntry(JsonObject tocEntry, byte[] rawStatement, String error) throws NoSuchAlgorithmException {
@@ -56,6 +91,7 @@ public class MetaDataEntry implements Shareable {
 
     this.entry = tocEntry;
     this.statement = new JsonObject(Buffer.buffer(BASE64DEC.decode(rawStatement)));
+    this.version = statement.getInteger("schema", 2);
 
     // convert status report effective date to a Instant
     for (Object o : entry.getJsonArray("statusReports")) {
@@ -93,6 +129,9 @@ public class MetaDataEntry implements Shareable {
       for (int i = reports.size() - 1; i >= 0; i--) {
         JsonObject statusReport = reports.getJsonObject(i);
         if (statusReport.getInstant("effectiveDate").isBefore(now)) {
+          if (INFO_STATUS.contains(statusReport.getString("status"))) {
+            LOG.info("Software Update is available: " + statement.getString("description"));
+          }
           if (INVALID_STATUS.contains(statusReport.getString("status"))) {
             throw new MetaDataException("Invalid MDS status: " + statusReport.getString("status"));
           }

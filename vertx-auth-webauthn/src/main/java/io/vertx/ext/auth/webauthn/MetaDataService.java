@@ -52,6 +52,23 @@ public interface MetaDataService {
   }
 
   /**
+   * Fetches the FIDO2 MDS3 TOC and process the entries to the metadata store.
+   * Only valid entries will be stored. The operation will return {@code true} only if all
+   * entries have been added. {@code false} if they have been processed but at least one was
+   * invalid.
+   *
+   * The operation will only fail on network problems.
+   *
+   * @param handler the async handler to process the response
+   * @return fluent self
+   */
+  @Fluent
+  default MetaDataService fetchTOC(Handler<AsyncResult<Boolean>> handler) {
+    fetchTOC().onComplete(handler);
+    return this;
+  }
+
+  /**
    * Fetches the FIDO2 TOC for the given URL and process the entries to the metadata store.
    * Only valid entries will be stored. The operation will return {@code true} only if all
    * entries have been added. {@code false} if they have been processed but at least one was
@@ -63,6 +80,20 @@ public interface MetaDataService {
    * @return future result of the operation
    */
   Future<Boolean> fetchTOC(String url);
+
+  /**
+   * Fetches the FIDO2 MDS3 TOC and process the entries to the metadata store.
+   * Only valid entries will be stored. The operation will return {@code true} only if all
+   * entries have been added. {@code false} if they have been processed but at least one was
+   * invalid.
+   *
+   * The operation will only fail on network problems.
+   *
+   * @return future result of the operation
+   */
+  default Future<Boolean> fetchTOC() {
+    return fetchTOC("https://mds.fidoalliance.org");
+  }
 
   /**
    * Manually feed a Meta Data Statement to the service.
