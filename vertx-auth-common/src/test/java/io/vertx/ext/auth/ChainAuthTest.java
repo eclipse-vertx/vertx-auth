@@ -167,17 +167,20 @@ public class ChainAuthTest {
 
     auth.add((authInfo, res) -> {
       // always OK
-      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 1))));
+      res.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attribute", "one"))));
     });
 
     auth.add((authInfo, res) -> {
       // always OK
-      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+      res.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two"))));
     });
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
+        User result = res.result();
+        should.assertNotNull(result);
         should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        should.assertEquals("two",res.result().attributes().getString("attribute"));
         test.complete();
       } else {
         should.fail();
