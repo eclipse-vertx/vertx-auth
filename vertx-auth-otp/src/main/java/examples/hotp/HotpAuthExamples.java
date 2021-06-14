@@ -45,7 +45,7 @@ public class HotpAuthExamples {
   }
 
   public static void example2() {
-    final HotpAuthOptions hotpAuthOptions = new HotpAuthOptions(6, 0 ,0);
+    final HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
     final HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
 
     // key
