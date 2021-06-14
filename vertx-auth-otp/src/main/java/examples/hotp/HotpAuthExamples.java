@@ -49,7 +49,7 @@ public class HotpAuthExamples {
     final HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
 
     // key
-    final String userKey = "2P3V27SMNQHEE4CYK26ZHTN5HPIGWT4R";
+    final String userKey = "OK7JVNHJO5ZMC57QLYJ6QNTOZFKVN76Y";
     final byte[] keyBytes = new Base32(false).decode(userKey);
     final OtpKey otpKey = new OtpKey(keyBytes, "HmacSHA1");
 
@@ -64,7 +64,7 @@ public class HotpAuthExamples {
     // auth user hotp
     JsonObject credentials = new JsonObject() {{
       put("identifier", "user1");
-      put("code", "651075");
+      put("code", "249916");
     }};
     authProvider.authenticate(credentials);
   }
