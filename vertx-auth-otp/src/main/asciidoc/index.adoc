@@ -1,0 +1,45 @@
+= OTP Auth provider
+
+This is an auth provider implementation that authenticates via HOTP (rfc4226).
+Supported Google authenticator with key base32 and qr codes.
+
+== Getting started
+
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-otp</artifactId>
+  <version>${maven.version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-otp:${maven.version}'
+----
+
+
+== Instantiation
+
+To create an instance of the Otp auth provider, use {@link io.vertx.ext.auth.otp.hotp.HotpAuth#create(io.vertx.ext.auth.otp.hotp.HotpAuthOptions)} as follows:
+
+== Hotp Configuration
+
+The class {@link io.vertx.ext.auth.otp.hotp.HotpAuthOptions} is used to configure the Hotp authentication provider:
+
+`passwordLength`:: the set otp code length, valid value between 6 and 8, default value equal 6.
+
+`authAttemptsLimit`:: the limit auth attempts.
+
+`lookAheadWindow`:: the resynchronization mechanism usage.
+
+== Notes
+
+Note that when authenticating using this implementation, it assumes `identifier`, `key` and `counter` fields are present in the authentication info
