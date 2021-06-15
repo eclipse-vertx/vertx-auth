@@ -60,11 +60,6 @@
       <version>generate_strings-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>com.github.kenglxn.qrgen</groupId>
-      <artifactId>javase</artifactId>
-      <version>2.6.0</version>
-    </dependency>
-    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-unit</artifactId>
       <scope>test</scope>

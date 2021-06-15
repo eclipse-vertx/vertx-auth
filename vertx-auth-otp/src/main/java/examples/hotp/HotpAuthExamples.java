@@ -15,33 +15,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
-import io.vertx.ext.auth.otp.utils.AuthenticatorUriGenerator;
 import io.vertx.ext.auth.otp.utils.OtpKey;
 import io.vertx.ext.auth.otp.utils.OtpKeyGenerator;
-import net.glxn.qrgen.core.image.ImageType;
-import net.glxn.qrgen.javase.QRCode;
 import org.apache.commons.codec.binary.Base32;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URI;
 
 public class HotpAuthExamples {
 
   public static void example1() {
-    // generate key
+    // generate new key
     OtpKeyGenerator keyGenerator = new OtpKeyGenerator();
     OtpKey otpKey = keyGenerator.generate();
-
-    // create qr code
-    URI uri = AuthenticatorUriGenerator.generateHotpUri(otpKey, "vertx_hotp", "user_1", "service_1");
-    QRCode qrCode = QRCode.from(uri.toString()).to(ImageType.PNG).withSize(512, 512);
-
-    try(FileOutputStream fos = new FileOutputStream("otp_key.png")) {
-      qrCode.writeTo(fos);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   public static void example2() {

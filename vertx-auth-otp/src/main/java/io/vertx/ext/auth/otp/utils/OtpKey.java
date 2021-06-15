@@ -21,7 +21,7 @@ public class OtpKey implements SecretKey {
 
   private Key key;
 
-  private final String encoded;
+  private final String base32Encoded;
 
   public OtpKey(byte[] key, String algorithm) {
     this(new SecretKeySpec(key, algorithm));
@@ -29,7 +29,7 @@ public class OtpKey implements SecretKey {
 
   public OtpKey(Key key) {
     this.key = key;
-    encoded = new Base32(false).encodeToString(key.getEncoded());
+    base32Encoded = new Base32(false).encodeToString(key.getEncoded());
   }
 
   @Override
@@ -48,6 +48,6 @@ public class OtpKey implements SecretKey {
   }
 
   public String getBase32() {
-    return encoded;
+    return base32Encoded;
   }
 }
