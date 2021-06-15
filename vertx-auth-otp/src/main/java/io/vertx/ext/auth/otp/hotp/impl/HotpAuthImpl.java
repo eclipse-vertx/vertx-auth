@@ -18,7 +18,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.hotp.HotpCredentials;
@@ -37,7 +36,7 @@ public class HotpAuthImpl implements HotpAuth {
 
   private final HotpAuthOptions hotpAuthOptions;
 
-  private final ConcurrentMap<String, UserImpl> hotpUserMap;
+  private final ConcurrentMap<String, User> hotpUserMap;
 
   private final HmacOneTimePasswordGenerator hotp;
 
@@ -66,7 +65,7 @@ public class HotpAuthImpl implements HotpAuth {
       HotpCredentials authInfo = (HotpCredentials) credentials;
       authInfo.checkValid(hotpAuthOptions);
 
-      UserImpl user = hotpUserMap.get(authInfo.getIdentifier());
+      User user = hotpUserMap.get(authInfo.getIdentifier());
       if (user == null) {
         resultHandler.handle(Future.failedFuture("user is not found"));
         return;
@@ -125,7 +124,7 @@ public class HotpAuthImpl implements HotpAuth {
   }
 
   @Override
-  public void requestHotp(UserImpl user, Handler<AsyncResult<User>> resultHandler) {
+  public void requestHotp(User user, Handler<AsyncResult<User>> resultHandler) {
     try {
       validateUser(user);
     } catch (RuntimeException e) {
@@ -136,7 +135,7 @@ public class HotpAuthImpl implements HotpAuth {
   }
 
   @Override
-  public void revokeHotp(UserImpl user, Handler<AsyncResult<User>> resultHandler) {
+  public void revokeHotp(User user, Handler<AsyncResult<User>> resultHandler) {
     try {
       validateUser(user);
     } catch (RuntimeException e) {
@@ -146,23 +145,23 @@ public class HotpAuthImpl implements HotpAuth {
     hotpUserMap.remove(user.principal().getString("identifier"));
   }
 
-  private void validateUser(UserImpl user) {
+  private void validateUser(User user) {
 
     String identifier = user.principal().getString("identifier");
     if (identifier == null || identifier.length() == 0) {
-      throw new IllegalStateException("user attributes not contain identifier");
+      throw new IllegalStateException("user principal not contain identifier");
     }
 
     Integer counter = user.principal().getInteger("counter");
     if (counter == null) {
-      throw new IllegalStateException("user attributes not contain counter");
+      throw new IllegalStateException("user principal not contain counter");
     } else if (counter < 0) {
       throw new IllegalStateException("counter has negative value");
     }
 
     String key = user.principal().getString("key");
     if (key == null || key.length() == 0) {
-      throw new IllegalStateException("user attributes not contain key");
+      throw new IllegalStateException("user principal not contain key");
     }
   }
 

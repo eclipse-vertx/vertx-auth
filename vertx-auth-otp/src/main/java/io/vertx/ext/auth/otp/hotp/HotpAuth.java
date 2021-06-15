@@ -11,23 +11,19 @@
 
 package io.vertx.ext.auth.otp.hotp;
 
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.otp.hotp.impl.HotpAuthImpl;
 
 @VertxGen
 public interface HotpAuth extends AuthenticationProvider {
 
-  @GenIgnore
-  void requestHotp(UserImpl user, Handler<AsyncResult<User>> resultHandler);
+  void requestHotp(User user, Handler<AsyncResult<User>> resultHandler);
 
-  @GenIgnore
-  void revokeHotp(UserImpl user, Handler<AsyncResult<User>> resultHandler);
+  void revokeHotp(User user, Handler<AsyncResult<User>> resultHandler);
 
   static HotpAuth create(HotpAuthOptions hotpAuthOptions) {
     return new HotpAuthImpl(hotpAuthOptions);

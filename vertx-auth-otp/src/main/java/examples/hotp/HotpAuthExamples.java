@@ -12,7 +12,7 @@
 package examples.hotp;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.UserImpl;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.utils.OtpKey;
@@ -37,18 +37,18 @@ public class HotpAuthExamples {
     final OtpKey otpKey = new OtpKey(keyBytes, "HmacSHA1");
 
     // request hotp for user
-    JsonObject principal = new JsonObject() {{
-      put("identifier", "user1");
-      put("key", otpKey.getBase32());
-      put("counter", 0);
-    }};
-    authProvider.requestHotp(new UserImpl(principal), userAsyncResult -> {});
+    JsonObject principal = new JsonObject()
+      .put("identifier", "user1")
+      .put("key", otpKey.getBase32())
+      .put("counter", 0);
+
+    authProvider.requestHotp(User.create(principal), userAsyncResult -> {});
 
     // auth user hotp
-    JsonObject credentials = new JsonObject() {{
-      put("identifier", "user1");
-      put("code", "249916");
-    }};
+    JsonObject credentials = new JsonObject()
+      .put("identifier", "user1")
+      .put("code", "249916");
+
     authProvider.authenticate(credentials);
   }
 }
