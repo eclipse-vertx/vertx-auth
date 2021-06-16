@@ -11,7 +11,6 @@
 
 package io.vertx.ext.auth.otp.hotp.impl;
 
-import com.eatthepath.otp.HmacOneTimePasswordGenerator;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -21,12 +20,12 @@ import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.hotp.HotpCredentials;
+import io.vertx.ext.auth.otp.utils.OtpKey;
 import org.apache.commons.codec.binary.Base32;
+import org.openauthentication.otp.OneTimePasswordAlgorithm;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -38,8 +37,6 @@ public class HotpAuthImpl implements HotpAuth {
 
   private final ConcurrentMap<String, User> hotpUserMap;
 
-  private final HmacOneTimePasswordGenerator hotp;
-
   public HotpAuthImpl(HotpAuthOptions hotpAuthOptions) {
     if (hotpAuthOptions == null) {
       throw new IllegalArgumentException("hotpAuthOptions cannot null");
@@ -47,11 +44,6 @@ public class HotpAuthImpl implements HotpAuth {
     this.hotpAuthOptions = hotpAuthOptions;
 
     hotpUserMap = new ConcurrentHashMap<>();
-    try {
-      hotp = new HmacOneTimePasswordGenerator(6);
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -76,15 +68,15 @@ public class HotpAuthImpl implements HotpAuth {
       long counter = user.principal().getLong("counter");
       String key = user.principal().getString("key");
 
-      SecretKeySpec secretKeySpec = new SecretKeySpec(base32.decode(key), HmacOneTimePasswordGenerator.HOTP_HMAC_ALGORITHM);
+      OtpKey otpKey = new OtpKey(base32.decode(key), "HmacSHA1");
       counter = ++counter;
       Long authAttempts = user.attributes().getLong("auth_attempts");
       authAttempts = authAttempts != null ? ++authAttempts : 1;
       user.attributes().put("auth_attempts", authAttempts);
       String oneTimePassword;
       try {
-        oneTimePassword = hotp.generateOneTimePasswordString(secretKeySpec, counter, Locale.ENGLISH);
-      } catch (InvalidKeyException e) {
+        oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getEncoded(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+      } catch (GeneralSecurityException e) {
         resultHandler.handle(Future.failedFuture(e));
         return;
       }
@@ -103,8 +95,8 @@ public class HotpAuthImpl implements HotpAuth {
           counter = ++counter;
 
           try {
-            oneTimePassword = hotp.generateOneTimePasswordString(secretKeySpec, counter, Locale.ENGLISH);
-          } catch (InvalidKeyException e) {
+            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getEncoded(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+          } catch (GeneralSecurityException e) {
             resultHandler.handle(Future.failedFuture(e));
             return;
           }
