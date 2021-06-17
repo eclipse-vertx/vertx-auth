@@ -9,16 +9,19 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package io.vertx.ext.auth.otp.utils;
+package io.vertx.ext.auth.otp.impl;
+
+import io.vertx.ext.auth.otp.AuthenticatorUriGenerator;
+import io.vertx.ext.auth.otp.OtpKey;
 
 import java.net.URI;
 
-public class AuthenticatorUriGenerator {
+public class AuthenticatorUriGeneratorImpl implements AuthenticatorUriGenerator {
 
   private static final String HOTP_GOOGLE_AUTH_URI_TEMPLATE = "otpauth://hotp/%s:%s?secret=%s&issuer=%s";
 
-  public static URI generateHotpUri(OtpKey otpKey, String label, String user, String issuer) {
-    String uri = String.format(HOTP_GOOGLE_AUTH_URI_TEMPLATE, label, user, otpKey.getBase32(), issuer);
+  public URI generateHotpUri(OtpKey otpKey, String label, String user, String issuer) {
+    String uri = String.format(AuthenticatorUriGeneratorImpl.HOTP_GOOGLE_AUTH_URI_TEMPLATE, label, user, otpKey.getBase32(), issuer);
     return URI.create(uri);
   }
 }

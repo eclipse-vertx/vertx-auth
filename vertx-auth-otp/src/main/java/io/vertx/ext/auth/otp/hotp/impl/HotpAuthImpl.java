@@ -20,9 +20,9 @@ import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.hotp.HotpCredentials;
-import io.vertx.ext.auth.otp.utils.OtpKey;
-import org.apache.commons.codec.binary.Base32;
+import io.vertx.ext.auth.otp.impl.OtpKeyImpl;
 import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgorithm;
+import org.apache.commons.codec.binary.Base32;
 
 import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +67,7 @@ public class HotpAuthImpl implements HotpAuth {
       long counter = user.principal().getLong("counter");
       String key = user.principal().getString("key");
 
-      OtpKey otpKey = new OtpKey(base32.decode(key), "HmacSHA1");
+      OtpKeyImpl otpKey = new OtpKeyImpl(base32.decode(key), "HmacSHA1");
       counter = ++counter;
       Long authAttempts = user.attributes().getLong("auth_attempts");
       authAttempts = authAttempts != null ? ++authAttempts : 1;

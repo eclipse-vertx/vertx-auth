@@ -9,12 +9,15 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package io.vertx.ext.auth.otp.utils;
+package io.vertx.ext.auth.otp.impl;
+
+import io.vertx.ext.auth.otp.OtpKey;
+import io.vertx.ext.auth.otp.OtpKeyGenerator;
 
 import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
 
-public class OtpKeyGenerator {
+public class OtpKeyGeneratorImpl implements OtpKeyGenerator {
 
   public static final int DEFAULT_KEY_SIZE = 160;
 
@@ -22,11 +25,11 @@ public class OtpKeyGenerator {
 
   private final KeyGenerator keyGenerator;
 
-  public OtpKeyGenerator() {
+  public OtpKeyGeneratorImpl() {
     this(DEFAULT_HMAC_ALGORITHM);
   }
 
-  public OtpKeyGenerator(String algorithm) {
+  public OtpKeyGeneratorImpl(String algorithm) {
     try {
       keyGenerator = KeyGenerator.getInstance(algorithm);
     } catch (NoSuchAlgorithmException e) {
@@ -34,15 +37,18 @@ public class OtpKeyGenerator {
     }
   }
 
+  @Override
   public OtpKey generate() {
     return generate(DEFAULT_KEY_SIZE);
   }
 
+  @Override
   public OtpKey generate(int keySize) {
     keyGenerator.init(keySize);
-    return new OtpKey(keyGenerator.generateKey());
+    return new OtpKeyImpl(keyGenerator.generateKey());
   }
 
+  @Override
   public String getAlgorithm() {
     return keyGenerator.getAlgorithm();
   }
