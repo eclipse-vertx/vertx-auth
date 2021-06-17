@@ -1,4 +1,4 @@
-package org.openauthentication.otp;
+package io.vertx.ext.auth.otp.impl.org.openauthentication.otp;
 
 /*
  * OneTimePasswordAlgorithm.java

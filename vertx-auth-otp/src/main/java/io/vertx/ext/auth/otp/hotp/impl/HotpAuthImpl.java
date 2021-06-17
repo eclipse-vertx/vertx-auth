@@ -22,9 +22,8 @@ import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.hotp.HotpCredentials;
 import io.vertx.ext.auth.otp.utils.OtpKey;
 import org.apache.commons.codec.binary.Base32;
-import org.openauthentication.otp.OneTimePasswordAlgorithm;
+import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgorithm;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
