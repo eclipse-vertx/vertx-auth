@@ -13,6 +13,7 @@ package io.vertx.ext.auth.otp;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.auth.otp.impl.OtpKeyImpl;
 
 @VertxGen
 public interface OtpKey {
@@ -21,8 +22,11 @@ public interface OtpKey {
 
   String getFormat();
 
-  Buffer getEncodedBuffer();
+  Buffer getBuffer();
 
   String getBase32();
 
+  static OtpKey create(Buffer buffer, String algorithm) {
+    return new OtpKeyImpl(buffer, algorithm);
+  }
 }

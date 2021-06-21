@@ -14,13 +14,14 @@ package io.vertx.ext.auth.otp.hotp.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.hotp.HotpCredentials;
-import io.vertx.ext.auth.otp.impl.OtpKeyImpl;
 import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgorithm;
 import org.apache.commons.codec.binary.Base32;
 
@@ -64,17 +65,17 @@ public class HotpAuthImpl implements HotpAuth {
 
       validateUser(user);
 
-      long counter = user.principal().getLong("counter");
+      int counter = user.principal().getInteger("counter");
       String key = user.principal().getString("key");
 
-      OtpKeyImpl otpKey = new OtpKeyImpl(base32.decode(key), "HmacSHA1");
+      OtpKey otpKey = OtpKey.create(Buffer.buffer(base32.decode(key)), "HmacSHA1");
       counter = ++counter;
-      Long authAttempts = user.attributes().getLong("auth_attempts");
+      Integer authAttempts = user.attributes().getInteger("auth_attempts");
       authAttempts = authAttempts != null ? ++authAttempts : 1;
       user.attributes().put("auth_attempts", authAttempts);
       String oneTimePassword;
       try {
-        oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getEncoded(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+        oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getBuffer().getBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
       } catch (GeneralSecurityException e) {
         resultHandler.handle(Future.failedFuture(e));
         return;
@@ -94,7 +95,7 @@ public class HotpAuthImpl implements HotpAuth {
           counter = ++counter;
 
           try {
-            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getEncoded(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getBuffer().getBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
           } catch (GeneralSecurityException e) {
             resultHandler.handle(Future.failedFuture(e));
             return;
@@ -123,6 +124,7 @@ public class HotpAuthImpl implements HotpAuth {
       return;
     }
     hotpUserMap.put(user.principal().getString("identifier"), user);
+    resultHandler.handle(Future.succeededFuture(user));
   }
 
   @Override
@@ -134,6 +136,7 @@ public class HotpAuthImpl implements HotpAuth {
       return;
     }
     hotpUserMap.remove(user.principal().getString("identifier"));
+    resultHandler.handle(Future.succeededFuture(user));
   }
 
   private void validateUser(User user) {

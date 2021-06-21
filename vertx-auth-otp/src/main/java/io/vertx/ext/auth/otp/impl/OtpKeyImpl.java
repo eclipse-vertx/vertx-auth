@@ -25,6 +25,10 @@ public class OtpKeyImpl implements OtpKey, SecretKey {
 
   private final String base32Encoded;
 
+  public OtpKeyImpl(Buffer buffer, String algorithm) {
+    this(buffer.getBytes(), algorithm);
+  }
+
   public OtpKeyImpl(byte[] key, String algorithm) {
     this(new SecretKeySpec(key, algorithm));
   }
@@ -50,10 +54,11 @@ public class OtpKeyImpl implements OtpKey, SecretKey {
   }
 
   @Override
-  public Buffer getEncodedBuffer() {
+  public Buffer getBuffer() {
     return Buffer.buffer(key.getEncoded());
   }
 
+  @Override
   public String getBase32() {
     return base32Encoded;
   }
