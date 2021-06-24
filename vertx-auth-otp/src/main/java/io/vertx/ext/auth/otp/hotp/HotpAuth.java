@@ -11,20 +11,62 @@
 
 package io.vertx.ext.auth.otp.hotp;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.ext.auth.User;
+import io.vertx.core.Future;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.hotp.impl.HotpAuthImpl;
+
+import java.util.function.Function;
 
 @VertxGen
 public interface HotpAuth extends AuthenticationProvider {
 
-  void requestHotp(User user, Handler<AsyncResult<User>> resultHandler);
+  /**
+   * Provide a {@link Function} that can fetch {@link Authenticator}s from a backend given an {@code identifier}
+   * argument.
+   *
+   * The function signature is as follows:
+   *
+   * {@code (id) -> Future<Authenticator>}
+   *
+   * <ul>
+   *   <li>{@code id} the identifier to lookup.</li>
+   *   <li>{@link Future} async result with a authenticator.</li>
+   * </ul>
+   *
+   * @param fetcher fetcher function.
+   * @return fluent self.
+   */
+  @Fluent
+  HotpAuth authenticatorFetcher(Function<String, Future<Authenticator>> fetcher);
 
-  void revokeHotp(User user, Handler<AsyncResult<User>> resultHandler);
+  /**
+   * Provide a {@link Function} that can update or insert a {@link Authenticator}.
+   * The function <strong>should</strong> store a given authenticator to a persistence storage.
+   *
+   * When an authenticator is already present, this method <strong>must</strong> at least update
+   * {@link Authenticator#getCounter()}, and is not required to perform any other update.
+   *
+   * For new authenticators, the whole object data <strong>must</strong> be persisted.
+   *
+   * The function signature is as follows:
+   *
+   * {@code (Authenticator) -> Future<Void>}
+   *
+   * <ul>
+   *   <li>{@link Authenticator} the authenticator data to update.</li>
+   *   <li>{@link Future}async result of the operation.</li>
+   * </ul>
+   *
+   * @param updater updater function.
+   * @return fluent self.
+   */
+  @Fluent
+  HotpAuth authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
+
 
   String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label);
 
@@ -34,6 +76,10 @@ public interface HotpAuth extends AuthenticationProvider {
 
   default String generateUri(OtpKey otpKey, long counter, String label) {
     return generateUri(otpKey, counter, null, null, label);
+  }
+
+  static HotpAuth create() {
+    return create(new HotpAuthOptions());
   }
 
   static HotpAuth create(HotpAuthOptions hotpAuthOptions) {

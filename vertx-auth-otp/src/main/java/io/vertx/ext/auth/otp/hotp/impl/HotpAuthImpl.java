@@ -17,6 +17,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
@@ -26,23 +27,20 @@ import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgo
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
-import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 public class HotpAuthImpl implements HotpAuth {
 
   private final HotpAuthOptions hotpAuthOptions;
 
-  private final ConcurrentMap<String, User> hotpUserMap;
+  private Function<String, Future<Authenticator>> fetcher;
+  private Function<Authenticator, Future<Void>> updater;
 
   public HotpAuthImpl(HotpAuthOptions hotpAuthOptions) {
     if (hotpAuthOptions == null) {
       throw new IllegalArgumentException("hotpAuthOptions cannot null");
     }
     this.hotpAuthOptions = hotpAuthOptions;
-
-    hotpUserMap = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -56,89 +54,86 @@ public class HotpAuthImpl implements HotpAuth {
       HotpCredentials authInfo = (HotpCredentials) credentials;
       authInfo.checkValid(hotpAuthOptions);
 
-      User user = hotpUserMap.get(authInfo.getIdentifier());
-      if (user == null) {
-        resultHandler.handle(Future.failedFuture("user is not found"));
-        return;
-      }
+      fetcher.apply(authInfo.getIdentifier())
+        .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
+        .onSuccess(authenticator -> {
+          if (authenticator == null) {
+            resultHandler.handle(Future.failedFuture("user is not found"));
+          } else {
+            long counter = authenticator.getCounter();
+            String key = authenticator.getKey();
+            String algorithm = authenticator.getAlgorithm();
 
-      validateUser(user);
+            OtpKey otpKey = new OtpKey()
+              .setKey(key)
+              .setAlgorithm(algorithm);
 
-      int counter = user.principal().getInteger("counter");
-      String key = user.principal().getString("key");
+            counter = ++counter;
+            Integer authAttempts = authenticator.getAuthAttempts();
+            authAttempts = authAttempts != null ? ++authAttempts : 1;
+            authenticator.setAuthAttempts(authAttempts);
 
-      OtpKey otpKey = new OtpKey()
-        .setKey(key)
-        .setAlgorithm("SHA1");
+            String oneTimePassword;
 
-      counter = ++counter;
-      Integer authAttempts = user.attributes().getInteger("auth_attempts");
-      authAttempts = authAttempts != null ? ++authAttempts : 1;
-      user.attributes().put("auth_attempts", authAttempts);
-      String oneTimePassword;
-      try {
-        oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
-      } catch (GeneralSecurityException e) {
-        resultHandler.handle(Future.failedFuture(e));
-        return;
-      }
+            try {
+              oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+            } catch (GeneralSecurityException e) {
+              resultHandler.handle(Future.failedFuture(e));
+              return;
+            }
 
-      if (oneTimePassword.equals(authInfo.getCode())) {
-        user.attributes().put("counter", counter);
-        hotpUserMap.remove(authInfo.getIdentifier());
-        resultHandler.handle(Future.succeededFuture(user));
-        return;
-      }
+            if (oneTimePassword.equals(authInfo.getCode())) {
+              authenticator.setCounter(counter);
+              updater.apply(authenticator)
+                .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
+                .onSuccess(v -> resultHandler.handle(Future.succeededFuture(createUser(authenticator))));
+              return;
+            }
 
-      if (hotpAuthOptions.isUsingAttemptsLimit() && authAttempts >= hotpAuthOptions.getAuthAttemptsLimit()) {
-        hotpUserMap.remove(authInfo.getIdentifier());
-      } else if (hotpAuthOptions.isUsingResynchronization()) {
-        for (int i = 0; i < hotpAuthOptions.getLookAheadWindow(); i++) {
-          counter = ++counter;
+            if (hotpAuthOptions.isUsingAttemptsLimit() && authAttempts >= hotpAuthOptions.getAuthAttemptsLimit()) {
+              updater.apply(authenticator)
+                .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
+                .onSuccess(v -> resultHandler.handle(Future.failedFuture("invalid code")));
+              return;
+            } else if (hotpAuthOptions.isUsingResynchronization()) {
+              for (int i = 0; i < hotpAuthOptions.getLookAheadWindow(); i++) {
+                counter = ++counter;
 
-          try {
-            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
-          } catch (GeneralSecurityException e) {
-            resultHandler.handle(Future.failedFuture(e));
-            return;
+                try {
+                  oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+                } catch (GeneralSecurityException e) {
+                  resultHandler.handle(Future.failedFuture(e));
+                  return;
+                }
+
+                if (oneTimePassword.equals(authInfo.getCode())) {
+                  authenticator.setCounter(counter);
+                  updater.apply(authenticator)
+                    .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
+                    .onSuccess(v -> resultHandler.handle(Future.succeededFuture(createUser(authenticator))));
+                  return;
+                }
+              }
+            }
+
+            resultHandler.handle(Future.failedFuture("invalid code"));
           }
-
-          if (oneTimePassword.equals(authInfo.getCode())) {
-            user.attributes().put("counter", counter);
-            hotpUserMap.remove(authInfo.getIdentifier());
-            resultHandler.handle(Future.succeededFuture(user));
-            return;
-          }
-        }
-      }
-      resultHandler.handle(Future.failedFuture("invalid code"));
+        });
     } catch (RuntimeException e) {
       resultHandler.handle(Future.failedFuture(e));
     }
   }
 
   @Override
-  public void requestHotp(User user, Handler<AsyncResult<User>> resultHandler) {
-    try {
-      validateUser(user);
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
-      return;
-    }
-    hotpUserMap.put(user.principal().getString("identifier"), user);
-    resultHandler.handle(Future.succeededFuture(user));
+  public HotpAuth authenticatorFetcher(Function<String, Future<Authenticator>> fetcher) {
+    this.fetcher = fetcher;
+    return this;
   }
 
   @Override
-  public void revokeHotp(User user, Handler<AsyncResult<User>> resultHandler) {
-    try {
-      validateUser(user);
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
-      return;
-    }
-    hotpUserMap.remove(user.principal().getString("identifier"));
-    resultHandler.handle(Future.succeededFuture(user));
+  public HotpAuth authenticatorUpdater(Function<Authenticator, Future<Void>> updater) {
+    this.updater = updater;
+    return this;
   }
 
   @Override
@@ -172,7 +167,7 @@ public class HotpAuthImpl implements HotpAuth {
       }
       // digits is optional, default is 6
       if (hotpAuthOptions.getPasswordLength() != 6) {
-        sb.append("&digits").append(hotpAuthOptions.getPasswordLength());
+        sb.append("&digits=").append(hotpAuthOptions.getPasswordLength());
       }
       // counter is required
       sb.append("&counter=").append(counter);
@@ -187,24 +182,12 @@ public class HotpAuthImpl implements HotpAuth {
     }
   }
 
-  private void validateUser(User user) {
-
-    String identifier = user.principal().getString("identifier");
-    if (identifier == null || identifier.length() == 0) {
-      throw new IllegalStateException("user principal not contain identifier");
-    }
-
-    Integer counter = user.principal().getInteger("counter");
-    if (counter == null) {
-      throw new IllegalStateException("user principal not contain counter");
-    } else if (counter < 0) {
-      throw new IllegalStateException("counter has negative value");
-    }
-
-    String key = user.principal().getString("key");
-    if (key == null || key.length() == 0) {
-      throw new IllegalStateException("user principal not contain key");
-    }
+  private User createUser(Authenticator authenticator) {
+    return User.create(
+      new JsonObject()
+        .put("otp", "hotp")
+        .put("counter", authenticator.getCounter())
+        .put("auth_attempts", authenticator.getAuthAttempts()));
   }
 
   public HotpAuthOptions getHotpAuthOptions() {

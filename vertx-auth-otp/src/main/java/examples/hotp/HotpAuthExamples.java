@@ -11,8 +11,9 @@
 
 package examples.hotp;
 
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.OtpKeyGenerator;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
@@ -42,7 +43,8 @@ public class HotpAuthExamples {
       .put("key", otpKey.getKey())
       .put("counter", 0);
 
-    authProvider.requestHotp(User.create(principal), userAsyncResult -> {});
+    authProvider
+      .authenticatorFetcher(id -> Future.succeededFuture(new Authenticator()));
 
     // auth user hotp
     JsonObject credentials = new JsonObject()

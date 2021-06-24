@@ -12,7 +12,6 @@
 package io.vertx.ext.auth.otp;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.unit.TestContext;
@@ -33,46 +32,37 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp1(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test valid auth code
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
       .put("code", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
-      int counter = user1.attributes().getInteger("counter");
-      should.assertEquals(1, counter);
-      Integer authAttempt = user1.attributes().getInteger("auth_attempt");
+      long counter = user1.get("counter");
+      should.assertEquals(1L, counter);
+      Integer authAttempt = user1.get("auth_attempt");
       should.assertNull(authAttempt);
     }));
   }
 
   @Test
   public void testHotp2(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test use valid auth code after invalid code
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     // Attempt auth with invalid code
     JsonObject credentials = new JsonObject()
@@ -87,8 +77,8 @@ public class HotpAuthTest {
       .put("code", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
-      int counter = user1.get("counter");
-      should.assertEquals(1, counter);
+      long counter = user1.get("counter");
+      should.assertEquals(1L, counter);
       int authAttempt = user1.get("auth_attempts");
       should.assertEquals(2, authAttempt);
     }));
@@ -96,19 +86,14 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp3(TestContext should) {
-    // Test use valid auth code after several invalid code
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(5));
+// Test use valid auth code after several invalid code
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 5);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     // Attempt auth with invalid code
     JsonObject credentials = new JsonObject()
@@ -137,8 +122,8 @@ public class HotpAuthTest {
       .put("code", "142559");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
-      int counter = user1.get("counter");
-      should.assertEquals(6, counter);
+      long counter = user1.get("counter");
+      should.assertEquals(6L, counter);
       int authAttempt = user1.get("auth_attempts");
       should.assertEquals(4, authAttempt);
     }));
@@ -146,10 +131,13 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp4(TestContext should) {
+    final DummyDatabase db = new DummyDatabase();
     // Test valid auth code without require auth
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
@@ -160,27 +148,22 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp5(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test valid auth code and repeated auth previous code
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
       .put("code", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
-      int counter = user1.attributes().getInteger("counter");
-      should.assertEquals(1, counter);
+      long counter = user1.get("counter");
+      should.assertEquals(1L, counter);
       Integer authAttempt = user1.get("auth_attempt");
       should.assertNull(authAttempt);
     }));
@@ -190,21 +173,14 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp6(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test valid auth code after revoke hotp
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
-
-    authProvider.revokeHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
@@ -215,34 +191,23 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp7(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(7))
+      .fixture(new Authenticator().setIdentifier("user2").setKey(USER2_KEY).setCounter(3));
     // test valid auth code for several users
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject user1Principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 7);
-
-    User user1 = User.create(user1Principal);
-    authProvider.requestHotp(user1, should.asyncAssertSuccess());
-
-    JsonObject user2Principal = new JsonObject()
-      .put("identifier", "user2")
-      .put("key", USER2_KEY)
-      .put("counter", 3);
-
-    User user2 = User.create(user2Principal);
-    authProvider.requestHotp(user2, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject user1Credentials = new JsonObject()
       .put("identifier", "user1")
       .put("code", "974712");
 
     authProvider.authenticate(user1Credentials, should.asyncAssertSuccess(user -> {
-      int counter = user.attributes().getInteger("counter");
-      should.assertEquals(8, counter);
+      long counter = user.get("counter");
+      should.assertEquals(8L, counter);
       Integer authAttempt = user.get("auth_attempt");
       should.assertNull(authAttempt);
     }));
@@ -252,8 +217,8 @@ public class HotpAuthTest {
       .put("code", "054804");
 
     authProvider.authenticate(user2Credentials, should.asyncAssertSuccess(user -> {
-      int counter = user.attributes().getInteger("counter");
-      should.assertEquals(4, counter);
+      long counter = user.get("counter");
+      should.assertEquals(4L, counter);
       Integer authAttempt = user.get("auth_attempt");
       should.assertNull(authAttempt);
     }));
@@ -261,34 +226,23 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp8(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(7))
+      .fixture(new Authenticator().setIdentifier("user2").setKey(USER2_KEY).setCounter(3));
     // test valid authorization code for the first user
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions();
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject user1Principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 7);
-
-    User user1 = User.create(user1Principal);
-    authProvider.requestHotp(user1, should.asyncAssertSuccess());
-
-    JsonObject user2Principal = new JsonObject()
-      .put("identifier", "user2")
-      .put("key", USER2_KEY)
-      .put("counter", 3);
-
-    User user2 = User.create(user2Principal);
-    authProvider.requestHotp(user2, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject user1Credentials = new JsonObject()
       .put("identifier", "user1")
       .put("code", "974712");
 
     authProvider.authenticate(user1Credentials, should.asyncAssertSuccess(user -> {
-      int counter = user.attributes().getInteger("counter");
-      should.assertEquals(8, counter);
+      long counter = user.get("counter");
+      should.assertEquals(8L, counter);
       Integer authAttempt = user.get("auth_attempt");
       should.assertNull(authAttempt);
     }));
@@ -302,20 +256,15 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp9(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test valid auth code and unexpected password length
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
       .setPasswordLength(8);
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
@@ -326,20 +275,15 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp10(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test auth with unexpected code length
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
       .setPasswordLength(6);
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
@@ -349,43 +293,17 @@ public class HotpAuthTest {
   }
 
   @Test
-  public void testHotp11(TestContext should) {
-    // Test request code and auth attempts limit
-
-    HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
-      .setAuthAttemptsLimit(5);
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 6);
-
-    final JsonObject attributes = new JsonObject()
-      .put("attempts_limit", 8);
-
-    User user = User.create(principal, attributes);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
-  }
-
-  @Test
   public void testHotp12(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(0));
     // Test invalid auth code with attempts limit
 
     final int attemptsLimit = 3;
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
       .setAuthAttemptsLimit(attemptsLimit);
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 0);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
@@ -407,29 +325,24 @@ public class HotpAuthTest {
 
   @Test
   public void testHotp13(TestContext should) {
+    final DummyDatabase db = new DummyDatabase()
+      .fixture(new Authenticator().setIdentifier("user1").setKey(USER1_KEY).setCounter(8));
     // Test valid auth code with using resynchronization
 
     HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
       .setLookAheadWindow(5);
-    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions);
-
-    JsonObject principal = new JsonObject()
-      .put("identifier", "user1")
-      .put("key", USER1_KEY)
-      .put("counter", 8);
-
-    User user = User.create(principal);
-
-    authProvider.requestHotp(user, should.asyncAssertSuccess());
+    HotpAuth authProvider = HotpAuth.create(hotpAuthOptions)
+      .authenticatorFetcher(db::fetch)
+      .authenticatorUpdater(db::upsert);
 
     JsonObject credentials = new JsonObject()
       .put("identifier", "user1")
       .put("code", "203646");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(res -> {
-      int counter = user.attributes().getInteger("counter");
-      should.assertEquals(11, counter);
-      Integer authAttempt = user.get("auth_attempt");
+      long counter = res.get("counter");
+      should.assertEquals(11L, counter);
+      Integer authAttempt = res.get("auth_attempt");
       should.assertNull(authAttempt);
     }));
   }
