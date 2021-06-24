@@ -14,7 +14,6 @@ package io.vertx.ext.auth.otp.hotp.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -23,15 +22,15 @@ import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.auth.otp.hotp.HotpCredentials;
 import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgorithm;
-import org.apache.commons.codec.binary.Base32;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class HotpAuthImpl implements HotpAuth {
-
-  private final Base32 base32 = new Base32(false);
 
   private final HotpAuthOptions hotpAuthOptions;
 
@@ -68,14 +67,17 @@ public class HotpAuthImpl implements HotpAuth {
       int counter = user.principal().getInteger("counter");
       String key = user.principal().getString("key");
 
-      OtpKey otpKey = OtpKey.create(Buffer.buffer(base32.decode(key)), "HmacSHA1");
+      OtpKey otpKey = new OtpKey()
+        .setKey(key)
+        .setAlgorithm("SHA1");
+
       counter = ++counter;
       Integer authAttempts = user.attributes().getInteger("auth_attempts");
       authAttempts = authAttempts != null ? ++authAttempts : 1;
       user.attributes().put("auth_attempts", authAttempts);
       String oneTimePassword;
       try {
-        oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getBuffer().getBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+        oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
       } catch (GeneralSecurityException e) {
         resultHandler.handle(Future.failedFuture(e));
         return;
@@ -95,7 +97,7 @@ public class HotpAuthImpl implements HotpAuth {
           counter = ++counter;
 
           try {
-            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getBuffer().getBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
           } catch (GeneralSecurityException e) {
             resultHandler.handle(Future.failedFuture(e));
             return;
@@ -137,6 +139,52 @@ public class HotpAuthImpl implements HotpAuth {
     }
     hotpUserMap.remove(user.principal().getString("identifier"));
     resultHandler.handle(Future.succeededFuture(user));
+  }
+
+  @Override
+  public String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label) {
+    try {
+      if (label == null) {
+        if (issuer == null) {
+          throw new IllegalArgumentException("label and issuer cannot all be null");
+        }
+        if (user == null) {
+          label = URLEncoder.encode(issuer, "UTF8");
+        } else {
+          label = URLEncoder.encode(issuer, "UTF8") + ":" + URLEncoder.encode(user, "UTF8");
+        }
+      }
+
+      // build the parameter
+      StringBuilder sb = new StringBuilder();
+      // secret is required
+      sb.append("secret=").append(otpKey.getKey());
+      // issuer is strongly recommended
+      if (issuer != null) {
+        sb.append("&issuer=").append(URLEncoder.encode(issuer, "UTF8"));
+      }
+      // algorithm is optional, default is SHA1
+      if (otpKey.getAlgorithm() != null) {
+        // strip the HMac" part
+        if (!otpKey.getAlgorithm().equals("SHA1")) {
+          sb.append("&algorithm=").append(otpKey.getAlgorithm());
+        }
+      }
+      // digits is optional, default is 6
+      if (hotpAuthOptions.getPasswordLength() != 6) {
+        sb.append("&digits").append(hotpAuthOptions.getPasswordLength());
+      }
+      // counter is required
+      sb.append("&counter=").append(counter);
+
+      return String.format(
+        "otpauth://hotp/%s?%s",
+        label,
+        sb);
+
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void validateUser(User user) {

@@ -17,8 +17,6 @@ import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.OtpKeyGenerator;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
-import io.vertx.ext.auth.otp.impl.OtpKeyImpl;
-import org.apache.commons.codec.binary.Base32;
 
 public class HotpAuthExamples {
 
@@ -34,13 +32,14 @@ public class HotpAuthExamples {
 
     // key
     final String userKey = "OK7JVNHJO5ZMC57QLYJ6QNTOZFKVN76Y";
-    final byte[] keyBytes = new Base32(false).decode(userKey);
-    final OtpKey otpKey = new OtpKeyImpl(keyBytes, "HmacSHA1");
+    final OtpKey otpKey = new OtpKey()
+      .setKey(userKey)
+      .setAlgorithm("HmacSHA1");
 
     // request hotp for user
     JsonObject principal = new JsonObject()
       .put("identifier", "user1")
-      .put("key", otpKey.getBase32())
+      .put("key", otpKey.getKey())
       .put("counter", 0);
 
     authProvider.requestHotp(User.create(principal), userAsyncResult -> {});

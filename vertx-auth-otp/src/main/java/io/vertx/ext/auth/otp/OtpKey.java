@@ -11,22 +11,80 @@
 
 package io.vertx.ext.auth.otp;
 
-import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.auth.otp.impl.OtpKeyImpl;
+import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonObject;
+import org.apache.commons.codec.binary.Base32;
 
-@VertxGen
-public interface OtpKey {
+import java.util.Locale;
 
-  String getAlgorithm();
+@DataObject
+public class OtpKey {
 
-  String getFormat();
+  private final Base32 BASE32 = new Base32(false);
 
-  Buffer getBuffer();
+  private String key;
+  private String algorithm;
 
-  String getBase32();
+  public OtpKey() {}
 
-  static OtpKey create(Buffer buffer, String algorithm) {
-    return new OtpKeyImpl(buffer, algorithm);
+  public OtpKey(OtpKey other) {
+    this.key = other.key;
+    this.algorithm = other.algorithm;
+  }
+
+  public OtpKey(JsonObject json) {
+    setKey(json.getString("key"));
+    setAlgorithm(json.getString("algorithm"));
+  }
+
+  public OtpKey(byte[] rawKey, String algorithm) {
+    setKey(BASE32.encodeToString(rawKey));
+    setAlgorithm(algorithm);
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public byte[] getKeyBytes() {
+    return BASE32.decode(key);
+  }
+
+  public OtpKey setKey(String key) {
+    this.key = key;
+    return this;
+  }
+
+  public String getAlgorithm() {
+    return algorithm;
+  }
+
+  public OtpKey setAlgorithm(String algorithm) {
+    if (algorithm == null) {
+      algorithm = "SHA1";
+    } else {
+      algorithm = algorithm.toUpperCase(Locale.US);
+    }
+
+    switch (algorithm) {
+      case "SHA1":
+      case "SHA256":
+      case "SHA512":
+        this.algorithm = algorithm;
+        return this;
+      default:
+        throw new IllegalArgumentException("Invalid algorithm, must be SHA{1,256,512}");
+    }
+  }
+
+  public JsonObject toJson() {
+    return new JsonObject()
+      .put("key", getKey())
+      .put("algorithm", getAlgorithm());
+  }
+
+  @Override
+  public String toString() {
+    return toJson().encode();
   }
 }

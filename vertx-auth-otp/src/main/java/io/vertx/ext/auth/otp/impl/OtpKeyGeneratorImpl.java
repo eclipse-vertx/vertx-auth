@@ -15,7 +15,9 @@ import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.OtpKeyGenerator;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 
 public class OtpKeyGeneratorImpl implements OtpKeyGenerator {
 
@@ -31,7 +33,15 @@ public class OtpKeyGeneratorImpl implements OtpKeyGenerator {
 
   public OtpKeyGeneratorImpl(String algorithm) {
     try {
-      keyGenerator = KeyGenerator.getInstance(algorithm);
+      switch (algorithm) {
+        case "HmacSHA1":
+        case "HmacSHA256":
+        case "HmacSHA512":
+          keyGenerator = KeyGenerator.getInstance(algorithm);
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid algorithm, must be HmacSHA{1,256,512}");
+      }
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
@@ -45,7 +55,11 @@ public class OtpKeyGeneratorImpl implements OtpKeyGenerator {
   @Override
   public OtpKey generate(int keySize) {
     keyGenerator.init(keySize);
-    return new OtpKeyImpl(keyGenerator.generateKey());
+    SecretKey key = keyGenerator.generateKey();
+    return new OtpKey(
+      key.getEncoded(),
+      // strip the "Hmac" prefix
+      key.getAlgorithm().substring(4));
   }
 
   @Override
