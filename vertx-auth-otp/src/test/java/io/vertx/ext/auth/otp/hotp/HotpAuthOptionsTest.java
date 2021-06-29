@@ -9,9 +9,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package io.vertx.ext.auth.otp;
+package io.vertx.ext.auth.otp.hotp;
 
-import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
