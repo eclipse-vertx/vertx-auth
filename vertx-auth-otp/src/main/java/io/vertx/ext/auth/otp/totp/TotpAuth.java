@@ -67,6 +67,7 @@ public interface TotpAuth extends AuthenticationProvider {
   @Fluent
   TotpAuth authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
 
+  Future<Authenticator> createAuthenticator(String id, OtpKey otpKey);
 
   String generateUri(OtpKey otpKey, long period, String issuer, String user, String label);
 

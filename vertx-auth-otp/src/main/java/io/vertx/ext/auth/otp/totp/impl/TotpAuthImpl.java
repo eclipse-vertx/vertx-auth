@@ -117,6 +117,20 @@ public class TotpAuthImpl implements TotpAuth {
   }
 
   @Override
+  public Future<Authenticator> createAuthenticator(String id, OtpKey otpKey) {
+    // Create user in the database
+    final Authenticator authenticator = new Authenticator(true)
+      .setIdentifier(id)
+      .setKey(otpKey.getKey())
+      .setAlgorithm(otpKey.getAlgorithm())
+      .setCounter(0);
+
+    return updater
+      .apply(authenticator)
+      .map(authenticator);
+  }
+
+  @Override
   public String generateUri(OtpKey otpKey, long period, String issuer, String user, String label) {
     try {
       if (label == null) {

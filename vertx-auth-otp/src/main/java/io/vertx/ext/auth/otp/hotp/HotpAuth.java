@@ -67,6 +67,7 @@ public interface HotpAuth extends AuthenticationProvider {
   @Fluent
   HotpAuth authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
 
+  Future<Authenticator> createAuthenticator(String id, OtpKey otpKey);
 
   String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label);
 

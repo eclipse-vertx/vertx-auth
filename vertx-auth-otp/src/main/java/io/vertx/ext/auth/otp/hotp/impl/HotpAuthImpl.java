@@ -137,6 +137,20 @@ public class HotpAuthImpl implements HotpAuth {
   }
 
   @Override
+  public Future<Authenticator> createAuthenticator(String id, OtpKey otpKey) {
+    // Create user in the database
+    final Authenticator authenticator = new Authenticator(true)
+      .setIdentifier(id)
+      .setKey(otpKey.getKey())
+      .setAlgorithm(otpKey.getAlgorithm())
+      .setCounter(0);
+
+    return updater
+      .apply(authenticator)
+      .map(authenticator);
+  }
+
+  @Override
   public String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label) {
     try {
       if (label == null) {
