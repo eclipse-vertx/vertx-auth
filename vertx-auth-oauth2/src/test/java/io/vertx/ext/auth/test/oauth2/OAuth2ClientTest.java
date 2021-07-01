@@ -2,6 +2,7 @@ package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
@@ -28,6 +29,10 @@ public class OAuth2ClientTest extends VertxTestBase {
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("grant_type", "client_credentials");
+
+  private static final JsonObject oauthConfigWithScopes = new JsonObject()
+    .put("grant_type", "client_credentials")
+    .put("scope", "scopeA");
 
   protected OAuth2Auth oauth2;
   private HttpServer server;
@@ -79,6 +84,22 @@ public class OAuth2ClientTest extends VertxTestBase {
   public void getToken() {
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
+      if (res.failed()) {
+        fail(res.cause().getMessage());
+      } else {
+        User token = res.result();
+        assertNotNull(token);
+        assertNotNull(token.principal());
+        testComplete();
+      }
+    });
+    await();
+  }
+
+  @Test
+  public void getTokenWithScopes() {
+    config = oauthConfigWithScopes;
+    oauth2.authenticate(new JsonObject().put("scopes", new JsonArray().add("scopeA")), res -> {
       if (res.failed()) {
         fail(res.cause().getMessage());
       } else {
