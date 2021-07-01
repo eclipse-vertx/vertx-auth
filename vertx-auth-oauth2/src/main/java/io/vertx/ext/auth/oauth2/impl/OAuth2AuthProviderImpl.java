@@ -156,11 +156,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     }
 
     final OAuth2FlowType flow = config.getFlow();
+    final Oauth2Credentials cred;
 
     switch (flow) {
       case AUTH_CODE:
         if (authInfo.containsKey("code")) {
-          Oauth2Credentials cred = new Oauth2Credentials()
+          cred = new Oauth2Credentials()
             .setCode(authInfo.getString("code"))
             .setCodeVerifier(authInfo.getString("codeVerifier"))
             .setRedirectUri(authInfo.getString("redirectUri"));
@@ -170,23 +171,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         }
         break;
       case CLIENT:
-        if (authInfo.size() == 0) {
-          Oauth2Credentials cred = new Oauth2Credentials();
+        cred = new Oauth2Credentials();
 
-          if (authInfo.containsKey("scopes")) {
-            for (Object scope : authInfo.getJsonArray("scopes")) {
-              cred.addScope((String) scope);
-            }
+        if (authInfo.containsKey("scopes")) {
+          for (Object scope : authInfo.getJsonArray("scopes")) {
+            cred.addScope((String) scope);
           }
-
-          authenticate(cred, handler);
-          return;
         }
-        break;
+
+        authenticate(cred, handler);
+        return;
       case PASSWORD:
         if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
 
-          Oauth2Credentials cred = new Oauth2Credentials()
+          cred = new Oauth2Credentials()
             .setUsername(authInfo.getString("username"))
             .setPassword(authInfo.getString("password"));
 
@@ -203,7 +201,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       case AUTH_JWT:
       case AAD_OBO:
         if (authInfo.containsKey("assertion")) {
-          Oauth2Credentials cred = new Oauth2Credentials()
+          cred = new Oauth2Credentials()
             .setAssertion(authInfo.getString("assertion"));
 
           authenticate(cred, handler);
@@ -222,7 +220,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   /**
    * OAuth2/OIDC authentication. Authentication in this object means, checking if the given credentials are valid by
    * verifying them with the IdP or doing a cryptographic check of the credentials.
-   *
+   * <p>
    * Depending on the flow in use, different credential objects can be used in this method.
    *
    * <ul>
@@ -237,7 +235,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
    *   {@code access_token} in order to perform a action on behalf of the user.</li>
    *   <li>{@code IMPLICIT} - The implicit flow has been deprecated by OAuth2 and was never supported by this module.</li>
    * </ul>
-   *
+   * <p>
    * This means that different {@link Credentials} types can be used.
    *
    * <ul>
