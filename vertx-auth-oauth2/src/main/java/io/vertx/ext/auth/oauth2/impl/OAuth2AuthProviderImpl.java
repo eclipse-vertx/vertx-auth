@@ -636,9 +636,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     // the user object is a JWT so we should validate it as mandated by OIDC
     final JWTOptions jwtOptions = config.getJWTOptions();
 
+    JsonArray target = null;
+
     // validate the audience
-    if (jwtOptions.getAudience() != null && token.containsKey("aud")) {
-      JsonArray target;
+    if (token.containsKey("aud")) {
       try {
         if (token.getValue("aud") instanceof String) {
           target = new JsonArray().add(token.getValue("aud"));
@@ -648,8 +649,19 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       } catch (RuntimeException e) {
         throw new IllegalStateException("User audience isn't a JsonArray or String");
       }
+    }
 
-      if (target != null && target.size() > 0) {
+    if (target != null && target.size() > 0) {
+      if (idToken || jwtOptions.getAudience() == null) {
+        // https://openid.net/specs/openid-connect-core-1_0.html#  $3.1.3.7.
+        // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at the Issuer
+        // identified by the iss (issuer) Claim as an audience. The aud (audience) Claim MAY contain an array with more
+        // than one element. The ID Token MUST be rejected if the ID Token does not list the Client as a valid audience,
+        // or if it contains additional audiences not trusted by the Client.
+        if (!target.contains(config.getClientId())) {
+          throw new IllegalStateException("Invalid JWT audience. expected: " + config.getClientId());
+        }
+      } else {
         final List<String> aud = jwtOptions.getAudience();
         for (String el : aud) {
           if (!target.contains(el)) {
@@ -670,8 +682,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     if (idToken) {
       if (token.containsKey("azp")) {
         String clientId = config.getClientId();
-        if (clientId != null && !clientId.equals(token.getString("azp"))) {
+        if (!clientId.equals(token.getString("azp"))) {
           throw new IllegalStateException("Invalid authorised party != config.clientID");
+        }
+        if (target != null && target.size() > 1) {
+          // https://openid.net/specs/openid-connect-core-1_0.html#  $3.1.3.7.
+          // If the ID Token contains multiple audiences, the Client SHOULD verify that an azp Claim is present.
+          if (!target.contains(token.getString("azp"))) {
+            throw new IllegalStateException("ID Token with multiple audiences, doesn't contain azp Claim value");
+          }
         }
       }
     }

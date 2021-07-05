@@ -130,22 +130,16 @@ public interface OpenIDConnectAuth {
         config.setJwkPath(json.getString("jwks_uri"));
         config.setIntrospectionPath(json.getString("introspection_endpoint"));
 
-        JWTOptions jwtOptions = config.getJWTOptions();
-        if (jwtOptions == null) {
-          jwtOptions = new JWTOptions();
-          config.setJWTOptions(jwtOptions);
-        }
-
         if (json.containsKey("issuer")) {
           // the discovery document includes the issuer, this means we can and should assert that source of all tokens
           // when in JWT form
+          JWTOptions jwtOptions = config.getJWTOptions();
+          if (jwtOptions == null) {
+            jwtOptions = new JWTOptions();
+            config.setJWTOptions(jwtOptions);
+          }
+          // configure the issuer
           jwtOptions.setIssuer(json.getString("issuer"));
-        }
-
-        if (jwtOptions.getAudience() == null) {
-          // if the user hasn't defined a custom audience, by default, all JWTs audience will be verified against
-          // the client id as mandated by the OIDC spec
-          jwtOptions.addAudience(config.getClientId());
         }
 
         // optional config
