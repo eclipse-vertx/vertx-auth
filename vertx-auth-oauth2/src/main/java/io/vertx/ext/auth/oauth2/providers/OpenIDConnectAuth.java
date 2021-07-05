@@ -142,7 +142,7 @@ public interface OpenIDConnectAuth {
           jwtOptions.setIssuer(json.getString("issuer"));
         }
 
-        if (jwtOptions.getAudience() == null || jwtOptions.getAudience().size() == 0) {
+        if (jwtOptions.getAudience() == null) {
           // if the user hasn't defined a custom audience, by default, all JWTs audience will be verified against
           // the client id as mandated by the OIDC spec
           jwtOptions.addAudience(config.getClientId());
