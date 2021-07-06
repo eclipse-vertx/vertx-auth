@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -295,6 +296,121 @@ public class OAuth2Keycloak14IT {
                   .onSuccess(bob -> {
                     test.complete();
                   });
+              });
+          });
+      });
+  }
+
+  @Test
+  public void discoverGetTokenFromFrontEndPerformAuthWithBackend(TestContext should) {
+    final Async test = should.async();
+
+    // in this test we get a token from client "frontend", the token should contain an audience "backend" so it is not
+    // consumable from "this" app directly. The token should be seen as an opaque token.
+
+    // then we use that token to authenticate on client "backend" which should be accepted as the audience is correct.
+
+    OAuth2Options options = new OAuth2Options()
+      .setFlow(OAuth2FlowType.PASSWORD)
+      .setClientId("frontend")
+      .setTenant("vertx-it")
+      .setSite(site + "/auth/realms/{tenant}");
+
+    options.getHttpClientOptions().setTrustAll(true);
+
+    KeycloakAuth.discover(rule.vertx(), options)
+      .onFailure(should::fail)
+      .onSuccess(oauth2 -> {
+
+        oauth2
+          .authenticate(new Oauth2Credentials().setUsername("alice").setPassword("password").addScope("backend"))
+          .onFailure(should::fail)
+          .onSuccess(alice -> {
+            should.assertNotNull(alice);
+            // the audience isn't valid so the token is considered opaque
+            should.assertNull(alice.attributes().getJsonObject("accessToken"));
+
+            // step #2 use the token acquired by the frontend and perform authn to "backend"
+            OAuth2Options options2 = new OAuth2Options()
+              .setClientId("backend")
+              .setTenant("vertx-it")
+              .setSite(site + "/auth/realms/{tenant}");
+
+            options2.getHttpClientOptions().setTrustAll(true);
+
+            KeycloakAuth.discover(rule.vertx(), options2)
+              .onFailure(should::fail)
+              .onSuccess(oAuth2 -> {
+
+                // perform auth using a token, this is a bearer client, so it assumes tokens have been issued elsewhere
+                oAuth2
+                  .authenticate(new TokenCredentials(alice.principal().getString("access_token")))
+                  .onFailure(should::fail)
+                  .onSuccess(backendAlice -> {
+                    should.assertNotNull(backendAlice);
+                    // the audience is valid so the token is a JWT
+                    should.assertNotNull(backendAlice.attributes().getJsonObject("accessToken"));
+                    // and the right audience is present
+                    should.assertTrue(backendAlice.attributes().getJsonObject("accessToken").getJsonArray("aud").contains("backend"));
+
+                    test.complete();
+                  });
+              });
+          });
+      });
+  }
+
+  @Test
+  public void discoverGetTokenFromFrontEndPerformAuthWithBorkendWillFail(TestContext should) {
+    final Async test = should.async();
+
+    // in this test we get a token from client "frontend", the token should contain an audience "backend" so it is not
+    // consumable from "this" app directly. The token should be seen as an opaque token.
+
+    // then we use that token to authenticate on client "borkend" which should fail as we have a "typpo" client and the
+    // audience will not match.
+
+    OAuth2Options options = new OAuth2Options()
+      .setFlow(OAuth2FlowType.PASSWORD)
+      .setClientId("frontend")
+      .setTenant("vertx-it")
+      .setSite(site + "/auth/realms/{tenant}");
+
+    options.getHttpClientOptions().setTrustAll(true);
+
+    KeycloakAuth.discover(rule.vertx(), options)
+      .onFailure(should::fail)
+      .onSuccess(oauth2 -> {
+        oauth2
+          .authenticate(
+            new Oauth2Credentials()
+              .setUsername("alice")
+              .setPassword("password")
+              // this is a client scope that will add the "backend" audience to the token
+              .addScope("backend"))
+          .onFailure(should::fail)
+          .onSuccess(alice -> {
+            should.assertNotNull(alice);
+            // the audience isn't valid so the token is considered opaque
+            should.assertNull(alice.attributes().getJsonObject("accessToken"));
+
+            // step #2 use the token acquired by the frontend and perform authn to "backend"
+            OAuth2Options options2 = new OAuth2Options()
+              .setClientId("borkend")
+              .setTenant("vertx-it")
+              .setSite(site + "/auth/realms/{tenant}");
+
+            options2.getHttpClientOptions().setTrustAll(true);
+
+            KeycloakAuth.discover(rule.vertx(), options2)
+              .onFailure(should::fail)
+              .onSuccess(oAuth2 -> {
+
+                // perform auth using a token, this is a bearer client, so it assumes tokens have been issued elsewhere
+                oAuth2
+                  .authenticate(new TokenCredentials(alice.principal().getString("access_token")))
+                  .onFailure(err -> test.complete())
+                  .onSuccess(backendAlice -> should.fail("We are on the wrong audience for a bearer client"));
               });
           });
       });
