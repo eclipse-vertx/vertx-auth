@@ -75,8 +75,6 @@ public class OAuth2KeycloakIT {
         throw new IllegalArgumentException("Invalid proto: " + proto);
     }
 
-    System.out.println(site);
-
     OAuth2Options options = new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("confidential-client")
