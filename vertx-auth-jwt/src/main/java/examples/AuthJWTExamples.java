@@ -249,7 +249,7 @@ public class AuthJWTExamples {
             "dEjwl8s+Sn0GULko+H95fsTREQ1A2soCFHS4wV3/23Nebq9omY3KuK9DKw==\n" +
             "-----END PUBLIC KEY-----"))
       .addPubSecKey(new PubSecKeyOptions()
-        .setAlgorithm("RS256")
+        .setAlgorithm("ES256")
         .setBuffer(
           "-----BEGIN PRIVATE KEY-----\n" +
             "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgeRyEfU1NSHPTCuC9\n" +
