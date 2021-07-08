@@ -21,6 +21,11 @@ import io.vertx.ext.auth.otp.hotp.impl.HotpAuthImpl;
 
 import java.util.function.Function;
 
+/**
+ * An extension of AuthProvider which uses the one time passwords based on counter to perform authentication.
+ *
+ * @author Dmitry Novikov
+ */
 @VertxGen
 public interface HotpAuth extends AuthenticationProvider {
 
@@ -67,22 +72,67 @@ public interface HotpAuth extends AuthenticationProvider {
   @Fluent
   HotpAuth authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
 
+  /**
+   * Creating authenticator from user id and key.
+   *
+   * @param id id user.
+   * @param otpKey key of user used for auth.
+   * @return {@link Authenticator} an object containing all the necessary information to authenticate a user.
+   */
   Future<Authenticator> createAuthenticator(String id, OtpKey otpKey);
 
+  /**
+   * Creating URI for register in key in user device.
+   *
+   * @param otpKey user key.
+   * @param counter initial counter value.
+   * @param issuer issuer of key.
+   * @param user display name of user account.
+   * @param label the label to identify which account a key is associated with.
+   * @return uri containing the key.
+   */
   String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label);
 
+  /**
+   * Creating URI for register in key in user device.
+   *
+   * @param otpKey user key.
+   * @param counter initial counter value.
+   * @param issuer issuer of key.
+   * @param user display name of user account.
+   * @return uri containing the key.
+   */
   default String generateUri(OtpKey otpKey, long counter, String issuer, String user) {
     return generateUri(otpKey, counter, issuer, user, null);
   }
 
+  /**
+   * Creating URI for register in key in user device.
+   *
+   * @param otpKey user key.
+   * @param counter initial counter value.
+   * @param label the label to identify which account a key is associated with.
+   * @return uri containing the key.
+   */
   default String generateUri(OtpKey otpKey, long counter, String label) {
     return generateUri(otpKey, counter, null, null, label);
   }
 
+  /**
+   * Creates an instance of HotpAuth.
+   *
+   * @return the created instance of {@link HotpAuth}.
+   */
   static HotpAuth create() {
     return create(new HotpAuthOptions());
   }
 
+  /**
+   * Creates an instance of HotpAuth.
+   *
+   * @param hotpAuthOptions the config.
+   * @return the created instance of {@link HotpAuth}.
+   */
   static HotpAuth create(HotpAuthOptions hotpAuthOptions) {
     return new HotpAuthImpl(hotpAuthOptions);
   }

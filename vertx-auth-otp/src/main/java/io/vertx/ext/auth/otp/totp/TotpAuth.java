@@ -21,6 +21,11 @@ import io.vertx.ext.auth.otp.totp.impl.TotpAuthImpl;
 
 import java.util.function.Function;
 
+/**
+ * An extension of AuthProvider which uses the one time passwords based on time to perform authentication.
+ *
+ * @author Dmitry Novikov
+ */
 @VertxGen
 public interface TotpAuth extends AuthenticationProvider {
 
@@ -67,22 +72,67 @@ public interface TotpAuth extends AuthenticationProvider {
   @Fluent
   TotpAuth authenticatorUpdater(Function<Authenticator, Future<Void>> updater);
 
+  /**
+   * Creating authenticator from user id and key.
+   *
+   * @param id id user.
+   * @param otpKey key of user used for auth.
+   * @return {@link Authenticator} an object containing all the necessary information to authenticate a user.
+   */
   Future<Authenticator> createAuthenticator(String id, OtpKey otpKey);
 
+  /**
+   * Creating URI for register in key in user device.
+   *
+   * @param otpKey user key.
+   * @param period period of valid code.
+   * @param issuer issuer of key.
+   * @param user display name of user account.
+   * @param label the label to identify which account a key is associated with.
+   * @return uri containing the key.
+   */
   String generateUri(OtpKey otpKey, long period, String issuer, String user, String label);
 
+  /**
+   * Creating URI for register in key in user device.
+   *
+   * @param otpKey user key.
+   * @param period period of valid code.
+   * @param issuer issuer of key.
+   * @param user display name of user account.
+   * @return uri containing the key.
+   */
   default String generateUri(OtpKey otpKey, long period, String issuer, String user) {
     return generateUri(otpKey, period, issuer, user, null);
   }
 
+  /**
+   * Creating URI for register in key in user device.
+   *
+   * @param otpKey user key.
+   * @param period period of valid code.
+   * @param label the label to identify which account a key is associated with.
+   * @return uri containing the key.
+   */
   default String generateUri(OtpKey otpKey, long period, String label) {
     return generateUri(otpKey, period, null, null, label);
   }
 
+  /**
+   * Creates an instance of TotpAuth.
+   *
+   * @return the created instance of {@link TotpAuth}.
+   */
   static TotpAuth create() {
     return create(new TotpAuthOptions());
   }
 
+  /**
+   * Creates an instance of TotpAuth.
+   *
+   * @param totpAuthOptions the config.
+   * @return the created instance of {@link TotpAuth}.
+   */
   static TotpAuth create(TotpAuthOptions totpAuthOptions) {
     return new TotpAuthImpl(totpAuthOptions);
   }
