@@ -1,11 +1,11 @@
 = OTP Auth provider
 
-This is an auth provider implementation that authenticates via HOTP (rfc4226).
-Supported Google authenticator with key base32 and qr codes.
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the one time passwords
+to perform authentication.
+The module supports the Google Authenticator, you can choose any convenient library for creating the QR code with key, or simply transfer key in the format base32.
 
-== Getting started
-
-To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
+To use this project, add the following
+dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
 
@@ -25,12 +25,12 @@ To use this project, add the following dependency to the _dependencies_ section 
 compile 'io.vertx:vertx-auth-otp:${maven.version}'
 ----
 
+---
 
-== Instantiation
+== HOTP Authentication
+To create an instance of the Hotp auth provider, use {@link io.vertx.ext.auth.otp.hotp.HotpAuth#create(io.vertx.ext.auth.otp.hotp.HotpAuthOptions)} as follows:
 
-To create an instance of the Otp auth provider, use {@link io.vertx.ext.auth.otp.hotp.HotpAuth#create(io.vertx.ext.auth.otp.hotp.HotpAuthOptions)} as follows:
-
-== Hotp Configuration
+=== HOTP Configuration
 
 The class {@link io.vertx.ext.auth.otp.hotp.HotpAuthOptions} is used to configure the Hotp authentication provider:
 
@@ -40,6 +40,24 @@ The class {@link io.vertx.ext.auth.otp.hotp.HotpAuthOptions} is used to configur
 
 `lookAheadWindow`:: the resynchronization mechanism usage.
 
-== Notes
+=== Notes
 
 Note that when authenticating using this implementation, it assumes `identifier`, `key` and `counter` fields are present in the authentication info
+
+== TOTP Authentication
+
+To create an instance of the Hotp auth provider, use {@link io.vertx.ext.auth.otp.totp.TotpAuth#create(io.vertx.ext.auth.otp.totp.TotpAuthOptions)} as follows
+
+=== TOTP Configuration
+
+The class {@link io.vertx.ext.auth.otp.totp.TotpAuthOptions} is used to configure the Totp authentication provider:
+
+`passwordLength`:: the set otp code length, valid value between 6 and 8, default value equal 6.
+
+`authAttemptsLimit`:: the limit auth attempts.
+
+`period`:: time period in seconds during which the authentication code is valid, default value equal 30.
+
+=== Notes
+
+Note that when authenticating using this implementation, it assumes `identifier`, `key` fields are present in the authentication info
