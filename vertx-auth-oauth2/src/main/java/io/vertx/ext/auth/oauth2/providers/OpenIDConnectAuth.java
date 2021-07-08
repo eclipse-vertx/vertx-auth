@@ -148,7 +148,7 @@ public interface OpenIDConnectAuth {
         if (json.containsKey("grant_types_supported")) {
           flows = json.getJsonArray("grant_types_supported");
           if (!flows.contains(config.getFlow().getGrantType())) {
-            handler.handle(Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows.toString()));
+            handler.handle(Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows));
             return;
           }
         }

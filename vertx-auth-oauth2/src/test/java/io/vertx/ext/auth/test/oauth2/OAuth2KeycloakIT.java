@@ -1,5 +1,6 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
@@ -74,8 +75,6 @@ public class OAuth2KeycloakIT {
         throw new IllegalArgumentException("Invalid proto: " + proto);
     }
 
-    System.out.println(site);
-
     OAuth2Options options = new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("confidential-client")
@@ -105,6 +104,20 @@ public class OAuth2KeycloakIT {
     keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
+      should.assertNotNull(authn.result().attributes().getJsonObject("accessToken"));
+      test.complete();
+    });
+  }
+
+  @Test
+  public void shouldLoginWithUsernamePasswordAndGetIdToken(TestContext should) {
+    final Async test = should.async();
+
+    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger").put("scopes", new JsonArray().add("openid")), authn -> {
+      should.assertTrue(authn.succeeded());
+      should.assertNotNull(authn.result());
+      should.assertNotNull(authn.result().attributes().getJsonObject("accessToken"));
+      should.assertNotNull(authn.result().attributes().getJsonObject("idToken"));
       test.complete();
     });
   }

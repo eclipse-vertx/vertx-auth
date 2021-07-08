@@ -32,7 +32,7 @@ public class TokenCredentials implements Credentials {
   private String token;
   private List<String> scopes;
 
-  protected TokenCredentials() {}
+  public TokenCredentials() {}
 
   public TokenCredentials(String token) {
     this.token = token;

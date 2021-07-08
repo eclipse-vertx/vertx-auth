@@ -18,7 +18,6 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -64,8 +63,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setAuthorizationPath("/oauth2/authorize")
         .setJwkPath("/../common/discovery/keys")
         .setJWTOptions(new JWTOptions()
-          .setNonceAlgorithm("SHA-256")
-          .addAudience(clientId)));
+          .setNonceAlgorithm("SHA-256")));
   }
 
   /**
@@ -91,9 +89,6 @@ public interface AzureADAuth extends OpenIDConnectAuth {
     // azure jwt options defaults
     if (jwtOptions.getNonceAlgorithm() == null) {
       jwtOptions.setNonceAlgorithm("SHA-256");
-    }
-    if (jwtOptions.getAudience() == null || jwtOptions.getAudience().size() == 0) {
-      jwtOptions.addAudience(config.getClientId());
     }
 
     OpenIDConnectAuth.discover(
