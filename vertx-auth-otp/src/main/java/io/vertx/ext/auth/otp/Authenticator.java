@@ -15,6 +15,11 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Authenticator of specific user.
+ *
+ * @author Paulo Lopes
+ */
 @DataObject(generateConverter = true)
 public class Authenticator {
 

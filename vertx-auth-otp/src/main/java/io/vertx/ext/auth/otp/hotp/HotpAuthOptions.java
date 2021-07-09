@@ -15,6 +15,11 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Options configuring HOTP authentication.
+ *
+ * @author Dmitry Novikov
+ */
 @DataObject(generateConverter = true)
 public class HotpAuthOptions {
 

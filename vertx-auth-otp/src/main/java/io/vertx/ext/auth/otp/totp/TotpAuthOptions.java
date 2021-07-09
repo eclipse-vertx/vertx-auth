@@ -15,8 +15,11 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.json.JsonObject;
 
-import java.time.Duration;
-
+/**
+ * Options configuring TOTP authentication.
+ *
+ * @author Dmitry Novikov
+ */
 @DataObject(generateConverter = true)
 public class TotpAuthOptions {
 

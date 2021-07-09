@@ -16,6 +16,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 
+/**
+ * Credentials specific to the {@link TotpAuth} authentication provider.
+ *
+ * @author Dmitry Novikov
+ */
 @DataObject(generateConverter = true, publicConverter = false)
 public class TotpCredentials implements Credentials {
 

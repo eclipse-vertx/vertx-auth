@@ -17,6 +17,11 @@ import org.apache.commons.codec.binary.Base32;
 
 import java.util.Locale;
 
+/**
+ * Key of specific user.
+ *
+ * @author Dmitry Novikov
+ */
 @DataObject
 public class OtpKey {
 
