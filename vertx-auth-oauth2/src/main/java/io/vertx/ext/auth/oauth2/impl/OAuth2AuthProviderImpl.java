@@ -639,7 +639,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     JsonArray target = null;
 
     // validate the audience
-    if (token.containsKey("aud")) {
+    if (jwtOptions.getAudience() != null &&token.containsKey("aud")) {
       try {
         if (token.getValue("aud") instanceof String) {
           target = new JsonArray().add(token.getValue("aud"));
