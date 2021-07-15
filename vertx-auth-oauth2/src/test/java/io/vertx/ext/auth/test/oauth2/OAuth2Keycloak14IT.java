@@ -314,7 +314,8 @@ public class OAuth2Keycloak14IT {
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("frontend")
       .setTenant("vertx-it")
-      .setSite(site + "/auth/realms/{tenant}");
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(new JWTOptions().addAudience("backend"));
 
     options.getHttpClientOptions().setTrustAll(true);
 
@@ -374,7 +375,8 @@ public class OAuth2Keycloak14IT {
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("frontend")
       .setTenant("vertx-it")
-      .setSite(site + "/auth/realms/{tenant}");
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(new JWTOptions().addAudience("backend"));
 
     options.getHttpClientOptions().setTrustAll(true);
 
