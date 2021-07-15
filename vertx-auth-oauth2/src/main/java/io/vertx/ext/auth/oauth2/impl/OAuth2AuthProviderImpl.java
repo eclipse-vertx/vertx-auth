@@ -633,6 +633,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   private JsonObject validToken(JsonObject token, boolean idToken) throws IllegalStateException {
+    try {
+      return validToken2(token, idToken);
+    } catch (IllegalStateException e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  private JsonObject validToken2(JsonObject token, boolean idToken) throws IllegalStateException {
     // the user object is a JWT so we should validate it as mandated by OIDC
     final JWTOptions jwtOptions = config.getJWTOptions();
 
@@ -651,8 +660,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       }
     }
 
+    System.out.println("target = " + target);
     if (target != null && target.size() > 0) {
       if (idToken || jwtOptions.getAudience() == null) {
+        System.out.println("a");
         // https://openid.net/specs/openid-connect-core-1_0.html#  $3.1.3.7.
         // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at the Issuer
         // identified by the iss (issuer) Claim as an audience. The aud (audience) Claim MAY contain an array with more
@@ -662,6 +673,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           throw new IllegalStateException("Invalid JWT audience. expected: " + config.getClientId());
         }
       } else {
+        System.out.println("b");
         final List<String> aud = jwtOptions.getAudience();
         for (String el : aud) {
           if (!target.contains(el)) {
