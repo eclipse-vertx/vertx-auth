@@ -512,10 +512,16 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           }
         }
         // copy basic properties to the attributes
-        copyProperties(json, user.attributes(), true, "sub", "name", "email", "picture");
+        copyProperties(json, user.attributes(), true);
       }
-      // complete
-      handler.handle(userInfo);
+      // final step, verify if the user is not expired
+      // this may happen if the user tokens have been issued for future use for example
+      if (user.expired(config.getJWTOptions().getLeeway())) {
+        handler.handle(Future.failedFuture("Used is expired."));
+      } else {
+        // basic validation passed, the user token is not expired
+        handler.handle(userInfo);
+      }
     });
     return this;
   }
@@ -825,10 +831,18 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private static void copyProperties(JsonObject source, JsonObject target, boolean overwrite, String... keys) {
     if (source != null && target != null) {
-      for (String key : keys) {
-        if (source.containsKey(key)) {
+      if (keys.length == 0) {
+        for (String key : source.fieldNames()) {
           if (!target.containsKey(key) || overwrite) {
             target.put(key, source.getValue(key));
+          }
+        }
+      } else {
+        for (String key : keys) {
+          if (source.containsKey(key)) {
+            if (!target.containsKey(key) || overwrite) {
+              target.put(key, source.getValue(key));
+            }
           }
         }
       }

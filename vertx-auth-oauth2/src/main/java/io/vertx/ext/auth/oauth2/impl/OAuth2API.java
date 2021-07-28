@@ -402,7 +402,7 @@ public class OAuth2API {
     }
 
     if (extraParams != null) {
-      path += "?" + SimpleHttpClient.jsonToQuery(extraParams).toString();
+      path += "?" + SimpleHttpClient.jsonToQuery(extraParams);
     }
 
     headers.put("Authorization", "Bearer " + accessToken);

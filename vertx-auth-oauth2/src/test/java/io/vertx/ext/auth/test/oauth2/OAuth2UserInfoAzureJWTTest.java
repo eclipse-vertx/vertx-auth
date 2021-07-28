@@ -4,6 +4,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -36,7 +37,9 @@ public class OAuth2UserInfoAzureJWTTest extends VertxTestBase {
     .setClientSecret("client-secret")
     .setSite("http://localhost:8080")
     .setUserInfoPath("/oauth/userinfo")
-    .setUserInfoParameters(azureParams);
+    .setUserInfoParameters(azureParams)
+    // these fixtures are very old tokens, we avoid the expiration check by giving an insane leeway
+    .setJWTOptions(new JWTOptions().setLeeway(1_000_000_000));
 
   @Override
   public void setUp() throws Exception {
