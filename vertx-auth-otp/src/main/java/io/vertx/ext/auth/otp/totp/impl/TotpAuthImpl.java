@@ -18,15 +18,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.otp.Authenticator;
+import io.vertx.ext.auth.otp.OtpCredentials;
 import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgorithm;
 import io.vertx.ext.auth.otp.totp.TotpAuth;
 import io.vertx.ext.auth.otp.totp.TotpAuthOptions;
-import io.vertx.ext.auth.otp.totp.TotpCredentials;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.function.Function;
 
@@ -46,13 +48,13 @@ public class TotpAuthImpl implements TotpAuth {
 
   @Override
   public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new TotpCredentials(credentials), resultHandler);
+    authenticate(new OtpCredentials(credentials), resultHandler);
   }
 
   @Override
   public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     try {
-      TotpCredentials authInfo = (TotpCredentials) credentials;
+      OtpCredentials authInfo = (OtpCredentials) credentials;
       authInfo.checkValid(totpAuthOptions);
 
       fetcher.apply(authInfo.getIdentifier())
@@ -82,7 +84,7 @@ public class TotpAuthImpl implements TotpAuth {
               return;
             }
 
-            if (oneTimePassword.equals(authInfo.getCode())) {
+            if (MessageDigest.isEqual(oneTimePassword.getBytes(StandardCharsets.UTF_8), authInfo.getCode().getBytes(StandardCharsets.UTF_8))) {
               updater.apply(authenticator)
                 .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
                 .onSuccess(v -> resultHandler.handle(Future.succeededFuture(createUser(authenticator))));
@@ -123,7 +125,7 @@ public class TotpAuthImpl implements TotpAuth {
       .setIdentifier(id)
       .setKey(otpKey.getKey())
       .setAlgorithm(otpKey.getAlgorithm())
-      .setCounter(0);
+      .setPeriod(totpAuthOptions.getPeriod());
 
     return updater
       .apply(authenticator)
@@ -131,7 +133,7 @@ public class TotpAuthImpl implements TotpAuth {
   }
 
   @Override
-  public String generateUri(OtpKey otpKey, long period, String issuer, String user, String label) {
+  public String generateUri(OtpKey otpKey, String issuer, String user, String label) {
     try {
       if (label == null) {
         if (issuer == null) {
@@ -164,7 +166,7 @@ public class TotpAuthImpl implements TotpAuth {
         sb.append("&digits=").append(totpAuthOptions.getPasswordLength());
       }
       // period is required
-      sb.append("&period=").append(period);
+      sb.append("&period=").append(totpAuthOptions.getPeriod());
 
       return String.format(
         "otpauth://totp/%s?%s",
@@ -181,9 +183,5 @@ public class TotpAuthImpl implements TotpAuth {
       new JsonObject()
         .put("otp", "totp")
         .put("auth_attempts", authenticator.getAuthAttempts()));
-  }
-
-  public TotpAuthOptions getTotpAuthOptions() {
-    return totpAuthOptions;
   }
 }

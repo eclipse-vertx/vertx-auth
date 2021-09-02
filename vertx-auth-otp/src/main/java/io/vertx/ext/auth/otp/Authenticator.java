@@ -28,6 +28,7 @@ public class Authenticator {
   private String algorithm;
 
   private long counter;
+  private long period;
   private Integer authAttempts;
 
   boolean registration;
@@ -75,6 +76,15 @@ public class Authenticator {
 
   public Authenticator setCounter(long counter) {
     this.counter = counter;
+    return this;
+  }
+
+  public long getPeriod() {
+    return period;
+  }
+
+  public Authenticator setPeriod(long period) {
+    this.period = period;
     return this;
   }
 

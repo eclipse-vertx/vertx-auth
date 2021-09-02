@@ -21,12 +21,14 @@ import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.OtpKey;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
-import io.vertx.ext.auth.otp.hotp.HotpCredentials;
+import io.vertx.ext.auth.otp.OtpCredentials;
 import io.vertx.ext.auth.otp.impl.org.openauthentication.otp.OneTimePasswordAlgorithm;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.util.function.Function;
 
 public class HotpAuthImpl implements HotpAuth {
@@ -45,13 +47,13 @@ public class HotpAuthImpl implements HotpAuth {
 
   @Override
   public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new HotpCredentials(credentials), resultHandler);
+    authenticate(new OtpCredentials(credentials), resultHandler);
   }
 
   @Override
   public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     try {
-      HotpCredentials authInfo = (HotpCredentials) credentials;
+      OtpCredentials authInfo = (OtpCredentials) credentials;
       authInfo.checkValid(hotpAuthOptions);
 
       fetcher.apply(authInfo.getIdentifier())
@@ -106,7 +108,7 @@ public class HotpAuthImpl implements HotpAuth {
                   return;
                 }
 
-                if (oneTimePassword.equals(authInfo.getCode())) {
+                if (MessageDigest.isEqual(oneTimePassword.getBytes(StandardCharsets.UTF_8), authInfo.getCode().getBytes(StandardCharsets.UTF_8))) {
                   authenticator.setCounter(counter);
                   updater.apply(authenticator)
                     .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
@@ -143,7 +145,7 @@ public class HotpAuthImpl implements HotpAuth {
       .setIdentifier(id)
       .setKey(otpKey.getKey())
       .setAlgorithm(otpKey.getAlgorithm())
-      .setCounter(0);
+      .setCounter(hotpAuthOptions.getCounter());
 
     return updater
       .apply(authenticator)
@@ -151,7 +153,7 @@ public class HotpAuthImpl implements HotpAuth {
   }
 
   @Override
-  public String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label) {
+  public String generateUri(OtpKey otpKey, String issuer, String user, String label) {
     try {
       if (label == null) {
         if (issuer == null) {
@@ -184,7 +186,7 @@ public class HotpAuthImpl implements HotpAuth {
         sb.append("&digits=").append(hotpAuthOptions.getPasswordLength());
       }
       // counter is required
-      sb.append("&counter=").append(counter);
+      sb.append("&counter=").append(hotpAuthOptions.getCounter());
 
       return String.format(
         "otpauth://hotp/%s?%s",
@@ -202,9 +204,5 @@ public class HotpAuthImpl implements HotpAuth {
         .put("otp", "hotp")
         .put("counter", authenticator.getCounter())
         .put("auth_attempts", authenticator.getAuthAttempts()));
-  }
-
-  public HotpAuthOptions getHotpAuthOptions() {
-    return hotpAuthOptions;
   }
 }

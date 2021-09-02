@@ -9,30 +9,32 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package io.vertx.ext.auth.otp.totp;
+package io.vertx.ext.auth.otp;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.otp.hotp.HotpAuth;
+import io.vertx.ext.auth.otp.totp.TotpAuth;
 
 /**
- * Credentials specific to the {@link TotpAuth} authentication provider.
+ * Credentials for {@link HotpAuth} or {@link TotpAuth} authentication providers.
  *
  * @author Dmitry Novikov
  */
 @DataObject(generateConverter = true, publicConverter = false)
-public class TotpCredentials implements Credentials {
+public class OtpCredentials implements Credentials {
 
   private String identifier;
 
   private String code;
 
-  public TotpCredentials(JsonObject jsonObject) {
-    TotpCredentialsConverter.fromJson(jsonObject, this);
+  public OtpCredentials(JsonObject jsonObject) {
+    OtpCredentialsConverter.fromJson(jsonObject, this);
   }
 
-  public TotpCredentials(String identifier, String code) {
+  public OtpCredentials(String identifier, String code) {
     this.identifier = identifier;
     this.code = code;
   }
@@ -45,35 +47,31 @@ public class TotpCredentials implements Credentials {
     return identifier;
   }
 
-  public TotpCredentials setCode(String code) {
+  public OtpCredentials setCode(String code) {
     this.code = code;
     return this;
   }
 
-  public TotpCredentials setIdentifier(String identifier) {
+  public OtpCredentials setIdentifier(String identifier) {
     this.identifier = identifier;
     return this;
   }
 
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
-    TotpAuthOptions authOptions = (TotpAuthOptions) arg;
-
     if (identifier == null || identifier.length() == 0) {
       throw new CredentialValidationException("identifier cannot null or empty");
     }
 
     if (code == null || code.length() == 0) {
       throw new CredentialValidationException("code cannot null or empty");
-    } else if (authOptions.getPasswordLength() != code.length()) {
-      throw new CredentialValidationException("code length does not match the expected");
     }
   }
 
   @Override
   public JsonObject toJson() {
     JsonObject result = new JsonObject();
-    TotpCredentialsConverter.toJson(this, result);
+    OtpCredentialsConverter.toJson(this, result);
     return result;
   }
 }

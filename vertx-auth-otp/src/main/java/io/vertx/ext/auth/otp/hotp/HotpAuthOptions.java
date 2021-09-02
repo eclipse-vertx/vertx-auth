@@ -29,6 +29,8 @@ public class HotpAuthOptions {
 
   private int lookAheadWindow;
 
+  private long counter;
+
   public HotpAuthOptions(JsonObject jsonObject) {
     HotpAuthOptionsConverter.fromJson(jsonObject, this);
   }
@@ -54,6 +56,10 @@ public class HotpAuthOptions {
     return lookAheadWindow;
   }
 
+  public long getCounter() {
+    return counter;
+  }
+
   public HotpAuthOptions setPasswordLength(int passwordLength) {
     if (passwordLength < 6 || passwordLength > 8) {
       throw new IllegalArgumentException("password length must be between 6 and 8 digits");
@@ -75,6 +81,14 @@ public class HotpAuthOptions {
       throw new IllegalArgumentException("look ahead window must above 0");
     }
     this.lookAheadWindow = lookAheadWindow;
+    return this;
+  }
+
+  public HotpAuthOptions setCounter(long counter) {
+    if (counter < 0) {
+      throw new IllegalArgumentException("Authenticator initial counter must above 0");
+    }
+    this.counter = counter;
     return this;
   }
 

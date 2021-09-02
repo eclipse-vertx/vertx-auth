@@ -21,6 +21,11 @@ public class HotpAuthOptionsConverter {
             obj.setAuthAttemptsLimit(((Number)member.getValue()).intValue());
           }
           break;
+        case "counter":
+          if (member.getValue() instanceof Number) {
+            obj.setCounter(((Number)member.getValue()).longValue());
+          }
+          break;
         case "lookAheadWindow":
           if (member.getValue() instanceof Number) {
             obj.setLookAheadWindow(((Number)member.getValue()).intValue());
@@ -41,6 +46,7 @@ public class HotpAuthOptionsConverter {
 
   public static void toJson(HotpAuthOptions obj, java.util.Map<String, Object> json) {
     json.put("authAttemptsLimit", obj.getAuthAttemptsLimit());
+    json.put("counter", obj.getCounter());
     json.put("lookAheadWindow", obj.getLookAheadWindow());
     json.put("passwordLength", obj.getPasswordLength());
   }

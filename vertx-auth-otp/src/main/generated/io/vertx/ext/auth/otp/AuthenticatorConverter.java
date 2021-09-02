@@ -41,6 +41,11 @@ public class AuthenticatorConverter {
             obj.setKey((String)member.getValue());
           }
           break;
+        case "period":
+          if (member.getValue() instanceof Number) {
+            obj.setPeriod(((Number)member.getValue()).longValue());
+          }
+          break;
       }
     }
   }
@@ -63,5 +68,6 @@ public class AuthenticatorConverter {
     if (obj.getKey() != null) {
       json.put("key", obj.getKey());
     }
+    json.put("period", obj.getPeriod());
   }
 }

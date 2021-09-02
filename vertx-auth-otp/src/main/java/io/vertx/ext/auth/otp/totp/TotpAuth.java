@@ -85,37 +85,34 @@ public interface TotpAuth extends AuthenticationProvider {
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param period period of valid code.
    * @param issuer issuer of key.
    * @param user display name of user account.
    * @param label the label to identify which account a key is associated with.
    * @return uri containing the key.
    */
-  String generateUri(OtpKey otpKey, long period, String issuer, String user, String label);
+  String generateUri(OtpKey otpKey, String issuer, String user, String label);
 
   /**
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param period period of valid code.
    * @param issuer issuer of key.
    * @param user display name of user account.
    * @return uri containing the key.
    */
-  default String generateUri(OtpKey otpKey, long period, String issuer, String user) {
-    return generateUri(otpKey, period, issuer, user, null);
+  default String generateUri(OtpKey otpKey, String issuer, String user) {
+    return generateUri(otpKey, issuer, user, null);
   }
 
   /**
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param period period of valid code.
    * @param label the label to identify which account a key is associated with.
    * @return uri containing the key.
    */
-  default String generateUri(OtpKey otpKey, long period, String label) {
-    return generateUri(otpKey, period, null, null, label);
+  default String generateUri(OtpKey otpKey, String label) {
+    return generateUri(otpKey, null, null, label);
   }
 
   /**

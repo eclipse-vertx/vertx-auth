@@ -85,37 +85,34 @@ public interface HotpAuth extends AuthenticationProvider {
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param counter initial counter value.
    * @param issuer issuer of key.
    * @param user display name of user account.
    * @param label the label to identify which account a key is associated with.
    * @return uri containing the key.
    */
-  String generateUri(OtpKey otpKey, long counter, String issuer, String user, String label);
+  String generateUri(OtpKey otpKey, String issuer, String user, String label);
 
   /**
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param counter initial counter value.
    * @param issuer issuer of key.
    * @param user display name of user account.
    * @return uri containing the key.
    */
-  default String generateUri(OtpKey otpKey, long counter, String issuer, String user) {
-    return generateUri(otpKey, counter, issuer, user, null);
+  default String generateUri(OtpKey otpKey, String issuer, String user) {
+    return generateUri(otpKey, issuer, user, null);
   }
 
   /**
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param counter initial counter value.
    * @param label the label to identify which account a key is associated with.
    * @return uri containing the key.
    */
-  default String generateUri(OtpKey otpKey, long counter, String label) {
-    return generateUri(otpKey, counter, null, null, label);
+  default String generateUri(OtpKey otpKey, String label) {
+    return generateUri(otpKey, null, null, label);
   }
 
   /**

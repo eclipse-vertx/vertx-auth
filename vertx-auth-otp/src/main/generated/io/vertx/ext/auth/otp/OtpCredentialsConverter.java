@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.otp.hotp;
+package io.vertx.ext.auth.otp;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
@@ -7,13 +7,13 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.otp.hotp.HotpCredentials}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.otp.hotp.HotpCredentials} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.otp.OtpCredentials}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.otp.OtpCredentials} original class using Vert.x codegen.
  */
-public class HotpCredentialsConverter {
+public class OtpCredentialsConverter {
 
 
-   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HotpCredentials obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OtpCredentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "code":
@@ -30,11 +30,11 @@ public class HotpCredentialsConverter {
     }
   }
 
-   static void toJson(HotpCredentials obj, JsonObject json) {
+   static void toJson(OtpCredentials obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-   static void toJson(HotpCredentials obj, java.util.Map<String, Object> json) {
+   static void toJson(OtpCredentials obj, java.util.Map<String, Object> json) {
     if (obj.getCode() != null) {
       json.put("code", obj.getCode());
     }
