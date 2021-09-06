@@ -50,9 +50,11 @@ public final class JWE {
       throw new IllegalStateException("Key doesn't contain a pubKey material");
     }
 
-    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-    cipher.update(payload);
-    return cipher.doFinal();
+    synchronized (cipher) {
+      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+      cipher.update(payload);
+      return cipher.doFinal();
+    }
   }
 
   public byte[] decrypt(byte[] payload) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
@@ -61,9 +63,11 @@ public final class JWE {
         throw new IllegalStateException("Key doesn't contain a secKey material");
       }
 
-      cipher.init(Cipher.DECRYPT_MODE, privateKey);
-      cipher.update(payload);
-      return cipher.doFinal();
+      synchronized (cipher) {
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        cipher.update(payload);
+        return cipher.doFinal();
+      }
   }
 
   public String label() {

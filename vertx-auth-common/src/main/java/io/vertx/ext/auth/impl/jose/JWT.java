@@ -69,13 +69,15 @@ public final class JWT {
 
     if (jwk.use() == null || "sig".equals(jwk.use())) {
       List<JWS> current;
-      if (jwk.mac() != null || jwk.publicKey() != null) {
-        current = VERIFY.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
-        addJWK(current, jwk);
-      }
-      if (jwk.mac() != null || jwk.privateKey() != null) {
-        current = SIGN.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
-        addJWK(current, jwk);
+      synchronized (this) {
+        if (jwk.mac() != null || jwk.publicKey() != null) {
+          current = VERIFY.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+          addJWK(current, jwk);
+        }
+        if (jwk.mac() != null || jwk.privateKey() != null) {
+          current = SIGN.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
+          addJWK(current, jwk);
+        }
       }
     } else {
       LOG.warn("JWK skipped: use: sig != " + jwk.use());
