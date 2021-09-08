@@ -76,7 +76,12 @@ public class MetaDataServiceImpl implements MetaDataService {
           }
           // add the root certificate
           certChain.add(options.getRootCertificate("mds"));
-          CertificateHelper.checkValidity(certChain, options.getRootCrls());
+          List<X509CRL> crls = options.getRootCrls();
+          if (crls == null || crls.size() == 0) {
+            // warning: we don't have CRLs loaded
+            LOG.warn("No CRLs loaded for MDS Certificate");
+          }
+          CertificateHelper.checkValidity(certChain, crls);
 
           payload = json.getJsonObject("payload");
 
@@ -96,6 +101,10 @@ public class MetaDataServiceImpl implements MetaDataService {
           if (payload == null) {
             promise.fail("Could not parse TOC");
           } else {
+            if (payload.containsKey("legalHeader")) {
+              LOG.info(payload.getString("legalHeader"));
+            }
+
             JsonArray entries = payload.getJsonArray("entries");
 
             final String e = error;
@@ -127,16 +136,30 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   private Future<Void> addEntry(String error, JsonObject entry) {
     final Promise<Void> promise = vertx.promise();
-    httpClient.fetch(HttpMethod.GET, entry.getString("url"), null, null)
-      .onFailure(promise::fail)
-      .onSuccess(res -> {
-        try {
-          metadata.loadMetadata(new MetaDataEntry(entry, res.body().getBytes(), error));
-          promise.complete();
-        } catch (RuntimeException | NoSuchAlgorithmException e) {
-          promise.fail(e);
-        }
-      });
+    if (entry.containsKey("url")) {
+      // MDSv2
+      httpClient.fetch(HttpMethod.GET, entry.getString("url"), null, null)
+        .onFailure(promise::fail)
+        .onSuccess(res -> {
+          try {
+            metadata.loadMetadata(new MetaDataEntry(entry, res.body().getBytes(), error));
+            promise.complete();
+          } catch (RuntimeException | NoSuchAlgorithmException e) {
+            promise.fail(e);
+          }
+        });
+    } else if (entry.containsKey("metadataStatement") && entry.getJsonObject("metadataStatement").getInteger("schema", 0) == 3) {
+      // likely MDSv3
+      try {
+        metadata.loadMetadata(new MetaDataEntry(entry, entry.getJsonObject("metadataStatement"), error));
+        promise.complete();
+      } catch (RuntimeException | NoSuchAlgorithmException e) {
+        promise.fail(e);
+      }
+    } else {
+      // unknown
+      promise.fail("Invalid metadataStatement (no url or metadataStatement with schema == 3)");
+    }
 
     return promise.future();
   }
