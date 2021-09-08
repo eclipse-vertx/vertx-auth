@@ -106,13 +106,32 @@ public class WebAuthnOptions {
       "1bWeT0vT";
 
   /**
+   * Default FIDO2 MDS ROOT Certificate
+   */
+  @Deprecated
+  String FIDO_MDS_ROOT_CERTIFICATE =
+    "MIICQzCCAcigAwIBAgIORqmxkzowRM99NQZJurcwCgYIKoZIzj0EAwMwUzELMAkG" +
+      "A1UEBhMCVVMxFjAUBgNVBAoTDUZJRE8gQWxsaWFuY2UxHTAbBgNVBAsTFE1ldGFk" +
+      "YXRhIFRPQyBTaWduaW5nMQ0wCwYDVQQDEwRSb290MB4XDTE1MDYxNzAwMDAwMFoX" +
+      "DTQ1MDYxNzAwMDAwMFowUzELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUZJRE8gQWxs" +
+      "aWFuY2UxHTAbBgNVBAsTFE1ldGFkYXRhIFRPQyBTaWduaW5nMQ0wCwYDVQQDEwRS" +
+      "b290MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEFEoo+6jdxg6oUuOloqPjK/nVGyY+" +
+      "AXCFz1i5JR4OPeFJs+my143ai0p34EX4R1Xxm9xGi9n8F+RxLjLNPHtlkB3X4ims" +
+      "rfIx7QcEImx1cMTgu5zUiwxLX1ookVhIRSoso2MwYTAOBgNVHQ8BAf8EBAMCAQYw" +
+      "DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQU0qUfC6f2YshA1Ni9udeO0VS7vEYw" +
+      "HwYDVR0jBBgwFoAU0qUfC6f2YshA1Ni9udeO0VS7vEYwCgYIKoZIzj0EAwMDaQAw" +
+      "ZgIxAKulGbSFkDSZusGjbNkAhAkqTkLWo3GrN5nRBNNk2Q4BlG+AvM5q9wa5WciW" +
+      "DcMdeQIxAMOEzOFsxX9Bo0h4LOFE5y5H8bdPFYW+l5gy1tQiJv+5NUyM2IBB55XU" +
+      "YjdBz56jSA==";
+
+  /**
    * Default FIDO2 MDS3 ROOT Certificate
    *
    * Downloaded from https://valid.r3.roots.globalsign.com/
    *
    * Valid until 18 March 2029
    */
-  String FIDO_MDS_ROOT_CERTIFICATE =
+  String FIDO_MDS3_ROOT_CERTIFICATE =
     "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G" +
       "A1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjMxEzARBgNVBAoTCkdsb2JhbFNp" +
       "Z24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDkwMzE4MTAwMDAwWhcNMjkwMzE4" +
@@ -185,7 +204,7 @@ public class WebAuthnOptions {
     putRootCertificate("android-key", ANDROID_KEYSTORE_ROOT);
     putRootCertificate("android-safetynet", ANDROID_SAFETYNET_ROOT);
     putRootCertificate("apple", APPLE_WEBAUTHN_ROOT_CA);
-    putRootCertificate("mds", FIDO_MDS_ROOT_CERTIFICATE);
+    putRootCertificate("mds", FIDO_MDS3_ROOT_CERTIFICATE);
   }
 
   public RelyingParty getRelyingParty() {
