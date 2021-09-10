@@ -49,6 +49,7 @@ public class OAuth2Options {
   private static final boolean ROTATE_JWKS = true;
 
   private OAuth2FlowType flow;
+  private List<String> supportedGrantTypes;
   private String authorizationPath;
   private String tokenPath;
   private String revocationPath;
@@ -142,6 +143,7 @@ public class OAuth2Options {
     rotateJWKs = other.isRotateJWKs();
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
+    supportedGrantTypes = other.getSupportedGrantTypes();
     // compute paths with variables, at this moment it is only relevant that
     // the paths and site are properly computed
     replaceVariables(false);
@@ -526,6 +528,28 @@ public class OAuth2Options {
     this.rotateJWKs = rotateJWKs;
     return this;
   }
+
+  /**
+   * The provider supported grant types
+   * @return the supported grant types options
+   */
+  public List<String> getSupportedGrantTypes() {
+    return supportedGrantTypes;
+  }
+
+  public OAuth2Options setSupportedGrantTypes(List<String> supportedGrantTypes) {
+    this.supportedGrantTypes = supportedGrantTypes;
+    return this;
+  }
+
+  public OAuth2Options addSupportedGrantType(String supportedGrantType) {
+    if (supportedGrantTypes == null) {
+      supportedGrantTypes = new ArrayList<>();
+    }
+    supportedGrantTypes.add(supportedGrantType);
+    return this;
+  }
+
 
   public void replaceVariables(boolean strict) {
     // strip trailing slashes if present
