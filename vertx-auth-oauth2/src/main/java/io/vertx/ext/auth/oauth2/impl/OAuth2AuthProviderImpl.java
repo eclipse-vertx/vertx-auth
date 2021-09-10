@@ -52,7 +52,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   // avoid caching, as it may swap,
   // old references are still valid though
   private volatile JWT jwt = new JWT();
-  private long updateTimerId = -1;
+  private volatile long updateTimerId = -1;
   private Handler<String> missingKeyHandler;
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
@@ -75,53 +75,74 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
+  public void close() {
+    synchronized (OAuth2AuthProviderImpl.this) {
+      if (updateTimerId != -1) {
+        // cancel any running timer to avoid multiple updates
+        // it is not important if the timer isn't active anymore
+
+        // this could happen if both the user triggers the update and
+        // there's a timer already in progress
+        vertx.cancelTimer(updateTimerId);
+        updateTimerId = -1;
+      }
+      // clear the JWT object reference too
+      jwt = null;
+    }
+  }
+
+  @Override
   public OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
     api.jwkSet(res -> {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
       } else {
-        if (updateTimerId != -1) {
-          // cancel any running timer to avoid multiple updates
-          // it is not important if the timer isn't active anymore
+        // enforce a lock to ensure state isn't corrupted
+        synchronized (OAuth2AuthProviderImpl.this) {
+          if (updateTimerId != -1) {
+            // cancel any running timer to avoid multiple updates
+            // it is not important if the timer isn't active anymore
 
-          // this could happen if both the user triggers the update and
-          // there's a timer already in progress
-          vertx.cancelTimer(updateTimerId);
-        }
-        final JsonObject json = res.result();
-        JWT jwt = new JWT()
-          // set the nonce algorithm
-          .nonceAlgorithm(config.getJWTOptions().getNonceAlgorithm());
-
-        JsonArray keys = json.getJsonArray("keys");
-        for (Object key : keys) {
-          try {
-            jwt.addJWK(new JWK((JsonObject) key));
-          } catch (RuntimeException e) {
-            LOG.warn("Skipped unsupported JWK: " + e.getMessage());
+            // this could happen if both the user triggers the update and
+            // there's a timer already in progress
+            vertx.cancelTimer(updateTimerId);
           }
-        }
-        // swap
-        synchronized (this) {
+          final JsonObject json = res.result();
+          JWT jwt = new JWT()
+            // set the nonce algorithm
+            .nonceAlgorithm(config.getJWTOptions().getNonceAlgorithm());
+
+          JsonArray keys = json.getJsonArray("keys");
+          for (Object key : keys) {
+            try {
+              jwt.addJWK(new JWK((JsonObject) key));
+            } catch (RuntimeException e) {
+              LOG.warn("Skipped unsupported JWK: " + e.getMessage());
+            }
+          }
+          // swap
           this.jwt = jwt;
-        }
-        // compute the next update if the server told us too
-        if (json.containsKey("maxAge")) {
-          // ensure that leeway is never negative
-          int leeway = Math.max(0, config.getJWTOptions().getLeeway());
-          // delay is in ms, while cache max age is sec
-          final long delay = json.getLong("maxAge") * 1000 - leeway;
-          // salesforce (for example) sometimes disables the max-age as setting it to 0
-          // for these cases we just cancel
-          if (delay > 0) {
-            this.updateTimerId = vertx.setPeriodic(delay, t ->
-              jWKSet(autoUpdateRes -> {
-                if (autoUpdateRes.failed()) {
-                  LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
-                }
-              }));
-          } else {
-            updateTimerId = -1;
+
+          if (config.isRotateJWKs()) {
+            // compute the next update if the server told us too
+            if (json.containsKey("maxAge")) {
+              // ensure that leeway is never negative
+              int leeway = Math.max(0, config.getJWTOptions().getLeeway());
+              // delay is in ms, while cache max age is sec
+              final long delay = json.getLong("maxAge") * 1000 - leeway;
+              // salesforce (for example) sometimes disables the max-age as setting it to 0
+              // for these cases we just cancel
+              if (delay > 0) {
+                this.updateTimerId = vertx.setPeriodic(delay, t ->
+                  jWKSet(autoUpdateRes -> {
+                    if (autoUpdateRes.failed()) {
+                      LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
+                    }
+                  }));
+              } else {
+                updateTimerId = -1;
+              }
+            }
           }
         }
         // return

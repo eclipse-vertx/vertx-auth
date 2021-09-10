@@ -33,7 +33,7 @@ import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 public interface OAuth2Auth extends AuthenticationProvider {
 
   /**
-   * Create a OAuth2 auth provider
+   * Create a OAuth2 auth provider.
    *
    * @param vertx the Vertx instance
    * @return the auth provider
@@ -65,6 +65,8 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * To avoid the refresh to happen too late, this means that they keys will be invalid,
    * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
    * positive leeway, it will be used to request the refresh ahead of time.
+   *
+   * Key rotation can be controled by {@link OAuth2Options#setRotateJWKs(boolean)}.
    *
    * @param handler the handler success/failure.
    * @return fluent self.
@@ -371,4 +373,10 @@ public interface OAuth2Auth extends AuthenticationProvider {
   @Fluent
   @Deprecated
   OAuth2Auth rbacHandler(OAuth2RBAC rbac);
+
+  /**
+   * Releases any resources or timers used by this instance. Users are expected to call this method when the provider
+   * isn't needed any more to return the used resources back to the platform.
+   */
+  void close();
 }

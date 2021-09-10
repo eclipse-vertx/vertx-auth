@@ -101,6 +101,11 @@ public class OAuth2OptionsConverter {
             obj.setRevocationPath((String)member.getValue());
           }
           break;
+        case "rotateJWKs":
+          if (member.getValue() instanceof Boolean) {
+            obj.setRotateJWKs((Boolean)member.getValue());
+          }
+          break;
         case "scopeSeparator":
           if (member.getValue() instanceof String) {
             obj.setScopeSeparator((String)member.getValue());
@@ -200,6 +205,7 @@ public class OAuth2OptionsConverter {
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());
     }
+    json.put("rotateJWKs", obj.isRotateJWKs());
     if (obj.getScopeSeparator() != null) {
       json.put("scopeSeparator", obj.getScopeSeparator());
     }

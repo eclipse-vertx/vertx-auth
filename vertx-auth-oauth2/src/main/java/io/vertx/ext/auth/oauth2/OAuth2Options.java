@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
@@ -45,6 +46,7 @@ public class OAuth2Options {
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
+  private static final boolean ROTATE_JWKS = true;
 
   private OAuth2FlowType flow;
   private String authorizationPath;
@@ -61,6 +63,7 @@ public class OAuth2Options {
   private String introspectionPath;
   // JWK path RFC7517
   private String jwkPath;
+  private boolean rotateJWKs;
   // OpenID non standard
   private String tenant;
 
@@ -136,6 +139,7 @@ public class OAuth2Options {
       headers = null;
     }
     jwkPath = other.getJwkPath();
+    rotateJWKs = other.isRotateJWKs();
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
     // compute paths with variables, at this moment it is only relevant that
@@ -151,6 +155,7 @@ public class OAuth2Options {
     revocationPath = REVOCATION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
     jwtOptions = JWT_OPTIONS;
+    rotateJWKs = ROTATE_JWKS;
   }
 
   /**
@@ -505,6 +510,20 @@ public class OAuth2Options {
    */
   public OAuth2Options setTenant(String tenant) {
     this.tenant = tenant;
+    return this;
+  }
+
+  public boolean isRotateJWKs() {
+    return rotateJWKs;
+  }
+
+  /**
+   * Enable/Disable the JWKs rotation.
+   * @param rotateJWKs {@code true} to rotate keys as described in {@link OAuth2Auth#jWKSet(Handler)}.
+   * @return self
+   */
+  public OAuth2Options setRotateJWKs(boolean rotateJWKs) {
+    this.rotateJWKs = rotateJWKs;
     return this;
   }
 

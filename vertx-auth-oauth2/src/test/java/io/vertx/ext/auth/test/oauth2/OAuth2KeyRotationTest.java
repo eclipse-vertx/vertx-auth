@@ -166,4 +166,21 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
     });
     await();
   }
+
+  @Test
+  public void testCloseNoMoreRefresh() {
+    requestHandler = req -> {
+        fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
+    };
+
+    oauth2.jWKSet(res -> {
+      if (res.failed()) {
+        fail(res.cause().getMessage());
+      } else {
+        oauth2.close();
+        vertx.setTimer(5500L, v -> testComplete());
+      }
+    });
+    await();
+  }
 }
