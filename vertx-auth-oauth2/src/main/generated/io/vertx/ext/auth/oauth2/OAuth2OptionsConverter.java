@@ -116,6 +116,16 @@ public class OAuth2OptionsConverter {
             obj.setSite((String)member.getValue());
           }
           break;
+        case "supportedGrantTypes":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setSupportedGrantTypes(list);
+          }
+          break;
         case "tenant":
           if (member.getValue() instanceof String) {
             obj.setTenant((String)member.getValue());
@@ -211,6 +221,11 @@ public class OAuth2OptionsConverter {
     }
     if (obj.getSite() != null) {
       json.put("site", obj.getSite());
+    }
+    if (obj.getSupportedGrantTypes() != null) {
+      JsonArray array = new JsonArray();
+      obj.getSupportedGrantTypes().forEach(item -> array.add(item));
+      json.put("supportedGrantTypes", array);
     }
     if (obj.getTenant() != null) {
       json.put("tenant", obj.getTenant());
