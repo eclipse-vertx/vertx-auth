@@ -113,4 +113,51 @@ public class UserTest {
     JsonArray groups = user.get("groups");
     assertEquals(4, groups.size());
   }
+
+  @Test
+  public void testMerge() {
+    User userA, userB;
+
+    userA = User.create(new JsonObject().put("access_token", "A"), new JsonObject().put("roles", new JsonArray().add("read")));
+    userB = User.create(new JsonObject().put("access_token", "B"), new JsonObject().put("roles", new JsonArray().add("write")));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals("B", userA.principal().getString("access_token"));
+    assertEquals(new JsonArray().add("read").add("write"), userA.attributes().getJsonArray("roles"));
+
+    // same can be said if both values are plain strings
+
+    userA = User.create(new JsonObject().put("access_token", "A"), new JsonObject().put("roles", "read"));
+    userB = User.create(new JsonObject().put("access_token", "B"), new JsonObject().put("roles", "write"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals("B", userA.principal().getString("access_token"));
+    assertEquals(new JsonArray().add("read").add("write"), userA.attributes().getJsonArray("roles"));
+
+    // or 1st is array already
+
+    userA = User.create(new JsonObject().put("access_token", "A"), new JsonObject().put("roles", new JsonArray().add("read")));
+    userB = User.create(new JsonObject().put("access_token", "B"), new JsonObject().put("roles", "write"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals("B", userA.principal().getString("access_token"));
+    assertEquals(new JsonArray().add("read").add("write"), userA.attributes().getJsonArray("roles"));
+
+    // or 2nd is array already
+
+    userA = User.create(new JsonObject().put("access_token", "A"), new JsonObject().put("roles", "read"));
+    userB = User.create(new JsonObject().put("access_token", "B"), new JsonObject().put("roles", new JsonArray().add("write")));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals("B", userA.principal().getString("access_token"));
+    assertEquals(new JsonArray().add("read").add("write"), userA.attributes().getJsonArray("roles"));
+  }
 }

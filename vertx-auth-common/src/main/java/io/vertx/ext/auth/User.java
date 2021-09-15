@@ -334,4 +334,44 @@ public interface User {
    */
   @Deprecated
   void setAuthProvider(AuthProvider authProvider);
+
+  /**
+   * Merge the principal and attributes of a second user into this object properties.
+   *
+   * It is important to notice that the principal merges by replacing existing keys with the new values, while the
+   * attributes (as they represent decoded data) are accumulated at the root level.
+   *
+   * This means that given:
+   *
+   * <pre>{@code
+   * userA = {
+   *   attributes: {
+   *     roles: [ 'read' ]
+   *   }
+   * }
+   *
+   * userB = {
+   *   attributes: {
+   *     roles: [ 'write' ]
+   *   }
+   * }
+   * }</pre>
+   *
+   * When performing a merge of {@code userA} with {@code userB}, you will get:
+   *
+   * <pre>{@code
+   * userA.merge(userB);
+   * // results in
+   * {
+   *   attributes: {
+   *     roles: [ 'read', 'write' ]
+   *   }
+   * }
+   * }</pre>
+   *
+   * @param other the other user to merge
+   * @return fluent self
+   */
+  @Fluent
+  User merge(User other);
 }

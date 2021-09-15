@@ -83,7 +83,8 @@ public class ChainAuthImpl implements ChainAuth {
           resultHandler.handle(res);
         } else {
           // if ALL then a success check the next one
-          iterate(idx + 1, authInfo, resultHandler, previousUser == null ? res.result() : User.create(previousUser.principal().mergeIn(res.result().principal())));
+          User result = res.result();
+          iterate(idx + 1, authInfo, resultHandler, previousUser == null ? result : previousUser.merge(result));
         }
       } else {
         // try again with next provider

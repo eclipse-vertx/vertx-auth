@@ -167,17 +167,21 @@ public class ChainAuthTest {
 
     auth.add((authInfo, res) -> {
       // always OK
-      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 1))));
+      res.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attributeOne", "one"))));
     });
 
     auth.add((authInfo, res) -> {
       // always OK
-      res.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+      res.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attributeTwo", "two"))));
     });
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
-        should.assertEquals(2, res.result().principal().getInteger("provider").intValue());
+        User result = res.result();
+        should.assertNotNull(result);
+        should.assertEquals(2, res.result().principal().getInteger("provider"));
+        should.assertEquals("one",res.result().attributes().getString("attributeOne"));
+        should.assertEquals("two",res.result().attributes().getString("attributeTwo"));
         test.complete();
       } else {
         should.fail();
@@ -187,5 +191,33 @@ public class ChainAuthTest {
 
   private User createUser(final JsonObject principal) {
     return User.create(principal);
+  }
+
+  @Test
+  public void matchAllMergeSameKeyTest(TestContext should) {
+    final Async test = should.async();
+    ChainAuth auth = ChainAuth.all();
+
+    auth.add((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attribute", "one"))));
+    });
+
+    auth.add((authInfo, res) -> {
+      // always OK
+      res.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two"))));
+    });
+
+    auth.authenticate(new JsonObject(), res -> {
+      if (res.succeeded()) {
+        User result = res.result();
+        should.assertNotNull(result);
+        should.assertEquals(2, res.result().principal().getInteger("provider"));
+        should.assertEquals("[\"one\",\"two\"]",res.result().attributes().getValue("attribute").toString());
+        test.complete();
+      } else {
+        should.fail();
+      }
+    });
   }
 }
