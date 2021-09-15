@@ -16,6 +16,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.impl.ClusterSerializable;
 import io.vertx.ext.auth.AuthProvider;
@@ -104,6 +105,51 @@ public class UserImpl implements User, ClusterSerializable {
   @Override
   public void setAuthProvider(AuthProvider authProvider) {
     // do nothing for now
+  }
+
+  @Override
+  public User merge(User other) {
+    if (other == null) {
+      return this;
+    }
+
+    principal()
+      // merge in the rhs
+      .mergeIn(other.principal());
+
+    JsonObject attrs = attributes();
+    JsonObject otherAttrs = other.attributes();
+
+    if (attrs == null) {
+      if (otherAttrs != null) {
+        // do not notify the state of the previous user
+        attributes = otherAttrs.copy();
+      }
+    } else {
+      if (otherAttrs != null) {
+        for (String key : otherAttrs.fieldNames()) {
+          Object lhsValue = attrs.getValue(key);
+          Object rhsValue = otherAttrs.getValue(key);
+          // accumulate
+          if (lhsValue == null) {
+            attrs.put(key, rhsValue instanceof JsonArray ? new JsonArray().add(rhsValue) : rhsValue);
+          } else if (lhsValue instanceof JsonArray) {
+            if (rhsValue instanceof JsonArray) {
+              ((JsonArray) lhsValue).addAll((JsonArray) rhsValue);
+            } else {
+              ((JsonArray) lhsValue).add(rhsValue);
+            }
+          } else {
+            if (rhsValue instanceof JsonArray) {
+              attrs.put(key, new JsonArray().add(lhsValue).addAll((JsonArray) rhsValue));
+            } else {
+              attrs.put(key, new JsonArray().add(lhsValue).add(rhsValue));
+            }
+          }
+        }
+      }
+    }
+    return this;
   }
 
   @Override
