@@ -25,6 +25,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
+import io.vertx.ext.auth.impl.http.SimpleHttpResponse;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -73,7 +74,7 @@ public class OAuth2API {
           return;
         }
 
-        final OAuth2Response reply = res.result();
+        final SimpleHttpResponse reply = res.result();
 
         if (reply.body() == null || reply.body().length() == 0) {
           handler.handle(Future.failedFuture("No Body"));
@@ -215,7 +216,7 @@ public class OAuth2API {
           return;
         }
 
-        final OAuth2Response reply = res.result();
+        final SimpleHttpResponse reply = res.result();
 
         if (reply.body() == null || reply.body().length() == 0) {
           handler.handle(Future.failedFuture("No Body"));
@@ -292,7 +293,7 @@ public class OAuth2API {
           return;
         }
 
-        final OAuth2Response reply = res.result();
+        final SimpleHttpResponse reply = res.result();
 
         if (reply.body() == null || reply.body().length() == 0) {
           handler.handle(Future.failedFuture("No Body"));
@@ -375,7 +376,7 @@ public class OAuth2API {
           return;
         }
 
-        final OAuth2Response reply = res.result();
+        final SimpleHttpResponse reply = res.result();
 
         if (reply.body() == null) {
           handler.handle(Future.failedFuture("No Body"));
@@ -420,7 +421,7 @@ public class OAuth2API {
           return;
         }
 
-        final OAuth2Response reply = fetch.result();
+        final SimpleHttpResponse reply = fetch.result();
         // userInfo is expected to be an object
         JsonObject userInfo;
 
@@ -539,7 +540,7 @@ public class OAuth2API {
     return description;
   }
 
-  public void fetch(HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<OAuth2Response>> callback) {
+  public void fetch(HttpMethod method, String path, JsonObject headers, Buffer payload, Handler<AsyncResult<SimpleHttpResponse>> callback) {
 
     if (path == null || path.length() == 0) {
       // and this can happen as it is a config option that is dependent on the provider
@@ -579,7 +580,7 @@ public class OAuth2API {
     makeRequest(options, payload, callback);
   }
 
-  private void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<OAuth2Response>> callback) {
+  private void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<SimpleHttpResponse>> callback) {
     client.request(options, request -> {
       if (request.failed()) {
         callback.handle(Future.failedFuture(request.cause()));
@@ -599,7 +600,7 @@ public class OAuth2API {
         // read the body regardless
         res.body(body -> {
           if (body.succeeded()) {
-            final OAuth2Response oauth2res = new OAuth2Response(res.statusCode(), res.headers(), body.result());
+            final SimpleHttpResponse oauth2res = new SimpleHttpResponse(res.statusCode(), res.headers(), body.result());
             if (res.statusCode() < 200 || res.statusCode() >= 300) {
               if (oauth2res.body() == null || oauth2res.body().length() == 0) {
                 callback.handle(Future.failedFuture(res.statusMessage()));
@@ -640,7 +641,7 @@ public class OAuth2API {
     });
   }
 
-  public static void processNonStandardHeaders(JsonObject json, OAuth2Response reply, String sep) {
+  public static void processNonStandardHeaders(JsonObject json, SimpleHttpResponse reply, String sep) {
     // inspect the response headers for the non-standard:
     // X-OAuth-Scopes and X-Accepted-OAuth-Scopes
     final String xOAuthScopes = reply.getHeader("X-OAuth-Scopes");

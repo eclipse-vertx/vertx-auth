@@ -290,16 +290,10 @@ public class AuthOAuth2Examples {
     }
   }
 
-  public void example20(AccessToken user) {
-    user.logout(res -> {
-      if (res.succeeded()) {
-        // the logout call succeeded
-      } else {
-        // the user might not have been logged out
-        // to know why:
-        System.err.println(res.cause());
-      }
-    });
+  public void example20(OAuth2Auth oauth2, User user) {
+    String logoutUrl = oauth2.endSessionURL(user);
+    // redirect the user to the url computed in "logoutUrl"
+    // ...
   }
 
   public void example21(User user) {

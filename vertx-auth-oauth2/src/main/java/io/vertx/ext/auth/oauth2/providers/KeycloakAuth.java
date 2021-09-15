@@ -23,7 +23,6 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.rbac.KeycloakRBAC;
 
 /**
  * Simplified factory to create an {@link OAuth2Auth} for Keycloak.
@@ -109,8 +108,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
     }
 
     return OAuth2Auth
-      .create(vertx, options)
-      .rbacHandler(KeycloakRBAC.create(options));
+      .create(vertx, options);
   }
 
   /**
@@ -126,14 +124,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    final OAuth2Options options = new OAuth2Options(config);
-    OpenIDConnectAuth.discover(vertx, options, discover -> {
-      // apply the Keycloak RBAC
-      if (discover.succeeded()) {
-        discover.result().rbacHandler(KeycloakRBAC.create(options));
-      }
-      handler.handle(discover);
-    });
+    OpenIDConnectAuth.discover(vertx, new OAuth2Options(config), handler);
   }
 
   /**

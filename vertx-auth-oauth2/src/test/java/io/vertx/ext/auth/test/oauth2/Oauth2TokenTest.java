@@ -1,27 +1,11 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
-import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
+import io.vertx.ext.auth.User;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 public class Oauth2TokenTest extends VertxTestBase {
-
-  final static JsonObject keycloakConfig = new JsonObject(
-    "{\n" +
-      "  \"realm\": \"master\",\n" +
-      "  \"auth-server-url\": \"http://localhost:9000/auth\",\n" +
-      "  \"ssl-required\": \"external\",\n" +
-      "  \"resource\": \"frontend\",\n" +
-      "  \"credentials\": {\n" +
-      "    \"secret\": \"2fbf5e18-b923-4a83-9657-b4ebd5317f60\"\n" +
-      "  }\n" +
-      "}"
-  );
 
   final static JsonObject keycloakToken = new JsonObject(
     "{\n" +
@@ -35,24 +19,18 @@ public class Oauth2TokenTest extends VertxTestBase {
       "}"
   );
 
-  private OAuth2Auth oauth2;
-
   @Test
   public void keycloakTest() throws Exception {
-    super.setUp();
-    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, keycloakConfig);
+    User token = User.create(keycloakToken);
 
-    AccessToken token = new AccessTokenImpl(keycloakToken, oauth2);
-
-    assertNotNull(token.opaqueAccessToken());
-    assertNotNull(token.opaqueRefreshToken());
-    assertNull(token.accessToken());
+    assertNotNull(token.get("access_token"));
+    assertNotNull(token.get("refresh_token"));
+    assertNull(token.get("accessToken"));
   }
 
   @Test
   public void testNullScope() throws Exception {
     super.setUp();
-    oauth2 = KeycloakAuth.create(vertx, OAuth2FlowType.AUTH_CODE, keycloakConfig);
 
     JsonObject json = new JsonObject(
       "{\n" +
@@ -65,7 +43,7 @@ public class Oauth2TokenTest extends VertxTestBase {
     );
 
     try {
-      AccessToken token = new AccessTokenImpl(json, oauth2);
+      User token = User.create(json);
     } catch (RuntimeException e) {
       fail();
     }
