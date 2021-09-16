@@ -14,78 +14,131 @@
   ~
   ~  You may elect to redistribute this code under either of these licenses.
   --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-  <modelVersion>4.0.0</modelVersion>
-
-  <packaging>pom</packaging>
-
-  <modules>
-    <module>vertx-auth-common</module>
-    <module>vertx-auth-shiro</module>
-    <module>vertx-auth-jdbc</module>
-    <module>vertx-auth-mongo</module>
-    <module>vertx-auth-jwt</module>
-    <module>vertx-auth-ldap</module>
-    <module>vertx-auth-oauth2</module>
-    <module>vertx-auth-htdigest</module>
-    <module>vertx-auth-htpasswd</module>
-    <module>vertx-auth-webauthn</module>
-    <module>vertx-auth-properties</module>
-    <module>vertx-auth-sql-client</module>
-  </modules>
-
-  <parent>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-ext-parent</artifactId>
-    <version>38</version>
-  </parent>
-
-  <artifactId>vertx-auth</artifactId>
-  <version>4.1.4-SNAPSHOT</version>
-
-  <name>Vert.x Auth</name>
-
-  <properties>
-    <stack.version>4.1.4-SNAPSHOT</stack.version>
-    <doc.skip>true</doc.skip>
-    <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
+      
+    <modelVersion>4.0.0</modelVersion>
+      
+    <packaging>pom</packaging>
+      
+    <modules>
+            
+        <module>vertx-auth-common</module>
+            
+        <module>vertx-auth-shiro</module>
+            
+        <module>vertx-auth-jdbc</module>
+            
+        <module>vertx-auth-mongo</module>
+            
+        <module>vertx-auth-jwt</module>
+            
+        <module>vertx-auth-ldap</module>
+            
+        <module>vertx-auth-oauth2</module>
+            
+        <module>vertx-auth-htdigest</module>
+            
+        <module>vertx-auth-htpasswd</module>
+            
+        <module>vertx-auth-webauthn</module>
+            
+        <module>vertx-auth-properties</module>
+            
+        <module>vertx-auth-sql-client</module>
+          
+    </modules>
+      
+    <parent>
+            
         <groupId>io.vertx</groupId>
-        <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+            
+        <artifactId>vertx-ext-parent</artifactId>
+            
+        <version>38</version>
+          
+    </parent>
+      
+    <artifactId>vertx-auth</artifactId>
+      
+    <version>4.1.4</version>
+      
+    <name>Vert.x Auth</name>
+      
+    <properties>
+            
+        <stack.version>4.1.4</stack.version>
+            
+        <doc.skip>true</doc.skip>
+            
+        <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+          
+    </properties>
+      
+    <dependencyManagement>
+            
+        <dependencies>
+                  
+            <dependency>
+                        
+                <groupId>io.vertx</groupId>
+                        
+                <artifactId>vertx-dependencies</artifactId>
+                        
+                <version>${stack.version}</version>
+                        
+                <type>pom</type>
+                        
+                <scope>import</scope>
+                      
+            </dependency>
+                
+        </dependencies>
+          
+    </dependencyManagement>
+      
+    <dependencies>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-codegen</artifactId>
+                  
+            <scope>provided</scope>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-docgen</artifactId>
+                  
+            <scope>provided</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>junit</groupId>
+                  
+            <artifactId>junit</artifactId>
+                  
+            <scope>test</scope>
+                  
+            <version>4.13.1</version>
+                
+        </dependency>
+          
     </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-docgen</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-      <version>4.13.1</version>
-    </dependency>
-  </dependencies>
-
+    
 </project>
