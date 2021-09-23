@@ -219,7 +219,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
     user.put(authenticationOptions.getUsernameField(), username);
     user.put(authenticationOptions.getPasswordField(), hashedPassword);
 
-    Promise promise = Promise.promise();
+    Promise<String> promise = Promise.promise();
     getMongoClient().save(authenticationOptions.getCollectionName(), user, promise);
     return promise.future();
   }
