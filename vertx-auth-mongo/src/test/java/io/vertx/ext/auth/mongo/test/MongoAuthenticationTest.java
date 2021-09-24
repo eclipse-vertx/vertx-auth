@@ -18,6 +18,7 @@ package io.vertx.ext.auth.mongo.test;
 
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.mongo.MongoAuthentication;
 import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
@@ -28,6 +29,7 @@ import org.junit.runners.model.InitializationError;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Testing MongoAuth with no encryption for the user password
@@ -38,7 +40,6 @@ import java.util.concurrent.CountDownLatch;
 public class MongoAuthenticationTest extends MongoBaseTest {
   private static final Logger log = LoggerFactory.getLogger(MongoAuthenticationTest.class);
 
-  private MongoAuthentication authenticationProvider;
   protected MongoAuthenticationOptions authenticationOptions = new MongoAuthenticationOptions().setCollectionName(createCollectionName(MongoAuthentication.DEFAULT_COLLECTION_NAME));
 
   @Override
@@ -69,15 +70,15 @@ public class MongoAuthenticationTest extends MongoBaseTest {
   }
 
   protected MongoAuthentication getAuthenticationProvider() {
-    if (authenticationProvider == null) {
+    return getAuthenticationProvider(authenticationOptions);
+  }
 
+  protected MongoAuthentication getAuthenticationProvider(MongoAuthenticationOptions options) {
       try {
-        authenticationProvider = MongoAuthentication.create(getMongoClient(), authenticationOptions);
+        return MongoAuthentication.create(getMongoClient(), options);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-    }
-    return authenticationProvider;
   }
 
   @Test
@@ -108,6 +109,25 @@ public class MongoAuthenticationTest extends MongoBaseTest {
       testComplete();
     }));
     await();
+  }
+
+  @Test
+  public void testAuthenticateUsesCustomPropertyNames() {
+    MongoAuthenticationOptions options = new MongoAuthenticationOptions()
+        .setCollectionName(createCollectionName(MongoAuthentication.DEFAULT_COLLECTION_NAME))
+        .setUsernameCredentialField("login")
+        .setPasswordCredentialField("pwd");
+    JsonObject credentials = new JsonObject()
+        .put("login", "tim")
+        .put("pwd", "sausages");
+    getAuthenticationProvider(options).authenticate(credentials)
+      .onSuccess(user -> {
+        log.info("authenticated user: " + user);
+        assertNotNull(user);
+        testComplete();
+      })
+      .onFailure(this::fail);
+    await(5, TimeUnit.SECONDS);
   }
 
   /*
