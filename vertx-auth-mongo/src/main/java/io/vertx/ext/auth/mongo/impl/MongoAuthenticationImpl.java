@@ -76,7 +76,11 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
 
   @Override
   public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
+    authenticate(
+        new UsernamePasswordCredentials(
+            credentials.getString(options.getUsernameCredentialField()),
+            credentials.getString(options.getPasswordCredentialField())),
+        resultHandler);
   }
 
   @Override
@@ -142,7 +146,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
     case 1: {
       JsonObject json = resultList.result().get(0);
       User user = createUser(json);
-      if (examinePassword(user, json.getString(options.getPasswordCredentialField()), authToken.password))
+      if (examinePassword(user, json.getString(options.getPasswordField()), authToken.password))
         return user;
       else {
         String message = "Invalid username/password [" + authToken.username + "]";
