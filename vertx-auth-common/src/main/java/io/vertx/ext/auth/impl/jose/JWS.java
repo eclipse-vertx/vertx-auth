@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
+import io.vertx.codegen.annotations.Nullable;
+
 import javax.crypto.Mac;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -175,7 +177,7 @@ public final class JWS {
     return jwk;
   }
 
-  private static Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  private static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     Signature sig;
 
     switch (alg) {
@@ -243,6 +245,10 @@ public final class JWS {
     }
 
     Signature sig = getSignature(alg);
+
+    if (sig == null) {
+      throw new SignatureException("Cannot get a signature for: " + alg);
+    }
 
     sig.initVerify(certificate);
     sig.update(data);

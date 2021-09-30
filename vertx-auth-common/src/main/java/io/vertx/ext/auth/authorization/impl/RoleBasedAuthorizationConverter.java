@@ -14,6 +14,7 @@ package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 
@@ -36,7 +37,7 @@ public class RoleBasedAuthorizationConverter {
     return result;
   }
 
-  public static RoleBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static @Nullable RoleBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_ROLE_BASED_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

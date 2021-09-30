@@ -97,6 +97,11 @@ public interface OpenIDConnectAuth {
 
         final JsonObject json = response.jsonObject();
 
+        if (json == null) {
+          handler.handle(Future.failedFuture("Cannot handle null JSON"));
+          return;
+        }
+
         // some providers return errors as JSON too
         if (json.containsKey("error")) {
           // attempt to handle the error as a string

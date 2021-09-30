@@ -23,8 +23,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
-import java.security.cert.CertificateException;
-
 /**
  * Factory interface for creating FIDO2 MetaDataService.
  *

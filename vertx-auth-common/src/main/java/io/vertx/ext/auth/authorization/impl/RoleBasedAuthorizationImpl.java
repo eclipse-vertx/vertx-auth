@@ -21,7 +21,7 @@ import io.vertx.ext.auth.User;
 
 public class RoleBasedAuthorizationImpl implements RoleBasedAuthorization {
 
-  private String role;
+  private final String role;
   private VariableAwareExpression resource;
 
   public RoleBasedAuthorizationImpl(String role) {

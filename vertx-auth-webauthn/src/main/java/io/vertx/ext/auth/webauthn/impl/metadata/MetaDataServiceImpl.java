@@ -3,6 +3,7 @@ package io.vertx.ext.auth.webauthn.impl.metadata;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.impl.VertxInternal;
@@ -59,9 +60,16 @@ public class MetaDataServiceImpl implements MetaDataService {
         JsonObject payload;
         String error = null;
 
+        Buffer body = res.body();
+
+        if (body == null) {
+          promise.fail("null JWT");
+          return;
+        }
+
         try {
           // verify jwt
-          JsonObject json = jwt.decode(res.body().toString(), true);
+          JsonObject json = jwt.decode(body.toString(), true);
           // verify cert chain
           JsonArray chain = json.getJsonObject("header").getJsonArray("x5c");
           List<X509Certificate> certChain = new ArrayList<>();
@@ -90,7 +98,7 @@ public class MetaDataServiceImpl implements MetaDataService {
           // decode it anyway but don't trust any of it's entries
           try {
             error = e.getMessage();
-            payload = JWT.parse(res.body().toString()).getJsonObject("payload");
+            payload = JWT.parse(body.toString()).getJsonObject("payload");
           } catch (RuntimeException re) {
             promise.fail(re);
             return;
@@ -141,8 +149,15 @@ public class MetaDataServiceImpl implements MetaDataService {
       httpClient.fetch(HttpMethod.GET, entry.getString("url"), null, null)
         .onFailure(promise::fail)
         .onSuccess(res -> {
+          Buffer body = res.body();
+
+          if (body == null) {
+            promise.fail("null JWT");
+            return;
+          }
+
           try {
-            metadata.loadMetadata(new MetaDataEntry(entry, res.body().getBytes(), error));
+            metadata.loadMetadata(new MetaDataEntry(entry, body.getBytes(), error));
             promise.complete();
           } catch (RuntimeException | NoSuchAlgorithmException e) {
             promise.fail(e);
@@ -153,7 +168,7 @@ public class MetaDataServiceImpl implements MetaDataService {
       try {
         metadata.loadMetadata(new MetaDataEntry(entry, entry.getJsonObject("metadataStatement"), error));
         promise.complete();
-      } catch (RuntimeException | NoSuchAlgorithmException e) {
+      } catch (RuntimeException e) {
         promise.fail(e);
       }
     } else {

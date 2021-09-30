@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.jwt.impl;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -242,7 +243,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
     }
   }
 
-  private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
+  private static @Nullable JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
     String[] keys = permissionsClaimKey.split("/");
     JsonObject obj = null;
     for (int i = 0; i < keys.length; i++) {

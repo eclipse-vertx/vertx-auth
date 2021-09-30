@@ -17,7 +17,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.Authorization;
@@ -38,9 +37,9 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   private final static Logger logger = Logger.getLogger(PropertyFileAuthentication.class.getName());
 
   private static class User {
-    String name;
+    final String name;
     String password;
-    Map<String, Role> roles;
+    final Map<String, Role> roles;
 
     private User(String name) {
       this.name = Objects.requireNonNull(name);
@@ -54,8 +53,8 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   private static class Role {
-    String name;
-    Set<String> permissions;
+    final String name;
+    final Set<String> permissions;
 
     private Role(String name) {
       this.name = Objects.requireNonNull(name);

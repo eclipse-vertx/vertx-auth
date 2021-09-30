@@ -67,6 +67,7 @@ public class KeyStoreOptions {
     path = other.getPath();
     value = other.getValue();
     passwordProtection = other.getPasswordProtection();
+    provider = other.getProvider();
   }
 
   /**

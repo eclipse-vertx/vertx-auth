@@ -58,7 +58,7 @@ public class NotAuthorizationImpl implements NotAuthorization {
 
   @Override
   public boolean verify(Authorization authorization) {
-    return this.equals(authorization) ? true : false;
+    return this.equals(authorization);
   }
 
 }

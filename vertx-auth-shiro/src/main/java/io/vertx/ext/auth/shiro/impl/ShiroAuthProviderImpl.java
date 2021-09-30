@@ -19,7 +19,6 @@ package io.vertx.ext.auth.shiro.impl;
 import java.util.Objects;
 
 import io.vertx.core.Future;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import org.apache.shiro.SecurityUtils;
@@ -48,9 +47,9 @@ import io.vertx.ext.auth.shiro.ShiroAuthOptions;
  */
 public class ShiroAuthProviderImpl implements ShiroAuth {
 
-  private Vertx vertx;
-  private org.apache.shiro.mgt.SecurityManager securityManager;
-  private String realmName;
+  private final Vertx vertx;
+  private final org.apache.shiro.mgt.SecurityManager securityManager;
+  private final String realmName;
 
   public static ShiroAuth create(Vertx vertx, ShiroAuthOptions options) {
     Realm realm;

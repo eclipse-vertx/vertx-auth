@@ -70,7 +70,7 @@ public class HotpAuthImpl implements HotpAuth {
               .setKey(key)
               .setAlgorithm(algorithm);
 
-            counter = ++counter;
+            ++counter;
             Integer authAttempts = authenticator.getAuthAttempts();
             authAttempts = authAttempts != null ? ++authAttempts : 1;
             authenticator.setAuthAttempts(authAttempts);
@@ -99,7 +99,7 @@ public class HotpAuthImpl implements HotpAuth {
               return;
             } else if (hotpAuthOptions.isUsingResynchronization()) {
               for (int i = 0; i < hotpAuthOptions.getLookAheadWindow(); i++) {
-                counter = ++counter;
+                ++counter;
 
                 try {
                   oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);

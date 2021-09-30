@@ -26,7 +26,6 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
@@ -53,15 +52,15 @@ public class MongoAuthImpl implements MongoAuth {
   final static String PROPERTY_FIELD_PASSWORD = "__field-password__";
   private static final Logger log = LoggerFactory.getLogger(MongoAuthImpl.class);
   private static final String PROVIDER_ID = "mongo-authentication";
-  private MongoClient mongoClient;
+  private final MongoClient mongoClient;
   private String saltField = DEFAULT_SALT_FIELD;
 
-  private MongoAuthentication mongoAuthentication;
-  private MongoAuthenticationOptions mongoAuthenticationOptions;
-  private MongoAuthorization mongoAuthorization;
-  private MongoAuthorizationOptions mongoAuthorizationOptions;
+  private final MongoAuthentication mongoAuthentication;
+  private final MongoAuthenticationOptions mongoAuthenticationOptions;
+  private final MongoAuthorization mongoAuthorization;
+  private final MongoAuthorizationOptions mongoAuthorizationOptions;
 
-  private JsonObject config;
+  private final JsonObject config;
 
   private HashStrategy hashStrategy;
 

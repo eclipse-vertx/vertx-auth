@@ -14,6 +14,7 @@ package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 
@@ -36,7 +37,7 @@ public class PermissionBasedAuthorizationConverter {
     return result;
   }
 
-  public static PermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static @Nullable PermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_PERMISSION_BASED_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -39,7 +40,8 @@ public enum UserVerification {
     return value;
   }
 
-  @GenIgnore
+  @Nullable
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   public static UserVerification of(String string) {
     for (UserVerification el : values()) {
       if (el.toString().equals(string)) {

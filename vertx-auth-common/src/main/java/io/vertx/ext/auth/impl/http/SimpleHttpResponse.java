@@ -41,22 +41,28 @@ public final class SimpleHttpResponse {
     return headers;
   }
 
-  public String getHeader(String header) {
+  public @Nullable String getHeader(String header) {
     if (headers != null) {
       return headers.get(header);
     }
     return null;
   }
 
-  public Buffer body() {
+  public @Nullable Buffer body() {
     return body;
   }
 
   public @Nullable JsonObject jsonObject() {
+    if (body == null) {
+      return null;
+    }
     return new JsonObject(body);
   }
 
   public @Nullable JsonArray jsonArray() {
+    if (body == null) {
+      return null;
+    }
     return new JsonArray(body);
   }
 

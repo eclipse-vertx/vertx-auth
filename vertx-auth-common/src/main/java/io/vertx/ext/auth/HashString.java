@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.auth;
 
+import io.vertx.codegen.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,7 +97,7 @@ public final class HashString {
     return id;
   }
 
-  public String param(String param) {
+  public @Nullable String param(String param) {
     if (params == null) {
       return null;
     }

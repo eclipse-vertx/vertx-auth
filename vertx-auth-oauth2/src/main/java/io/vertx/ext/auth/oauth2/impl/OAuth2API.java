@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -156,7 +157,7 @@ public class OAuth2API {
     final String path = config.getAuthorizationPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
-    return url + '?' + SimpleHttpClient.jsonToQuery(query).toString();
+    return url + '?' + SimpleHttpClient.jsonToQuery(query);
   }
 
   /**
@@ -227,7 +228,7 @@ public class OAuth2API {
 
         if (reply.is("application/json")) {
           try {
-            json = new JsonObject(reply.body());
+            json = reply.jsonObject();
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -245,7 +246,7 @@ public class OAuth2API {
         }
 
         try {
-          if (json.containsKey("error")) {
+          if (json == null || json.containsKey("error")) {
             handler.handle(Future.failedFuture(extractErrorDescription(json)));
           } else {
             OAuth2API.processNonStandardHeaders(json, reply, config.getScopeSeparator());
@@ -304,7 +305,7 @@ public class OAuth2API {
 
         if (reply.is("application/json")) {
           try {
-            json = new JsonObject(reply.body());
+            json = reply.jsonObject();
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -322,7 +323,7 @@ public class OAuth2API {
         }
 
         try {
-          if (json.containsKey("error")) {
+          if (json == null || json.containsKey("error")) {
             handler.handle(Future.failedFuture(extractErrorDescription(json)));
           } else {
             processNonStandardHeaders(json, reply, config.getScopeSeparator());
@@ -422,13 +423,21 @@ public class OAuth2API {
         }
 
         final SimpleHttpResponse reply = fetch.result();
+
+        Buffer body = reply.body();
+
+        if (body == null) {
+          handler.handle(Future.failedFuture("null response"));
+          return;
+        }
+
         // userInfo is expected to be an object
         JsonObject userInfo;
 
         if (reply.is("application/json")) {
           try {
             // userInfo is expected to be an object
-            userInfo = new JsonObject(reply.body());
+            userInfo = reply.jsonObject();
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -436,7 +445,7 @@ public class OAuth2API {
         } else if (reply.is("application/jwt")) {
           try {
             // userInfo is expected to be a JWT
-            userInfo = jwt.decode(reply.body().toString(StandardCharsets.UTF_8));
+            userInfo = jwt.decode(body.toString(StandardCharsets.UTF_8));
           } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
             return;
@@ -464,7 +473,7 @@ public class OAuth2API {
    *
    * see: https://openid.net/specs/openid-connect-session-1_0.html
    */
-  public String endSessionURL(String idToken, JsonObject params) {
+  public @Nullable String endSessionURL(String idToken, JsonObject params) {
     final String path = config.getLogoutPath();
 
     if (path == null) {
@@ -480,7 +489,7 @@ public class OAuth2API {
 
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
-    return url + '?' + SimpleHttpClient.jsonToQuery(query).toString();
+    return url + '?' + SimpleHttpClient.jsonToQuery(query);
   }
 
   /**
@@ -525,6 +534,10 @@ public class OAuth2API {
   }
 
   private String extractErrorDescription(JsonObject json) {
+    if (json == null) {
+      return "null";
+    }
+
     String description;
     Object error = json.getValue("error");
     if (error instanceof JsonObject) {
@@ -537,6 +550,11 @@ public class OAuth2API {
         description = error.toString();
       }
     }
+
+    if (description == null) {
+      return "null";
+    }
+
     return description;
   }
 
@@ -609,7 +627,7 @@ public class OAuth2API {
                   // if value is json, extract error, error_descriptions
                   try {
                     JsonObject error = oauth2res.jsonObject();
-                    if (error.containsKey("error")) {
+                    if (error != null && error.containsKey("error")) {
                       if (error.containsKey("error_description")) {
                         callback.handle(Future.failedFuture(error.getString("error") + ": " + error.getString("error_description")));
                       } else {

@@ -26,7 +26,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
@@ -44,9 +43,9 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
   private final HashingStrategy strategy = HashingStrategy.load();
 
-  private JDBCClient client;
+  private final JDBCClient client;
   private JDBCHashStrategy legacyStrategy;
-  private JDBCAuthenticationOptions options;
+  private final JDBCAuthenticationOptions options;
 
   public JDBCAuthenticationImpl(JDBCClient client, JDBCHashStrategy hashStrategy, JDBCAuthenticationOptions options) {
     this.client = Objects.requireNonNull(client);

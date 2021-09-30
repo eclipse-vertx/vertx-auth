@@ -24,7 +24,6 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.UserImpl;
@@ -44,8 +43,8 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   private static final Logger log = LoggerFactory.getLogger(MongoAuthenticationImpl.class);
 
   private final HashingStrategy strategy = HashingStrategy.load();
-  private MongoClient mongoClient;
-  private MongoAuthenticationOptions options;
+  private final MongoClient mongoClient;
+  private final MongoAuthenticationOptions options;
   private HashStrategy legacyStrategy;
   private String hashField;
 
@@ -197,8 +196,8 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
    * @author mremme
    */
   static class AuthToken {
-    String username;
-    String password;
+    final String username;
+    final String password;
 
     AuthToken(String username, String password) {
       this.username = username;

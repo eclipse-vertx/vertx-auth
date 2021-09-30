@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.webauthn.impl.metadata;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -92,7 +93,7 @@ public final class MetaData {
     return store.size();
   }
 
-  public PublicKeyCredential toJOSEAlg(int fido2AlgSign) {
+  public @Nullable PublicKeyCredential toJOSEAlg(int fido2AlgSign) {
     switch (fido2AlgSign) {
       case ALG_SIGN_SECP256R1_ECDSA_SHA256_RAW:
       case ALG_SIGN_SECP256R1_ECDSA_SHA256_DER:
@@ -138,6 +139,7 @@ public final class MetaData {
     return verifyMetadata(aaguid, alg, x5c, rootCert, true);
   }
 
+  @Nullable
   public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c, X509Certificate rootCert, boolean includesRoot) throws MetaDataException, AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     // If available, validate attestation alg and x5c with info in the metadata statement
     MetaDataEntry entry = store.get(aaguid);

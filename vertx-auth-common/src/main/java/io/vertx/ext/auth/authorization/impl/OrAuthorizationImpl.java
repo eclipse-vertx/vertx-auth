@@ -22,7 +22,7 @@ import io.vertx.ext.auth.authorization.OrAuthorization;
 
 public class OrAuthorizationImpl implements OrAuthorization {
 
-  private List<Authorization> authorizations;
+  private final List<Authorization> authorizations;
 
   public OrAuthorizationImpl() {
     this.authorizations = new ArrayList<>();

@@ -23,7 +23,7 @@ import io.vertx.ext.auth.authorization.Authorizations;
 
 public class AuthorizationsImpl implements Authorizations {
 
-  private Map<String, Set<Authorization>> authorizations;
+  private final Map<String, Set<Authorization>> authorizations;
 
   public AuthorizationsImpl() {
     this.authorizations = new HashMap<>();
@@ -68,12 +68,8 @@ public class AuthorizationsImpl implements Authorizations {
     if (!(obj instanceof AuthorizationsImpl))
       return false;
     AuthorizationsImpl other = (AuthorizationsImpl) obj;
-    if (authorizations == null) {
-      if (other.authorizations != null)
-        return false;
-    } else if (!authorizations.equals(other.authorizations))
-      return false;
-    return true;
+
+    return authorizations.equals(other.authorizations);
   }
 
   @Override
@@ -84,8 +80,7 @@ public class AuthorizationsImpl implements Authorizations {
   }
 
   private Set<Authorization> getOrCreateAuthorizations(String providerId) {
-    Set<Authorization> result = authorizations.computeIfAbsent(providerId, k -> new HashSet<>());
-    return result;
+    return authorizations.computeIfAbsent(providerId, k -> new HashSet<>());
   }
 
   @Override
@@ -97,7 +92,7 @@ public class AuthorizationsImpl implements Authorizations {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((authorizations == null) ? 0 : authorizations.hashCode());
+    result = prime * result + authorizations.hashCode();
     return result;
   }
 

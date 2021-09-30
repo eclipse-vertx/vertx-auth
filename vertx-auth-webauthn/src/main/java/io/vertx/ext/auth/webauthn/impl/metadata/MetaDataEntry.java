@@ -30,6 +30,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 public class MetaDataEntry implements Shareable {
@@ -45,10 +46,9 @@ public class MetaDataEntry implements Shareable {
       "USER_KEY_REMOTE_COMPROMISE",
       "USER_KEY_PHYSICAL_COMPROMISE",
       "REVOKED");
-  private static final List<String> INFO_STATUS = Arrays
-    .asList(
-      "UPDATE_AVAILABLE"
-    );
+  private static final List<String> INFO_STATUS = Collections
+    .singletonList(
+      "UPDATE_AVAILABLE");
 
   private final int version;
   private final JsonObject entry;
@@ -65,7 +65,7 @@ public class MetaDataEntry implements Shareable {
     this.version = statement.getInteger("schema", 2);
   }
 
-  public MetaDataEntry(JsonObject tocEntry, JsonObject statement, String error) throws NoSuchAlgorithmException {
+  public MetaDataEntry(JsonObject tocEntry, JsonObject statement, String error) {
     if (tocEntry == null || statement == null) {
       throw new IllegalArgumentException("toc and statement cannot be null");
     }

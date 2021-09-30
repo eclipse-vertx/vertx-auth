@@ -22,7 +22,7 @@ import io.vertx.ext.auth.authorization.AuthorizationContext;
 
 public class AndAuthorizationImpl implements AndAuthorization {
 
-  private List<Authorization> authorizations;
+  private final List<Authorization> authorizations;
 
   public AndAuthorizationImpl() {
     this.authorizations = new ArrayList<>();

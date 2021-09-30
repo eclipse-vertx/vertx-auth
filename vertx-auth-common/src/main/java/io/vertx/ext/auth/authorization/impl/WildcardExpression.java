@@ -133,7 +133,7 @@ class WildcardExpression {
   |    I N S T A N C E   V A R I A B L E S    |
   ============================================*/
   private List<Set<String>> parts;
-  private String value;
+  private final String value;
 
   /*--------------------------------------------
   |         C O N S T R U C T O R S           |
@@ -184,7 +184,7 @@ class WildcardExpression {
     // slightly slower path where we've got to convert 'p' to a wildcard
     return implies(new WildcardExpression(p));
   }
-  
+
   public boolean implies(WildcardExpression p) {
     if (p == null) {
       return false;

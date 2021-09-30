@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.impl.http;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
@@ -107,7 +108,7 @@ public final class SimpleHttpClient {
     return buffer;
   }
 
-  public static JsonObject queryToJson(Buffer query) throws UnsupportedEncodingException {
+  public static @Nullable JsonObject queryToJson(Buffer query) throws UnsupportedEncodingException {
     if (query == null) {
       return null;
     }
@@ -166,7 +167,7 @@ public final class SimpleHttpClient {
               if (value == null || value.length() == 0) {
                 callback.handle(Future.failedFuture(res.statusMessage()));
               } else {
-                callback.handle(Future.failedFuture(res.statusMessage() + ": " + value.toString()));
+                callback.handle(Future.failedFuture(res.statusMessage() + ": " + value));
               }
             } else {
               callback.handle(Future.succeededFuture(new SimpleHttpResponse(res.statusCode(), res.headers(), value)));

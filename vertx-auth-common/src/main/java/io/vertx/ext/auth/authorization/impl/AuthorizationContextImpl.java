@@ -20,8 +20,8 @@ import io.vertx.ext.auth.User;
 
 public class AuthorizationContextImpl implements AuthorizationContext {
 
-  private User user;
-  private MultiMap variables;
+  private final User user;
+  private final MultiMap variables;
 
   public AuthorizationContextImpl(User user) {
     this(user, MultiMap.caseInsensitiveMultiMap());

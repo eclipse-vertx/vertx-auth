@@ -14,6 +14,7 @@ package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
@@ -36,7 +37,7 @@ public class WildcardPermissionBasedAuthorizationConverter {
     return result;
   }
 
-  public static WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static @Nullable WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_WILDCARD_PERMISSION.equals(json.getString(FIELD_TYPE))) {

@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
@@ -136,7 +137,7 @@ public class Authenticator {
     return json;
   }
 
-  public static UUID toUUID(String string) {
+  public static @Nullable UUID toUUID(String string) {
     if (string == null) {
       return null;
     }

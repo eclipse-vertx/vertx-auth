@@ -58,7 +58,6 @@ public class MongoAuthOptions implements io.vertx.ext.auth.AuthOptions {
   public MongoAuthOptions(MongoAuthOptions that) {
     shared = that.shared;
     datasourceName = that.datasourceName;
-    datasourceName = that.datasourceName;
     collectionName = that.collectionName;
     usernameField = that.usernameField;
     passwordField = that.passwordField;

@@ -25,7 +25,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.ldap.LdapAuthentication;
@@ -39,8 +38,8 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   private static final String SIMPLE_AUTHENTICATION_MECHANISM = "simple";
   private static final String FOLLOW_REFERRAL = "follow";
 
-  private Vertx vertx;
-  private LdapAuthenticationOptions authenticationOptions;
+  private final Vertx vertx;
+  private final LdapAuthenticationOptions authenticationOptions;
 
   public LdapAuthenticationImpl(Vertx vertx, LdapAuthenticationOptions authenticationOptions) {
     this.vertx = Objects.requireNonNull(vertx);

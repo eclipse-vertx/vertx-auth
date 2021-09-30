@@ -19,6 +19,7 @@ package io.vertx.ext.auth.webauthn.impl;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import io.netty.buffer.ByteBufInputStream;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 
@@ -62,7 +63,7 @@ public final class CBOR {
     }
   }
 
-  private static Object parseAny(JsonParser parser) throws IOException, DecodeException {
+  private static @Nullable Object parseAny(JsonParser parser) throws IOException, DecodeException {
     switch (parser.getCurrentTokenId()) {
       case JsonTokenId.ID_START_OBJECT:
         return parseObject(parser);

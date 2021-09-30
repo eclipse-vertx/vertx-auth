@@ -17,6 +17,7 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -171,7 +172,7 @@ public interface User {
    * @return the value or null if missing
    * @throws ClassCastException if the value cannot be casted to {@code T}
    */
-  default <T> T get(String key) {
+  default <T> @Nullable T get(String key) {
     if (attributes().containsKey("rootClaim")) {
       JsonObject rootClaim;
       try {

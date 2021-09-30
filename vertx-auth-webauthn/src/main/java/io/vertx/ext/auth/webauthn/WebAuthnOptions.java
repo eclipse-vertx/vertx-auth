@@ -17,6 +17,7 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWS;
 
@@ -131,7 +132,7 @@ public class WebAuthnOptions {
    *
    * Valid until 18 March 2029
    */
-  String FIDO_MDS3_ROOT_CERTIFICATE =
+  final String FIDO_MDS3_ROOT_CERTIFICATE =
     "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G" +
       "A1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjMxEzARBgNVBAoTCkdsb2JhbFNp" +
       "Z24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDkwMzE4MTAwMDAwWhcNMjkwMzE4" +
@@ -354,7 +355,7 @@ public class WebAuthnOptions {
     return rootCertificates;
   }
 
-  public X509Certificate getRootCertificate(String key) {
+  public @Nullable X509Certificate getRootCertificate(String key) {
     if (rootCertificates == null) {
       return null;
     }

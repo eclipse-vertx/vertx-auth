@@ -38,9 +38,9 @@ import java.util.Objects;
  */
 public class MongoAuthorizationImpl implements MongoAuthorization {
   private static final Logger log = LoggerFactory.getLogger(MongoAuthorizationImpl.class);
-  private MongoClient mongoClient;
-  private String providerId;
-  private MongoAuthorizationOptions options;
+  private final MongoClient mongoClient;
+  private final String providerId;
+  private final MongoAuthorizationOptions options;
 
   /**
    * Creates a new instance

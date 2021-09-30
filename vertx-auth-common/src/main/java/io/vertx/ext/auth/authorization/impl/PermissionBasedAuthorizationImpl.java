@@ -22,7 +22,7 @@ import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthorization {
 
-  private String permission;
+  private final String permission;
   private VariableAwareExpression resource;
 
   public PermissionBasedAuthorizationImpl(String permission) {

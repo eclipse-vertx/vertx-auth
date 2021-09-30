@@ -21,8 +21,8 @@ import java.util.function.Function;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 
 class VariableAwareExpression {
-  private String value;
-  private transient Function<AuthorizationContext, String>[] parts;
+  private final String value;
+  private final transient Function<AuthorizationContext, String>[] parts;
   private transient boolean hasVariable = false;
 
   @SuppressWarnings("unchecked")

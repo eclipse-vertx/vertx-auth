@@ -14,6 +14,7 @@ package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.NotAuthorization;
 
@@ -32,7 +33,7 @@ public class NotAuthorizationConverter {
     return result;
   }
 
-  public static NotAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static @Nullable NotAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_NOT_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

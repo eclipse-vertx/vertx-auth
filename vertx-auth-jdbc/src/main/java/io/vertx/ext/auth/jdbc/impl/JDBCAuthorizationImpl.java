@@ -26,10 +26,10 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
    */
   private final static String DEFAULT_USERNAME_KEY = "username";
 
-  private String providerId;
-  private JDBCAuthorizationOptions options;
-  private JDBCClient client;
-  private String usernameKey;
+  private final String providerId;
+  private final JDBCAuthorizationOptions options;
+  private final JDBCClient client;
+  private final String usernameKey;
 
   public JDBCAuthorizationImpl(String providerId, JDBCClient client, JDBCAuthorizationOptions options) {
     this.providerId = Objects.requireNonNull(providerId);

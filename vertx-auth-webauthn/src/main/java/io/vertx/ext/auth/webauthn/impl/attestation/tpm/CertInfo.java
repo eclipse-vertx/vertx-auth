@@ -1,7 +1,6 @@
 package io.vertx.ext.auth.webauthn.impl.attestation.tpm;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 
 public class CertInfo {
 

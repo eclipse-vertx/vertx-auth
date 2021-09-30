@@ -141,7 +141,7 @@ public final class JWK {
         // algorithm is valid
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, passwordProtection == null ? keyStorePassword.toCharArray() : passwordProtection.get(alias).toCharArray());
         keys.add(new JWK(alias, certificate, privateKey));
-      } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException | NoSuchAlgorithmException | UnrecoverableKeyException | InvalidAlgorithmParameterException e) {
+      } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
         LOG.warn("Failed to load key for algorithm: " + alias, e);
       }
     }
@@ -325,7 +325,7 @@ public final class JWK {
     }
   }
 
-  private JWK(String algorithm, X509Certificate certificate, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  private JWK(String algorithm, X509Certificate certificate, PrivateKey privateKey) throws NoSuchAlgorithmException {
 
     alg = algorithm;
     kid = null;
@@ -432,14 +432,12 @@ public final class JWK {
 
       label = kid != null ? kid : alg + "#" + json.hashCode();
 
-    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchPaddingException | NoSuchProviderException | SignatureException | InvalidAlgorithmParameterException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchProviderException | SignatureException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, InvalidAlgorithmParameterException {
-    int use = 0;
-
+  private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
     // public key
     if (jsonHasProperties(json, "n", "e")) {
       final BigInteger n = new BigInteger(1, json.getBinary("n"));
@@ -477,7 +475,7 @@ public final class JWK {
     }
   }
 
-  private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+  private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException {
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
     parameters.init(new ECGenParameterSpec(translateECCrv(json.getString("crv"))));
 
@@ -495,7 +493,7 @@ public final class JWK {
     }
   }
 
-  private void createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+  private void createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
     // public key
     if (jsonHasProperties(json, "x")) {
       final byte[] key = json.getBinary("x");

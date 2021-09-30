@@ -13,7 +13,6 @@
 package io.vertx.ext.auth.authentication;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 

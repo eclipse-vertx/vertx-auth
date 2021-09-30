@@ -14,6 +14,7 @@ package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.AndAuthorization;
@@ -38,7 +39,7 @@ public class AndAuthorizationConverter {
     return result;
   }
 
-  public static AndAuthorization decode(JsonObject json) throws IllegalArgumentException {
+  public static @Nullable AndAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
     if (TYPE_AND_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {

@@ -150,7 +150,6 @@ public class OneTimePasswordAlgorithm {
                                    int truncationOffset)
     throws NoSuchAlgorithmException, InvalidKeyException {
     // put movingFactor value into text byte array
-    String result = null;
     int digits = addChecksum ? (codeDigits + 1) : codeDigits;
     byte[] text = new byte[8];
     for (int i = text.length - 1; i >= 0; i--) {
@@ -177,11 +176,13 @@ public class OneTimePasswordAlgorithm {
     if (addChecksum) {
       otp = (otp * 10) + calcChecksum(otp, codeDigits);
     }
-    result = Integer.toString(otp);
+
+    StringBuilder result = new StringBuilder(Integer.toString(otp));
     while (result.length() < digits) {
-      result = "0" + result;
+      result.insert(0, "0");
     }
-    return result;
+
+    return result.toString();
   }
 }
 

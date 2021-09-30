@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.impl;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 
@@ -55,7 +56,7 @@ public final class CertificateHelper {
       return false;
     }
 
-    public String subject(String key) {
+    public @Nullable String subject(String key) {
       if (subject != null) {
         return subject.get(key);
       }
