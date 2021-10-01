@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 @Deprecated
 public class SHA512Strategy extends AbstractHashingStrategy implements JDBCHashStrategy {
 
@@ -42,9 +44,9 @@ public class SHA512Strategy extends AbstractHashingStrategy implements JDBCHashS
 
     byte[] bHash = md.digest(concat.getBytes(StandardCharsets.UTF_8));
     if (version >= 0) {
-      return bytesToHex(bHash) + '$' + version;
+      return base16Encode(bHash).toUpperCase() + '$' + version;
     } else {
-      return bytesToHex(bHash);
+      return base16Encode(bHash).toUpperCase();
     }
   }
 }

@@ -1,5 +1,6 @@
 package io.vertx.ext.auth;
 
+import io.vertx.ext.auth.impl.Codec;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
@@ -7,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 
 import static org.junit.Assert.*;
@@ -18,9 +18,7 @@ public class HashingStrategyTest {
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
 
-  Base64.Encoder B64ENC = Base64.getEncoder();
-
-  String salt = B64ENC.encodeToString("keyboard.cat".getBytes(StandardCharsets.UTF_8));
+  String salt = Codec.base64Encode("keyboard.cat".getBytes(StandardCharsets.UTF_8));
 
   @Test
   public void testHashSimple() {

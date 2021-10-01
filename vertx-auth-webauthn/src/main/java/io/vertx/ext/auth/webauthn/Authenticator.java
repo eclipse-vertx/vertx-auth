@@ -20,8 +20,9 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Base64;
 import java.util.UUID;
+
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 
 /**
  * Data Object representing an authenticator at rest.
@@ -141,7 +142,7 @@ public class Authenticator {
     if (string == null) {
       return null;
     }
-    Buffer buffer = Buffer.buffer(Base64.getUrlDecoder().decode(string));
+    Buffer buffer = Buffer.buffer(base64UrlDecode(string));
     return new UUID(buffer.getLong(0), buffer.getLong(8));
   }
 

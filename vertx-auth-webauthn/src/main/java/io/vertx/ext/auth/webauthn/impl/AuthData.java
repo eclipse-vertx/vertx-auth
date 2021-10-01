@@ -26,6 +26,8 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import java.io.IOException;
 import java.util.Map;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 /**
  * FIDO2 Authenticator Data
  * This class decodes the buffer into a parsable object
@@ -36,18 +38,6 @@ public class AuthData {
   public static final int USER_VERIFIED = 0x04;
   public static final int ATTESTATION_DATA = 0x40;
   public static final int EXTENSION_DATA = 0x80;
-
-  private final static char[] HEX = "0123456789abcdef".toCharArray();
-
-  private static String bytesToHex(byte[] bytes) {
-    char[] hexChars = new char[bytes.length * 2];
-    for ( int j = 0; j < bytes.length; j++ ) {
-      int v = bytes[j] & 0xFF;
-      hexChars[j * 2] = HEX[v >>> 4];
-      hexChars[j * 2 + 1] = HEX[v & 0x0F];
-    }
-    return new String(hexChars);
-  }
 
   private final byte[] raw;
 
@@ -120,7 +110,7 @@ public class AuthData {
       aaguid = buffer.getBytes(pos, pos + 16);
       pos += 16;
 
-      String tmp = bytesToHex(aaguid);
+      String tmp = base16Encode(aaguid);
       aaguidString = tmp.substring(0, 8) + "-" + tmp.substring(8, 12)+ "-" + tmp.substring(12, 16) + "-" + tmp.substring(16, 20) + "-" + tmp.substring(20);
 
       int credIDLen = buffer.getUnsignedShort(pos);

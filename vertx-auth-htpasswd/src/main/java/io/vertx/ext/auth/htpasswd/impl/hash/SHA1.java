@@ -21,7 +21,8 @@ import io.vertx.ext.auth.HashingAlgorithm;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+
+import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
 /**
  * Implementation of the SHA1 Hashing algorithm
@@ -29,8 +30,6 @@ import java.util.Base64;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 public class SHA1 implements HashingAlgorithm {
-
-  private static final Base64.Encoder B64ENC = Base64.getEncoder();
 
   private final MessageDigest md;
 
@@ -49,7 +48,7 @@ public class SHA1 implements HashingAlgorithm {
 
   @Override
   public String hash(HashString hashString, String password) {
-    return B64ENC.encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));
+    return base64Encode(md.digest(password.getBytes(StandardCharsets.UTF_8)));
   }
 
   @Override

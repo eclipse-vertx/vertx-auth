@@ -19,8 +19,9 @@ import io.vertx.core.Vertx;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
 
 /**
  * Wrapper around secure random that periodically seeds the PRNG with new entropy. To avoid entropy exhaustion
@@ -33,8 +34,6 @@ public class PRNG implements VertxContextPRNG {
 
   private static final int DEFAULT_SEED_INTERVAL_MILLIS = 300000;
   private static final int DEFAULT_SEED_BITS = 64;
-
-  private static final Base64.Encoder base64url = Base64.getUrlEncoder().withoutPadding();
 
   private final SecureRandom random;
   private final long seedID;
@@ -178,7 +177,7 @@ public class PRNG implements VertxContextPRNG {
     // fill with random data
     nextBytes(data);
     // encode
-    return base64url.encodeToString(data);
+    return base64UrlEncode(data);
   }
 
 }

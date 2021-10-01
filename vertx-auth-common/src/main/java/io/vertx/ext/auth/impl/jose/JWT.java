@@ -32,6 +32,9 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
+
 /**
  * JWT and JWS implementation draft-ietf-oauth-json-web-token-32.
  *
@@ -46,9 +49,6 @@ public final class JWT {
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
 
-  // as described in the terminology section: https://tools.ietf.org/html/rfc7515#section-2
-  private static final Base64.Encoder urlEncoder = Base64.getUrlEncoder().withoutPadding();
-  private static final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
   private static final Base64.Decoder decoder = Base64.getDecoder();
 
   private boolean allowEmbeddedKey = false;
@@ -165,8 +165,8 @@ public final class JWT {
     String signatureSeg = segments.length == 2 ? null : segments[2];
 
     // base64 decode and parse JSON
-    JsonObject header = new JsonObject(new String(base64urlDecode(headerSeg), UTF8));
-    JsonObject payload = new JsonObject(new String(base64urlDecode(payloadSeg), UTF8));
+    JsonObject header = new JsonObject(new String(base64UrlDecode(headerSeg), UTF8));
+    JsonObject payload = new JsonObject(new String(base64UrlDecode(payloadSeg), UTF8));
 
     return new JsonObject()
       .put("header", header)
@@ -198,7 +198,7 @@ public final class JWT {
     }
 
     // base64 decode and parse JSON
-    JsonObject header = new JsonObject(Buffer.buffer(base64urlDecode(headerSeg)));
+    JsonObject header = new JsonObject(Buffer.buffer(base64UrlDecode(headerSeg)));
 
     final boolean unsecure = isUnsecure();
     if (unsecure) {
@@ -215,7 +215,7 @@ public final class JWT {
       }
     }
 
-    JsonObject payload = new JsonObject(Buffer.buffer(base64urlDecode(payloadSeg)));
+    JsonObject payload = new JsonObject(Buffer.buffer(base64UrlDecode(payloadSeg)));
 
     String alg = header.getString("alg");
 
@@ -255,7 +255,7 @@ public final class JWT {
           CertificateHelper.checkValidity(certChain, false, null);
         }
 
-        if (JWS.verifySignature(alg, certChain.get(0), base64urlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {
+        if (JWS.verifySignature(alg, certChain.get(0), base64UrlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {
           // ok
           return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
         } else {
@@ -278,7 +278,7 @@ public final class JWT {
       if (signatureSeg == null) {
         throw new IllegalStateException("missing signature segment");
       }
-      byte[] payloadInput = base64urlDecode(signatureSeg);
+      byte[] payloadInput = base64UrlDecode(signatureSeg);
       if (nonceDigest != null && header.containsKey("nonce")) {
         // this is an Azure Graph extension, a nonce is added to the token
         // after the serialization. The original value is the digest of the
@@ -286,7 +286,7 @@ public final class JWT {
         synchronized (this) {
           nonceDigest.reset();
           header.put("nonce", nonceDigest.digest(header.getString("nonce").getBytes(StandardCharsets.UTF_8)));
-          headerSeg = urlEncoder.encodeToString(header.encode().getBytes(StandardCharsets.UTF_8));
+          headerSeg = base64UrlEncode(header.encode().getBytes(StandardCharsets.UTF_8));
         }
       }
       byte[] signingInput = (headerSeg + "." + payloadSeg).getBytes(UTF8);
@@ -382,28 +382,16 @@ public final class JWT {
     }
 
     // create segments, all segment should be base64 string
-    String headerSegment = base64urlEncode(header.encode());
-    String payloadSegment = base64urlEncode(payload.encode());
+    String headerSegment = base64UrlEncode(header.encode().getBytes(StandardCharsets.UTF_8));
+    String payloadSegment = base64UrlEncode(payload.encode().getBytes(StandardCharsets.UTF_8));
 
     if (!unsecure) {
       String signingInput = headerSegment + "." + payloadSegment;
-      String signSegment = base64urlEncode(jws.sign(signingInput.getBytes(UTF8)));
+      String signSegment = base64UrlEncode(jws.sign(signingInput.getBytes(UTF8)));
       return headerSegment + "." + payloadSegment + "." + signSegment;
     } else {
       return headerSegment + "." + payloadSegment;
     }
-  }
-
-  private static byte[] base64urlDecode(String str) {
-    return urlDecoder.decode(str.getBytes(UTF8));
-  }
-
-  private static String base64urlEncode(String str) {
-    return base64urlEncode(str.getBytes(UTF8));
-  }
-
-  private static String base64urlEncode(byte[] bytes) {
-    return urlEncoder.encodeToString(bytes);
   }
 
   public boolean isUnsecure() {

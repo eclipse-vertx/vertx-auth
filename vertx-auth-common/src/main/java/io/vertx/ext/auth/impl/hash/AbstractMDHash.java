@@ -22,7 +22,8 @@ import io.vertx.ext.auth.HashingAlgorithm;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+
+import static io.vertx.ext.auth.impl.Codec.base64EncodeWithoutPadding;
 
 /**
  * Abstract implementation of hashing algorithms based on <code>java.security.MessageDigest</code>.
@@ -30,8 +31,6 @@ import java.util.Base64;
  * @author <a href="mailto:lgao@redhat.com">Lin Gao</a>
  */
 public abstract class AbstractMDHash implements HashingAlgorithm {
-
-  private static final Base64.Encoder B64ENC = Base64.getEncoder().withoutPadding();
 
   private final MessageDigest md;
 
@@ -45,7 +44,7 @@ public abstract class AbstractMDHash implements HashingAlgorithm {
 
   @Override
   public String hash(HashString hashString, String password) {
-    return B64ENC.encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));
+    return base64EncodeWithoutPadding(md.digest(password.getBytes(StandardCharsets.UTF_8)));
   }
 
 }

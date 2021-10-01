@@ -22,9 +22,11 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Set;
+
+import static io.vertx.ext.auth.impl.Codec.base64Decode;
+import static io.vertx.ext.auth.impl.Codec.base64EncodeWithoutPadding;
 
 /**
  * Implementation of the PBKDF2 Hashing algorithm
@@ -34,8 +36,6 @@ import java.util.Set;
 public class PBKDF2 implements HashingAlgorithm {
 
   private static final int DEFAULT_ITERATIONS = 10000;
-  private static final Base64.Decoder B64DEC = Base64.getDecoder();
-  private static final Base64.Encoder B64ENC = Base64.getEncoder().withoutPadding();
 
   private static final Set<String> DEFAULT_CONFIG = Collections.singleton("it");
 
@@ -78,7 +78,7 @@ public class PBKDF2 implements HashingAlgorithm {
       throw new RuntimeException("hashString salt is null");
     }
 
-    byte[] salt = B64DEC.decode(hashString.salt());
+    byte[] salt = base64Decode(hashString.salt());
 
     PBEKeySpec spec = new PBEKeySpec(
       password.toCharArray(),
@@ -87,7 +87,7 @@ public class PBKDF2 implements HashingAlgorithm {
       64 * 8);
 
     try {
-      return B64ENC.encodeToString(skf.generateSecret(spec).getEncoded());
+      return base64EncodeWithoutPadding(skf.generateSecret(spec).getEncoded());
     } catch (InvalidKeySpecException ikse) {
       throw new RuntimeException(ikse);
     }
