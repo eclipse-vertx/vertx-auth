@@ -44,7 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 
-import static io.vertx.core.json.impl.JsonUtil.BASE64_ENCODER;
+import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 
 public class WebAuthnImpl implements WebAuthn {
@@ -532,9 +532,9 @@ public class WebAuthnImpl implements WebAuthn {
       return new Authenticator()
         .setFmt(fmt)
         .setAaguid(authData.getAaguidString())
-        .setPublicKey(BASE64_ENCODER.encodeToString(authData.getCredentialPublicKey()))
+        .setPublicKey(base64UrlEncode(authData.getCredentialPublicKey()))
         .setCounter(authData.getSignCounter())
-        .setCredID(BASE64_ENCODER.encodeToString(authData.getCredentialId()))
+        .setCredID(base64UrlEncode(authData.getCredentialId()))
         .setAttestationCertificates(certificates);
     }
   }

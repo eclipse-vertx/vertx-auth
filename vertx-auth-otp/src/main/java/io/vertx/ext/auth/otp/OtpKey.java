@@ -13,9 +13,11 @@ package io.vertx.ext.auth.otp;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.codec.binary.Base32;
 
 import java.util.Locale;
+
+import static io.vertx.ext.auth.impl.Codec.base32Decode;
+import static io.vertx.ext.auth.impl.Codec.base32Encode;
 
 /**
  * Key of specific user.
@@ -24,8 +26,6 @@ import java.util.Locale;
  */
 @DataObject
 public class OtpKey {
-
-  private final Base32 BASE32 = new Base32(false);
 
   private String key;
   private String algorithm;
@@ -43,7 +43,7 @@ public class OtpKey {
   }
 
   public OtpKey(byte[] rawKey, String algorithm) {
-    setKey(BASE32.encodeToString(rawKey));
+    setKey(base32Encode(rawKey));
     setAlgorithm(algorithm);
   }
 
@@ -52,7 +52,7 @@ public class OtpKey {
   }
 
   public byte[] getKeyBytes() {
-    return BASE32.decode(key);
+    return base32Decode(key);
   }
 
   public OtpKey setKey(String key) {

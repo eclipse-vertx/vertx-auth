@@ -3,23 +3,6 @@ package io.vertx.ext.auth.impl.jose;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import org.junit.Test;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 

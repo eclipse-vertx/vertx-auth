@@ -5,6 +5,8 @@ import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.util.Locale;
+
 public class PBKDF2StrategyTest extends VertxTestBase {
 
   @Test

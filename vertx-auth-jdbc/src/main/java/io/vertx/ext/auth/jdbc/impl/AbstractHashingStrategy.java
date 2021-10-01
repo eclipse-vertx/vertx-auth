@@ -5,6 +5,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.PRNG;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 @Deprecated
 public abstract class AbstractHashingStrategy implements JDBCHashStrategy {
 
@@ -20,19 +22,7 @@ public abstract class AbstractHashingStrategy implements JDBCHashStrategy {
     byte[] salt = new byte[32];
     random.nextBytes(salt);
 
-    return bytesToHex(salt);
-  }
-
-  private final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
-
-  String bytesToHex(byte[] bytes) {
-    char[] chars = new char[bytes.length * 2];
-    for (int i = 0; i < bytes.length; i++) {
-      int x = 0xFF & bytes[i];
-      chars[i * 2] = HEX_CHARS[x >>> 4];
-      chars[1 + i * 2] = HEX_CHARS[0x0F & x];
-    }
-    return new String(chars);
+    return base16Encode(salt).toUpperCase();
   }
 
   @Override

@@ -26,14 +26,15 @@ import io.vertx.core.json.DecodeException;
 import java.io.*;
 import java.util.*;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
+
 public final class CBOR {
 
-  private static final Base64.Encoder B64ENC = Base64.getUrlEncoder().withoutPadding();
-  private static final Base64.Decoder B64DEC = Base64.getUrlDecoder();
   private static final CBORFactory FACTORY = new CBORFactory();
 
   public static JsonParser cborParser(String base64) {
-    return cborParser(B64DEC.decode(base64));
+    return cborParser(base64UrlDecode(base64));
   }
 
   public static JsonParser cborParser(byte[] data) {
@@ -70,7 +71,7 @@ public final class CBOR {
       case JsonTokenId.ID_START_ARRAY:
         return parseArray(parser);
       case JsonTokenId.ID_EMBEDDED_OBJECT:
-        return B64ENC.encodeToString(parser.getBinaryValue(Base64Variants.MODIFIED_FOR_URL));
+        return base64UrlEncode(parser.getBinaryValue(Base64Variants.MODIFIED_FOR_URL));
       case JsonTokenId.ID_STRING:
         return parser.getText();
       case JsonTokenId.ID_NUMBER_FLOAT:

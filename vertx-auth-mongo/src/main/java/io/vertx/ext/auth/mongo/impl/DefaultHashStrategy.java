@@ -31,6 +31,8 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 /**
  * Implementation of HashStrategy which is using SHA-512 as crypt
  *
@@ -38,7 +40,6 @@ import java.util.Random;
  */
 @Deprecated
 public class DefaultHashStrategy implements HashStrategy {
-  private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
   private static final int WORK_FACTOR = 10000;
 
   private HashSaltStyle saltStyle;
@@ -183,7 +184,7 @@ public class DefaultHashStrategy implements HashStrategy {
       switch (algorithm) {
         case SHA512:
           String concat = (salt == null ? "" : salt) + password;
-          return bytesToHex(md.digest(concat.getBytes(StandardCharsets.UTF_8)));
+          return base16Encode(md.digest(concat.getBytes(StandardCharsets.UTF_8)));
         case PBKDF2:
           PBEKeySpec spec = new PBEKeySpec(
             password.toCharArray(),
@@ -191,7 +192,7 @@ public class DefaultHashStrategy implements HashStrategy {
             WORK_FACTOR,
             64 * 8);
 
-          return bytesToHex(skf.generateSecret(spec).getEncoded());
+          return base16Encode(skf.generateSecret(spec).getEncoded()).toUpperCase();
         default:
           throw new VertxException("Can't compute hash for algorithm: " + algorithm);
       }
@@ -209,17 +210,7 @@ public class DefaultHashStrategy implements HashStrategy {
     final Random r = new SecureRandom();
     byte[] salt = new byte[32];
     r.nextBytes(salt);
-    return bytesToHex(salt);
-  }
-
-  private static String bytesToHex(byte[] bytes) {
-    char[] chars = new char[bytes.length * 2];
-    for (int i = 0; i < bytes.length; i++) {
-      int x = 0xFF & bytes[i];
-      chars[i * 2] = HEX_CHARS[x >>> 4];
-      chars[1 + i * 2] = HEX_CHARS[0x0F & x];
-    }
-    return new String(chars);
+    return base16Encode(salt).toUpperCase();
   }
 
   /*

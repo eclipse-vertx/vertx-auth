@@ -33,6 +33,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 /**
  * An implementation of {@link HtdigestAuth}
  *
@@ -154,20 +156,8 @@ public class HtdigestAuthImpl implements HtdigestAuth {
     }
   }
 
-  private final static char[] hexArray = "0123456789abcdef".toCharArray();
-
-  private static String bytesToHex(byte[] bytes) {
-    char[] hexChars = new char[bytes.length * 2];
-    for (int j = 0; j < bytes.length; j++) {
-      int v = bytes[j] & 0xFF;
-      hexChars[j * 2] = hexArray[v >>> 4];
-      hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-    }
-    return new String(hexChars);
-  }
-
   private static synchronized String md5(String payload) {
     MD5.reset();
-    return bytesToHex(MD5.digest(payload.getBytes(StandardCharsets.UTF_8)));
+    return base16Encode(MD5.digest(payload.getBytes(StandardCharsets.UTF_8)));
   }
 }

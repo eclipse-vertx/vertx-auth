@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 @Deprecated
 public class PBKDF2Strategy extends AbstractHashingStrategy implements JDBCHashStrategy {
 
@@ -52,9 +54,9 @@ public class PBKDF2Strategy extends AbstractHashingStrategy implements JDBCHashS
       byte[] hash = skf.generateSecret(spec).getEncoded();
 
       if (version >= 0) {
-        return bytesToHex(hash) + '$' + version;
+        return base16Encode(hash).toUpperCase() + '$' + version;
       } else {
-        return bytesToHex(hash);
+        return base16Encode(hash).toUpperCase();
       }
 
     } catch (InvalidKeySpecException ikse) {

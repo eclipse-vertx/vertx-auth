@@ -26,6 +26,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.vertx.ext.auth.impl.Codec.base16Encode;
+
 /**
  * Credentials specific to the {@link HtdigestAuth} authentication provider
  *
@@ -322,7 +324,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
 
     // Generate response hash
     Buffer response = Buffer.buffer()
-      .appendString(bytesToHex(ha1))
+      .appendString(base16Encode(ha1))
       .appendByte((byte) ':')
       .appendString(nonce);
 
@@ -338,7 +340,7 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
 
     response
       .appendByte((byte) ':')
-      .appendString(bytesToHex(ha2));
+      .appendString(base16Encode(ha2));
 
     Buffer header = Buffer.buffer("Digest ");
 
@@ -356,22 +358,10 @@ public class HtdigestCredentials extends UsernamePasswordCredentials implements 
     }
 
     header
-      .appendString("\", response=\"").appendString(bytesToHex(MD5.digest(response.getBytes())))
+      .appendString("\", response=\"").appendString(base16Encode(MD5.digest(response.getBytes())))
       .appendString("\", opaque=\"").appendString(opaque)
       .appendString("\"");
 
     return header.toString();
-  }
-
-  private final static char[] hexArray = "0123456789abcdef".toCharArray();
-
-  private static String bytesToHex(byte[] bytes) {
-    char[] hexChars = new char[bytes.length * 2];
-    for (int j = 0; j < bytes.length; j++) {
-      int v = bytes[j] & 0xFF;
-      hexChars[j * 2] = hexArray[v >>> 4];
-      hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-    }
-    return new String(hexChars);
   }
 }
