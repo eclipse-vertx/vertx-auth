@@ -18,6 +18,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 
+import static io.vertx.ext.auth.impl.Codec.base32Encode;
+
 public class OtpKeyGeneratorImpl implements OtpKeyGenerator {
 
   public static final int DEFAULT_KEY_SIZE = 160;
@@ -55,10 +57,10 @@ public class OtpKeyGeneratorImpl implements OtpKeyGenerator {
   public OtpKey generate(int keySize) {
     keyGenerator.init(keySize);
     SecretKey key = keyGenerator.generateKey();
-    return new OtpKey(
-      key.getEncoded(),
+    return new OtpKey()
+      .setKey(base32Encode(key.getEncoded()))
       // strip the "Hmac" prefix
-      key.getAlgorithm().substring(4));
+      .setAlgorithm(key.getAlgorithm().substring(4));
   }
 
   @Override

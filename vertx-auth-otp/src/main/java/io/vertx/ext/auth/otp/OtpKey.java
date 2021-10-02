@@ -17,7 +17,6 @@ import io.vertx.core.json.JsonObject;
 import java.util.Locale;
 
 import static io.vertx.ext.auth.impl.Codec.base32Decode;
-import static io.vertx.ext.auth.impl.Codec.base32Encode;
 
 /**
  * Key of specific user.
@@ -40,11 +39,6 @@ public class OtpKey {
   public OtpKey(JsonObject json) {
     setKey(json.getString("key"));
     setAlgorithm(json.getString("algorithm"));
-  }
-
-  public OtpKey(byte[] rawKey, String algorithm) {
-    setKey(base32Encode(rawKey));
-    setAlgorithm(algorithm);
   }
 
   public String getKey() {
