@@ -24,7 +24,8 @@ import io.vertx.ext.auth.jdbc.JDBCUserUtil;
 import io.vertx.ext.jdbc.JDBCClient;
 
 import java.security.SecureRandom;
-import java.util.*;
+
+import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
 public class JDBCUserUtilImpl implements JDBCUserUtil {
 
@@ -65,7 +66,7 @@ public class JDBCUserUtilImpl implements JDBCUserUtil {
       username,
       strategy.hash("pbkdf2",
         null,
-        Base64.getMimeEncoder().encodeToString(salt),
+        base64Encode(salt),
         password),
       resultHandler
     );

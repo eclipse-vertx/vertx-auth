@@ -79,7 +79,7 @@
       <id>IT</id>
       <activation>
         <property>
-          <name>env.TRAVIS</name>
+          <name>env.CI</name>
           <value>true</value>
         </property>
       </activation>

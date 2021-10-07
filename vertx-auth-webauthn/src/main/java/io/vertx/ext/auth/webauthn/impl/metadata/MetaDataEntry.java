@@ -29,15 +29,16 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+
+import static io.vertx.ext.auth.impl.Codec.base64Decode;
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 
 public class MetaDataEntry implements Shareable {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataEntry.class);
 
-  private static final Base64.Decoder BASE64DEC = Base64.getDecoder();
   // https://fidoalliance.org/specs/mds/fido-metadata-service-v3.0-ps-20210518.html
   private static final List<String> INVALID_STATUS = Arrays
     .asList(
@@ -90,7 +91,7 @@ public class MetaDataEntry implements Shareable {
     }
 
     this.entry = tocEntry;
-    this.statement = new JsonObject(Buffer.buffer(BASE64DEC.decode(rawStatement)));
+    this.statement = new JsonObject(Buffer.buffer(base64Decode(rawStatement)));
     this.version = statement.getInteger("schema", 2);
 
     // convert status report effective date to a Instant
@@ -107,7 +108,7 @@ public class MetaDataEntry implements Shareable {
       // verify the hash
       MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
       byte[] digest = sha256.digest(rawStatement);
-      if (MessageDigest.isEqual(digest, entry.getBinary("hash"))) {
+      if (MessageDigest.isEqual(digest, base64UrlDecode(entry.getString("hash")))) {
         this.error = null;
       } else {
         this.error = "MDS entry hash did not match corresponding hash in MDS TOC";
@@ -145,5 +146,9 @@ public class MetaDataEntry implements Shareable {
 
   JsonObject statement() {
     return statement;
+  }
+
+  int version() {
+    return version;
   }
 }

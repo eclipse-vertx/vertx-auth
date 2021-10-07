@@ -32,8 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
-import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
+import static io.vertx.ext.auth.impl.Codec.*;
 
 /**
  * JWT and JWS implementation draft-ietf-oauth-json-web-token-32.
@@ -48,8 +47,6 @@ public final class JWT {
   private static final Random RND = new Random();
 
   private static final Charset UTF8 = StandardCharsets.UTF_8;
-
-  private static final Base64.Decoder decoder = Base64.getDecoder();
 
   private boolean allowEmbeddedKey = false;
   private X509Certificate rootCA;
@@ -113,7 +110,7 @@ public final class JWT {
    * @return fluent self.
    */
   public JWT embeddedKeyRootCA(String rootCA) throws CertificateException {
-    this.rootCA = JWS.parseX5c(decoder.decode(rootCA.getBytes(UTF8)));
+    this.rootCA = JWS.parseX5c(base64Decode(rootCA));
     this.allowEmbeddedKey = true;
     return this;
   }
@@ -245,7 +242,7 @@ public final class JWT {
           // states:
           // Each string in the array is a base64-encoded (Section 4 of [RFC4648] -- not base64url-encoded) DER
           // [ITU.X690.2008] PKIX certificate value.
-          certChain.add(JWS.parseX5c(decoder.decode(chain.getString(i).getBytes(UTF8))));
+          certChain.add(JWS.parseX5c(base64Decode(chain.getString(i))));
         }
 
         if (rootCA != null) {
@@ -285,7 +282,7 @@ public final class JWT {
         // post value.
         synchronized (this) {
           nonceDigest.reset();
-          header.put("nonce", nonceDigest.digest(header.getString("nonce").getBytes(StandardCharsets.UTF_8)));
+          header.put("nonce", base64UrlEncode(nonceDigest.digest(header.getString("nonce").getBytes(StandardCharsets.UTF_8))));
           headerSeg = base64UrlEncode(header.encode().getBytes(StandardCharsets.UTF_8));
         }
       }

@@ -34,6 +34,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.impl.asn.ASN1.OCTET_STRING;
 import static io.vertx.ext.auth.impl.asn.ASN1.parseASN1;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
@@ -64,7 +65,7 @@ public class PackedAttestation implements Attestation {
 
       // Check attStmt and it contains “x5c” then its a FULL attestation.
       JsonObject attStmt = attestation.getJsonObject("attStmt");
-      byte[] signature = attStmt.getBinary("sig");
+      byte[] signature = base64UrlDecode(attStmt.getString("sig"));
 
       if (attStmt.containsKey("x5c")) {
         // FULL basically means that it’s an attestation that chains to the manufacturer.

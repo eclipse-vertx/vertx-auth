@@ -36,6 +36,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.vertx.ext.auth.impl.Codec.base64MimeDecode;
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+
 /**
  * JWK https://tools.ietf.org/html/rfc7517
  * <p>
@@ -276,12 +279,12 @@ public final class JWK {
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
       case "RSA PUBLIC KEY":
-        publicKey = kf.generatePublic(new X509EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
+        publicKey = kf.generatePublic(new X509EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
         return;
       case "PRIVATE KEY":
       case "PRIVATE RSA KEY":
       case "RSA PRIVATE KEY":
-        privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(buffer.getBytes())));
+        privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
         return;
       default:
         throw new IllegalStateException("Invalid PEM content: " + kind);
@@ -440,17 +443,17 @@ public final class JWK {
   private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
     // public key
     if (jsonHasProperties(json, "n", "e")) {
-      final BigInteger n = new BigInteger(1, json.getBinary("n"));
-      final BigInteger e = new BigInteger(1, json.getBinary("e"));
+      final BigInteger n = new BigInteger(1, base64UrlDecode(json.getString("n")));
+      final BigInteger e = new BigInteger(1, base64UrlDecode(json.getString("e")));
       publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
       // private key
       if (jsonHasProperties(json, "d", "p", "q", "dp", "dq", "qi")) {
-        final BigInteger d = new BigInteger(1, json.getBinary("d"));
-        final BigInteger p = new BigInteger(1, json.getBinary("p"));
-        final BigInteger q = new BigInteger(1, json.getBinary("q"));
-        final BigInteger dp = new BigInteger(1, json.getBinary("dp"));
-        final BigInteger dq = new BigInteger(1, json.getBinary("dq"));
-        final BigInteger qi = new BigInteger(1, json.getBinary("qi"));
+        final BigInteger d = new BigInteger(1, base64UrlDecode(json.getString("d")));
+        final BigInteger p = new BigInteger(1, base64UrlDecode(json.getString("p")));
+        final BigInteger q = new BigInteger(1, base64UrlDecode(json.getString("q")));
+        final BigInteger dp = new BigInteger(1, base64UrlDecode(json.getString("dp")));
+        final BigInteger dq = new BigInteger(1, base64UrlDecode(json.getString("dq")));
+        final BigInteger qi = new BigInteger(1, base64UrlDecode(json.getString("qi")));
 
         privateKey = KeyFactory.getInstance("RSA").generatePrivate(new RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, qi));
       }
@@ -481,14 +484,14 @@ public final class JWK {
 
     // public key
     if (jsonHasProperties(json, "x", "y")) {
-      final BigInteger x = new BigInteger(1, json.getBinary("x"));
-      final BigInteger y = new BigInteger(1, json.getBinary("y"));
+      final BigInteger x = new BigInteger(1, base64UrlDecode(json.getString("x")));
+      final BigInteger y = new BigInteger(1, base64UrlDecode(json.getString("y")));
       publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(new ECPoint(x, y), parameters.getParameterSpec(ECParameterSpec.class)));
     }
 
     // private key
     if (jsonHasProperties(json, "d")) {
-      final BigInteger d = new BigInteger(1, json.getBinary("d"));
+      final BigInteger d = new BigInteger(1, base64UrlDecode(json.getString("d")));
       privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
     }
   }
@@ -496,7 +499,7 @@ public final class JWK {
   private void createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
     // public key
     if (jsonHasProperties(json, "x")) {
-      final byte[] key = json.getBinary("x");
+      final byte[] key = base64UrlDecode(json.getString("x"));
       final byte bitStringTag = (byte) 0x3;
 
       //  SPKI ::= SEQUENCE {
@@ -521,7 +524,7 @@ public final class JWK {
 
     // private key
     if (jsonHasProperties(json, "d")) {
-      final byte[] key = json.getBinary("d");
+      final byte[] key = base64UrlDecode(json.getString("d"));
       final byte octetStringTag = (byte) 0x4;
 
       byte[] asnKey = Buffer.buffer()
@@ -557,7 +560,7 @@ public final class JWK {
 
   private void createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
     mac = Mac.getInstance(alias);
-    mac.init(new SecretKeySpec(json.getBinary("k"), alias));
+    mac.init(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
   }
 
   public String getAlgorithm() {

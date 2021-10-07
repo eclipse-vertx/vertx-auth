@@ -30,6 +30,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+
 public interface Attestation {
 
   /**
@@ -94,7 +96,7 @@ public interface Attestation {
     }
 
     for (int i = 0; i < x5c.size(); i++) {
-      certChain.add(JWS.parseX5c(x5c.getBinary(i)));
+      certChain.add(JWS.parseX5c(base64UrlDecode(x5c.getString(i))));
     }
 
     return certChain;

@@ -39,4 +39,43 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.0</version>
+        <executions>
+          <execution>
+            <id>legacy-base64-itest</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>io/vertx/ext/auth/it/JWKLegacyBase64Test.java</include>
+              </includes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>router-extended-param-itest</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <systemProperties>
+                <io.vertx.web.route.param.extended-pattern>true</io.vertx.web.route.param.extended-pattern>
+              </systemProperties>
+              <includes>
+                <include>io/vertx/ext/web/it/RouterExtendedParamTest.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

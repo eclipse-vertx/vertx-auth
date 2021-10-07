@@ -44,6 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 
@@ -86,10 +87,10 @@ public class WebAuthnImpl implements WebAuthn {
     }
   }
 
-  private byte[] randomBase64URLBuffer(int length) {
+  private String randomBase64URLBuffer(int length) {
     final byte[] buff = new byte[length];
     random.nextBytes(buff);
-    return buff;
+    return base64UrlEncode(buff);
   }
 
   private void putOpt(JsonObject json, String key, Object value) {
@@ -132,11 +133,11 @@ public class WebAuthnImpl implements WebAuthn {
     }
   }
 
-  private static Buffer UUIDtoBuffer(UUID uuid) {
+  private static String uUIDtoBase64Url(UUID uuid) {
     Buffer buffer = Buffer.buffer(16);
     buffer.setLong(0, uuid.getMostSignificantBits());
     buffer.setLong(8, uuid.getLeastSignificantBits());
-    return buffer;
+    return base64UrlEncode(buffer.getBytes());
   }
 
   @Override
@@ -177,7 +178,7 @@ public class WebAuthnImpl implements WebAuthn {
         putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
 
         // put non null values for User
-        putOpt(json.getJsonObject("user"), "id", UUIDtoBuffer(UUID.randomUUID()));
+        putOpt(json.getJsonObject("user"), "id", uUIDtoBase64Url(UUID.randomUUID()));
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
@@ -321,7 +322,7 @@ public class WebAuthnImpl implements WebAuthn {
       // The client data (or session) is a base64 url encoded JSON
       // we specifically keep track of the binary representation as it will be
       // used later on during validation to verify signatures for tampering
-      final byte[] clientDataJSON = webauthn.getJsonObject("response").getBinary("clientDataJSON");
+      final byte[] clientDataJSON = base64UrlDecode(webauthn.getJsonObject("response").getString("clientDataJSON"));
       JsonObject clientData = new JsonObject(Buffer.buffer(clientDataJSON));
 
       // Step #2
@@ -466,7 +467,7 @@ public class WebAuthnImpl implements WebAuthn {
 
       // Step #5
       // Extract and parse auth data
-      AuthData authData = new AuthData(attestation.getBinary("authData"));
+      AuthData authData = new AuthData(base64UrlDecode(attestation.getString("authData")));
       // One extra check, we can verify that the relying party id is for the given domain
       if (request.getDomain() != null) {
         if (!MessageDigest.isEqual(authData.getRpIdHash(), hash("SHA-256", request.getDomain().getBytes(StandardCharsets.UTF_8)))) {
@@ -552,7 +553,7 @@ public class WebAuthnImpl implements WebAuthn {
 
     // Step #5
     // parse auth data
-    byte[] authenticatorData = response.getBinary("authenticatorData");
+    byte[] authenticatorData = base64UrlDecode(response.getString("authenticatorData"));
     AuthData authData = new AuthData(authenticatorData);
     // One extra check, we can verify that the relying party id is for the given domain
     if (request.getDomain() != null) {
@@ -599,7 +600,7 @@ public class WebAuthnImpl implements WebAuthn {
       // the decoded credential primary as a JWK
       JWK publicKey = CWK.toJWK(new JsonObject(CBOR.<Map<String, Object>>parse(parser)));
       // convert signature to buffer
-      byte[] signature = response.getBinary("signature");
+      byte[] signature = base64UrlDecode(response.getString("signature"));
       // verify signature
       JWS jws = new JWS(publicKey);
       if (!jws.verify(signature, signatureBase.getBytes())) {
