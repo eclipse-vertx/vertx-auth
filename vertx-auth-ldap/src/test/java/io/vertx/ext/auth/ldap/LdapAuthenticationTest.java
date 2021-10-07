@@ -12,151 +12,80 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap;
 
-import java.util.function.Consumer;
-
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
 import org.apache.directory.server.core.annotations.CreateDS;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.integ.CreateLdapServerRule;
+import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.test.core.VertxTestBase;
+import org.junit.runner.RunWith;
 
-@CreateDS(name = "myDS", partitions = { @CreatePartition(name = "test", suffix = "dc=myorg,dc=com") })
-@CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", address = "localhost") })
-@ApplyLdifFiles({ "ldap.ldif" })
-public class LdapAuthenticationTest extends VertxTestBase {
+@CreateDS(name = "myDS", partitions = {@CreatePartition(name = "test", suffix = "dc=myorg,dc=com")})
+@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP", address = "localhost")})
+@ApplyLdifFiles({"ldap.ldif"})
+@RunWith(VertxUnitRunner.class)
+public class LdapAuthenticationTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   @ClassRule
   public static CreateLdapServerRule serverRule = new CreateLdapServerRule();
   private LdapAuthentication authProvider;
 
   @Test
-  public void testSimpleAuthenticate() throws Exception {
+  public void testSimpleAuthenticate(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testSimpleAuthenticateFailWrongPassword() throws Exception {
-    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "wrongpassword");
-    authProvider.authenticate(credentials, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testSimpleAuthenticateFailWrongUser() throws Exception {
-    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("frank", "sausages");
-    authProvider.authenticate(credentials, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
-  }
-/*
-  @Test
-  public void testHasRole() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("role:morris_dancer", handler), res -> {
-      assertTrue(res.succeeded());
-      assertTrue(res.result());
-    }));
-    await();
-  }
-
-  @Test
-  public void testNotHasRole() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("role:manager", handler), res -> {
-      assertTrue(res.succeeded());
-      assertFalse(res.result());
-    }));
-    await();
-  }
-
-  @Test
-  public void testHasPermission() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("do_actual_work", handler), res -> {
-      assertTrue(res.succeeded());
-      assertTrue(res.result());
-    }));
-    await();
-  }
-
-  @Test
-  public void testNotHasPermission() throws Exception {
-    loginThen(user -> this.<Boolean>executeTwice(handler -> user.isAuthorized("play_golf", handler), res -> {
-      assertTrue(res.succeeded());
-      assertFalse(res.result());
-    }));
-    await();
-  }
-*/
-  private void loginThen(Consumer<User> runner) throws Exception {
-    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      runner.accept(user);
-    }));
-  }
-
-  private <T> void executeTwice(Consumer<Handler<AsyncResult<T>>> action, Consumer<AsyncResult<T>> resultConsumer) {
-    action.accept(res -> {
-      resultConsumer.accept(res);
-      action.accept(res2 -> {
-        resultConsumer.accept(res);
-        testComplete();
+    authProvider.authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
       });
-    });
   }
 
-  @Override
+  @Test
+  public void testSimpleAuthenticateFailWrongPassword(TestContext should) {
+    final Async test = should.async();
+
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "wrongpassword");
+    authProvider.authenticate(credentials)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testSimpleAuthenticateFailWrongUser(TestContext should) {
+    final Async test = should.async();
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("frank", "sausages");
+    authProvider.authenticate(credentials)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
+  }
+
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     LdapAuthenticationOptions ldapOptions = new LdapAuthenticationOptions().setUrl("ldap://localhost:" + serverRule.getLdapServer().getPort())
-        .setAuthenticationQuery("uid={0},ou=Users,dc=myorg,dc=com");
+      .setAuthenticationQuery("uid={0},ou=Users,dc=myorg,dc=com");
 
-    authProvider = LdapAuthentication.create(vertx, ldapOptions);
+    authProvider = LdapAuthentication.create(rule.vertx(), ldapOptions);
   }
-/*
-  @Test
-  public void testHasWildcardPermission() throws Exception {
-    JsonObject authInfo = new JsonObject().put("username", "paulo").put("password", "secret");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      // paulo can do anything...
-      user.isAuthorized("do_actual_work", onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-
-  @Test
-  public void testHasWildcardMatchPermission() throws Exception {
-    JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "secret");
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      // editor can edit any newsletter item...
-      user.isAuthorized("newsletter:edit:13", onSuccess(res -> {
-        assertTrue(res);
-        testComplete();
-      }));
-    }));
-    await();
-  }
-*/
 }

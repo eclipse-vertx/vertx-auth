@@ -16,23 +16,27 @@
 package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.*;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class JWTConcurrentCreationTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class JWTConcurrentCreationTest {
 
-    @Override
-    protected VertxOptions getOptions() {
-        return new VertxOptions().setEventLoopPoolSize(16);
-    }
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext(new VertxOptions().setEventLoopPoolSize(16));
 
-    @Test
-    public void testParallelCreation() {
-        vertx.deployVerticle(DummyVerticle.class.getName(), new DeploymentOptions().setInstances(512), res -> {
-            assertTrue(res.succeeded());
-            testComplete();
-        });
+  @Test
+  public void testParallelCreation(TestContext should) {
+    final Async test = should.async();
+    rule.vertx()
+      .deployVerticle(DummyVerticle.class.getName(), new DeploymentOptions().setInstances(512))
+      .onFailure(should::fail)
+      .onSuccess(id -> test.complete());
 
-        await();
-    }
+  }
 }

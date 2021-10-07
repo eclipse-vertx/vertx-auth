@@ -15,21 +15,32 @@
  */
 package io.vertx.ext.auth.htdigest;
 
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class HtdigestAuthTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class HtdigestAuthTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   protected HtdigestAuth authProvider;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    authProvider = HtdigestAuth.create(vertx);
+  @Before
+  public void setUp() {
+    authProvider = HtdigestAuth.create(rule.vertx());
   }
 
   @Test
-  public void testValidDigestWithQOP() {
+  public void testValidDigestWithQOP(TestContext should) {
+    final Async test = should.async();
+
     HtdigestCredentials authInfo = new HtdigestCredentials()
       .setMethod("GET")
       .setUsername("Mufasa")
@@ -40,16 +51,20 @@ public class HtdigestAuthTest extends VertxTestBase {
       .setNc("00000001")
       .setCnonce("0a4f113b")
       .setResponse("6629fae49393a05397450978507c4ef1");
-    
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+
+    authProvider
+      .authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 
   @Test
-  public void testValidDigestWithoutQOP() {
+  public void testValidDigestWithoutQOP(TestContext should) {
+    final Async test = should.async();
+
     HtdigestCredentials authInfo = new HtdigestCredentials()
       .setMethod("GET")
       .setUsername("Mufasa")
@@ -59,12 +74,13 @@ public class HtdigestAuthTest extends VertxTestBase {
       .setNc("00000001")
       .setCnonce("0a4f113b")
       .setResponse("670fd8c2df070c60b045671b8b24ff02");
-    
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
-  }
 
+    authProvider
+      .authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
+  }
 }

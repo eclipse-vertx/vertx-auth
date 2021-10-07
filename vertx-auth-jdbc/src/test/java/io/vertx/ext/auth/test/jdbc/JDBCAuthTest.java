@@ -21,7 +21,13 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import io.vertx.core.json.JsonArray;
@@ -29,12 +35,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.test.core.VertxTestBase;
+import org.junit.runner.RunWith;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class JDBCAuthTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class JDBCAuthTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   static final List<String> SQL = new ArrayList<>();
 
@@ -83,7 +93,7 @@ public class JDBCAuthTest extends VertxTestBase {
   public static void createDb() throws Exception {
     Connection conn = DriverManager.getConnection(config().getString("url"));
     for (String sql : SQL) {
-      System.out.println("Executing: "  + sql);
+      System.out.println("Executing: " + sql);
       conn.createStatement().execute(sql);
     }
   }
@@ -96,111 +106,145 @@ public class JDBCAuthTest extends VertxTestBase {
 
   protected JDBCAuth authProvider;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     authProvider = createProvider().setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
   }
 
   protected JDBCAuth createProvider() {
-    JDBCClient client = JDBCClient.create(vertx, config());
-    return JDBCAuth.create(vertx, client);
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
+    JDBCClient client = JDBCClient.create(rule.vertx(), config());
+    return JDBCAuth.create(rule.vertx(), client);
   }
 
   @Test
-  public void testAuthenticate() {
+  public void testAuthenticate(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 
   @Test
-  public void testAuthenticateFailBadPwd() {
+  public void testAuthenticateFailBadPwd(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "eggs");
-    authProvider.authenticate(credentials, onFailure(v -> {
-      assertEquals("Invalid username/password", v.getMessage());
-      testComplete();
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onSuccess(user -> should.fail("This test should have failed!"))
+      .onFailure(err -> {
+        should.assertEquals("Invalid username/password", err.getMessage());
+        test.complete();
+      });
   }
 
   @Test
-  public void testAuthenticateFailBadUser() {
+  public void testAuthenticateFailBadUser(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("blah", "whatever");
-    authProvider.authenticate(credentials, onFailure(v -> {
-      assertEquals("Invalid username/password", v.getMessage());
-      testComplete();
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onSuccess(user -> should.fail("This test should have failed!"))
+      .onFailure(err -> {
+        should.assertEquals("Invalid username/password", err.getMessage());
+        test.complete();
+      });
   }
 
   @Test
-  public void testAuthoriseHasRole() {
+  public void testAuthoriseHasRole(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      user.isAuthorized("role:dev", onSuccess(has -> {
-        assertTrue(has);
-        testComplete();
-      }));
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        user.isAuthorized("role:dev")
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertTrue(has);
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthoriseNotHasRole() {
+  public void testAuthoriseNotHasRole(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      user.isAuthorized("role:manager", onSuccess(has -> {
-        assertFalse(has);
-        testComplete();
-      }));
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        user.isAuthorized("role:manager")
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertFalse(has);
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthoriseHasPermission() {
+  public void testAuthoriseHasPermission(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      user.isAuthorized("commit_code", onSuccess(has -> {
-        assertTrue(has);
-        testComplete();
-      }));
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        user.isAuthorized("commit_code")
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertTrue(has);
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthoriseNotHasPermission() {
+  public void testAuthoriseNotHasPermission(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      user.isAuthorized("eat_sandwich", onSuccess(has -> {
-        assertFalse(has);
-        testComplete();
-      }));
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        user.isAuthorized("eat_sandwich")
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertFalse(has);
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthenticateWithNonce() {
+  public void testAuthenticateWithNonce(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("paulo", "secret");
-    authProvider.authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
+    authProvider
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 }
