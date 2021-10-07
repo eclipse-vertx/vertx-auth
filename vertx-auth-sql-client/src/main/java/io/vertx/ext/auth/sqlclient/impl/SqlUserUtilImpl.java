@@ -24,7 +24,8 @@ import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
 
 import java.security.SecureRandom;
-import java.util.Base64;
+
+import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
 public class SqlUserUtilImpl implements SqlUserUtil {
 
@@ -65,7 +66,7 @@ public class SqlUserUtilImpl implements SqlUserUtil {
       username,
       strategy.hash("pbkdf2",
         null,
-        Base64.getEncoder().encodeToString(salt),
+        base64Encode(salt),
         password),
       resultHandler
     );

@@ -43,7 +43,7 @@ public class WebAuthnOptions {
   /* Android Keystore Root is not published anywhere.
    * This certificate was extracted from one of the attestations
    * The last certificate in x5c must match this certificate
-   * This needs to be checked to ensure that malicious party wont generate fake attestations
+   * This needs to be checked to ensure that malicious party won't generate fake attestations
    */
   private static final String ANDROID_KEYSTORE_ROOT =
     "MIICizCCAjKgAwIBAgIJAKIFntEOQ1tXMAoGCCqGSM49BAMCMIGYMQswCQYDVQQG" +
@@ -132,7 +132,7 @@ public class WebAuthnOptions {
    *
    * Valid until 18 March 2029
    */
-  final String FIDO_MDS3_ROOT_CERTIFICATE =
+  private static final String FIDO_MDS3_ROOT_CERTIFICATE =
     "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G" +
       "A1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjMxEzARBgNVBAoTCkdsb2JhbFNp" +
       "Z24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDkwMzE4MTAwMDAwWhcNMjkwMzE4" +

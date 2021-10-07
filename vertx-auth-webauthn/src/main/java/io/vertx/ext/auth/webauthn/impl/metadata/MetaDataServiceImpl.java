@@ -20,7 +20,6 @@ import io.vertx.ext.auth.webauthn.MetaDataService;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
@@ -28,10 +27,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.vertx.core.json.impl.JsonUtil.BASE64_DECODER;
+import static io.vertx.ext.auth.impl.Codec.base64Decode;
 
 public class MetaDataServiceImpl implements MetaDataService {
 
-  private static final Base64.Decoder BASE64DEC = Base64.getDecoder();
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
   private final VertxInternal vertx;
@@ -80,7 +79,7 @@ public class MetaDataServiceImpl implements MetaDataService {
             // states:
             // Each string in the array is a base64-encoded (Section 4 of [RFC4648] -- not base64url-encoded) DER
             // [ITU.X690.2008] PKIX certificate value.
-            certChain.add(JWS.parseX5c(BASE64DEC.decode(chain.getString(i).getBytes(StandardCharsets.UTF_8))));
+            certChain.add(JWS.parseX5c(base64Decode(chain.getString(i))));
           }
           // add the root certificate
           certChain.add(options.getRootCertificate("mds"));

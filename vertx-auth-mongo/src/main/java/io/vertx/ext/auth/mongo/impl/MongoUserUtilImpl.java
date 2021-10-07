@@ -26,9 +26,10 @@ import io.vertx.ext.auth.mongo.MongoUserUtil;
 import io.vertx.ext.mongo.MongoClient;
 
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+
+import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
 public class MongoUserUtilImpl implements MongoUserUtil {
 
@@ -63,7 +64,7 @@ public class MongoUserUtilImpl implements MongoUserUtil {
       username,
       strategy.hash("pbkdf2",
         null,
-        Base64.getMimeEncoder().encodeToString(salt),
+        base64Encode(salt),
         password),
       resultHandler
     );

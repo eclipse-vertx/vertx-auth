@@ -62,6 +62,9 @@ public final class Codec {
   private static final Base64.Encoder BASE64_NOPADDING = Base64.getEncoder().withoutPadding();
   private static final Base64.Decoder BASE64_DECODER = Base64.getDecoder();
 
+  private static final Base64.Encoder BASE64MIME = Base64.getMimeEncoder();
+  private static final Base64.Decoder BASE64MIME_DECODER = Base64.getMimeDecoder();
+
   public static String base16Encode(byte[] bytes) {
     byte[] base16 = new byte[bytes.length * 2];
     for (int i = 0; i < bytes.length; i++) {
@@ -69,7 +72,7 @@ public final class Codec {
       base16[i * 2] = BASE16[v >>> 4];
       base16[i * 2 + 1] = BASE16[v & 0x0F];
     }
-    return new String(base16);
+    return new String(base16, StandardCharsets.ISO_8859_1);
   }
 
   public static byte[] base16Decode(String base16) {
@@ -188,6 +191,10 @@ public final class Codec {
     return BASE64URL_DECODER.decode(base64);
   }
 
+  public static byte[] base64UrlDecode(byte[] base64) {
+    return BASE64URL_DECODER.decode(base64);
+  }
+
   public static String base64Encode(byte[] bytes) {
     return BASE64.encodeToString(bytes);
   }
@@ -198,5 +205,21 @@ public final class Codec {
 
   public static byte[] base64Decode(String base64) {
     return BASE64_DECODER.decode(base64);
+  }
+
+  public static byte[] base64Decode(byte[] base64) {
+    return BASE64_DECODER.decode(base64);
+  }
+
+  public static String base64MimeEncode(byte[] bytes) {
+    return BASE64MIME.encodeToString(bytes);
+  }
+
+  public static byte[] base64MimeDecode(String base64) {
+    return BASE64MIME_DECODER.decode(base64);
+  }
+
+  public static byte[] base64MimeDecode(byte[] base64) {
+    return BASE64MIME_DECODER.decode(base64);
   }
 }

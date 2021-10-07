@@ -34,9 +34,9 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
+import static io.vertx.ext.auth.impl.Codec.base64Decode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.verifySignature;
@@ -51,9 +51,6 @@ import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.verifySign
  * @author <a href="mailto:pmlopes@gmail.com>Paulo Lopes</a>
  */
 public class AndroidSafetynetAttestation implements Attestation {
-
-  // codecs
-  private static final Base64.Decoder b64dec = Base64.getDecoder();
 
   @Override
   public String fmt() {
@@ -89,7 +86,7 @@ public class AndroidSafetynetAttestation implements Attestation {
         .appendBytes(clientDataHash);
       // 3. Hash nonceBase using SHA256 to create nonceBuffer.
       // 4. Check that “nonce” is set to expectedNonce
-      if (!MessageDigest.isEqual(hash("SHA-256", nonceBase.getBytes()), b64dec.decode(token.getJsonObject("payload").getString("nonce")))) {
+      if (!MessageDigest.isEqual(hash("SHA-256", nonceBase.getBytes()), base64Decode(token.getJsonObject("payload").getString("nonce")))) {
         throw new AttestationException("JWS nonce does not contains expected nonce!");
       }
       // 5. Check that “ctsProfileMatch” is set to true. If its not set to true, that means that device has been rooted
@@ -113,7 +110,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       List<X509Certificate> certChain = new ArrayList<>();
 
       for (int i = 0; i < x5c.size(); i++) {
-        final byte[] bytes = b64dec.decode(x5c.getString(i));
+        final byte[] bytes = base64Decode(x5c.getString(i));
         certChain.add(JWS.parseX5c(bytes));
         // patch the x5c data to be base64url
         x5c.set(i, bytes);

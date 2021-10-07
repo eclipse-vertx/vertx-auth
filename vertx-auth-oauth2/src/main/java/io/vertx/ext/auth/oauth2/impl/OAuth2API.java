@@ -33,11 +33,12 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
 /**
  * @author Paulo Lopes
@@ -178,7 +179,7 @@ public class OAuth2API {
 
     if (confidentialClient) {
       String basic = config.getClientId() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+      headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
     // Enable the system to send authorization params in the body (for example github does not require to be in the header)
@@ -270,7 +271,7 @@ public class OAuth2API {
 
     if (confidentialClient) {
       String basic = config.getClientId() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+      headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
     final JsonObject form = new JsonObject()
@@ -352,7 +353,7 @@ public class OAuth2API {
 
     if (confidentialClient) {
       String basic = config.getClientId() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+      headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
     }
 
     final JsonObject form = new JsonObject();

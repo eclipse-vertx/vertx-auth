@@ -361,7 +361,7 @@ public class AuthOAuth2Examples {
       new OAuth2Options()
         .setClientId("clientId")
         .setClientSecret("clientSecret")
-        .setSite("http://keycloakhost:keycloakport/auth/realms/{realm}")
+        .setSite("https://keycloakhost:keycloakport/auth/realms/{realm}")
         .setTenant("your-realm"))
       .onSuccess(oauth2 -> {
         // ...
@@ -418,7 +418,7 @@ public class AuthOAuth2Examples {
       new OAuth2Options()
         .setClientId("clientId")
         .setTenant("your_realm")
-        .setSite("http://server:port/auth/realms/{tenant}"))
+        .setSite("https://server:port/auth/realms/{tenant}"))
       .onSuccess(oauth2 -> {
         // the setup call succeeded.
         // at this moment your auth is ready to use

@@ -29,6 +29,7 @@ import io.vertx.ext.auth.webauthn.impl.attestation.tpm.CertInfo;
 import io.vertx.ext.auth.webauthn.impl.attestation.tpm.PubArea;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -324,7 +325,7 @@ public class TPMAttestation implements Attestation {
         ASN1.ASN val = el.object(1, ASN1.UTF8_STRING);
 
         if (MessageDigest.isEqual(oid.binary(0), new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x01})) {
-          if (!TPM_MANUFACTURERS.contains(new String(val.binary(0)))) {
+          if (!TPM_MANUFACTURERS.contains(new String(val.binary(0), StandardCharsets.UTF_8))) {
             throw new AttestationException("Unknown Manufacturer id");
           }
         }

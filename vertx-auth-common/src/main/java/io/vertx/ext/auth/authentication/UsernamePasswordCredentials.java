@@ -17,7 +17,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+
+import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
 /**
  * Credentials used by any {@link AuthenticationProvider} that requires tokens, for example JWT, Oauth2, OpenId Connect
@@ -105,7 +106,7 @@ public class UsernamePasswordCredentials implements Credentials {
         ":" +
         (password == null ? "" : password);
 
-    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+    return "Basic " + base64Encode(credentials.getBytes(StandardCharsets.UTF_8));
   }
 
 }
