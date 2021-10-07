@@ -282,7 +282,7 @@ public final class JWT {
         // post value.
         synchronized (this) {
           nonceDigest.reset();
-          header.put("nonce", nonceDigest.digest(header.getString("nonce").getBytes(StandardCharsets.UTF_8)));
+          header.put("nonce", base64UrlEncode(nonceDigest.digest(header.getString("nonce").getBytes(StandardCharsets.UTF_8))));
           headerSeg = base64UrlEncode(header.encode().getBytes(StandardCharsets.UTF_8));
         }
       }

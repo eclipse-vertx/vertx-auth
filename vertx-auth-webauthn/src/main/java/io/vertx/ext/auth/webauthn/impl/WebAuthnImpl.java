@@ -87,10 +87,10 @@ public class WebAuthnImpl implements WebAuthn {
     }
   }
 
-  private byte[] randomBase64URLBuffer(int length) {
+  private String randomBase64URLBuffer(int length) {
     final byte[] buff = new byte[length];
     random.nextBytes(buff);
-    return buff;
+    return base64UrlEncode(buff);
   }
 
   private void putOpt(JsonObject json, String key, Object value) {
@@ -133,11 +133,11 @@ public class WebAuthnImpl implements WebAuthn {
     }
   }
 
-  private static Buffer UUIDtoBuffer(UUID uuid) {
+  private static String uUIDtoBase64Url(UUID uuid) {
     Buffer buffer = Buffer.buffer(16);
     buffer.setLong(0, uuid.getMostSignificantBits());
     buffer.setLong(8, uuid.getLeastSignificantBits());
-    return buffer;
+    return base64UrlEncode(buffer.getBytes());
   }
 
   @Override
@@ -178,7 +178,7 @@ public class WebAuthnImpl implements WebAuthn {
         putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
 
         // put non null values for User
-        putOpt(json.getJsonObject("user"), "id", UUIDtoBuffer(UUID.randomUUID()));
+        putOpt(json.getJsonObject("user"), "id", uUIDtoBase64Url(UUID.randomUUID()));
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
