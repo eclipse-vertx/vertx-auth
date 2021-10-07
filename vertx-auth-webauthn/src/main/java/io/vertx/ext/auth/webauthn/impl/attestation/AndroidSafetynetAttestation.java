@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.verifySignature;
 
@@ -77,7 +78,7 @@ public class AndroidSafetynetAttestation implements Attestation {
         throw new AttestationException("Missing {ver} in attStmt");
       }
       // response is a JWT
-      JsonObject token = JWT.parse(attStmt.getBinary("response"));
+      JsonObject token = JWT.parse(base64UrlDecode(attStmt.getString("response")));
 
       // verify the payload:
       // 1. Hash clientDataJSON using SHA256, to create clientDataHash
@@ -138,7 +139,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       verifySignature(
         PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")),
         certChain.get(0),
-        token.getBinary("signature"),
+        base64UrlDecode(token.getString("signature")),
         token.getString("signatureBase").getBytes(StandardCharsets.UTF_8));
 
       return new AttestationCertificates()

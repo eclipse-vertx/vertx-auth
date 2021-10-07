@@ -35,6 +35,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 
 /**
@@ -98,7 +99,7 @@ public class FidoU2fAttestation implements Attestation {
       verifySignature(
         PublicKeyCredential.ES256,
         certChain.get(0),
-        attStmt.getBinary("sig"),
+        base64UrlDecode(attStmt.getString("sig")),
         signatureBase.getBytes());
 
       return new AttestationCertificates()
@@ -138,8 +139,8 @@ public class FidoU2fAttestation implements Attestation {
 
       return Buffer.buffer()
         .appendByte((byte) 0x04)
-        .appendBytes(key.getBinary("-2"))
-        .appendBytes(key.getBinary("-3"))
+        .appendBytes(base64UrlDecode(key.getString("-2")))
+        .appendBytes(base64UrlDecode(key.getString("-3")))
         .getBytes();
     } catch (IOException e) {
       throw new DecodeException(e.getMessage());

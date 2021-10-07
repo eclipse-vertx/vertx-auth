@@ -32,6 +32,7 @@ import java.security.cert.*;
 import java.util.Collections;
 import java.util.List;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
 
@@ -85,7 +86,7 @@ public class AndroidKeyAttestation implements Attestation {
       // 2. Verify signature sig over the signatureBase using
       //    public key extracted from leaf certificate in x5c
       JsonObject attStmt = attestation.getJsonObject("attStmt");
-      byte[] signature = attStmt.getBinary("sig");
+      byte[] signature = base64UrlDecode(attStmt.getString("sig"));
       List<X509Certificate> certChain = parseX5c(attStmt.getJsonArray("x5c"));
       if (certChain.size() == 0) {
         throw new AttestationException("Invalid certificate chain");
@@ -161,7 +162,7 @@ public class AndroidKeyAttestation implements Attestation {
         if (rootCertificate == null) {
           throw new AttestationException("Root certificate is invalid!");
         }
-        if (!MessageDigest.isEqual(rootCertificate.getEncoded(), x5c.getBinary(x5c.size() - 1))) {
+        if (!MessageDigest.isEqual(rootCertificate.getEncoded(), base64UrlDecode(x5c.getString(x5c.size() - 1)))) {
           throw new AttestationException("Root certificate is invalid!");
         }
       }

@@ -33,6 +33,8 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
+import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+
 public class MetaDataEntry implements Shareable {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataEntry.class);
@@ -107,7 +109,7 @@ public class MetaDataEntry implements Shareable {
       // verify the hash
       MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
       byte[] digest = sha256.digest(rawStatement);
-      if (MessageDigest.isEqual(digest, entry.getBinary("hash"))) {
+      if (MessageDigest.isEqual(digest, base64UrlDecode(entry.getString("hash")))) {
         this.error = null;
       } else {
         this.error = "MDS entry hash did not match corresponding hash in MDS TOC";
@@ -145,5 +147,9 @@ public class MetaDataEntry implements Shareable {
 
   JsonObject statement() {
     return statement;
+  }
+
+  int version() {
+    return version;
   }
 }
