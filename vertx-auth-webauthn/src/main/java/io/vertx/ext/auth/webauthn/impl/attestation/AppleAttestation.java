@@ -34,6 +34,8 @@ import java.util.*;
 
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.ATTESTATION_ANONCA;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.statementAttestationTypesContains;
 
 /**
  * Implementation of the Apple attestation check.
@@ -83,12 +85,12 @@ public class AppleAttestation implements Attestation {
       final X509Certificate credCert = certChain.get(0);
       byte[] appleExtension = credCert.getExtensionValue("1.2.840.113635.100.8.2");
       ASN1.ASN extension = ASN1.parseASN1(appleExtension);
-      if (extension.tag.type != OCTET_STRING) {
+      if (!extension.is(OCTET_STRING)) {
         throw new AttestationException("1.2.840.113635.100.8.2 Extension is not an ASN.1 OCTET string!");
       }
       // parse the octet as ASN.1 and expect it to se a sequence
       extension = parseASN1(extension.binary(0));
-      if (extension.tag.type != SEQUENCE) {
+      if (!extension.is(SEQUENCE)) {
         throw new AttestationException("1.2.840.113635.100.8.2 Extension is not an ASN.1 SEQUENCE!");
       }
       if (!MessageDigest.isEqual(nonce, extension.object(0).object(0).binary(0))) {
@@ -108,10 +110,17 @@ public class AppleAttestation implements Attestation {
         null;
 
       // meta data check
-      metadata.verifyMetadata(
+      JsonObject statement = metadata.verifyMetadata(
         authData.getAaguidString(),
         alg,
         certChain);
+
+      if (statement != null) {
+        // verify that the statement allows this type of attestation
+        if (!statementAttestationTypesContains(statement, ATTESTATION_ANONCA)) {
+          throw new AttestationException("Metadata does not indicate support for anonca attestations");
+        }
+      }
 
       return new AttestationCertificates()
         .setAlg(alg)

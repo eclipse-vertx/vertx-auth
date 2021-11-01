@@ -31,24 +31,27 @@ public class ASN1 {
   public final static int NULL = 0x05;
   public final static int OBJECT_IDENTIFIER = 0x06;
   public final static int REAL = 0x09;
-  public final static int ENUMERATED = 0x0a;
+  public final static int ENUMERATED = 0x0A;
+  public final static int UTF8_STRING = 0x0C;
 
-  public final static int SEQUENCE = 0x30;
-  public final static int SET = 0x31;
+  public final static int SEQUENCE = 0x10;
+  public final static int SET = 0x11;
 
   public final static int NUMERIC_STRING = 0x12;
   public final static int PRINTABLE_STRING = 0x13;
   public final static int VIDEOTEX_STRING = 0x15;
   public final static int IA5_STRING = 0x16;
+  public final static int UTC_TIME = 0x17;
   public final static int GRAPHIC_STRING = 0x19;
   public final static int ISO646_STRING = 0x1A;
   public final static int GENERAL_STRING = 0x1B;
 
-  public final static int UTF8_STRING = 0x0C;
   public final static int UNIVERSAL_STRING = 0x1C;
   public final static int BMP_STRING = 0x1E;
 
-  public final static int UTC_TIME = 0x17;
+
+  public final static int CONSTRUCTED = 0x20;
+  public final static int CONTEXT_SPECIFIC = 0x80;
 
   public static byte[] length(int x) {
     if (x <= 127) {
@@ -90,7 +93,7 @@ public class ASN1 {
 
     public ASN object(int index, int type) {
       ASN object = (ASN) value.get(index);
-      if (object.tag.type != type) {
+      if (!object.is(type)) {
         throw new ClassCastException("Object at index(" + index + ") is not of type: " + type);
       }
       return object;
@@ -130,6 +133,14 @@ public class ASN1 {
 
     public int length() {
       return value.size();
+    }
+
+    public boolean is(int number) {
+      if (tag.constructed) {
+        return tag.type == CONSTRUCTED + number;
+      } else {
+        return tag.type == number;
+      }
     }
   }
 

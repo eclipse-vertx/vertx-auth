@@ -40,6 +40,8 @@ import static io.vertx.ext.auth.impl.Codec.base64Decode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.verifySignature;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.ATTESTATION_ANONCA;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.statementAttestationTypesContains;
 
 /**
  * Implementation of the "android-safetynet" attestation check.
@@ -97,7 +99,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       // 6. Verify the timestamp
       long timestampMs = token.getJsonObject("payload").getLong("timestampMs", 0L);
       long now = System.currentTimeMillis();
-      if (timestampMs > now || (timestampMs + 60_000L) < now) {
+      if (timestampMs > now || (timestampMs + options.getTimeout()) < now) {
         throw new AttestationException("timestampMs is invalid!");
       }
 
@@ -123,7 +125,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       }
 
       // If available, validate attestation alg and x5c with info in the metadata statement
-      metadata.verifyMetadata(
+      JsonObject statement = metadata.verifyMetadata(
         authData.getAaguidString(),
         PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")),
         certChain,
@@ -131,6 +133,13 @@ public class AndroidSafetynetAttestation implements Attestation {
         // Attach it to the end of header.x5c and try to verify it
         options.getRootCertificate(fmt())
       );
+
+      if (statement != null) {
+        // verify that the statement allows this type of attestation
+        if (!statementAttestationTypesContains(statement, ATTESTATION_ANONCA)) {
+          throw new AttestationException("Metadata does not indicate support for anonca attestations");
+        }
+      }
 
       // Verify the signature
       verifySignature(

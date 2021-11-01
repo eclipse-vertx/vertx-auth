@@ -68,7 +68,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
         try {
           // verify jwt
-          JsonObject json = jwt.decode(body.toString(), true);
+          JsonObject json = jwt.decode(body.toString(), true, options.getRootCrls());
           // verify cert chain
           JsonArray chain = json.getJsonObject("header").getJsonArray("x5c");
           List<X509Certificate> certChain = new ArrayList<>();

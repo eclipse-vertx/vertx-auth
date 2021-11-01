@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,11 +86,11 @@ public final class JWT {
 
   /**
    * Enable/Disable support for embedded keys. Default {@code false}.
-   *
+   * <p>
    * By default this is disabled as it could be used as an attack vector to the application. A malicious user could
    * generate a self signed certificate and embed the public certificate on the token, which would always pass the
    * validation.
-   *
+   * <p>
    * Users of this feature should regardless of the validation status, ensure that the chain is valid by adding a
    * well known root certificate (that has been previously agreed with the server).
    *
@@ -173,10 +174,14 @@ public final class JWT {
   }
 
   public JsonObject decode(final String token) {
-    return decode(token, false);
+    return decode(token, false, null);
   }
 
-  public JsonObject decode(final String token, boolean full) {
+  public JsonObject decode(final String token, List<X509CRL> crls) {
+    return decode(token, false, crls);
+  }
+
+  public JsonObject decode(final String token, boolean full, List<X509CRL> crls) {
     // lock the secure state
     String[] segments = token.split("\\.");
 
@@ -223,7 +228,7 @@ public final class JWT {
 
     // handle the x5c case, only in allowEmbeddedKey mode
     if (allowEmbeddedKey && header.containsKey("x5c")) {
-       // if signatureSeg is null fail
+      // if signatureSeg is null fail
       if (signatureSeg == null) {
         throw new IllegalStateException("missing signature segment");
       }
@@ -247,9 +252,9 @@ public final class JWT {
 
         if (rootCA != null) {
           certChain.add(rootCA);
-          CertificateHelper.checkValidity(certChain, true,null);
+          CertificateHelper.checkValidity(certChain, true, crls);
         } else {
-          CertificateHelper.checkValidity(certChain, false, null);
+          CertificateHelper.checkValidity(certChain, false, crls);
         }
 
         if (JWS.verifySignature(alg, certChain.get(0), base64UrlDecode(signatureSeg), (headerSeg + "." + payloadSeg).getBytes(UTF8))) {

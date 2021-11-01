@@ -35,6 +35,7 @@ import java.util.List;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.*;
 
 /**
  * Implementation of the "android-key" attestation check.
@@ -115,12 +116,12 @@ public class AndroidKeyAttestation implements Attestation {
       }
       // 2. Find Android KeyStore Extension with OID “1.3.6.1.4.1.11129.2.1.17” in certificate extensions.
       ASN attestationExtension = parseASN1(Buffer.buffer(leafCert.getExtensionValue("1.3.6.1.4.1.11129.2.1.17")));
-      if (attestationExtension.tag.type != OCTET_STRING) {
+      if (!attestationExtension.is(OCTET_STRING)) {
         throw new AttestationException("Attestation Extension is not an ASN.1 OCTECT string!");
       }
       // parse the octec as ASN.1 and expect it to se a sequence
       attestationExtension = parseASN1(Buffer.buffer(attestationExtension.binary(0)));
-      if (attestationExtension.tag.type != SEQUENCE) {
+      if (!attestationExtension.is(SEQUENCE)) {
         throw new AttestationException("Attestation Extension Value is not an ASN.1 SEQUENCE!");
       }
       // get the data at index 4 (certificate challenge)
@@ -164,6 +165,20 @@ public class AndroidKeyAttestation implements Attestation {
         }
         if (!MessageDigest.isEqual(rootCertificate.getEncoded(), base64UrlDecode(x5c.getString(x5c.size() - 1)))) {
           throw new AttestationException("Root certificate is invalid!");
+        }
+      }
+
+      if (statement != null) {
+        // verify that the statement allows this type of attestation
+        if (!statementAttestationTypesContains(statement, ATTESTATION_ANONCA)) {
+          throw new AttestationException("Metadata does not indicate support for anonca attestations");
+        }
+      }
+
+      if (statement != null) {
+        // verify that the statement allows this type of attestation
+        if (!statementAttestationTypesContains(statement, ATTESTATION_ANONCA)) {
+          throw new AttestationException("Metadata does not indicate support for anonca attestations");
         }
       }
 

@@ -61,7 +61,7 @@ public class MetaDataEntry implements Shareable {
       throw new IllegalArgumentException("MetaData statement cannot be null");
     }
     this.entry = null;
-    this.statement = statement;
+    this.statement = new JsonObject(Collections.unmodifiableMap(statement.getMap()));
     this.error = null;
     this.version = statement.getInteger("schema", 2);
   }
@@ -71,9 +71,9 @@ public class MetaDataEntry implements Shareable {
       throw new IllegalArgumentException("toc and statement cannot be null");
     }
 
-    this.entry = tocEntry;
+    this.entry = new JsonObject(Collections.unmodifiableMap(tocEntry.getMap()));
     this.error = error;
-    this.statement = statement;
+    this.statement = new JsonObject(Collections.unmodifiableMap(statement.getMap()));
     this.version = statement.getInteger("schema", 2);
 
     // convert status report effective date to a Instant
@@ -90,8 +90,8 @@ public class MetaDataEntry implements Shareable {
       throw new IllegalArgumentException("toc and statement cannot be null");
     }
 
-    this.entry = tocEntry;
-    this.statement = new JsonObject(Buffer.buffer(base64Decode(rawStatement)));
+    this.entry = new JsonObject(Collections.unmodifiableMap(tocEntry.getMap()));
+    this.statement = new JsonObject(Collections.unmodifiableMap(new JsonObject(Buffer.buffer(base64Decode(rawStatement))).getMap()));
     this.version = statement.getInteger("schema", 2);
 
     // convert status report effective date to a Instant

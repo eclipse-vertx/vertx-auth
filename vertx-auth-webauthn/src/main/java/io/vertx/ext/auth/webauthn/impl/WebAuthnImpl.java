@@ -327,7 +327,7 @@ public class WebAuthnImpl implements WebAuthn {
 
       // Step #2
       // Verify challenge is match with session
-      if (!clientData.getString("challenge").equals(authInfo.getChallenge())) {
+      if (!authInfo.getChallenge().equals(clientData.getString("challenge"))) {
         handler.handle(Future.failedFuture("Challenges don't match!"));
         return;
       }
@@ -335,7 +335,7 @@ public class WebAuthnImpl implements WebAuthn {
       // Step #3
       // If the auth info object contains an Origin we can verify it:
       if (authInfo.getOrigin() != null) {
-        if (!clientData.getString("origin").equals(authInfo.getOrigin())) {
+        if (!authInfo.getOrigin().equals(clientData.getString("origin"))) {
           handler.handle(Future.failedFuture("Origins don't match!"));
           return;
         }
@@ -344,6 +344,10 @@ public class WebAuthnImpl implements WebAuthn {
       // optional data
       if (clientData.containsKey("tokenBinding")) {
         JsonObject tokenBinding = clientData.getJsonObject("tokenBinding");
+        if (tokenBinding == null) {
+          handler.handle(Future.failedFuture("Invalid clientDataJSON.tokenBinding"));
+          return;
+        }
         // in this case we need to check the status
         switch (tokenBinding.getString("status")) {
           case "present":
@@ -451,6 +455,9 @@ public class WebAuthnImpl implements WebAuthn {
    */
   private Authenticator verifyWebAuthNCreate(WebAuthnCredentials request, byte[] clientDataJSON) throws AttestationException, IOException, NoSuchAlgorithmException {
     JsonObject response = request.getWebauthn().getJsonObject("response");
+    if (!response.containsKey("attestationObject")) {
+      throw new AttestationException("Missing response.attestationObject");
+    }
     // Extract attestation Object
     try (JsonParser parser = CBOR.cborParser(response.getString("attestationObject"))) {
       //      {

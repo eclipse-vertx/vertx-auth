@@ -16,6 +16,9 @@
 package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.codegen.annotations.Nullable;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.ext.auth.impl.asn.ASN1;
 
 import javax.crypto.Mac;
 import java.io.ByteArrayInputStream;
@@ -26,12 +29,16 @@ import java.security.interfaces.RSAKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
+import static io.vertx.ext.auth.impl.asn.ASN1.*;
+
 /**
  * Utilities to work with Json Web Signatures.
  *
  * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
 public final class JWS {
+
+  private static final Logger LOG = LoggerFactory.getLogger(JWS.class);
 
   public static final String EdDSA = "EdDSA";
 
@@ -289,13 +296,58 @@ public final class JWS {
   }
 
   public static X509Certificate parseX5c(String data) throws CertificateException {
-    return (X509Certificate) X509
-      .generateCertificate(
+    final X509Certificate certificate =
+      (X509Certificate) X509.generateCertificate(
         new ByteArrayInputStream(addBoundaries(data, "CERTIFICATE").getBytes(StandardCharsets.UTF_8)));
+
+    logCRLs(certificate);
+    return certificate;
   }
 
   public static X509Certificate parseX5c(byte[] data) throws CertificateException {
-    return (X509Certificate) X509.generateCertificate(new ByteArrayInputStream(data));
+    final X509Certificate certificate =
+      (X509Certificate) X509.generateCertificate(new ByteArrayInputStream(data));
+
+    logCRLs(certificate);
+    return certificate;
+  }
+
+  private static void logCRLs(X509Certificate certificate) throws CertificateException {
+    if (certificate != null) {
+      byte[] crlExtension = certificate.getExtensionValue("2.5.29.31");
+      if (crlExtension != null) {
+        // OCTET STRING
+        ASN1.ASN extension = ASN1.parseASN1(crlExtension);
+        if (!extension.is(OCTET_STRING)) {
+          throw new CertificateException("2.5.29.31 Extension is not an ASN.1 OCTET STRING!");
+        }
+        // parse the octet as ASN.1 and expect it to be a sequence
+        extension = parseASN1(extension.binary(0));
+        //        SEQUENCE
+        if (!extension.is(SEQUENCE)) {
+          throw new CertificateException("2.5.29.31 Extension is not an ASN.1 SEQUENCE!");
+        }
+
+        ASN1.ASN crlDistributionPoint;
+        for (int i = 0; i < extension.length(); i++) {
+          //        SEQUENCE
+          //          [0] (1 elem) distributionPoint <optional>
+          //          [0] (1 elem) reasons  <optional>
+          //          [6] (55 byte) cRLIssuer  <optional>
+          crlDistributionPoint = extension.object(i, SEQUENCE);
+
+          ASN1.ASN crlIssuer =
+            crlDistributionPoint
+              .object(0)
+              .object(0)
+              .object(0, CONTEXT_SPECIFIC | OBJECT_IDENTIFIER);
+
+          if (crlIssuer != null) {
+            LOG.info("CRL Distribution Point: " + new String(crlIssuer.binary(0), StandardCharsets.US_ASCII));
+          }
+        }
+      }
+    }
   }
 
   public static X509CRL parseX5crl(String data) throws CRLException {

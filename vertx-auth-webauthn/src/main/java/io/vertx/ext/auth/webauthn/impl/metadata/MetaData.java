@@ -33,12 +33,15 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * This class will hold the Fido2 Metadata Records.
  */
 public final class MetaData {
+
+  private static final JsonArray EMTPY = new JsonArray(Collections.emptyList());
 
   /**
    * A mapping of ALG_SIGN hex values (as unsigned shorts) to COSE curve values. Keys should appear as
@@ -74,6 +77,8 @@ public final class MetaData {
   public static final int ATTESTATION_BASIC_SURROGATE = 0x3E08;
   public static final int ATTESTATION_ECDAA = 0x3E09;
   public static final int ATTESTATION_ATTCA = 0x3E0A;
+  public static final int ATTESTATION_ANONCA = 0x3E0C;
+  public static final int ATTESTATION_NONE = 0x3E0B;
 
   private final LocalMap<String, MetaDataEntry> store;
   private final WebAuthnOptions options;
@@ -93,7 +98,10 @@ public final class MetaData {
     return store.size();
   }
 
-  public @Nullable PublicKeyCredential toJOSEAlg(int fido2AlgSign) {
+  public @Nullable PublicKeyCredential toJOSEAlg(Integer fido2AlgSign) {
+    if (fido2AlgSign == null) {
+      return null;
+    }
     switch (fido2AlgSign) {
       case ALG_SIGN_SECP256R1_ECDSA_SHA256_RAW:
       case ALG_SIGN_SECP256R1_ECDSA_SHA256_DER:
@@ -127,6 +135,43 @@ public final class MetaData {
     }
   }
 
+  public static @Nullable PublicKeyCredential toJOSEAlg(String fido2AlgSign) {
+    if (fido2AlgSign == null) {
+      return null;
+    }
+    switch (fido2AlgSign) {
+      case "secp256r1_ecdsa_sha256_raw":
+      case "secp256r1_ecdsa_sha256_der":
+        return PublicKeyCredential.ES256;
+      case "rsassa_pss_sha256_raw":
+      case "rsassa_pss_sha256_der":
+        return PublicKeyCredential.PS256;
+      case "secp256k1_ecdsa_sha256_raw":
+      case "secp256k1_ecdsa_sha256_der":
+        return PublicKeyCredential.ES256K;
+      case "rsassa_pss_sha384_raw":
+        return PublicKeyCredential.PS384;
+      case "rsassa_pss_sha512_raw":
+        return PublicKeyCredential.PS512;
+      case "rsassa_pkcsv15_sha256_raw":
+        return PublicKeyCredential.RS256;
+      case "rsassa_pkcsv15_sha384_raw":
+        return PublicKeyCredential.RS384;
+      case "rsassa_pkcsv15_sha512_raw":
+        return PublicKeyCredential.RS512;
+      case "rsassa_pkcsv15_sha1_raw":
+        return PublicKeyCredential.RS1;
+      case "secp384r1_ecdsa_sha384_raw":
+        return PublicKeyCredential.ES384;
+      case "secp521r1_ecdsa_sha512_raw":
+        return PublicKeyCredential.ES512;
+      case "ed25519_eddsa_sha256_raw":
+        return PublicKeyCredential.EdDSA;
+      default:
+        return null;
+    }
+  }
+
   public JsonObject verifyMetadata(String aaguid, PublicKeyCredential alg, List<X509Certificate> x5c) throws MetaDataException, AttestationException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, CertificateException {
     return verifyMetadata(aaguid, alg, x5c, null, true);
   }
@@ -147,8 +192,28 @@ public final class MetaData {
       entry.checkValid();
 
       // Make sure the alg in the attestation statement matches the one specified in the metadata
-      if (alg != toJOSEAlg(entry.statement().getInteger("authenticationAlgorithm"))) {
-        throw new AttestationException("Attestation alg did not match metadata auth alg");
+      switch (entry.version()) {
+        case 2:
+          if (alg != toJOSEAlg(entry.statement().getInteger("authenticationAlgorithm"))) {
+            throw new AttestationException("Attestation alg did not match metadata auth alg");
+          }
+          break;
+        case 3:
+          // in MDS3 this field is an array
+          boolean found = false;
+          for (Object el : entry.statement().getJsonArray("authenticationAlgorithms", EMTPY)) {
+            if (alg == toJOSEAlg((String) el)) {
+              // OK
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            throw new AttestationException("Attestation alg did not match metadata auth alg");
+          }
+          break;
+        default:
+          throw new AttestationException("Unsupported metadata version: " + entry.version());
       }
 
       if (x5c != null) {
@@ -212,5 +277,46 @@ public final class MetaData {
       store.put(aaguid, entry);
     }
     return this;
+  }
+
+  public static boolean statementAttestationTypesContains(JsonObject statement, int type) throws MetaDataException {
+    if (!statement.containsKey("attestationTypes")) {
+      return true;
+    }
+
+    final JsonArray attestationTypes = statement.getJsonArray("attestationTypes");
+
+    switch (statement.getInteger("schema", 2)) {
+      case 2:
+        return attestationTypes.contains(type);
+      case 3:
+        String stype;
+
+        switch (type) {
+          case ATTESTATION_BASIC_FULL:
+            stype = "basic_full";
+            break;
+          case ATTESTATION_BASIC_SURROGATE:
+            stype = "basic_surrogate";
+            break;
+          case ATTESTATION_ECDAA:
+            stype = "ecdaa";
+            break;
+          case ATTESTATION_ATTCA:
+            stype = "attca";
+            break;
+          case ATTESTATION_ANONCA:
+            stype = "anonca";
+            break;
+          case ATTESTATION_NONE:
+            stype = "none";
+            break;
+          default:
+            throw new IllegalArgumentException("Invalid type: " + type);
+        }
+        return attestationTypes.contains(stype);
+      default:
+        throw new MetaDataException("Unsupported metadata version");
+    }
   }
 }

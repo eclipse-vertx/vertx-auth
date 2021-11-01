@@ -39,6 +39,7 @@ import java.util.List;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.*;
 
 /**
  * Implementation of the FIDO "tpm" attestation check.
@@ -304,25 +305,25 @@ public class TPMAttestation implements Attestation {
       //            UTF8String id:4E544300
 
       // parse the initial OCTET STRING body
-      if (extension.tag.type != OCTET_STRING) {
+      if (!extension.is(OCTET_STRING)) {
         throw new AttestationException("2.5.29.17 Extension is not an ASN.1 OCTET_STRING");
       }
       ASN1.ASN root = ASN1.parseASN1(extension.binary(0));
       // root should be of type SEQUENCE
-      if (root.tag.type != SEQUENCE) {
+      if (!root.is(SEQUENCE)) {
         throw new AttestationException("2.5.29.17 Extension OCTET_STRING is not an ASN.1 SEQUENCE");
       }
       ASN1.ASN set = root
-        .object(0, 164 /* [4] */)
+        .object(0, CONTEXT_SPECIFIC | OCTET_STRING)
         // SEQUENCE
-        .object(0, ASN1.SEQUENCE)
+        .object(0, SEQUENCE)
         // SET
-        .object(0, ASN1.SET);
+        .object(0, SET);
 
       for (int i = 0; i < set.length(); i++) {
         ASN1.ASN el = set.object(i);
-        ASN1.ASN oid = el.object(0, ASN1.OBJECT_IDENTIFIER);
-        ASN1.ASN val = el.object(1, ASN1.UTF8_STRING);
+        ASN1.ASN oid = el.object(0, OBJECT_IDENTIFIER);
+        ASN1.ASN val = el.object(1, UTF8_STRING);
 
         if (MessageDigest.isEqual(oid.binary(0), new byte[]{0x67, (byte) 0x81, 0x05, 0x02, 0x01})) {
           if (!TPM_MANUFACTURERS.contains(new String(val.binary(0), StandardCharsets.UTF_8))) {
@@ -340,17 +341,17 @@ public class TPMAttestation implements Attestation {
       //    OBJECT IDENTIFIER 2.23.133.8.3
 
       // parse the initial OCTET STRING body
-      if (extension.tag.type != OCTET_STRING) {
+      if (!extension.is(OCTET_STRING)) {
         throw new AttestationException("2.5.29.37 Extension is not an ASN.1 OCTET_STRING");
       }
       // root should be of type SEQUENCE
       root = ASN1.parseASN1(extension.binary(0));
-      if (root.tag.type != SEQUENCE) {
+      if (!root.is(SEQUENCE)) {
         throw new AttestationException("2.5.29.37 Extension OCTET_STRING is not an ASN.1 SEQUENCE");
       }
       boolean found = false;
       for (int i = 0; i < root.length(); i++) {
-        ASN1.ASN el = root.object(i, ASN1.OBJECT_IDENTIFIER);
+        ASN1.ASN el = root.object(i, OBJECT_IDENTIFIER);
         // tcg-kp-AIKCertificate
         if (MessageDigest.isEqual(el.binary(0), new byte[]{0x67, (byte) 0x81, 0x05, 0x08, 0x03})) {
           found = true;
@@ -365,12 +366,12 @@ public class TPMAttestation implements Attestation {
       byte[] idFidoGenCeAaguid = leafCert.getExtensionValue("1.3.6.1.4.1.45724.1.1.4");
       if (idFidoGenCeAaguid != null) {
         extension = ASN1.parseASN1(idFidoGenCeAaguid);
-        if (extension.tag.type != OCTET_STRING) {
+        if (!extension.is(OCTET_STRING)) {
           throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
         }
         // parse the octet as ASN.1 and expect it to se a sequence
         extension = parseASN1(extension.binary(0));
-        if (extension.tag.type != OCTET_STRING) {
+        if (!extension.is(OCTET_STRING)) {
           throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
         }
         // match check
@@ -380,11 +381,18 @@ public class TPMAttestation implements Attestation {
       }
 
       // If available, validate attestation alg and x5c with info in the metadata statement
-      metadata.verifyMetadata(
+      JsonObject statement = metadata.verifyMetadata(
         authData.getAaguidString(),
         PublicKeyCredential.valueOf(attStmt.getInteger("alg")),
         x5c,
         false);
+
+      if (statement != null) {
+        // verify that the statement allows this type of attestation
+        if (!statementAttestationTypesContains(statement, ATTESTATION_ATTCA) && !statementAttestationTypesContains(statement, ATTESTATION_BASIC_FULL)) {
+          throw new AttestationException("Metadata does not indicate support for attca/basic_full attestations");
+        }
+      }
 
       // 9. Verify signature over certInfo with the public key extracted from AIK certificate.
       verifySignature(

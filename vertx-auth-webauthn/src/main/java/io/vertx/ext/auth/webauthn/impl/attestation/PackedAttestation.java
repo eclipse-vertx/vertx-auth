@@ -38,6 +38,7 @@ import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.impl.asn.ASN1.OCTET_STRING;
 import static io.vertx.ext.auth.impl.asn.ASN1.parseASN1;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.*;
 
 /**
  * Implementation of the FIDO "packed" attestation check.
@@ -111,13 +112,13 @@ public class PackedAttestation implements Attestation {
         byte[] idFidoGenCeAaguid = x509Certificate.getExtensionValue("1.3.6.1.4.1.45724.1.1.4");
         if (idFidoGenCeAaguid != null) {
           ASN1.ASN extension = ASN1.parseASN1(idFidoGenCeAaguid);
-          if (extension.tag.type != OCTET_STRING) {
-            throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
+          if (!extension.is(OCTET_STRING)) {
+            throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTET string!");
           }
-          // parse the octet as ASN.1 and expect it to se a sequence
+          // parse the octet as ASN.1 and expect it to be a sequence
           extension = parseASN1(extension.binary(0));
-          if (extension.tag.type != OCTET_STRING) {
-            throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTECT string!");
+          if (!extension.is(OCTET_STRING)) {
+            throw new AttestationException("1.3.6.1.4.1.45724.1.1.4 Extension is not an ASN.1 OCTET string!");
           }
           // match check
           if (!MessageDigest.isEqual(extension.binary(0), authData.getAaguid())) {
@@ -132,10 +133,9 @@ public class PackedAttestation implements Attestation {
           certChain);
 
         if (statement != null) {
-          // The presence of x5c means this is a full attestation. Check to see if attestationTypes
-          // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(MetaData.ATTESTATION_BASIC_FULL)) {
-            throw new AttestationException("Metadata does not indicate support for full attestations");
+          // verify that the statement allows this type of attestation
+          if (!statementAttestationTypesContains(statement, ATTESTATION_BASIC_FULL)) {
+            throw new AttestationException("Metadata does not indicate support for basic_full attestations");
           }
         }
 
@@ -161,9 +161,8 @@ public class PackedAttestation implements Attestation {
           null);
 
         if (statement != null) {
-          // The presence of x5c means this is a full attestation. Check to see if attestationTypes
-          // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(MetaData.ATTESTATION_ECDAA)) {
+          // verify that the statement allows this type of attestation
+          if (!statementAttestationTypesContains(statement, ATTESTATION_ECDAA)) {
             throw new AttestationException("Metadata does not indicate support for ecdaa attestations");
           }
         }
@@ -176,10 +175,9 @@ public class PackedAttestation implements Attestation {
           null);
 
         if (statement != null) {
-          // The presence of x5c means this is a full attestation. Check to see if attestationTypes
-          // includes packed attestations.
-          if (!statement.getJsonArray("attestationTypes").contains(MetaData.ATTESTATION_BASIC_SURROGATE)) {
-            throw new AttestationException("Metadata does not indicate support for surrogate attestations");
+          // verify that the statement allows this type of attestation
+          if (!statementAttestationTypesContains(statement, ATTESTATION_BASIC_SURROGATE)) {
+            throw new AttestationException("Metadata does not indicate support for basic_surrogate attestations");
           }
         }
 
