@@ -175,13 +175,6 @@ public class AndroidKeyAttestation implements Attestation {
         }
       }
 
-      if (statement != null) {
-        // verify that the statement allows this type of attestation
-        if (!statementAttestationTypesContains(statement, ATTESTATION_ANONCA)) {
-          throw new AttestationException("Metadata does not indicate support for anonca attestations");
-        }
-      }
-
       return new AttestationCertificates()
         .setAlg(PublicKeyCredential.valueOf(attStmt.getInteger("alg")))
         .setX5c(attStmt.getJsonArray("x5c"));

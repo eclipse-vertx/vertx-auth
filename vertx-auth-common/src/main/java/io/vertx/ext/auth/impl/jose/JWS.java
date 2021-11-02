@@ -300,7 +300,9 @@ public final class JWS {
       (X509Certificate) X509.generateCertificate(
         new ByteArrayInputStream(addBoundaries(data, "CERTIFICATE").getBytes(StandardCharsets.UTF_8)));
 
-    logCRLs(certificate);
+    if (LOG.isDebugEnabled()) {
+      logCRLs(certificate);
+    }
     return certificate;
   }
 
@@ -308,7 +310,9 @@ public final class JWS {
     final X509Certificate certificate =
       (X509Certificate) X509.generateCertificate(new ByteArrayInputStream(data));
 
-    logCRLs(certificate);
+    if (LOG.isDebugEnabled()) {
+      logCRLs(certificate);
+    }
     return certificate;
   }
 
@@ -343,7 +347,7 @@ public final class JWS {
               .object(0, CONTEXT_SPECIFIC | OBJECT_IDENTIFIER);
 
           if (crlIssuer != null) {
-            LOG.info("CRL Distribution Point: " + new String(crlIssuer.binary(0), StandardCharsets.US_ASCII));
+            LOG.debug("CRL Distribution Point: " + new String(crlIssuer.binary(0), StandardCharsets.US_ASCII));
           }
         }
       }
