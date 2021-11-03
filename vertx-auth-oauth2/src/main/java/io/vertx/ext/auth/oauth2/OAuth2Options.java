@@ -20,6 +20,8 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.JWTOptions;
@@ -37,6 +39,8 @@ import java.util.regex.Pattern;
  */
 @DataObject(generateConverter = true)
 public class OAuth2Options {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2Options.class);
 
   // Defaults
   private static final OAuth2FlowType FLOW = OAuth2FlowType.AUTH_CODE;
@@ -611,11 +615,22 @@ public class OAuth2Options {
       case AUTH_CODE:
       case AUTH_JWT:
       case AAD_OBO:
-      case PASSWORD:
         if (clientAssertion == null && clientAssertionType == null) {
           // not using client assertions
           if (clientId == null) {
             throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
+          }
+        } else {
+          if (clientAssertion == null || clientAssertionType == null) {
+            throw new IllegalStateException("Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+          }
+        }
+        break;
+      case PASSWORD:
+        if (clientAssertion == null && clientAssertionType == null) {
+          // not using client assertions
+          if (clientId == null) {
+            LOG.debug("If you are using Client Oauth2 Resource Owner flow. You need to specify [clientId]");
           }
         } else {
           if (clientAssertion == null || clientAssertionType == null) {

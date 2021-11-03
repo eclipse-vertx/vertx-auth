@@ -150,9 +150,14 @@ public class OAuth2API {
     if (clientId != null) {
       query.put("client_id", clientId);
     } else {
-      query
-        .put("client_assertion_type", config.getClientAssertionType())
-        .put("client_assertion", config.getClientAssertion());
+      if (config.getClientAssertionType() != null) {
+        query
+          .put("client_assertion_type", config.getClientAssertionType());
+      }
+      if (config.getClientAssertion() != null) {
+        query
+          .put("client_assertion", config.getClientAssertion());
+      }
     }
 
     final String path = config.getAuthorizationPath();
@@ -195,9 +200,14 @@ public class OAuth2API {
       if (clientId != null) {
         form.put("client_id", clientId);
       } else {
-        form
-          .put("client_assertion_type", config.getClientAssertionType())
-          .put("client_assertion", config.getClientAssertion());
+        if (config.getClientAssertionType() != null) {
+          form
+            .put("client_assertion_type", config.getClientAssertionType());
+        }
+        if (config.getClientAssertion() != null) {
+          form
+            .put("client_assertion", config.getClientAssertion());
+        }
       }
     }
 
