@@ -59,13 +59,13 @@
       
     <artifactId>vertx-auth</artifactId>
       
-    <version>4.1.6</version>
+    <version>4.1.7-SNAPSHOT</version>
       
     <name>Vert.x Auth</name>
       
     <properties>
             
-        <stack.version>4.1.6</stack.version>
+        <stack.version>4.1.7-SNAPSHOT</stack.version>
             
         <doc.skip>true</doc.skip>
             
