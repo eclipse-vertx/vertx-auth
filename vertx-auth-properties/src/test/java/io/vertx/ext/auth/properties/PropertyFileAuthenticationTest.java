@@ -16,157 +16,186 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.*;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.function.Consumer;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class PropertyFileAuthenticationTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class PropertyFileAuthenticationTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private AuthenticationProvider authn;
   private AuthorizationProvider authz;
 
   @Test
-  public void testSimpleAuthenticate() throws Exception {
+  public void testSimpleAuthenticate(TestContext should) {
+    final Async test = should.async();
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
-    authn.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
+    authn.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 
   @Test
-  public void testSimpleAuthenticateFailWrongPassword() throws Exception {
+  public void testSimpleAuthenticateFailWrongPassword(TestContext should) {
+    final Async test = should.async();
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "wrongpassword");
-    authn.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
+    authn.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Not Expected"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
   }
 
   @Test
-  public void testSimpleAuthenticateFailWrongUser() throws Exception {
+  public void testSimpleAuthenticateFailWrongUser(TestContext should) {
+    final Async test = should.async();
     JsonObject authInfo = new JsonObject().put("username", "frank").put("password", "sausages");
-    authn.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
+    authn.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Not Expected"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
   }
 
   @Test
-  public void testHasRole() throws Exception {
-    loginThen(user ->
-      authz.getAuthorizations(user, get -> {
-        assertTrue(get.succeeded());
-        assertTrue(
-          RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
+  public void testHasRole(TestContext should) {
+    final Async test = should.async();
+    loginThen(should, user ->
+      authz.getAuthorizations(user)
+        .onFailure(should::fail)
+        .onSuccess(v -> {
+          should.assertTrue(
+            RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
 
-        assertTrue(
-          RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
+          should.assertTrue(
+            RoleBasedAuthorization.create("morris_dancer").match(AuthorizationContext.create(user)));
 
-        testComplete();
-      }));
-    await();
+          test.complete();
+        }));
   }
 
   @Test
-  public void testNotHasRole() throws Exception {
-    loginThen(user -> authz.getAuthorizations(user, get -> {
-      assertTrue(get.succeeded());
-      assertFalse(
-        RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
+  public void testNotHasRole(TestContext should) {
+    final Async test = should.async();
+    loginThen(should, user ->
+      authz.getAuthorizations(user)
+        .onFailure(should::fail)
+        .onSuccess(v -> {
+          should.assertFalse(
+            RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
 
-      assertFalse(
-        RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
+          should.assertFalse(
+            RoleBasedAuthorization.create("manager").match(AuthorizationContext.create(user)));
 
-      testComplete();
-    }));
-    await();
+          test.complete();
+        }));
   }
 
   @Test
-  public void testHasPermission() throws Exception {
-    loginThen(user -> authz.getAuthorizations(user, get -> {
-      assertTrue(get.succeeded());
-      assertTrue(
-        PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
+  public void testHasPermission(TestContext should) {
+    final Async test = should.async();
+    loginThen(should, user ->
+      authz.getAuthorizations(user)
+        .onFailure(should::fail)
+        .onSuccess(v -> {
+          should.assertTrue(
+            PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
 
-      assertTrue(
-        PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
+          should.assertTrue(
+            PermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
 
-      testComplete();
-    }));
-    await();
+          test.complete();
+        }));
   }
 
   @Test
-  public void testNotHasPermission() throws Exception {
-    loginThen(user -> authz.getAuthorizations(user, get -> {
-      assertTrue(get.succeeded());
-      assertFalse(
-        PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
+  public void testNotHasPermission(TestContext should) {
+    final Async test = should.async();
+    loginThen(should, user ->
+      authz.getAuthorizations(user)
+        .onFailure(should::fail)
+        .onSuccess(v -> {
+          should.assertFalse(
+            PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
 
-      assertFalse(
-        PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
+          should.assertFalse(
+            PermissionBasedAuthorization.create("play_golf").match(AuthorizationContext.create(user)));
 
-      testComplete();
-    }));
-    await();
+          test.complete();
+        }));
   }
 
-  private void loginThen(Consumer<User> runner) {
+  private void loginThen(TestContext should, Consumer<User> runner) {
     JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
-    authn.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      runner.accept(user);
-    }));
+    authn.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        runner.accept(user);
+      });
   }
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
-    authn = PropertyFileAuthentication.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
-    authz = PropertyFileAuthorization.create(vertx, this.getClass().getResource("/test-auth.properties").getFile());
+    authn = PropertyFileAuthentication.create(rule.vertx(), this.getClass().getResource("/test-auth.properties").getFile());
+    authz = PropertyFileAuthorization.create(rule.vertx(), this.getClass().getResource("/test-auth.properties").getFile());
   }
 
   @Test
-  public void testHasWildcardPermission() {
+  public void testHasWildcardPermission(TestContext should) {
+    final Async test = should.async();
     JsonObject authInfo = new JsonObject().put("username", "paulo").put("password", "secret");
-    authn.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
+    authn.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
 
-      authz.getAuthorizations(user, get -> {
-        assertTrue(get.succeeded());
-        // paulo can do anything...
-        assertTrue(
-          WildcardPermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
-        testComplete();
+        authz.getAuthorizations(user)
+          .onFailure(should::fail)
+          .onSuccess(v -> {
+            // paulo can do anything...
+            should.assertTrue(
+              WildcardPermissionBasedAuthorization.create("do_actual_work").match(AuthorizationContext.create(user)));
+            test.complete();
+          });
       });
-    }));
-    await();
   }
 
   @Test
-  public void testHasWildcardMatchPermission() throws Exception {
+  public void testHasWildcardMatchPermission(TestContext should) {
+    final Async test = should.async();
     JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "secret");
-    authn.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      // editor can edit any newsletter item...
-      authz.getAuthorizations(user, get -> {
-        assertTrue(get.succeeded());
-        assertTrue(
-          WildcardPermissionBasedAuthorization.create("newsletter:edit:13").match(AuthorizationContext.create(user)));
-        testComplete();
+    authn.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        // editor can edit any newsletter item...
+        authz.getAuthorizations(user)
+          .onFailure(should::fail)
+          .onSuccess(u -> {
+            should.assertTrue(
+              WildcardPermissionBasedAuthorization.create("newsletter:edit:13").match(AuthorizationContext.create(user)));
+            test.complete();
+          });
       });
-    }));
-    await();
   }
-
 }
