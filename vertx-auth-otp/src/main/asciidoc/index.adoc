@@ -46,7 +46,7 @@ Note that when authenticating using this implementation, it assumes `identifier`
 
 == TOTP Authentication
 
-To create an instance of the Hotp auth provider, use {@link io.vertx.ext.auth.otp.totp.TotpAuth#create(io.vertx.ext.auth.otp.totp.TotpAuthOptions)} as follows
+To create an instance of the Totp auth provider, use {@link io.vertx.ext.auth.otp.totp.TotpAuth#create(io.vertx.ext.auth.otp.totp.TotpAuthOptions)} as follows
 
 === TOTP Configuration
 
