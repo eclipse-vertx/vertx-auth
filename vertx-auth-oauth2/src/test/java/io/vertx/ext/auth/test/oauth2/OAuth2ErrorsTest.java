@@ -6,12 +6,23 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 
-public class OAuth2ErrorsTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2ErrorsTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject tokenConfig = new JsonObject()
       .put("code", "code")
@@ -21,43 +32,42 @@ public class OAuth2ErrorsTest extends VertxTestBase {
   private HttpServer server;
   private JsonObject fixture;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
-        .setClientId("client-id")
-        .setClientSecret("client-secret")
-        .setSite("http://localhost:8080"));
+  @Before
+  public void setUp(TestContext should) throws Exception {
+    final Async setup = should.async();
 
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer().requestHandler(req -> {
+    server = rule.vertx().createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer ->
           req.response().putHeader("Content-Type", "application/json").end(fixture.encode()));
       } else {
         req.response().setStatusCode(400).end();
       }
-    }).listen(8080, ready -> {
+    }).listen(0, ready -> {
       if (ready.failed()) {
         throw new RuntimeException(ready.cause());
       }
+      oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientId("client-id")
+        .setClientSecret("client-secret")
+        .setSite("http://localhost:" + ready.result().actualPort()));
       // ready
-      latch.countDown();
+      setup.complete();
     });
-
-    latch.await();
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async tearDown = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> tearDown.complete());
   }
 
   @Test
-  public void errorAsJson() {
+  public void errorAsJson(TestContext should) {
+    final Async test = should.async();
     // facebook style
     fixture = new JsonObject()
       .put("error", new JsonObject()
@@ -67,17 +77,17 @@ public class OAuth2ErrorsTest extends VertxTestBase {
 
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        assertEquals("Error validating access token: User USER_ID has not authorized application APP_ID.", res.cause().getMessage());
-        testComplete();
+        should.assertEquals("Error validating access token: User USER_ID has not authorized application APP_ID.", res.cause().getMessage());
+        test.complete();
       } else {
-        fail("Should fail");
+        should.fail("Should fail");
       }
     });
-    await();
   }
 
   @Test
-  public void errorAsText() {
+  public void errorAsText(TestContext should) {
+    final Async test = should.async();
     // github style
     fixture = new JsonObject()
       .put("error", "incorrect_client_credentials")
@@ -86,44 +96,43 @@ public class OAuth2ErrorsTest extends VertxTestBase {
 
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        assertEquals("The client_id and/or client_secret passed are incorrect.", res.cause().getMessage());
-        testComplete();
+        should.assertEquals("The client_id and/or client_secret passed are incorrect.", res.cause().getMessage());
+        test.complete();
       } else {
-        fail("Should fail");
+        should.fail("Should fail");
       }
     });
-    await();
   }
 
   @Test
-  public void errorSimpleText() {
+  public void errorSimpleText(TestContext should) {
+    final Async test = should.async();
     fixture = new JsonObject()
       .put("error", "incorrect_client_credentials");
 
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        assertEquals("incorrect_client_credentials", res.cause().getMessage());
-        testComplete();
+        should.assertEquals("incorrect_client_credentials", res.cause().getMessage());
+        test.complete();
       } else {
-        fail("Should fail");
+        should.fail("Should fail");
       }
     });
-    await();
   }
 
   @Test
-  public void errorAsSomethingElse() {
+  public void errorAsSomethingElse(TestContext should) {
+    final Async test = should.async();
     fixture = new JsonObject()
       .put("error", 190);
 
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        assertEquals("190", res.cause().getMessage());
-        testComplete();
+        should.assertEquals("190", res.cause().getMessage());
+        test.complete();
       } else {
-        fail("Should fail");
+        should.fail("Should fail");
       }
     });
-    await();
   }
 }

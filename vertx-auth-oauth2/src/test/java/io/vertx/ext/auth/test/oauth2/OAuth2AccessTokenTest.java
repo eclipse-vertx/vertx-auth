@@ -1,5 +1,6 @@
 package io.vertx.ext.auth.test.oauth2;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
@@ -8,15 +9,23 @@ import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
 
-import static io.vertx.ext.auth.oauth2.impl.OAuth2API.*;
+@RunWith(VertxUnitRunner.class)
+public class OAuth2AccessTokenTest {
 
-public class OAuth2AccessTokenTest extends VertxTestBase {
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -61,64 +70,62 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
   private HttpServer server;
   private JsonObject config;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientId("client-id")
-      .setClientSecret("client-secret")
-      .setSite("http://localhost:8080")
-      .setHeaders(new JsonObject().put("x-foo", "bar")));
-
-    final CountDownLatch latch = new CountDownLatch(1);
+  @Before
+  public void setUp(TestContext should) throws Exception {
+    final Async setup = should.async();
+    final Vertx vertx = rule.vertx();
 
     server = vertx.createHttpServer().requestHandler(req -> {
-      assertEquals("bar", req.getHeader("x-foo"));
+      should.assertEquals("bar", req.getHeader("x-foo"));
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
-        assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
+        should.assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
             JsonObject expectedRequest = config;
 
-            assertEquals(expectedRequest, SimpleHttpClient.queryToJson(buffer));
+            should.assertEquals(expectedRequest, SimpleHttpClient.queryToJson(buffer));
+            req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
           } catch (UnsupportedEncodingException e) {
-            fail(e);
+            should.fail(e);
           }
-          req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else if (req.method() == HttpMethod.POST && "/oauth/revoke".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           //Revoke does not pass auth details
           JsonObject expectedRequest = removeAuthDetails(config);
           try {
-            assertEquals(expectedRequest, SimpleHttpClient.queryToJson(buffer));
+            should.assertEquals(expectedRequest, SimpleHttpClient.queryToJson(buffer));
+            req.response().end();
           } catch (UnsupportedEncodingException e) {
-            fail(e);
+            should.fail(e);
           }
-          req.response().end();
         });
       } else if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+            should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+            req.response().putHeader("Content-Type", "application/json").end(fixtureIntrospect.encode());
           } catch (UnsupportedEncodingException e) {
-            fail(e);
+            should.fail(e);
           }
-          req.response().putHeader("Content-Type", "application/json").end(fixtureIntrospect.encode());
         });
       } else {
         req.response().setStatusCode(400).end();
       }
-    }).listen(8080, ready -> {
+    }).listen(0, ready -> {
       if (ready.failed()) {
         throw new RuntimeException(ready.cause());
       }
-      // ready
-      latch.countDown();
-    });
 
-    latch.await();
+      oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientId("client-id")
+        .setClientSecret("client-secret")
+        .setSite("http://localhost:" + ready.result().actualPort())
+        .setHeaders(new JsonObject().put("x-foo", "bar")));
+
+      setup.complete();
+    });
   }
 
   private JsonObject removeAuthDetails(JsonObject config) {
@@ -128,101 +135,103 @@ public class OAuth2AccessTokenTest extends VertxTestBase {
     return request;
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) {
+    final Async after = should.async();
+    server.close()
+      .onSuccess(v -> after.complete())
+      .onFailure(should::fail);
   }
 
   @Test
-  public void createAccessToken() {
+  public void createAccessToken(TestContext should) {
+    final Async test = should.async();
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         User token = res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
-        testComplete();
+        should.assertNotNull(token);
+        should.assertNotNull(token.principal());
+        test.complete();
       }
     });
-    await();
   }
 
   @Test
-  public void tokenShouldNotBeExpired() {
+  public void tokenShouldNotBeExpired(TestContext should) {
+    final Async test = should.async();
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         User token = res.result();
-        assertFalse(token.expired());
-        testComplete();
+        should.assertFalse(token.expired());
+        test.complete();
       }
     });
-    await();
   }
 
   @Test
-  public void tokenShouldBeExpiredWhenExpirationDateIsInThePast() {
+  public void tokenShouldBeExpiredWhenExpirationDateIsInThePast(TestContext should) {
+    final Async test = should.async();
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         User token = res.result();
         // hack the token to set the exp (to yesterday)
         token.attributes().put("exp", System.currentTimeMillis() / 1000 - 24 * 60 * 60);
-        assertTrue(token.expired());
-        testComplete();
+        should.assertTrue(token.expired());
+        test.complete();
       }
     });
-    await();
   }
 
   @Test
-  public void whenRefreshingTokenShouldGetNewAccessToken() {
+  public void whenRefreshingTokenShouldGetNewAccessToken(TestContext should) {
+    final Async test = should.async();
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause());
+        should.fail(res.cause());
       } else {
         User token = res.result();
         // refresh the token
         config = refreshConfig;
         oauth2.refresh(token, v -> {
           if (v.failed()) {
-            fail(v.cause().getMessage());
+            should.fail(v.cause().getMessage());
           } else {
-            testComplete();
+            test.complete();
           }
         });
       }
     });
-    await();
   }
 
   @Test
-  public void shouldRevokeAToken() {
+  public void shouldRevokeAToken(TestContext should) {
+    final Async test = should.async();
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         User token = res.result();
         // refresh the token
         config = revokeConfig;
         oauth2.revoke(token, "refresh_token", v -> {
           if (v.failed()) {
-            fail(v.cause().getMessage());
+            should.fail(v.cause().getMessage());
           } else {
-            testComplete();
+            test.complete();
           }
         });
       }
     });
-    await();
   }
 }

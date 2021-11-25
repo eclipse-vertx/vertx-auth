@@ -82,10 +82,15 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
         // synchronize on the class to avoid the case where multiple file accesses will overlap
         synchronized (JWTAuthProviderImpl.class) {
-          final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getPath());
+          String path = keyStore.getPath();
+          if (path != null) {
+            final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getPath());
 
-          try (InputStream in = new ByteArrayInputStream(keystore.getBytes())) {
-            ks.load(in, keyStore.getPassword().toCharArray());
+            try (InputStream in = new ByteArrayInputStream(keystore.getBytes())) {
+              ks.load(in, keyStore.getPassword().toCharArray());
+            }
+          } else {
+            ks.load(null, keyStore.getPassword().toCharArray());
           }
         }
         // load all available keys in the keystore

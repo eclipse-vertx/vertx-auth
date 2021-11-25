@@ -10,13 +10,23 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
 
-public class OAuth2IntrospectTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2IntrospectTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   // according to RFC
   private static final JsonObject fixtureIntrospect = new JsonObject(
@@ -60,74 +70,74 @@ public class OAuth2IntrospectTest extends VertxTestBase {
   private JsonObject config;
   private JsonObject fixture;
 
-  private final OAuth2Options oauthConfig = new OAuth2Options()
-    .setFlow(OAuth2FlowType.AUTH_CODE)
-    .setClientId("client-id")
-    .setClientSecret("client-secret")
-    .setSite("http://localhost:8080")
-    .setIntrospectionPath("/oauth/introspect");
+  @Before
+  public void setUp(TestContext should) throws Exception {
+    final Async setup = should.async();
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
-
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer().requestHandler(req -> {
+    server = rule.vertx().createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
             JsonObject body = SimpleHttpClient.queryToJson(buffer);
-            assertEquals(config.getString("token"), body.getString("token"));
+            should.assertEquals(config.getString("token"), body.getString("token"));
             // conditional test for token_type_hint
             if (config.containsKey("token_type_hint")) {
-              assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
+              should.assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
             }
+            req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
           } catch (UnsupportedEncodingException e) {
-            fail(e);
+            should.fail(e);
           }
-          req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else if (req.method() == HttpMethod.POST && "/oauth/tokeninfo".equals(req.path())) {
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+            should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+            req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
           } catch (UnsupportedEncodingException e) {
-            fail(e);
+            should.fail(e);
           }
-          req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else {
         req.response().setStatusCode(400).end();
       }
-    }).listen(8080, ready -> {
+    }).listen(0, ready -> {
       if (ready.failed()) {
         throw new RuntimeException(ready.cause());
       }
-      // ready
-      latch.countDown();
-    });
 
-    latch.await();
+      oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientId("client-id")
+        .setClientSecret("client-secret")
+        .setSite("http://localhost:" + ready.result().actualPort())
+        .setIntrospectionPath("/oauth/introspect"));
+
+      // ready
+      setup.complete();
+    });
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async tearDown = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> tearDown.complete());
   }
 
   @Test
-  public void introspectAccessToken() {
+  public void introspectAccessToken(TestContext should) {
+    final Async test = should.async();
+
     config = oauthIntrospect;
     fixture = fixtureIntrospect;
     oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         User token2 = res.result();
-        assertNotNull(token2);
+        should.assertNotNull(token2);
         JsonObject principal = token2.principal().copy();
 
         // clean time specific value
@@ -136,45 +146,45 @@ public class OAuth2IntrospectTest extends VertxTestBase {
 
         final JsonObject assertion = fixtureIntrospect.copy();
 
-        assertEquals(assertion.getMap(), principal.getMap());
+        should.assertEquals(assertion.getMap(), principal.getMap());
 
         ScopeAuthorization.create(" ").getAuthorizations(token2, res0 -> {
           if (res0.failed()) {
-            fail(res0.cause().getMessage());
+            should.fail(res0.cause().getMessage());
           } else {
             if (PermissionBasedAuthorization.create("scopeB").match(token2)) {
-              testComplete();
+              test.complete();
             } else {
-              fail("Should be allowed");
+              should.fail("Should be allowed");
             }
           }
         });
       }
     });
-    await();
   }
 
   @Test
-  public void introspectAccessTokenGoogleWay() {
+  public void introspectAccessTokenGoogleWay(TestContext should) {
+    final Async test = should.async();
     config = oauthIntrospect;
     fixture = fixtureGoogle;
     oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         User token = res.result();
-        assertNotNull(token);
+        should.assertNotNull(token);
         // make a copy because later we need to original data
         JsonObject principal = token.principal().copy();
 
         // clean up control
         final JsonObject assertion = fixtureGoogle.copy();
 
-        assertEquals(assertion.getMap(), principal.getMap());
+        should.assertEquals(assertion.getMap(), principal.getMap());
 
         ScopeAuthorization.create(" ").getAuthorizations(token, res0 -> {
           if (res0.failed()) {
-            fail(res0.cause().getMessage());
+            should.fail(res0.cause().getMessage());
           } else {
             if (PermissionBasedAuthorization.create("profile").match(token)) {
               // Issue #142
@@ -186,35 +196,34 @@ public class OAuth2IntrospectTest extends VertxTestBase {
               // directly too
               oauth2.authenticate(token.principal().put("access_token", OAuth2IntrospectTest.token).put("token_type", "Bearer"), v -> {
                 if (v.failed()) {
-                  fail(v.cause());
+                  should.fail(v.cause());
                 } else {
-                  testComplete();
+                  test.complete();
                 }
               });
             } else {
-              fail("Should be allowed");
+              should.fail("Should be allowed");
             }
           }
         });
       }
     });
-    await();
   }
 
   @Test
-  public void introspectAccessTokenKeyCloakWay() {
+  public void introspectAccessTokenKeyCloakWay(TestContext should) {
+    final Async test = should.async();
     config = oauthIntrospect;
     fixture = fixtureKeycloak;
     oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
       if (res.failed()) {
-        fail(res.cause());
+        should.fail(res.cause());
       } else {
         User token = res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
-        testComplete();
+        should.assertNotNull(token);
+        should.assertNotNull(token.principal());
+        test.complete();
       }
     });
-    await();
   }
 }

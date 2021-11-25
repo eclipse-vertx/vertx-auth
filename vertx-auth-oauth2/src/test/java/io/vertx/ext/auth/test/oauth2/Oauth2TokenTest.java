@@ -2,10 +2,18 @@ package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class Oauth2TokenTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class Oauth2TokenTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   final static JsonObject keycloakToken = new JsonObject(
     "{\n" +
@@ -20,18 +28,16 @@ public class Oauth2TokenTest extends VertxTestBase {
   );
 
   @Test
-  public void keycloakTest() throws Exception {
+  public void keycloakTest(TestContext should) throws Exception {
     User token = User.create(keycloakToken);
 
-    assertNotNull(token.get("access_token"));
-    assertNotNull(token.get("refresh_token"));
-    assertNull(token.get("accessToken"));
+    should.assertNotNull(token.get("access_token"));
+    should.assertNotNull(token.get("refresh_token"));
+    should.assertNull(token.get("accessToken"));
   }
 
   @Test
-  public void testNullScope() throws Exception {
-    super.setUp();
-
+  public void testNullScope(TestContext should) throws Exception {
     JsonObject json = new JsonObject(
       "{\n" +
         "    \"access_token\":\"xyz\",\n" +
@@ -45,7 +51,7 @@ public class Oauth2TokenTest extends VertxTestBase {
     try {
       User token = User.create(json);
     } catch (RuntimeException e) {
-      fail();
+      should.fail(e);
     }
   }
 }

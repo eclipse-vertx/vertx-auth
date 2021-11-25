@@ -38,25 +38,6 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.directory.server</groupId>
-      <artifactId>apacheds-protocol-dns</artifactId>
-      <version>1.5.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.21</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
       <artifactId>vertx-unit</artifactId>
       <scope>test</scope>
     </dependency>
@@ -68,7 +49,7 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>1.15.2</version>
+      <version>1.16.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

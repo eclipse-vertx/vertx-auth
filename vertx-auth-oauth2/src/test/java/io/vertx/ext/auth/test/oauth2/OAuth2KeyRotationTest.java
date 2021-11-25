@@ -9,14 +9,24 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class OAuth2KeyRotationTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2KeyRotationTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixtureJwks = new JsonObject(
     "{\"keys\":" +
@@ -40,19 +50,11 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
 
   private Handler<HttpServerRequest> requestHandler;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientId("client-id")
-      .setClientSecret("client-secret")
-      .setJwkPath("/oauth/jwks")
-      .setSite("http://localhost:8080"));
+  @Before
+  public void setUp(TestContext should) {
+    final Async setup = should.async();
 
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer()
+    server = rule.vertx().createHttpServer()
       .connectionHandler(c -> connectionCounter++)
       .requestHandler(req -> {
         if (req.method() == HttpMethod.GET && "/oauth/jwks".equals(req.path())) {
@@ -69,75 +71,85 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
             if (cnt.compareAndSet(1, 2)) {
               requestHandler.handle(req);
             } else {
-              fail("Too many calls on the mock");
+              should.fail("Too many calls on the mock");
             }
           });
         } else {
           req.response().setStatusCode(400).end();
         }
       })
-      .listen(8080, ready -> {
+      .listen(0, ready -> {
         if (ready.failed()) {
           throw new RuntimeException(ready.cause());
         }
+
+        oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+          .setFlow(OAuth2FlowType.AUTH_CODE)
+          .setClientId("client-id")
+          .setClientSecret("client-secret")
+          .setJwkPath("/oauth/jwks")
+          .setSite("http://localhost:" + ready.result().actualPort()));
+
         // ready
-        latch.countDown();
+        setup.complete();
       });
 
     connectionCounter = 0;
-    latch.await();
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async tearDown = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> tearDown.complete());
   }
 
   @Test
-  public void testLoadJWK() {
-    OAuth2Auth oauth2 = GoogleAuth.create(vertx, "", "");
+  public void testLoadJWK(TestContext should) {
+    final Async test = should.async();
+    OAuth2Auth oauth2 = GoogleAuth.create(rule.vertx(), "", "");
 
     oauth2.jWKSet(load -> {
-      assertFalse(load.failed());
-      testComplete();
+      should.assertFalse(load.failed());
+      test.complete();
     });
-    await();
   }
 
   @Test
-  public void testAutoRefresh() {
+  public void testAutoRefresh(TestContext should) {
+    final Async test = should.async();
     requestHandler = req -> {
       if (then.get() + 5000 <= System.currentTimeMillis()) {
         req.response()
           .putHeader("Content-Type", "application/json")
           .end(fixtureJwks.encode());
         // allow the process to complete
-        vertx.runOnContext(n -> testComplete());
+        rule.vertx().runOnContext(n -> test.complete());
       } else {
-        fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
+        should.fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
       }
     };
 
     oauth2.jWKSet(res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       }
     });
-    await();
   }
 
   @Test
-  public void testMissingKey() {
+  public void testMissingKey(TestContext should) {
+    final Async test = should.async();
     requestHandler = req -> {
       if (then.get() + 5000 <= System.currentTimeMillis()) {
         req.response()
           .putHeader("Content-Type", "application/json")
           .end(fixtureJwks.encode());
         // allow the process to complete
-        vertx.runOnContext(n -> testComplete());
+        rule.vertx().runOnContext(n -> test.complete());
       } else {
-        fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
+        should.fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
       }
     };
 
@@ -145,42 +157,41 @@ public class OAuth2KeyRotationTest extends VertxTestBase {
 
     oauth2.jWKSet(res -> {
       if (res.failed()) {
-        fail(res.cause());
+        should.fail(res.cause());
       } else {
         oauth2
           .missingKeyHandler(kid -> {
             if ("HS256#<null>".equals(kid)) {
-              testComplete();
+              test.complete();
             } else {
-              fail("wrong key id");
+              should.fail("wrong key id");
             }
           })
           .authenticate(new JsonObject().put("access_token", jwt), authenticate -> {
-          if (authenticate.failed()) {
-            // OK
-          } else {
-            fail("we don't have such key");
-          }
-        });
+            if (authenticate.failed()) {
+              // OK
+            } else {
+              should.fail("we don't have such key");
+            }
+          });
       }
     });
-    await();
   }
 
   @Test
-  public void testCloseNoMoreRefresh() {
+  public void testCloseNoMoreRefresh(TestContext should) {
+    final Async test = should.async();
     requestHandler = req -> {
-        fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
+      should.fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
     };
 
     oauth2.jWKSet(res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         oauth2.close();
-        vertx.setTimer(5500L, v -> testComplete());
+        rule.vertx().setTimer(5500L, v -> test.complete());
       }
     });
-    await();
   }
 }
