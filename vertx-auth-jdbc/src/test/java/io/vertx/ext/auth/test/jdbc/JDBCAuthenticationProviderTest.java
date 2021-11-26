@@ -23,9 +23,15 @@ import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -35,7 +41,11 @@ import java.util.List;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class JDBCAuthenticationProviderTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class JDBCAuthenticationProviderTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   static final List<String> SQL = new ArrayList<>();
 
@@ -87,21 +97,17 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
   private JDBCAuthenticationOptions authenticationOptions;
   private JDBCClient jdbcClient;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-  }
 
   protected JDBCClient getJDBCCLient() {
     if (jdbcClient == null) {
-      jdbcClient = JDBCClient.create(vertx, config());
+      jdbcClient = JDBCClient.create(rule.vertx(), config());
     }
     return jdbcClient;
   }
 
   protected JDBCHashStrategy getHashStrategy() {
     if (jdbcHashStrategy == null) {
-      jdbcHashStrategy = JDBCHashStrategy.createSHA512(vertx);
+      jdbcHashStrategy = JDBCHashStrategy.createSHA512(rule.vertx());
       jdbcHashStrategy.setNonces(new JsonArray().add("queiM3ayei1ahCheicupohphioveer0O"));
     }
     return jdbcHashStrategy;
@@ -128,60 +134,78 @@ public class JDBCAuthenticationProviderTest extends VertxTestBase {
     return authenticationOptions;
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     getJDBCCLient().close();
-    super.tearDown();
   }
 
   @Test
-  public void testAuthenticate() {
+  public void testAuthenticate(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 
   @Test
-  public void testAuthenticateFailBadPwd() {
+  public void testAuthenticateFailBadPwd(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "eggs");
-    getAuthenticationProvider().authenticate(credentials, onFailure(v -> {
-      assertEquals("Invalid username/password", v.getMessage());
-      testComplete();
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onSuccess(user -> should.fail("This test should have failed"))
+      .onFailure(err -> {
+        should.assertEquals("Invalid username/password", err.getMessage());
+        test.complete();
+      });
   }
 
   @Test
-  public void testAuthenticateFailBadUser() {
+  public void testAuthenticateFailBadUser(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("blah", "whatever");
-    getAuthenticationProvider().authenticate(credentials, onFailure(v -> {
-      assertEquals("Invalid username/password", v.getMessage());
-      testComplete();
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onSuccess(user -> should.fail("This test should have failed"))
+      .onFailure(err -> {
+        should.assertEquals("Invalid username/password", err.getMessage());
+        test.complete();
+      });
   }
 
   @Test
-  public void testAuthenticateWithNonce() {
+  public void testAuthenticateWithNonce(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("paulo", "secret");
-    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      testComplete();
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 
   @Test
-  public void testPHC() {
+  public void testPHC(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("lopus", "secret");
     getPHCAuthenticationProvider()
-      .authenticate(credentials, onSuccess(user -> {
-        assertNotNull(user);
-        testComplete();
-      }));
-    await();
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
   }
 }

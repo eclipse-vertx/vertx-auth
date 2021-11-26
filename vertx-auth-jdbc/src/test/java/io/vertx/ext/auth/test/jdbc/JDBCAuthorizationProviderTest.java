@@ -21,12 +21,11 @@ import java.sql.DriverManager;
 
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jdbc.JDBCAuthorization;
 import io.vertx.ext.auth.jdbc.JDBCAuthorizationOptions;
@@ -67,11 +66,6 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
   private JDBCAuthorization authorizationProvider;
   private JDBCAuthorizationOptions authorizationOptions;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-  }
-
   @BeforeClass
   public static void createDb() throws Exception {
     Connection conn = DriverManager.getConnection(config().getString("url"));
@@ -95,65 +89,83 @@ public class JDBCAuthorizationProviderTest extends JDBCAuthenticationProviderTes
     return authorizationProvider;
   }
 
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
+  @Test
+  public void testAuthoriseHasRole(TestContext should) {
+    final Async test = should.async();
 
-  private void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizationProvider().getAuthorizations(user, handler);
+    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        getAuthorizationProvider()
+          .getAuthorizations(user)
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertTrue(RoleBasedAuthorization.create("dev").match(user));
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthoriseHasRole() {
+  public void testAuthoriseNotHasRole(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      fillUserAuthorizations(user, onSuccess(has -> {
-        assertTrue(RoleBasedAuthorization.create("dev").match(user));
-        testComplete();
-      }));
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        getAuthorizationProvider()
+          .getAuthorizations(user)
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertFalse(RoleBasedAuthorization.create("manager").match(user));
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthoriseNotHasRole() {
+  public void testAuthoriseHasPermission(TestContext should) {
+    final Async test = should.async();
+
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      fillUserAuthorizations(user, onSuccess(has -> {
-        assertFalse(RoleBasedAuthorization.create("manager").match(user));
-        testComplete();
-      }));
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        getAuthorizationProvider()
+          .getAuthorizations(user)
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
+            test.complete();
+          });
+      });
   }
 
   @Test
-  public void testAuthoriseHasPermission() {
-    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      fillUserAuthorizations(user, onSuccess(has -> {
-        assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
-        testComplete();
-      }));
-    }));
-    await();
-  }
+  public void testAuthoriseNotHasPermission(TestContext should) {
+    final Async test = should.async();
 
-  @Test
-  public void testAuthoriseNotHasPermission() {
     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("tim", "sausages");
-    getAuthenticationProvider().authenticate(credentials, onSuccess(user -> {
-      assertNotNull(user);
-      fillUserAuthorizations(user, onSuccess(has -> {
-        assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));
-        testComplete();
-      }));
-    }));
-    await();
+    getAuthenticationProvider()
+      .authenticate(credentials)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        getAuthorizationProvider()
+          .getAuthorizations(user)
+          .onFailure(should::fail)
+          .onSuccess(has -> {
+            should.assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));
+            test.complete();
+          });
+      });
   }
-
 }

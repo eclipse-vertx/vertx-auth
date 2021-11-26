@@ -43,6 +43,7 @@ public class KeyStoreOptions {
   private String provider;
   private String password;
   private String path;
+  @Deprecated
   private Buffer value;
   private Map<String, String> passwordProtection;
 
@@ -104,6 +105,7 @@ public class KeyStoreOptions {
   }
 
   @Fluent
+  @Deprecated
   public KeyStoreOptions setValue(Buffer value) {
     this.value = value;
     return this;
@@ -123,7 +125,6 @@ public class KeyStoreOptions {
     return provider;
   }
 
-  @Fluent
   public String getPassword() {
     return password;
   }
@@ -132,6 +133,7 @@ public class KeyStoreOptions {
     return path;
   }
 
+  @Deprecated
   public Buffer getValue() {
     return value;
   }

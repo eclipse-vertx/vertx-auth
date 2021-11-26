@@ -14,13 +14,23 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.AzureADAuth;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
 
-public class OAuth2OBODiscoveryTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2OBODiscoveryTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -32,13 +42,13 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
   protected OAuth2Auth oauth2;
   private HttpServer server;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    final CountDownLatch latch = new CountDownLatch(1);
+  @Before
+  public void setUp(TestContext should) {
+    final Async setup = should.async();
+
     // mock AzureAD
     AzureADAuth.discover(
-      vertx,
+      rule.vertx(),
       new OAuth2Options()
         .setFlow(OAuth2FlowType.AAD_OBO)
         .setClientId("client-id")
@@ -48,29 +58,24 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
           new JWTOptions()
             .addAudience("api://resource")))
 
-      .onFailure(this::fail)
+      .onFailure(should::fail)
       .onSuccess(oauth2 -> {
         this.oauth2 = oauth2;
 
-        // hack the config to go to the mock
-        ((OAuth2AuthProviderImpl) this.oauth2).getConfig()
-          .setTokenPath("http://localhost:8080/resource/oauth2/token")
-          .setAuthorizationPath("http://localhost:8080/resource/oauth2/authorize");
-
-        server = vertx.createHttpServer().requestHandler(req -> {
+        server = rule.vertx().createHttpServer().requestHandler(req -> {
           if (req.method() == HttpMethod.POST && "/resource/oauth2/token".equals(req.path())) {
-            assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
+            should.assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
             req.setExpectMultipart(true).bodyHandler(buffer -> {
               try {
                 JsonObject payload = SimpleHttpClient.queryToJson(buffer);
                 // according to the docs Azure expects the following values:
-                assertEquals("urn:ietf:params:oauth:grant-type:jwt-bearer", payload.getString("grant_type"));
-                assertEquals("head.body.signature", payload.getValue("assertion"));
+                should.assertEquals("urn:ietf:params:oauth:grant-type:jwt-bearer", payload.getString("grant_type"));
+                should.assertEquals("head.body.signature", payload.getValue("assertion"));
                 // client-id and client-secret are passed in the authorization header
-                assertEquals("on_behalf_of", payload.getValue("requested_token_use"));
-                assertEquals("a b", payload.getValue("scope"));
+                should.assertEquals("on_behalf_of", payload.getValue("requested_token_use"));
+                should.assertEquals("a b", payload.getValue("scope"));
               } catch (UnsupportedEncodingException e) {
-                fail(e);
+                should.fail(e);
               }
               req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
             });
@@ -81,30 +86,36 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
           if (ready.failed()) {
             throw new RuntimeException(ready.cause());
           }
+
+          // hack the config to go to the mock
+          ((OAuth2AuthProviderImpl) this.oauth2).getConfig()
+            .setTokenPath("http://localhost:" + ready.result().actualPort() + "/resource/oauth2/token")
+            .setAuthorizationPath("http://localhost:" + ready.result().actualPort() + "/resource/oauth2/authorize");
+
           // ready
-          latch.countDown();
+          setup.complete();
         });
       });
-
-    latch.await();
-
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async tearDown = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> tearDown.complete());
   }
 
   @Test
-  public void getToken() {
+  public void getToken(TestContext should) {
+    final Async test = should.async();
     oauth2.authenticate(new TokenCredentials("head.body.signature").addScope("a").addScope("b"), res -> {
       if (res.failed()) {
-        fail(res.cause());
+        should.fail(res.cause());
       } else {
         User token = res.result();
-        assertNotNull(token);
-        assertNotNull(token.principal());
+        should.assertNotNull(token);
+        should.assertNotNull(token.principal());
 
         // mock the token
         // with a dump from the official docs:
@@ -140,12 +151,11 @@ public class OAuth2OBODiscoveryTest extends VertxTestBase {
             "}"));
 
         ScopeAuthorization.create(" ", "scp").getAuthorizations(token, authz1 -> {
-          assertTrue(authz1.succeeded());
-          assertTrue(PermissionBasedAuthorization.create("user_impersonation").match(token));
-          testComplete();
+          should.assertTrue(authz1.succeeded());
+          should.assertTrue(PermissionBasedAuthorization.create("user_impersonation").match(token));
+          test.complete();
         });
       }
     });
-    await();
   }
 }

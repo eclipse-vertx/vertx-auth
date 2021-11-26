@@ -9,15 +9,25 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class OAuth2KeyRotationWithoutMaxAgeTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2KeyRotationWithoutMaxAgeTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixtureJwks = new JsonObject(
     "{\"keys\":" +
@@ -41,19 +51,19 @@ public class OAuth2KeyRotationWithoutMaxAgeTest extends VertxTestBase {
 
   private Handler<HttpServerRequest> requestHandler;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
+  @Before
+  public void setUp(TestContext should) throws Exception {
+    final Async test = should.async();
+
+    oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
       .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientID("client-id")
+      .setClientId("client-id")
       .setClientSecret("client-secret")
       .setJwkPath("/oauth/jwks")
       .setSite("http://localhost:8080"));
 
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer()
+    server = rule.vertx()
+      .createHttpServer()
       .connectionHandler(c -> connectionCounter++)
       .requestHandler(req -> {
         if (req.method() == HttpMethod.GET && "/oauth/jwks".equals(req.path())) {
@@ -70,7 +80,7 @@ public class OAuth2KeyRotationWithoutMaxAgeTest extends VertxTestBase {
             if (cnt.compareAndSet(1, 2)) {
               requestHandler.handle(req);
             } else {
-              fail("Too many calls on the mock");
+              should.fail("Too many calls on the mock");
             }
           });
         } else {
@@ -82,39 +92,39 @@ public class OAuth2KeyRotationWithoutMaxAgeTest extends VertxTestBase {
           throw new RuntimeException(ready.cause());
         }
         // ready
-        latch.countDown();
+        test.complete();
       });
-
-    connectionCounter = 0;
-    latch.await();
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
-  }
-
-  @Test
-  public void testLoadJWK() {
-    OAuth2Auth oauth2 = GoogleAuth.create(vertx, "", "");
-
-    oauth2.jWKSet(load -> {
-      assertFalse(load.failed());
-      testComplete();
-    });
-    await();
+  @After
+  public void tearDown(TestContext should) {
+    final Async test = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(ok -> test.complete());
   }
 
   @Test
-  public void testMissingKey() {
+  public void testLoadJWK(TestContext should) {
+    final Async test = should.async();
+    OAuth2Auth oauth2 = GoogleAuth.create(rule.vertx(), "", "");
+
+    oauth2.jWKSet()
+      .onFailure(should::fail)
+      .onSuccess(ok -> test.complete());
+  }
+
+  @Test
+  public void testMissingKey(TestContext should) {
+    final Async test = should.async();
 
     requestHandler = req -> {
       req.response()
         .putHeader("Content-Type", "application/json")
         .end(fixtureJwks.encode());
       // allow the process to complete
-      vertx.runOnContext(n -> testComplete());
+      rule.vertx()
+        .runOnContext(n -> test.complete());
     };
 
     String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIifQ.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NYY8FXsouaKSuMafoNshtQ997X4x1Jta0GEtl3BAJGY";
@@ -135,21 +145,15 @@ public class OAuth2KeyRotationWithoutMaxAgeTest extends VertxTestBase {
         }
       })
 
-      .jWKSet(res -> {
-        if (res.failed()) {
-          fail(res.cause());
-        } else {
-          oauth2
-            .authenticate(new JsonObject().put("access_token", jwt), authenticate -> {
-              if (authenticate.failed()) {
-                // OK, this will trigger a refresh as it's the default behavior of the missing key
-                // and try to use the introspect mode (which isn't configured so it will fail)
-              } else {
-                fail("we don't have such key");
-              }
-            });
-        }
+      .jWKSet()
+      .onFailure(should::fail)
+      .onSuccess(ok -> {
+        oauth2
+          .authenticate(new JsonObject().put("access_token", jwt))
+          .onFailure(err -> {
+            // ok
+          })
+          .onSuccess(user -> should.fail());
       });
-    await();
   }
 }

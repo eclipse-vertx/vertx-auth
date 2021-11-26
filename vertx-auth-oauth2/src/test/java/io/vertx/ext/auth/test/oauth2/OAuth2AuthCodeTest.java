@@ -2,9 +2,15 @@ package io.vertx.ext.auth.test.oauth2;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.concurrent.CountDownLatch;
 
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import io.vertx.core.Future;
@@ -16,9 +22,13 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.test.core.VertxTestBase;
+import org.junit.runner.RunWith;
 
-public class OAuth2AuthCodeTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2AuthCodeTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixtureTokens = new JsonObject(
     "{" +
@@ -59,31 +69,23 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
   private HttpServer server;
   private JsonObject config;
   private int connectionCounter;
+  private int currentPort;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientId("client-id")
-      .setClientSecret("client-secret")
-      .setJwkPath("/oauth/jwks")
-      .setSite("http://localhost:8080"));
-
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer()
+  @Before
+  public void setUp(TestContext should) throws Exception {
+    final Async setup = should.async();
+    server = rule.vertx().createHttpServer()
       .connectionHandler(c -> connectionCounter++)
       .requestHandler(req -> {
         if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
-          assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
+          should.assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
           req.setExpectMultipart(true).bodyHandler(buffer -> {
             try {
-              assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+              should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+              req.response().putHeader("Content-Type", "application/json").end(fixtureTokens.encode());
             } catch (UnsupportedEncodingException e) {
-              fail(e);
+              should.fail(e);
             }
-            req.response().putHeader("Content-Type", "application/json").end(fixtureTokens.encode());
           });
         } else if (req.method() == HttpMethod.GET && "/oauth/jwks".equals(req.path())) {
           req.bodyHandler(buffer -> {
@@ -93,70 +95,80 @@ public class OAuth2AuthCodeTest extends VertxTestBase {
           req.response().setStatusCode(400).end();
         }
       })
-      .listen(8080, ready -> {
+      .listen(0, ready -> {
         if (ready.failed()) {
           throw new RuntimeException(ready.cause());
         }
+
+        oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+          .setFlow(OAuth2FlowType.AUTH_CODE)
+          .setClientId("client-id")
+          .setClientSecret("client-secret")
+          .setJwkPath("/oauth/jwks")
+          .setSite("http://localhost:" + ready.result().actualPort()));
+
+        currentPort = ready.result().actualPort();
         // ready
-        latch.countDown();
+        setup.complete();
       });
 
     connectionCounter = 0;
-    latch.await();
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
-  }
-
-  @Test
-  public void generateAuthorizeURL() throws Exception {
-    String expected = "http://localhost:8080/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
-    assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async after = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> after.complete());
   }
 
   @Test
-  public void getToken() {
+  public void generateAuthorizeURL(TestContext should) throws Exception {
+    String expected = "http://localhost:" + currentPort + "/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
+    should.assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
+  }
+
+  @Test
+  public void getToken(TestContext should) {
+    final Async test = should.async();
+
     config = oauthConfig;
     oauth2.jWKSet(res -> {
       if (res.failed()) {
-        fail(res.cause().getMessage());
+        should.fail(res.cause().getMessage());
       } else {
         oauth2.authenticate(tokenConfig, res2 -> {
           if (res2.failed()) {
-            fail(res2.cause().getMessage());
+            should.fail(res2.cause().getMessage());
           } else {
             User token = res2.result();
-            assertNotNull(token);
-            assertNotNull(token.principal());
-            assertNotNull(token.principal().getString("access_token"));
-            testComplete();
+            should.assertNotNull(token);
+            should.assertNotNull(token.principal());
+            should.assertNotNull(token.principal().getString("access_token"));
+            test.complete();
           }
         });
-
       }
     });
-    await();
   }
 
   @Test
-  public void testConnectionReuse() {
+  public void testConnectionReuse(TestContext should) {
+    final Async test = should.async();
     auth()
       .compose(x -> auth())
       .compose(x -> auth())
       .compose(x -> auth())
       .onComplete(r -> {
         if (r.failed()) {
-          fail(r.cause());
+          should.fail(r.cause());
         } else {
           // on slow environments multiple connections may be used
-          assertTrue(connectionCounter < 3);
-          testComplete();
+          should.assertTrue(connectionCounter < 3);
+          test.complete();
         }
       });
-    await();
   }
 
   Future<Void> auth() {

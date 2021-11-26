@@ -9,13 +9,23 @@ import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
 
-public class OAuth2UserInfoTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2UserInfoTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   // according to https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
   private static final JsonObject fixture = new JsonObject()
@@ -33,78 +43,75 @@ public class OAuth2UserInfoTest extends VertxTestBase {
   private OAuth2Auth oauth2;
   private HttpServer server;
 
-  private final OAuth2Options oauthConfig = new OAuth2Options()
-    .setFlow(OAuth2FlowType.AUTH_CODE)
-    .setClientId("client-id")
-    .setClientSecret("client-secret")
-    .setSite("http://localhost:8080")
-    .setUserInfoPath("/oauth/userinfo")
-    .setUserInfoParameters(googleParams);
+  @Before
+  public void setUp(TestContext should) {
+    final Async setup = should.async();
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
-
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer().requestHandler(req -> {
+    server = rule.vertx().createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.GET && "/oauth/userinfo".equals(req.path())) {
-        assertTrue(req.getHeader("Authorization").contains("Bearer "));
+        should.assertTrue(req.getHeader("Authorization").contains("Bearer "));
 
         try {
-          assertEquals(googleParams, SimpleHttpClient.queryToJson(Buffer.buffer(req.query())));
+          should.assertEquals(googleParams, SimpleHttpClient.queryToJson(Buffer.buffer(req.query())));
         } catch (UnsupportedEncodingException e) {
-          fail(e);
+          should.fail(e);
         }
 
         req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
       } else {
         req.response().setStatusCode(400).end();
       }
-    }).listen(8080, ready -> {
+    }).listen(0, ready -> {
       if (ready.failed()) {
         throw new RuntimeException(ready.cause());
       }
+      oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientId("client-id")
+        .setClientSecret("client-secret")
+        .setSite("http://localhost:" + ready.result().actualPort())
+        .setUserInfoPath("/oauth/userinfo")
+        .setUserInfoParameters(googleParams));
+
       // ready
-      latch.countDown();
+      setup.complete();
     });
-
-    latch.await();
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async tearDown = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> tearDown.complete());
   }
 
   @Test
-  public void getUserInfo() {
+  public void getUserInfo(TestContext should) {
+    final Async test = should.async();
     final User accessToken = User.create(new JsonObject("{\"access_token\":\"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdXRob3JpemF0aW9uIjp7InBlcm1pc3Npb25zIjpbeyJyZXNvdXJjZV9zZXRfaWQiOiJkMmZlOTg0My02NDYyLTRiZmMtYmFiYS1iNTc4N2JiNmUwZTciLCJyZXNvdXJjZV9zZXRfbmFtZSI6IkhlbGxvIFdvcmxkIFJlc291cmNlIn1dfSwianRpIjoiZDYxMDlhMDktNzhmZC00OTk4LWJmODktOTU3MzBkZmQwODkyLTE0NjQ5MDY2Nzk0MDUiLCJleHAiOjk5OTk5OTk5OTksIm5iZiI6MCwiaWF0IjoxNDY0OTA2NjcxLCJzdWIiOiJmMTg4OGY0ZC01MTcyLTQzNTktYmUwYy1hZjMzODUwNWQ4NmMiLCJ0eXAiOiJrY19ldHQiLCJhenAiOiJoZWxsby13b3JsZC1hdXRoei1zZXJ2aWNlIn0\",\"active\":true,\"scope\":\"scopeA scopeB\",\"client_id\":\"client-id\",\"username\":\"username\",\"token_type\":\"bearer\",\"expires_at\":99999999999000}"));
 
     oauth2.userInfo(accessToken, userInfo -> {
       if (userInfo.failed()) {
-        fail(userInfo.cause().getMessage());
+        should.fail(userInfo.cause().getMessage());
       } else {
-        testComplete();
+        test.complete();
       }
     });
-    await();
   }
 
   @Test
-  public void getUserInfoWithParams() {
+  public void getUserInfoWithParams(TestContext should) {
+    final Async test = should.async();
     final User accessToken = User.create(new JsonObject("{\"access_token\":\"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdXRob3JpemF0aW9uIjp7InBlcm1pc3Npb25zIjpbeyJyZXNvdXJjZV9zZXRfaWQiOiJkMmZlOTg0My02NDYyLTRiZmMtYmFiYS1iNTc4N2JiNmUwZTciLCJyZXNvdXJjZV9zZXRfbmFtZSI6IkhlbGxvIFdvcmxkIFJlc291cmNlIn1dfSwianRpIjoiZDYxMDlhMDktNzhmZC00OTk4LWJmODktOTU3MzBkZmQwODkyLTE0NjQ5MDY2Nzk0MDUiLCJleHAiOjk5OTk5OTk5OTksIm5iZiI6MCwiaWF0IjoxNDY0OTA2NjcxLCJzdWIiOiJmMTg4OGY0ZC01MTcyLTQzNTktYmUwYy1hZjMzODUwNWQ4NmMiLCJ0eXAiOiJrY19ldHQiLCJhenAiOiJoZWxsby13b3JsZC1hdXRoei1zZXJ2aWNlIn0\",\"active\":true,\"scope\":\"scopeA scopeB\",\"client_id\":\"client-id\",\"username\":\"username\",\"token_type\":\"bearer\",\"expires_at\":99999999999000}"));
 
     oauth2.userInfo(accessToken, userInfo -> {
       if (userInfo.failed()) {
-        fail(userInfo.cause().getMessage());
+        should.fail(userInfo.cause().getMessage());
       } else {
-        assertEquals(fixture, userInfo.result());
-        testComplete();
+        should.assertEquals(fixture, userInfo.result());
+        test.complete();
       }
     });
-    await();
   }
 }

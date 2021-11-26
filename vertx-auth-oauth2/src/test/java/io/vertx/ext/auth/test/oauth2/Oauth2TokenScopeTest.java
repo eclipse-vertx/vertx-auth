@@ -11,13 +11,23 @@ import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.auth.JWTOptions;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
 
-public class Oauth2TokenScopeTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class Oauth2TokenScopeTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private final static String JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlQSBzY29wZUIgc2NvcGVDIiwiZXhwIjo5OTk5OTk5OTk5LCJuYmYiOjAsImlhdCI6MTQ2NDkwNjY3MSwic3ViIjoiZjE4ODhmNGQtNTE3Mi00MzU5LWJlMGMtYWYzMzg1MDVkODZjIn0.7aJYjGVe4YfdnYTlQH_FYhRCjvctcE7DtWwzxXrbLmM";
 
@@ -27,9 +37,9 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
   private OAuth2Options oauthConfig;
   private JsonObject fixtureIntrospect;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp(TestContext should) {
+    final Async setup = should.async();
 
     fixtureIntrospect = new JsonObject(
       "{" +
@@ -48,22 +58,20 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .setClientId("client-id")
       .setClientSecret("client-secret");
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer().requestHandler(req -> {
+    server = rule.vertx().createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
           req.setExpectMultipart(true).bodyHandler(buffer -> {
             try {
               JsonObject body = SimpleHttpClient.queryToJson(buffer);
-              assertEquals(config.getString("token"), body.getString("token"));
+              should.assertEquals(config.getString("token"), body.getString("token"));
               // conditional test for token_type_hint
               if (config.containsKey("token_type_hint")) {
-                assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
+                should.assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
               }
             } catch (UnsupportedEncodingException e) {
-              fail(e);
+              should.fail(e);
             }
             req.response().putHeader("Content-Type", "application/json").end(fixtureIntrospect.encode());
           });
@@ -79,16 +87,16 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
           .setSite("http://localhost:" + actualPort);
       }
       // ready
-      latch.countDown();
+      setup.complete();
     });
-
-    latch.await();
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async tearDown = should.async();
+    server.close()
+      .onFailure(should::fail)
+      .onSuccess(v -> tearDown.complete());
   }
 
   /**
@@ -97,7 +105,8 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
    * JWT generated in HS256 with vertx as shared secret.
    */
   @Test
-  public void tokenIsValid() {
+  public void tokenIsValid(TestContext should) {
+    final Async test = should.async();
     config = new JsonObject()
       .put("token_type", "Bearer")
       .put("access_token", JWT)
@@ -107,18 +116,17 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"))
       .setJWTOptions(new JWTOptions());
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
     oauth2.authenticate(new TokenCredentials(JWT), res -> {
       if (res.failed()) {
-        fail(res.cause());
+        should.fail(res.cause());
       } else {
         User token = res.result();
-        assertFalse(token.expired());
-        testComplete();
+        should.assertFalse(token.expired());
+        test.complete();
       }
     });
-    await();
   }
 
   /**
@@ -126,7 +134,8 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
    * Scopes are retrieved through the token introspection.
    */
   @Test
-  public void tokenIsValid_withIntrospection() {
+  public void tokenIsValid_withIntrospection(TestContext should) {
+    final Async test = should.async();
     final String opaqueToken = "opaqueToken";
 
     config = new JsonObject()
@@ -138,24 +147,23 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .setIntrospectionPath("/oauth/introspect")
       .setJWTOptions(new JWTOptions());
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
     oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
       if (res.failed()) {
-        fail(res.cause());
+        should.fail(res.cause());
       } else {
         User token = res.result();
-        assertFalse(token.expired());
+        should.assertFalse(token.expired());
 
         ScopeAuthorization.create(" ").getAuthorizations(token, call -> {
-          assertTrue(call.succeeded());
-          assertTrue(PermissionBasedAuthorization.create("scopeA").match(token));
-          assertTrue(PermissionBasedAuthorization.create("scopeB").match(token));
-          testComplete();
+          should.assertTrue(call.succeeded());
+          should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(token));
+          should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(token));
+          test.complete();
         });
       }
     });
-    await();
   }
 
   /**
@@ -164,7 +172,8 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
    * JWT generated in HS256 with vertx as shared secret.
    */
   @Test
-  public void tokenIsNotValid() {
+  public void tokenIsNotValid(TestContext should) {
+    final Async test = should.async();
     config = new JsonObject()
       .put("token_type", "Bearer")
       .put("access_token", JWT)
@@ -174,19 +183,18 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"))
       .setJWTOptions(new JWTOptions());
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
     oauth2.authenticate(new TokenCredentials(JWT), res -> {
-      assertTrue(res.succeeded());
+      should.assertTrue(res.succeeded());
       ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
-        assertTrue(call.succeeded());
+        should.assertTrue(call.succeeded());
         // the scopes are missing
-        assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
-        assertFalse(PermissionBasedAuthorization.create("scopeB").match(res.result()));
-        testComplete();
+        should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
+        should.assertFalse(PermissionBasedAuthorization.create("scopeB").match(res.result()));
+        test.complete();
       });
     });
-    await();
   }
 
   /**
@@ -194,7 +202,8 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
    * Scopes are retrieved through the token introspection.
    */
   @Test
-  public void tokenIsNotValid_withIntrospection() {
+  public void tokenIsNotValid_withIntrospection(TestContext should) {
+    final Async test = should.async();
     final String opaqueToken = "opaqueToken";
 
     config = new JsonObject()
@@ -206,20 +215,19 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .setIntrospectionPath("/oauth/introspect")
       .setJWTOptions(new JWTOptions());
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
     oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
-      assertTrue(res.succeeded());
+      should.assertTrue(res.succeeded());
       ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
-        assertTrue(call.succeeded());
-        assertTrue(PermissionBasedAuthorization.create("scopeA").match(res.result()));
-        assertTrue(PermissionBasedAuthorization.create("scopeB").match(res.result()));
+        should.assertTrue(call.succeeded());
+        should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(res.result()));
+        should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(res.result()));
         // the scope is missing
-        assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
-        testComplete();
+        should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
+        test.complete();
       });
     });
-    await();
   }
 
   /**
@@ -227,7 +235,8 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
    * Scopes check must not be performed / throw an error.
    */
   @Test
-  public void shouldNotFailWhenNoIntrospectionScope() {
+  public void shouldNotFailWhenNoIntrospectionScope(TestContext should) {
+    final Async test = should.async();
     final String opaqueToken = "opaqueToken";
 
     this.fixtureIntrospect = new JsonObject(
@@ -251,26 +260,26 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .setIntrospectionPath("/oauth/introspect")
       .setJWTOptions(new JWTOptions());
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
     oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
       if (res.failed()) {
-        fail("Test should have not failed");
+        should.fail("Test should have not failed");
       } else {
         User token = res.result();
-        assertEquals("username",token.principal().getValue("username"));
-        assertNull(token.principal().getValue("scope"));
-        testComplete();
+        should.assertEquals("username",token.principal().getValue("username"));
+        should.assertNull(token.principal().getValue("scope"));
+        test.complete();
       }
     });
-    await();
   }
 
   /**
    * Scopes are available into the token but no scopes requirement is set.
    */
   @Test
-  public void shouldNotFailWhenNoScopeRequired() {
+  public void shouldNotFailWhenNoScopeRequired(TestContext should) {
+    final Async test = should.async();
     config = new JsonObject()
       .put("token_type", "Bearer")
       .put("access_token", JWT)
@@ -280,17 +289,16 @@ public class Oauth2TokenScopeTest extends VertxTestBase {
       .setJWTOptions(new JWTOptions())
       .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"));
 
-    oauth2 = OAuth2Auth.create(vertx, oauthConfig);
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
     oauth2.authenticate(new TokenCredentials(JWT), res -> {
       if (res.failed()) {
-        fail("Test should have not failed");
+        should.fail("Test should have not failed");
       } else {
         User token = res.result();
-        assertNotNull(token);
-        testComplete();
+        should.assertNotNull(token);
+        test.complete();
       }
     });
-    await();
   }
 }

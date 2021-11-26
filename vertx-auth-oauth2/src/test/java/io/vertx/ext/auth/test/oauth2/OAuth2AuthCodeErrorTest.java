@@ -7,13 +7,23 @@ import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.test.core.VertxTestBase;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
 
-public class OAuth2AuthCodeErrorTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class OAuth2AuthCodeErrorTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -40,59 +50,60 @@ public class OAuth2AuthCodeErrorTest extends VertxTestBase {
   private HttpServer server;
   private JsonObject config;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
-      .setClientId("client-id")
-      .setClientSecret("client-secret")
-      .setSite("http://localhost:8080"));
+  @Before
+  public void setUp(TestContext should) throws Exception {
+    final Async setup = should.async();
 
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    server = vertx.createHttpServer().requestHandler(req -> {
+    server = rule.vertx().createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
-        assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
+        should.assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
         req.setExpectMultipart(true).bodyHandler(buffer -> {
           try {
-            assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+            should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+            req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
           } catch (UnsupportedEncodingException e) {
-            fail(e);
+            should.fail(e);
           }
-          req.response().putHeader("Content-Type", "application/json").end(fixture.encode());
         });
       } else {
         req.response().setStatusCode(400).end();
       }
-    }).listen(8080, ready -> {
+    }).listen(0, ready -> {
       if (ready.failed()) {
         throw new RuntimeException(ready.cause());
       }
-      // ready
-      latch.countDown();
-    });
 
-    latch.await();
+      oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+        .setFlow(OAuth2FlowType.AUTH_CODE)
+        .setClientId("client-id")
+        .setClientSecret("client-secret")
+        .setSite("http://localhost:" + ready.result().actualPort()));
+
+      // ready
+      setup.complete();
+    });
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.close();
-    super.tearDown();
+  @After
+  public void tearDown(TestContext should) throws Exception {
+    final Async cleanup = should.async();
+    server.close()
+      .onSuccess(v -> cleanup.complete())
+      .onFailure(should::fail);
   }
 
   @Test
-  public void getToken() {
+  public void getToken(TestContext should) {
+    final Async test = should.async();
+
     config = oauthConfig;
     oauth2.authenticate(tokenConfig, res -> {
       if (res.failed()) {
-        assertNotNull(res.cause());
-        testComplete();
+        should.assertNotNull(res.cause());
+        test.complete();
       } else {
-        fail("Should fail with bad verification code");
+        should.fail("Should fail with bad verification code");
       }
     });
-    await();
   }
 }

@@ -16,6 +16,8 @@
 
 package io.vertx.ext.auth.test.jdbc;
 
+import org.junit.Before;
+
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -25,9 +27,8 @@ public class OverrideSQLTest extends JDBCAuthorizationProviderTest {
   static final String PERMISSIONS_QUERY_OVERRIDE = "select perm from roles_perms2 rp, user_roles2 ur where ur.user_name = ? and ur.role = rp.role";
   static final String ROLES_QUERY_OVERRIDE = "select role from user_roles2 where user_name = ?";
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() {
     getAuthenticationOptions().setAuthenticationQuery(AUTHENTICATION_QUERY_OVERRIDE);
     getAuthorizationOptions().setRolesQuery(ROLES_QUERY_OVERRIDE).setPermissionsQuery(PERMISSIONS_QUERY_OVERRIDE);
   }

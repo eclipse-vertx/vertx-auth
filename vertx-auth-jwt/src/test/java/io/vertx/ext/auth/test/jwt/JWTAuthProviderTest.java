@@ -25,16 +25,25 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
-import io.vertx.test.core.VertxTestBase;
-import org.junit.Assert;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static org.junit.Assert.assertNotEquals;
 
-public class JWTAuthProviderTest extends VertxTestBase {
+@RunWith(VertxUnitRunner.class)
+public class JWTAuthProviderTest {
+
+  @Rule
+  public RunTestOnContext rule = new RunTestOnContext();
 
   private JWTAuth authProvider;
 
@@ -44,10 +53,9 @@ public class JWTAuthProviderTest extends VertxTestBase {
   // {"sub":"Paulo","iat":1400159434,"exp":1400245834,"roles":["admin","developer","user"],"permissions":["read","write","execute"]}
   private static final String JWT_INVALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImlhdCI6MTQwMDE1OTQzNCwiZXhwIjoxNDAwMjQ1ODM0LCJyb2xlcyI6WyJhZG1pbiIsImRldmVsb3BlciIsInVzZXIiXSwicGVybWlzc2lvbnMiOlsicmVhZCIsIndyaXRlIiwiZXhlY3V0ZSJdfQ==.NhHul0OFlmUaatFwNeGBbshVNzac2z_3twEEg57x80s=";
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
-    authProvider = JWTAuth.create(vertx, getConfig());
+    authProvider = JWTAuth.create(rule.vertx(), getConfig());
   }
 
   private JWTAuthOptions getConfig() {
@@ -59,70 +67,88 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   @Test
-  public void testValidJWT() {
+  public void testValidJWT(TestContext should) {
+    final Async test = should.async();
+
     TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      // assert that the content of the principal is not empty
-      assertNotNull(res.principal().getString("sub"));
-      assertNotNull(res.principal().getValue("permissions"));
-      assertNotNull(res.principal().getValue("roles"));
+    authProvider
+      .authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        // assert that the content of the principal is not empty
+        should.assertNotNull(res.principal().getString("sub"));
+        should.assertNotNull(res.principal().getValue("permissions"));
+        should.assertNotNull(res.principal().getValue("roles"));
 
-      testComplete();
-    }));
-    await();
+        test.complete();
+      });
   }
 
   @Test
-  public void testInValidCredentials() {
-    authProvider.authenticate(new JsonObject().put("username", "username").put("password", "password"), onFailure(err -> {
-      assertNotNull(err);
-      Assert.assertTrue(err instanceof CredentialValidationException);
-      testComplete();
-    }));
-    await();
+  public void testInValidCredentials(TestContext should) {
+    final Async test = should.async();
+
+    authProvider
+      .authenticate(new JsonObject().put("username", "username").put("password", "password"))
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(err -> {
+        should.assertNotNull(err);
+        should.assertTrue(err instanceof CredentialValidationException);
+        test.complete();
+      });
   }
 
   @Test
-  public void testInvalidJWT() {
+  public void testInvalidJWT(TestContext should) {
+    final Async test = should.async();
+
     TokenCredentials authInfo = new TokenCredentials(JWT_INVALID);
-    authProvider.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
-  }
-
-  @Test
-  public void testJWTValidPermission() {
-    TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
-        assertTrue(res.succeeded());
-        assertTrue(PermissionBasedAuthorization.create("write").match(user));
-        testComplete();
+    authProvider
+      .authenticate(authInfo)
+      .onSuccess(user -> should.fail())
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
       });
-    }));
-    await();
   }
 
   @Test
-  public void testJWTInvalidPermission() {
+  public void testJWTValidPermission(TestContext should) {
+    final Async test = should.async();
+
     TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
-    authProvider.authenticate(authInfo, onSuccess(user -> {
-      assertNotNull(user);
-      JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
-        assertTrue(res.succeeded());
-        assertFalse(PermissionBasedAuthorization.create("drop").match(user));
-        testComplete();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
+          should.assertTrue(res.succeeded());
+          should.assertTrue(PermissionBasedAuthorization.create("write").match(user));
+          test.complete();
+        });
       });
-    }));
-    await();
   }
 
   @Test
-  public void testGenerateNewToken() {
+  public void testJWTInvalidPermission(TestContext should) {
+    final Async test = should.async();
+
+    TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
+          should.assertTrue(res.succeeded());
+          should.assertFalse(PermissionBasedAuthorization.create("drop").match(user));
+          test.complete();
+        });
+      });
+  }
+
+  @Test
+  public void testGenerateNewToken(TestContext should) {
 
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo")
@@ -138,8 +164,8 @@ public class JWTAuthProviderTest extends VertxTestBase {
         .add("user"));
 
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
-    assertNotNull(token);
-    assertEquals(JWT_VALID, token);
+    should.assertNotNull(token);
+    should.assertEquals(JWT_VALID, token);
   }
 
   @Test
@@ -155,105 +181,119 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   @Test
-  public void testTokenWithoutTimestamp() {
+  public void testTokenWithoutTimestamp(TestContext should) {
+    final Async test = should.async();
+
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
       new JWTOptions().setExpiresInMinutes(5).setNoTimestamp(true));
 
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      assertTrue(res.attributes().getJsonObject("accessToken").containsKey("exp"));
-      assertFalse(res.attributes().getJsonObject("accessToken").containsKey("iat"));
-      testComplete();
-    }));
-
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        should.assertTrue(res.attributes().getJsonObject("accessToken").containsKey("exp"));
+        should.assertFalse(res.attributes().getJsonObject("accessToken").containsKey("iat"));
+        test.complete();
+      });
   }
 
   @Test
-  public void testTokenWithTimestamp() {
+  public void testTokenWithTimestamp(TestContext should) {
+    final Async test = should.async();
+
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions());
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      assertTrue(res.attributes().getJsonObject("accessToken").containsKey("iat"));
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        should.assertTrue(res.attributes().getJsonObject("accessToken").containsKey("iat"));
+        test.complete();
+      });
   }
 
   @Test
-  public void testExpiration() {
+  public void testExpiration(TestContext should) {
+    final Async test = should.async();
+
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
       new JWTOptions().setExpiresInSeconds(1).setNoTimestamp(true));
 
-    assertNotNull(token);
+    should.assertNotNull(token);
 
-    vertx.setTimer(2000L, t -> {
+    rule.vertx().setTimer(2000L, t -> {
       TokenCredentials authInfo = new TokenCredentials(token);
-      authProvider.authenticate(authInfo, onFailure(thr -> {
-        assertNotNull(thr);
-        testComplete();
-      }));
+      authProvider.authenticate(authInfo)
+        .onSuccess(user -> should.fail("Should have failed"))
+        .onFailure(thr -> {
+          should.assertNotNull(thr);
+          test.complete();
+        });
     });
 
-    await();
   }
 
   @Test
-  public void testGoodIssuer() {
+  public void testGoodIssuer(TestContext should) {
+    final Async test = should.async();
+
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://vertx.io"));
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testBadIssuer() {
+  public void testBadIssuer(TestContext should) {
+    final Async test = should.async();
 
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setIssuer("https://vertx.io")));
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(new JWTOptions().setIssuer("https://vertx.io")));
 
     JsonObject payload = new JsonObject().put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setIssuer("https://auth0.io"));
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
   }
 
   @Test
-  public void testGoodAudience() {
+  public void testGoodAudience(TestContext should) {
+    final Async test = should.async();
 
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(
       new JWTOptions()
         .addAudience("b")
         .addAudience("d")));
@@ -264,21 +304,23 @@ public class JWTAuthProviderTest extends VertxTestBase {
     final String token = authProvider.generateToken(payload,
       new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
 
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testBadAudience() {
+  public void testBadAudience(TestContext should) {
+    final Async test = should.async();
 
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(
       new JWTOptions()
         .addAudience("e")
         .addAudience("d")));
@@ -289,116 +331,132 @@ public class JWTAuthProviderTest extends VertxTestBase {
     final String token = authProvider.generateToken(payload,
       new JWTOptions().addAudience("a").addAudience("b").addAudience("c"));
 
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
   }
 
   @Test
-  public void testGenerateNewTokenES256() {
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+  public void testGenerateNewTokenES256(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("es256-keystore.jceks")
         .setType("jceks")
         .setPassword("secret")));
 
     String token = authProvider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions().setAlgorithm("ES256"));
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
     authProvider.authenticate(authInfo, res -> {
       if (res.failed()) {
         res.cause().printStackTrace();
-        fail();
+        should.fail();
       }
 
-      assertNotNull(res.result());
-      testComplete();
+      should.assertNotNull(res.result());
+      test.complete();
     });
-    await();
   }
 
   @Test
-  public void testGenerateNewTokenWithMacSecret() {
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+  public void testGenerateNewTokenWithMacSecret(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
       .addJwk(new JsonObject()
         .put("kty", "oct")
         .put("k", "notasecret"))
     );
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("HS256"));
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     // reverse
     TokenCredentials authInfo = new TokenCredentials(token);
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testValidateTokenWithInvalidMacSecret() {
+  public void testValidateTokenWithInvalidMacSecret(TestContext should) {
+    final Async test = should.async();
+
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
       .addJwk(new JsonObject()
         .put("kty", "oct")
         .put("k", Base64.getUrlEncoder().encodeToString("a bad secret".getBytes(StandardCharsets.UTF_8))))
     );
     TokenCredentials authInfo = new TokenCredentials(token);
-    authProvider.authenticate(authInfo, onFailure(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testValidateTokenWithValidMacSecret() {
+  public void testValidateTokenWithValidMacSecret(TestContext should) {
+    final Async test = should.async();
+
     String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
       .addJwk(new JsonObject()
         .put("kty", "oct")
         .put("k", Base64.getUrlEncoder().encodeToString("notasecret".getBytes(StandardCharsets.UTF_8))))
     );
     TokenCredentials authInfo = new TokenCredentials(token);
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testGenerateNewTokenForceAlgorithm() {
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+  public void testGenerateNewTokenForceAlgorithm(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("keystore.jceks")
         .setType("jceks")
         .setPassword("secret")));
 
     String token = authProvider.generateToken(new JsonObject(), new JWTOptions().setAlgorithm("RS256"));
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     // reverse
     TokenCredentials authInfo = new TokenCredentials(token);
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testAcceptInvalidJWT() {
+  public void testAcceptInvalidJWT(TestContext should) {
+    final Async test = should.async();
+
     String[] segments = JWT_INVALID.split("\\.");
     // All segment should be base64
     String headerSeg = segments[0];
@@ -419,17 +477,19 @@ public class JWTAuthProviderTest extends VertxTestBase {
     // build attack token
     String attackerJWT = headerSeg + "." + payloadSeg + "." + signatureSeg;
     TokenCredentials authInfo = new TokenCredentials(attackerJWT);
-    authProvider.authenticate(authInfo, onFailure(thr -> {
-      assertNotNull(thr);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(thr -> {
+        should.assertNotNull(thr);
+        test.complete();
+      });
   }
 
   @Test
-  public void testAlgNone() {
+  public void testAlgNone(TestContext should) {
+    final Async test = should.async();
 
-    JWTAuth authProvider = JWTAuth.create(vertx, new JWTAuthOptions());
+    JWTAuth authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions());
 
     JsonObject payload = new JsonObject()
       .put("sub", "UserUnderTest")
@@ -440,20 +500,23 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("permissions", new JsonArray().add("read").add("write").add("execute"));
 
     final String token = authProvider.generateToken(payload, new JWTOptions().setSubject("UserUnderTest").setAlgorithm("none"));
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testLeeway() {
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(0)));
+  public void testLeeway(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(new JWTOptions().setLeeway(0)));
 
     long now = System.currentTimeMillis() / 1000;
 
@@ -462,17 +525,20 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("exp", now);
 
     String token = authProvider.generateToken(payload);
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
     // fail because exp is <= to now
-    authProvider.authenticate(authInfo, onFailure(t -> testComplete()));
-    await();
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(t -> test.complete());
   }
 
   @Test
-  public void testLeeway2() {
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(0)));
+  public void testLeeway2(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(new JWTOptions().setLeeway(0)));
 
     long now = (System.currentTimeMillis() / 1000) + 2;
 
@@ -481,17 +547,20 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("iat", now);
 
     String token = authProvider.generateToken(payload);
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
     // fail because iat is > now (clock drifted 2 sec)
-    authProvider.authenticate(authInfo, onFailure(t -> testComplete()));
-    await();
+    authProvider.authenticate(authInfo)
+      .onSuccess(user -> should.fail("Should have failed"))
+      .onFailure(t -> test.complete());
   }
 
   @Test
-  public void testLeeway3() {
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(5)));
+  public void testLeeway3(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(new JWTOptions().setLeeway(5)));
 
     long now = System.currentTimeMillis() / 1000;
 
@@ -501,17 +570,20 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("iat", now);
 
     String token = authProvider.generateToken(payload);
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
     // fail because exp is <= to now
-    authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(t -> test.complete());
   }
 
   @Test
-  public void testLeeway4() {
-    authProvider = JWTAuth.create(vertx, getConfig().setJWTOptions(new JWTOptions().setLeeway(5)));
+  public void testLeeway4(TestContext should) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), getConfig().setJWTOptions(new JWTOptions().setLeeway(5)));
 
     long now = (System.currentTimeMillis() / 1000) + 2;
 
@@ -520,18 +592,18 @@ public class JWTAuthProviderTest extends VertxTestBase {
       .put("iat", now);
 
     String token = authProvider.generateToken(payload);
-    assertNotNull(token);
+    should.assertNotNull(token);
 
     TokenCredentials authInfo = new TokenCredentials(token);
     // pass because iat is > now (clock drifted 2 sec) and we have a leeway of 5sec
-    authProvider.authenticate(authInfo, onSuccess(t -> testComplete()));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(t -> test.complete());
   }
 
   @Test
   public void testJWKShouldNotCrash() {
-
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions().addJwk(
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions().addJwk(
       new JsonObject()
         .put("kty", "RSA")
         .put("n", "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw")
@@ -542,8 +614,10 @@ public class JWTAuthProviderTest extends VertxTestBase {
   }
 
   @Test
-  public void testValidateTokenWithIgnoreExpired() throws InterruptedException {
-    authProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+  public void testValidateTokenWithIgnoreExpired(TestContext should) throws InterruptedException {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
       .addJwk(new JsonObject()
         .put("kty", "oct")
         .put("k", "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow"))
@@ -563,15 +637,17 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      testComplete();
-    }));
-    await();
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        test.complete();
+      });
   }
 
   @Test
-  public void testGenerateClaimsAndCheck() {
+  public void testGenerateClaimsAndCheck(TestContext should) {
+    final Async test = should.async();
 
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
@@ -580,21 +656,22 @@ public class JWTAuthProviderTest extends VertxTestBase {
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, onSuccess(res -> {
-      assertNotNull(res);
-      // the permission has been properly decoded from the legacy token
-      assertTrue(PermissionBasedAuthorization.create("user").match(res));
+    authProvider.authenticate(authInfo)
+      .onFailure(should::fail)
+      .onSuccess(res -> {
+        should.assertNotNull(res);
+        // the permission has been properly decoded from the legacy token
+        should.assertTrue(PermissionBasedAuthorization.create("user").match(res));
 
-      res.clearCache();
+        res.clearCache();
 
-      // overwrite with the JWT decoder
-      JWTAuthorization.create("permissions").getAuthorizations(res, permissions -> {
-        assertTrue(permissions.succeeded());
-        assertTrue(PermissionBasedAuthorization.create("user").match(res));
-        testComplete();
+        // overwrite with the JWT decoder
+        JWTAuthorization.create("permissions").getAuthorizations(res, permissions -> {
+          should.assertTrue(permissions.succeeded());
+          should.assertTrue(PermissionBasedAuthorization.create("user").match(res));
+          test.complete();
+        });
       });
-    }));
-    await();
   }
 
 }
