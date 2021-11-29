@@ -147,7 +147,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
       }
 
       if (digest.equals(authInfo.getResponse())) {
-        resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", credential.username).put("realm", credential.realm))));
+        resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", credential.username).put("realm", credential.realm))));
       } else {
         resultHandler.handle(Future.failedFuture("Bad response"));
       }
