@@ -91,12 +91,107 @@ public interface User {
   }
 
   /**
-   * Gets extra attributes of the user. Attributes contains any attributes related
+   * The user subject. Usually a human representation that identifies this user.
+   *
+   * The lookup for this information will take place in several places in the following order:
+   *
+   * <ol>
+   *   <li>{@code principal.username} - Usually for username/password or webauthn authentication</li>
+   *   <li>{@code principal.userHandle} - Optional field for webauthn</li>
+   *   <li>{@code attributes.idToken.sub} - For OpenID Connect ID Tokens</li>
+   *   <li>{@code attributes.[rootClaim?]accessToken.sub} - For OpenID Connect/OAuth2 Access Tokens</li>
+   * </ol>
+   *
+   * @return the subject for this user or {@code null}.
+   */
+  default @Nullable String subject() {
+    if (principal().containsKey("username")) {
+      return principal().getString("username");
+    }
+    if (principal().containsKey("userHandle")) {
+      return principal().getString("userHandle");
+    }
+    if (attributes().containsKey("idToken")) {
+      JsonObject idToken = attributes().getJsonObject("idToken");
+      if (idToken.containsKey("sub")) {
+        return idToken.getString("sub");
+      }
+    }
+    return get("sub");
+  }
+
+  /**
+   * Gets extra attributes of the user. Attributes contain any attributes related
    * to the outcome of authenticating a user (e.g.: issued date, metadata, etc...)
    *
    * @return a json object with any relevant attribute.
    */
   JsonObject attributes();
+
+  /**
+   * The actor claim provides a means to express that delegation has occurred and identify the acting party to whom
+   * authority has been delegated.
+   *
+   * @return the delegated user
+   */
+  default @Nullable User actor() {
+    try {
+      JsonObject act = get("act");
+      if (act != null) {
+        JsonObject principal = principal();
+        JsonObject attributes = attributes().copy();
+        JsonObject rootClaim = attributes;
+
+        if (attributes.containsKey("rootClaim")) {
+          try {
+            rootClaim = attributes.getJsonObject(attributes.getString("rootClaim"));
+          } catch (ClassCastException e) {
+            // ignore
+          }
+        }
+        rootClaim.remove("act");
+        rootClaim.remove("may_act");
+        rootClaim.mergeIn(act);
+
+        return User.create(principal, attributes);
+      }
+    } catch (ClassCastException e) {
+      // invalid type
+    }
+    return null;
+  }
+
+  /**
+   * The may act for claim provides a means to express that delegation has occurred and identify the acting party to
+   * whom authority has been delegated (yet it is not guaranteed that it will be allowed).
+   *
+   * @return the delegated user
+   */
+  default @Nullable User mayActFor() {
+    try {
+      JsonObject mayAct = get("may_act");
+      if (mayAct != null) {
+        JsonObject principal = principal();
+        JsonObject attributes = attributes().copy();
+        JsonObject rootClaim = attributes;
+
+        if (attributes.containsKey("rootClaim")) {
+          try {
+            rootClaim = attributes.getJsonObject(attributes.getString("rootClaim"));
+          } catch (ClassCastException e) {
+            // ignore
+          }
+        }
+        rootClaim.remove("act");
+        rootClaim.remove("may_act");
+        rootClaim.mergeIn(mayAct);
+        return User.create(principal, attributes);
+      }
+    } catch (ClassCastException e) {
+      // invalid type
+    }
+    return null;
+  }
 
   /**
    * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
@@ -135,13 +230,13 @@ public interface User {
     final long now = (System.currentTimeMillis() / 1000);
 
     if (containsKey("exp")) {
-      if (now - leeway >= attributes().getLong("exp", principal().getLong("exp"))) {
+      if (now - leeway >= attributes().getLong("exp", principal().getLong("exp", 0L))) {
         return true;
       }
     }
 
     if (containsKey("iat")) {
-      Long iat = attributes().getLong("iat", principal().getLong("iat"));
+      Long iat = attributes().getLong("iat", principal().getLong("iat", 0L));
       // issue at must be in the past
       if (iat > now + leeway) {
         return true;
@@ -149,7 +244,7 @@ public interface User {
     }
 
     if (containsKey("nbf")) {
-      Long nbf = attributes().getLong("nbf", principal().getLong("nbf"));
+      Long nbf = attributes().getLong("nbf", principal().getLong("nbf", 0L));
       // not before must be after now
       if (nbf > now + leeway) {
         return true;

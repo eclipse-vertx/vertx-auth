@@ -27,6 +27,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -35,7 +36,6 @@ import java.util.Objects;
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 public class UserImpl implements User, ClusterSerializable {
-
   // set of authorizations
   private Authorizations authorizations;
   // attributes
@@ -45,10 +45,6 @@ public class UserImpl implements User, ClusterSerializable {
 
   public UserImpl() {
     // for ClusterSerializable
-  }
-
-  public UserImpl(JsonObject principal) {
-    this(principal, new JsonObject());
   }
 
   public UserImpl(JsonObject principal, JsonObject attributes) {

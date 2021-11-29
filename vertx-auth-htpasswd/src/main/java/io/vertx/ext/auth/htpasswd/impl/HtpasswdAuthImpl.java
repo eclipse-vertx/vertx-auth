@@ -83,7 +83,7 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
       }
 
       if (strategy.verify(htUsers.get(authInfo.getUsername()), authInfo.getPassword())) {
-        resultHandler.handle(Future.succeededFuture(new UserImpl(new JsonObject().put("username", authInfo.getUsername()))));
+        resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", authInfo.getUsername()))));
       } else {
         resultHandler.handle(Future.failedFuture("Bad response"));
       }
