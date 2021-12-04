@@ -30,6 +30,7 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.mongo.MongoAuthentication;
 import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
+import io.vertx.ext.auth.mongo.MongoAuthorizationOptions;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.AfterClass;
@@ -232,6 +233,25 @@ public abstract class MongoBaseTest extends VertxTestBase {
     getMongoClient().find(collectionName, new JsonObject(), res -> {
       if (res.succeeded()) {
         log.info(res.result().size() + " users found: " + res.result());
+
+      } else {
+        log.error("", res.cause());
+        buffer.append("false");
+      }
+      intLatch.countDown();
+    });
+    awaitLatch(intLatch);
+    return buffer.length() == 0;
+  }
+
+  protected boolean verifyRoleData(MongoAuthorizationOptions authorizationOptions) throws Exception {
+    final StringBuffer buffer = new StringBuffer();
+    CountDownLatch intLatch = new CountDownLatch(1);
+    String collectionName = authorizationOptions.getRoleCollectionName();
+    log.info("verifyRoleData in " + collectionName);
+    getMongoClient().find(collectionName, new JsonObject(), res -> {
+      if (res.succeeded()) {
+        log.info(res.result().size() + " roles found: " + res.result());
 
       } else {
         log.error("", res.cause());

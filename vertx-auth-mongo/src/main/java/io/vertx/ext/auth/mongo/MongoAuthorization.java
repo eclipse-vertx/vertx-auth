@@ -30,7 +30,7 @@ import io.vertx.ext.mongo.MongoClient;
 public interface MongoAuthorization extends AuthorizationProvider {
 
   /**
-   * The default name of the collection to be used
+   * The default name of the collection to be used to store user permissions and roles
    */
   String DEFAULT_COLLECTION_NAME = "authorizations";
 
@@ -50,6 +50,27 @@ public interface MongoAuthorization extends AuthorizationProvider {
    * saved as JsonArray
    */
   String DEFAULT_PERMISSION_FIELD = "permissions";
+
+  /**
+   * The default value of enablement of the behavior consisting in reading role definitions from another collection to get permissions attached to roles.
+   */
+  boolean DEFAULT_READ_ROLE_PERMISSIONS = false;
+
+  /**
+   * The default name of the collection to be used to store role definitions
+   */
+  String DEFAULT_ROLES_COLLECTION_NAME = "roles";
+
+  /**
+   * The default name of the property for the role name, like it is stored in mongodb
+   */
+  String DEFAULT_ROLENAME_FIELD = "rolename";
+
+  /**
+   * The default name of the property for role permissions, like it is stored in mongodb. Permissions are expected to be
+   * saved as JsonArray
+   */
+  String DEFAULT_ROLE_PERMISSION_FIELD = "permissions";
 
   /**
    * Creates an instance of MongoAuthorization by using the given {@link MongoClient} and configuration object.

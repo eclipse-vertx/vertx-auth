@@ -71,6 +71,22 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
 
   }
 
+  @Before
+  public void initTestRoles() throws Exception {
+    log.info("initTestRoles");
+    List<InternalRole> roles = createRoleList();
+    CountDownLatch latch = new CountDownLatch(roles.size());
+
+    for (InternalRole role : roles) {
+      if (!initOneRole(role, latch))
+        throw new InitializationError("could not create roles");
+    }
+    awaitLatch(latch);
+    if (!verifyRoleData(authorizationOptions))
+      throw new InitializationError("roles weren't created");
+
+  }
+
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
@@ -78,9 +94,8 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
 
   protected MongoAuthorization getAuthorizationProvider() {
     if (authorizationProvider == null) {
-      MongoAuthorizationOptions options = new MongoAuthorizationOptions();
       try {
-        authorizationProvider = MongoAuthorization.create("id", getMongoClient(), options);
+        authorizationProvider = MongoAuthorization.create("id", getMongoClient(), authorizationOptions);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -144,6 +159,24 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
     await();
   }
 
+  @Test
+  public void testAuthoriseWithRolePermission() {
+    // "sudo" permission is defined on "superadmin" role
+    // but read role permissions is disabled by default
+    assertFalse(authorizationOptions.isReadRolePermissions());
+    // so tim must not have the sudo permission
+    JsonObject authInfo = new JsonObject();
+    authInfo.put(authenticationOptions.getUsernameField(), "tim").put(authenticationOptions.getPasswordField(), "sausages");
+    getAuthenticationProvider().authenticate(authInfo, onSuccess(user -> {
+      assertNotNull(user);
+      fillUserAuthorizations(user, onSuccess(has -> {
+        assertFalse(PermissionBasedAuthorization.create("sudo").match(user));
+        testComplete();
+      }));
+    }));
+    await();
+  }
+
   /*
    * ################################################## preparation methods
    * ##################################################
@@ -158,6 +191,13 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
     users.add(new InternalUser("tim", "sausages", Arrays.asList("morris_dancer", "superadmin", "developer"), Arrays
         .asList("commit_code", "merge_pr", "do_actual_work", "bang_sticks")));
     return users;
+  }
+
+  private List<InternalRole> createRoleList() {
+    List<InternalRole> roles = new ArrayList<>();
+    roles.add(new InternalRole("superadmin", Arrays.asList("sudo")));
+    roles.add(new InternalRole("morris_dancer", Arrays.asList("have_fun", "wear_white_shirt")));
+    return roles;
   }
 
   @Override
@@ -186,8 +226,28 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
   }
 
 
+  private boolean initOneRole(InternalRole role, CountDownLatch latch) throws Exception {
+    CountDownLatch intLatch = new CountDownLatch(1);
+    final StringBuffer buffer = new StringBuffer();
 
-  private void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    insertRole(role.rolename, role.permissions)
+      .onComplete(res -> {
+      if (res.succeeded()) {
+        log.info("role added: " + role.rolename);
+        latch.countDown();
+      } else {
+        log.error("", res.cause());
+        buffer.append("false");
+      }
+      intLatch.countDown();
+    });
+    awaitLatch(intLatch);
+    return buffer.length() == 0;
+  }
+
+
+
+  protected void fillUserAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
     getAuthorizationProvider().getAuthorizations(user, handler);
   }
 
@@ -205,6 +265,33 @@ public class MongoAuthorizationTest extends MongoAuthenticationTest {
       throw new RuntimeException(e);
     }
     return promise.future();
+  }
+
+  public Future<String> insertRole(String rolename, List<String> permissions) {
+
+    JsonObject role = new JsonObject();
+    role.put(authorizationOptions.getRoleNameField(), rolename);
+    role.put(authorizationOptions.getRolePermissionField(), permissions);
+
+    Promise promise = Promise.promise();
+    try {
+      getMongoClient().save(authorizationOptions.getRoleCollectionName(), role, promise);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    return promise.future();
+  }
+
+  private class InternalRole {
+    String rolename;
+    List<String> permissions;
+
+    InternalRole(String rolename, List<String> permissions) {
+      this.rolename = rolename;
+      this.permissions = permissions;
+
+    }
+
   }
 
   private class InternalUser {

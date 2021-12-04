@@ -31,12 +31,20 @@ public class MongoAuthorizationOptions {
   private String usernameField;
   private String roleField;
   private String permissionField;
+  private String roleCollectionName;
+  private String roleNameField;
+  private String rolePermissionField;
+  private boolean readRolePermissions;
 
   public MongoAuthorizationOptions() {
     collectionName = MongoAuthorization.DEFAULT_COLLECTION_NAME;
     usernameField = MongoAuthorization.DEFAULT_USERNAME_FIELD;
     roleField = MongoAuthorization.DEFAULT_ROLE_FIELD;
     permissionField = MongoAuthorization.DEFAULT_PERMISSION_FIELD;
+    roleCollectionName = MongoAuthorization.DEFAULT_ROLES_COLLECTION_NAME;
+    roleNameField = MongoAuthorization.DEFAULT_ROLENAME_FIELD;
+    rolePermissionField = MongoAuthorization.DEFAULT_ROLE_PERMISSION_FIELD;
+    readRolePermissions = MongoAuthorization.DEFAULT_READ_ROLE_PERMISSIONS;
   }
 
   public MongoAuthorizationOptions(JsonObject json) {
@@ -49,7 +57,13 @@ public class MongoAuthorizationOptions {
   }
 
   /**
-   * The property name to be used to set the name of the collection inside the config.
+   * Set the name of the MongoDB collection containing user authorizations.
+   * Per default configuration, that collection is called <code>user</code> and is expected to contain objects having the following fields:
+   * <ul>
+   *     <li><code>username</code>: field name can be overridden with {@link #setUsernameField(String) setUsernameField} </li>
+   *     <li><code>permissions</code>: field name can be overridden with {@link #setPermissionField(String) setPermissionField} </li>
+   *     <li><code>roles</code>: field name can be overridden with {@link #setRoleField(String) setPermissionField} </li>
+   * </ul>
    *
    * @param collectionName the collection name
    * @return a reference to this, so the API can be used fluently
@@ -59,12 +73,33 @@ public class MongoAuthorizationOptions {
     return this;
   }
 
+  public String getRoleCollectionName() {
+    return roleCollectionName;
+  }
+
+  /**
+   * Set the name of the MongoDB collection containing role definitions.
+   * Per default configuration, that collection is called <code>roles</code> and is expected to contain objects having the following properties:
+   * <ul>
+   *     <li><code>rolename</code>: can be overridden with {@link #setRoleNameField(String) setRoleNameField} </li>
+   *     <li><code>permissions</code>: can be overridden with {@link #setRolePermissionField(String) setRolePermissionField} </li>
+   * </ul>
+   *
+   * @param roleCollectionName the collection name
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MongoAuthorizationOptions setRoleCollectionName(String roleCollectionName) {
+    this.roleCollectionName = roleCollectionName;
+    return this;
+  }
+
   public String getUsernameField() {
     return usernameField;
   }
 
   /**
-   * The property name to be used to set the name of the field, where the username is stored inside.
+   * Set the name of field containing the username in the collection of user authorizations.
+   * The default value is <code>username</code>.
    *
    * @param usernameField the username field
    * @return a reference to this, so the API can be used fluently
@@ -79,7 +114,8 @@ public class MongoAuthorizationOptions {
   }
 
   /**
-   * The property name to be used to set the name of the field, where the roles are stored inside.
+   * Set the name of field containing user roles in the collection of user authorizations.
+   * The default value is <code>roles</code>.
    *
    * @param roleField the role field
    * @return a reference to this, so the API can be used fluently
@@ -94,7 +130,8 @@ public class MongoAuthorizationOptions {
   }
 
   /**
-   * The property name to be used to set the name of the field, where the permissions are stored inside.
+   * Set the name of field containing user permissions in the collection of user authorizations.
+   * The default value is <code>permissions</code>.
    *
    * @param permissionField the permission field
    * @return a reference to this, so the API can be used fluently
@@ -103,4 +140,53 @@ public class MongoAuthorizationOptions {
     this.permissionField = permissionField;
     return this;
   }
+
+  public String getRoleNameField() {
+    return roleNameField;
+  }
+
+  /**
+   * Set the name of field containing the name of the role in the collection of role definitions.
+   * The default value is <code>rolename</code>.
+   *
+   * @param roleNameField the role name field
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MongoAuthorizationOptions setRoleNameField(String roleNameField) {
+    this.roleNameField = roleNameField;
+    return this;
+  }
+
+  public String getRolePermissionField() {
+    return rolePermissionField;
+  }
+
+  /**
+   * Set the name of field containing role permissions in the collection of role definitions.
+   * The default value is <code>permissions</code>.
+   *
+   * @param rolePermissionField the permission field
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MongoAuthorizationOptions setRolePermissionField(String rolePermissionField) {
+    this.rolePermissionField = rolePermissionField;
+    return this;
+  }
+
+  public boolean isReadRolePermissions() {
+    return readRolePermissions;
+  }
+
+  /**
+   * Enable or disable the behavior consisting in reading role definitions from another collection to get permissions attached to roles.
+   * The default value is <code>false</code>.
+   *
+   * @param readRolePermissions true to enable, false to disable the behavior
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MongoAuthorizationOptions setReadRolePermissions(boolean readRolePermissions) {
+    this.readRolePermissions = readRolePermissions;
+    return this;
+  }
+
 }
