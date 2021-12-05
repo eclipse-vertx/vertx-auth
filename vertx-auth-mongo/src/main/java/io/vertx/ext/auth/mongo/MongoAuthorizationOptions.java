@@ -58,7 +58,7 @@ public class MongoAuthorizationOptions {
 
   /**
    * Set the name of the MongoDB collection containing user authorizations.
-   * Per default configuration, that collection is called <code>user</code> and is expected to contain objects having the following fields:
+   * Per default configuration, that collection is called <code>authorizations</code> and is expected to contain objects having the following fields:
    * <ul>
    *     <li><code>username</code>: field name can be overridden with {@link #setUsernameField(String) setUsernameField} </li>
    *     <li><code>permissions</code>: field name can be overridden with {@link #setPermissionField(String) setPermissionField} </li>

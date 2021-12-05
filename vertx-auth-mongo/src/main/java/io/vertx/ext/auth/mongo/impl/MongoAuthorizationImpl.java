@@ -166,7 +166,7 @@ public class MongoAuthorizationImpl implements MongoAuthorization {
         [{$match: {
           "username": "tim"
         }}, {$lookup: {
-          from: 'role',
+          from: 'roles',
           localField: 'roles',
           foreignField: 'rolename',
           as: 'joinedRoles'
