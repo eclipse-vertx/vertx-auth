@@ -61,6 +61,64 @@ public final class JWK {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
 
+  private static final Map<String, List<String>> ALG_ALIAS = new HashMap<String, List<String>>() {{
+    put("HS256", Arrays.asList(
+      // JCE
+      "HMacSHA256",
+      // OID
+      "1.2.840.113549.2.9"));
+    put("HS384", Arrays.asList(
+      // JCE
+      "HMacSHA384",
+      // OID
+      "1.2.840.113549.2.10"));
+    put("HS512", Arrays.asList(
+      // JCE
+      "HMacSHA512",
+      // OID
+      "1.2.840.113549.2.11"));
+    put("RS256", Arrays.asList(
+      // JCE
+      "SHA256withRSA",
+      // OID
+      "1.2.840.113549.1.1.11"));
+    put("RS384", Arrays.asList(
+      // JCE
+      "SHA384withRSA",
+      // OID
+      "1.2.840.113549.1.1.12"));
+    put("RS512", Arrays.asList(
+      // JCE
+      "SHA512withRSA",
+      // OID
+      "1.2.840.113549.1.1.13"));
+    put("ES256K", Collections.singletonList("SHA256withECDSA"));
+    put("ES256", Arrays.asList(
+      // JCE
+      "SHA256withECDSA",
+      // OID
+      "1.2.840.10045.4.3.2"));
+    put("ES384", Arrays.asList(
+      // JCE
+      "SHA384withECDSA",
+      // OID
+      "1.2.840.10045.4.3.3"));
+    put("ES512", Arrays.asList(
+      // JCE
+      "SHA512withECDSA",
+      // OID
+      "1.2.840.10045.4.3.4"));
+  }};
+
+  private static boolean validAlgAlias(String alg, String alias) {
+    for (String expected : ALG_ALIAS.get(alias)) {
+      if (alg.equalsIgnoreCase(expected)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // JSON JWK properties
   private final String kid;
   private final String alg;
@@ -81,19 +139,6 @@ public final class JWK {
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
 
-    Map<String, String> aliases = new HashMap<String, String>() {{
-      put("HS256", "HMacSHA256");
-      put("HS384", "HMacSHA384");
-      put("HS512", "HMacSHA512");
-      put("RS256", "SHA256withRSA");
-      put("RS384", "SHA384withRSA");
-      put("RS512", "SHA512withRSA");
-      put("ES256K", "SHA256withECDSA");
-      put("ES256", "SHA256withECDSA");
-      put("ES384", "SHA384withECDSA");
-      put("ES512", "SHA512withECDSA");
-    }};
-
     final List<JWK> keys = new ArrayList<>();
 
     // load MACs
@@ -108,9 +153,8 @@ public final class JWK {
         String alg = secretKey.getAlgorithm();
         // the algorithm cannot be null and it cannot be different from
         // the alias list
-        final String expected = aliases.get(alias);
-        if (alg == null || !alg.equalsIgnoreCase(expected)) {
-          LOG.warn("The key algorithm does not match " + expected);
+        if (!validAlgAlias(alg, alias)) {
+          LOG.warn("The key algorithm does not match " + ALG_ALIAS.get(alias));
           continue;
         }
         // algorithm is valid
@@ -136,9 +180,8 @@ public final class JWK {
         String alg = certificate.getSigAlgName();
         // the algorithm cannot be null and it cannot be different from
         // the alias list
-        final String expected = aliases.get(alias);
-        if (alg == null || !alg.equalsIgnoreCase(expected)) {
-          LOG.warn("The key algorithm does not match " + expected);
+        if (!validAlgAlias(alg, alias)) {
+          LOG.warn("The key algorithm does not match " + ALG_ALIAS.get(alias));
           continue;
         }
         // algorithm is valid
@@ -298,29 +341,11 @@ public final class JWK {
     label = alg + "#" + mac.hashCode();
     use = null;
 
-    // test the algorithm
-    String macAlg = mac.getAlgorithm();
-
     switch (alg) {
       case "HS256":
-        kty = "oct";
-        if (!"HMacSHA256".equalsIgnoreCase(macAlg)) {
-          throw new IllegalArgumentException("The key algorithm does not match, expected: HMacSHA256");
-        }
-        this.mac = mac;
-        break;
       case "HS384":
-        kty = "oct";
-        if (!"HMacSHA384".equalsIgnoreCase(macAlg)) {
-          throw new IllegalArgumentException("The key algorithm does not match, expected: HMacSHA384");
-        }
-        this.mac = mac;
-        break;
       case "HS512":
         kty = "oct";
-        if (!"HMacSHA512".equalsIgnoreCase(macAlg)) {
-          throw new IllegalArgumentException("The key algorithm does not match, expected: HMacSHA512");
-        }
         this.mac = mac;
         break;
       default:

@@ -7,6 +7,13 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
@@ -232,5 +239,22 @@ public class JWKTest {
     assertEquals("bob", decoded.getString("sub"));
     assertEquals("me", decoded.getString("iss"));
     assertNotNull(decoded.getInteger("exp"));
+  }
+
+  @Test
+  public void testOID() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    // this keystore holds algorithms in OID format, not human readable strings
+    try (InputStream in = JWKTest.class.getResourceAsStream("/keystore.p12")) {
+      KeyStore ks = KeyStore.getInstance("PKCS12");
+      ks.load(in, "secret".toCharArray());
+
+      JWT jwt = new JWT();
+
+      for (JWK key : JWK.load(ks, "secret", null)) {
+        jwt.addJWK(key);
+      }
+
+      assertFalse(jwt.isUnsecure());
+    }
   }
 }
