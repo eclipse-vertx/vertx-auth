@@ -154,7 +154,7 @@ public final class JWK {
         // the algorithm cannot be null and it cannot be different from
         // the alias list
         if (!validAlgAlias(alg, alias)) {
-          LOG.warn("The key algorithm does not match " + ALG_ALIAS.get(alias));
+          LOG.warn("The key algorithm does not match: {" + alias + ": " + alg + "}");
           continue;
         }
         // algorithm is valid
@@ -181,7 +181,7 @@ public final class JWK {
         // the algorithm cannot be null and it cannot be different from
         // the alias list
         if (!validAlgAlias(alg, alias)) {
-          LOG.warn("The key algorithm does not match " + ALG_ALIAS.get(alias));
+          LOG.warn("The key algorithm does not match: {" + alias + ": " + alg + "}");
           continue;
         }
         // algorithm is valid
