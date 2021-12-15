@@ -106,7 +106,6 @@ public class MongoAuthorizationImpl implements MongoAuthorization {
         handler.handle(Future.failedFuture(res.cause()));
         return;
       }
-      user.authorizations().clear(providerId);
       for (JsonObject jsonObject : res.result()) {
         JsonArray roles = jsonObject.getJsonArray(options.getRoleField());
         if (roles != null) {
