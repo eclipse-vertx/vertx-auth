@@ -6,7 +6,6 @@ import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWS;
 import io.vertx.ext.auth.webauthn.impl.CBOR;
-import io.vertx.ext.auth.webauthn.impl.attestation.Attestation;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -19,7 +18,6 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
 
@@ -41,8 +39,8 @@ public class WebAuthNTest {
     final Async test = should.async();
 
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -71,8 +69,8 @@ public class WebAuthNTest {
   public void testFIDOLogin(TestContext should) {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")).setRequireResidentKey(true))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")).setRequireResidentKey(true))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -129,8 +127,8 @@ public class WebAuthNTest {
   public void testPAckedSurrogate(TestContext should) {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -218,8 +216,8 @@ public class WebAuthNTest {
   public void testAndroidSafetyNet(TestContext should) {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
