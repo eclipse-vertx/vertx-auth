@@ -129,8 +129,7 @@ public class AndroidSafetynetAttestation implements Attestation {
         authData.getAaguidString(),
         PublicKeyCredential.valueOf(token.getJsonObject("header").getString("alg")),
         certChain,
-        // 3. Use the “GlobalSign Root CA — R2” from Google PKI directory.
-        // Attach it to the end of header.x5c and try to verify it
+        // Attach the root certificate to the end of header.x5c and try to verify it
         options.getRootCertificate(fmt())
       );
 

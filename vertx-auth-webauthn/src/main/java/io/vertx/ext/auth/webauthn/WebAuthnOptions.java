@@ -17,6 +17,9 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.Nullable;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWS;
 
@@ -39,10 +42,12 @@ import static io.vertx.ext.auth.webauthn.UserVerification.*;
 @DataObject(generateConverter = true)
 public class WebAuthnOptions {
 
+  private static final Logger LOG = LoggerFactory.getLogger(WebAuthnOptions.class);
+
   /* Android Keystore Root is not published anywhere.
    * This certificate was extracted from one of the attestations
    * The last certificate in x5c must match this certificate
-   * This needs to be checked to ensure that malicious party wont generate fake attestations
+   * This needs to be checked to ensure that malicious party won't generate fake attestations
    */
   private static final String ANDROID_KEYSTORE_ROOT =
     "MIICizCCAjKgAwIBAgIJAKIFntEOQ1tXMAoGCCqGSM49BAMCMIGYMQswCQYDVQQG" +
@@ -60,12 +65,38 @@ public class WebAuthnOptions {
       "SM49BAMCA0cAMEQCIDUho++LNEYenNVg8x1YiSBq3KNlQfYNns6KGYxmSGB7AiBN" +
       "C/NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw==";
 
+  // https://aboutssl.org/globalsign-root-certificates-licensing-and-use/
+  //  Name 	gsr1
+  // Thumbprint: b1:bc:96:8b:d4:f4:9d:62:2a:a8:9a:81:f2:15:01:52:a4:1d:82:9c
+  //  Valid Until 	28 January 2028
+  private static final String GSR1 =
+    "MIIDdTCCAl2gAwIBAgILBAAAAAABFUtaw5QwDQYJKoZIhvcNAQEFBQAwVzELMAkG\n" +
+      "A1UEBhMCQkUxGTAXBgNVBAoTEEdsb2JhbFNpZ24gbnYtc2ExEDAOBgNVBAsTB1Jv\n" +
+      "b3QgQ0ExGzAZBgNVBAMTEkdsb2JhbFNpZ24gUm9vdCBDQTAeFw05ODA5MDExMjAw\n" +
+      "MDBaFw0yODAxMjgxMjAwMDBaMFcxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9i\n" +
+      "YWxTaWduIG52LXNhMRAwDgYDVQQLEwdSb290IENBMRswGQYDVQQDExJHbG9iYWxT\n" +
+      "aWduIFJvb3QgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDaDuaZ\n" +
+      "jc6j40+Kfvvxi4Mla+pIH/EqsLmVEQS98GPR4mdmzxzdzxtIK+6NiY6arymAZavp\n" +
+      "xy0Sy6scTHAHoT0KMM0VjU/43dSMUBUc71DuxC73/OlS8pF94G3VNTCOXkNz8kHp\n" +
+      "1Wrjsok6Vjk4bwY8iGlbKk3Fp1S4bInMm/k8yuX9ifUSPJJ4ltbcdG6TRGHRjcdG\n" +
+      "snUOhugZitVtbNV4FpWi6cgKOOvyJBNPc1STE4U6G7weNLWLBYy5d4ux2x8gkasJ\n" +
+      "U26Qzns3dLlwR5EiUWMWea6xrkEmCMgZK9FGqkjWZCrXgzT/LCrBbBlDSgeF59N8\n" +
+      "9iFo7+ryUp9/k5DPAgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8E\n" +
+      "BTADAQH/MB0GA1UdDgQWBBRge2YaRQ2XyolQL30EzTSo//z9SzANBgkqhkiG9w0B\n" +
+      "AQUFAAOCAQEA1nPnfE920I2/7LqivjTFKDK1fPxsnCwrvQmeU79rXqoRSLblCKOz\n" +
+      "yj1hTdNGCbM+w6DjY1Ub8rrvrTnhQ7k4o+YviiY776BQVvnGCv04zcQLcFGUl5gE\n" +
+      "38NflNUVyRRBnMRddWQVDf9VMOyGj/8N7yy5Y0b2qvzfvGn9LhJIZJrglfCm7ymP\n" +
+      "AbEVtQwdpf5pLGkkeB6zpxxxYu7KyJesF12KwvhHhm4qxFYxldBniYUr+WymXUad\n" +
+      "DKqC5JlR3XC321Y9YeRq4VzW9v493kHMB65jUr9TU/Qr6cf9tveCX4XSQRjbgbME\n" +
+      "HMUfpIBvFSDJ3gyICh3WZlXi/EjJKSZp4A==";
+
   // https://pki.goog/repository/
   //  Name 	gsr2
   //  Public Key 	RSA
   //  Fingerprint (SHA1) 	69:e2:d0:6c:30:f3:66:16:61:65:e9:1d:68:d1:ce:e5:cc:47:58:4a:80:22:7e:76:66:60:86:c0:10:72:41:eb
   //  Valid Until 	2021-12-15
-  private static final String ANDROID_SAFETYNET_ROOT =
+  @Deprecated
+  private static final String GSR2 =
     "MIIDvDCCAqSgAwIBAgINAgPk9GHsmdnVeWbKejANBgkqhkiG9w0BAQUFADBMMSAwHgYDVQQLExdH" +
       "bG9iYWxTaWduIFJvb3QgQ0EgLSBSMjETMBEGA1UEChMKR2xvYmFsU2lnbjETMBEGA1UEAxMKR2xv" +
       "YmFsU2lnbjAeFw0wNjEyMTUwODAwMDBaFw0yMTEyMTUwODAwMDBaMEwxIDAeBgNVBAsTF0dsb2Jh" +
@@ -108,7 +139,8 @@ public class WebAuthnOptions {
   /**
    * Default FIDO2 MDS ROOT Certificate
    */
-  String FIDO_MDS_ROOT_CERTIFICATE =
+  @Deprecated
+  private static final String FIDO_MDS_ROOT_CERTIFICATE =
     "MIICQzCCAcigAwIBAgIORqmxkzowRM99NQZJurcwCgYIKoZIzj0EAwMwUzELMAkG" +
       "A1UEBhMCVVMxFjAUBgNVBAoTDUZJRE8gQWxsaWFuY2UxHTAbBgNVBAsTFE1ldGFk" +
       "YXRhIFRPQyBTaWduaW5nMQ0wCwYDVQQDEwRSb290MB4XDTE1MDYxNzAwMDAwMFoX" +
@@ -122,6 +154,34 @@ public class WebAuthnOptions {
       "ZgIxAKulGbSFkDSZusGjbNkAhAkqTkLWo3GrN5nRBNNk2Q4BlG+AvM5q9wa5WciW" +
       "DcMdeQIxAMOEzOFsxX9Bo0h4LOFE5y5H8bdPFYW+l5gy1tQiJv+5NUyM2IBB55XU" +
       "YjdBz56jSA==";
+
+  /**
+   * Default FIDO2 MDS3 ROOT Certificate
+   *
+   * Downloaded from https://valid.r3.roots.globalsign.com/
+   *
+   * Valid until 18 March 2029
+   */
+  private static final String FIDO_MDS3_ROOT_CERTIFICATE =
+    "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G" +
+      "A1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjMxEzARBgNVBAoTCkdsb2JhbFNp" +
+      "Z24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDkwMzE4MTAwMDAwWhcNMjkwMzE4" +
+      "MTAwMDAwWjBMMSAwHgYDVQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEG" +
+      "A1UEChMKR2xvYmFsU2lnbjETMBEGA1UEAxMKR2xvYmFsU2lnbjCCASIwDQYJKoZI" +
+      "hvcNAQEBBQADggEPADCCAQoCggEBAMwldpB5BngiFvXAg7aEyiie/QV2EcWtiHL8" +
+      "RgJDx7KKnQRfJMsuS+FggkbhUqsMgUdwbN1k0ev1LKMPgj0MK66X17YUhhB5uzsT" +
+      "gHeMCOFJ0mpiLx9e+pZo34knlTifBtc+ycsmWQ1z3rDI6SYOgxXG71uL0gRgykmm" +
+      "KPZpO/bLyCiR5Z2KYVc3rHQU3HTgOu5yLy6c+9C7v/U9AOEGM+iCK65TpjoWc4zd" +
+      "QQ4gOsC0p6Hpsk+QLjJg6VfLuQSSaGjlOCZgdbKfd/+RFO+uIEn8rUAVSNECMWEZ" +
+      "XriX7613t2Saer9fwRPvm2L7DWzgVGkWqQPabumDk3F2xmmFghcCAwEAAaNCMEAw" +
+      "DgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFI/wS3+o" +
+      "LkUkrk1Q+mOai97i3Ru8MA0GCSqGSIb3DQEBCwUAA4IBAQBLQNvAUKr+yAzv95ZU" +
+      "RUm7lgAJQayzE4aGKAczymvmdLm6AC2upArT9fHxD4q/c2dKg8dEe3jgr25sbwMp" +
+      "jjM5RcOO5LlXbKr8EpbsU8Yt5CRsuZRj+9xTaGdWPoO4zzUhw8lo/s7awlOqzJCK" +
+      "6fBdRoyV3XpYKBovHd7NADdBj+1EbddTKJd+82cEHhXXipa0095MJ6RMG3NzdvQX" +
+      "mcIfeg7jLQitChws/zyrVQ4PkX4268NXSb7hLi18YIvDQVETI53O9zJrlAGomecs" +
+      "Mx86OyXShkDOOyyGeMlhLxS67ttVb9+E7gUJTb0o2HLO02JQZR7rkpeDMdmztcpH" +
+      "WD9f";
 
   private List<AuthenticatorTransport> transports;
 
@@ -172,10 +232,26 @@ public class WebAuthnOptions {
     addTransport(BLE);
     addTransport(INTERNAL);
     // default root certificates
-    putRootCertificate("android-key", ANDROID_KEYSTORE_ROOT);
-    putRootCertificate("android-safetynet", ANDROID_SAFETYNET_ROOT);
-    putRootCertificate("apple", APPLE_WEBAUTHN_ROOT_CA);
-    putRootCertificate("mds", FIDO_MDS_ROOT_CERTIFICATE);
+    try {
+      putRootCertificate("android-key", ANDROID_KEYSTORE_ROOT);
+    } catch (IllegalArgumentException e) {
+      LOG.warn("Ignoring root certificate", e);
+    }
+    try {
+      putRootCertificate("android-safetynet", GSR1);
+    } catch (IllegalArgumentException e) {
+      LOG.warn("Ignoring root certificate", e);
+    }
+    try {
+      putRootCertificate("apple", APPLE_WEBAUTHN_ROOT_CA);
+    } catch (IllegalArgumentException e) {
+      LOG.warn("Ignoring root certificate", e);
+    }
+    try {
+      putRootCertificate("mds", FIDO_MDS3_ROOT_CERTIFICATE);
+    } catch (IllegalArgumentException e) {
+      LOG.warn("Ignoring root certificate", e);
+    }
   }
 
   public RelyingParty getRelyingParty() {
@@ -325,7 +401,7 @@ public class WebAuthnOptions {
     return rootCertificates;
   }
 
-  public X509Certificate getRootCertificate(String key) {
+  public @Nullable X509Certificate getRootCertificate(String key) {
     if (rootCertificates == null) {
       return null;
     }
@@ -373,6 +449,9 @@ public class WebAuthnOptions {
     return this;
   }
 
+  /**
+   * Load a CRL, for example MDS3 certificate should use http://crl.globalsign.net/Root.crl
+   */
   public WebAuthnOptions addRootCrl(String value) {
     if (rootCrls == null) {
       rootCrls = new ArrayList<>();
