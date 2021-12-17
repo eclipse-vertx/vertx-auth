@@ -11,6 +11,7 @@ import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.AzureADAuth;
@@ -109,7 +110,9 @@ public class OAuth2OBODiscoveryTest {
   @Test
   public void getToken(TestContext should) {
     final Async test = should.async();
-    oauth2.authenticate(new TokenCredentials("head.body.signature").addScope("a").addScope("b"), res -> {
+
+    // Given that we want to trade an existing token for a new one (On-Behalf-Of) we **must** user OAuth2Credentials
+    oauth2.authenticate(new Oauth2Credentials().setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
       if (res.failed()) {
         should.fail(res.cause());
       } else {

@@ -4,11 +4,11 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -95,7 +95,7 @@ public class OAuth2OBOTest {
   @Test
   public void getToken(TestContext should) {
     final Async test = should.async();
-    oauth2.authenticate(new TokenCredentials("head.body.signature").addScope("a").addScope("b"), res -> {
+    oauth2.authenticate(new Oauth2Credentials().setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
       if (res.failed()) {
         should.fail(res.cause());
       } else {

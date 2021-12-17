@@ -293,27 +293,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         TokenCredentials tokenCredentials = (TokenCredentials) credentials;
         tokenCredentials.checkValid(null);
 
-        // this validation can be done in 3 different ways:
-        // 1) this object flow is JWT, in that case we need to request a new token On-Behalf-Of the original token
-        // 2) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
-        // 3) the token is an opaque string and we need to introspect it
-
-        // JWT flow must be checked first. The reason is that IdP could share the same jwks (like Azure) and tokens be
-        // valid and the flow would be ignored.
-
-        switch (config.getFlow()) {
-          case AUTH_JWT:
-          case AAD_OBO:
-            // this provider is expected to be working in OBO mode, yet there are no keys loaded or the loaded keys aren't
-            // usable with the received token. In this case we need to fetch a new token
-            final Oauth2Credentials oboCredentials = new Oauth2Credentials()
-              .setAssertion(tokenCredentials.getToken())
-              .setJwt(config.getExtraParameters())
-              .setScopes(tokenCredentials.getScopes());
-
-            authenticate(oboCredentials, handler);
-            return;
-        }
+        // this validation can be done in 2 different ways:
+        // 1) the token is a JWT and in this case if the provider is OpenId Compliant the token can be verified locally
+        // 2) the token is an opaque string, and we need to introspect it
 
         // if the JWT library is working in unsecure mode, local validation is not to be trusted
 
