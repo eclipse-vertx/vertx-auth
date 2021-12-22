@@ -34,7 +34,10 @@ import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
-import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 
 import java.util.List;
 
@@ -176,8 +179,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       return;
     }
 
-    final OAuth2FlowType flow = config.getFlow();
     final Oauth2Credentials cred;
+
+    final OAuth2FlowType flow;
+
+    if (authInfo.getString("flow") != null && !authInfo.getString("flow").isEmpty()) {
+        flow = OAuth2FlowType.getFlow(authInfo.getString("flow"));
+    } else {
+      flow = config.getFlow();
+    }
 
     switch (flow) {
       case AUTH_CODE:
@@ -185,14 +195,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           cred = new Oauth2Credentials()
             .setCode(authInfo.getString("code"))
             .setCodeVerifier(authInfo.getString("codeVerifier"))
-            .setRedirectUri(authInfo.getString("redirectUri"));
+            .setRedirectUri(authInfo.getString("redirectUri"))
+            .setFlow(flow);
 
           authenticate(cred, handler);
           return;
         }
         break;
       case CLIENT:
-        cred = new Oauth2Credentials();
+        cred = new Oauth2Credentials().setFlow(flow);
 
         if (authInfo.containsKey("scopes")) {
           for (Object scope : authInfo.getJsonArray("scopes")) {
@@ -207,7 +218,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
           cred = new Oauth2Credentials()
             .setUsername(authInfo.getString("username"))
-            .setPassword(authInfo.getString("password"));
+            .setPassword(authInfo.getString("password"))
+            .setFlow(flow);
 
           if (authInfo.containsKey("scopes")) {
             for (Object scope : authInfo.getJsonArray("scopes")) {
@@ -223,12 +235,13 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
       case AAD_OBO:
         if (authInfo.containsKey("assertion")) {
           cred = new Oauth2Credentials()
-            .setAssertion(authInfo.getString("assertion"));
+            .setAssertion(authInfo.getString("assertion"))
+            .setFlow(flow);
 
           authenticate(cred, handler);
           return;
         }
-        authenticate(new Oauth2Credentials().setJwt(authInfo), handler);
+        authenticate(new Oauth2Credentials().setJwt(authInfo).setFlow(flow), handler);
         return;
       case IMPLICIT:
       default:
@@ -278,7 +291,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
         Oauth2Credentials cred = new Oauth2Credentials()
           .setUsername(usernamePasswordCredentials.getUsername())
-          .setPassword(usernamePasswordCredentials.getPassword());
+          .setPassword(usernamePasswordCredentials.getPassword())
+          .setFlow(OAuth2FlowType.PASSWORD);
 
         authenticate(cred, handler);
         return;
@@ -374,14 +388,27 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
       // from this point, the only allowed sub type for credentials is OAuth2Credentials
       Oauth2Credentials oauth2Credentials = (Oauth2Credentials) credentials;
-      oauth2Credentials.checkValid(config.getFlow());
 
       // the authInfo object does not contain a token, so rely on the
       // configured flow to retrieve a token for the user
       // depending on the flow type the authentication will behave in different ways
       final JsonObject params = new JsonObject();
+      final OAuth2FlowType flow;
+      if (oauth2Credentials.getFlow() != null) {
+        flow = oauth2Credentials.getFlow();
+      } else {
+        flow = config.getFlow();
+      }
 
-      switch (config.getFlow()) {
+      oauth2Credentials.checkValid(flow);
+
+      if (config.getSupportedGrantTypes() != null && !config.getSupportedGrantTypes().isEmpty() &&
+        !config.getSupportedGrantTypes().contains(flow.getGrantType())) {
+        handler.handle(Future.failedFuture("Provided flow is not supported by provider"));
+        return;
+      }
+
+      switch (flow) {
         case AUTH_CODE:
           // code is always required. It's the code received on the web side
           params.put("code", oauth2Credentials.getCode());
@@ -437,7 +464,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           return;
       }
 
-      api.token(config.getFlow().getGrantType(), params, getToken -> {
+      api.token(flow.getGrantType(), params, getToken -> {
         if (getToken.failed()) {
           handler.handle(Future.failedFuture(getToken.cause()));
         } else {
