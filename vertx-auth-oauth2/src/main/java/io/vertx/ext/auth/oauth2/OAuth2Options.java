@@ -483,10 +483,18 @@ public class OAuth2Options {
     return this;
   }
 
+  /**
+   * @deprecated see {@link Oauth2Credentials#getFlow()}
+   */
+  @Deprecated
   public OAuth2FlowType getFlow() {
     return flow;
   }
 
+  /**
+    * @deprecated see {@link Oauth2Credentials#setFlow(OAuth2FlowType)}
+   */
+  @Deprecated
   public OAuth2Options setFlow(OAuth2FlowType flow) {
     this.flow = flow;
     return this;
