@@ -151,7 +151,7 @@ public interface OpenIDConnectAuth {
         // reset config
         config.setSupportedGrantTypes(null);
 
-        if (json.containsKey("grant_types_supported")) {
+        if (json.containsKey("grant_types_supported") && config.getFlow() != null) {
           // optional config
           JsonArray flows = json.getJsonArray("grant_types_supported");
           flows.forEach(el -> config.addSupportedGrantType((String) el));
@@ -160,12 +160,6 @@ public interface OpenIDConnectAuth {
             handler.handle(Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows));
             return;
           }
-        } else {
-          // https://datatracker.ietf.org/doc/html/rfc8414
-          // specifies that if omitted, assume the default: ["authorization_code", "implicit"]
-          config
-            .addSupportedGrantType("authorization_code")
-            .addSupportedGrantType("implicit");
         }
 
         try {
