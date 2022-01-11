@@ -214,6 +214,30 @@ public class OAuth2AccessTokenTest {
   }
 
   @Test
+  public void whenRefreshingTokenIsNotPresent(TestContext should) {
+    final Async test = should.async();
+    config = oauthConfig;
+    oauth2.authenticate(tokenConfig, res -> {
+      if (res.failed()) {
+        should.fail(res.cause());
+      } else {
+        User token = res.result();
+        //Clear refresh token
+        token.principal().clear();
+        oauth2.refresh(token, v -> {
+          if (v.failed()) {
+            should.assertTrue(v.cause() instanceof IllegalStateException);
+            should.assertEquals(v.cause().getMessage(), "refresh_token is null or empty");
+            test.complete();
+          } else {
+            should.fail("This should fail");
+          }
+        });
+      }
+    });
+  }
+
+  @Test
   public void shouldRevokeAToken(TestContext should) {
     final Async test = should.async();
     config = oauthConfig;
