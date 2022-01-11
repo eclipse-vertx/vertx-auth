@@ -485,6 +485,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
+
+    if (user.principal().getString("refresh_token") == null || user.principal().getString("refresh_token").isEmpty()) {
+      handler.handle(Future.failedFuture(new IllegalStateException("refresh_token is null or empty")));
+      return this;
+    }
+
     api.token(
       "refresh_token",
       new JsonObject()
