@@ -184,7 +184,7 @@ public class DefaultHashStrategy implements HashStrategy {
       switch (algorithm) {
         case SHA512:
           String concat = (salt == null ? "" : salt) + password;
-          return base16Encode(md.digest(concat.getBytes(StandardCharsets.UTF_8)));
+          return base16Encode(md.digest(concat.getBytes(StandardCharsets.UTF_8))).toUpperCase();
         case PBKDF2:
           PBEKeySpec spec = new PBEKeySpec(
             password.toCharArray(),

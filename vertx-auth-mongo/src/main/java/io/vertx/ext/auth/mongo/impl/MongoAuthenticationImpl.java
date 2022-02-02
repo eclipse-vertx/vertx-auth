@@ -30,6 +30,8 @@ import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
 import io.vertx.ext.mongo.MongoClient;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 
@@ -182,7 +184,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
       }
 
       String givenPassword = this.legacyStrategy.computeHash(password, user);
-      return hash.equals(givenPassword);
+      return MessageDigest.isEqual(hash.getBytes(StandardCharsets.UTF_8), givenPassword.getBytes(StandardCharsets.UTF_8));
     } else {
       return strategy.verify(hash, password);
     }
