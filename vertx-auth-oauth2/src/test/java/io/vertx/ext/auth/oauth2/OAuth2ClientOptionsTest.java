@@ -1,5 +1,6 @@
 package io.vertx.ext.auth.oauth2;
 
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.AzureADAuth;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -7,6 +8,8 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -55,5 +58,12 @@ public class OAuth2ClientOptionsTest {
       .replaceVariables(false);
 
     assertEquals("https://login.microsoftonline.com", config.getSite());
+  }
+
+  @Test
+  public void testImmuability() {
+    OAuth2Options options = new OAuth2Options();
+    options.setExtraParameters(new JsonObject(Collections.singletonMap("123", "123")));
+      options.replaceVariables(true);
   }
 }

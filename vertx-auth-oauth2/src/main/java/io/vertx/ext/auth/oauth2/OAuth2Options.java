@@ -572,13 +572,14 @@ public class OAuth2Options {
     jwkPath = replaceVariables(jwkPath);
 
     if (extraParams != null) {
+      extraParams = extraParams.copy();
       for (Map.Entry<String, Object> kv : extraParams) {
         Object v = kv.getValue();
         if (v instanceof String) {
           try {
             kv.setValue(replaceVariables((String) v));
           } catch (IllegalStateException e) {
-            // if we're strict the we assert that even the optional extra parameters must
+            // if we're strict then we assert that even the optional extra parameters must
             // be updated with the variable value
             if (strict) {
               throw e;
