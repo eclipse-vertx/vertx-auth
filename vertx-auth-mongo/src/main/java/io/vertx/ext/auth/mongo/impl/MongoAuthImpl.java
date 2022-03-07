@@ -149,7 +149,7 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   private User createUser(JsonObject json) {
-    User user = new UserImpl(json);
+    User user = User.create(json);
     json.put(PROPERTY_FIELD_SALT, getSaltField());
     json.put(PROPERTY_FIELD_PASSWORD, getPasswordField());
     JsonArray roles = json.getJsonArray(mongoAuthorizationOptions.getRoleField());

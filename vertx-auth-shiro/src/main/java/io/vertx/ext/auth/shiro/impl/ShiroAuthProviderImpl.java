@@ -122,7 +122,7 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
     Objects.requireNonNull(subject);
 
     JsonObject principal = new JsonObject().put("username",  subject.getPrincipal().toString());
-    User result = new UserImpl(principal);
+    User result = User.create(principal);
     result.authorizations().add("shiro-authentication", GetAuthorizationsHack.getAuthorizations(securityManager, subject));
     return result;
   }
