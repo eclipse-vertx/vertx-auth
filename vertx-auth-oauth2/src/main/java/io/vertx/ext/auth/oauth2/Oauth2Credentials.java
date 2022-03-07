@@ -45,6 +45,7 @@ public class Oauth2Credentials implements Credentials {
   private String username;
   // control state
   private List<String> scopes;
+  private OAuth2FlowType flow;
 
   public Oauth2Credentials() {
   }
@@ -130,6 +131,15 @@ public class Oauth2Credentials implements Credentials {
 
   public Oauth2Credentials setUsername(String username) {
     this.username = username;
+    return this;
+  }
+
+  public OAuth2FlowType getFlow() {
+    return flow;
+  }
+
+  public Oauth2Credentials setFlow(OAuth2FlowType flow) {
+    this.flow = flow;
     return this;
   }
 
