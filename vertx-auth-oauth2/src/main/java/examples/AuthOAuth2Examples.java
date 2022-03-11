@@ -48,7 +48,7 @@ public class AuthOAuth2Examples {
     // a challenge
 
     String authorization_uri = oauth2.authorizeURL(new JsonObject()
-      .put("redirect_uri", "http://localhost:8080/callback")
+      .put("redirectUri", "http://localhost:8080/callback")
       .put("scope", "notifications")
       .put("state", "3(#0/!~"));
 
@@ -63,7 +63,7 @@ public class AuthOAuth2Examples {
     oauth2.authenticate(
       new JsonObject()
         .put("code", code)
-        .put("redirect_uri", "http://localhost:8080/callback"))
+        .put("redirectUri", "http://localhost:8080/callback"))
       .onSuccess(user -> {
         // save the token and continue...
       })
@@ -87,7 +87,7 @@ public class AuthOAuth2Examples {
 
     // Authorization oauth2 URI
     String authorization_uri = oauth2.authorizeURL(new JsonObject()
-      .put("redirect_uri", "http://localhost:8080/callback")
+      .put("redirectUri", "http://localhost:8080/callback")
       .put("scope", "<scope>")
       .put("state", "<state>"));
 
@@ -98,7 +98,7 @@ public class AuthOAuth2Examples {
 
     JsonObject tokenConfig = new JsonObject()
       .put("code", "<code>")
-      .put("redirect_uri", "http://localhost:3000/callback");
+      .put("redirectUri", "http://localhost:3000/callback");
 
     // Callbacks
     // Save the access token
