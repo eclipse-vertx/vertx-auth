@@ -348,4 +348,61 @@ public class OAuth2KeycloakIT {
       });
     });
   }
+
+  @Test
+  public void shouldDiscoverGrant(TestContext should) {
+    final Async test = should.async();
+
+    OAuth2Options options = new OAuth2Options()
+      .setClientId("confidential-client")
+      .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e")
+      .setTenant("vertx-test")
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(
+        new JWTOptions()
+          .addAudience("account"));
+
+    options.getHttpClientOptions().setTrustAll(true);
+
+    KeycloakAuth.discover(
+      rule.vertx(),
+      options,
+      discover -> {
+        should.assertTrue(discover.succeeded());
+        OAuth2Auth keycloak = discover.result();
+        keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger").put("flow", OAuth2FlowType.PASSWORD.getGrantType()), authn -> {
+          should.assertTrue(authn.succeeded());
+          test.complete();
+        });
+      });
+  }
+
+  @Test
+  public void unsupportedGrant(TestContext should) {
+    final Async test = should.async();
+
+    OAuth2Options options = new OAuth2Options()
+      .setClientId("confidential-client")
+      .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e")
+      .setTenant("vertx-test")
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(
+        new JWTOptions()
+          .addAudience("account"));
+
+    options.getHttpClientOptions().setTrustAll(true);
+
+    KeycloakAuth.discover(
+      rule.vertx(),
+      options,
+      discover -> {
+        should.assertTrue(discover.succeeded());
+        OAuth2Auth keycloak = discover.result();
+        keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger").put("flow", OAuth2FlowType.AAD_OBO.getGrantType()), authn -> {
+          should.assertTrue(authn.failed());
+          should.assertEquals("Provided flow is not supported by provider", authn.cause().getMessage());
+          test.complete();
+        });
+      });
+  }
 }

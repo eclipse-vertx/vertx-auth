@@ -167,7 +167,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   }
 
   private User createUser(JsonObject json) {
-    User user = new UserImpl(json);
+    User user = User.create(json);
     if (legacyStrategy != null) {
       json.put(MongoAuthImpl.PROPERTY_FIELD_SALT, hashField);
       json.put(MongoAuthImpl.PROPERTY_FIELD_PASSWORD, options.getPasswordField());

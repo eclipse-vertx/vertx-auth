@@ -77,7 +77,7 @@ public class JWTAuthProviderTest {
       .onSuccess(res -> {
         should.assertNotNull(res);
         // assert that the content of the principal is not empty
-        should.assertNotNull(res.principal().getString("sub"));
+        should.assertNotNull(res.subject());
         should.assertNotNull(res.principal().getValue("permissions"));
         should.assertNotNull(res.principal().getValue("roles"));
 

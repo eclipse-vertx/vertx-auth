@@ -69,7 +69,7 @@ public enum OAuth2FlowType {
    * the security implications of using implicit grants, especially when the
    * authorization code grant type is available.
    */
-  IMPLICIT(null),
+  IMPLICIT("implicit"),
 
   /**
    * The resource owner password credentials (i.e., username and password)
@@ -122,5 +122,13 @@ public enum OAuth2FlowType {
 
   public String getGrantType() {
     return grantType;
+  }
+
+  public static OAuth2FlowType getFlow(String grantType) {
+    for(OAuth2FlowType flow : values()) {
+      if (flow.grantType.equals(grantType))
+        return flow;
+    }
+    return null;
   }
 }

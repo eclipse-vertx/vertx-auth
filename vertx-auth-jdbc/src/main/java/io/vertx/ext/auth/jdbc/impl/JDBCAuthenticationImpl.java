@@ -83,7 +83,7 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
               JsonArray row = rs.getResults().get(0);
               try {
                 if (verify(row, authInfo.getPassword())) {
-                  User user = new UserImpl(new JsonObject().put("username", authInfo.getUsername()));
+                  User user = User.create(new JsonObject().put("username", authInfo.getUsername()));
                   resultHandler.handle(Future.succeededFuture(user));
                 } else {
                   resultHandler.handle(Future.failedFuture("Invalid username/password"));
