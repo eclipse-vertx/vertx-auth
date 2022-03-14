@@ -144,7 +144,7 @@ public final class JWK {
     // load MACs
     for (String alias : Arrays.asList("HS256", "HS384", "HS512")) {
       try {
-        final Key secretKey = keyStore.getKey(alias, keyStorePassword.toCharArray());
+        final Key secretKey = keyStore.getKey(alias, passwordProtection == null ? keyStorePassword.toCharArray() : passwordProtection.get(alias).toCharArray());
         // key store does not have the requested algorithm
         if (secretKey == null) {
           continue;
