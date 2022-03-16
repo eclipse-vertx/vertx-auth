@@ -42,6 +42,9 @@ public interface VertxContextPRNG {
    * Get or create a secure non blocking random number generator using the current vert.x context. If there is no
    * current context (i.e.: not running on the eventloop) then a {@link java.lang.IllegalStateException} is thrown.
    *
+   * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
+   * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
+   *
    * @return A secure non blocking random number generator.
    * @throws IllegalStateException when there is no context available.
    */
@@ -57,6 +60,9 @@ public interface VertxContextPRNG {
   /**
    * Get or create a secure non blocking random number generator using the provided vert.x context. This method will not
    * throw an exception.
+   *
+   * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
+   * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
    *
    * @param context a Vert.x context.
    * @return A secure non blocking random number generator, or {@code null} if context access fails.
@@ -102,6 +108,9 @@ public interface VertxContextPRNG {
    * Get or create a secure non blocking random number generator using the current vert.x instance. Since the context
    * might be different this method will attempt to use the current context first if available and then fall back to
    * create a new instance of the PRNG.
+   *
+   * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
+   * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
    *
    * @param vertx a Vert.x instance.
    * @return A secure non blocking random number generator.
