@@ -12,11 +12,11 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.Authorizations;
@@ -26,7 +26,10 @@ public class AuthorizationsImpl implements Authorizations {
   private final Map<String, Set<Authorization>> authorizations;
 
   public AuthorizationsImpl() {
-    this.authorizations = new HashMap<>();
+    // store the authorizations as a concurrent hash map, mainly because this
+    // will be linked to a user object. In this case, we can't guarantee that
+    // concurrent access is safe.
+    this.authorizations = new ConcurrentHashMap<>();
   }
 
   @Override
