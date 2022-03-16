@@ -65,7 +65,7 @@ public final class CBOR {
   }
 
   private static @Nullable Object parseAny(JsonParser parser) throws IOException, DecodeException {
-    switch (parser.getCurrentTokenId()) {
+    switch (parser.currentTokenId()) {
       case JsonTokenId.ID_START_OBJECT:
         return parseObject(parser);
       case JsonTokenId.ID_START_ARRAY:
@@ -127,7 +127,7 @@ public final class CBOR {
     List<Object> array = new ArrayList<>();
     while (true) {
       parser.nextToken();
-      int tokenId = parser.getCurrentTokenId();
+      int tokenId = parser.currentTokenId();
       if (tokenId == JsonTokenId.ID_FIELD_NAME) {
         throw new UnsupportedOperationException();
       } else if (tokenId == JsonTokenId.ID_END_ARRAY) {
