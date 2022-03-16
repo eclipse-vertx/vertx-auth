@@ -20,6 +20,8 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 
+import java.util.Objects;
+
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**
@@ -40,8 +42,11 @@ public interface VertxContextPRNG {
    * Get or create a secure non blocking random number generator using the current vert.x context. If there is no
    * current context (i.e.: not running on the eventloop) then a {@link java.lang.IllegalStateException} is thrown.
    *
+   * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
+   * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
+   *
    * @return A secure non blocking random number generator.
-   * @throws IllegalStateException when there is no context available.
+   * @throws IllegalStateException when there is no {@link Context} instance available.
    */
   static VertxContextPRNG current() {
     final Context currentContext = Vertx.currentContext();
@@ -56,38 +61,57 @@ public interface VertxContextPRNG {
    * Get or create a secure non blocking random number generator using the provided vert.x context. This method will not
    * throw an exception.
    *
+   * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
+   * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
+   *
    * @param context a Vert.x context.
-   * @return A secure non blocking random number generator.
+   * @return A secure non blocking random number generator
+   * @throws IllegalStateException when there is no {@link Vertx} instance available.
    */
   @GenIgnore
   static VertxContextPRNG current(final Context context) {
-    final String contextKey = "__vertx.VertxContextPRNG";
-    // attempt to load a PRNG from the current context
-    PRNG random = context.get(contextKey);
+    Objects.requireNonNull(context, "context can not be null");
 
-    if (random == null) {
-      synchronized (context) {
-        // attempt to reload to avoid double creation when we were
-        // waiting for the lock
-        random = context.get(contextKey);
-        if (random == null) {
-          // there was no PRNG in the context, create one
-          random = new PRNG(context.owner());
-          // need to make the random final
-          final PRNG rand = random;
-          // save to the context
-          context.put(contextKey, rand);
+    try {
+      final String contextKey = "__vertx.VertxContextPRNG";
+      // attempt to load a PRNG from the current context
+      PRNG random = context.get(contextKey);
+
+      if (random == null) {
+        synchronized (context) {
+          // attempt to reload to avoid double creation when we were
+          // waiting for the lock
+          random = context.get(contextKey);
+          if (random == null) {
+            // there was no PRNG in the context, create one
+            random = new PRNG(context.owner());
+            // need to make the random final
+            final PRNG rand = random;
+            // save to the context
+            context.put(contextKey, rand);
+          }
         }
       }
-    }
 
-    return random;
+      return random;
+    } catch (UnsupportedOperationException e) {
+      // Access to the current context is probably blocked
+      Vertx vertx = context.owner();
+      if (vertx != null) {
+        return new PRNG(vertx);
+      }
+      // vert.x cannot be null
+      throw new IllegalStateException("Not running in a Vert.x Context.");
+    }
   }
 
   /**
    * Get or create a secure non blocking random number generator using the current vert.x instance. Since the context
    * might be different this method will attempt to use the current context first if available and then fall back to
    * create a new instance of the PRNG.
+   *
+   * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
+   * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
    *
    * @param vertx a Vert.x instance.
    * @return A secure non blocking random number generator.
@@ -98,6 +122,7 @@ public interface VertxContextPRNG {
       return current(currentContext);
     }
 
+    Objects.requireNonNull(vertx, "vertx can not be null");
     // we are not running on a vert.x context, fallback to create a new instance
     return new PRNG(vertx);
   }
