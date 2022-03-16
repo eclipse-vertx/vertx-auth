@@ -20,6 +20,8 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 
+import java.util.Objects;
+
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**
@@ -57,31 +59,43 @@ public interface VertxContextPRNG {
    * throw an exception.
    *
    * @param context a Vert.x context.
-   * @return A secure non blocking random number generator.
+   * @return A secure non blocking random number generator, or {@code null} if context access fails.
    */
   @GenIgnore
   static VertxContextPRNG current(final Context context) {
-    final String contextKey = "__vertx.VertxContextPRNG";
-    // attempt to load a PRNG from the current context
-    PRNG random = context.get(contextKey);
+    Objects.requireNonNull(context, "context can not be null");
 
-    if (random == null) {
-      synchronized (context) {
-        // attempt to reload to avoid double creation when we were
-        // waiting for the lock
-        random = context.get(contextKey);
-        if (random == null) {
-          // there was no PRNG in the context, create one
-          random = new PRNG(context.owner());
-          // need to make the random final
-          final PRNG rand = random;
-          // save to the context
-          context.put(contextKey, rand);
+    try {
+      final String contextKey = "__vertx.VertxContextPRNG";
+      // attempt to load a PRNG from the current context
+      PRNG random = context.get(contextKey);
+
+      if (random == null) {
+        synchronized (context) {
+          // attempt to reload to avoid double creation when we were
+          // waiting for the lock
+          random = context.get(contextKey);
+          if (random == null) {
+            // there was no PRNG in the context, create one
+            random = new PRNG(context.owner());
+            // need to make the random final
+            final PRNG rand = random;
+            // save to the context
+            context.put(contextKey, rand);
+          }
         }
       }
-    }
 
-    return random;
+      return random;
+    } catch (RuntimeException e) {
+      // Access to the current context is probably blocked
+      Vertx vertx = context.owner();
+      if (vertx != null) {
+        return new PRNG(vertx);
+      }
+      // vert.x cannot be null
+      throw new IllegalStateException("Not running in a Vert.x Context.");
+    }
   }
 
   /**
@@ -98,6 +112,7 @@ public interface VertxContextPRNG {
       return current(currentContext);
     }
 
+    Objects.requireNonNull(vertx, "vertx can not be null");
     // we are not running on a vert.x context, fallback to create a new instance
     return new PRNG(vertx);
   }
