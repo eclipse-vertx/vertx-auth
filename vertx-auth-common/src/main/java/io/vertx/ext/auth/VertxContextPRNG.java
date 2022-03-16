@@ -46,7 +46,7 @@ public interface VertxContextPRNG {
    * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
    *
    * @return A secure non blocking random number generator.
-   * @throws IllegalStateException when there is no context available.
+   * @throws IllegalStateException when there is no {@link Context} instance available.
    */
   static VertxContextPRNG current() {
     final Context currentContext = Vertx.currentContext();
@@ -65,7 +65,8 @@ public interface VertxContextPRNG {
    * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
    *
    * @param context a Vert.x context.
-   * @return A secure non blocking random number generator, or {@code null} if context access fails.
+   * @return A secure non blocking random number generator
+   * @throws IllegalStateException when there is no {@link Vertx} instance available.
    */
   @GenIgnore
   static VertxContextPRNG current(final Context context) {
