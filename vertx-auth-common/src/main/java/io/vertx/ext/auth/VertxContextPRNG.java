@@ -94,7 +94,7 @@ public interface VertxContextPRNG {
       }
 
       return random;
-    } catch (RuntimeException e) {
+    } catch (UnsupportedOperationException e) {
       // Access to the current context is probably blocked
       Vertx vertx = context.owner();
       if (vertx != null) {
