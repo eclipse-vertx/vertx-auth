@@ -12,10 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.vertx.ext.auth.authorization.Authorization;
@@ -79,7 +76,12 @@ public class AuthorizationsImpl implements Authorizations {
   public Set<Authorization> get(String providerId) {
     Objects.requireNonNull(providerId);
 
-    return authorizations.get(providerId);
+    final Set<Authorization> set = authorizations.get(providerId);
+    if (set == null) {
+      return Collections.emptySet();
+    }
+
+    return set;
   }
 
   private Set<Authorization> getOrCreateAuthorizations(String providerId) {

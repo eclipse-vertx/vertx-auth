@@ -35,6 +35,11 @@ public class Oauth2CredentialsConverter {
             obj.setCodeVerifier((String)member.getValue());
           }
           break;
+        case "flow":
+          if (member.getValue() instanceof String) {
+            obj.setFlow(io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf((String)member.getValue()));
+          }
+          break;
         case "jwt":
           if (member.getValue() instanceof JsonObject) {
             obj.setJwt(((JsonObject)member.getValue()).copy());
@@ -82,6 +87,9 @@ public class Oauth2CredentialsConverter {
     }
     if (obj.getCodeVerifier() != null) {
       json.put("codeVerifier", obj.getCodeVerifier());
+    }
+    if (obj.getFlow() != null) {
+      json.put("flow", obj.getFlow().name());
     }
     if (obj.getJwt() != null) {
       json.put("jwt", obj.getJwt());

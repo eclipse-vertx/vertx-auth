@@ -75,7 +75,7 @@ public class OAuth2Keycloak14IT {
   }
 
   @Test
-  public void discoverPublic(TestContext should) {
+  public void discoverPublicOpenId(TestContext should) {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
@@ -98,6 +98,50 @@ public class OAuth2Keycloak14IT {
 
             should.assertNotNull(alice.attributes().getJsonObject("idToken"));
             should.assertEquals(options.getClientId(), alice.attributes().getJsonObject("idToken").getString("aud"));
+
+            KeycloakAuthorization.create()
+              .getAuthorizations(alice)
+              .onFailure(should::fail)
+              .onSuccess(v -> {
+                // default from oidc
+                should.assertTrue(RoleBasedAuthorization.create("offline_access").match(alice));
+                // default from the realm
+                should.assertTrue(RoleBasedAuthorization.create("default-roles-vertx-it").match(alice));
+                // resource based role always present by default on keycloak
+                should.assertTrue(RoleBasedAuthorization.create("view-profile").setResource("account").match(alice));
+
+                loginAs(oauth2, should, "bob", "account", null)
+                  .onSuccess(bob -> {
+                    test.complete();
+                  });
+              });
+          });
+      });
+  }
+
+  @Test
+  public void discoverPublic(TestContext should) {
+    final Async test = should.async();
+
+    OAuth2Options options = new OAuth2Options()
+      .setFlow(OAuth2FlowType.PASSWORD)
+      .setClientId("public")
+      .setTenant("vertx-it")
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(
+        new JWTOptions()
+          .addAudience("account"));
+
+    options.getHttpClientOptions().setTrustAll(true);
+
+    KeycloakAuth.discover(rule.vertx(), options)
+      .onFailure(should::fail)
+      .onSuccess(oauth2 -> {
+
+        loginAs(oauth2, should, "alice", "account", null)
+          .onSuccess(alice -> {
+            // we should not receive a idToken
+            should.assertNull(alice.attributes().getJsonObject("idToken"));
 
             KeycloakAuthorization.create()
               .getAuthorizations(alice)

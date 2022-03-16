@@ -64,16 +64,17 @@ public interface WebAuthn extends AuthenticationProvider {
    * @return fluent self
    */
   @Fluent
-  WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler);
+  default WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
+    createCredentialsOptions(user)
+      .onComplete(handler);
+
+    return this;
+  }
 
   /**
    * Same as {@link #createCredentialsOptions(JsonObject, Handler)} but returning a Future.
    */
-  default Future<JsonObject> createCredentialsOptions(JsonObject user) {
-    Promise<JsonObject> promise = Promise.promise();
-    createCredentialsOptions(user, promise);
-    return promise.future();
-  }
+  Future<JsonObject> createCredentialsOptions(JsonObject user);
 
   /**
    * Creates an assertion challenge and any other parameters for the {@code navigator.credentials.get()} call.
@@ -87,16 +88,17 @@ public interface WebAuthn extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  WebAuthn getCredentialsOptions(@Nullable String name, Handler<AsyncResult<JsonObject>> handler);
+  default WebAuthn getCredentialsOptions(@Nullable String name, Handler<AsyncResult<JsonObject>> handler) {
+    getCredentialsOptions(name)
+      .onComplete(handler);
+
+    return this;
+  }
 
   /**
    * Same as {@link #getCredentialsOptions(String, Handler)} but returning a Future.
    */
-  default Future<JsonObject> getCredentialsOptions(@Nullable String username) {
-    Promise<JsonObject> promise = Promise.promise();
-    getCredentialsOptions(username, promise);
-    return promise.future();
-  }
+  Future<JsonObject> getCredentialsOptions(@Nullable String username);
 
   /**
    * Provide a {@link Function} that can fetch {@link Authenticator}s from a backend given the incomplete

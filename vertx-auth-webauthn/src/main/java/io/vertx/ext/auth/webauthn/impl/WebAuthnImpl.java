@@ -159,11 +159,11 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> createCredentialsOptions(JsonObject user) {
 
-    fetcher.apply(new Authenticator().setUserName(user.getString("name")))
-      .onFailure(err -> handler.handle(Future.failedFuture(err)))
-      .onSuccess(authenticators -> {
+    return fetcher
+      .apply(new Authenticator().setUserName(user.getString("name")))
+      .map(authenticators -> {
         // empty structure with all required fields
         JsonObject json = new JsonObject()
           .put("rp", new JsonObject())
@@ -222,14 +222,12 @@ public class WebAuthnImpl implements WebAuthn {
         // optional extensions
         putOpt(json, "extensions", options.getExtensions());
 
-        handler.handle(Future.succeededFuture(json));
+        return json;
       });
-
-    return this;
   }
 
   @Override
-  public WebAuthn getCredentialsOptions(String name, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> getCredentialsOptions(String name) {
 
     // https://w3c.github.io/webauthn/#dictionary-assertion-options
     JsonObject json = new JsonObject()
@@ -243,21 +241,22 @@ public class WebAuthnImpl implements WebAuthn {
     // this means that name is not required
     if (options.getRequireResidentKey()) {
       if (name == null) {
-        handler.handle(Future.succeededFuture(json));
-        return this;
+        return Future.succeededFuture(json);
       }
     }
 
     // fallback to non RK requests
-    fetcher.apply(new Authenticator().setUserName(name))
-      .onFailure(err -> handler.handle(Future.failedFuture(err)))
-      .onSuccess(authenticators -> {
+    return fetcher
+      .apply(new Authenticator().setUserName(name))
+      .compose(authenticators -> {
         if (authenticators.isEmpty()) {
           // fail as the user has never register an authenticator
-          handler.handle(Future.failedFuture("No authenticators registered for user: " + name));
-          return;
+          return Future.failedFuture("No authenticators registered for user: " + name);
         }
-
+        // there are authenticators, continue...
+        return Future.succeededFuture(authenticators);
+      })
+      .map(authenticators -> {
         JsonArray allowCredentials = new JsonArray();
 
         JsonArray transports = new JsonArray();
@@ -279,10 +278,9 @@ public class WebAuthnImpl implements WebAuthn {
           }
         }
         putOpt(json, "allowCredentials", allowCredentials);
-        handler.handle(Future.succeededFuture(json));
-      });
 
-    return this;
+        return json;
+      });
   }
 
   @Override

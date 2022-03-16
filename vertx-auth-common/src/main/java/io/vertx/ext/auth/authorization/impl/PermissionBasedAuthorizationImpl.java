@@ -14,11 +14,8 @@ package io.vertx.ext.auth.authorization.impl;
 
 import java.util.Objects;
 
-import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.AuthorizationContext;
-import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.*;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthorization {
 
@@ -55,9 +52,10 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
 
     User user = context.user();
     if (user != null) {
-      Authorization resolvedAuthorization = getResolvedAuthorization(context);
-      for (String providerId: user.authorizations().getProviderIds()) {
-        for (Authorization authorization : user.authorizations().get(providerId)) {
+      final Authorization resolvedAuthorization = getResolvedAuthorization(context);
+      final Authorizations authorizations = user.authorizations();
+      for (String providerId: authorizations.getProviderIds()) {
+        for (Authorization authorization : authorizations.get(providerId)) {
           if (authorization.verify(resolvedAuthorization)) {
             return true;
           }

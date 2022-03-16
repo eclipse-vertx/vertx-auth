@@ -15,9 +15,7 @@
  */
 package io.vertx.ext.auth.sqlclient.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.sqlclient.SqlUserUtil;
 import io.vertx.sqlclient.SqlClient;
@@ -53,10 +51,9 @@ public class SqlUserUtilImpl implements SqlUserUtil {
   }
 
   @Override
-  public SqlUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> createUser(String username, String password) {
     if (username == null || password == null) {
-      resultHandler.handle(Future.failedFuture("username or password are null"));
-      return this;
+      return Future.failedFuture("username or password are null");
     }
     // we have all required data to insert a user
     final byte[] salt = new byte[32];
@@ -67,59 +64,42 @@ public class SqlUserUtilImpl implements SqlUserUtil {
       strategy.hash("pbkdf2",
         null,
         base64Encode(salt),
-        password),
-      resultHandler
-    );
+        password));
   }
 
   @Override
-  public SqlUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> createHashedUser(String username, String hash) {
     if (username == null || hash == null) {
-      resultHandler.handle(Future.failedFuture("username or password hash are null"));
-      return this;
+      return Future.failedFuture("username or password hash are null");
     }
 
-    client.preparedQuery(insertUser).execute(Tuple.of(username, hash), prepare -> {
-      if (prepare.succeeded()) {
-        resultHandler.handle(Future.succeededFuture());
-      } else {
-        resultHandler.handle(Future.failedFuture(prepare.cause()));
-      }
-    });
-    return this;
+    return client
+      .preparedQuery(insertUser)
+      .execute(Tuple.of(username, hash))
+      .mapEmpty();
   }
 
   @Override
-  public SqlUserUtil createUserRole(String username, String role, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> createUserRole(String username, String role) {
     if (username == null || role == null) {
-      resultHandler.handle(Future.failedFuture("username or role are null"));
-      return this;
+      return Future.failedFuture("username or role are null");
     }
 
-    client.preparedQuery(insertUserRole).execute(Tuple.of(username, role), prepare -> {
-      if (prepare.succeeded()) {
-        resultHandler.handle(Future.succeededFuture());
-      } else {
-        resultHandler.handle(Future.failedFuture(prepare.cause()));
-      }
-    });
-    return this;
+    return client
+      .preparedQuery(insertUserRole)
+      .execute(Tuple.of(username, role))
+      .mapEmpty();
   }
 
   @Override
-  public SqlUserUtil createRolePermission(String role, String permission, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> createRolePermission(String role, String permission) {
     if (role == null || permission == null) {
-      resultHandler.handle(Future.failedFuture("role or permission are null"));
-      return this;
+      return Future.failedFuture("role or permission are null");
     }
 
-    client.preparedQuery(insertRolePermission).execute(Tuple.of(role, permission), insert -> {
-      if (insert.succeeded()) {
-        resultHandler.handle(Future.succeededFuture());
-      } else {
-        resultHandler.handle(Future.failedFuture(insert.cause()));
-      }
-    });
-    return this;
+    return client
+      .preparedQuery(insertRolePermission)
+      .execute(Tuple.of(role, permission))
+      .mapEmpty();
   }
 }

@@ -64,16 +64,17 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
-  SqlUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler);
+  default SqlUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler) {
+    createUser(username, password)
+      .onComplete(resultHandler);
+
+    return this;
+  }
 
   /**
    * @see #createUser(String, String, Handler).
    */
-  default Future<Void> createUser(String username, String password) {
-    Promise<Void> promise = Promise.promise();
-    createUser(username, password, promise);
-    return promise.future();
-  }
+  Future<Void> createUser(String username, String password);
 
   /**
    * Insert a user into a database.
@@ -87,16 +88,17 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
-  SqlUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler);
+  default SqlUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler) {
+    createHashedUser(username, hash)
+      .onComplete(resultHandler);
+
+    return this;
+  }
 
   /**
    * @see #createHashedUser(String, String, Handler).
    */
-  default Future<Void> createHashedUser(String username, String hash) {
-    Promise<Void> promise = Promise.promise();
-    createHashedUser(username, hash, promise);
-    return promise.future();
-  }
+  Future<Void> createHashedUser(String username, String hash);
 
   /**
    * Insert a user role into a database.
@@ -110,16 +112,17 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
-  SqlUserUtil createUserRole(String username, String role, Handler<AsyncResult<Void>> resultHandler);
+  default SqlUserUtil createUserRole(String username, String role, Handler<AsyncResult<Void>> resultHandler) {
+    createUserRole(username, role)
+      .onComplete(resultHandler);
+
+    return this;
+  }
 
   /**
    * @see #createUserRole(String, String, Handler).
    */
-  default Future<Void> createUserRole(String user, String role) {
-    Promise<Void> promise = Promise.promise();
-    createUserRole(user, role, promise);
-    return promise.future();
-  }
+  Future<Void> createUserRole(String user, String role);
 
   /**
    * Insert a role permission into a database.
@@ -133,14 +136,15 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
-  SqlUserUtil createRolePermission(String role, String permission, Handler<AsyncResult<Void>> resultHandler);
+  default SqlUserUtil createRolePermission(String role, String permission, Handler<AsyncResult<Void>> resultHandler) {
+    createRolePermission(role, permission)
+      .onComplete(resultHandler);
+
+    return this;
+  }
 
   /**
    * @see #createRolePermission(String, String, Handler).
    */
-  default Future<Void> createRolePermission(String role, String permission) {
-    Promise<Void> promise = Promise.promise();
-    createRolePermission(role, permission, promise);
-    return promise.future();
-  }
+  Future<Void> createRolePermission(String role, String permission);
 }
