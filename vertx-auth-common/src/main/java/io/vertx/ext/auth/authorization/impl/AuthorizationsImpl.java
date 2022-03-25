@@ -31,11 +31,8 @@ public class AuthorizationsImpl implements Authorizations {
 
   @Override
   public Authorizations add(String providerId, Authorization authorization) {
-    Objects.requireNonNull(providerId);
     Objects.requireNonNull(authorization);
-
-    getOrCreateAuthorizations(providerId).add(authorization);
-    return this;
+    return add(providerId, Collections.singleton(authorization));
   }
 
   @Override
@@ -43,7 +40,11 @@ public class AuthorizationsImpl implements Authorizations {
     Objects.requireNonNull(providerId);
     Objects.requireNonNull(authorizations);
 
-    getOrCreateAuthorizations(providerId).addAll(authorizations);
+    ConcurrentHashMap.KeySetView<Authorization, Boolean> concurrentAuthorizations = ConcurrentHashMap.newKeySet();
+    concurrentAuthorizations.addAll(authorizations);
+
+    getOrCreateAuthorizations(providerId)
+      .addAll(concurrentAuthorizations);
     return this;
   }
 
@@ -85,7 +86,7 @@ public class AuthorizationsImpl implements Authorizations {
   }
 
   private Set<Authorization> getOrCreateAuthorizations(String providerId) {
-    return authorizations.computeIfAbsent(providerId, k -> new HashSet<>());
+    return authorizations.computeIfAbsent(providerId, k -> ConcurrentHashMap.newKeySet());
   }
 
   @Override

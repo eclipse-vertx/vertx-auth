@@ -72,7 +72,12 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler);
+  default OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
+    jWKSet()
+      .onComplete(handler);
+
+    return this;
+  }
 
   /**
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
@@ -81,11 +86,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return Future result.
    * @see OAuth2Auth#jWKSet(Handler)
    */
-  default Future<Void> jWKSet() {
-    Promise<Void> promise = Promise.promise();
-    jWKSet(promise);
-    return promise.future();
-  }
+  Future<Void> jWKSet();
 
   /**
    * Handled to be called when a key (mentioned on a JWT) is missing from the current config.
@@ -145,7 +146,12 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler);
+  default OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
+    refresh(user)
+      .onComplete(handler);
+
+    return this;
+  }
 
   /**
    * Refresh the current User (access token).
@@ -154,11 +160,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return future result
    * @see OAuth2Auth#userInfo(User, Handler)
    */
-  default Future<User> refresh(User user) {
-    Promise<User> promise = Promise.promise();
-    refresh(user, promise);
-    return promise.future();
-  }
+  Future<User> refresh(User user);
 
   /**
    * Revoke an obtained access or refresh token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
@@ -169,7 +171,12 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler);
+  default OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
+    revoke(user, tokenType)
+      .onComplete(handler);
+
+    return this;
+  }
 
   /**
    * Revoke an obtained access token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
@@ -180,7 +187,10 @@ public interface OAuth2Auth extends AuthenticationProvider {
    */
   @Fluent
   default OAuth2Auth revoke(User user, Handler<AsyncResult<Void>> handler) {
-    return revoke(user, "access_token", handler);
+    revoke(user, "access_token")
+      .onComplete(handler);
+
+    return this;
   }
 
   /**
@@ -191,11 +201,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return future result
    * @see OAuth2Auth#revoke(User, String, Handler)
    */
-  default Future<Void> revoke(User user, String tokenType) {
-    Promise<Void> promise = Promise.promise();
-    revoke(user, tokenType, promise);
-    return promise.future();
-  }
+  Future<Void> revoke(User user, String tokenType);
 
   /**
    * Revoke an obtained access token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
@@ -205,9 +211,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @see OAuth2Auth#revoke(User, Handler)
    */
   default Future<Void> revoke(User user) {
-    Promise<Void> promise = Promise.promise();
-    revoke(user, promise);
-    return promise.future();
+    return revoke(user, "access_token");
   }
 
   /**
@@ -218,7 +222,12 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler);
+  default OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
+    userInfo(user)
+      .onComplete(handler);
+
+    return this;
+  }
 
   /**
    * Retrieve profile information and other attributes for a logged-in end-user. More info <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">https://openid.net/specs/openid-connect-core-1_0.html#UserInfo</a>
@@ -227,11 +236,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return future result
    * @see OAuth2Auth#userInfo(User, Handler)
    */
-  default Future<JsonObject> userInfo(User user) {
-    Promise<JsonObject> promise = Promise.promise();
-    userInfo(user, promise);
-    return promise.future();
-  }
+  Future<JsonObject> userInfo(User user);
 
   /**
    * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.

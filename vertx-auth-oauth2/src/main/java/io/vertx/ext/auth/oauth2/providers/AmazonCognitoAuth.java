@@ -85,11 +85,8 @@ public interface AmazonCognitoAuth extends OpenIDConnectAuth {
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    OpenIDConnectAuth.discover(
-      vertx,
-      new OAuth2Options(config)
-        .setScopeSeparator("+"),
-      handler);
+    discover(vertx, config)
+      .onComplete(handler);
   }
 
   /**
@@ -100,14 +97,15 @@ public interface AmazonCognitoAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see AmazonCognitoAuth#discover(Vertx, OAuth2Options, Handler)
-   * @param vertx   the vertx instance
-   * @param config  the initial config
+   * @param vertx  the vertx instance
+   * @param config the initial config
    * @return future with instantiated Oauth2 provider instance handler
+   * @see AmazonCognitoAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
-    Promise<OAuth2Auth> promise = Promise.promise();
-    discover(vertx, config, promise);
-    return promise.future();
+    return OpenIDConnectAuth.discover(
+        vertx,
+        new OAuth2Options(config)
+          .setScopeSeparator("+"));
   }
 }

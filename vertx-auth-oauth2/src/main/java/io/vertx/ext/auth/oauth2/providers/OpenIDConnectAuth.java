@@ -18,11 +18,11 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
-import io.vertx.ext.auth.impl.http.SimpleHttpResponse;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
@@ -46,9 +46,27 @@ public interface OpenIDConnectAuth {
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
+    discover(vertx, config)
+      .onComplete(handler);
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
+   * configuration options and attempt to load the well known descriptor.
+   * <p>
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @param vertx  the vertx instance
+   * @param config the initial config, it should contain a site url
+   * @return future with the instantiated Oauth2 provider instance handler
+   * @see OpenIDConnectAuth#discover(Vertx, OAuth2Options, Handler)
+   */
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
+    final ContextInternal ctx = (ContextInternal) vertx.getOrCreateContext();
+
     if (config.getSite() == null) {
-      handler.handle(Future.failedFuture("issuer cannot be null"));
-      return;
+      return ctx.failedFuture("issuer cannot be null");
     }
 
     // compute paths with variables, at this moment it is only relevant that
@@ -71,42 +89,31 @@ public interface OpenIDConnectAuth {
 
     // the response follows the OpenID Connect provider metadata spec:
     // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
-    httpClient.fetch(
-      HttpMethod.GET,
-      issuer + oidc_discovery_path,
-      new JsonObject()
-        .put("Accept", "application/json"),
-      null,
-      fetch -> {
-        if (fetch.failed()) {
-          handler.handle(Future.failedFuture(fetch.cause()));
-          return;
-        }
-
-        final SimpleHttpResponse response = fetch.result();
-
+    return httpClient.fetch(
+        HttpMethod.GET,
+        issuer + oidc_discovery_path,
+        new JsonObject()
+          .put("Accept", "application/json"),
+        null)
+      .compose(response -> {
         if (response.statusCode() != 200) {
-          handler.handle(Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body()));
-          return;
+          return ctx.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body());
         }
 
         if (!response.is("application/json")) {
-          handler.handle(Future.failedFuture("Cannot handle Content-Type: " + response.headers().get("Content-Type")));
-          return;
+          return ctx.failedFuture("Cannot handle Content-Type: " + response.headers().get("Content-Type"));
         }
 
         final JsonObject json = response.jsonObject();
 
         if (json == null) {
-          handler.handle(Future.failedFuture("Cannot handle null JSON"));
-          return;
+          return ctx.failedFuture("Cannot handle null JSON");
         }
 
         // some providers return errors as JSON too
         if (json.containsKey("error")) {
           // attempt to handle the error as a string
-          handler.handle(Future.failedFuture(json.getString("error_description", json.getString("error"))));
-          return;
+          return ctx.failedFuture(json.getString("error_description", json.getString("error")));
         }
 
         // issuer validation
@@ -121,8 +128,7 @@ public interface OpenIDConnectAuth {
             }
 
             if (!config.getSite().equals(issuerEndpoint)) {
-              handler.handle(Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]"));
-              return;
+              return ctx.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]");
             }
           }
         }
@@ -157,8 +163,7 @@ public interface OpenIDConnectAuth {
           flows.forEach(el -> config.addSupportedGrantType((String) el));
 
           if (!flows.contains(config.getFlow().getGrantType())) {
-            handler.handle(Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows));
-            return;
+            return ctx.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows);
           }
         }
 
@@ -167,38 +172,15 @@ public interface OpenIDConnectAuth {
           final OAuth2Auth oidc = OAuth2Auth.create(vertx, config);
 
           if (config.getJwkPath() != null) {
-            oidc.jWKSet(v -> {
-              if (v.failed()) {
-                handler.handle(Future.failedFuture(v.cause()));
-                return;
-              }
-
-              handler.handle(Future.succeededFuture(oidc));
-            });
+            return oidc
+              .jWKSet()
+              .map(oidc);
           } else {
-            handler.handle(Future.succeededFuture(oidc));
+            return ctx.succeededFuture(oidc);
           }
         } catch (IllegalArgumentException | IllegalStateException e) {
-          handler.handle(Future.failedFuture(e));
+          return ctx.failedFuture(e);
         }
       });
-  }
-
-  /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the given site in the
-   * configuration options and attempt to load the well known descriptor.
-   * <p>
-   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
-   * into the OAuth provider so tokens can be decoded.
-   *
-   * @param vertx  the vertx instance
-   * @param config the initial config, it should contain a site url
-   * @return future with the instantiated Oauth2 provider instance handler
-   * @see OpenIDConnectAuth#discover(Vertx, OAuth2Options, Handler)
-   */
-  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
-    Promise<OAuth2Auth> promise = Promise.promise();
-    discover(vertx, config, promise);
-    return promise.future();
   }
 }

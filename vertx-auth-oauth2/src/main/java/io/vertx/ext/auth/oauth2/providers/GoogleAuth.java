@@ -81,16 +81,8 @@ public interface GoogleAuth extends OpenIDConnectAuth {
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    // don't override if already set
-    final String site = config.getSite() == null ? "https://accounts.google.com" : config.getSite();
-
-    OpenIDConnectAuth.discover(
-      vertx,
-      new OAuth2Options(config)
-        .setSite(site)
-        .setUserInfoParameters(new JsonObject()
-          .put("alt", "json")),
-      handler);
+    discover(vertx, config)
+      .onComplete(handler);
   }
 
   /**
@@ -107,9 +99,15 @@ public interface GoogleAuth extends OpenIDConnectAuth {
    * @return future with the instantiated Oauth2 provider instance handler
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
-    Promise<OAuth2Auth> promise = Promise.promise();
-    discover(vertx, config, promise);
-    return promise.future();
+    // don't override if already set
+    final String site = config.getSite() == null ? "https://accounts.google.com" : config.getSite();
+
+    return OpenIDConnectAuth.discover(
+      vertx,
+      new OAuth2Options(config)
+        .setSite(site)
+        .setUserInfoParameters(new JsonObject()
+          .put("alt", "json")));
   }
 
   /**

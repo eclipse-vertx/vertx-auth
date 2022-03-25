@@ -129,7 +129,8 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    OpenIDConnectAuth.discover(vertx, new OAuth2Options(config), handler);
+    discover(vertx, config)
+      .onComplete(handler);
   }
 
   /**
@@ -146,8 +147,6 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * @return promise with the instantiated Oauth2 provider instance handler
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
-    Promise<OAuth2Auth> promise = Promise.promise();
-    discover(vertx, config, promise);
-    return promise.future();
+    return OpenIDConnectAuth.discover(vertx, config);
   }
 }

@@ -83,22 +83,8 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * @param handler the instantiated Oauth2 provider instance handler
    */
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    // don't override if already set
-    final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
-    final JWTOptions jwtOptions = config.getJWTOptions() == null ? new JWTOptions() : new JWTOptions(config.getJWTOptions());
-    // azure jwt options defaults
-    if (jwtOptions.getNonceAlgorithm() == null) {
-      jwtOptions.setNonceAlgorithm("SHA-256");
-    }
-
-    OpenIDConnectAuth.discover(
-      vertx,
-      new OAuth2Options(config)
-        // Azure OpenId does not return the same url where the request was sent to
-        .setValidateIssuer(false)
-        .setSite(site)
-        .setJWTOptions(jwtOptions),
-      handler);
+    discover(vertx, config)
+      .onComplete(handler);
   }
 
   /**
@@ -115,8 +101,20 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
-    Promise<OAuth2Auth> promise = Promise.promise();
-    discover(vertx, config, promise);
-    return promise.future();
+    // don't override if already set
+    final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
+    final JWTOptions jwtOptions = config.getJWTOptions() == null ? new JWTOptions() : new JWTOptions(config.getJWTOptions());
+    // azure jwt options defaults
+    if (jwtOptions.getNonceAlgorithm() == null) {
+      jwtOptions.setNonceAlgorithm("SHA-256");
+    }
+
+    return OpenIDConnectAuth.discover(
+      vertx,
+      new OAuth2Options(config)
+        // Azure OpenId does not return the same url where the request was sent to
+        .setValidateIssuer(false)
+        .setSite(site)
+        .setJWTOptions(jwtOptions));
   }
 }

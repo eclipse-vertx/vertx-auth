@@ -19,6 +19,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.DecodeException;
@@ -49,6 +50,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
   private final Vertx vertx;
+  private final ContextInternal ctx;
   private final OAuth2Options config;
   private final OAuth2API api;
 
@@ -60,6 +62,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
     this.vertx = vertx;
+    this.ctx = (ContextInternal) vertx.getOrCreateContext();
     this.config = config;
     this.api = new OAuth2API(vertx, config);
     // compute paths with variables, at this moment it is only relevant that
@@ -95,11 +98,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
-    api.jwkSet(res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
+  public Future<Void> jWKSet() {
+    return api.jwkSet()
+      .compose(json -> {
         // enforce a lock to ensure state isn't corrupted
         synchronized (OAuth2AuthProviderImpl.this) {
           if (updateTimerId != -1) {
@@ -110,7 +111,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             // there's a timer already in progress
             vertx.cancelTimer(updateTimerId);
           }
-          final JsonObject json = res.result();
+
           JWT jwt = new JWT()
             // set the nonce algorithm
             .nonceAlgorithm(config.getJWTOptions().getNonceAlgorithm());
@@ -148,11 +149,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             }
           }
         }
-        // return
-        handler.handle(Future.succeededFuture());
-      }
-    });
-    return this;
+        return ctx.succeededFuture();
+      });
   }
 
   @Override
@@ -184,7 +182,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
     final OAuth2FlowType flow;
 
     if (authInfo.getString("flow") != null && !authInfo.getString("flow").isEmpty()) {
-        flow = OAuth2FlowType.getFlow(authInfo.getString("flow"));
+      flow = OAuth2FlowType.getFlow(authInfo.getString("flow"));
     } else {
       flow = config.getFlow();
     }
@@ -344,18 +342,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
         // perform the introspection
         api
-          .tokenIntrospection("access_token", tokenCredentials.getToken(), res -> {
-            if (res.failed()) {
-              handler.handle(Future.failedFuture(res.cause()));
-              return;
-            }
-
-            final JsonObject json = res.result();
-
+          .tokenIntrospection("access_token", tokenCredentials.getToken())
+          .compose(json -> {
             // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
             if (json.containsKey("active") && !json.getBoolean("active", false)) {
-              handler.handle(Future.failedFuture("Inactive Token"));
-              return;
+              return ctx.failedFuture("Inactive Token");
             }
 
             // OPTIONALS
@@ -376,12 +367,13 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
-              handler.handle(Future.failedFuture("Used is expired."));
+              return ctx.failedFuture("Used is expired.");
             } else {
               // basic validation passed, the token is not expired
-              handler.handle(Future.succeededFuture(newUser));
+              return ctx.succeededFuture(newUser);
             }
-          });
+          })
+          .onComplete(handler);
 
         return;
       }
@@ -464,24 +456,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           return;
       }
 
-      api.token(flow.getGrantType(), params, getToken -> {
-        if (getToken.failed()) {
-          handler.handle(Future.failedFuture(getToken.cause()));
-        } else {
-
+      api.token(flow.getGrantType(), params)
+        .compose(json -> {
           // attempt to create a user from the json object
-          final User newUser = createUser(getToken.result(), false);
-
+          final User newUser = createUser(json, false);
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            handler.handle(Future.failedFuture("Used is expired."));
+            return ctx.failedFuture("Used is expired.");
           } else {
             // basic validation passed, the token is not expired
-            handler.handle(Future.succeededFuture(newUser));
+            return ctx.succeededFuture(newUser);
           }
-        }
-      });
+        })
+        .onComplete(handler);
     } catch (ClassCastException | CredentialValidationException e) {
       handler.handle(Future.failedFuture(e));
     }
@@ -493,47 +481,39 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
   }
 
   @Override
-  public OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
+  public Future<User> refresh(User user) {
 
     if (user.principal().getString("refresh_token") == null || user.principal().getString("refresh_token").isEmpty()) {
-      handler.handle(Future.failedFuture(new IllegalStateException("refresh_token is null or empty")));
-      return this;
+      return ctx.failedFuture(new IllegalStateException("refresh_token is null or empty"));
     }
 
-    api.token(
-      "refresh_token",
-      new JsonObject()
-        .put("refresh_token", user.principal().getString("refresh_token")),
-      getToken -> {
-        if (getToken.failed()) {
-          handler.handle(Future.failedFuture(getToken.cause()));
+    return api.token(
+        "refresh_token",
+        new JsonObject()
+          .put("refresh_token", user.principal().getString("refresh_token")))
+      .compose(json -> {
+        // attempt to create a user from the json object
+        final User newUser = createUser(json, false);
+        // final step, verify if the user is not expired
+        // this may happen if the user tokens have been issued for future use for example
+        if (newUser.expired(config.getJWTOptions().getLeeway())) {
+          return ctx.failedFuture("Used is expired.");
         } else {
-          // attempt to create a user from the json object
-          final User newUser = createUser(getToken.result(), false);
-          // final step, verify if the user is not expired
-          // this may happen if the user tokens have been issued for future use for example
-          if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            handler.handle(Future.failedFuture("Used is expired."));
-          } else {
-            // basic validation passed, the token is not expired
-            handler.handle(Future.succeededFuture(newUser));
-          }
+          // basic validation passed, the token is not expired
+          return ctx.succeededFuture(newUser);
         }
       });
-    return this;
   }
 
   @Override
-  public OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
-    api.tokenRevocation(tokenType, user.principal().getString(tokenType), handler);
-    return this;
+  public Future<Void> revoke(User user, String tokenType) {
+    return api.tokenRevocation(tokenType, user.principal().getString(tokenType));
   }
 
   @Override
-  public OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
-    api.userInfo(user.principal().getString("access_token"), jwt, userInfo -> {
-      if (userInfo.succeeded()) {
-        JsonObject json = userInfo.result();
+  public Future<JsonObject> userInfo(User user) {
+    return api.userInfo(user.principal().getString("access_token"), jwt)
+      .compose(json -> {
         // validation (the subject must match)
         String userSub = user.principal().getString("sub", user.attributes().getString("sub"));
         String userInfoSub = json.getString("sub");
@@ -541,25 +521,24 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           if (userSub != null) {
             if (userInfoSub != null) {
               if (!userSub.equals(userInfoSub)) {
-                handler.handle(Future.failedFuture("Used 'sub' does not match UserInfo 'sub'."));
-                return;
+                return ctx.failedFuture("Used 'sub' does not match UserInfo 'sub'.");
               }
             }
           }
         }
+
         // copy basic properties to the attributes
         copyProperties(json, user.attributes(), true);
-      }
-      // final step, verify if the user is not expired
-      // this may happen if the user tokens have been issued for future use for example
-      if (user.expired(config.getJWTOptions().getLeeway())) {
-        handler.handle(Future.failedFuture("Used is expired."));
-      } else {
-        // basic validation passed, the user token is not expired
-        handler.handle(userInfo);
-      }
-    });
-    return this;
+
+        // final step, verify if the user is not expired
+        // this may happen if the user tokens have been issued for future use for example
+        if (user.expired(config.getJWTOptions().getLeeway())) {
+          return ctx.failedFuture("Used is expired.");
+        } else {
+          // basic validation passed, the user token is not expired
+          return ctx.succeededFuture(json);
+        }
+      });
   }
 
   @Override
