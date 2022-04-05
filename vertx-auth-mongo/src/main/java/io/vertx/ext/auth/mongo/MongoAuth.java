@@ -133,6 +133,7 @@ public interface MongoAuth extends AuthProvider {
   /**
    * The prefix which is used by the method {@link User#isAuthorized(String, Handler)} when checking for role access
    */
+  @Deprecated
   String ROLE_PREFIX = "role:";
 
   /**
@@ -330,6 +331,8 @@ public interface MongoAuth extends AuthProvider {
   MongoAuth setHashAlgorithm(HashAlgorithm hashAlgorithm);
 
   /**
+   * @deprecated Please use {@link MongoUserUtil} instead.
+   *
    * Insert a new user into mongo in the convenient way
    *
    * @param username
@@ -343,10 +346,16 @@ public interface MongoAuth extends AuthProvider {
    * @param resultHandler
    *          the ResultHandler will be provided with the id of the generated record
    */
-  void insertUser(String username, String password, List<String> roles, List<String> permissions,
-      Handler<AsyncResult<String>> resultHandler);
+  @Deprecated
+  default void insertUser(String username, String password, List<String> roles, List<String> permissions,
+      Handler<AsyncResult<String>> resultHandler) {
+    insertUser(username, password, roles, permissions)
+      .onComplete(resultHandler);
+  }
 
   /**
+   * @deprecated Please use {@link MongoUserUtil} instead.
+   *
    * Insert a new user into mongo in the convenient way
    *
    * @see MongoAuth#insertUser(String, String, List, List, Handler)
@@ -361,9 +370,6 @@ public interface MongoAuth extends AuthProvider {
    * @return
    *          the result future  will be provided with the id of the generated record
    */
-  default Future<String> insertUser(String username, String password, List<String> roles, List<String> permissions) {
-    Promise<String> promise = Promise.promise();
-    insertUser(username, password, roles, permissions, promise);
-    return promise.future();
-  }
+  @Deprecated
+  Future<String> insertUser(String username, String password, List<String> roles, List<String> permissions);
 }

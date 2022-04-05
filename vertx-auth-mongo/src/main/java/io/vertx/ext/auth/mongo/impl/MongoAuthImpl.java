@@ -30,7 +30,6 @@ import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.HashAlgorithm;
 import io.vertx.ext.auth.mongo.HashSaltStyle;
 import io.vertx.ext.auth.mongo.HashStrategy;
@@ -124,8 +123,7 @@ public class MongoAuthImpl implements MongoAuth {
    * java.util.List, io.vertx.core.Handler)
    */
   @Override
-  public void insertUser(String username, String password, List<String> roles, List<String> permissions,
-      Handler<AsyncResult<String>> resultHandler) {
+  public Future<String> insertUser(String username, String password, List<String> roles, List<String> permissions) {
     JsonObject principal = new JsonObject();
     principal.put(getUsernameField(), username);
 
@@ -145,7 +143,7 @@ public class MongoAuthImpl implements MongoAuth {
     String cryptPassword = getHashStrategy().computeHash(password, user);
     principal.put(getPasswordField(), cryptPassword);
 
-    mongoClient.save(getCollectionName(), user.principal(), resultHandler);
+    return mongoClient.save(getCollectionName(), user.principal());
   }
 
   private User createUser(JsonObject json) {

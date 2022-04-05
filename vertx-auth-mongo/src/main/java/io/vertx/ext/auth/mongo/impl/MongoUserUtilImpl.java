@@ -15,9 +15,7 @@
  */
 package io.vertx.ext.auth.mongo.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.mongo.MongoAuthenticationOptions;
@@ -51,10 +49,9 @@ public class MongoUserUtilImpl implements MongoUserUtil {
   }
 
   @Override
-  public MongoUserUtil createUser(String username, String password, Handler<AsyncResult<String>> resultHandler) {
+  public Future<String> createUser(String username, String password) {
     if (username == null || password == null) {
-      resultHandler.handle(Future.failedFuture("username or password are null"));
-      return this;
+      return Future.failedFuture("username or password are null");
     }
     // we have all required data to insert a user
     final byte[] salt = new byte[32];
@@ -65,42 +62,33 @@ public class MongoUserUtilImpl implements MongoUserUtil {
       strategy.hash("pbkdf2",
         null,
         base64Encode(salt),
-        password),
-      resultHandler
-    );
+        password));
   }
 
   @Override
-  public MongoUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<String>> resultHandler) {
+  public Future<String> createHashedUser(String username, String hash) {
     if (username == null || hash == null) {
-      resultHandler.handle(Future.failedFuture("username or password hash are null"));
-      return this;
+      return Future.failedFuture("username or password hash are null");
     }
 
-    client.save(
+    return client.save(
       authnOptions.getCollectionName(),
       new JsonObject()
         .put(authnOptions.getUsernameCredentialField(), username)
-        .put(authnOptions.getPasswordCredentialField(), hash),
-      resultHandler);
-    return this;
+        .put(authnOptions.getPasswordCredentialField(), hash));
   }
 
   @Override
-  public MongoUserUtil createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions, Handler<AsyncResult<String>> resultHandler) {
+  public Future<String> createUserRolesAndPermissions(String username, List<String> roles, List<String> permissions) {
     if (username == null) {
-      resultHandler.handle(Future.failedFuture("username is null"));
-      return this;
+      return Future.failedFuture("username is null");
     }
 
-    client.save(
+    return client.save(
       authzOptions.getCollectionName(),
       new JsonObject()
         .put(authzOptions.getUsernameField(), username)
         .put(authzOptions.getRoleField(), roles == null ? Collections.emptyList() : roles)
-        .put(authzOptions.getPermissionField(), permissions == null ? Collections.emptyList() : permissions),
-      resultHandler);
-
-    return this;
+        .put(authzOptions.getPermissionField(), permissions == null ? Collections.emptyList() : permissions));
   }
 }
