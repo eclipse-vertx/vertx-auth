@@ -20,10 +20,13 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.core.json.JsonObject;
 
 /**
+ * @deprecated Please use {@code vertx-auth-sql-client} instead.
+ *
  * Options configuring JDBC authentication.
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
+@Deprecated
 @DataObject(generateConverter = true)
 public class JDBCAuthenticationOptions {
 

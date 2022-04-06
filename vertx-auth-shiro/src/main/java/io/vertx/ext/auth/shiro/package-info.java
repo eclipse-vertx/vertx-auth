@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
+@Deprecated
 @ModuleGen(name = "vertx-auth-shiro", groupPackage = "io.vertx")
 package io.vertx.ext.auth.shiro;
 

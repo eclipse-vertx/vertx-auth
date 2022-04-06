@@ -22,10 +22,13 @@ import io.vertx.ext.auth.jdbc.impl.JDBCAuthorizationImpl;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
+ * @deprecated Please use {@code vertx-auth-sql-client} instead.
+ *
  * Factory interface for creating {@link AuthorizationProvider} instances that use the Vert.x JDBC client.
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
+@Deprecated
 @VertxGen
 public interface JDBCAuthorization extends AuthorizationProvider {
 

@@ -16,6 +16,7 @@ import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
+@Deprecated
 public class GetAuthorizationsHack {
 
   public static Set<Authorization> getAuthorizations(SecurityManager securityManager, Subject subject) {

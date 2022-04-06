@@ -24,6 +24,8 @@ import io.vertx.ext.jdbc.JDBCClient;
 import java.util.Map;
 
 /**
+ * @deprecated Please use {@code vertx-auth-sql-client} instead.
+ *
  * Factory interface for creating {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances that use the Vert.x JDBC client.
  *
  * By default the hashing strategy is SHA-512. If you're already running in production this is backwards
@@ -33,6 +35,7 @@ import java.util.Map;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @VertxGen
+@Deprecated
 public interface JDBCAuthentication extends AuthenticationProvider {
 
   /**

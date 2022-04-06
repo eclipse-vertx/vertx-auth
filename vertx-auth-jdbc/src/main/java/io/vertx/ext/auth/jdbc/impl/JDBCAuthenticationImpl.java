@@ -39,6 +39,7 @@ import io.vertx.ext.sql.SQLConnection;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Deprecated
 public class JDBCAuthenticationImpl implements JDBCAuthentication {
 
   private final HashingStrategy strategy = HashingStrategy.load();

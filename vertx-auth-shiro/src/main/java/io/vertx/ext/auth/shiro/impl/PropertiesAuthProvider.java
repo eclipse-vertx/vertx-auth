@@ -30,6 +30,7 @@ import static io.vertx.ext.auth.shiro.PropertiesProviderConstants.PROPERTIES_PRO
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Deprecated
 public class PropertiesAuthProvider extends ShiroAuthProviderImpl {
 
   private static String resolve(String resource) {

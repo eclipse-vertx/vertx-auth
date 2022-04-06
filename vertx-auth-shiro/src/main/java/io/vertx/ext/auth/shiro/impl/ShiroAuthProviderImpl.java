@@ -45,6 +45,7 @@ import io.vertx.ext.auth.shiro.ShiroAuthOptions;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Deprecated
 public class ShiroAuthProviderImpl implements ShiroAuth {
 
   private final Vertx vertx;

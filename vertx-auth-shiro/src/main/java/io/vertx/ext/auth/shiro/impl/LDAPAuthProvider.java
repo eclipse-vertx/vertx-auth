@@ -36,6 +36,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Deprecated
 public class LDAPAuthProvider extends ShiroAuthProviderImpl {
 
   public static Realm createRealm(JsonObject config) {
