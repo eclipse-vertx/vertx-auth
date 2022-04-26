@@ -14,6 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
+@Deprecated
 @ModuleGen(name = "vertx-auth-jdbc", groupPackage = "io.vertx")
 package io.vertx.ext.auth.jdbc;
 

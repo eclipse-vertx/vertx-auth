@@ -39,6 +39,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@Deprecated
 public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
 
   private final JDBCClient client;

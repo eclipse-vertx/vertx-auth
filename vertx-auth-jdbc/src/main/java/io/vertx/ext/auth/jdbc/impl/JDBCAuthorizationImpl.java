@@ -19,6 +19,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
+@Deprecated
 public class JDBCAuthorizationImpl implements JDBCAuthorization {
 
   /**

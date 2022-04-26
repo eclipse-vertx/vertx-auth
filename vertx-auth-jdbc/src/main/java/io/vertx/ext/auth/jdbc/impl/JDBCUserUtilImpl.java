@@ -27,6 +27,7 @@ import java.security.SecureRandom;
 
 import static io.vertx.ext.auth.impl.Codec.base64Encode;
 
+@Deprecated
 public class JDBCUserUtilImpl implements JDBCUserUtil {
 
   private static final String INSERT_USER = "INSERT INTO user (username, password) VALUES (?, ?)";
