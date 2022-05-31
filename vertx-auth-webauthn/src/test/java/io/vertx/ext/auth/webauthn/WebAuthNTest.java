@@ -1,6 +1,5 @@
 package io.vertx.ext.auth.webauthn;
 
-import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
@@ -163,8 +162,8 @@ public class WebAuthNTest {
 
   @Test
   public void testVerify() throws IOException {
-    try (JsonParser parser = CBOR.cborParser(Base64.getDecoder().decode("pQECAyYgASFYIB4QBsdBFyVm79aQFrgdhAFsV0bD0+UfzsRRihvSU8bnIlggdBaaNC3nGWGcZd1msfoD0vMt0Ydg9InOFKkz6PKUEf8="))) {
-      JWK key = CWK.toJWK(new JsonObject(CBOR.<Map<String, Object>>parse(parser)));
+    try (CBOR decoder = new CBOR(Base64.getDecoder().decode("pQECAyYgASFYIB4QBsdBFyVm79aQFrgdhAFsV0bD0+UfzsRRihvSU8bnIlggdBaaNC3nGWGcZd1msfoD0vMt0Ydg9InOFKkz6PKUEf8="))) {
+      JWK key = CWK.toJWK(new JsonObject(decoder.<Map<String, Object>>readObject()));
       JWS jws = new JWS(key);
       System.out.println(jws.verify(
         Base64.getUrlDecoder().decode("MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8"),

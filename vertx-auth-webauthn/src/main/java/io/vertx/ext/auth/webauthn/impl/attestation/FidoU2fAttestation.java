@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
-import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
@@ -134,8 +133,8 @@ public class FidoU2fAttestation implements Attestation {
          | d    | 2     | -4    | bstr    | Private key                      |
          +------+-------+-------+---------+----------------------------------+
       */
-    try (JsonParser parser = CBOR.cborParser(cosePublicKey)) {
-      JsonObject key = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
+    try (CBOR decoder = new CBOR(cosePublicKey)) {
+      JsonObject key = new JsonObject(decoder.<Map<String, Object>>readObject());
 
       return Buffer.buffer()
         .appendByte((byte) 0x04)
@@ -143,7 +142,7 @@ public class FidoU2fAttestation implements Attestation {
         .appendBytes(base64UrlDecode(key.getString("-3")))
         .getBytes();
     } catch (IOException e) {
-      throw new DecodeException(e.getMessage());
+      throw new DecodeException("Invalid CBOR message", e);
     }
   }
 }
