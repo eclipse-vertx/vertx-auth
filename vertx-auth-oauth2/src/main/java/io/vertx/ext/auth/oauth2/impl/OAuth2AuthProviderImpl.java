@@ -15,11 +15,9 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.DecodeException;
@@ -45,7 +43,7 @@ import java.util.List;
 /**
  * @author Paulo Lopes
  */
-public class OAuth2AuthProviderImpl implements OAuth2Auth {
+public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
@@ -82,7 +80,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   @Override
   public void close() {
-    synchronized (OAuth2AuthProviderImpl.this) {
+    synchronized (this) {
       if (updateTimerId != -1) {
         // cancel any running timer to avoid multiple updates
         // it is not important if the timer isn't active anymore
@@ -90,6 +88,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         // this could happen if both the user triggers the update and
         // there's a timer already in progress
         vertx.cancelTimer(updateTimerId);
+        ((VertxInternal) vertx).removeCloseHook(this);
         updateTimerId = -1;
       }
       // clear the JWT object reference too
@@ -110,6 +109,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
             // this could happen if both the user triggers the update and
             // there's a timer already in progress
             vertx.cancelTimer(updateTimerId);
+            ((VertxInternal) vertx).removeCloseHook(this);
           }
 
           JWT jwt = new JWT()
@@ -138,11 +138,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
               // for these cases we just cancel
               if (delay > 0) {
                 this.updateTimerId = vertx.setPeriodic(delay, t ->
-                  jWKSet(autoUpdateRes -> {
-                    if (autoUpdateRes.failed()) {
-                      LOG.warn("Failed to auto-update JWK Set", autoUpdateRes.cause());
-                    }
-                  }));
+                  jWKSet()
+                    .onFailure(err -> LOG.warn("Failed to auto-update JWK Set", err)));
+                // ensure we get a clean exit
+                ((VertxInternal) vertx).addCloseHook(this);
               } else {
                 updateTimerId = -1;
               }
@@ -201,7 +200,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         }
         break;
       case CLIENT:
-        cred = new Oauth2Credentials().setFlow(flow);
+        cred = new Oauth2Credentials()
+          .setFlow(flow);
 
         if (authInfo.containsKey("scopes")) {
           for (Object scope : authInfo.getJsonArray("scopes")) {
@@ -239,7 +239,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
           authenticate(cred, handler);
           return;
         }
-        authenticate(new Oauth2Credentials().setJwt(authInfo).setFlow(flow), handler);
+
+        cred = new Oauth2Credentials()
+          .setJwt(authInfo)
+          .setFlow(flow);
+
+        authenticate(cred, handler);
         return;
       case IMPLICIT:
       default:
@@ -737,5 +742,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth {
         }
       }
     }
+  }
+
+  @Override
+  public void close(Promise<Void> onClose) {
+    close();
+    onClose.complete();
   }
 }

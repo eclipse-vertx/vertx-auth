@@ -153,6 +153,9 @@ public class Oauth2Credentials implements Credentials {
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
     OAuth2FlowType flow = (OAuth2FlowType) arg;
+    if (flow == null) {
+      throw new CredentialValidationException("flow cannot be null");
+    }
     // when there's no access token, validation shall be performed according to each flow
     switch (flow) {
       case CLIENT:
