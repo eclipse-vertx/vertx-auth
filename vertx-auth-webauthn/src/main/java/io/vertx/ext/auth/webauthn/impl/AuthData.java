@@ -122,7 +122,7 @@ public class AuthData {
 
       try (CBOR decoder = new CBOR(bytes)) {
         // the decoded credential primary as a JWK
-        this.credentialPublicKeyJson = new JsonObject(decoder.<Map<String, Object>>readObject());
+        this.credentialPublicKeyJson = decoder.read();
         this.credentialJWK = CWK.toJWK(credentialPublicKeyJson);
         int credentialPublicKeyLen = decoder.offset();
         this.credentialPublicKey = buffer.getBytes(pos, pos + credentialPublicKeyLen);
@@ -138,7 +138,7 @@ public class AuthData {
 
       try (CBOR decoder = new CBOR(bytes)) {
         // the decoded credential primary as a JWK
-        this.extensionsData = new JsonObject(decoder.<Map<String, Object>>readObject());
+        this.extensionsData = decoder.read();
         int extensionsDataLen = decoder.offset();
         this.extensions = buffer.getBytes(pos, pos + extensionsDataLen);
         pos += extensionsDataLen;

@@ -134,7 +134,7 @@ public class FidoU2fAttestation implements Attestation {
          +------+-------+-------+---------+----------------------------------+
       */
     try (CBOR decoder = new CBOR(cosePublicKey)) {
-      JsonObject key = new JsonObject(decoder.<Map<String, Object>>readObject());
+      JsonObject key = decoder.read();
 
       return Buffer.buffer()
         .appendByte((byte) 0x04)

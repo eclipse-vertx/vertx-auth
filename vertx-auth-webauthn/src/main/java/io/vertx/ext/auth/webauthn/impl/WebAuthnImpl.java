@@ -467,7 +467,7 @@ public class WebAuthnImpl implements WebAuthn {
       //          ]
       //        }
       //      }
-      JsonObject attestation = new JsonObject(decoder.<Map<String, Object>>readObject());
+      JsonObject attestation = decoder.read();
 
       // Step #5
       // Extract and parse auth data
@@ -602,7 +602,7 @@ public class WebAuthnImpl implements WebAuthn {
     // Using previously saved public key, verify signature over signatureBase.
     try (CBOR decoder = new CBOR(base64UrlDecode(credential.getString("publicKey")))) {
       // the decoded credential primary as a JWK
-      JWK publicKey = CWK.toJWK(new JsonObject(decoder.<Map<String, Object>>readObject()));
+      JWK publicKey = CWK.toJWK(decoder.read());
       // convert signature to buffer
       byte[] signature = base64UrlDecode(response.getString("signature"));
       // verify signature
