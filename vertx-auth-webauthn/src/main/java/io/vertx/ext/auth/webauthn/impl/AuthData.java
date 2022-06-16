@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth.webauthn.impl;
 
-import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
@@ -43,7 +42,7 @@ public class AuthData {
 
   /**
    * the hash of the rpId which is basically the effective domain or host.
-   * For example: “https://example.com” effective domain is “example.com”
+   * For example: {@code https://example.com} effective domain is {@code example.com}
    */
   private final byte[] rpIdHash;
   /**
@@ -111,7 +110,7 @@ public class AuthData {
       pos += 16;
 
       String tmp = base16Encode(aaguid);
-      aaguidString = tmp.substring(0, 8) + "-" + tmp.substring(8, 12)+ "-" + tmp.substring(12, 16) + "-" + tmp.substring(16, 20) + "-" + tmp.substring(20);
+      aaguidString = tmp.substring(0, 8) + "-" + tmp.substring(8, 12) + "-" + tmp.substring(12, 16) + "-" + tmp.substring(16, 20) + "-" + tmp.substring(20);
 
       int credIDLen = buffer.getUnsignedShort(pos);
       pos += 2;
@@ -121,15 +120,15 @@ public class AuthData {
 
       byte[] bytes = buffer.getBytes(pos, buffer.length());
 
-      try (JsonParser parser = CBOR.cborParser(bytes)) {
+      try (CBOR decoder = new CBOR(bytes)) {
         // the decoded credential primary as a JWK
-        this.credentialPublicKeyJson = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
+        this.credentialPublicKeyJson = decoder.read();
         this.credentialJWK = CWK.toJWK(credentialPublicKeyJson);
-        int credentialPublicKeyLen = (int) parser.getCurrentLocation().getByteOffset();
+        int credentialPublicKeyLen = decoder.offset();
         this.credentialPublicKey = buffer.getBytes(pos, pos + credentialPublicKeyLen);
         pos += credentialPublicKeyLen;
       } catch (IOException e) {
-        throw new IllegalArgumentException("Invalid CBOR message");
+        throw new IllegalArgumentException("Invalid CBOR message", e);
       }
     }
 
@@ -137,18 +136,18 @@ public class AuthData {
 
       byte[] bytes = buffer.getBytes(pos, buffer.length());
 
-      try (JsonParser parser = CBOR.cborParser(bytes)) {
+      try (CBOR decoder = new CBOR(bytes)) {
         // the decoded credential primary as a JWK
-        this.extensionsData = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
-        int extensionsDataLen = (int) parser.getCurrentLocation().getByteOffset();
+        this.extensionsData = decoder.read();
+        int extensionsDataLen = decoder.offset();
         this.extensions = buffer.getBytes(pos, pos + extensionsDataLen);
         pos += extensionsDataLen;
       } catch (IOException e) {
-        throw new DecodeException("Invalid CBOR message");
+        throw new DecodeException("Invalid CBOR message", e);
       }
     }
 
-    if(buffer.length() > pos) {
+    if (buffer.length() > pos) {
       throw new DecodeException("Failed to decode authData! Leftover bytes been detected!");
     }
   }

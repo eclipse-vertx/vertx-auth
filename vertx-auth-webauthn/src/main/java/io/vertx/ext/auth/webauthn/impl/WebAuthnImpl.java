@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth.webauthn.impl;
 
-import com.fasterxml.jackson.core.JsonParser;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -457,7 +456,7 @@ public class WebAuthnImpl implements WebAuthn {
       throw new AttestationException("Missing response.attestationObject");
     }
     // Extract attestation Object
-    try (JsonParser parser = CBOR.cborParser(response.getString("attestationObject"))) {
+    try (CBOR decoder = new CBOR(base64UrlDecode(response.getString("attestationObject")))) {
       //      {
       //        "fmt": "string",
       //        "authData": "cbor",
@@ -468,7 +467,7 @@ public class WebAuthnImpl implements WebAuthn {
       //          ]
       //        }
       //      }
-      JsonObject attestation = new JsonObject(CBOR.<Map<String, Object>>parse(parser));
+      JsonObject attestation = decoder.read();
 
       // Step #5
       // Extract and parse auth data
@@ -601,9 +600,9 @@ public class WebAuthnImpl implements WebAuthn {
 
     // Step webauthn.get#3
     // Using previously saved public key, verify signature over signatureBase.
-    try (JsonParser parser = CBOR.cborParser(credential.getString("publicKey"))) {
+    try (CBOR decoder = new CBOR(base64UrlDecode(credential.getString("publicKey")))) {
       // the decoded credential primary as a JWK
-      JWK publicKey = CWK.toJWK(new JsonObject(CBOR.<Map<String, Object>>parse(parser)));
+      JWK publicKey = CWK.toJWK(decoder.read());
       // convert signature to buffer
       byte[] signature = base64UrlDecode(response.getString("signature"));
       // verify signature
