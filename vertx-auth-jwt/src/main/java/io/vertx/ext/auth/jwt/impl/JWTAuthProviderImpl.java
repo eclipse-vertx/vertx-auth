@@ -119,7 +119,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
           try {
             jwt.addJWK(new JWK(jwk));
           } catch (Exception e) {
-            LOG.warn("Ignoring JWK", e);
+            LOG.warn("Unsupported JWK", e);
           }
         }
       }
