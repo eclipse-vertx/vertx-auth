@@ -17,6 +17,7 @@ package io.vertx.ext.auth.impl.asn;
 
 import io.vertx.core.buffer.Buffer;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +86,22 @@ public class ASN1 {
 
     public byte[] binary(int index) {
       return (byte[]) value.get(index);
+    }
+
+    public int integer(int index) {
+      byte[] bytes = binary(index);
+      if (bytes.length > 4) {
+        throw new IllegalArgumentException("integer too long");
+      }
+      int result = 0;
+      for (byte b : bytes) {
+        result = (result << 8) | (b & 0xFF);
+      }
+      return result;
+    }
+
+    public BigInteger bigInteger(int index) {
+      return new BigInteger(binary(index));
     }
 
     public ASN object(int index) {
