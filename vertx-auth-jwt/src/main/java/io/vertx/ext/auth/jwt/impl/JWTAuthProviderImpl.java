@@ -22,6 +22,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -54,6 +56,8 @@ import java.util.List;
  * @author Paulo Lopes
  */
 public class JWTAuthProviderImpl implements JWTAuth {
+
+  private static final Logger LOG = LoggerFactory.getLogger(JWTAuthProviderImpl.class);
 
   private static final JsonArray EMPTY_ARRAY = new JsonArray();
 
@@ -112,7 +116,11 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
       if (jwks != null) {
         for (JsonObject jwk : jwks) {
-          this.jwt.addJWK(new JWK(jwk));
+          try {
+            jwt.addJWK(new JWK(jwk));
+          } catch (Exception e) {
+            LOG.warn("Ignoring JWK", e);
+          }
         }
       }
 
