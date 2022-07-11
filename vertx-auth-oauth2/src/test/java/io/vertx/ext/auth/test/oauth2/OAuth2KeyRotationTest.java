@@ -168,9 +168,7 @@ public class OAuth2KeyRotationTest {
             }
           })
           .authenticate(new JsonObject().put("access_token", jwt), authenticate -> {
-            if (authenticate.failed()) {
-              // OK
-            } else {
+            if (authenticate.succeeded()) {
               should.fail("we don't have such key");
             }
           });

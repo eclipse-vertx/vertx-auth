@@ -15,7 +15,12 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Closeable;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
@@ -39,6 +44,8 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 
 import java.util.List;
+
+import static java.lang.Math.max;
 
 /**
  * @author Paulo Lopes
@@ -128,23 +135,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           this.jwt = jwt;
 
           if (config.isRotateJWKs()) {
-            // compute the next update if the server told us too
-            if (json.containsKey("maxAge")) {
-              // ensure that leeway is never negative
-              int leeway = Math.max(0, config.getJWTOptions().getLeeway());
-              // delay is in ms, while cache max age is sec
-              final long delay = json.getLong("maxAge") * 1000 - leeway;
-              // salesforce (for example) sometimes disables the max-age as setting it to 0
-              // for these cases we just cancel
-              if (delay > 0) {
-                this.updateTimerId = vertx.setPeriodic(delay, t ->
-                  jWKSet()
-                    .onFailure(err -> LOG.warn("Failed to auto-update JWK Set", err)));
-                // ensure we get a clean exit
-                ((VertxInternal) vertx).addCloseHook(this);
-              } else {
-                updateTimerId = -1;
-              }
+            // ensure that leeway is never negative
+            int leeway = max(0, config.getJWTOptions().getLeeway());
+            // delay is in ms, while cache max age is sec
+            final long delay = json.getLong("maxAge", config.getJwkMaxAge()) * 1000 - leeway;
+            // salesforce (for example) sometimes disables the max-age as setting it to 0
+            // for these cases we just cancel
+            if (delay > 0) {
+              this.updateTimerId = vertx.setPeriodic(delay, t ->
+                jWKSet()
+                  .onFailure(err -> LOG.warn("Failed to auto-update JWK Set", err)));
+              // ensure we get a clean exit
+              ((VertxInternal) vertx).addCloseHook(this);
+            } else {
+              updateTimerId = -1;
             }
           }
         }
