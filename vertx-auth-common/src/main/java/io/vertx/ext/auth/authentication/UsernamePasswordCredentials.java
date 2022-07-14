@@ -63,8 +63,8 @@ public class UsernamePasswordCredentials implements Credentials {
 
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
-    if (username == null || username.length() == 0) {
-      throw new CredentialValidationException("username cannot be null or empty");
+    if (username == null) {
+      throw new CredentialValidationException("username cannot be null");
     }
     // passwords are allowed to be empty
     // for example this is used by basic auth
@@ -100,13 +100,23 @@ public class UsernamePasswordCredentials implements Credentials {
 
   @Override
   public String toHttpAuthorization() {
+    final StringBuilder sb = new StringBuilder();
 
-    String credentials =
-      (username == null ? "" : username) +
-        ":" +
-        (password == null ? "" : password);
+    if (username != null) {
+      // RFC check
+      if (username.indexOf(':') != -1) {
+        throw new IllegalArgumentException("Username cannot contain ':'");
+      }
+      sb.append(username);
+    }
 
-    return "Basic " + base64Encode(credentials.getBytes(StandardCharsets.UTF_8));
+    sb.append(':');
+
+    if (password != null) {
+      sb.append(password);
+    }
+
+    return "Basic " + base64Encode(sb.toString().getBytes(StandardCharsets.UTF_8));
   }
 
 }
