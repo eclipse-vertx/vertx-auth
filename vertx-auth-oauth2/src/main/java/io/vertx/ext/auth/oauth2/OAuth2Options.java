@@ -51,7 +51,8 @@ public class OAuth2Options {
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
   private static final boolean ROTATE_JWKS = true;
-  private static final long JWK_DEFAULT_AGE = 1L;
+  //seconds of JWK's default age (5 mins)
+  private static final long JWK_DEFAULT_AGE = 300L;
 
   private OAuth2FlowType flow;
   private List<String> supportedGrantTypes;
@@ -72,7 +73,7 @@ public class OAuth2Options {
   @Deprecated
   private boolean rotateJWKs;
   //seconds of JWKs lifetime
-  private long jwkMaxAge;
+  private long jwkMaxAgeInSeconds;
   // OpenID non standard
   private String tenant;
 
@@ -149,7 +150,7 @@ public class OAuth2Options {
     }
     jwkPath = other.getJwkPath();
     rotateJWKs = other.isRotateJWKs();
-    jwkMaxAge = other.getJwkMaxAge();
+    jwkMaxAgeInSeconds = other.getJwkMaxAgeInSeconds();
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
     supportedGrantTypes = other.getSupportedGrantTypes();
@@ -167,7 +168,7 @@ public class OAuth2Options {
     scopeSeparator = SCOPE_SEPARATOR;
     jwtOptions = JWT_OPTIONS;
     rotateJWKs = ROTATE_JWKS;
-    jwkMaxAge = JWK_DEFAULT_AGE;
+    jwkMaxAgeInSeconds = JWK_DEFAULT_AGE;
   }
 
   /**
@@ -560,7 +561,7 @@ public class OAuth2Options {
   }
 
   public boolean isRotateJWKs() {
-    return jwkMaxAge != -1L;
+    return jwkMaxAgeInSeconds != -1L;
   }
 
   /**
@@ -568,7 +569,7 @@ public class OAuth2Options {
    *
    * @param rotateJWKs {@code true} to rotate keys as described in {@link OAuth2Auth#jWKSet(Handler)}.
    * @return self
-   * @deprecated use {@link #setJwkMaxAge(long)} instead
+   * @deprecated use {@link #setJwkMaxAgeInSeconds(long)} instead
    */
   @Deprecated
   public OAuth2Options setRotateJWKs(boolean rotateJWKs) {
@@ -707,16 +708,16 @@ public class OAuth2Options {
     return this;
   }
 
-  public long getJwkMaxAge() {
-    return jwkMaxAge;
+  public long getJwkMaxAgeInSeconds() {
+    return jwkMaxAgeInSeconds;
   }
 
   /**
    * -1 means no rotation for JWKs
    *
-   * @param jwkMaxAge timeout of JWKs rotation
+   * @param jwkMaxAgeInSeconds timeout of JWKs rotation
    */
-  public void setJwkMaxAge(long jwkMaxAge) {
-    this.jwkMaxAge = jwkMaxAge;
+  public void setJwkMaxAgeInSeconds(long jwkMaxAgeInSeconds) {
+    this.jwkMaxAgeInSeconds = jwkMaxAgeInSeconds;
   }
 }

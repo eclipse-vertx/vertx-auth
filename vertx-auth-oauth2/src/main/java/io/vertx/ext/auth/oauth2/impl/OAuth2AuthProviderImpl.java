@@ -138,7 +138,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // ensure that leeway is never negative
             int leeway = max(0, config.getJWTOptions().getLeeway());
             // delay is in ms, while cache max age is sec
-            final long delay = json.getLong("maxAge", config.getJwkMaxAge()) * 1000 - leeway;
+            final long delay = json.getLong("maxAge", config.getJwkMaxAgeInSeconds()) * 1000 - leeway;
             // salesforce (for example) sometimes disables the max-age as setting it to 0
             // for these cases we just cancel
             if (delay > 0) {

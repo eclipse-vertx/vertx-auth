@@ -75,9 +75,9 @@ public class OAuth2OptionsConverter {
             obj.setIntrospectionPath((String)member.getValue());
           }
           break;
-        case "jwkMaxAge":
+        case "jwkMaxAgeInSeconds":
           if (member.getValue() instanceof Number) {
-            obj.setJwkMaxAge(((Number)member.getValue()).longValue());
+            obj.setJwkMaxAgeInSeconds(((Number)member.getValue()).longValue());
           }
           break;
         case "jwkPath":
@@ -207,7 +207,7 @@ public class OAuth2OptionsConverter {
     if (obj.getIntrospectionPath() != null) {
       json.put("introspectionPath", obj.getIntrospectionPath());
     }
-    json.put("jwkMaxAge", obj.getJwkMaxAge());
+    json.put("jwkMaxAgeInSeconds", obj.getJwkMaxAgeInSeconds());
     if (obj.getJwkPath() != null) {
       json.put("jwkPath", obj.getJwkPath());
     }
