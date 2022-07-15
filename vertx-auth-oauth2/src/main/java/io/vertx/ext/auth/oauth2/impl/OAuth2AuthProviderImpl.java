@@ -134,22 +134,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           // swap
           this.jwt = jwt;
 
-          if (config.isRotateJWKs()) {
-            // ensure that leeway is never negative
-            int leeway = max(0, config.getJWTOptions().getLeeway());
-            // delay is in ms, while cache max age is sec
-            final long delay = json.getLong("maxAge", config.getJwkMaxAgeInSeconds()) * 1000 - leeway;
-            // salesforce (for example) sometimes disables the max-age as setting it to 0
-            // for these cases we just cancel
-            if (delay > 0) {
-              this.updateTimerId = vertx.setPeriodic(delay, t ->
-                jWKSet()
-                  .onFailure(err -> LOG.warn("Failed to auto-update JWK Set", err)));
-              // ensure we get a clean exit
-              ((VertxInternal) vertx).addCloseHook(this);
-            } else {
-              updateTimerId = -1;
-            }
+          // ensure that leeway is never negative
+          int leeway = max(0, config.getJWTOptions().getLeeway());
+          // delay is in ms, while cache max age is sec
+          final long delay = json.getLong("maxAge", config.getJwkMaxAgeInSeconds()) * 1000 - leeway;
+          // salesforce (for example) sometimes disables the max-age as setting it to 0
+          // for these cases we just cancel
+          if (delay > 0) {
+            this.updateTimerId = vertx.setPeriodic(delay, t ->
+              jWKSet()
+                .onFailure(err -> LOG.warn("Failed to auto-update JWK Set", err)));
+            // ensure we get a clean exit
+            ((VertxInternal) vertx).addCloseHook(this);
+          } else {
+            updateTimerId = -1;
           }
         }
         return ctx.succeededFuture();

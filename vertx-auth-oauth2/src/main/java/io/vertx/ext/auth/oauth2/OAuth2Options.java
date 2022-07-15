@@ -50,9 +50,8 @@ public class OAuth2Options {
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
-  private static final boolean ROTATE_JWKS = true;
-  //seconds of JWK's default age (5 mins)
-  private static final long JWK_DEFAULT_AGE = 300L;
+  //seconds of JWK's default age (-1 means no rotation)
+  private static final long JWK_DEFAULT_AGE = -1L;
 
   private OAuth2FlowType flow;
   private List<String> supportedGrantTypes;
@@ -70,8 +69,6 @@ public class OAuth2Options {
   private String introspectionPath;
   // JWK path RFC7517
   private String jwkPath;
-  @Deprecated
-  private boolean rotateJWKs;
   //seconds of JWKs lifetime
   private long jwkMaxAgeInSeconds;
   // OpenID non standard
@@ -149,7 +146,6 @@ public class OAuth2Options {
       headers = null;
     }
     jwkPath = other.getJwkPath();
-    rotateJWKs = other.isRotateJWKs();
     jwkMaxAgeInSeconds = other.getJwkMaxAgeInSeconds();
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
@@ -167,7 +163,6 @@ public class OAuth2Options {
     revocationPath = REVOCATION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
     jwtOptions = JWT_OPTIONS;
-    rotateJWKs = ROTATE_JWKS;
     jwkMaxAgeInSeconds = JWK_DEFAULT_AGE;
   }
 
@@ -560,6 +555,7 @@ public class OAuth2Options {
     return this;
   }
 
+  @Deprecated
   public boolean isRotateJWKs() {
     return jwkMaxAgeInSeconds != -1L;
   }
@@ -573,7 +569,6 @@ public class OAuth2Options {
    */
   @Deprecated
   public OAuth2Options setRotateJWKs(boolean rotateJWKs) {
-    this.rotateJWKs = rotateJWKs;
     return this;
   }
 
