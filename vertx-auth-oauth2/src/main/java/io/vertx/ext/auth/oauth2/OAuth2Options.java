@@ -51,6 +51,8 @@ public class OAuth2Options {
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
   private static final boolean ROTATE_JWKS = true;
+  //seconds of JWK's default age (5 mins)
+  private static final long JWK_DEFAULT_AGE = 300L;
 
   private OAuth2FlowType flow;
   private List<String> supportedGrantTypes;
@@ -68,7 +70,10 @@ public class OAuth2Options {
   private String introspectionPath;
   // JWK path RFC7517
   private String jwkPath;
+  @Deprecated
   private boolean rotateJWKs;
+  //seconds of JWKs lifetime
+  private long jwkMaxAgeInSeconds;
   // OpenID non standard
   private String tenant;
 
@@ -145,6 +150,7 @@ public class OAuth2Options {
     }
     jwkPath = other.getJwkPath();
     rotateJWKs = other.isRotateJWKs();
+    jwkMaxAgeInSeconds = other.getJwkMaxAgeInSeconds();
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
     supportedGrantTypes = other.getSupportedGrantTypes();
@@ -162,6 +168,7 @@ public class OAuth2Options {
     scopeSeparator = SCOPE_SEPARATOR;
     jwtOptions = JWT_OPTIONS;
     rotateJWKs = ROTATE_JWKS;
+    jwkMaxAgeInSeconds = JWK_DEFAULT_AGE;
   }
 
   /**
@@ -179,6 +186,7 @@ public class OAuth2Options {
 
   /**
    * Get the Oauth2 authorization resource path. e.g.: /oauth/authorize
+   *
    * @return authorization path
    */
   public String getAuthorizationPath() {
@@ -192,6 +200,7 @@ public class OAuth2Options {
 
   /**
    * Get the Oauth2 token resource path. e.g.: /oauth/token
+   *
    * @return token path
    */
   public String getTokenPath() {
@@ -205,6 +214,7 @@ public class OAuth2Options {
 
   /**
    * Get the Oauth2 revocation resource path. e.g.: /oauth/revoke
+   *
    * @return revocation path
    */
   public String getRevocationPath() {
@@ -213,6 +223,7 @@ public class OAuth2Options {
 
   /**
    * Set the Oauth2 revocation resource path. e.g.: /oauth/revoke
+   *
    * @return self
    */
   public OAuth2Options setRevocationPath(String revocationPath) {
@@ -222,6 +233,7 @@ public class OAuth2Options {
 
   /**
    * Root URL for the provider without trailing slashes
+   *
    * @param site a url
    * @return self
    */
@@ -248,6 +260,7 @@ public class OAuth2Options {
 
   /**
    * Get the provider client id
+   *
    * @return client id
    */
   public String getClientId() {
@@ -256,6 +269,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider client id
+   *
    * @param clientId client id
    * @return self
    */
@@ -266,6 +280,7 @@ public class OAuth2Options {
 
   /**
    * Get the provider client secret
+   *
    * @return the client secret
    */
   public String getClientSecret() {
@@ -274,6 +289,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider client secret
+   *
    * @param clientSecret client secret
    * @return self
    */
@@ -302,6 +318,7 @@ public class OAuth2Options {
 
   /**
    * The User-Agent header to use when communicating with a provider
+   *
    * @return the user agent string
    */
   public String getUserAgent() {
@@ -310,6 +327,7 @@ public class OAuth2Options {
 
   /**
    * Set a custom user agent to use when communicating to a provider
+   *
    * @param userAgent the user agent
    * @return self
    */
@@ -320,6 +338,7 @@ public class OAuth2Options {
 
   /**
    * Custom headers to send along with every request.
+   *
    * @return the headers as a json structure
    */
   public JsonObject getHeaders() {
@@ -328,6 +347,7 @@ public class OAuth2Options {
 
   /**
    * Set custom headers to be sent with every request to the provider
+   *
    * @param headers the headers
    * @return self
    */
@@ -338,6 +358,7 @@ public class OAuth2Options {
 
   /**
    * The provider PubSec key options
+   *
    * @return the pub sec key options
    */
   public List<PubSecKeyOptions> getPubSecKeys() {
@@ -359,6 +380,7 @@ public class OAuth2Options {
 
   /**
    * The provider logout path
+   *
    * @return a logout resource path
    */
   public String getLogoutPath() {
@@ -367,6 +389,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider logout path
+   *
    * @param logoutPath a logout resource path
    * @return self
    */
@@ -377,6 +400,7 @@ public class OAuth2Options {
 
   /**
    * The provider userInfo resource path
+   *
    * @return a resouce path
    */
   public String getUserInfoPath() {
@@ -385,6 +409,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider userInfo resource path
+   *
    * @param userInfoPath a resource path
    * @return self
    */
@@ -395,6 +420,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider scope separator
+   *
    * @return a single character string usually a space or a plus
    */
   public String getScopeSeparator() {
@@ -403,6 +429,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider scope separator
+   *
    * @param scopeSeparator a separator e.g.: ' ', '+', ','
    * @return self
    */
@@ -413,6 +440,7 @@ public class OAuth2Options {
 
   /**
    * Extra parameters to send to the provider
+   *
    * @return a json representation of the parameters
    */
   public JsonObject getExtraParameters() {
@@ -421,6 +449,7 @@ public class OAuth2Options {
 
   /**
    * Set extra parameters to be sent to the provider on each request
+   *
    * @param extraParams a json representation of the parameters
    * @return self
    */
@@ -431,6 +460,7 @@ public class OAuth2Options {
 
   /**
    * The provider token introspection resource path
+   *
    * @return the resource path
    */
   public String getIntrospectionPath() {
@@ -439,6 +469,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider token introspection resource path
+   *
    * @param introspectionPath a resource path
    * @return self
    */
@@ -449,6 +480,7 @@ public class OAuth2Options {
 
   /**
    * Set the provider custom userInfo parameters to send when requesting them.
+   *
    * @return a json representation of the extra parameters
    */
   public JsonObject getUserInfoParameters() {
@@ -457,6 +489,7 @@ public class OAuth2Options {
 
   /**
    * Set custom parameters to be sent during the userInfo resource request
+   *
    * @param userInfoParams json representation of the parameters
    * @return self
    */
@@ -492,7 +525,7 @@ public class OAuth2Options {
   }
 
   /**
-    * @deprecated see {@link Oauth2Credentials#setFlow(OAuth2FlowType)}
+   * @deprecated see {@link Oauth2Credentials#setFlow(OAuth2FlowType)}
    */
   @Deprecated
   public OAuth2Options setFlow(OAuth2FlowType flow) {
@@ -516,7 +549,7 @@ public class OAuth2Options {
   /**
    * Sets an optional tenant. Tenants are used in some OpenID servers as placeholders for the URLs.
    * The tenant should be set prior to any URL as it affects the way the URLs will be stored.
-   *
+   * <p>
    * Some provders may name this differently, for example: `realm`.
    *
    * @param tenant the tenant/realm for this config.
@@ -528,14 +561,17 @@ public class OAuth2Options {
   }
 
   public boolean isRotateJWKs() {
-    return rotateJWKs;
+    return jwkMaxAgeInSeconds != -1L;
   }
 
   /**
    * Enable/Disable the JWKs rotation.
+   *
    * @param rotateJWKs {@code true} to rotate keys as described in {@link OAuth2Auth#jWKSet(Handler)}.
    * @return self
+   * @deprecated use {@link #setJwkMaxAgeInSeconds(long)} instead
    */
+  @Deprecated
   public OAuth2Options setRotateJWKs(boolean rotateJWKs) {
     this.rotateJWKs = rotateJWKs;
     return this;
@@ -543,6 +579,7 @@ public class OAuth2Options {
 
   /**
    * The provider supported grant types
+   *
    * @return the supported grant types options
    */
   public List<String> getSupportedGrantTypes() {
@@ -630,7 +667,8 @@ public class OAuth2Options {
           }
         } else {
           if (clientAssertion == null || clientAssertionType == null) {
-            throw new IllegalStateException("Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+            throw new IllegalStateException(
+              "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
           }
         }
         break;
@@ -642,7 +680,8 @@ public class OAuth2Options {
           }
         } else {
           if (clientAssertion == null || clientAssertionType == null) {
-            throw new IllegalStateException("Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+            throw new IllegalStateException(
+              "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
           }
         }
         break;
@@ -667,5 +706,18 @@ public class OAuth2Options {
   public OAuth2Options setHttpClientOptions(HttpClientOptions httpClientOptions) {
     this.httpClientOptions = httpClientOptions;
     return this;
+  }
+
+  public long getJwkMaxAgeInSeconds() {
+    return jwkMaxAgeInSeconds;
+  }
+
+  /**
+   * -1 means no rotation for JWKs
+   *
+   * @param jwkMaxAgeInSeconds timeout of JWKs rotation
+   */
+  public void setJwkMaxAgeInSeconds(long jwkMaxAgeInSeconds) {
+    this.jwkMaxAgeInSeconds = jwkMaxAgeInSeconds;
   }
 }
