@@ -147,13 +147,9 @@ public class OAuth2KeyRotationWithoutMaxAgeTest {
 
       .jWKSet()
       .onFailure(should::fail)
-      .onSuccess(ok -> {
+      .onSuccess(ok ->
         oauth2
           .authenticate(new JsonObject().put("access_token", jwt))
-          .onFailure(err -> {
-            // ok
-          })
-          .onSuccess(user -> should.fail());
-      });
+          .onSuccess(user -> should.fail()));
   }
 }
