@@ -278,7 +278,7 @@ public class AttestationTest {
     WebAuthn webAuthN = WebAuthn.create(
         rule.vertx(),
         new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation"))
-          .setTimeout(System.currentTimeMillis()))
+          .setTimeoutInMilliseconds(System.currentTimeMillis()))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 

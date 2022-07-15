@@ -190,7 +190,7 @@ public class WebAuthnImpl implements WebAuthn {
               .put("type", "public-key"));
         }
         // optional timeout
-        putOpt(json, "timeout", options.getTimeout());
+        putOpt(json, "timeout", options.getTimeoutInMilliseconds());
         // optional excluded credentials
         if (!authenticators.isEmpty()) {
           JsonArray transports = new JsonArray();
@@ -231,7 +231,7 @@ public class WebAuthnImpl implements WebAuthn {
     // https://w3c.github.io/webauthn/#dictionary-assertion-options
     JsonObject json = new JsonObject()
       .put("challenge", randomBase64URLBuffer(options.getChallengeLength()));
-    putOpt(json, "timeout", options.getTimeout());
+    putOpt(json, "timeout", options.getTimeoutInMilliseconds());
     putOpt(json, "rpId", options.getRelyingParty().getId());
     putOpt(json, "userVerification", options.getUserVerification());
     putOpt(json, "extensions", options.getExtensions());

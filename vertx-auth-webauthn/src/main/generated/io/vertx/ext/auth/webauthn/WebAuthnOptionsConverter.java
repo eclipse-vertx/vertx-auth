@@ -3,8 +3,7 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.impl.JsonUtil;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+
 import java.util.Base64;
 
 /**
@@ -82,7 +81,7 @@ public class WebAuthnOptionsConverter {
           break;
         case "timeout":
           if (member.getValue() instanceof Number) {
-            obj.setTimeout(((Number)member.getValue()).longValue());
+            obj.setTimeoutInMilliseconds(((Number)member.getValue()).longValue());
           }
           break;
         case "transports":
@@ -128,8 +127,8 @@ public class WebAuthnOptionsConverter {
       json.put("relyingParty", obj.getRelyingParty().toJson());
     }
     json.put("requireResidentKey", obj.getRequireResidentKey());
-    if (obj.getTimeout() != null) {
-      json.put("timeout", obj.getTimeout());
+    if (obj.getTimeoutInMilliseconds() != null) {
+      json.put("timeout", obj.getTimeoutInMilliseconds());
     }
     if (obj.getTransports() != null) {
       JsonArray array = new JsonArray();

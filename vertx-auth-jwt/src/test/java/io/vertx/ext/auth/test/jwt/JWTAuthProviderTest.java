@@ -232,7 +232,7 @@ public class JWTAuthProviderTest {
       .put("sub", "Paulo");
 
     final String token = authProvider.generateToken(payload,
-      new JWTOptions().setExpiresInSeconds(1).setNoTimestamp(true));
+      new JWTOptions().setExpires(1).setNoTimestamp(true));
 
     should.assertNotNull(token);
 
@@ -628,7 +628,7 @@ public class JWTAuthProviderTest {
       .generateToken(
         new JsonObject(),
         new JWTOptions()
-          .setExpiresInSeconds(1)
+          .setExpires(1)
           .setSubject("subject")
           .setAlgorithm("HS256"));
 

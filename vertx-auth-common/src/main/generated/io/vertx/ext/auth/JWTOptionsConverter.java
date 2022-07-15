@@ -3,8 +3,7 @@ package io.vertx.ext.auth;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.impl.JsonUtil;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+
 import java.util.Base64;
 
 /**
@@ -50,7 +49,7 @@ public class JWTOptionsConverter {
           break;
         case "expiresInSeconds":
           if (member.getValue() instanceof Number) {
-            obj.setExpiresInSeconds(((Number)member.getValue()).intValue());
+            obj.setExpires(((Number)member.getValue()).intValue());
           }
           break;
         case "header":
@@ -115,7 +114,7 @@ public class JWTOptionsConverter {
       obj.getAudience().forEach(item -> array.add(item));
       json.put("audience", array);
     }
-    json.put("expiresInSeconds", obj.getExpiresInSeconds());
+    json.put("expiresInSeconds", obj.getExpires());
     if (obj.getHeader() != null) {
       json.put("header", obj.getHeader());
     }
