@@ -363,8 +363,8 @@ public final class JWT {
       payload.put("iat", payload.getValue("iat", timestamp));
     }
 
-    if (options.getExpires() > 0) {
-      payload.put("exp", timestamp + options.getExpires());
+    if (options.getExpiresInSeconds() > 0) {
+      payload.put("exp", timestamp + options.getExpiresInSeconds());
     }
 
     if (options.getAudience() != null && options.getAudience().size() >= 1) {

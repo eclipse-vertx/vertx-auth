@@ -49,7 +49,7 @@ public class JWTOptionsConverter {
           break;
         case "expiresInSeconds":
           if (member.getValue() instanceof Number) {
-            obj.setExpires(((Number)member.getValue()).intValue());
+            obj.setExpiresInSeconds(((Number)member.getValue()).intValue());
           }
           break;
         case "header":
@@ -114,7 +114,7 @@ public class JWTOptionsConverter {
       obj.getAudience().forEach(item -> array.add(item));
       json.put("audience", array);
     }
-    json.put("expiresInSeconds", obj.getExpires());
+    json.put("expiresInSeconds", obj.getExpiresInSeconds());
     if (obj.getHeader() != null) {
       json.put("header", obj.getHeader());
     }

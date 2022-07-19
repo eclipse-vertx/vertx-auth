@@ -146,7 +146,7 @@ public class OAuth2Options {
       headers = null;
     }
     jwkPath = other.getJwkPath();
-    jwkMaxAge = other.getJwkMaxAge();
+    jwkMaxAge = other.getJwkMaxAgeInSeconds();
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
     supportedGrantTypes = other.getSupportedGrantTypes();
@@ -565,7 +565,7 @@ public class OAuth2Options {
    *
    * @param rotateJWKs {@code true} to rotate keys as described in {@link OAuth2Auth#jWKSet(Handler)}.
    * @return self
-   * @deprecated use {@link #setJwkMaxAge(long)} instead
+   * @deprecated use {@link #setJwkMaxAgeInSeconds(long)} instead
    */
   @Deprecated
   public OAuth2Options setRotateJWKs(boolean rotateJWKs) {
@@ -703,16 +703,16 @@ public class OAuth2Options {
     return this;
   }
 
-  public long getJwkMaxAge() {
+  public long getJwkMaxAgeInSeconds() {
     return jwkMaxAge;
   }
 
   /**
    * -1 means no rotation for JWKs
    *
-   * @param jwkMaxAge timeout of JWKs rotation
+   * @param jwkMaxAgeInSeconds timeout of JWKs rotation
    */
-  public void setJwkMaxAge(long jwkMaxAge) {
-    this.jwkMaxAge = jwkMaxAge;
+  public void setJwkMaxAgeInSeconds(long jwkMaxAgeInSeconds) {
+    this.jwkMaxAge = jwkMaxAgeInSeconds;
   }
 }

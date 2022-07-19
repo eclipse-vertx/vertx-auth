@@ -96,11 +96,11 @@ public class JWTOptions {
     return this;
   }
 
-  public int getExpires() {
+  public int getExpiresInSeconds() {
     return expires;
   }
 
-  public JWTOptions setExpires(int expires) {
+  public JWTOptions setExpiresInSeconds(int expires) {
     this.expires = expires;
     return this;
   }

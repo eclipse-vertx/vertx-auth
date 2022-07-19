@@ -191,7 +191,7 @@ public class WebAuthnOptions {
   private boolean requireResidentKey;
   private UserVerification userVerification;
 
-  private Long timeoutInMilliseconds;
+  private Long timeout;
   private Attestation attestation;
 
   // Needs to be a list, order is important
@@ -220,7 +220,7 @@ public class WebAuthnOptions {
     extensions = new JsonObject()
       .put("txAuthSimple", "");
 
-    timeoutInMilliseconds = 60_000L;
+    timeout = 60_000L;
     challengeLength = 64;
     // Support FIDO2 devices, MACOSX, default
     addPubKeyCredParam(ES256);
@@ -361,9 +361,8 @@ public class WebAuthnOptions {
     return this;
   }
 
-  //ms
   public Long getTimeoutInMilliseconds() {
-    return timeoutInMilliseconds;
+    return timeout;
   }
 
   public WebAuthnOptions setTimeoutInMilliseconds(Long timeoutInMilliseconds) {
@@ -372,7 +371,7 @@ public class WebAuthnOptions {
         throw new IllegalArgumentException("Timeout must be >= 0");
       }
     }
-    this.timeoutInMilliseconds = timeoutInMilliseconds;
+    this.timeout = timeoutInMilliseconds;
     return this;
   }
 
