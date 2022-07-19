@@ -99,7 +99,7 @@ public class AndroidSafetynetAttestation implements Attestation {
       // 6. Verify the timestamp
       long timestampMs = token.getJsonObject("payload").getLong("timestampMs", 0L);
       long now = System.currentTimeMillis();
-      if (timestampMs > now || (timestampMs + options.getTimeout()) < now) {
+      if (timestampMs > now || (timestampMs + options.getTimeoutInMilliseconds()) < now) {
         throw new AttestationException("timestampMs is invalid!");
       }
 

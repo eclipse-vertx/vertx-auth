@@ -17,7 +17,7 @@ public class JWTOptions {
   private String algorithm = "HS256";
   private JsonObject header = EMPTY;
   private boolean noTimestamp;
-  private int expiresInSeconds;
+  private int expires;
   private List<String> audience;
   private String issuer;
   private String subject;
@@ -33,7 +33,7 @@ public class JWTOptions {
     this.algorithm = other.algorithm;
     this.header = other.header;
     this.noTimestamp = other.noTimestamp;
-    this.expiresInSeconds = other.expiresInSeconds;
+    this.expires = other.expires;
     this.audience = other.audience;
     this.issuer = other.issuer;
     this.subject = other.subject;
@@ -97,16 +97,16 @@ public class JWTOptions {
   }
 
   public int getExpiresInSeconds() {
-    return expiresInSeconds;
+    return expires;
   }
 
-  public JWTOptions setExpiresInSeconds(int expiresInSeconds) {
-    this.expiresInSeconds = expiresInSeconds;
+  public JWTOptions setExpiresInSeconds(int expires) {
+    this.expires = expires;
     return this;
   }
 
   public JWTOptions setExpiresInMinutes(int expiresInMinutes) {
-    this.expiresInSeconds = expiresInMinutes * 60;
+    this.expires = expiresInMinutes * 60;
     return this;
   }
 

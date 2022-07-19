@@ -361,17 +361,17 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public Long getTimeout() {
+  public Long getTimeoutInMilliseconds() {
     return timeout;
   }
 
-  public WebAuthnOptions setTimeout(Long timeout) {
-    if (timeout != null) {
-      if (timeout < 0) {
+  public WebAuthnOptions setTimeoutInMilliseconds(Long timeoutInMilliseconds) {
+    if (timeoutInMilliseconds != null) {
+      if (timeoutInMilliseconds < 0) {
         throw new IllegalArgumentException("Timeout must be >= 0");
       }
     }
-    this.timeout = timeout;
+    this.timeout = timeoutInMilliseconds;
     return this;
   }
 
