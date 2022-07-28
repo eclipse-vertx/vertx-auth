@@ -60,6 +60,10 @@ public class AuthenticatorConverter {
             obj.setUserName((String)member.getValue());
           }
           break;
+        case "userId":
+          if (member.getValue() instanceof String) {
+            obj.setUserId((String)member.getValue());
+          }
       }
     }
   }
@@ -90,6 +94,9 @@ public class AuthenticatorConverter {
     }
     if (obj.getUserName() != null) {
       json.put("userName", obj.getUserName());
+    }
+    if (obj.getUserId() != null) {
+      json.put("userId", obj.getUserId());
     }
   }
 }

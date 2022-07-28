@@ -73,6 +73,11 @@ public class Authenticator {
   private AttestationCertificates attestationCertificates;
   private String fmt;
 
+  /**
+   * The base64 url encoded user handle associated with this authenticator.
+   */
+  private String userId;
+
   public Authenticator() {}
   public Authenticator(JsonObject json) {
     AuthenticatorConverter.fromJson(json, this);
@@ -167,5 +172,14 @@ public class Authenticator {
 
   public String getAaguid() {
     return aaguid;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public Authenticator setUserId(String userId) {
+    this.userId = userId;
+    return this;
   }
 }

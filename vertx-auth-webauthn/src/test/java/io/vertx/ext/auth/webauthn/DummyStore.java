@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DummyStore {
@@ -20,17 +21,25 @@ public class DummyStore {
   }
 
   public Future<List<Authenticator>> fetch(Authenticator query) {
+    if (query.getUserName() == null && query.getCredID() == null && query.getUserId() == null) {
+      return Future.failedFuture(new IllegalArgumentException("Bad authenticator query! All conditions were null"));
+    }
+
     return Future.succeededFuture(
       database.stream()
         .filter(entry -> {
+          boolean matches = true;
           if (query.getUserName() != null) {
-            return query.getUserName().equals(entry.getUserName());
+            matches = query.getUserName().equals(entry.getUserName());
           }
           if (query.getCredID() != null) {
-            return query.getCredID().equals(entry.getCredID());
+            matches = matches || query.getCredID().equals(entry.getCredID());
           }
-          // This is a bad query! both username and credID are null
-          return false;
+          if (query.getUserId() != null) {
+            matches = matches || query.getUserId().equals(entry.getUserId());
+          }
+
+          return matches;
         })
         .collect(Collectors.toList())
     );

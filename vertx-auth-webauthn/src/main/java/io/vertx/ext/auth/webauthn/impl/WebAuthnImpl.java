@@ -159,9 +159,20 @@ public class WebAuthnImpl implements WebAuthn {
 
   @Override
   public Future<JsonObject> createCredentialsOptions(JsonObject user) {
+    String userId;
+
+    if (user.getString("id") != null) {
+      userId = user.getString("id");
+    } else if (user.getString("rawId") != null) {
+      // For backwards compatibility, allow using rawId in place of id. Should be removed in future.
+      userId = user.getString("rawId");
+    } else {
+      // For backwards compatibility, if both id and rawId is missing, use a random base64url encoded UUID
+      userId = uUIDtoBase64Url(UUID.randomUUID());
+    }
 
     return fetcher
-      .apply(new Authenticator().setUserName(user.getString("name")))
+      .apply(new Authenticator().setUserId(userId).setUserName(user.getString("name")))
       .map(authenticators -> {
         // empty structure with all required fields
         JsonObject json = new JsonObject()
@@ -177,10 +188,11 @@ public class WebAuthnImpl implements WebAuthn {
         putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
 
         // put non null values for User
-        putOpt(json.getJsonObject("user"), "id", uUIDtoBase64Url(UUID.randomUUID()));
+        putOpt(json.getJsonObject("user"), "id", userId);
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
+
         // put the public key credentials parameters
         for (PublicKeyCredential pubKeyCredParam : options.getPubKeyCredParams()) {
           addOpt(
@@ -294,6 +306,7 @@ public class WebAuthnImpl implements WebAuthn {
       WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
       // check
       authInfo.checkValid(null);
+
       // The basic data supplied with any kind of validation is:
       //    {
       //      "rawId": "base64url",
@@ -339,6 +352,7 @@ public class WebAuthnImpl implements WebAuthn {
       }
 
       // optional data
+
       if (clientData.containsKey("tokenBinding")) {
         JsonObject tokenBinding = clientData.getJsonObject("tokenBinding");
         if (tokenBinding == null) {
@@ -358,6 +372,7 @@ public class WebAuthnImpl implements WebAuthn {
         }
       }
 
+      final String userId = authInfo.getUserId();
       final String username = authInfo.getUsername();
 
       // Step #4
@@ -379,6 +394,7 @@ public class WebAuthnImpl implements WebAuthn {
             final Authenticator authrInfo = verifyWebAuthNCreate(authInfo, clientDataJSON);
             // by default the store can upsert if a credential is missing, the user has been verified so it is valid
             // the store however might disallow this operation
+            authrInfo.setUserId(userId);
             authrInfo.setUserName(username);
 
             // the create challenge is complete we can finally safe this
@@ -393,6 +409,7 @@ public class WebAuthnImpl implements WebAuthn {
           return;
         case "webauthn.get":
           Authenticator query = new Authenticator();
+
           if (options.getRequireResidentKey()) {
             // username are not provided (RK) we now need to lookup by id
             query.setCredID(webauthn.getString("id"));
@@ -402,7 +419,12 @@ public class WebAuthnImpl implements WebAuthn {
               handler.handle(Future.failedFuture("username can't be null!"));
               return;
             }
+
             query.setUserName(username);
+          }
+
+          if (userId != null) {
+            query.setUserId(userId);
           }
 
           fetcher.apply(query)
