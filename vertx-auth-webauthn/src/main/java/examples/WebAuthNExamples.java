@@ -18,6 +18,7 @@ package examples;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.Codec;
 import io.vertx.ext.auth.webauthn.Authenticator;
 import io.vertx.ext.auth.webauthn.RelyingParty;
 import io.vertx.ext.auth.webauthn.WebAuthn;
@@ -49,8 +50,7 @@ public class WebAuthNExamples {
     // some user
     JsonObject user = new JsonObject()
       // id is expected to be a base64url string
-      .put("id", "000000000000000000000000")
-      .put("rawId", "000000000000000000000000")
+      .put("id", Codec.base64UrlEncode("8d7c481b-b60f-4833-9f07-1a299a38ad85".getBytes()))
       .put("name", "john.doe@email.com")
       // optionally
       .put("displayName", "John Doe")
@@ -59,8 +59,10 @@ public class WebAuthNExamples {
     webAuthN
       .createCredentialsOptions(user)
       .onSuccess(challengeResponse -> {
-        // return the challenge to the browser
-        // for further processing
+        // Extract the challenge from the challengeResponse
+        // and store it somewhere (e.g. user session) for verifying the
+        // registration in the next step, and then return the
+        // challengeResponse to the browser.
       });
   }
 
@@ -70,8 +72,8 @@ public class WebAuthNExamples {
       new WebAuthnOptions()
         .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(query -> {
-        // function that fetches some authenticators from a
-        // persistence storage
+        // function that fetches authenticators from a
+        // persistence storage with either user id or name
         return Future.succeededFuture(authenticators);
       })
       .authenticatorUpdater(authenticator -> {
@@ -92,6 +94,7 @@ public class WebAuthNExamples {
     webAuthN
       .authenticate(
         new JsonObject()
+          .put("userId", Codec.base64UrlEncode("8d7c481b-b60f-4833-9f07-1a299a38ad85".getBytes()))
           // the username you want to link to
           .put("username", "paulo")
           // the server origin
