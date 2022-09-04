@@ -441,7 +441,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
         case AUTH_JWT:
           params
-            .put("assertion", jwt.sign(oauth2Credentials.getJwt(), config.getJWTOptions()));
+            .put("assertion", jwt.sign(oauth2Credentials.getJwt().copy(), config.getJWTOptions()));
 
           if (oauth2Credentials.getScopes() != null) {
             params.put("scope", String.join(config.getScopeSeparator(), oauth2Credentials.getScopes()));
