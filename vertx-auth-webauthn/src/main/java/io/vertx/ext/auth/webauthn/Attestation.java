@@ -27,7 +27,8 @@ import io.vertx.codegen.annotations.VertxGen;
 public enum Attestation {
   NONE("none"),
   INDIRECT("indirect"),
-  DIRECT("direct");
+  DIRECT("direct"),
+  ENTERPRISE("enterprise");
 
   private final String value;
 

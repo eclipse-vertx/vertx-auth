@@ -301,7 +301,10 @@ public final class JWS {
         new ByteArrayInputStream(addBoundaries(data, "CERTIFICATE").getBytes(StandardCharsets.UTF_8)));
 
     if (LOG.isDebugEnabled()) {
-      logCRLs(certificate);
+      String crl = extractCRLs(certificate);
+      if (crl != null) {
+        LOG.debug("CRL Distribution Point: " + crl);
+      }
     }
     return certificate;
   }
@@ -311,12 +314,15 @@ public final class JWS {
       (X509Certificate) X509.generateCertificate(new ByteArrayInputStream(data));
 
     if (LOG.isDebugEnabled()) {
-      logCRLs(certificate);
+      String crl = extractCRLs(certificate);
+      if (crl != null) {
+        LOG.debug("CRL Distribution Point: " + crl);
+      }
     }
     return certificate;
   }
 
-  private static void logCRLs(X509Certificate certificate) throws CertificateException {
+  public static String extractCRLs(X509Certificate certificate) throws CertificateException {
     if (certificate != null) {
       byte[] crlExtension = certificate.getExtensionValue("2.5.29.31");
       if (crlExtension != null) {
@@ -347,11 +353,13 @@ public final class JWS {
               .object(0, CONTEXT_SPECIFIC | OBJECT_IDENTIFIER);
 
           if (crlIssuer != null) {
-            LOG.debug("CRL Distribution Point: " + new String(crlIssuer.binary(0), StandardCharsets.US_ASCII));
+            return new String(crlIssuer.binary(0), StandardCharsets.US_ASCII);
           }
         }
       }
     }
+
+    return null;
   }
 
   public static X509CRL parseX5crl(String data) throws CRLException {

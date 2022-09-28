@@ -39,6 +39,7 @@ public class RelyingParty {
   /**
    * A URL location for an icon
    */
+  @Deprecated
   private String icon;
 
   public RelyingParty() {
@@ -72,10 +73,12 @@ public class RelyingParty {
     return this;
   }
 
+  @Deprecated
   public String getIcon() {
     return icon;
   }
 
+  @Deprecated
   public RelyingParty setIcon(String icon) {
     this.icon = icon;
     return this;
