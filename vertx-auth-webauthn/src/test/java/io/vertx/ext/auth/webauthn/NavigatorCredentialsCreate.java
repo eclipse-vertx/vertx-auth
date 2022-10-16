@@ -1,6 +1,8 @@
 package io.vertx.ext.auth.webauthn;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.Codec;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -10,7 +12,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertNotNull;
+import javax.naming.AuthenticationException;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
 
 @RunWith(VertxUnitRunner.class)
 public class NavigatorCredentialsCreate {
@@ -36,10 +44,19 @@ public class NavigatorCredentialsCreate {
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
+    final String userId = Codec.base64UrlEncode(UUID.randomUUID().toString().getBytes());
+
+    // Authenticator to test excludedCredentials
+    database.add(
+      new Authenticator()
+        .setUserId(userId)
+        .setType("public-key")
+        .setCredID("-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw")
+    );
+
     // Dummy user
     JsonObject user = new JsonObject()
-      // id is expected to be a base64url string
-      .put("id", "000000000000000000000000")
+      .put("id", userId)
       .put("name", "john.doe@email.com")
       .put("displayName", "John Doe")
       .put("icon", "https://pics.example.com/00/p/aBjjjpqPb.png");
@@ -56,7 +73,77 @@ public class NavigatorCredentialsCreate {
         assertNotNull(challengeResponse.getJsonArray("pubKeyCredParams"));
         // ensure that challenge and user.id are base64url encoded
         assertNotNull(challengeResponse.getBinary("challenge"));
-        assertNotNull(challengeResponse.getJsonObject("user").getBinary("id"));
+
+        final JsonObject challengeResponseUser = challengeResponse.getJsonObject("user");
+        assertNotNull(challengeResponseUser);
+        assertEquals(userId, challengeResponseUser.getString("id"));
+        assertEquals(user.getString("name"), challengeResponseUser.getString("name"));
+        assertEquals(user.getString("displayName"), challengeResponseUser.getString("displayName"));
+        assertEquals(user.getString("icon"), challengeResponseUser.getString("icon"));
+
+        final JsonArray excludeCredentials = challengeResponse.getJsonArray("excludeCredentials");
+        assertEquals(1, excludeCredentials.size());
+
+        final JsonObject excludeCredential = excludeCredentials.getJsonObject(0);
+        assertEquals("public-key", excludeCredential.getString("type"));
+        assertEquals("-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw", excludeCredential.getString("id"));
+        assertEquals(new JsonArray(Arrays.asList("usb", "nfc", "ble", "internal")), excludeCredential.getJsonArray("transports"));
+
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testRequestRegisterWithRawId(TestContext should) {
+    final Async test = should.async();
+
+    WebAuthn webAuthN = WebAuthn.create(
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation"))
+          .setAttestation(Attestation.of("direct")))
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
+
+    final String userId = Codec.base64UrlEncode(UUID.randomUUID().toString().getBytes());
+
+    // Dummy user
+    JsonObject user = new JsonObject()
+      .put("rawId", userId)
+      .put("displayName", "John Doe");
+
+    webAuthN
+      .createCredentialsOptions(user)
+      .onFailure(should::fail)
+      .onSuccess(challengeResponse -> {
+        final JsonObject challengeResponseUser = challengeResponse.getJsonObject("user");
+        assertNotNull(challengeResponseUser);
+        assertEquals("rawId should have been used as-is", user.getString("rawId"), challengeResponseUser.getString("id"));
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testRequestRegisterWithNoId(TestContext should) {
+    final Async test = should.async();
+
+    WebAuthn webAuthN = WebAuthn.create(
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation"))
+          .setAttestation(Attestation.of("direct")))
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
+
+    // Dummy user
+    JsonObject user = new JsonObject()
+      .put("displayName", "John Doe");
+
+    webAuthN
+      .createCredentialsOptions(user)
+      .onFailure(should::fail)
+      .onSuccess(challengeResponse -> {
+        final JsonObject challengeResponseUser = challengeResponse.getJsonObject("user");
+        assertNotNull(challengeResponseUser);
+        assertNotNull("random id should have been generated", challengeResponseUser.getBinary("id"));
         test.complete();
       });
   }

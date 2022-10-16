@@ -143,12 +143,28 @@ established a secure session.
 {@link examples.WebAuthNExamples#example1}
 ----
 
+After this, store the generated challenge somewhere where it can be retrieved from in
+the next step. Some options for this are user session, JWT token handed to the client, or
+database. Implementers should pay special care to scope the stored challenge to WebAuthn
+registration to ensure that a solution to the registration challenge can't be used for
+logging in. To prevent replay attacks, the challenge should have a reasonably short
+time-to-live (for example, no longer than the `timeout` in the generated
+`PublicKeyCredentialCreationOptions`) and be invalidated after a valid solution has been
+provided.
+
 === Verify the registration request
+
+Retrieve the challenge generated in the previous step, ensure the challenge is meant only
+for authenticator registration and call `authenticate` with the `AuthenticatorAttestationResponse`
+from `navigator.credentials.create()`.
 
 [source,$lang]
 ----
 {@link examples.WebAuthNExamples#example2}
 ----
+
+To prevent replay attacks, it would be a good idea to invalidate the challenge after use, so the same
+challenge can't be used to register another authenticator.
 
 === Create a Login request
 
@@ -157,12 +173,23 @@ established a secure session.
 {@link examples.WebAuthNExamples#example3}
 ----
 
+Like in registration, store the generated challenge so it can be retrieved in the next step. Make sure
+to scope the challenge to WebAuthn login to ensure that a solution to a registration challenge can't be
+used for logging in. Also, same considerations as in registration should be given to the TTL of the
+challenge.
+
 === Verify the Login request
+
+Again, retrieve the challenge generated in the previous step and ensure it's only valid in login
+context, and then call `authenticate` with the `AuthenticatorAssertionResponse` from
+`navigator.credentials.get()`:
 
 [source,$lang]
 ----
 {@link examples.WebAuthNExamples#example4}
 ----
+
+Here too, to prevent replay attacks, it would be a good idea to invalidate the challenge after use.
 
 == Metadata Service
 

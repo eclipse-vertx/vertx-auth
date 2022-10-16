@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
 
@@ -59,7 +60,24 @@ public interface WebAuthn extends AuthenticationProvider {
    * Gets a challenge and any other parameters for the {@code navigator.credentials.create()} call.
    *
    * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
-   * @param user    - the user object with name and optionally displayName and icon
+   *
+   * The caller should extract the generated challenge and store it, so it can be fetched later for the
+   * {@link #authenticate(JsonObject)} call. The challenge could for example be stored in a session and later
+   * pulled from there.
+   *
+   * The user object should contain base64 url encoded id (the user handle), name and, optionally, displayName and icon.
+   * See the above link for more documentation on the content of the different fields. The user handle should be base64
+   * url encoded. You can use <code>java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(byte[])</code>
+   * to encode any user id bytes to base64 url format.
+   *
+   * For backwards compatibility, if user id is not defined, a random UUID will be generated instead. This has some
+   * drawbacks, as it might cause user to register the same authenticator multiple times.
+   *
+   * Will use the configured {@link #authenticatorFetcher(Function)} to fetch any existing authenticators
+   * by the user id or name. Any authenticators found will be added as excludedCredentials, so the application
+   * knows not to register those again.
+   *
+   * @param user    - the user object with id, name and optionally displayName and icon
    * @param handler server encoded make credentials request
    * @return fluent self
    */
@@ -106,6 +124,7 @@ public interface WebAuthn extends AuthenticationProvider {
    *
    * The implementation must consider the following fields <strong>exclusively</strong>, while performing the lookup:
    * <ul>
+   *   <li>{@link Authenticator#getUserId()}</li>
    *   <li>{@link Authenticator#getUserName()}</li>
    *   <li>{@link Authenticator#getCredID()} ()}</li>
    * </ul>

@@ -45,6 +45,11 @@ public class WebAuthnCredentialsConverter {
             obj.setWebauthn(((JsonObject)member.getValue()).copy());
           }
           break;
+        case "userId":
+          if (member.getValue() instanceof String) {
+            obj.setUserId((String)member.getValue());
+          }
+          break;
       }
     }
   }
@@ -68,6 +73,9 @@ public class WebAuthnCredentialsConverter {
     }
     if (obj.getWebauthn() != null) {
       json.put("webauthn", obj.getWebauthn());
+    }
+    if (obj.getUserId() != null) {
+      json.put("userId", obj.getUserId());
     }
   }
 }

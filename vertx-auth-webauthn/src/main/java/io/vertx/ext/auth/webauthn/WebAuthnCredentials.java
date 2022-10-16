@@ -26,6 +26,7 @@ public class WebAuthnCredentials implements Credentials {
   private String challenge;
   private JsonObject webauthn;
   private String username;
+  private String userId;
   private String origin;
   private String domain;
 
@@ -77,6 +78,15 @@ public class WebAuthnCredentials implements Credentials {
 
   public WebAuthnCredentials setDomain(String domain) {
     this.domain = domain;
+    return this;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public WebAuthnCredentials setUserId(String userId) {
+    this.userId = userId;
     return this;
   }
 
