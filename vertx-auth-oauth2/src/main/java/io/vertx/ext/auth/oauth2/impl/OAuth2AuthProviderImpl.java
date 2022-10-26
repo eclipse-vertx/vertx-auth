@@ -55,7 +55,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
   private final Vertx vertx;
-  private final ContextInternal ctx;
   private final OAuth2Options config;
   private final OAuth2API api;
 
@@ -67,7 +66,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
     this.vertx = vertx;
-    this.ctx = (ContextInternal) vertx.getOrCreateContext();
     this.config = config;
     this.api = new OAuth2API(vertx, config);
     // compute paths with variables, at this moment it is only relevant that
@@ -150,7 +148,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             updateTimerId = -1;
           }
         }
-        return ctx.succeededFuture();
+        return Future.succeededFuture();
       });
   }
 
@@ -353,7 +351,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           .compose(json -> {
             // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
             if (json.containsKey("active") && !json.getBoolean("active", false)) {
-              return ctx.failedFuture("Inactive Token");
+              return Future.failedFuture("Inactive Token");
             }
 
             // OPTIONALS
@@ -374,10 +372,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
-              return ctx.failedFuture("Used is expired.");
+              return Future.failedFuture("Used is expired.");
             } else {
               // basic validation passed, the token is not expired
-              return ctx.succeededFuture(newUser);
+              return Future.succeededFuture(newUser);
             }
           })
           .onComplete(handler);
@@ -470,10 +468,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            return ctx.failedFuture("Used is expired.");
+            return Future.failedFuture("Used is expired.");
           } else {
             // basic validation passed, the token is not expired
-            return ctx.succeededFuture(newUser);
+            return Future.succeededFuture(newUser);
           }
         })
         .onComplete(handler);
@@ -491,7 +489,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   public Future<User> refresh(User user) {
 
     if (user.principal().getString("refresh_token") == null || user.principal().getString("refresh_token").isEmpty()) {
-      return ctx.failedFuture(new IllegalStateException("refresh_token is null or empty"));
+      return Future.failedFuture(new IllegalStateException("refresh_token is null or empty"));
     }
 
     return api.token(
@@ -504,10 +502,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (newUser.expired(config.getJWTOptions().getLeeway())) {
-          return ctx.failedFuture("Used is expired.");
+          return Future.failedFuture("Used is expired.");
         } else {
           // basic validation passed, the token is not expired
-          return ctx.succeededFuture(newUser);
+          return Future.succeededFuture(newUser);
         }
       });
   }
@@ -528,7 +526,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           if (userSub != null) {
             if (userInfoSub != null) {
               if (!userSub.equals(userInfoSub)) {
-                return ctx.failedFuture("Used 'sub' does not match UserInfo 'sub'.");
+                return Future.failedFuture("Used 'sub' does not match UserInfo 'sub'.");
               }
             }
           }
@@ -540,10 +538,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (user.expired(config.getJWTOptions().getLeeway())) {
-          return ctx.failedFuture("Used is expired.");
+          return Future.failedFuture("Used is expired.");
         } else {
           // basic validation passed, the user token is not expired
-          return ctx.succeededFuture(json);
+          return Future.succeededFuture(json);
         }
       });
   }

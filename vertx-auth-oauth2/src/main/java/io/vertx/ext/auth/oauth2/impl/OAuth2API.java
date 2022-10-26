@@ -48,12 +48,10 @@ public class OAuth2API {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2API.class);
   private static final Pattern MAX_AGE = Pattern.compile("max-age=\"?(\\d+)\"?");
 
-  private final ContextInternal ctx;
   private final HttpClient client;
   private final OAuth2Options config;
 
   public OAuth2API(Vertx vertx, OAuth2Options config) {
-    this.ctx = (ContextInternal) vertx.getOrCreateContext();
     this.config = config;
     this.client = vertx.createHttpClient(config.getHttpClientOptions());
   }
@@ -70,7 +68,7 @@ public class OAuth2API {
     return fetch(HttpMethod.GET, config.getJwkPath(), headers, null)
       .compose(reply -> {
         if (reply.body() == null || reply.body().length() == 0) {
-          return ctx.failedFuture("No Body");
+          return Future.failedFuture("No Body");
         }
 
         JsonObject json;
@@ -79,15 +77,15 @@ public class OAuth2API {
           try {
             json = new JsonObject(reply.body());
           } catch (RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else {
-          return ctx.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type"));
+          return Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type"));
         }
 
         try {
           if (json.containsKey("error")) {
-            return ctx.failedFuture(extractErrorDescription(json));
+            return Future.failedFuture(extractErrorDescription(json));
           } else {
             // process the cache headers as recommended by: https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
             List<String> cacheControl = reply.headers().getAll(HttpHeaders.CACHE_CONTROL);
@@ -107,10 +105,10 @@ public class OAuth2API {
                 }
               }
             }
-            return ctx.succeededFuture(json);
+            return Future.succeededFuture(json);
           }
         } catch (RuntimeException e) {
-          return ctx.failedFuture(e);
+          return Future.failedFuture(e);
         }
       });
   }
@@ -169,7 +167,7 @@ public class OAuth2API {
   public Future<JsonObject> token(String grantType, JsonObject params) {
     // quick check and abort
     if (grantType == null) {
-      return ctx.failedFuture("Token request requires a grantType other than null");
+      return Future.failedFuture("Token request requires a grantType other than null");
     }
 
     final JsonObject headers = new JsonObject();
@@ -214,7 +212,7 @@ public class OAuth2API {
     return fetch(HttpMethod.POST, config.getTokenPath(), headers, payload)
       .compose(reply -> {
         if (reply.body() == null || reply.body().length() == 0) {
-          return ctx.failedFuture("No Body");
+          return Future.failedFuture("No Body");
         }
 
         JsonObject json;
@@ -223,27 +221,27 @@ public class OAuth2API {
           try {
             json = reply.jsonObject();
           } catch (RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
             json = SimpleHttpClient.queryToJson(reply.body());
           } catch (UnsupportedEncodingException | RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else {
-          return ctx.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type"));
+          return Future.failedFuture("Cannot handle content type: " + reply.headers().get("Content-Type"));
         }
 
         try {
           if (json == null || json.containsKey("error")) {
-            return ctx.failedFuture(extractErrorDescription(json));
+            return Future.failedFuture(extractErrorDescription(json));
           } else {
             OAuth2API.processNonStandardHeaders(json, reply, config.getScopeSeparator());
-            return ctx.succeededFuture(json);
+            return Future.succeededFuture(json);
           }
         } catch (RuntimeException e) {
-          return ctx.failedFuture(e);
+          return Future.failedFuture(e);
         }
       });
   }
@@ -276,7 +274,7 @@ public class OAuth2API {
     return fetch(HttpMethod.POST, config.getIntrospectionPath(), headers, payload)
       .compose(reply -> {
         if (reply.body() == null || reply.body().length() == 0) {
-          return ctx.failedFuture("No Body");
+          return Future.failedFuture("No Body");
         }
 
         JsonObject json;
@@ -285,27 +283,27 @@ public class OAuth2API {
           try {
             json = reply.jsonObject();
           } catch (RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
             json = SimpleHttpClient.queryToJson(reply.body());
           } catch (UnsupportedEncodingException | RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else {
-          return ctx.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type"));
+          return Future.failedFuture("Cannot handle accessToken type: " + reply.headers().get("Content-Type"));
         }
 
         try {
           if (json == null || json.containsKey("error")) {
-            return ctx.failedFuture(extractErrorDescription(json));
+            return Future.failedFuture(extractErrorDescription(json));
           } else {
             processNonStandardHeaders(json, reply, config.getScopeSeparator());
-            return ctx.succeededFuture(json);
+            return Future.succeededFuture(json);
           }
         } catch (RuntimeException e) {
-          return ctx.failedFuture(e);
+          return Future.failedFuture(e);
         }
       });
   }
@@ -317,7 +315,7 @@ public class OAuth2API {
    */
   public Future<Void> tokenRevocation(String tokenType, String token) {
     if (token == null) {
-      return ctx.failedFuture("Cannot revoke null token");
+      return Future.failedFuture("Cannot revoke null token");
     }
 
     final JsonObject headers = new JsonObject();
@@ -343,10 +341,10 @@ public class OAuth2API {
     return fetch(HttpMethod.POST, config.getRevocationPath(), headers, payload)
       .compose(reply -> {
         if (reply.body() == null) {
-          return ctx.failedFuture("No Body");
+          return Future.failedFuture("No Body");
         }
 
-        return ctx.succeededFuture();
+        return Future.succeededFuture();
       });
   }
 
@@ -361,7 +359,7 @@ public class OAuth2API {
     String path = config.getUserInfoPath();
 
     if (path == null) {
-      return ctx.failedFuture("userInfo path is not configured");
+      return Future.failedFuture("userInfo path is not configured");
     }
 
     if (extraParams != null) {
@@ -377,7 +375,7 @@ public class OAuth2API {
         Buffer body = reply.body();
 
         if (body == null) {
-          return ctx.failedFuture("No Body");
+          return Future.failedFuture("No Body");
         }
 
         // userInfo is expected to be an object
@@ -388,28 +386,28 @@ public class OAuth2API {
             // userInfo is expected to be an object
             userInfo = reply.jsonObject();
           } catch (RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else if (reply.is("application/jwt")) {
           try {
             // userInfo is expected to be a JWT
             userInfo = jwt.decode(body.toString(StandardCharsets.UTF_8));
           } catch (RuntimeException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
           try {
             // attempt to convert url encoded string to json
             userInfo = SimpleHttpClient.queryToJson(reply.body());
           } catch (RuntimeException | UnsupportedEncodingException e) {
-            return ctx.failedFuture(e);
+            return Future.failedFuture(e);
           }
         } else {
-          return ctx.failedFuture("Cannot handle Content-Type: " + reply.headers().get("Content-Type"));
+          return Future.failedFuture("Cannot handle Content-Type: " + reply.headers().get("Content-Type"));
         }
 
         processNonStandardHeaders(userInfo, reply, config.getScopeSeparator());
-        return ctx.succeededFuture(userInfo);
+        return Future.succeededFuture(userInfo);
       });
   }
 
@@ -497,7 +495,7 @@ public class OAuth2API {
 
     if (path == null || path.length() == 0) {
       // and this can happen as it is a config option that is dependent on the provider
-      return ctx.failedFuture("Invalid path");
+      return Future.failedFuture("Invalid path");
     }
 
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
@@ -543,7 +541,7 @@ public class OAuth2API {
               final SimpleHttpResponse oauth2res = new SimpleHttpResponse(res.statusCode(), res.headers(), body);
               if (res.statusCode() < 200 || res.statusCode() >= 300) {
                 if (oauth2res.body() == null || oauth2res.body().length() == 0) {
-                  return ctx.failedFuture(res.statusMessage());
+                  return Future.failedFuture(res.statusMessage());
                 } else {
                   if (oauth2res.is("application/json")) {
                     // if value is json, extract error, error_descriptions
@@ -551,19 +549,19 @@ public class OAuth2API {
                       JsonObject error = oauth2res.jsonObject();
                       if (error != null && error.containsKey("error")) {
                         if (error.containsKey("error_description")) {
-                          return ctx.failedFuture(error.getString("error") + ": " + error.getString("error_description"));
+                          return Future.failedFuture(error.getString("error") + ": " + error.getString("error_description"));
                         } else {
-                          return ctx.failedFuture(error.getString("error"));
+                          return Future.failedFuture(error.getString("error"));
                         }
                       }
                     } catch (RuntimeException e) {
                       // ignore, we can't parse the json, don't mind, rely on the status code anyway
                     }
                   }
-                  return ctx.failedFuture(res.statusMessage() + ": " + oauth2res.body());
+                  return Future.failedFuture(res.statusMessage() + ": " + oauth2res.body());
                 }
               } else {
-                return ctx.succeededFuture(oauth2res);
+                return Future.succeededFuture(oauth2res);
               }
             });
         };
