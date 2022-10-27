@@ -15,11 +15,7 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
-import io.vertx.core.Closeable;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -53,6 +49,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
   private final Vertx vertx;
+  private final Context context;
+
   private final OAuth2Options config;
   private final OAuth2API api;
 
@@ -64,6 +62,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
     this.vertx = vertx;
+    this.context = vertx.getOrCreateContext();
     this.config = config;
     this.api = new OAuth2API(vertx, config);
     // compute paths with variables, at this moment it is only relevant that
@@ -588,7 +587,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // if the user has specified a handler for this situation then it
             // shall be executed, otherwise just log as a typical validation
             if (missingKeyHandler != null) {
-              missingKeyHandler.handle(e.id());
+              context.runOnContext(v -> missingKeyHandler.handle(e.id()));
             } else {
               LOG.trace("Cannot decode access token:", e);
             }
@@ -622,7 +621,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               // if the user has specified a handler for this situation then it
               // shall be executed, otherwise just log as a typical validation
               if (missingKeyHandler != null) {
-                missingKeyHandler.handle(e.id());
+                context.runOnContext(v -> missingKeyHandler.handle(e.id()));
               } else {
                 LOG.trace("Cannot decode access token:", e);
               }
