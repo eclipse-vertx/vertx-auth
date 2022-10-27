@@ -22,13 +22,13 @@ import java.util.Objects;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.jdbc.JDBCAuthentication;
 import io.vertx.ext.auth.jdbc.JDBCAuthenticationOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
@@ -60,54 +60,57 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
+  public Future<User> authenticate(JsonObject authInfo) {
+    return authenticate(new UsernamePasswordCredentials(authInfo));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
-
+  public Future<User> authenticate(Credentials credentials) {
+    final UsernamePasswordCredentials authInfo;
     try {
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo = (UsernamePasswordCredentials) credentials;
       authInfo.checkValid(null);
+    } catch (RuntimeException e) {
+      return Future.failedFuture(e);
+    }
 
-      executeQuery(options.getAuthenticationQuery(), new JsonArray().add(authInfo.getUsername()), queryResponse -> {
-        if (queryResponse.succeeded()) {
-          ResultSet rs = queryResponse.result();
-          switch (rs.getNumRows()) {
-            case 0: {
-              // Unknown user/password
-              resultHandler.handle(Future.failedFuture("Invalid username/password"));
-              break;
-            }
-            case 1: {
-              JsonArray row = rs.getResults().get(0);
-              try {
-                if (verify(row, authInfo.getPassword())) {
-                  User user = User.create(new JsonObject().put("username", authInfo.getUsername()));
-                  resultHandler.handle(Future.succeededFuture(user));
-                } else {
-                  resultHandler.handle(Future.failedFuture("Invalid username/password"));
-                }
-              } catch (RuntimeException e) {
-                resultHandler.handle(Future.failedFuture(e));
+    Promise<User> promise = Promise.promise();
+
+    executeQuery(options.getAuthenticationQuery(), new JsonArray().add(authInfo.getUsername()), queryResponse -> {
+      if (queryResponse.succeeded()) {
+        ResultSet rs = queryResponse.result();
+        switch (rs.getNumRows()) {
+          case 0: {
+            // Unknown user/password
+            promise.fail("Invalid username/password");
+            break;
+          }
+          case 1: {
+            JsonArray row = rs.getResults().get(0);
+            try {
+              if (verify(row, authInfo.getPassword())) {
+                User user = User.create(new JsonObject().put("username", authInfo.getUsername()));
+                promise.complete(user);
+              } else {
+                promise.fail("Invalid username/password");
               }
-              break;
+            } catch (RuntimeException e) {
+              promise.fail(e);
             }
-            default: {
-              // More than one row returned!
-              resultHandler.handle(Future.failedFuture("Failure in authentication"));
-              break;
-            }
+            break;
+          }
+          default: {
+            // More than one row returned!
+            promise.fail("Failure in authentication");
+            break;
           }
         }
-        else {
-          resultHandler.handle(Future.failedFuture(queryResponse.cause()));
-        }
-      });
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
-    }
+      } else {
+        promise.fail(queryResponse.cause());
+      }
+    });
+
+    return promise.future();
   }
 
   private boolean verify(JsonArray row, String password) {

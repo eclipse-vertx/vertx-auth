@@ -31,6 +31,9 @@ import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Represents an authenticates User and contains operations to authorise the user.
  * <p>
@@ -405,4 +408,16 @@ public interface User {
    */
   @Fluent
   User merge(User other);
+
+  /**
+   * The "amr" (Authentication Methods References) returns a unique list of claims as defined and
+   * registered in the IANA "JSON Web Token Claims" registry. The values in this collection are based
+   * on <a href="https://datatracker.ietf.org/doc/html/rfc8176">RFC8176</a>. This information can be used
+   * to filter authenticated users by their authentication mechanism.
+   *
+   * @return unique list of claims.
+   */
+  default List<String> amr() {
+    return Collections.emptyList();
+  }
 }

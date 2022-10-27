@@ -11,9 +11,7 @@
 
 package io.vertx.ext.auth.otp.totp.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -47,63 +45,59 @@ public class TotpAuthImpl implements TotpAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new OtpCredentials(credentials), resultHandler);
+  public Future<User> authenticate(JsonObject credentials) {
+    return authenticate(new OtpCredentials(credentials));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
+    final OtpCredentials authInfo;
     try {
-      OtpCredentials authInfo = (OtpCredentials) credentials;
+      authInfo = (OtpCredentials) credentials;
       authInfo.checkValid(totpAuthOptions);
-
-      fetcher.apply(authInfo.getIdentifier())
-        .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-        .onSuccess(authenticator -> {
-          if (authenticator == null) {
-            resultHandler.handle(Future.failedFuture("user is not found"));
-          } else {
-            String key = authenticator.getKey();
-            String algorithm = authenticator.getAlgorithm();
-
-            OtpKey otpKey = new OtpKey()
-              .setKey(key)
-              .setAlgorithm(algorithm);
-
-            Integer authAttempts = authenticator.getAuthAttempts();
-            authAttempts = authAttempts != null ? ++authAttempts : 1;
-            authenticator.setAuthAttempts(authAttempts);
-
-            String oneTimePassword;
-
-            try {
-              final long movingFactor = Instant.now().getEpochSecond() / totpAuthOptions.getPeriod();
-              oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), movingFactor, totpAuthOptions.getPasswordLength(), false, -1);
-            } catch (GeneralSecurityException e) {
-              resultHandler.handle(Future.failedFuture(e));
-              return;
-            }
-
-            if (MessageDigest.isEqual(oneTimePassword.getBytes(StandardCharsets.UTF_8), authInfo.getCode().getBytes(StandardCharsets.UTF_8))) {
-              updater.apply(authenticator)
-                .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-                .onSuccess(v -> resultHandler.handle(Future.succeededFuture(createUser(authenticator))));
-              return;
-            }
-
-            if (totpAuthOptions.isUsingAttemptsLimit() && authAttempts >= totpAuthOptions.getAuthAttemptsLimit()) {
-              updater.apply(authenticator)
-                .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-                .onSuccess(v -> resultHandler.handle(Future.failedFuture("invalid code")));
-              return;
-            }
-
-            resultHandler.handle(Future.failedFuture("invalid code"));
-          }
-        });
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
+
+    return fetcher
+      .apply(authInfo.getIdentifier())
+      .compose(authenticator -> {
+        if (authenticator == null) {
+          return Future.failedFuture("user is not found");
+        } else {
+          String key = authenticator.getKey();
+          String algorithm = authenticator.getAlgorithm();
+
+          OtpKey otpKey = new OtpKey()
+            .setKey(key)
+            .setAlgorithm(algorithm);
+
+          Integer authAttempts = authenticator.getAuthAttempts();
+          authAttempts = authAttempts != null ? ++authAttempts : 1;
+          authenticator.setAuthAttempts(authAttempts);
+
+          String oneTimePassword;
+
+          try {
+            final long movingFactor = Instant.now().getEpochSecond() / totpAuthOptions.getPeriod();
+            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), movingFactor, totpAuthOptions.getPasswordLength(), false, -1);
+          } catch (GeneralSecurityException e) {
+            return Future.failedFuture(e);
+          }
+
+          if (MessageDigest.isEqual(oneTimePassword.getBytes(StandardCharsets.UTF_8), authInfo.getCode().getBytes(StandardCharsets.UTF_8))) {
+            return updater.apply(authenticator)
+              .compose(v -> Future.succeededFuture(createUser(authenticator)));
+          }
+
+          if (totpAuthOptions.isUsingAttemptsLimit() && authAttempts >= totpAuthOptions.getAuthAttemptsLimit()) {
+            return updater.apply(authenticator)
+              .compose(v -> Future.failedFuture("invalid code"));
+          }
+
+          return Future.failedFuture("invalid code");
+        }
+      });
   }
 
   @Override

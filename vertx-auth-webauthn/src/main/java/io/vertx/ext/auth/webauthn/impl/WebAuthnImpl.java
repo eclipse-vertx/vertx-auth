@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth.webauthn.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -283,12 +282,12 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-    authenticate(new WebAuthnCredentials(authInfo), handler);
+  public Future<User> authenticate(JsonObject authInfo) {
+    return authenticate(new WebAuthnCredentials(authInfo));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
+  public Future<User> authenticate(Credentials credentials) {
     try {
       // cast
       WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
@@ -325,16 +324,14 @@ public class WebAuthnImpl implements WebAuthn {
       // Step #2
       // Verify challenge is match with session
       if (!authInfo.getChallenge().equals(clientData.getString("challenge"))) {
-        handler.handle(Future.failedFuture("Challenges don't match!"));
-        return;
+        return Future.failedFuture("Challenges don't match!");
       }
 
       // Step #3
       // If the auth info object contains an Origin we can verify it:
       if (authInfo.getOrigin() != null) {
         if (!authInfo.getOrigin().equals(clientData.getString("origin"))) {
-          handler.handle(Future.failedFuture("Origins don't match!"));
-          return;
+          return Future.failedFuture("Origins don't match!");
         }
       }
 
@@ -342,8 +339,7 @@ public class WebAuthnImpl implements WebAuthn {
       if (clientData.containsKey("tokenBinding")) {
         JsonObject tokenBinding = clientData.getJsonObject("tokenBinding");
         if (tokenBinding == null) {
-          handler.handle(Future.failedFuture("Invalid clientDataJSON.tokenBinding"));
-          return;
+          return Future.failedFuture("Invalid clientDataJSON.tokenBinding");
         }
         // in this case we need to check the status
         switch (tokenBinding.getString("status")) {
@@ -353,8 +349,7 @@ public class WebAuthnImpl implements WebAuthn {
             // OK
             break;
           default:
-            handler.handle(Future.failedFuture("Invalid clientDataJSON.tokenBinding.status"));
-            return;
+            return Future.failedFuture("Invalid clientDataJSON.tokenBinding.status");
         }
       }
 
@@ -363,16 +358,14 @@ public class WebAuthnImpl implements WebAuthn {
       // Step #4
       // Verify that the type is valid and that is "webauthn.create" or "webauthn.get"
       if (!clientData.containsKey("type")) {
-        handler.handle(Future.failedFuture("Missing type on client data"));
-        return;
+        return Future.failedFuture("Missing type on client data");
       }
 
       switch (clientData.getString("type")) {
         case "webauthn.create":
           // we always need a username to register
           if (username == null) {
-            handler.handle(Future.failedFuture("username can't be null!"));
-            return;
+            return Future.failedFuture("username can't be null!");
           }
 
           try {
@@ -383,14 +376,12 @@ public class WebAuthnImpl implements WebAuthn {
 
             // the create challenge is complete we can finally safe this
             // new authenticator to the storage
-            updater.apply(authrInfo)
-              .onFailure(err -> handler.handle(Future.failedFuture(err)))
-              .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authrInfo.toJson()))));
+           return updater.apply(authrInfo)
+              .compose(stored -> Future.succeededFuture(User.create(authrInfo.toJson())));
 
           } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
-            handler.handle(Future.failedFuture(e));
+            return Future.failedFuture(e);
           }
-          return;
         case "webauthn.get":
           Authenticator query = new Authenticator();
           if (options.getRequireResidentKey()) {
@@ -399,48 +390,41 @@ public class WebAuthnImpl implements WebAuthn {
           } else {
             // username can't be null
             if (username == null) {
-              handler.handle(Future.failedFuture("username can't be null!"));
-              return;
+              return Future.failedFuture("username can't be null!");
             }
             query.setUserName(username);
           }
 
-          fetcher.apply(query)
-            .onFailure(err -> handler.handle(Future.failedFuture(err)))
-            .onSuccess(authenticators -> {
-              if (authenticators == null) {
-                authenticators = Collections.emptyList();
-              }
-              // As we can get here with or without a username the size of the authenticator
-              // list is unbounded.
-              // This means that we **must** lookup the list for the right authenticator
-              for (Authenticator authenticator : authenticators) {
-                if (webauthn.getString("id").equals(authenticator.getCredID())) {
-                  try {
-                    final long counter = verifyWebAuthNGet(authInfo, clientDataJSON, authenticator.toJson());
-                    // update the counter on the authenticator
-                    authenticator.setCounter(counter);
-                    // update the credential (the important here is to update the counter)
-                    updater.apply(authenticator)
-                      .onFailure(err -> handler.handle(Future.failedFuture(err)))
-                      .onSuccess(stored -> handler.handle(Future.succeededFuture(User.create(authenticator.toJson()))));
+          return fetcher.apply(query)
+            .compose(authenticators -> {
+              if (authenticators != null) {
+                // As we can get here with or without a username the size of the authenticator
+                // list is unbounded.
+                // This means that we **must** lookup the list for the right authenticator
+                for (Authenticator authenticator : authenticators) {
+                  if (webauthn.getString("id").equals(authenticator.getCredID())) {
+                    try {
+                      final long counter = verifyWebAuthNGet(authInfo, clientDataJSON, authenticator.toJson());
+                      // update the counter on the authenticator
+                      authenticator.setCounter(counter);
+                      // update the credential (the important here is to update the counter)
+                      return updater.apply(authenticator)
+                        .compose(stored -> Future.succeededFuture(User.create(authenticator.toJson())));
 
-                  } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
-                    handler.handle(Future.failedFuture(e));
+                    } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
+                      return Future.failedFuture(e);
+                    }
                   }
-                  return;
                 }
               }
               // No valid authenticator was found
-              handler.handle(Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("id")));
+              return Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("id"));
             });
-
-          return;
         default:
-          handler.handle(Future.failedFuture("Can not determine type of response!"));
+          return Future.failedFuture("Can not determine type of response!");
       }
     } catch (RuntimeException e) {
-      handler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
   }
 

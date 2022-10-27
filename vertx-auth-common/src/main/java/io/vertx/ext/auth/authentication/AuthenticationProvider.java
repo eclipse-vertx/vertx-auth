@@ -16,12 +16,12 @@
 
 package io.vertx.ext.auth.authentication;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 
@@ -51,10 +51,17 @@ public interface AuthenticationProvider {
    * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
    * The user object can then be used for authorisation.
    *
+   * @deprecated For type safety this method should be avoided and {@link #authenticate(Credentials, Handler)} should be
+   * used instead.
+   *
    * @param credentials  The credentials
    * @param resultHandler  The result handler
    */
-  void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler);
+  @Deprecated
+  default void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
+  }
 
   /**
    * Authenticate a user.
@@ -73,15 +80,15 @@ public interface AuthenticationProvider {
    * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
    * The user object can then be used for authorisation.
    *
+   * @deprecated For type safety this method should be avoided and {@link #authenticate(Credentials)} should be
+   * used instead.
+   *
    * @see AuthenticationProvider#authenticate(JsonObject, Handler)
    * @param credentials  The credentials
    * @return The result future
    */
-  default Future<User> authenticate(JsonObject credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
-  }
+  @Deprecated
+  Future<User> authenticate(JsonObject credentials);
 
   /**
    * Authenticate a user.
@@ -96,13 +103,12 @@ public interface AuthenticationProvider {
    * @param resultHandler  The result handler
    */
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
-  default void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
-    try {
-      credentials.checkValid(null);
-      authenticate(credentials.toJson(), resultHandler);
-    } catch (CredentialValidationException e) {
-      resultHandler.handle(Future.failedFuture(e));
-    }
+  @Fluent
+  default AuthenticationProvider authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
+
+    return this;
   }
 
   /**
@@ -117,8 +123,6 @@ public interface AuthenticationProvider {
    */
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
   default Future<User> authenticate(Credentials credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
+    return authenticate(credentials.toJson());
   }
 }

@@ -15,9 +15,7 @@
  */
 package io.vertx.ext.auth.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.ChainAuth;
 import io.vertx.ext.auth.User;
@@ -44,59 +42,58 @@ public class ChainAuthImpl implements ChainAuth {
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
     try {
       credentials.checkValid(null);
-      authenticate(credentials.toJson(), resultHandler);
     } catch (CredentialValidationException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
+    return authenticate(credentials.toJson());
   }
 
   @Override
-  public void authenticate(final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(final JsonObject authInfo) {
     if (providers.size() == 0) {
-      resultHandler.handle(Future.failedFuture("No providers in the auth chain."));
+      return Future.failedFuture("No providers in the auth chain.");
     } else {
-      iterate(0, authInfo, resultHandler, null);
+      return iterate(0, authInfo, null);
     }
   }
 
-  private void iterate(final int idx, final JsonObject authInfo, final Handler<AsyncResult<User>> resultHandler, final User previousUser) {
+  private Future<User> iterate(final int idx, final JsonObject authInfo, final User previousUser) {
     // stop condition
     if (idx >= providers.size()) {
       if (!all) {
         // no more providers, means that we failed to find a provider capable of performing this operation
-        resultHandler.handle(Future.failedFuture("No more providers in the auth chain."));
+        return Future.failedFuture("No more providers in the auth chain.");
       } else {
         // if ALL then a success completes
-        resultHandler.handle(Future.succeededFuture(previousUser));
+        return Future.succeededFuture(previousUser);
       }
-      return;
     }
 
     // attempt to perform operation
-    providers.get(idx).authenticate(authInfo, res -> {
-      if (res.succeeded()) {
+    return providers.get(idx)
+      .authenticate(authInfo)
+      .compose(user -> {
         if (!all) {
           // if ANY then a success completes
-          resultHandler.handle(res);
+          return Future.succeededFuture(user);
         } else {
           // if ALL then a success check the next one
-          User result = res.result();
-          iterate(idx + 1, authInfo, resultHandler, previousUser == null ? result : previousUser.merge(result));
+          return iterate(idx + 1, authInfo, previousUser == null ? user : previousUser.merge(user));
         }
-      } else {
+      })
+      .recover(err -> {
         // try again with next provider
         if (!all) {
           // try again with next provider
-          iterate(idx + 1, authInfo, resultHandler, null);
+          return iterate(idx + 1, authInfo, null);
         } else {
           // short circuit when ALL is used a failure is enough to terminate
           // no more providers, means that we failed to find a provider capable of performing this operation
-          resultHandler.handle(res);
+          return Future.failedFuture(err);
         }
-      }
-    });
+      });
   }
 }

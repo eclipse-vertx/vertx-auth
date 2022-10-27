@@ -18,9 +18,8 @@ package io.vertx.ext.auth.mongo.impl;
 
 import java.util.List;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
@@ -83,12 +82,13 @@ public class MongoAuthImpl implements MongoAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
+  public Future<User> authenticate(JsonObject credentials) {
+    return authenticate(new UsernamePasswordCredentials(credentials));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
+    final Promise<User> promise = Promise.promise();
 
     try {
       UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
@@ -96,24 +96,26 @@ public class MongoAuthImpl implements MongoAuth {
 
       mongoAuthentication.authenticate(authInfo, authenticationResult -> {
         if (authenticationResult.failed()) {
-          resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
+          promise.fail(authenticationResult.cause());
         } else {
           User user = authenticationResult.result();
           mongoAuthorization.getAuthorizations(user, userAuthorizationResult -> {
             if (userAuthorizationResult.failed()) {
               // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
               // for now, lets return a failure
-              resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
+              promise.fail(userAuthorizationResult.cause());
             }
             else {
-              resultHandler.handle(Future.succeededFuture(user));
+              promise.complete(user);
             }
           });
         }
       });
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      promise.fail(e);
     }
+
+    return promise.future();
   }
 
   /*

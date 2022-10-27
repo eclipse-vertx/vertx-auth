@@ -1,8 +1,6 @@
 package io.vertx.ext.auth.sqlclient.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
@@ -10,7 +8,6 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.sqlclient.SqlAuthorization;
 import io.vertx.ext.auth.sqlclient.SqlAuthorizationOptions;
 import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
 
@@ -34,68 +31,56 @@ public class SqlAuthorizationImpl implements SqlAuthorization {
     return "sql-client";
   }
 
-  private void getRoles(String username, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  private Future<Set<Authorization>> getRoles(String username) {
     if (options.getRolesQuery() != null) {
-      client.preparedQuery(options.getRolesQuery()).execute(Tuple.of(username), preparedQuery -> {
-        if (preparedQuery.succeeded()) {
-          RowSet<Row> rows = preparedQuery.result();
+      return client.preparedQuery(options.getRolesQuery())
+        .execute(Tuple.of(username))
+        .compose(rows -> {
           Set<Authorization> authorizations = new HashSet<>();
           for (Row row : rows) {
             String role = row.getString(0);
             authorizations.add(RoleBasedAuthorization.create(role));
           }
-          resultHandler.handle(Future.succeededFuture(authorizations));
-        } else {
-          resultHandler.handle(Future.failedFuture(preparedQuery.cause()));
-        }
-      });
+          return Future.succeededFuture(authorizations);
+        });
     } else {
-      resultHandler.handle(Future.succeededFuture(Collections.emptySet()));
+      return Future.succeededFuture(Collections.emptySet());
     }
   }
 
-  private void getPermissions(String username, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  private Future<Set<Authorization>> getPermissions(String username) {
     if (options.getPermissionsQuery() != null) {
-      client.preparedQuery(options.getPermissionsQuery()).execute(Tuple.of(username), preparedQuery -> {
-        if (preparedQuery.succeeded()) {
-          RowSet<Row> rows = preparedQuery.result();
+      return client.preparedQuery(options.getPermissionsQuery())
+        .execute(Tuple.of(username))
+        .compose(rows -> {
           Set<Authorization> authorizations = new HashSet<>();
           for (Row row : rows) {
             String permission = row.getString(0);
             authorizations.add(PermissionBasedAuthorization.create(permission));
           }
-          resultHandler.handle(Future.succeededFuture(authorizations));
-        } else {
-          resultHandler.handle(Future.failedFuture(preparedQuery.cause()));
-        }
-      });
+          return Future.succeededFuture(authorizations);
+        });
     } else {
-      resultHandler.handle(Future.succeededFuture(Collections.emptySet()));
+      return Future.succeededFuture(Collections.emptySet());
     }
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> getAuthorizations(User user) {
     String username = user.principal().getString("username");
     if (username != null) {
-      getRoles(username, roleResponse -> {
-        if (roleResponse.succeeded()) {
-          Set<Authorization> authorizations = new HashSet<>(roleResponse.result());
-          getPermissions(username, permissionResponse -> {
-            if (permissionResponse.succeeded()) {
-              authorizations.addAll(permissionResponse.result());
+      return getRoles(username)
+        .compose(roles -> {
+          Set<Authorization> authorizations = new HashSet<>(roles);
+          return getPermissions(username)
+            .onSuccess(permissions -> {
+              authorizations.addAll(permissions);
               user.authorizations().add(getId(), authorizations);
-              resultHandler.handle(Future.succeededFuture());
-            } else {
-              resultHandler.handle(Future.failedFuture(permissionResponse.cause()));
-            }
-          });
-        } else {
-          resultHandler.handle(Future.failedFuture(roleResponse.cause()));
-        }
-      });
+            })
+            .mapEmpty();
+        });
     } else {
-      resultHandler.handle(Future.failedFuture("Couldn't get the username from the principal"));
+      return Future.failedFuture("Couldn't get the username from the principal");
     }
   }
 }

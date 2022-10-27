@@ -63,10 +63,8 @@ public interface OpenIDConnectAuth {
    * @see OpenIDConnectAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
-    final ContextInternal ctx = (ContextInternal) vertx.getOrCreateContext();
-
     if (config.getSite() == null) {
-      return ctx.failedFuture("issuer cannot be null");
+      return Future.failedFuture("issuer cannot be null");
     }
 
     // compute paths with variables, at this moment it is only relevant that
@@ -97,23 +95,23 @@ public interface OpenIDConnectAuth {
         null)
       .compose(response -> {
         if (response.statusCode() != 200) {
-          return ctx.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body());
+          return Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body());
         }
 
         if (!response.is("application/json")) {
-          return ctx.failedFuture("Cannot handle Content-Type: " + response.headers().get("Content-Type"));
+          return Future.failedFuture("Cannot handle Content-Type: " + response.headers().get("Content-Type"));
         }
 
         final JsonObject json = response.jsonObject();
 
         if (json == null) {
-          return ctx.failedFuture("Cannot handle null JSON");
+          return Future.failedFuture("Cannot handle null JSON");
         }
 
         // some providers return errors as JSON too
         if (json.containsKey("error")) {
           // attempt to handle the error as a string
-          return ctx.failedFuture(json.getString("error_description", json.getString("error")));
+          return Future.failedFuture(json.getString("error_description", json.getString("error")));
         }
 
         // issuer validation
@@ -128,7 +126,7 @@ public interface OpenIDConnectAuth {
             }
 
             if (!config.getSite().equals(issuerEndpoint)) {
-              return ctx.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]");
+              return Future.failedFuture("issuer validation failed: received [" + issuerEndpoint + "]");
             }
           }
         }
@@ -163,7 +161,7 @@ public interface OpenIDConnectAuth {
           flows.forEach(el -> config.addSupportedGrantType((String) el));
 
           if (!flows.contains(config.getFlow().getGrantType())) {
-            return ctx.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows);
+            return Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows);
           }
         }
 
@@ -176,10 +174,10 @@ public interface OpenIDConnectAuth {
               .jWKSet()
               .map(oidc);
           } else {
-            return ctx.succeededFuture(oidc);
+            return Future.succeededFuture(oidc);
           }
         } catch (IllegalArgumentException | IllegalStateException e) {
-          return ctx.failedFuture(e);
+          return Future.failedFuture(e);
         }
       });
   }

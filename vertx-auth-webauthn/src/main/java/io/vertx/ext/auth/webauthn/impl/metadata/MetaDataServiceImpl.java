@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.webauthn.impl.metadata;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
@@ -23,8 +23,6 @@ import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.vertx.core.json.impl.JsonUtil.BASE64_DECODER;
 import static io.vertx.ext.auth.impl.Codec.base64Decode;
@@ -50,11 +48,9 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   @Override
   public Future<Boolean> fetchTOC(String toc) {
-
-    final Promise<Boolean> promise = vertx.promise();
-    httpClient.fetch(HttpMethod.GET, toc, null, null)
-      .onFailure(promise::fail)
-      .onSuccess(res -> {
+    return httpClient
+      .fetch(HttpMethod.GET, toc, null, null)
+      .compose(res -> {
 
         JsonObject payload;
         String error = null;
@@ -62,8 +58,7 @@ public class MetaDataServiceImpl implements MetaDataService {
         Buffer body = res.body();
 
         if (body == null) {
-          promise.fail("null JWT");
-          return;
+          return Future.failedFuture("null JWT");
         }
 
         try {
@@ -99,14 +94,13 @@ public class MetaDataServiceImpl implements MetaDataService {
             error = e.getMessage();
             payload = JWT.parse(body.toString()).getJsonObject("payload");
           } catch (RuntimeException re) {
-            promise.fail(re);
-            return;
+            return Future.failedFuture(re);
           }
         }
 
         try {
           if (payload == null) {
-            promise.fail("Could not parse TOC");
+            return Future.failedFuture("Could not parse TOC");
           } else {
             if (payload.containsKey("legalHeader")) {
               LOG.info(payload.getString("legalHeader"));
@@ -114,68 +108,55 @@ public class MetaDataServiceImpl implements MetaDataService {
 
             JsonArray entries = payload.getJsonArray("entries");
 
+            final List<Future> futures = new ArrayList<>(entries.size());
             final String e = error;
-            final AtomicInteger cnt = new AtomicInteger(entries.size());
-            final AtomicBoolean success = new AtomicBoolean(true);
 
-            entries.forEach(el ->
-              addEntry(e, (JsonObject) el)
-                .onFailure(err -> {
-                  LOG.error("Failed to add entry", err);
-                  success.set(false);
-                  if (cnt.decrementAndGet() == 0) {
-                    promise.complete(success.get());
-                  }
-                })
-                .onComplete(done -> {
-                  if (cnt.decrementAndGet() == 0) {
-                    promise.complete(success.get());
-                  }
-                }));
+            entries.forEach(el -> {
+              futures.add(addEntry(e, (JsonObject) el));
+            });
+
+            return CompositeFuture
+              .all(futures)
+              .map(true)
+              .otherwise(false);
           }
         } catch (RuntimeException e) {
-          promise.fail(e);
+          return Future.failedFuture(e);
         }
       });
-
-    return promise.future();
   }
 
   private Future<Void> addEntry(String error, JsonObject entry) {
-    final Promise<Void> promise = vertx.promise();
     if (entry.containsKey("url")) {
       // MDSv2
-      httpClient.fetch(HttpMethod.GET, entry.getString("url"), null, null)
-        .onFailure(promise::fail)
-        .onSuccess(res -> {
+      return httpClient.
+        fetch(HttpMethod.GET, entry.getString("url"), null, null)
+        .compose(res -> {
           Buffer body = res.body();
 
           if (body == null) {
-            promise.fail("null JWT");
-            return;
+            return Future.failedFuture("null JWT");
           }
 
           try {
             metadata.loadMetadata(new MetaDataEntry(entry, body.getBytes(), error));
-            promise.complete();
+            return Future.succeededFuture();
           } catch (RuntimeException | NoSuchAlgorithmException e) {
-            promise.fail(e);
+            return Future.failedFuture(e);
           }
         });
     } else if (entry.containsKey("metadataStatement") && entry.getJsonObject("metadataStatement").getInteger("schema", 0) == 3) {
       // likely MDSv3
       try {
         metadata.loadMetadata(new MetaDataEntry(entry, entry.getJsonObject("metadataStatement"), error));
-        promise.complete();
+        return Future.succeededFuture();
       } catch (RuntimeException e) {
-        promise.fail(e);
+        return Future.failedFuture(e);
       }
     } else {
       // unknown
-      promise.fail("Invalid metadataStatement (no url or metadataStatement with schema == 3)");
+      return Future.failedFuture("Invalid metadataStatement (no url or metadataStatement with schema == 3)");
     }
-
-    return promise.future();
   }
 
   @Override

@@ -16,9 +16,7 @@
 package io.vertx.ext.auth.jwt.impl;
 
 import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
@@ -124,61 +122,64 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
 
-    } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException e) {
+    } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException |
+             NoSuchProviderException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new TokenCredentials(authInfo.getString("token")), resultHandler);
+  public Future<User> authenticate(JsonObject authInfo) {
+    return authenticate(new TokenCredentials(authInfo.getString("token")));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
+    final TokenCredentials authInfo;
     try {
       // cast
-      TokenCredentials authInfo = (TokenCredentials) credentials;
+      authInfo = (TokenCredentials) credentials;
       // check
       authInfo.checkValid(null);
-
-      final JsonObject payload = jwt.decode(authInfo.getToken());
-
-      if (jwtOptions.getAudience() != null) {
-        JsonArray target;
-        if (payload.getValue("aud") instanceof String) {
-          target = new JsonArray().add(payload.getValue("aud", ""));
-        } else {
-          target = payload.getJsonArray("aud", EMPTY_ARRAY);
-        }
-
-        if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience())));
-          return;
-        }
-      }
-
-      if (jwtOptions.getIssuer() != null) {
-        if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT issuer"));
-          return;
-        }
-      }
-
-      final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
-
-      if (user.expired(jwtOptions.getLeeway())) {
-        if (!jwtOptions.isIgnoreExpiration()) {
-          resultHandler.handle(Future.failedFuture("Invalid JWT token: token expired."));
-          return;
-        }
-      }
-
-      resultHandler.handle(Future.succeededFuture(user));
-
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
+
+    final JsonObject payload;
+    try {
+      payload = jwt.decode(authInfo.getToken());
+    } catch (RuntimeException e) {
+      return Future.failedFuture(e);
+    }
+
+    if (jwtOptions.getAudience() != null) {
+      JsonArray target;
+      if (payload.getValue("aud") instanceof String) {
+        target = new JsonArray().add(payload.getValue("aud", ""));
+      } else {
+        target = payload.getJsonArray("aud", EMPTY_ARRAY);
+      }
+
+      if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
+        return Future.failedFuture("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
+      }
+    }
+
+    if (jwtOptions.getIssuer() != null) {
+      if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
+        return Future.failedFuture("Invalid JWT issuer");
+      }
+    }
+
+    final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
+
+    if (user.expired(jwtOptions.getLeeway())) {
+      if (!jwtOptions.isIgnoreExpiration()) {
+        return Future.failedFuture("Invalid JWT token: token expired.");
+      }
+    }
+
+    return Future.succeededFuture(user);
   }
 
   @Override

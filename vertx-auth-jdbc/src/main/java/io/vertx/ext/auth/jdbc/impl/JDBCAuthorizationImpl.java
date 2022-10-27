@@ -8,6 +8,7 @@ import java.util.Set;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
@@ -44,8 +45,7 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
     return providerId;
   }
 
-  private void getRoles(SQLConnection sqlConnection, JsonArray params,
-      Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  private void getRoles(SQLConnection sqlConnection, JsonArray params, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
     if (options.getRolesQuery() != null) {
       sqlConnection.queryWithParams(options.getRolesQuery(), params, queryResponse -> {
         if (queryResponse.succeeded()) {
@@ -65,8 +65,7 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
     }
   }
 
-  private void getPermissions(SQLConnection sqlConnection, JsonArray params,
-      Handler<AsyncResult<Set<Authorization>>> resultHandler) {
+  private void getPermissions(SQLConnection sqlConnection, JsonArray params, Handler<AsyncResult<Set<Authorization>>> resultHandler) {
     if (options.getPermissionsQuery() != null) {
       sqlConnection.queryWithParams(options.getPermissionsQuery(), params, queryResponse -> {
         if (queryResponse.succeeded()) {
@@ -87,7 +86,9 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> getAuthorizations(User user) {
+    final Promise<Void> promise = Promise.promise();
+
     client.getConnection(connectionResponse -> {
       if (connectionResponse.succeeded()) {
         String username = user.principal().getString(usernameKey);
@@ -101,24 +102,26 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
                 if (permissionResponse.succeeded()) {
                   authorizations.addAll(permissionResponse.result());
                   user.authorizations().add(getId(), authorizations);
-                  resultHandler.handle(Future.succeededFuture());
+                  promise.complete();
                 } else {
-                  resultHandler.handle(Future.failedFuture(permissionResponse.cause()));
+                  promise.fail(permissionResponse.cause());
                 }
                 connection.close();
               });
             } else {
-              resultHandler.handle(Future.failedFuture(roleResponse.cause()));
+              promise.fail(roleResponse.cause());
               connection.close();
             }
           });
         } else {
-          resultHandler.handle(Future.failedFuture("Couldn't get the username"));
+          promise.fail("Couldn't get the username");
           connectionResponse.result().close();
         }
       } else {
-        resultHandler.handle(Future.failedFuture(connectionResponse.cause()));
+        promise.fail(connectionResponse.cause());
       }
     });
+
+    return promise.future();
   }
 }
