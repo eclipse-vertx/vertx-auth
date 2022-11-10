@@ -12,6 +12,8 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Objects;
 
@@ -21,6 +23,7 @@ import javax.naming.ldap.LdapContext;
 
 import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -62,6 +65,8 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
     return createLdapContext(ldapPrincipal, authInfo.getPassword())
       .compose(ldapContext -> {
         User user = User.fromName(authInfo.getUsername());
+        // metadata "amr"
+        user.principal().put("amr", Collections.singletonList("pwd"));
         return Future.succeededFuture(user);
       });
   }

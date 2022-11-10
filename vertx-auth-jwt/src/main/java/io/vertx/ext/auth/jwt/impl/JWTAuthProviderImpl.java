@@ -217,6 +217,11 @@ public class JWTAuthProviderImpl implements JWTAuth {
   private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
     User result = User.fromToken(accessToken);
 
+    if (jwtToken.containsKey("amr")) {
+      // metadata "amr"
+      result.principal().put("amr", jwtToken.getValue("amr"));
+    }
+
     // update the attributes
     result.attributes()
       .put("accessToken", jwtToken);

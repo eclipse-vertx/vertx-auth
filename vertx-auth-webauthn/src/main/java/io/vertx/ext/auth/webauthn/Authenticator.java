@@ -71,7 +71,10 @@ public class Authenticator {
    * }</pre>
    */
   private AttestationCertificates attestationCertificates;
+
   private String fmt;
+
+  private int flags;
 
   public Authenticator() {}
   public Authenticator(JsonObject json) {
@@ -130,6 +133,15 @@ public class Authenticator {
 
   public AttestationCertificates getAttestationCertificates() {
     return attestationCertificates;
+  }
+
+  public int getFlags() {
+    return flags;
+  }
+
+  public Authenticator setFlags(int flags) {
+    this.flags = flags;
+    return this;
   }
 
   public JsonObject toJson() {

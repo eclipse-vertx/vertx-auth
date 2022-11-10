@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.shiro.impl;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import io.vertx.core.*;
@@ -124,6 +125,9 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
 
     JsonObject principal = new JsonObject().put("username", subject.getPrincipal().toString());
     User result = User.create(principal);
+    // metadata "amr"
+    result.principal().put("amr", Collections.singletonList("pwd"));
+
     result.authorizations().add("shiro-authentication", GetAuthorizationsHack.getAuthorizations(securityManager, subject));
     return result;
   }

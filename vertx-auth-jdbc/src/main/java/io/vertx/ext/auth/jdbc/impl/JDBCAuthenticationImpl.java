@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.jdbc.impl;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -89,7 +90,9 @@ public class JDBCAuthenticationImpl implements JDBCAuthentication {
             JsonArray row = rs.getResults().get(0);
             try {
               if (verify(row, authInfo.getPassword())) {
-                User user = User.create(new JsonObject().put("username", authInfo.getUsername()));
+                User user = User.fromName(authInfo.getUsername());
+                // metadata "amr"
+                user.principal().put("amr", Collections.singletonList("pwd"));
                 promise.complete(user);
               } else {
                 promise.fail("Invalid username/password");

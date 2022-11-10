@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class TotpAuthImpl implements TotpAuth {
@@ -176,6 +177,9 @@ public class TotpAuthImpl implements TotpAuth {
     return User.create(
       new JsonObject()
         .put("otp", "totp")
-        .put("auth_attempts", authenticator.getAuthAttempts()));
+        .put("auth_attempts", authenticator.getAuthAttempts())
+        // amr
+        .put("amr", Arrays.asList("mfa", "otp"))
+    );
   }
 }

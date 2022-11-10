@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.sqlclient.impl;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -74,7 +75,10 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
             Row row = rows.iterator().next();
             String hashedStoredPwd = row.getString(0);
             if (strategy.verify(hashedStoredPwd, authInfo.getPassword())) {
-              return Future.succeededFuture(User.fromName(authInfo.getUsername()));
+              User user = User.fromName(authInfo.getUsername());
+              // metadata "amr"
+              user.principal().put("amr", Collections.singletonList("pwd"));
+              return Future.succeededFuture(user);
             } else {
               return Future.failedFuture("Invalid username/password");
             }

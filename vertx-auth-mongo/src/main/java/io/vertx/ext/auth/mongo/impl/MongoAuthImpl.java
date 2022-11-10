@@ -16,6 +16,7 @@
 
 package io.vertx.ext.auth.mongo.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import io.vertx.core.Future;
@@ -150,6 +151,9 @@ public class MongoAuthImpl implements MongoAuth {
 
   private User createUser(JsonObject json) {
     User user = User.create(json);
+    // metadata "amr"
+    user.principal().put("amr", Collections.singletonList("pwd"));
+
     json.put(PROPERTY_FIELD_SALT, getSaltField());
     json.put(PROPERTY_FIELD_PASSWORD, getPasswordField());
     JsonArray roles = json.getJsonArray(mongoAuthorizationOptions.getRoleField());

@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.auth.htpasswd.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -83,7 +84,10 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
     }
 
     if (strategy.verify(htUsers.get(authInfo.getUsername()), authInfo.getPassword())) {
-      return Future.succeededFuture(User.create(new JsonObject().put("username", authInfo.getUsername())));
+      User user = User.fromName(authInfo.getUsername());
+      // metadata "amr"
+      user.principal().put("amr", Collections.singletonList("pwd"));
+      return Future.succeededFuture(user);
     } else {
       return Future.failedFuture("Bad response");
     }

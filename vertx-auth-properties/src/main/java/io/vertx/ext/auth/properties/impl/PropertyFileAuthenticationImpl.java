@@ -162,7 +162,10 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     return getUser(authInfo.getUsername())
       .compose(propertyUser -> {
         if (Objects.equals(propertyUser.password, authInfo.getPassword())) {
-          return Future.succeededFuture(io.vertx.ext.auth.User.fromName(propertyUser.name));
+          io.vertx.ext.auth.User user = io.vertx.ext.auth.User.fromName(propertyUser.name);
+          // metadata "amr"
+          user.principal().put("amr", Collections.singletonList("pwd"));
+          return Future.succeededFuture(user);
         } else {
           return Future.failedFuture("invalid username/password");
         }

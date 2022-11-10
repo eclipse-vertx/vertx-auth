@@ -31,9 +31,6 @@ import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Represents an authenticates User and contains operations to authorise the user.
  * <p>
@@ -228,6 +225,42 @@ public interface User {
   }
 
   /**
+   * Get a value from the user object. This method will perform lookups on several places before returning a value.
+   * <ol>
+   *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
+   *   <li>If exists the value will be returned from the {@link #attributes()}</li>
+   *   <li>If exists the value will be returned from the {@link #principal()}</li>
+   *   <li>Otherwise it will be {@code null}</li>
+   * </ol>
+   * @param key the key to look up
+   * @param defaultValue default value to return if missing
+   * @param <T> the expected type
+   * @return the value or null if missing
+   * @throws ClassCastException if the value cannot be casted to {@code T}
+   */
+  default <T> @Nullable T getOrDefault(String key, T defaultValue) {
+    if (attributes().containsKey("rootClaim")) {
+      JsonObject rootClaim;
+      try {
+        rootClaim = attributes().getJsonObject(attributes().getString("rootClaim"));
+      } catch (ClassCastException e) {
+        // ignore
+        rootClaim = null;
+      }
+      if (rootClaim != null && rootClaim.containsKey(key)) {
+        return (T) rootClaim.getValue(key);
+      }
+    }
+    if (attributes().containsKey(key)) {
+      return (T) attributes().getValue(key);
+    }
+    if (principal().containsKey(key)) {
+      return (T) principal().getValue(key);
+    }
+    return defaultValue;
+  }
+
+  /**
    * Checks if a value exists on the user object. This method will perform lookups on several places before returning.
    * <ol>
    *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
@@ -415,9 +448,12 @@ public interface User {
    * on <a href="https://datatracker.ietf.org/doc/html/rfc8176">RFC8176</a>. This information can be used
    * to filter authenticated users by their authentication mechanism.
    *
-   * @return unique list of claims.
+   * @return {@code true} if claim is present in the principal.
    */
-  default List<String> amr() {
-    return Collections.emptyList();
+  default boolean hasAmr(String value) {
+    if (principal().containsKey("amr")) {
+      return principal().getJsonArray("amr").contains(value);
+    }
+    return false;
   }
 }

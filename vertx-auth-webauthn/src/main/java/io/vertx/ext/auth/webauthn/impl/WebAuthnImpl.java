@@ -377,7 +377,17 @@ public class WebAuthnImpl implements WebAuthn {
             // the create challenge is complete we can finally safe this
             // new authenticator to the storage
            return updater.apply(authrInfo)
-              .compose(stored -> Future.succeededFuture(User.create(authrInfo.toJson())));
+              .compose(stored -> {
+                User user = User.create(authrInfo.toJson());
+                // metadata "amr"
+                if ((authrInfo.getFlags() & AuthData.USER_PRESENT) != 0) {
+                  user.principal().put("amr", Arrays.asList("user", "swk"));
+                } else {
+                  user.principal().put("amr", Collections.singletonList("swk"));
+                }
+
+                return Future.succeededFuture(user);
+              });
 
           } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
             return Future.failedFuture(e);
@@ -409,7 +419,17 @@ public class WebAuthnImpl implements WebAuthn {
                       authenticator.setCounter(counter);
                       // update the credential (the important here is to update the counter)
                       return updater.apply(authenticator)
-                        .compose(stored -> Future.succeededFuture(User.create(authenticator.toJson())));
+                        .compose(stored -> {
+                          User user = User.create(authenticator.toJson());
+                          // metadata "amr"
+                          if ((authenticator.getFlags() & AuthData.USER_PRESENT) != 0) {
+                            user.principal().put("amr", Arrays.asList("user", "swk"));
+                          } else {
+                            user.principal().put("amr", Collections.singletonList("swk"));
+                          }
+
+                          return Future.succeededFuture(user);
+                        });
 
                     } catch (RuntimeException | AttestationException | IOException | NoSuchAlgorithmException e) {
                       return Future.failedFuture(e);
@@ -524,7 +544,8 @@ public class WebAuthnImpl implements WebAuthn {
         .setPublicKey(base64UrlEncode(authData.getCredentialPublicKey()))
         .setCounter(authData.getSignCounter())
         .setCredID(base64UrlEncode(authData.getCredentialId()))
-        .setAttestationCertificates(certificates);
+        .setAttestationCertificates(certificates)
+        .setFlags(authData.getFlags());
     }
   }
 

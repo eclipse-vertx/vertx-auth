@@ -609,6 +609,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             .put("idToken", validToken(token, true));
           // copy the userInfo basic properties to the root
           copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false, "sub", "name", "email", "picture");
+          // copy amr to the principal
+          copyProperties(user.attributes().getJsonObject("idToken"), user.principal(), true, "amr");
         } catch (NoSuchKeyIdException e) {
           if (!skipMissingKeyNotify) {
             // we haven't notified this id yet

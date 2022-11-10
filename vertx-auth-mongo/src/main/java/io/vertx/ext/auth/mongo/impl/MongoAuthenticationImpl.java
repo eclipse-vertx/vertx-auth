@@ -29,6 +29,7 @@ import io.vertx.ext.mongo.MongoClient;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -157,6 +158,9 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
 
   private User createUser(JsonObject json) {
     User user = User.create(json);
+    // metadata "amr"
+    user.principal().put("amr", Collections.singletonList("pwd"));
+
     if (legacyStrategy != null) {
       json.put(MongoAuthImpl.PROPERTY_FIELD_SALT, hashField);
       json.put(MongoAuthImpl.PROPERTY_FIELD_PASSWORD, options.getPasswordField());

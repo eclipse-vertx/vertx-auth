@@ -27,6 +27,7 @@ import io.vertx.ext.auth.htdigest.HtdigestCredentials;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -144,7 +145,11 @@ public class HtdigestAuthImpl implements HtdigestAuth {
     }
 
     if (digest.equals(authInfo.getResponse())) {
-      return Future.succeededFuture(User.create(new JsonObject().put("username", credential.username).put("realm", credential.realm)));
+      User user = User.create(new JsonObject().put("username", credential.username).put("realm", credential.realm));
+      // metadata "amr"
+      user.principal().put("amr", Collections.singletonList("pwd"));
+
+      return Future.succeededFuture(user);
     } else {
       return Future.failedFuture("Bad response");
     }

@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class HotpAuthImpl implements HotpAuth {
@@ -194,6 +195,9 @@ public class HotpAuthImpl implements HotpAuth {
       new JsonObject()
         .put("otp", "hotp")
         .put("counter", authenticator.getCounter())
-        .put("auth_attempts", authenticator.getAuthAttempts()));
+        .put("auth_attempts", authenticator.getAuthAttempts())
+        // amr
+        .put("amr", Arrays.asList("mfa", "otp"))
+    );
   }
 }
