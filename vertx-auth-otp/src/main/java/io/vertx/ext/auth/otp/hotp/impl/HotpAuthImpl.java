@@ -11,9 +11,7 @@
 
 package io.vertx.ext.auth.otp.hotp.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -29,6 +27,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class HotpAuthImpl implements HotpAuth {
@@ -46,84 +45,77 @@ public class HotpAuthImpl implements HotpAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new OtpCredentials(credentials), resultHandler);
+  public Future<User> authenticate(JsonObject credentials) {
+    return authenticate(new OtpCredentials(credentials));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
+    final OtpCredentials authInfo;
     try {
-      OtpCredentials authInfo = (OtpCredentials) credentials;
+      authInfo = (OtpCredentials) credentials;
       authInfo.checkValid(hotpAuthOptions);
+    } catch (RuntimeException e) {
+      return Future.failedFuture(e);
+    }
 
-      fetcher.apply(authInfo.getIdentifier())
-        .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-        .onSuccess(authenticator -> {
-          if (authenticator == null) {
-            resultHandler.handle(Future.failedFuture("user is not found"));
-          } else {
-            long counter = authenticator.getCounter();
-            String key = authenticator.getKey();
-            String algorithm = authenticator.getAlgorithm();
+    return fetcher
+      .apply(authInfo.getIdentifier())
+      .compose(authenticator -> {
+        if (authenticator == null) {
+          return Future.failedFuture("user is not found");
+        } else {
+          long counter = authenticator.getCounter();
+          String key = authenticator.getKey();
+          String algorithm = authenticator.getAlgorithm();
 
-            OtpKey otpKey = new OtpKey()
-              .setKey(key)
-              .setAlgorithm(algorithm);
+          OtpKey otpKey = new OtpKey()
+            .setKey(key)
+            .setAlgorithm(algorithm);
 
-            ++counter;
-            Integer authAttempts = authenticator.getAuthAttempts();
-            authAttempts = authAttempts != null ? ++authAttempts : 1;
-            authenticator.setAuthAttempts(authAttempts);
+          ++counter;
+          Integer authAttempts = authenticator.getAuthAttempts();
+          authAttempts = authAttempts != null ? ++authAttempts : 1;
+          authenticator.setAuthAttempts(authAttempts);
 
-            String oneTimePassword;
+          String oneTimePassword;
 
-            try {
-              oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
-            } catch (GeneralSecurityException e) {
-              resultHandler.handle(Future.failedFuture(e));
-              return;
-            }
+          try {
+            oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+          } catch (GeneralSecurityException e) {
+            return Future.failedFuture(e);
+          }
 
-            if (oneTimePassword.equals(authInfo.getCode())) {
-              authenticator.setCounter(counter);
-              updater.apply(authenticator)
-                .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-                .onSuccess(v -> resultHandler.handle(Future.succeededFuture(createUser(authenticator))));
-              return;
-            }
+          if (oneTimePassword.equals(authInfo.getCode())) {
+            authenticator.setCounter(counter);
+            return updater.apply(authenticator)
+              .compose(v -> Future.succeededFuture(createUser(authenticator)));
+          }
 
-            if (hotpAuthOptions.isUsingAttemptsLimit() && authAttempts >= hotpAuthOptions.getAuthAttemptsLimit()) {
-              updater.apply(authenticator)
-                .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-                .onSuccess(v -> resultHandler.handle(Future.failedFuture("invalid code")));
-              return;
-            } else if (hotpAuthOptions.isUsingResynchronization()) {
-              for (int i = 0; i < hotpAuthOptions.getLookAheadWindow(); i++) {
-                ++counter;
+          if (hotpAuthOptions.isUsingAttemptsLimit() && authAttempts >= hotpAuthOptions.getAuthAttemptsLimit()) {
+            return updater.apply(authenticator)
+              .compose(v -> Future.failedFuture("invalid code"));
+          } else if (hotpAuthOptions.isUsingResynchronization()) {
+            for (int i = 0; i < hotpAuthOptions.getLookAheadWindow(); i++) {
+              ++counter;
 
-                try {
-                  oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
-                } catch (GeneralSecurityException e) {
-                  resultHandler.handle(Future.failedFuture(e));
-                  return;
-                }
+              try {
+                oneTimePassword = OneTimePasswordAlgorithm.generateOTP(otpKey.getKeyBytes(), counter, hotpAuthOptions.getPasswordLength(), false, -1);
+              } catch (GeneralSecurityException e) {
+                return Future.failedFuture(e);
+              }
 
-                if (MessageDigest.isEqual(oneTimePassword.getBytes(StandardCharsets.UTF_8), authInfo.getCode().getBytes(StandardCharsets.UTF_8))) {
-                  authenticator.setCounter(counter);
-                  updater.apply(authenticator)
-                    .onFailure(err -> resultHandler.handle(Future.failedFuture(err)))
-                    .onSuccess(v -> resultHandler.handle(Future.succeededFuture(createUser(authenticator))));
-                  return;
-                }
+              if (MessageDigest.isEqual(oneTimePassword.getBytes(StandardCharsets.UTF_8), authInfo.getCode().getBytes(StandardCharsets.UTF_8))) {
+                authenticator.setCounter(counter);
+                return updater.apply(authenticator)
+                  .compose(v -> Future.succeededFuture(createUser(authenticator)));
               }
             }
-
-            resultHandler.handle(Future.failedFuture("invalid code"));
           }
-        });
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
-    }
+
+          return Future.failedFuture("invalid code");
+        }
+      });
   }
 
   @Override
@@ -203,6 +195,9 @@ public class HotpAuthImpl implements HotpAuth {
       new JsonObject()
         .put("otp", "hotp")
         .put("counter", authenticator.getCounter())
-        .put("auth_attempts", authenticator.getAuthAttempts()));
+        .put("auth_attempts", authenticator.getAuthAttempts())
+        // amr
+        .put("amr", Arrays.asList("mfa", "otp"))
+    );
   }
 }

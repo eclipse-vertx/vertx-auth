@@ -19,7 +19,6 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -27,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.function.Function;
 
 
 /**
@@ -38,22 +38,17 @@ import java.util.Map;
  */
 public final class SimpleHttpClient {
 
-  private final VertxInternal vertx;
   private final HttpClient client;
   private final String userAgent;
 
   public SimpleHttpClient(Vertx vertx, String userAgent, HttpClientOptions options) {
-    this.vertx = (VertxInternal) vertx;
     this.client = vertx.createHttpClient(options);
     this.userAgent = userAgent;
   }
 
   public Future<SimpleHttpResponse> fetch(HttpMethod method, String url, JsonObject headers, Buffer payload) {
-    final Promise<SimpleHttpResponse> promise = vertx.promise();
-
     if (url == null || url.length() == 0) {
-      promise.fail("Invalid url");
-      return promise.future();
+      return Future.failedFuture("Invalid url");
     }
 
     RequestOptions options = new RequestOptions()
@@ -77,13 +72,7 @@ public final class SimpleHttpClient {
     }
 
     // create a request
-    makeRequest(options, payload, promise);
-    return promise.future();
-  }
-
-  public SimpleHttpClient fetch(HttpMethod method, String url, JsonObject headers, Buffer payload, Handler<AsyncResult<SimpleHttpResponse>> callback) {
-    fetch(method, url, headers, payload).onComplete(callback);
-    return this;
+    return makeRequest(options, payload);
   }
 
   public static Buffer jsonToQuery(JsonObject json) {
@@ -142,48 +131,33 @@ public final class SimpleHttpClient {
   }
 
 
-  private void makeRequest(RequestOptions options, Buffer payload, final Handler<AsyncResult<SimpleHttpResponse>> callback) {
-    client.request(options, request -> {
-      if (request.failed()) {
-        callback.handle(Future.failedFuture(request.cause()));
-        return;
-      }
+  private Future<SimpleHttpResponse> makeRequest(RequestOptions options, Buffer payload) {
+    return client.request(options)
+      .compose(req -> {
+        final Function<HttpClientResponse, Future<SimpleHttpResponse>> resultHandler = res -> {
+          // read the body regardless
+          return res.body()
+            .compose(value -> {
+                if (res.statusCode() < 200 || res.statusCode() >= 300) {
+                  if (value == null || value.length() == 0) {
+                    return Future.failedFuture(res.statusMessage());
+                  } else {
+                    return Future.failedFuture(res.statusMessage() + ": " + value);
+                  }
+                } else {
+                  return Future.succeededFuture(new SimpleHttpResponse(res.statusCode(), res.headers(), value));
+                }
+            });
+        };
 
-      final HttpClientRequest req = request.result();
-
-      final Handler<AsyncResult<HttpClientResponse>> resultHandler = send -> {
-        if (send.failed()) {
-          callback.handle(Future.failedFuture(send.cause()));
-          return;
+        // send
+        if (payload != null) {
+          return req.send(payload)
+            .compose(resultHandler);
+        } else {
+          return req.send()
+            .compose(resultHandler);
         }
-
-        final HttpClientResponse res = send.result();
-
-        // read the body regardless
-        res.body(body -> {
-          if (body.succeeded()) {
-            Buffer value = body.result();
-            if (res.statusCode() < 200 || res.statusCode() >= 300) {
-              if (value == null || value.length() == 0) {
-                callback.handle(Future.failedFuture(res.statusMessage()));
-              } else {
-                callback.handle(Future.failedFuture(res.statusMessage() + ": " + value));
-              }
-            } else {
-              callback.handle(Future.succeededFuture(new SimpleHttpResponse(res.statusCode(), res.headers(), value)));
-            }
-          } else {
-            callback.handle(Future.failedFuture(body.cause()));
-          }
-        });
-      };
-
-      // send
-      if (payload != null) {
-        req.send(payload, resultHandler);
-      } else {
-        req.send(resultHandler);
-      }
-    });
+      });
   }
 }

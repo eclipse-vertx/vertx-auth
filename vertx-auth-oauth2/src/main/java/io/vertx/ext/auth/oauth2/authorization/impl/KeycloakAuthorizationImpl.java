@@ -15,9 +15,7 @@
  */
 package io.vertx.ext.auth.oauth2.authorization.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -39,12 +37,11 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+  public Future<Void> getAuthorizations(User user) {
     final JsonObject accessToken = user.attributes().getJsonObject("accessToken");
 
     if (accessToken == null) {
-      handler.handle(Future.failedFuture("User doesn't contain a decoded Token"));
-      return;
+      return Future.failedFuture("User doesn't contain a decoded Token");
     }
 
     final Set<Authorization> authorizations = new HashSet<>();
@@ -54,20 +51,18 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
     try {
       extractApplicationRoles(accessToken, authorizations);
     } catch (RuntimeException e) {
-      handler.handle(Future.failedFuture(e));
-      return;
+      return Future.failedFuture(e);
     }
     // 2. realm roles
     try {
       extractRealmRoles(accessToken, authorizations);
     } catch (RuntimeException e) {
-      handler.handle(Future.failedFuture(e));
-      return;
+      return Future.failedFuture(e);
     }
 
     user.authorizations().add(getId(), authorizations);
     // return
-    handler.handle(Future.succeededFuture());
+    return Future.succeededFuture();
   }
 
   private static void extractApplicationRoles(JsonObject accessToken, Set<Authorization> authorizations) {

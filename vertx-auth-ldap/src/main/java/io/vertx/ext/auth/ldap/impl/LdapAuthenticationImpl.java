@@ -12,6 +12,8 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Objects;
 
@@ -19,10 +21,9 @@ import javax.naming.Context;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
+import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -31,7 +32,6 @@ import io.vertx.ext.auth.ldap.LdapAuthentication;
 import io.vertx.ext.auth.ldap.LdapAuthenticationOptions;
 
 /**
- *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 public class LdapAuthenticationImpl implements LdapAuthentication {
@@ -47,31 +47,31 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(credentials), resultHandler);
+  public Future<io.vertx.ext.auth.User> authenticate(JsonObject credentials) {
+    return authenticate(new UsernamePasswordCredentials(credentials));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
+  public Future<io.vertx.ext.auth.User> authenticate(Credentials credentials) {
+    final UsernamePasswordCredentials authInfo;
     try {
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo = (UsernamePasswordCredentials) credentials;
       authInfo.checkValid(null);
-
-      String ldapPrincipal = getLdapPrincipal(authInfo.getUsername());
-      createLdapContext(ldapPrincipal, authInfo.getPassword(), contextResponse -> {
-        if (contextResponse.succeeded()) {
-          User user = User.fromName(authInfo.getUsername());
-          resultHandler.handle(Future.succeededFuture(user));
-        } else {
-          resultHandler.handle(Future.failedFuture(contextResponse.cause()));
-        }
-      });
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
+
+    String ldapPrincipal = getLdapPrincipal(authInfo.getUsername());
+    return createLdapContext(ldapPrincipal, authInfo.getPassword())
+      .compose(ldapContext -> {
+        User user = User.fromName(authInfo.getUsername());
+        // metadata "amr"
+        user.principal().put("amr", Collections.singletonList("pwd"));
+        return Future.succeededFuture(user);
+      });
   }
 
-  private void createLdapContext(String principal, String credential, Handler<AsyncResult<LdapContext>> resultHandler) {
+  private Future<LdapContext> createLdapContext(String principal, String credential) {
     Hashtable<String, Object> environment = new Hashtable<>();
     // set the initial cntext factory
     environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -89,7 +89,10 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
     }
     // referral
     environment.put(Context.REFERRAL,
-        authenticationOptions.getReferral() == null ? FOLLOW_REFERRAL : authenticationOptions.getReferral());
+      authenticationOptions.getReferral() == null ? FOLLOW_REFERRAL : authenticationOptions.getReferral());
+
+    Promise<LdapContext> promise = ((VertxInternal) vertx).promise();
+
     vertx.executeBlocking(blockingResult -> {
       try {
         LdapContext context = new InitialLdapContext(environment, null);
@@ -97,7 +100,9 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
       } catch (Throwable t) {
         blockingResult.fail(t);
       }
-    }, resultHandler);
+    }, promise);
+
+    return promise.future();
   }
 
   private String getLdapPrincipal(String principal) {

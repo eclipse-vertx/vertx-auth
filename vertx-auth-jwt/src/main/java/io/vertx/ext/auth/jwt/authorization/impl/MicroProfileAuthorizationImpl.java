@@ -15,9 +15,7 @@
  */
 package io.vertx.ext.auth.jwt.authorization.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
@@ -39,12 +37,11 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+  public Future<Void> getAuthorizations(User user) {
     final JsonObject accessToken = user.attributes().getJsonObject("accessToken");
 
     if (accessToken == null) {
-      handler.handle(Future.failedFuture("User doesn't contain a decoded Token"));
-      return;
+      return Future.failedFuture("User doesn't contain a decoded Token");
     }
 
     final Set<Authorization> authorizations = new HashSet<>();
@@ -63,14 +60,13 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
           authorizations.add(RoleBasedAuthorization.create((String) el));
         } else {
           // abort the parsing
-          handler.handle(Future.failedFuture("Cannot parse role: " + el));
-          return;
+          return Future.failedFuture("Cannot parse role: " + el);
         }
       }
     }
 
     user.authorizations().add(getId(), authorizations);
     // return
-    handler.handle(Future.succeededFuture());
+    return Future.succeededFuture();
   }
 }

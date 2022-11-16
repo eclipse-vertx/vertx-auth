@@ -16,9 +16,11 @@
 
 package io.vertx.ext.auth.shiro.impl;
 
+import java.util.Collections;
 import java.util.Objects;
 
-import io.vertx.core.Future;
+import io.vertx.core.*;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import org.apache.shiro.SecurityUtils;
@@ -32,17 +34,12 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 
 /**
- *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @Deprecated
@@ -74,36 +71,40 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
+  public Future<User> authenticate(JsonObject authInfo) {
+    return authenticate(new UsernamePasswordCredentials(authInfo));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
+    final UsernamePasswordCredentials authInfo;
     try {
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo = (UsernamePasswordCredentials) credentials;
       authInfo.checkValid(null);
-
-      vertx.executeBlocking(fut -> {
-        // before doing any shiro operations set the context
-        SecurityUtils.setSecurityManager(securityManager);
-        // proceed
-        SubjectContext subjectContext = new DefaultSubjectContext();
-        Subject subject = securityManager.createSubject(subjectContext);
-        String username = authInfo.getUsername();
-        String password = authInfo.getPassword();
-        AuthenticationToken token = new UsernamePasswordToken(username, password);
-        try {
-          subject.login(token);
-          fut.complete(createUser(securityManager, subject));
-        } catch (AuthenticationException e) {
-          fut.fail(e);
-        }
-      }, resultHandler);
-
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
+
+    final Promise<User> promise = ((VertxInternal) vertx).promise();
+
+    vertx.executeBlocking(fut -> {
+      // before doing any shiro operations set the context
+      SecurityUtils.setSecurityManager(securityManager);
+      // proceed
+      SubjectContext subjectContext = new DefaultSubjectContext();
+      Subject subject = securityManager.createSubject(subjectContext);
+      String username = authInfo.getUsername();
+      String password = authInfo.getPassword();
+      AuthenticationToken token = new UsernamePasswordToken(username, password);
+      try {
+        subject.login(token);
+        fut.complete(createUser(securityManager, subject));
+      } catch (AuthenticationException e) {
+        fut.fail(e);
+      }
+    }, promise);
+
+    return promise.future();
   }
 
   Vertx getVertx() {
@@ -122,8 +123,11 @@ public class ShiroAuthProviderImpl implements ShiroAuth {
     Objects.requireNonNull(securityManager);
     Objects.requireNonNull(subject);
 
-    JsonObject principal = new JsonObject().put("username",  subject.getPrincipal().toString());
+    JsonObject principal = new JsonObject().put("username", subject.getPrincipal().toString());
     User result = User.create(principal);
+    // metadata "amr"
+    result.principal().put("amr", Collections.singletonList("pwd"));
+
     result.authorizations().add("shiro-authentication", GetAuthorizationsHack.getAuthorizations(securityManager, subject));
     return result;
   }

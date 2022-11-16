@@ -12,9 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -67,128 +65,111 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     }
   }
 
-  private final Vertx vertx;
   private final String path;
 
-  private Map<String, User> users;
-  private Map<String, Role> roles;
+  private final Map<String, User> users = new HashMap<>();
 
   public PropertyFileAuthenticationImpl(Vertx vertx, String path) {
-    this.vertx = Objects.requireNonNull(vertx);
+    Objects.requireNonNull(vertx);
     this.path = Objects.requireNonNull(path);
-  }
+    final Map<String, Role> roles = new HashMap<>();
 
-  private void readFile(Handler<AsyncResult<Boolean>> handler) {
-    vertx.fileSystem().readFile(path, readResponse -> {
-      this.users = new HashMap<>();
-      this.roles = new HashMap<>();
-      if (readResponse.failed()) {
-        handler.handle(Future.failedFuture(readResponse.cause()));
-      } else {
-        String fileContent = readResponse.result().toString(StandardCharsets.UTF_8);
-        String[] lines = fileContent.split("\n");
-        for (String line : lines) {
-          if (line.length() == 0 || line.startsWith("#")) {
-            // skip empty lines or comments
-            continue;
-          }
-
-          if (line.startsWith("user.")) {
-            logger.log(Level.FINE, () -> "read user line: " + line);
-            String usernameAndRoles = line.substring(5);
-            int index = usernameAndRoles.indexOf('=');
-            String tmpName = index > 0 ? usernameAndRoles.substring(0, index).trim() : "";
-            String tmpRoles = index > 0 ? usernameAndRoles.substring(index + 1).trim() : "";
-            if (tmpName.length() > 0) {
-              User user = new User(tmpName);
-              users.put(tmpName, user);
-              int roleIndex = 0;
-              for (String tmpRole : tmpRoles.split(",")) {
-                tmpRole = tmpRole.trim();
-                if (roleIndex == 0) {
-                  user.password = tmpRole;
-                } else if (tmpRole.length() > 0) {
-                  Role role = roles.get(tmpRole);
-                  if (role == null) {
-                    role = new Role(tmpRole);
-                    roles.put(tmpRole, role);
-                  }
-                  user.addRole(role);
-                }
-                roleIndex++;
-              }
-            } else {
-              logger.log(Level.WARNING, () -> "read blank username - " + line);
-            }
-          } else if (line.startsWith("role.")) {
-            logger.log(Level.FINE, () -> "read role line - " + line);
-            String roleAndProperties = line.substring(5);
-            int index = roleAndProperties.indexOf('=');
-            String tmpName = index > 0 ? roleAndProperties.substring(0, index).trim() : "";
-            String tmpProperties = index > 0 ? roleAndProperties.substring(index + 1).trim() : "";
-            if (tmpName.length() > 0) {
-              Role role = roles.get(tmpName);
-              if (role == null) {
-                role = new Role(tmpName);
-                roles.put(tmpName, role);
-              }
-              for (String tmpProperty : tmpProperties.split(",")) {
-                tmpProperty = tmpProperty.trim();
-                if (tmpProperty.length() > 0) {
-                  role.addPermission(tmpProperty);
-                }
-              }
-            } else {
-              logger.log(Level.WARNING, () -> "read blank role - " + line);
-            }
-          } else {
-            logger.log(Level.WARNING, () -> "read unknow line - " + line);
-          }
-        }
-        handler.handle(Future.succeededFuture(Boolean.TRUE));
+    String fileContent = vertx.fileSystem().readFileBlocking(path).toString(StandardCharsets.UTF_8);
+    String[] lines = fileContent.split("\n");
+    for (String line : lines) {
+      if (line.length() == 0 || line.startsWith("#")) {
+        // skip empty lines or comments
+        continue;
       }
-    });
-  }
 
-  private void getUser(String username, Handler<AsyncResult<User>> handler) {
-    if (users == null) {
-      readFile(readFileResponse -> {
-        User result = users.get(username);
-        handler.handle(result != null ? Future.succeededFuture(result) : Future.failedFuture("unknown user"));
-      });
-    } else {
-      User result = users.get(username);
-      handler.handle(result != null ? Future.succeededFuture(result) : Future.failedFuture("unknown user"));
-    }
-  }
-
-  @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
-  }
-
-  @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    try {
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
-      authInfo.checkValid(null);
-
-      getUser(authInfo.getUsername(), userResult -> {
-        if (userResult.succeeded()) {
-          User propertyUser = userResult.result();
-          if (Objects.equals(propertyUser.password, authInfo.getPassword())) {
-            resultHandler.handle(Future.succeededFuture(io.vertx.ext.auth.User.fromName(propertyUser.name)));
-          } else {
-            resultHandler.handle(Future.failedFuture("invalid username/password"));
+      if (line.startsWith("user.")) {
+        logger.log(Level.FINE, () -> "read user line: " + line);
+        String usernameAndRoles = line.substring(5);
+        int index = usernameAndRoles.indexOf('=');
+        String tmpName = index > 0 ? usernameAndRoles.substring(0, index).trim() : "";
+        String tmpRoles = index > 0 ? usernameAndRoles.substring(index + 1).trim() : "";
+        if (tmpName.length() > 0) {
+          User user = new User(tmpName);
+          users.put(tmpName, user);
+          int roleIndex = 0;
+          for (String tmpRole : tmpRoles.split(",")) {
+            tmpRole = tmpRole.trim();
+            if (roleIndex == 0) {
+              user.password = tmpRole;
+            } else if (tmpRole.length() > 0) {
+              Role role = roles.get(tmpRole);
+              if (role == null) {
+                role = new Role(tmpRole);
+                roles.put(tmpRole, role);
+              }
+              user.addRole(role);
+            }
+            roleIndex++;
           }
         } else {
-          resultHandler.handle(Future.failedFuture("invalid username/password"));
+          logger.log(Level.WARNING, () -> "read blank username - " + line);
+        }
+      } else if (line.startsWith("role.")) {
+        logger.log(Level.FINE, () -> "read role line - " + line);
+        String roleAndProperties = line.substring(5);
+        int index = roleAndProperties.indexOf('=');
+        String tmpName = index > 0 ? roleAndProperties.substring(0, index).trim() : "";
+        String tmpProperties = index > 0 ? roleAndProperties.substring(index + 1).trim() : "";
+        if (tmpName.length() > 0) {
+          Role role = roles.get(tmpName);
+          if (role == null) {
+            role = new Role(tmpName);
+            roles.put(tmpName, role);
+          }
+          for (String tmpProperty : tmpProperties.split(",")) {
+            tmpProperty = tmpProperty.trim();
+            if (tmpProperty.length() > 0) {
+              role.addPermission(tmpProperty);
+            }
+          }
+        } else {
+          logger.log(Level.WARNING, () -> "read blank role - " + line);
+        }
+      } else {
+        logger.log(Level.WARNING, () -> "read unknow line - " + line);
+      }
+    }
+  }
+
+  private Future<User> getUser(String username) {
+    if (!users.containsKey(username)) {
+      return Future.failedFuture("unknown user");
+    }
+
+    return Future.succeededFuture(users.get(username));
+  }
+
+  @Override
+  public Future<io.vertx.ext.auth.User> authenticate(JsonObject authInfo) {
+    return authenticate(new UsernamePasswordCredentials(authInfo));
+  }
+
+  @Override
+  public Future<io.vertx.ext.auth.User> authenticate(Credentials credentials) {
+    final UsernamePasswordCredentials authInfo;
+    try {
+      authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+    } catch (RuntimeException e) {
+      return Future.failedFuture(e);
+    }
+
+    return getUser(authInfo.getUsername())
+      .compose(propertyUser -> {
+        if (Objects.equals(propertyUser.password, authInfo.getPassword())) {
+          io.vertx.ext.auth.User user = io.vertx.ext.auth.User.fromName(propertyUser.name);
+          // metadata "amr"
+          user.principal().put("amr", Collections.singletonList("pwd"));
+          return Future.succeededFuture(user);
+        } else {
+          return Future.failedFuture("invalid username/password");
         }
       });
-
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
-    }
   }
 
   @Override
@@ -198,23 +179,19 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Void>> resultHandler) {
+  public Future<Void> getAuthorizations(io.vertx.ext.auth.User user) {
     String username = user.principal().getString("username");
-    getUser(username, userResult -> {
-      if (userResult.succeeded()) {
+    return getUser(username)
+      .onSuccess(record -> {
         Set<Authorization> result = new HashSet<>();
-        for (Role role : userResult.result().roles.values()) {
+        for (Role role : record.roles.values()) {
           result.add(RoleBasedAuthorization.create(role.name));
           for (String permission : role.permissions) {
             result.add(WildcardPermissionBasedAuthorization.create(permission));
           }
         }
         user.authorizations().add(getId(), result);
-        resultHandler.handle(Future.succeededFuture());
-      } else {
-        resultHandler.handle(Future.failedFuture("invalid username"));
-      }
-    });
+      })
+      .mapEmpty();
   }
-
 }

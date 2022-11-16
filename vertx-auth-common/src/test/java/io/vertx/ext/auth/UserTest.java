@@ -20,8 +20,9 @@ import org.junit.Test;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.UserConverter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 public class UserTest {
 
@@ -159,5 +160,62 @@ public class UserTest {
     // expectation
     assertEquals("B", userA.principal().getString("access_token"));
     assertEquals(new JsonArray().add("read").add("write"), userA.attributes().getJsonArray("roles"));
+  }
+
+  @Test
+  public void testMergeAmr() {
+    User userA, userB;
+
+    userA = User.fromName("a");
+    userB = User.fromName("b");
+
+    userA.principal().put("amr", Collections.singletonList("pwd"));
+    userB.principal().put("amr", Collections.singletonList("pwd"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertTrue(userA.hasAmr("pwd"));
+    assertTrue(userA.hasAmr("mfa"));
+    assertFalse(userB.hasAmr("mfa"));
+
+    // Test #2 (B) has no amr
+
+    userA = User.fromName("a");
+    userB = User.fromName("b");
+
+    userA.principal().put("amr", Collections.singletonList("pwd"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertTrue(userA.hasAmr("pwd"));
+    assertTrue(userA.hasAmr("mfa"));
+    assertFalse(userB.hasAmr("mfa"));
+
+    // Test #3 (A) has no amr
+
+    userA = User.fromName("a");
+    userB = User.fromName("b");
+
+    userA.principal().put("amr", Collections.singletonList("pwd"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertTrue(userA.hasAmr("pwd"));
+    assertTrue(userA.hasAmr("mfa"));
+    assertFalse(userB.hasAmr("mfa"));
+
+    // Test #4 (A and B) has no amr
+
+    userA = User.fromName("a");
+    userB = User.fromName("b");
+
+    userA.merge(userB);
+
+    // expectation
+    assertTrue(userA.hasAmr("mfa"));
+    assertFalse(userB.hasAmr("mfa"));
   }
 }

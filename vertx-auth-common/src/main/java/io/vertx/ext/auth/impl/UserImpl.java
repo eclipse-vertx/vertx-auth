@@ -109,9 +109,42 @@ public class UserImpl implements User, ClusterSerializable {
       return this;
     }
 
+    // hold a reference before we mutate the principal bellow
+    JsonArray amr = principal().getJsonArray("amr");
+    JsonArray otherAmr = other.principal().getJsonArray("amr");
+
     principal()
       // merge in the rhs
       .mergeIn(other.principal());
+
+    // process "amr"
+    if (amr == null) {
+      if (otherAmr != null) {
+        amr = otherAmr.copy();
+      }
+    } else {
+      if (otherAmr != null) {
+        amr = amr.copy();
+        for (Object el : otherAmr) {
+          if (!amr.contains(el)) {
+            amr.add(el);
+          }
+        }
+      }
+    }
+
+    // merge also means mfa
+    if (amr == null) {
+      principal.put("amr", Collections.singletonList("mfa"));
+    } else {
+      amr = amr.copy();
+      if (!amr.contains("mfa")) {
+        amr.add("mfa");
+      }
+      principal.put("amr", amr);
+    }
+
+    // process the attributes
 
     JsonObject attrs = attributes();
     JsonObject otherAttrs = other.attributes();

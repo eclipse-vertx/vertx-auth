@@ -40,6 +40,11 @@ public class AuthenticatorConverter {
             obj.setCredID((String)member.getValue());
           }
           break;
+        case "flags":
+          if (member.getValue() instanceof Number) {
+            obj.setFlags(((Number)member.getValue()).intValue());
+          }
+          break;
         case "fmt":
           if (member.getValue() instanceof String) {
             obj.setFmt((String)member.getValue());
@@ -79,6 +84,7 @@ public class AuthenticatorConverter {
     if (obj.getCredID() != null) {
       json.put("credID", obj.getCredID());
     }
+    json.put("flags", obj.getFlags());
     if (obj.getFmt() != null) {
       json.put("fmt", obj.getFmt());
     }

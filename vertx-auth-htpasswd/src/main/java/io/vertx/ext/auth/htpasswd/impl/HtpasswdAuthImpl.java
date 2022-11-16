@@ -15,14 +15,13 @@
  */
 package io.vertx.ext.auth.htpasswd.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
@@ -32,7 +31,6 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 import io.vertx.ext.auth.htpasswd.impl.hash.Plaintext;
-import io.vertx.ext.auth.impl.UserImpl;
 
 /**
  * An implementation of {@link HtpasswdAuth}
@@ -66,29 +64,32 @@ public class HtpasswdAuthImpl implements HtpasswdAuth {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
+  public Future<User> authenticate(JsonObject authInfo) {
+    return authenticate(new UsernamePasswordCredentials(authInfo));
   }
 
   @Override
-  public void authenticate(Credentials credential, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credential) {
 
+    final UsernamePasswordCredentials authInfo;
     try {
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credential;
+      authInfo = (UsernamePasswordCredentials) credential;
       authInfo.checkValid(null);
-
-      if (!htUsers.containsKey(authInfo.getUsername())) {
-        resultHandler.handle((Future.failedFuture("Unknown username.")));
-        return;
-      }
-
-      if (strategy.verify(htUsers.get(authInfo.getUsername()), authInfo.getPassword())) {
-        resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("username", authInfo.getUsername()))));
-      } else {
-        resultHandler.handle(Future.failedFuture("Bad response"));
-      }
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
+    }
+
+    if (!htUsers.containsKey(authInfo.getUsername())) {
+      return Future.failedFuture("Unknown username.");
+    }
+
+    if (strategy.verify(htUsers.get(authInfo.getUsername()), authInfo.getPassword())) {
+      User user = User.fromName(authInfo.getUsername());
+      // metadata "amr"
+      user.principal().put("amr", Collections.singletonList("pwd"));
+      return Future.succeededFuture(user);
+    } else {
+      return Future.failedFuture("Bad response");
     }
   }
 }

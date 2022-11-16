@@ -44,12 +44,10 @@ public class MongoAuthorizationImpl implements MongoAuthorization {
 
   /**
    * Creates a new instance
-   * @param providerId
-    *          the provider ID to differentiate from others
-   * @param mongoClient
-   *          the {@link MongoClient} to be used
-   * @param options
-   *          the options for configuring the new instance
+   *
+   * @param providerId  the provider ID to differentiate from others
+   * @param mongoClient the {@link MongoClient} to be used
+   * @param options     the options for configuring the new instance
    */
   public MongoAuthorizationImpl(String providerId, MongoClient mongoClient, MongoAuthorizationOptions options) {
     this.providerId = Objects.requireNonNull(providerId);
@@ -73,32 +71,27 @@ public class MongoAuthorizationImpl implements MongoAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+  public Future<Void> getAuthorizations(User user) {
     JsonObject query = createQuery(user.principal().getString(options.getUsernameField()));
-    mongoClient.find(options.getCollectionName(), query, res -> {
-
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-        return;
-      }
-
-      for (JsonObject jsonObject : res.result()) {
-        JsonArray roles = jsonObject.getJsonArray(options.getRoleField());
-        if (roles!=null) {
-          for (int i=0; i<roles.size(); i++) {
-            String role = roles.getString(i);
-            user.authorizations().add(providerId, RoleBasedAuthorization.create(role));
+    return mongoClient.find(options.getCollectionName(), query)
+      .compose(res -> {
+        for (JsonObject jsonObject : res) {
+          JsonArray roles = jsonObject.getJsonArray(options.getRoleField());
+          if (roles != null) {
+            for (int i = 0; i < roles.size(); i++) {
+              String role = roles.getString(i);
+              user.authorizations().add(providerId, RoleBasedAuthorization.create(role));
+            }
+          }
+          JsonArray permissions = jsonObject.getJsonArray(options.getPermissionField());
+          if (permissions != null) {
+            for (int i = 0; i < permissions.size(); i++) {
+              String permission = permissions.getString(i);
+              user.authorizations().add(providerId, PermissionBasedAuthorization.create(permission));
+            }
           }
         }
-        JsonArray permissions = jsonObject.getJsonArray(options.getPermissionField());
-        if (permissions!=null) {
-          for (int i=0; i<permissions.size(); i++) {
-            String permission = permissions.getString(i);
-            user.authorizations().add(providerId, PermissionBasedAuthorization.create(permission));
-          }
-        }
-      }
-      handler.handle(Future.succeededFuture());
-    });
+        return Future.succeededFuture();
+      });
   }
 }

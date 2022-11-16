@@ -15,13 +15,7 @@
  */
 package io.vertx.ext.auth.oauth2.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Closeable;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -55,7 +49,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
   private final Vertx vertx;
-  private final ContextInternal ctx;
+  private final Context context;
+
   private final OAuth2Options config;
   private final OAuth2API api;
 
@@ -67,7 +62,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
     this.vertx = vertx;
-    this.ctx = (ContextInternal) vertx.getOrCreateContext();
+    this.context = vertx.getOrCreateContext();
     this.config = config;
     this.api = new OAuth2API(vertx, config);
     // compute paths with variables, at this moment it is only relevant that
@@ -150,7 +145,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             updateTimerId = -1;
           }
         }
-        return ctx.succeededFuture();
+        return Future.succeededFuture();
       });
   }
 
@@ -165,7 +160,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
+  public Future<User> authenticate(JsonObject authInfo) {
 
     if (authInfo.containsKey("access_token")) {
       TokenCredentials cred = new TokenCredentials(authInfo.getString("access_token"));
@@ -174,8 +169,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           cred.addScope((String) scope);
         }
       }
-      authenticate(cred, handler);
-      return;
+      return authenticate(cred);
     }
 
     final Oauth2Credentials cred;
@@ -197,8 +191,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             .setRedirectUri(authInfo.getString("redirectUri"))
             .setFlow(flow);
 
-          authenticate(cred, handler);
-          return;
+          return authenticate(cred);
         }
         break;
       case CLIENT:
@@ -211,8 +204,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           }
         }
 
-        authenticate(cred, handler);
-        return;
+        return authenticate(cred);
       case PASSWORD:
         if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
 
@@ -227,8 +219,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             }
           }
 
-          authenticate(cred, handler);
-          return;
+          return authenticate(cred);
         }
         break;
       case AUTH_JWT:
@@ -238,22 +229,20 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             .setAssertion(authInfo.getString("assertion"))
             .setFlow(flow);
 
-          authenticate(cred, handler);
-          return;
+          return authenticate(cred);
         }
 
         cred = new Oauth2Credentials()
           .setJwt(authInfo)
           .setFlow(flow);
 
-        authenticate(cred, handler);
-        return;
+        return authenticate(cred);
       case IMPLICIT:
       default:
         break;
     }
     // fallback
-    handler.handle(Future.failedFuture("can't parse token: " + authInfo));
+    return Future.failedFuture("can't parse token: " + authInfo);
   }
 
   /**
@@ -287,7 +276,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
    * </ul>
    */
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> handler) {
+  public Future<User> authenticate(Credentials credentials) {
     try {
       // adapt credential type to be always the expected one
       if (credentials instanceof UsernamePasswordCredentials) {
@@ -299,8 +288,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           .setPassword(usernamePasswordCredentials.getPassword())
           .setFlow(OAuth2FlowType.PASSWORD);
 
-        authenticate(cred, handler);
-        return;
+        return authenticate(cred);
       }
 
       // if the authInfo object already contains a token validate it to confirm that it
@@ -326,8 +314,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           // the token might be valid, but expired
           if (!user.expired(jwtOptions.getLeeway())) {
             // basic validation passed, the token is not expired
-            handler.handle(Future.succeededFuture(user));
-            return;
+            return Future.succeededFuture(user);
           }
         }
 
@@ -340,20 +327,19 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           // this provider doesn't allow introspection, this means we are not able to perform
           // any authentication,
           if (user.attributes().containsKey("missing-kid")) {
-            handler.handle(Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid"))));
+            return Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid")));
           } else {
-            handler.handle(Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection"));
+            return Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection");
           }
-          return;
         }
 
         // perform the introspection
-        api
+        return api
           .tokenIntrospection("access_token", tokenCredentials.getToken())
           .compose(json -> {
             // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
             if (json.containsKey("active") && !json.getBoolean("active", false)) {
-              return ctx.failedFuture("Inactive Token");
+              return Future.failedFuture("Inactive Token");
             }
 
             // OPTIONALS
@@ -374,18 +360,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
-              return ctx.failedFuture("Used is expired.");
+              return Future.failedFuture("Used is expired.");
             } else {
               // basic validation passed, the token is not expired
-              return ctx.succeededFuture(newUser);
+              return Future.succeededFuture(newUser);
             }
-          })
-          .onComplete(handler);
-
-        return;
+          });
       }
 
-      // from this point, the only allowed sub type for credentials is OAuth2Credentials
+      // from this point, the only allowed subtype for credentials is OAuth2Credentials
       Oauth2Credentials oauth2Credentials = (Oauth2Credentials) credentials;
 
       // the authInfo object does not contain a token, so rely on the
@@ -403,8 +386,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
       if (config.getSupportedGrantTypes() != null && !config.getSupportedGrantTypes().isEmpty() &&
         !config.getSupportedGrantTypes().contains(flow.getGrantType())) {
-        handler.handle(Future.failedFuture("Provided flow is not supported by provider"));
-        return;
+        return Future.failedFuture("Provided flow is not supported by provider");
       }
 
       switch (flow) {
@@ -459,26 +441,24 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           break;
 
         default:
-          handler.handle(Future.failedFuture("Current flow does not allow acquiring a token by the replay party"));
-          return;
+          return Future.failedFuture("Current flow does not allow acquiring a token by the replay party");
       }
 
-      api.token(flow.getGrantType(), params)
+      return api.token(flow.getGrantType(), params)
         .compose(json -> {
           // attempt to create a user from the json object
           final User newUser = createUser(json, false);
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            return ctx.failedFuture("Used is expired.");
+            return Future.failedFuture("Used is expired.");
           } else {
             // basic validation passed, the token is not expired
-            return ctx.succeededFuture(newUser);
+            return Future.succeededFuture(newUser);
           }
-        })
-        .onComplete(handler);
+        });
     } catch (ClassCastException | CredentialValidationException e) {
-      handler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
   }
 
@@ -491,7 +471,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   public Future<User> refresh(User user) {
 
     if (user.principal().getString("refresh_token") == null || user.principal().getString("refresh_token").isEmpty()) {
-      return ctx.failedFuture(new IllegalStateException("refresh_token is null or empty"));
+      return Future.failedFuture(new IllegalStateException("refresh_token is null or empty"));
     }
 
     return api.token(
@@ -504,10 +484,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (newUser.expired(config.getJWTOptions().getLeeway())) {
-          return ctx.failedFuture("Used is expired.");
+          return Future.failedFuture("Used is expired.");
         } else {
           // basic validation passed, the token is not expired
-          return ctx.succeededFuture(newUser);
+          return Future.succeededFuture(newUser);
         }
       });
   }
@@ -528,7 +508,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           if (userSub != null) {
             if (userInfoSub != null) {
               if (!userSub.equals(userInfoSub)) {
-                return ctx.failedFuture("Used 'sub' does not match UserInfo 'sub'.");
+                return Future.failedFuture("Used 'sub' does not match UserInfo 'sub'.");
               }
             }
           }
@@ -540,10 +520,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (user.expired(config.getJWTOptions().getLeeway())) {
-          return ctx.failedFuture("Used is expired.");
+          return Future.failedFuture("Used is expired.");
         } else {
           // basic validation passed, the user token is not expired
-          return ctx.succeededFuture(json);
+          return Future.succeededFuture(json);
         }
       });
   }
@@ -607,7 +587,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // if the user has specified a handler for this situation then it
             // shall be executed, otherwise just log as a typical validation
             if (missingKeyHandler != null) {
-              missingKeyHandler.handle(e.id());
+              context.runOnContext(v -> missingKeyHandler.handle(e.id()));
             } else {
               LOG.trace("Cannot decode access token:", e);
             }
@@ -629,6 +609,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             .put("idToken", validToken(token, true));
           // copy the userInfo basic properties to the root
           copyProperties(user.attributes().getJsonObject("idToken"), user.attributes(), false, "sub", "name", "email", "picture");
+          // copy amr to the principal
+          copyProperties(user.attributes().getJsonObject("idToken"), user.principal(), true, "amr");
         } catch (NoSuchKeyIdException e) {
           if (!skipMissingKeyNotify) {
             // we haven't notified this id yet
@@ -641,7 +623,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               // if the user has specified a handler for this situation then it
               // shall be executed, otherwise just log as a typical validation
               if (missingKeyHandler != null) {
-                missingKeyHandler.handle(e.id());
+                context.runOnContext(v -> missingKeyHandler.handle(e.id()));
               } else {
                 LOG.trace("Cannot decode access token:", e);
               }

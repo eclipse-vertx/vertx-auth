@@ -44,7 +44,7 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+  public Future<Void> getAuthorizations(User user) {
 
     final JsonArray roles;
 
@@ -52,15 +52,13 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
       try {
         roles = getNestedJsonValue(user.attributes().getJsonObject("accessToken"), rootClaim);
       } catch (RuntimeException e) {
-        handler.handle(Future.failedFuture(e));
-        return;
+        return Future.failedFuture(e);
       }
     } else {
       try {
         roles = user.attributes().getJsonObject("accessToken").getJsonArray(rootClaim);
       } catch (RuntimeException e) {
-        handler.handle(Future.failedFuture(e));
-        return;
+        return Future.failedFuture(e);
       }
     }
 
@@ -73,14 +71,13 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
           authorizations.add(PermissionBasedAuthorization.create((String) el));
         } else {
           // abort the parsing
-          handler.handle(Future.failedFuture("Cannot parse role: " + el));
-          return;
+          return Future.failedFuture("Cannot parse role: " + el);
         }
       }
     }
     user.authorizations().add(getId(), authorizations);
     // return
-    handler.handle(Future.succeededFuture());
+    return Future.succeededFuture();
   }
 
   private static @Nullable JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {

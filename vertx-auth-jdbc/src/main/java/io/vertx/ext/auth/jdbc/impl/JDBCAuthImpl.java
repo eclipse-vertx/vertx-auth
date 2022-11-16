@@ -18,10 +18,7 @@ package io.vertx.ext.auth.jdbc.impl;
 
 import java.util.Objects;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
@@ -59,36 +56,39 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   }
 
   @Override
-  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(new UsernamePasswordCredentials(authInfo), resultHandler);
+  public Future<User> authenticate(JsonObject authInfo) {
+    return authenticate(new UsernamePasswordCredentials(authInfo));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  public Future<User> authenticate(Credentials credentials) {
     try {
       UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
       authInfo.checkValid(null);
-
-      authenticationProvider.authenticate(credentials, authenticationResult -> {
-        if (authenticationResult.failed()) {
-          resultHandler.handle(Future.failedFuture(authenticationResult.cause()));
-        } else {
-          User user = authenticationResult.result();
-          authorizationProvider.getAuthorizations(user, userAuthorizationResult -> {
-            if (userAuthorizationResult.failed()) {
-              // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
-              // for now, lets return a faillure
-              resultHandler.handle(Future.failedFuture(userAuthorizationResult.cause()));
-            }
-            else {
-              resultHandler.handle(Future.succeededFuture(user));
-            }
-          });
-        }
-      });
     } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+      return Future.failedFuture(e);
     }
+
+    Promise<User> promise = Promise.promise();
+
+    authenticationProvider.authenticate(credentials, authenticationResult -> {
+      if (authenticationResult.failed()) {
+        promise.fail(authenticationResult.cause());
+      } else {
+        User user = authenticationResult.result();
+        authorizationProvider.getAuthorizations(user, userAuthorizationResult -> {
+          if (userAuthorizationResult.failed()) {
+            // what do we do in case something goes wrong during authorizationProvider but we've got a correct user ?
+            // for now, lets return a faillure
+            promise.fail(userAuthorizationResult.cause());
+          } else {
+            promise.complete(user);
+          }
+        });
+      }
+    });
+
+    return promise.future();
   }
 
   @Override

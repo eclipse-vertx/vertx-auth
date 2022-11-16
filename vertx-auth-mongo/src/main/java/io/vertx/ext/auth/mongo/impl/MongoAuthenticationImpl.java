@@ -16,9 +16,7 @@
 
 package io.vertx.ext.auth.mongo.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
@@ -26,12 +24,12 @@ import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.mongo.*;
 import io.vertx.ext.mongo.MongoClient;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -53,10 +51,8 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   /**
    * Creates a new instance
    *
-   * @param mongoClient
-   *          the {@link MongoClient} to be used
-   * @param options
-   *          the options for configuring the new instance
+   * @param mongoClient the {@link MongoClient} to be used
+   * @param options     the options for configuring the new instance
    */
   public MongoAuthenticationImpl(MongoClient mongoClient, MongoAuthenticationOptions options) {
     this.mongoClient = mongoClient;
@@ -65,6 +61,7 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
 
   /**
    * Provided for backward compatibility
+   *
    * @param mongoClient
    * @param legacyStrategy
    * @param options
@@ -77,47 +74,42 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(
-        new UsernamePasswordCredentials(
-            credentials.getString(options.getUsernameCredentialField()),
-            credentials.getString(options.getPasswordCredentialField())),
-        resultHandler);
+  public Future<User> authenticate(JsonObject credentials) {
+    return authenticate(
+      new UsernamePasswordCredentials(
+        credentials.getString(options.getUsernameCredentialField()),
+        credentials.getString(options.getPasswordCredentialField())));
   }
 
   @Override
-  public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
-    try {
-      // Null username is invalid
-      if (credentials == null) {
-        resultHandler.handle((Future.failedFuture("Credentials must be set for authentication.")));
-        return;
-      }
-
-      UsernamePasswordCredentials authInfo = (UsernamePasswordCredentials) credentials;
-      authInfo.checkValid(null);
-
-      AuthToken token = new AuthToken(authInfo.getUsername(), authInfo.getPassword());
-
-      JsonObject query = createQuery(authInfo.getUsername());
-      mongoClient.find(options.getCollectionName(), query, res -> {
-
-        try {
-          if (res.succeeded()) {
-            User user = handleSelection(res, token);
-            resultHandler.handle(Future.succeededFuture(user));
-          } else {
-            resultHandler.handle(Future.failedFuture(res.cause()));
-          }
-        } catch (Exception e) {
-          log.warn(e);
-          resultHandler.handle(Future.failedFuture(e));
-        }
-
-      });
-    } catch (RuntimeException e) {
-      resultHandler.handle(Future.failedFuture(e));
+  public Future<User> authenticate(Credentials credentials) {
+    // Null username is invalid
+    if (credentials == null) {
+      return Future.failedFuture("Credentials must be set for authentication.");
     }
+
+    final UsernamePasswordCredentials authInfo;
+
+    try {
+      authInfo = (UsernamePasswordCredentials) credentials;
+      authInfo.checkValid(null);
+    } catch (RuntimeException e) {
+      return Future.failedFuture(e);
+    }
+
+    AuthToken token = new AuthToken(authInfo.getUsername(), authInfo.getPassword());
+
+    JsonObject query = createQuery(authInfo.getUsername());
+    return mongoClient
+      .find(options.getCollectionName(), query)
+      .compose(rows -> {
+        try {
+          User user = handleSelection(rows, token);
+          return Future.succeededFuture(user);
+        } catch (Exception e) {
+          return Future.failedFuture(e);
+        }
+      });
   }
 
   /**
@@ -137,37 +129,38 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
    * @param authToken
    * @return
    */
-  private User handleSelection(AsyncResult<List<JsonObject>> resultList, AuthToken authToken)
-      throws Exception {
-    switch (resultList.result().size()) {
-    case 0: {
-      String message = "No account found for user [" + authToken.username + "]";
-      // log.warn(message);
-      throw new Exception(message);
-    }
-    case 1: {
-      JsonObject json = resultList.result().get(0);
-      User user = createUser(json);
-      if (examinePassword(user, json.getString(options.getPasswordField()), authToken.password))
-        return user;
-      else {
-        String message = "Invalid username/password [" + authToken.username + "]";
+  private User handleSelection(List<JsonObject> resultList, AuthToken authToken) throws Exception {
+    switch (resultList.size()) {
+      case 0: {
+        String message = "No account found for user [" + authToken.username + "]";
         // log.warn(message);
         throw new Exception(message);
       }
-    }
-    default: {
-      // More than one row returned!
-      String message = "More than one user row found for user [" + authToken.username + "( "
-          + resultList.result().size() + " )]. Usernames must be unique.";
-      // log.warn(message);
-      throw new Exception(message);
-    }
+      case 1: {
+        JsonObject json = resultList.get(0);
+        User user = createUser(json);
+        if (examinePassword(user, json.getString(options.getPasswordField()), authToken.password))
+          return user;
+        else {
+          String message = "Invalid username/password [" + authToken.username + "]";
+          // log.warn(message);
+          throw new Exception(message);
+        }
+      }
+      default: {
+        // More than one row returned!
+        String message = "More than one user row found for user [" + authToken.username + "( " + resultList.size() + " )]. Usernames must be unique.";
+        // log.warn(message);
+        throw new Exception(message);
+      }
     }
   }
 
   private User createUser(JsonObject json) {
     User user = User.create(json);
+    // metadata "amr"
+    user.principal().put("amr", Collections.singletonList("pwd"));
+
     if (legacyStrategy != null) {
       json.put(MongoAuthImpl.PROPERTY_FIELD_SALT, hashField);
       json.put(MongoAuthImpl.PROPERTY_FIELD_PASSWORD, options.getPasswordField());

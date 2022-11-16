@@ -166,17 +166,28 @@ public class JWTTest {
     assertNotNull(jwt.decode("eyJhbGciOiJSUzI1NiIsImtpZCI6ImMzODM1NWU3MjA5ZTlmOTkwOWJlODUxOTIyODhkMDg1OTY1NGEyOTUifQ.eyJhenAiOiI1ODUyMDUyMjk1NzctZGlxZ2l1NWkwbjNoN2hzZmF0cG91MzY0OXVvaGduOWkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI1ODUyMDUyMjk1NzctZGlxZ2l1NWkwbjNoN2hzZmF0cG91MzY0OXVvaGduOWkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDI1ODI3NDEyNjA5NDc1ODQxNDQiLCJhdF9oYXNoIjoiV1hJZlQ3WWVIaWZUaXVmRkt2NldJZyIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE1MDc1Nzk5MTEsImV4cCI6MTUwNzU4MzUxMX0.fZ_Z0Xz3Odef-1_iZbpn50h9vQ6mtY7Fqc69cWsfX_8f699252hNPnZWDvw_gfe0HU1b8hvGKIbR7ZTzzqqzgMBRW8Jy7FqNAj0zlKi2OIMaQlWFmQG7owMQOYXuc0FSI_EMCjBVe7jdbkFxZ6PTa6o0k-A88Aw2NEmLitTSp2WSPtcSu7o_oV3DawC0qUyMyP-xhG5rPEbhpn0WJ4f3NGV8qY1wY2nsV9PdO985IQQJNjp3DHoV1eWQDsg0v1ouTnGjNVLWRIxV2CZPW6T9PpkQO9eh5WBoqCAKfVg3mBGs0Am0xdh-GSqwejBpPWqVQyXVDfjCbHYTan8li3rPSg"));
   }
 
+  private static int getVersion() {
+    String version = System.getProperty("java.version");
+
+    if(version.startsWith("1.")) {
+      version = version.substring(2, 3);
+    } else {
+      int dot = version.indexOf(".");
+      if(dot != -1) { version = version.substring(0, dot); }
+    }
+
+    int dash = version.indexOf('-');
+    if (dash != -1) {
+      version = version.substring(0, dash);
+    }
+
+    return Integer.parseInt(version);
+  }
 
   @Test
   public void testPSS() {
-    String version = System.getProperty("java.version");
-    int firstDot = version.indexOf('.');
-    if (firstDot != -1) {
-      version = version.substring(0, firstDot);
-    }
-
     // RSASSA-PSS is only available on >=11
-    Assume.assumeTrue(Integer.parseInt(version) >= 11);
+    Assume.assumeTrue(getVersion() >= 11);
 
     JWT jwt = new JWT()
       .addJWK(new JWK(new PubSecKeyOptions().setAlgorithm("PS256").setBuffer(
