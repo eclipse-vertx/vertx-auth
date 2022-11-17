@@ -56,6 +56,12 @@ public class JDBCAuthImpl implements AuthProvider, JDBCAuth {
   }
 
   @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
+  }
+
+  @Override
   public Future<User> authenticate(JsonObject authInfo) {
     return authenticate(new UsernamePasswordCredentials(authInfo));
   }

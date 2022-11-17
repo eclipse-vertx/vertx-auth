@@ -16,7 +16,9 @@
 package io.vertx.ext.auth.jwt.impl;
 
 import io.vertx.codegen.annotations.Nullable;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
@@ -126,6 +128,12 @@ public class JWTAuthProviderImpl implements JWTAuth {
              NoSuchProviderException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

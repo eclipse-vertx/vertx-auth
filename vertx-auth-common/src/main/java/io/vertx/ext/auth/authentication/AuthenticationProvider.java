@@ -22,6 +22,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 
@@ -58,10 +59,7 @@ public interface AuthenticationProvider {
    * @param resultHandler  The result handler
    */
   @Deprecated
-  default void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
+  void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler);
 
   /**
    * Authenticate a user.
@@ -88,7 +86,11 @@ public interface AuthenticationProvider {
    * @return The result future
    */
   @Deprecated
-  Future<User> authenticate(JsonObject credentials);
+  default Future<User> authenticate(JsonObject credentials) {
+    Promise<User> promise = Promise.promise();
+    authenticate(credentials, promise);
+    return promise.future();
+  }
 
   /**
    * Authenticate a user.
@@ -103,12 +105,9 @@ public interface AuthenticationProvider {
    * @param resultHandler  The result handler
    */
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
-  @Fluent
-  default AuthenticationProvider authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+  default void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     authenticate(credentials)
       .onComplete(resultHandler);
-
-    return this;
   }
 
   /**

@@ -11,7 +11,9 @@
 
 package io.vertx.ext.auth.otp.hotp.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -42,6 +44,12 @@ public class HotpAuthImpl implements HotpAuth {
       throw new IllegalArgumentException("hotpAuthOptions cannot null");
     }
     this.hotpAuthOptions = hotpAuthOptions;
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

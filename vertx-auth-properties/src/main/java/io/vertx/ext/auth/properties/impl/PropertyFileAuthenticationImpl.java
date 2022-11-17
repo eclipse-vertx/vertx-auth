@@ -12,9 +12,12 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.Authorization;
@@ -145,6 +148,12 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
+  }
+
+  @Override
   public Future<io.vertx.ext.auth.User> authenticate(JsonObject authInfo) {
     return authenticate(new UsernamePasswordCredentials(authInfo));
   }
@@ -176,6 +185,12 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   public String getId() {
     // use the path as the id
     return path;
+  }
+
+  @Override
+  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizations(user)
+      .onComplete(handler);
   }
 
   @Override

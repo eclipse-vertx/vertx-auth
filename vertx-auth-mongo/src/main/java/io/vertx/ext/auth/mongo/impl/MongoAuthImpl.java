@@ -19,7 +19,9 @@ package io.vertx.ext.auth.mongo.impl;
 import java.util.Collections;
 import java.util.List;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -80,6 +82,12 @@ public class MongoAuthImpl implements MongoAuth {
     init();
     this.mongoAuthentication = MongoAuthentication.create(mongoClient, getHashStrategy(), mongoAuthenticationOptions);
     this.mongoAuthorization = MongoAuthorization.create(PROVIDER_ID, mongoClient, mongoAuthorizationOptions);
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

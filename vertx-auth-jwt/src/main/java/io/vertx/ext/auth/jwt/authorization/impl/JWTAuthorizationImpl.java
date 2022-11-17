@@ -44,6 +44,12 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
   }
 
   @Override
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizations(user)
+      .onComplete(handler);
+  }
+
+  @Override
   public Future<Void> getAuthorizations(User user) {
 
     final JsonArray roles;

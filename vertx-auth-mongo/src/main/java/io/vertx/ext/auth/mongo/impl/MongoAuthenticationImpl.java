@@ -16,7 +16,9 @@
 
 package io.vertx.ext.auth.mongo.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
@@ -71,6 +73,12 @@ public class MongoAuthenticationImpl implements MongoAuthentication {
     this.options = options;
     this.legacyStrategy = legacyStrategy;
     this.hashField = hashField;
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

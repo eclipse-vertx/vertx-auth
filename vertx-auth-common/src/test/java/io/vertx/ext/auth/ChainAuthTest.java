@@ -50,9 +50,9 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(createUser(new JsonObject()));
+      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject())));
     });
 
     auth.authenticate(new JsonObject(), res -> {
@@ -69,9 +69,9 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(createUser(new JsonObject()));
+      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject())));
     });
 
     auth.authenticate(new JsonObject(), res -> {
@@ -88,14 +88,14 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always Fail
-      return Future.failedFuture("some error/bad auth");
+      resultHandler.handle(Future.failedFuture("some error/bad auth"));
     });
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
+      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
 
     auth.authenticate(new JsonObject(), res -> {
@@ -113,14 +113,14 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always Fail
-      return Future.failedFuture("some error/bad auth");
+      resultHandler.handle(Future.failedFuture("some error/bad auth"));
     });
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
+      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
 
     auth.authenticate(new JsonObject(), res -> {
@@ -138,17 +138,19 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always Fail
-      return Future.failedFuture("some error/bad auth");
+      resultHandler.handle(Future.failedFuture("some error/bad auth"));
     });
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
+      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
     });
 
-    auth.add(authInfo -> Future.failedFuture("should not be called"));
+    auth.add((credentials, resultHandler) -> {
+      resultHandler.handle(Future.failedFuture("should not be called"));
+    });
 
     auth.authenticate(new JsonObject(), res -> {
       if (res.succeeded()) {
@@ -165,14 +167,14 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attributeOne", "one")));
+      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attributeOne", "one"))));
     });
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attributeTwo", "two")));
+      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attributeTwo", "two"))));
     });
 
     auth.authenticate(new JsonObject(), res -> {
@@ -198,14 +200,14 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attribute", "one")));
+      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attribute", "one"))));
     });
 
-    auth.add(authInfo -> {
+    auth.add((credentials, resultHandler) -> {
       // always OK
-      return Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two")));
+      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two"))));
     });
 
     auth.authenticate(new JsonObject(), res -> {

@@ -47,6 +47,12 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   }
 
   @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
+  }
+
+  @Override
   public Future<io.vertx.ext.auth.User> authenticate(JsonObject credentials) {
     return authenticate(new UsernamePasswordCredentials(credentials));
   }

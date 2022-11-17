@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
@@ -44,6 +46,12 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
   public SqlAuthenticationImpl(SqlClient client, SqlAuthenticationOptions options) {
     this.client = Objects.requireNonNull(client);
     this.options = Objects.requireNonNull(options);
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

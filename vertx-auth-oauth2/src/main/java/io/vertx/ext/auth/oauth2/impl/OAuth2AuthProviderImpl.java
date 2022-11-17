@@ -160,6 +160,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   }
 
   @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
+  }
+
+  @Override
   public Future<User> authenticate(JsonObject authInfo) {
 
     if (authInfo.containsKey("access_token")) {

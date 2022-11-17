@@ -15,7 +15,9 @@
  */
 package io.vertx.ext.auth.jwt.authorization.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
@@ -34,6 +36,12 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
   @Override
   public String getId() {
     return "mp-jwt";
+  }
+
+  @Override
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizations(user)
+      .onComplete(handler);
   }
 
   @Override

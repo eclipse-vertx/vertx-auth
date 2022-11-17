@@ -86,6 +86,12 @@ public class JDBCAuthorizationImpl implements JDBCAuthorization {
   }
 
   @Override
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizations(user)
+      .onComplete(handler);
+  }
+
+  @Override
   public Future<Void> getAuthorizations(User user) {
     final Promise<Void> promise = Promise.promise();
 

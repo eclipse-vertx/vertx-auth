@@ -16,7 +16,9 @@
 
 package io.vertx.ext.auth.htdigest.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -90,6 +92,12 @@ public class HtdigestAuthImpl implements HtdigestAuth {
   @Override
   public String realm() {
     return realm;
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

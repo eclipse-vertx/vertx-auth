@@ -15,7 +15,9 @@
  */
 package io.vertx.ext.auth.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.ChainAuth;
 import io.vertx.ext.auth.User;
@@ -39,6 +41,12 @@ public class ChainAuthImpl implements ChainAuth {
   public ChainAuth add(AuthenticationProvider other) {
     providers.add(other);
     return this;
+  }
+
+  @Override
+  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
+    authenticate(credentials)
+      .onComplete(resultHandler);
   }
 
   @Override

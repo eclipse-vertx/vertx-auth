@@ -45,6 +45,12 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
   }
 
   @Override
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizations(user)
+      .onComplete(handler);
+  }
+
+  @Override
   public Future<Void> getAuthorizations(User user) {
     String scopes =
       claimKey == null ?

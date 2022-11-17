@@ -71,6 +71,12 @@ public class MongoAuthorizationImpl implements MongoAuthorization {
   }
 
   @Override
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
+    getAuthorizations(user)
+      .onComplete(handler);
+  }
+
+  @Override
   public Future<Void> getAuthorizations(User user) {
     JsonObject query = createQuery(user.principal().getString(options.getUsernameField()));
     return mongoClient.find(options.getCollectionName(), query)
