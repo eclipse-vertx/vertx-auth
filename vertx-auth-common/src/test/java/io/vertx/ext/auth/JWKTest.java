@@ -13,6 +13,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Base64;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
@@ -264,5 +265,24 @@ public class JWKTest {
 
       assertFalse(jwt.isUnsecure());
     }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void publicECKSignZero() {
+    JsonObject jwk = new JsonObject()
+      .put("kty", "EC")
+      .put("crv", "P-256")
+      .put("x", "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4")
+      .put("y", "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM")
+      .put("d", "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE")
+//      .put("use", "enc")
+      .put("kid", "1");
+
+    JWT jwt = new JWT().addJWK(new JWK(jwk));
+
+    String token = jwt.sign(new JsonObject().put("user", "Paulo"), new JWTOptions().setAlgorithm("ES256"));
+    String zeros = Base64.getUrlEncoder().withoutPadding().encodeToString(new byte[64]);
+    token = token.substring(0, token.lastIndexOf('.') + 1) + zeros;
+    jwt.decode(token);
   }
 }
