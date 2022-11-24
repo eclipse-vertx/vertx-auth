@@ -531,11 +531,11 @@ public final class JWS {
       && (jwsSignature[2 * rawLen - k] == 0))
       k--;
 
-    int l = k;
-
     if (k == 0) {
       throw new RuntimeException("Invalid ECDSA signature");
     }
+
+    int l = k;
 
     if (jwsSignature[2 * rawLen - k] < 0) {
       l += 1;
