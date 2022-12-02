@@ -36,6 +36,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
+import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
 
 import java.util.List;
 
@@ -471,6 +472,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   @Override
   public String authorizeURL(JsonObject params) {
     return api.authorizeURL(params);
+  }
+
+  @Override
+  public String authorizeURL(OAuth2AuthorizationURL url) {
+    return api.authorizeURL(url.toJson());
   }
 
   @Override
