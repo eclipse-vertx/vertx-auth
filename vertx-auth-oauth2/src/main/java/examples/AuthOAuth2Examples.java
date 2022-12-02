@@ -27,6 +27,8 @@ import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
 import io.vertx.ext.auth.oauth2.providers.*;
 
+import java.util.Arrays;
+
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
@@ -47,10 +49,10 @@ public class AuthOAuth2Examples {
     // or call a protected method, call the authZ url for
     // a challenge
 
-    String authorization_uri = oauth2.authorizeURL(new JsonObject()
-      .put("redirectUri", "http://localhost:8080/callback")
-      .put("scope", "notifications")
-      .put("state", "3(#0/!~"));
+    String authorization_uri = oauth2.authorizeURL(new OAuth2AuthorizationURL()
+      .setRedirectUri("http://localhost:8080/callback")
+      .setScopes(Arrays.asList("notifications"))
+      .setState("3(#0/!~"));
 
     // when working with web application use the above string as a redirect url
 
@@ -86,10 +88,10 @@ public class AuthOAuth2Examples {
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
 
     // Authorization oauth2 URI
-    String authorization_uri = oauth2.authorizeURL(new JsonObject()
-      .put("redirectUri", "http://localhost:8080/callback")
-      .put("scope", "<scope>")
-      .put("state", "<state>"));
+    String authorization_uri = oauth2.authorizeURL(new OAuth2AuthorizationURL()
+      .setRedirectUri("http://localhost:8080/callback")
+      .setScopes(Arrays.asList("<scope>"))
+      .setState("<state>"));
 
     // Redirect example using Vert.x
     response.putHeader("Location", authorization_uri)
