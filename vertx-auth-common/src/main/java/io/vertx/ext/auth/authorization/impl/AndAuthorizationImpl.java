@@ -93,4 +93,16 @@ public class AndAuthorizationImpl implements AndAuthorization {
     return match;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("AND(");
+    for (int i = 0; i < authorizations.size(); i++) {
+      if (i > 0)
+        sb.append(", ");
+      sb.append(authorizations.get(i).toString());
+    }
+    sb.append(")");
+    return sb.toString();
+  }
 }

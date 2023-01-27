@@ -96,4 +96,8 @@ public class RoleBasedAuthorizationImpl implements RoleBasedAuthorization {
     return this;
   }
 
+  @Override
+  public String toString() {
+    return "ROLE[" + role + "]";
+  }
 }

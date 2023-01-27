@@ -25,7 +25,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Paulo Lopes
  */
-@VertxGen
+@VertxGen(concrete = false)
 public interface Credentials {
   /**
    * Implementors should override this method to perform validation. An argument is allowed to

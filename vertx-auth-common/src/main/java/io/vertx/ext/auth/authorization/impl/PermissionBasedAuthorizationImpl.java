@@ -101,4 +101,9 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
     this.resource = new VariableAwareExpression(resource);
     return this;
   }
+
+  @Override
+  public String toString() {
+    return "PERMISSION[" + permission + "]";
+  }
 }

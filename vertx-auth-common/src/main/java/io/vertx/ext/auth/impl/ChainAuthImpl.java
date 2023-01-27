@@ -18,9 +18,6 @@ package io.vertx.ext.auth.impl;
 import io.vertx.core.Future;
 import io.vertx.ext.auth.ChainAuth;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.audit.AuditLogger;
-import io.vertx.ext.auth.audit.Marker;
-import io.vertx.ext.auth.audit.StructuredData;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -29,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChainAuthImpl implements ChainAuth {
-
-  private static final AuditLogger AUDIT_LOG = AuditLogger.instance();
 
   private final List<AuthenticationProvider> providers = new ArrayList<>();
   private final boolean all;
@@ -54,7 +49,7 @@ public class ChainAuthImpl implements ChainAuth {
     }
 
     if (providers.size() == 0) {
-      return Future.<User>failedFuture("No providers in the auth chain.").andThen(AUDIT_LOG.handle(Marker.SECURITY, new StructuredData(authInfo)));
+      return Future.failedFuture("No providers in the auth chain.");
     } else {
       return iterate(0, credentials, null).andThen(AUDIT_LOG.handle(Marker.SECURITY, new StructuredData(authInfo)));
     }

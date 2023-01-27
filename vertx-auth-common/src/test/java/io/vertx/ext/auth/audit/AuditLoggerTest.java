@@ -1,89 +1,41 @@
 package io.vertx.ext.auth.audit;
 
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.SocketAddress;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.ext.auth.impl.jose.JWK;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import io.vertx.ext.auth.authorization.AndAuthorization;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import org.junit.*;
 
-import java.io.IOException;
-
-@RunWith(VertxUnitRunner.class)
 public class AuditLoggerTest {
 
-  static {
-    AuditLogger
-      .init(
-        new JWK(
-          new JsonObject()
-            .put("kty", "oct")
-            .put("alg", "HS256")
-            .put("k", "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ")));
-  }
-
-  @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
-
   @Test
-  public void testSync(TestContext should) throws IOException {
+  public void testSync() {
 
-    AuditLogger log = AuditLogger.instance();
+    SecurityAudit audit = SecurityAudit.create();
 
-    log.succeeded(Marker.SECURITY, new StructuredData().setSub("paulo"));
-    log.succeeded(Marker.EVENT, new StructuredData().setSub("paulo"));
-    log.succeeded(Marker.AUDIT, new StructuredData().setSub("paulo"));
+    // fake a request coming in
+    audit.source(SocketAddress.inetSocketAddress(12345, "localhost"));
+    audit.destination(SocketAddress.inetSocketAddress(8080, "localhost"));
 
-    // 2023-01-20T16:33:50.052877059+01:00[Europe/Amsterdam] [iat=1674228830051 sub="paulo"]; sig=zN0nPVo++KrXqW/qF1p8aDaVxtLbEQEpKScfuFFvq18=
-    // 2023-01-20T16:33:50.066322140+01:00[Europe/Amsterdam] [iat=1674228830066 sub="paulo"]
-    // 2023-01-20T16:33:50.066610521+01:00[Europe/Amsterdam] [iat=1674228830066 sub="*****"]; sig=pif5e4QepkQbJAcgkLbsV9fTjMxlo8yC8yzpdeW5id0=
+    audit.credentials(new UsernamePasswordCredentials("paulo", "password"));
+    audit.audit(Marker.AUTHENTICATION, true);
+    // [AUTHENTICATION epoch="1674814080597" source="localhost" destination="localhost" password="********" username="paulo"] OK
 
-    log.succeeded(Marker.SECURITY, new StructuredData(new UsernamePasswordCredentials("pmlopes@gmail.com", "password")));
-    log.succeeded(Marker.EVENT, new StructuredData(new UsernamePasswordCredentials("pmlopes@gmail.com", "password")));
-    log.succeeded(Marker.AUDIT, new StructuredData(new UsernamePasswordCredentials("pmlopes@gmail.com", "password")));
+    audit.user(User.fromName("paulo"));
+    audit.authorization(
+      AndAuthorization.create()
+        .addAuthorization(PermissionBasedAuthorization.create("permission1"))
+        .addAuthorization(RoleBasedAuthorization.create("role1"))
+        .addAuthorization(PermissionBasedAuthorization.create("permission2"))
+        .addAuthorization(RoleBasedAuthorization.create("role2")));
 
-    // 2023-01-20T16:36:03.674704725+01:00[Europe/Amsterdam] [iat=1674228963674 password="********" username="pmlopes@gmail.com"]; sig=q3RYnRQVkMEDpn3fTiii+6uDL+KsjiG4ISKBYxMdlEo=
-    // 2023-01-20T16:36:03.675031419+01:00[Europe/Amsterdam] [iat=1674228963675 password="********" username="pmlopes@gmail.com"]
-    // 2023-01-20T16:36:03.675366132+01:00[Europe/Amsterdam] [iat=1674228963675 password="********" username="*****************"]; sig=VluYJtniwx3os+SQjNdeIhw9pqMeGS4H9EXhXv5QOdY=
-  }
+    audit.audit(Marker.AUTHORIZATION, false);
+    // [AUTHORIZATION epoch="1674814080617" source="localhost" destination="localhost" subject="paulo" authorizations="{}" authorization="AND(PERMISSION[permission1], ROLE[role1], PERMISSION[permission2], ROLE[role2])"] FAIL
 
-  @Test
-  public void testAsync(TestContext should) {
-    final Async test = should.async();
-    AuditLogger log = AuditLogger.instance();
-
-    log.succeeded(Marker.EVENT);
-
-    // 2023-01-20T16:45:25.388942642+01:00[Europe/Amsterdam] -
-
-    final Promise<Void> promise = Promise.promise();
-
-    rule.vertx()
-      .executeBlocking(task -> {
-        try {
-          Thread.sleep(100);
-          task.complete();
-        } catch (InterruptedException e) {
-          should.fail(e);
-        }
-      }, op -> promise.complete());
-
-    promise.future()
-      // this is what we need to add to the existing APIs
-      .andThen(log.handle(Marker.SECURITY, new StructuredData(new UsernamePasswordCredentials("pmlopes@gmail.com", "\b\b\bpassword"))))
-      // here is what happens at the user code (outside the framework code)
-      .onFailure(should::fail)
-      .onSuccess(v -> {
-        test.complete();
-      });
-
-    // 2023-01-20T16:45:25.513330147+01:00[Europe/Amsterdam] [iat=1674229525412 password="***********" username="pmlopes@gmail.com"]; sig=O2RCmXbFqnfOzp2ZFc3GAa7IXza0ZwZsSZ/F4kd3RYk=
-
-    // Note the time difference
+    audit.status(403);
+    audit.audit(Marker.REQUEST, true);
+    //[REQUEST epoch="1674814080618" source="localhost" destination="localhost" status=403] OK
   }
 }

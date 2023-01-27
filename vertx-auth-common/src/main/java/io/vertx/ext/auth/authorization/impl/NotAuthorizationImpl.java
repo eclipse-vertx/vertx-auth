@@ -61,4 +61,8 @@ public class NotAuthorizationImpl implements NotAuthorization {
     return this.equals(authorization);
   }
 
+  @Override
+  public String toString() {
+    return "NOT(" + authorization.toString() + ")";
+  }
 }
