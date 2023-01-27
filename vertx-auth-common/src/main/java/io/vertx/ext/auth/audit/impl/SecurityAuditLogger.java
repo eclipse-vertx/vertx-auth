@@ -2,6 +2,8 @@ package io.vertx.ext.auth.audit.impl;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpVersion;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.auth.User;
@@ -17,6 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 public final class SecurityAuditLogger implements SecurityAudit {
+
+  public static final Logger LOGGER = LoggerFactory.getLogger(SecurityAudit.class);
 
   private static final String FORMAT = System.getProperty("io.vertx.ext.auth.audit.format", "rfc5424");
 
@@ -90,6 +94,10 @@ public final class SecurityAuditLogger implements SecurityAudit {
   private User user;
   private Authorization authorization;
   private int status;
+
+  public static boolean isEnabled() {
+    return LOGGER.isInfoEnabled();
+  }
 
   @Override
   public SecurityAudit source(SocketAddress address) {

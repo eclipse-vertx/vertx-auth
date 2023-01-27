@@ -3,12 +3,9 @@ package io.vertx.ext.auth.audit;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpVersion;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.audit.impl.SecurityAuditNOOP;
@@ -19,10 +16,8 @@ import io.vertx.ext.auth.authorization.Authorization;
 @VertxGen
 public interface SecurityAudit {
 
-  Logger LOGGER = LoggerFactory.getLogger(SecurityAudit.class);
-
   static SecurityAudit create() {
-    if (LOGGER.isInfoEnabled()) {
+    if (SecurityAuditLogger.isEnabled()) {
       return new SecurityAuditLogger();
     }
     // no logging
