@@ -16,13 +16,6 @@
 
 package io.vertx.ext.auth.mongo.test;
 
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
@@ -34,6 +27,8 @@ import io.vertx.ext.mongo.MongoClient;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +45,7 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   public static final String TABLE_PREFIX = "TestMongo_";
 
-  private static MongodExecutable exe;
+  private static MongoDBContainer mongoDBContainer;
   private MongoClient mongoClient;
 
   /**
@@ -93,15 +88,10 @@ public abstract class MongoBaseTest extends VertxTestBase {
   public static void startMongo() throws Exception {
     String uri = getConnectionString();
     if (uri == null ) {
-      Version.Main version = Version.Main.V3_4;
-      int port = 27018;
-      System.out.println("Starting Mongo " + version + " on port " + port);
-      IMongodConfig config = new MongodConfigBuilder().
-        version(version).
-        net(new Net(port, Network.localhostIsIPv6())).
-        build();
-      exe = MongodStarter.getDefaultInstance().prepare(config);
-      exe.start();
+      DockerImageName img = DockerImageName.parse("mongo:4.0.10");
+      mongoDBContainer = new MongoDBContainer(img);
+      System.out.println("Starting Mongo " + img.getVersionPart() + " on a random port");
+      mongoDBContainer.start();
     } else {
       System.out.println("Using existing Mongo " + uri);
     }
@@ -109,8 +99,10 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   @AfterClass
   public static void stopMongo() {
-    if (exe != null) {
-      exe.stop();
+    MongoDBContainer container = mongoDBContainer;
+    mongoDBContainer = null;
+    if (container != null) {
+      container.stop();
     }
   }
 
@@ -130,7 +122,6 @@ public abstract class MongoBaseTest extends VertxTestBase {
 
   private void initMongoClient() throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
-    System.out.println(getConfig().encode());
     mongoClient = MongoClient.createShared(vertx, getConfig());
     dropCollections(latch);
     awaitLatch(latch);
@@ -159,7 +150,8 @@ public abstract class MongoBaseTest extends VertxTestBase {
     if (connectionString != null) {
       config.put("connection_string", connectionString);
     } else {
-      config.put("connection_string", "mongodb://localhost:27018");
+      Integer port = mongoDBContainer.getFirstMappedPort();
+      config.put("connection_string", "mongodb://localhost:" + port);
     }
     String databaseName = getDatabaseName();
     if (databaseName != null) {
