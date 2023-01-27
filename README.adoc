@@ -1,7 +1,11 @@
 = Vert.x Auth
 
-image:https://github.com/vert-x3/vertx-auth/workflows/CI/badge.svg?branch=master["Build Status", link="https://github.com/vert-x3/vertx-auth/actions?query=workflow%3ACI"]
+image:https://github.com/eclipse-vertx/vertx-auth/workflows/CI/badge.svg?branch=master["Build Status", link="https://github.com/vert-x3/vertx-auth/actions?query=workflow%3ACI"]
 
 This module contains auth implementations for Vert.x and common auth interfaces
 
 Particular implementations are stored in sub modules.
+
+Legacy modules (vertx-auth-mongo, vertx-auth-jdbc, vertx-auth-shiro) are maintained at https://github.com/vert-x3/vertx-auth.
+
+
