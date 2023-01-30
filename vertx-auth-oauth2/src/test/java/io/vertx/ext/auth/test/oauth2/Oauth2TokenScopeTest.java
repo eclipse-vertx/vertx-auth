@@ -31,6 +31,8 @@ public class Oauth2TokenScopeTest {
 
   private final static String JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlQSBzY29wZUIgc2NvcGVDIiwiZXhwIjo5OTk5OTk5OTk5LCJuYmYiOjAsImlhdCI6MTQ2NDkwNjY3MSwic3ViIjoiZjE4ODhmNGQtNTE3Mi00MzU5LWJlMGMtYWYzMzg1MDVkODZjIn0.7aJYjGVe4YfdnYTlQH_FYhRCjvctcE7DtWwzxXrbLmM";
 
+  private final static String JWT_INVALID_SIGNATURE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlQSBzY29wZUIgc2NvcGVDIiwiZXhwIjo5OTk5OTk5OTk5LCJuYmYiOjAsImlhdCI6MTQ2NDkwNjY3MSwic3ViIjoiZjE4ODhmNGQtNTE3Mi00MzU5LWJlMGMtYWYzMzg1MDVkODZjIn0.7aJYjGVe4YfdnYTlQH_FYhRCjvctcE7DtWwzxXrbLm";
+
   private OAuth2Auth oauth2;
   private HttpServer server;
   private JsonObject config;
@@ -127,6 +129,55 @@ public class Oauth2TokenScopeTest {
         test.complete();
       }
     });
+  }
+
+  /*
+    Skip validation of access token if is opaque.
+   */
+  @Test
+  public void opaqueAccessTokenIsValidWithInvalidSignature(TestContext should) {
+    final Async test = should.async();
+    config = new JsonObject()
+      .put("token_type", "Bearer")
+      .put("access_token", JWT_INVALID_SIGNATURE)
+      .put("token", JWT_INVALID_SIGNATURE)
+      .put("is_opaque_access_token", Boolean.TRUE);
+
+    oauthConfig
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"))
+      .setJWTOptions(new JWTOptions())
+      .setIntrospectionPath("/oauth/introspect")
+      .setExtraParameters(config);
+
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
+
+    oauth2.authenticate(new TokenCredentials(JWT_INVALID_SIGNATURE), res -> {
+      if (res.failed()) {
+        should.fail(res.cause());
+      } else {
+        User token = res.result();
+        should.assertFalse(token.expired());
+        test.complete();
+      }
+    });
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void accessTokenIsInvalidWithInvalidSignature(TestContext should) {
+    final Async test = should.async();
+    config = new JsonObject()
+      .put("token_type", "Bearer")
+      .put("access_token", JWT_INVALID_SIGNATURE)
+      .put("token", JWT_INVALID_SIGNATURE);
+
+    oauthConfig
+      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("vertx"))
+      .setJWTOptions(new JWTOptions())
+      .setIntrospectionPath("/oauth/introspect")
+      .setExtraParameters(config);
+
+    oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
+    oauth2.authenticate(new TokenCredentials(JWT_INVALID_SIGNATURE), null);
   }
 
   /**

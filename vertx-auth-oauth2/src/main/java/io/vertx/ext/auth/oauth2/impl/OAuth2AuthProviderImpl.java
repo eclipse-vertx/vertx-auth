@@ -37,7 +37,9 @@ import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 
+import java.security.SignatureException;
 import java.util.List;
+import java.lang.Boolean;
 
 import static java.lang.Math.max;
 
@@ -568,7 +570,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
     // attempt to decode tokens if jwt keys are available
     if (!jwt.isUnsecure()) {
-      if (json.containsKey("access_token")) {
+      if (json.containsKey("access_token") && !isOpaqueAccessToken(config)) {
         try {
           final JsonObject token = jwt.decode(json.getString("access_token"));
           // the OIDC validation will throw if the iss, aud do not match
@@ -646,6 +648,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
     }
 
     return user;
+  }
+
+  private boolean isOpaqueAccessToken(OAuth2Options config) {
+    return config.getExtraParameters() != null &&
+      Boolean.TRUE.equals(config.getExtraParameters().getBoolean("is_opaque_access_token", Boolean.FALSE));
   }
 
   private JsonObject validToken(JsonObject token, boolean idToken) throws IllegalStateException {
