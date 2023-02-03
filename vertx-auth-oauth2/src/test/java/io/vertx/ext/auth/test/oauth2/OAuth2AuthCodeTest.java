@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
+import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -127,6 +128,17 @@ public class OAuth2AuthCodeTest {
   public void generateAuthorizeURL(TestContext should) throws Exception {
     String expected = "http://localhost:" + currentPort + "/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
     should.assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
+  }
+
+  @Test
+  public void generateAuthorizeURLTypeSafe(TestContext should) throws Exception {
+    String expected = "http://localhost:" + currentPort + "/oauth/authorize?state=02afe928b&scope=user&response_type=code&client_id=client-id&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&login_hint=my-username&prompt=none+login+consent";
+    should.assertEquals(expected, oauth2.authorizeURL(new OAuth2AuthorizationURL()
+      .setState(authorizeConfig.getString("state"))
+      .setRedirectUri(authorizeConfig.getString("redirect_uri"))
+      .addScope(authorizeConfig.getString("scope"))
+      .addAdditionalParameter("login_hint", "my-username")
+      .addAdditionalParameter("prompt", "none login consent")));
   }
 
   @Test

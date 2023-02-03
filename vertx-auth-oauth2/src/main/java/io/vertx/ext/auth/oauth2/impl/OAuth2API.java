@@ -152,6 +152,18 @@ public class OAuth2API {
       }
     }
 
+    if (query.getString("redirectUri") != null && !params.getString("redirectUri").isEmpty()) {
+      query.put("redirect_uri", params.getString("redirectUri"));
+      query.remove("redirectUri");
+    }
+
+    if (query.containsKey("additionalParameters")) {
+      query.getJsonObject("additionalParameters").forEach(entry -> {
+        query.put(entry.getKey(), entry.getValue());
+      });
+      query.remove("additionalParameters");
+    }
+
     final String path = config.getAuthorizationPath();
     final String url = path.charAt(0) == '/' ? config.getSite() + path : path;
 
