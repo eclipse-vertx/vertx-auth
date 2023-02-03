@@ -137,8 +137,8 @@ public class OAuth2AuthCodeTest {
       .setState(authorizeConfig.getString("state"))
       .setRedirectUri(authorizeConfig.getString("redirect_uri"))
       .addScope(authorizeConfig.getString("scope"))
-      .addAdditionalParameter("login_hint", "my-username")
-      .addAdditionalParameter("prompt", "none login consent")));
+      .putAdditionalParameter("login_hint", "my-username")
+      .putAdditionalParameter("prompt", "none login consent")));
   }
 
   @Test

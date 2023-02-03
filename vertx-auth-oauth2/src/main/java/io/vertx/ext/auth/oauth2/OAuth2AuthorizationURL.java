@@ -153,7 +153,7 @@ public class OAuth2AuthorizationURL {
    * @param value the value of the parameter. Should be in final format that is expected by the provider. Example: "fr-CA fr en"
    * @return self
    */
-  public OAuth2AuthorizationURL addAdditionalParameter(String key, String value) {
+  public OAuth2AuthorizationURL putAdditionalParameter(String key, String value) {
     if (this.additionalParameters == null) {
       this.additionalParameters = new HashMap<>();
     }
