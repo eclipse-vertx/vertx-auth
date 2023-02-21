@@ -25,26 +25,28 @@ import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
 public class AuthorizationConverter {
 
+  public final static String FIELD_TYPE = "type";
+  public final static String FIELD_AUTHORIZATIONS = "authorizations";
+
   public static Authorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
-    Authorization result = AndAuthorizationConverter.decode(json);
-    if (result == null) {
-      result = NotAuthorizationConverter.decode(json);
-      if (result == null) {
-        result = OrAuthorizationConverter.decode(json);
-        if (result == null) {
-          result = PermissionBasedAuthorizationConverter.decode(json);
-          if (result == null) {
-            result = RoleBasedAuthorizationConverter.decode(json);
-            if (result == null) {
-              result = WildcardPermissionBasedAuthorizationConverter.decode(json);
-            }
-          }
-        }
-      }
+    switch (Objects.requireNonNull(json.getString(FIELD_TYPE))) {
+      case AndAuthorizationConverter.TYPE:
+        return AndAuthorizationConverter.decode(json);
+      case NotAuthorizationConverter.TYPE:
+        return NotAuthorizationConverter.decode(json);
+      case OrAuthorizationConverter.TYPE:
+        return OrAuthorizationConverter.decode(json);
+      case PermissionBasedAuthorizationConverter.TYPE:
+        return PermissionBasedAuthorizationConverter.decode(json);
+      case RoleBasedAuthorizationConverter.TYPE:
+        return RoleBasedAuthorizationConverter.decode(json);
+      case WildcardPermissionBasedAuthorizationConverter.TYPE:
+        return WildcardPermissionBasedAuthorizationConverter.decode(json);
+      default:
+        throw new IllegalArgumentException("Unsupported authorization " + json.getString(FIELD_TYPE));
     }
-    return result;
   }
 
   public static JsonObject encode(Authorization value) throws IllegalArgumentException {

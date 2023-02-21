@@ -20,17 +20,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.OrAuthorization;
 
+import static io.vertx.ext.auth.authorization.impl.AuthorizationConverter.FIELD_AUTHORIZATIONS;
+import static io.vertx.ext.auth.authorization.impl.AuthorizationConverter.FIELD_TYPE;
+
 public class OrAuthorizationConverter {
 
-  private final static String FIELD_TYPE = "type";
-  private final static String TYPE_AND_AUTHORIZATION = "or";
-  private final static String FIELD_AUTHORIZATIONS = "authorizations";
+  public final static String TYPE = "or";
 
   public static JsonObject encode(OrAuthorization value) throws IllegalArgumentException {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
-    result.put(FIELD_TYPE, TYPE_AND_AUTHORIZATION);
+    result.put(FIELD_TYPE, TYPE);
     JsonArray authorizations = new JsonArray();
     result.put(FIELD_AUTHORIZATIONS, authorizations);
     for (Authorization authorization : value.getAuthorizations()) {
@@ -42,16 +43,12 @@ public class OrAuthorizationConverter {
   public static @Nullable OrAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
-    if (TYPE_AND_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {
-      OrAuthorization result = OrAuthorization.create();
-      JsonArray authorizations = json.getJsonArray(FIELD_AUTHORIZATIONS);
-      for (int i = 0; i < authorizations.size(); i++) {
-        JsonObject authorization = authorizations.getJsonObject(i);
-        result.addAuthorization(AuthorizationConverter.decode(authorization));
-      }
-      return result;
+    OrAuthorization result = OrAuthorization.create();
+    JsonArray authorizations = json.getJsonArray(FIELD_AUTHORIZATIONS);
+    for (int i = 0; i < authorizations.size(); i++) {
+      JsonObject authorization = authorizations.getJsonObject(i);
+      result.addAuthorization(AuthorizationConverter.decode(authorization));
     }
-    return null;
+    return result;
   }
-
 }

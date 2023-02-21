@@ -18,10 +18,11 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 
+import static io.vertx.ext.auth.authorization.impl.AuthorizationConverter.FIELD_TYPE;
+
 public class WildcardPermissionBasedAuthorizationConverter {
 
-  private final static String FIELD_TYPE = "type";
-  private final static String TYPE_WILDCARD_PERMISSION = "wildcard";
+  public final static String TYPE = "wildcard";
   private final static String FIELD_PERMISSION = "permission";
   private final static String FIELD_RESOURCE = "resource";
 
@@ -29,7 +30,7 @@ public class WildcardPermissionBasedAuthorizationConverter {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
-    result.put(FIELD_TYPE, TYPE_WILDCARD_PERMISSION);
+    result.put(FIELD_TYPE, TYPE);
     result.put(FIELD_PERMISSION, value.getPermission());
     if (value.getResource() != null) {
       result.put(FIELD_RESOURCE, value.getResource());
@@ -40,15 +41,12 @@ public class WildcardPermissionBasedAuthorizationConverter {
   public static @Nullable WildcardPermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
-    if (TYPE_WILDCARD_PERMISSION.equals(json.getString(FIELD_TYPE))) {
-      WildcardPermissionBasedAuthorization result = WildcardPermissionBasedAuthorization
-          .create(json.getString(FIELD_PERMISSION));
-      if (json.getString(FIELD_RESOURCE) != null) {
-        result.setResource(json.getString(FIELD_RESOURCE));
-      }
-      return result;
-    }
-    return null;
-  }
+    WildcardPermissionBasedAuthorization result =
+      WildcardPermissionBasedAuthorization.create(json.getString(FIELD_PERMISSION));
 
+    if (json.getString(FIELD_RESOURCE) != null) {
+      result.setResource(json.getString(FIELD_RESOURCE));
+    }
+    return result;
+  }
 }

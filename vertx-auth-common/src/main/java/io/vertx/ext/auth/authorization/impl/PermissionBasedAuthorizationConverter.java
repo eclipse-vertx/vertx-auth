@@ -18,10 +18,11 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 
+import static io.vertx.ext.auth.authorization.impl.AuthorizationConverter.FIELD_TYPE;
+
 public class PermissionBasedAuthorizationConverter {
 
-  private final static String FIELD_TYPE = "type";
-  private final static String TYPE_PERMISSION_BASED_AUTHORIZATION = "permission";
+  public final static String TYPE = "permission";
   private final static String FIELD_PERMISSION = "permission";
   private final static String FIELD_RESOURCE = "resource";
 
@@ -29,7 +30,7 @@ public class PermissionBasedAuthorizationConverter {
     Objects.requireNonNull(value);
 
     JsonObject result = new JsonObject();
-    result.put(FIELD_TYPE, TYPE_PERMISSION_BASED_AUTHORIZATION);
+    result.put(FIELD_TYPE, TYPE);
     result.put(FIELD_PERMISSION, value.getPermission());
     if (value.getResource() != null) {
       result.put(FIELD_RESOURCE, value.getResource());
@@ -40,14 +41,10 @@ public class PermissionBasedAuthorizationConverter {
   public static @Nullable PermissionBasedAuthorization decode(JsonObject json) throws IllegalArgumentException {
     Objects.requireNonNull(json);
 
-    if (TYPE_PERMISSION_BASED_AUTHORIZATION.equals(json.getString(FIELD_TYPE))) {
-      PermissionBasedAuthorization result = PermissionBasedAuthorization.create(json.getString(FIELD_PERMISSION));
-      if (json.getString(FIELD_RESOURCE) != null) {
-        result.setResource(json.getString(FIELD_RESOURCE));
-      }
-      return result;
+    PermissionBasedAuthorization result = PermissionBasedAuthorization.create(json.getString(FIELD_PERMISSION));
+    if (json.getString(FIELD_RESOURCE) != null) {
+      result.setResource(json.getString(FIELD_RESOURCE));
     }
-    return null;
+    return result;
   }
-
 }
