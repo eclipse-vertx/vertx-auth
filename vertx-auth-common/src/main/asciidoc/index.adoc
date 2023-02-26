@@ -60,19 +60,11 @@ To find out what a particular {@link io.vertx.ext.auth.authorization.Authorizati
 
 == Authentication
 
-To authenticate a user you use {@link io.vertx.ext.auth.authentication.AuthenticationProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
+To authenticate a user you use {@link io.vertx.ext.auth.authentication.AuthenticationProvider#authenticate(io.vertx.ext.auth.authentication.Credentials, io.vertx.core.Handler)}.
 
-The first argument is a JSON object which contains authentication information. What this actually contains depends
-on the specific implementation; for a simple username/password based authentication it might contain something like:
-
-----
-{
-  "username": "tim"
-  "password": "mypassword"
-}
-----
-
-For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
+The first argument is a {@link io.vertx.ext.auth.authentication.Credentials} object which contains authentication information. 
+This interface has multiple implementations. For most simple cases, you'll use {@link io.vertx.ext.auth.authentication.UsernamePasswordCredentials},
+while other types of API might, for example, use {@link io.vertx.ext.auth.oauth2.Oauth2Credentials} or {@link io.vertx.ext.auth.authentication.TokenCredentials}. 
 
 Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
 the call. The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated
