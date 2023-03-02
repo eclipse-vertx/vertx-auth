@@ -90,7 +90,7 @@ public class AuthorizationPolicyProviderTest {
     ));
 
     // required authz
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop=nl");
+    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
 
     // simulate the authz flow
     policyAuthz
@@ -216,6 +216,60 @@ public class AuthorizationPolicyProviderTest {
         authorizationContext.variables().add("action", "read");
 
         // the admin user has no restriction on resource so it will still be able to match
+        if (authorization.match(authorizationContext)) {
+          test.complete();
+        } else {
+          should.fail("Authorization should match");
+        }
+      });
+  }
+
+  @Test
+  public void testPolicyWithMultipleValues(TestContext should) throws Exception {
+
+    final Async test = should.async();
+
+    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
+      .create(dummy, new JsonObject()
+        .put("support-cashier", new JsonArray()
+          .add(WildcardPermissionBasedAuthorization.create("txo.shop:*").toJson())
+          .add(WildcardPermissionBasedAuthorization.create("view.cart:eu").toJson())));
+
+    // same as policy:
+    // {
+    //   "support-cashier":
+    //     [ {
+    //       "type" : "wildcard",
+    //       "permission" : "txo.shop:*"
+    //       }, {
+    //       "type" : "wildcard",
+    //       "permission" : "view.cart:eu"
+    //    } ]
+    // }
+
+    // This is a user that was decoded from a token...
+    User paulo = User.create(new JsonObject(
+      "{\n" +
+        "  \"sub\" : \"paulo\",\n" +
+        "  \"claims\" : [ \"support-cashier\" ]\n" +
+        "}\n"
+    ));
+
+    // required authz (nl + view customer cart nl)
+    Authorization authorization =
+      AndAuthorization.create()
+        .addAuthorization(WildcardPermissionBasedAuthorization.create("txo.shop:nl"))
+        .addAuthorization(WildcardPermissionBasedAuthorization.create("view.cart:eu"));
+
+
+    // simulate the authz flow
+    policyAuthz
+      .getAuthorizations(paulo)
+      .onFailure(should::fail)
+      .onSuccess(v -> {
+        // create the authorization context
+        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+
         if (authorization.match(authorizationContext)) {
           test.complete();
         } else {
