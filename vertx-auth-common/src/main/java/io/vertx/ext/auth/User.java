@@ -19,15 +19,8 @@ package io.vertx.ext.auth;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.Authorizations;
-import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 

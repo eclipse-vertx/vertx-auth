@@ -21,7 +21,6 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
 /**
  * Simplified factory to create an {@link OAuth2Auth} for GitLab.com.

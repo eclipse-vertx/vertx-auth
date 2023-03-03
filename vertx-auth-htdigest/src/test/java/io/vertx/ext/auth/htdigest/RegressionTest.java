@@ -1,6 +1,5 @@
 package io.vertx.ext.auth.htdigest;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.unit.Async;

@@ -26,7 +26,6 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.impl.http.SimpleHttpResponse;
 import io.vertx.ext.auth.impl.jose.JWT;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;

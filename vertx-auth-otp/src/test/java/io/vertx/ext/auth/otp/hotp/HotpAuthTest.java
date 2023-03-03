@@ -11,7 +11,6 @@
 
 package io.vertx.ext.auth.otp.hotp;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.DummyDatabase;

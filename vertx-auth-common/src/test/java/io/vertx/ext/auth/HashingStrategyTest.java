@@ -64,7 +64,7 @@ public class HashingStrategyTest {
     assertTrue(strategy.verify(hash, "SuperSecret$!"));
     // should be wrong
     assertFalse(strategy.verify(hash, "superSecret$!"));
-    HashMap<String, String> params = new HashMap<String, String>();
+    HashMap<String, String> params = new HashMap<>();
     params.put("it", "100000");
     String hashWithPararms = strategy.hash("pbkdf2", params, salt, "SuperSecret$!");
     // should be different

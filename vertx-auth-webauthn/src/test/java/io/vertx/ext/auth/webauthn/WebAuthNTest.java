@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.Base64;
-import java.util.Map;
 
 @RunWith(VertxUnitRunner.class)
 public class WebAuthNTest {

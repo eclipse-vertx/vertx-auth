@@ -12,7 +12,6 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.Credentials;

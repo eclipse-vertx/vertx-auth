@@ -18,8 +18,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.CountDownLatch;
-
 @RunWith(VertxUnitRunner.class)
 public class OAuth2ErrorsTest {
 

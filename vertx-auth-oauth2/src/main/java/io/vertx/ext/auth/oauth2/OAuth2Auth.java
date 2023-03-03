@@ -66,8 +66,6 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
    * positive leeway, it will be used to request the refresh ahead of time.
    *
-   * Key rotation can be controled by {@link OAuth2Options#setRotateJWKs(boolean)}.
-   *
    * @param handler the handler success/failure.
    * @return fluent self.
    */

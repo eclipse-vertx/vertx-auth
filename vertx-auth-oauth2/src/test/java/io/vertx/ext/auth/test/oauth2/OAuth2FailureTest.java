@@ -1,7 +1,5 @@
 package io.vertx.ext.auth.test.oauth2;
 
-import io.vertx.core.VertxOptions;
-import io.vertx.core.dns.AddressResolverOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;

@@ -16,14 +16,11 @@
 
 package io.vertx.ext.auth.authentication;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 
 /**
