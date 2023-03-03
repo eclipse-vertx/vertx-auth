@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-@ModuleGen(name = "vertx-auth-jwt", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-auth-jwt", groupPackage = "io.vertx", checkCallbackDeprecation = true)
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.ModuleGen;

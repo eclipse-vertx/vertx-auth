@@ -77,6 +77,7 @@ public interface AuthorizationProvider {
    * @param user user to lookup and update
    * @param handler result handler
    */
+  @Deprecated
   void getAuthorizations(User user, Handler<AsyncResult<Void>> handler);
 
   /**

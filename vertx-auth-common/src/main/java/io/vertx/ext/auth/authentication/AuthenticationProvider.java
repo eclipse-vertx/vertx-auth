@@ -105,6 +105,7 @@ public interface AuthenticationProvider {
    * @param resultHandler  The result handler
    */
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
+  @Deprecated
   default void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
     authenticate(credentials)
       .onComplete(resultHandler);
