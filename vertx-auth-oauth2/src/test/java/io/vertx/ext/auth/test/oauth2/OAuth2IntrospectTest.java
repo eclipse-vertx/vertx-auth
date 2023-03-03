@@ -4,6 +4,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -107,7 +108,6 @@ public class OAuth2IntrospectTest {
       }
 
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort())
@@ -132,7 +132,7 @@ public class OAuth2IntrospectTest {
 
     config = oauthIntrospect;
     fixture = fixtureIntrospect;
-    oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
+    oauth2.authenticate(new TokenCredentials(token), res -> {
       if (res.failed()) {
         should.fail(res.cause().getMessage());
       } else {
@@ -168,7 +168,7 @@ public class OAuth2IntrospectTest {
     final Async test = should.async();
     config = oauthIntrospect;
     fixture = fixtureGoogle;
-    oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
+    oauth2.authenticate(new TokenCredentials(token), res -> {
       if (res.failed()) {
         should.fail(res.cause().getMessage());
       } else {
@@ -194,7 +194,7 @@ public class OAuth2IntrospectTest {
 
               // the replay shows that the api can be used from the user object
               // directly too
-              oauth2.authenticate(token.principal().put("access_token", OAuth2IntrospectTest.token).put("token_type", "Bearer"), v -> {
+              oauth2.authenticate(new TokenCredentials(OAuth2IntrospectTest.token), v -> {
                 if (v.failed()) {
                   should.fail(v.cause());
                 } else {
@@ -215,7 +215,7 @@ public class OAuth2IntrospectTest {
     final Async test = should.async();
     config = oauthIntrospect;
     fixture = fixtureKeycloak;
-    oauth2.authenticate(new JsonObject().put("access_token", token).put("token_type", "Bearer"), res -> {
+    oauth2.authenticate(new TokenCredentials(token), res -> {
       if (res.failed()) {
         should.fail(res.cause());
       } else {

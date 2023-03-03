@@ -36,12 +36,6 @@ public class RelyingParty {
    */
   private String name;
 
-  /**
-   * A URL location for an icon
-   */
-  @Deprecated
-  private String icon;
-
   public RelyingParty() {
   }
 
@@ -52,7 +46,6 @@ public class RelyingParty {
   public RelyingParty(RelyingParty other) {
     this.id = other.id;
     this.name = other.name;
-    this.icon = other.icon;
   }
 
   public String getId() {
@@ -70,17 +63,6 @@ public class RelyingParty {
 
   public RelyingParty setName(String name) {
     this.name = name;
-    return this;
-  }
-
-  @Deprecated
-  public String getIcon() {
-    return icon;
-  }
-
-  @Deprecated
-  public RelyingParty setIcon(String icon) {
-    this.icon = icon;
     return this;
   }
 

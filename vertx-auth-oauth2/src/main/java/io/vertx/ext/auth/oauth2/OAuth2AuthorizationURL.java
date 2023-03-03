@@ -52,6 +52,22 @@ public class OAuth2AuthorizationURL {
   }
 
   /**
+   * Constructor to create an options from an existing options
+   *
+   * @param other the existing one to clone
+   */
+  public OAuth2AuthorizationURL(OAuth2AuthorizationURL other) {
+    this.redirectUri = other.redirectUri;
+    this.state = other.state;
+    if (other.scopes != null) {
+      this.scopes = new ArrayList<>(other.scopes);
+    }
+    if (other.additionalParameters != null) {
+      this.additionalParameters = new HashMap<>(other.additionalParameters);
+    }
+  }
+
+  /**
    * Get the redirect URI
    *
    * @return the redirectUri

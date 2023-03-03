@@ -22,6 +22,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.htdigest.HtdigestAuth;
 import io.vertx.ext.auth.htdigest.HtdigestCredentials;
@@ -95,21 +96,14 @@ public class HtdigestAuthImpl implements HtdigestAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-    return authenticate(new HtdigestCredentials(authInfo));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     final HtdigestCredentials authInfo;
     try {
-      authInfo = (HtdigestCredentials) credentials;
+      try {
+        authInfo = (HtdigestCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       authInfo.checkValid(null);
     } catch (RuntimeException e) {
       return Future.failedFuture(e);

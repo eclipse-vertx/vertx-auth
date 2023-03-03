@@ -134,20 +134,6 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * authentication and consent. This endpoint is used in the code and implicit
    * OAuth 2.0 flows which require end-user interaction.
    *
-   * @deprecated For type safety this method should be avoided and {@link #authorizeURL(OAuth2AuthorizationURL)} should be
-   * used instead.
-   *
-   * @param params extra params to be included in the final URL.
-   * @return the url to be used to authorize the user.
-   */
-  @Deprecated
-  String authorizeURL(JsonObject params);
-
-  /**
-   * The client sends the end-user's browser to this endpoint to request their
-   * authentication and consent. This endpoint is used in the code and implicit
-   * OAuth 2.0 flows which require end-user interaction.
-   *
    * @param url Base URL with path together with other parameters to be included in the final URL.
    * @return the url to be used to authorize the user.
    */

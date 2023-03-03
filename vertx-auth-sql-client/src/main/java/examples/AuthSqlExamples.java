@@ -21,6 +21,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.sqlclient.SqlAuthentication;
@@ -47,9 +49,8 @@ public class AuthSqlExamples {
 
   public void example6(AuthenticationProvider authProvider) {
 
-    JsonObject authInfo = new JsonObject()
-      .put("username", "tim")
-      .put("password", "sausages");
+    Credentials authInfo = new UsernamePasswordCredentials(
+      "tim", "sausages");
 
     authProvider.authenticate(authInfo)
       .onSuccess(user -> System.out.println("User: " + user.principal()))

@@ -1,5 +1,6 @@
 package io.vertx.ext.auth;
 
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -22,7 +23,7 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         should.fail();
       } else {
@@ -36,7 +37,7 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         should.fail();
       } else {
@@ -50,12 +51,12 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject())));
+      return Future.succeededFuture(createUser(new JsonObject()));
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         test.complete();
       } else {
@@ -69,12 +70,12 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject())));
+      return Future.succeededFuture(createUser(new JsonObject()));
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         test.complete();
       } else {
@@ -88,17 +89,17 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always Fail
-      resultHandler.handle(Future.failedFuture("some error/bad auth"));
+      return Future.failedFuture("some error/bad auth");
     });
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+      return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         should.assertEquals(2, res.result().principal().getInteger("provider"));
         test.complete();
@@ -113,17 +114,17 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always Fail
-      resultHandler.handle(Future.failedFuture("some error/bad auth"));
+      return Future.failedFuture("some error/bad auth");
     });
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+      return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         should.assertEquals(2, res.result().principal().getInteger("provider"));
         should.fail();
@@ -138,21 +139,21 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always Fail
-      resultHandler.handle(Future.failedFuture("some error/bad auth"));
+      return Future.failedFuture("some error/bad auth");
     });
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(createUser(new JsonObject().put("provider", 2))));
+      return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
     });
 
-    auth.add((credentials, resultHandler) -> {
-      resultHandler.handle(Future.failedFuture("should not be called"));
+    auth.add(credentials -> {
+      return Future.failedFuture("should not be called");
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         should.assertEquals(2, res.result().principal().getInteger("provider"));
         test.complete();
@@ -167,17 +168,17 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attributeOne", "one"))));
+      return Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attributeOne", "one")));
     });
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attributeTwo", "two"))));
+      return Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attributeTwo", "two")));
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         User result = res.result();
         should.assertNotNull(result);
@@ -200,17 +201,17 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attribute", "one"))));
+      return Future.succeededFuture(User.create(new JsonObject().put("provider", 1), new JsonObject().put("attribute", "one")));
     });
 
-    auth.add((credentials, resultHandler) -> {
+    auth.add(credentials -> {
       // always OK
-      resultHandler.handle(Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two"))));
+      return Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two")));
     });
 
-    auth.authenticate(new JsonObject(), res -> {
+    auth.authenticate(new TokenCredentials("xyz"), res -> {
       if (res.succeeded()) {
         User result = res.result();
         should.assertNotNull(result);

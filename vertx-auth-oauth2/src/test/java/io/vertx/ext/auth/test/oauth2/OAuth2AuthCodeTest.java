@@ -3,8 +3,9 @@ package io.vertx.ext.auth.test.oauth2;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
-import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
+import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -20,9 +21,6 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
@@ -51,19 +49,20 @@ public class OAuth2AuthCodeTest {
       "  ]" +
       "}");
 
-  private static final JsonObject tokenConfig = new JsonObject()
-    .put("code", "code")
-    .put("redirectUri", "http://callback.com");
+  private static final Credentials tokenConfig = new Oauth2Credentials()
+    .setFlow(OAuth2FlowType.AUTH_CODE)
+    .setCode("code")
+    .setRedirectUri("http://callback.com");
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
     .put("redirect_uri", "http://callback.com")
     .put("grant_type", "authorization_code");
 
-  private static final JsonObject authorizeConfig = new JsonObject()
-    .put("redirect_uri", "http://localhost:3000/callback")
-    .put("scope", "user")
-    .put("state", "02afe928b");
+  private static final OAuth2AuthorizationURL authorizeConfig = new OAuth2AuthorizationURL()
+    .setRedirectUri("http://localhost:3000/callback")
+    .addScope("user")
+    .setState("02afe928b");
 
 
   protected OAuth2Auth oauth2;
@@ -102,7 +101,6 @@ public class OAuth2AuthCodeTest {
         }
 
         oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-          .setFlow(OAuth2FlowType.AUTH_CODE)
           .setClientId("client-id")
           .setClientSecret("client-secret")
           .setJwkPath("/oauth/jwks")
@@ -126,17 +124,14 @@ public class OAuth2AuthCodeTest {
 
   @Test
   public void generateAuthorizeURL(TestContext should) throws Exception {
-    String expected = "http://localhost:" + currentPort + "/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&scope=user&state=02afe928b&response_type=code&client_id=client-id";
+    String expected = "http://localhost:" + currentPort + "/oauth/authorize?state=02afe928b&scope=user&response_type=code&client_id=client-id&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8");
     should.assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
   }
 
   @Test
   public void generateAuthorizeURLTypeSafe(TestContext should) throws Exception {
     String expected = "http://localhost:" + currentPort + "/oauth/authorize?state=02afe928b&scope=user&response_type=code&client_id=client-id&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&login_hint=my-username&prompt=none+login+consent";
-    should.assertEquals(expected, oauth2.authorizeURL(new OAuth2AuthorizationURL()
-      .setState(authorizeConfig.getString("state"))
-      .setRedirectUri(authorizeConfig.getString("redirect_uri"))
-      .addScope(authorizeConfig.getString("scope"))
+    should.assertEquals(expected, oauth2.authorizeURL(new OAuth2AuthorizationURL(authorizeConfig)
       .putAdditionalParameter("login_hint", "my-username")
       .putAdditionalParameter("prompt", "none login consent")));
   }

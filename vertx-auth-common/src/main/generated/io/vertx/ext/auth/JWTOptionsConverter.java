@@ -83,16 +83,6 @@ public class JWTOptionsConverter {
             obj.setNonceAlgorithm((String)member.getValue());
           }
           break;
-        case "permissions":
-          if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
-            ((Iterable<Object>)member.getValue()).forEach( item -> {
-              if (item instanceof String)
-                list.add((String)item);
-            });
-            obj.setPermissions(list);
-          }
-          break;
         case "subject":
           if (member.getValue() instanceof String) {
             obj.setSubject((String)member.getValue());
@@ -127,11 +117,6 @@ public class JWTOptionsConverter {
     json.put("noTimestamp", obj.isNoTimestamp());
     if (obj.getNonceAlgorithm() != null) {
       json.put("nonceAlgorithm", obj.getNonceAlgorithm());
-    }
-    if (obj.getPermissions() != null) {
-      JsonArray array = new JsonArray();
-      obj.getPermissions().forEach(item -> array.add(item));
-      json.put("permissions", array);
     }
     if (obj.getSubject() != null) {
       json.put("subject", obj.getSubject());

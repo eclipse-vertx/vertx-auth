@@ -54,7 +54,6 @@ public interface GoogleAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://accounts.google.com")
@@ -130,7 +129,6 @@ public interface GoogleAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setFlow(OAuth2FlowType.AUTH_JWT)
         .setClientId(serviceAccountJson.getString("client_id"))
         .setSite("https://accounts.google.com")
         .setTokenPath(serviceAccountJson.getString("token_uri"))

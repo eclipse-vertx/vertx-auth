@@ -4,6 +4,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -34,9 +36,7 @@ public class OAuth2PasswordTest {
       "  \"expires_in\": 7200" +
       "}");
 
-  private static final JsonObject tokenConfig = new JsonObject()
-    .put("username", "alice")
-    .put("password", "secret");
+  private static final Credentials tokenConfig = new UsernamePasswordCredentials("alice", "secret");
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("password", "secret")
@@ -70,7 +70,6 @@ public class OAuth2PasswordTest {
         throw new RuntimeException(ready.cause());
       }
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.PASSWORD)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort()));

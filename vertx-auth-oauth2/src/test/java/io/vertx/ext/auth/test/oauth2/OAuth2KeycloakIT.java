@@ -1,14 +1,15 @@
 package io.vertx.ext.auth.test.oauth2;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
@@ -76,7 +77,6 @@ public class OAuth2KeycloakIT {
     }
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("confidential-client")
       .setClientSecret("62b8de48-672e-4287-bb1e-6af39aec045e")
       .setTenant("vertx-test")
@@ -101,7 +101,7 @@ public class OAuth2KeycloakIT {
   public void shouldLoginWithUsernamePassword(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
       should.assertNotNull(authn.result().attributes().getJsonObject("accessToken"));
@@ -113,7 +113,7 @@ public class OAuth2KeycloakIT {
   public void shouldLoginWithUsernamePasswordAndGetIdToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger").put("scopes", new JsonArray().add("openid")), authn -> {
+    keycloak.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.PASSWORD).setUsername("test-user").setPassword("tiger").addScope("openid"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
       should.assertNotNull(authn.result().attributes().getJsonObject("accessToken"));
@@ -126,14 +126,14 @@ public class OAuth2KeycloakIT {
   public void shouldLoginWithAccessToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
       // generate a access token from the user
       User token = authn.result();
 
-      keycloak.authenticate(new JsonObject().put("access_token", token.principal().getString("access_token")).put("token_type", "Bearer"), authn2 -> {
+      keycloak.authenticate(new TokenCredentials(token.principal().getString("access_token")), authn2 -> {
         should.assertTrue(authn2.succeeded());
         should.assertNotNull(authn2.result());
         test.complete();
@@ -145,7 +145,7 @@ public class OAuth2KeycloakIT {
   public void shouldFailLoginWithInvalidToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("access_token", "aaaaaaaaaaaaaaaaaa").put("token_type", "Bearer"), authn2 -> {
+    keycloak.authenticate(new TokenCredentials("aaaaaaaaaaaaaaaaaa"), authn2 -> {
       should.assertTrue(authn2.failed());
       should.assertNotNull(authn2.cause());
       test.complete();
@@ -156,7 +156,7 @@ public class OAuth2KeycloakIT {
   public void shouldIntrospectAccessTokenInactive(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
@@ -164,7 +164,6 @@ public class OAuth2KeycloakIT {
       User token = authn.result();
 
       OAuth2Options options = new OAuth2Options()
-        .setFlow(OAuth2FlowType.PASSWORD)
         .setClientId("confidential-client")
         .setTenant("vertx-test")
         .setSite(site + "/auth/realms/{realm}")
@@ -180,7 +179,7 @@ public class OAuth2KeycloakIT {
           should.assertTrue(discover.succeeded());
           OAuth2Auth confidential = discover.result();
           try { Thread.sleep(5000L); } catch (InterruptedException e) {}
-          confidential.authenticate(token.principal(), introspect -> {
+          confidential.authenticate(new TokenCredentials(token.principal().getString("access_token")), introspect -> {
             should.assertTrue(introspect.failed());
             should.assertEquals("Inactive Token", introspect.cause().getMessage());
             test.complete();
@@ -193,7 +192,7 @@ public class OAuth2KeycloakIT {
   public void shouldIntrospectAccessToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
@@ -201,7 +200,6 @@ public class OAuth2KeycloakIT {
       User token = authn.result();
 
       OAuth2Options options = new OAuth2Options()
-        .setFlow(OAuth2FlowType.PASSWORD)
         .setClientId("confidential-client")
         .setTenant("vertx-test")
         .setSite(site + "/auth/realms/{realm}")
@@ -216,7 +214,7 @@ public class OAuth2KeycloakIT {
         discover -> {
           should.assertTrue(discover.succeeded());
           OAuth2Auth confidential = discover.result();
-          confidential.authenticate(token.principal(), introspect -> {
+          confidential.authenticate(new TokenCredentials(token.principal().getString("access_token")), introspect -> {
             should.assertTrue(introspect.succeeded());
             test.complete();
           });
@@ -228,7 +226,7 @@ public class OAuth2KeycloakIT {
   public void shouldGetPermissionsFromToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
@@ -271,7 +269,7 @@ public class OAuth2KeycloakIT {
   public void shouldGetPermissionsFromTokenButPermissionIsNotAllowed(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
@@ -290,7 +288,7 @@ public class OAuth2KeycloakIT {
   public void shouldLoadTheUserInfo(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
@@ -311,7 +309,7 @@ public class OAuth2KeycloakIT {
   public void shouldRefreshAToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
       should.assertTrue(authn.succeeded());
       should.assertNotNull(authn.result());
 
@@ -336,7 +334,7 @@ public class OAuth2KeycloakIT {
     keycloak.jWKSet(load -> {
       should.assertTrue(load.succeeded());
 
-      keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger"), authn -> {
+      keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
         should.assertTrue(authn.succeeded());
         should.assertNotNull(authn.result());
 
@@ -370,7 +368,7 @@ public class OAuth2KeycloakIT {
       discover -> {
         should.assertTrue(discover.succeeded());
         OAuth2Auth keycloak = discover.result();
-        keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger").put("flow", OAuth2FlowType.PASSWORD.getGrantType()), authn -> {
+        keycloak.authenticate(new Oauth2Credentials().setUsername("test-user").setPassword("tiger").setFlow(OAuth2FlowType.PASSWORD), authn -> {
           should.assertTrue(authn.succeeded());
           test.complete();
         });
@@ -398,7 +396,7 @@ public class OAuth2KeycloakIT {
       discover -> {
         should.assertTrue(discover.succeeded());
         OAuth2Auth keycloak = discover.result();
-        keycloak.authenticate(new JsonObject().put("username", "test-user").put("password", "tiger").put("flow", OAuth2FlowType.AAD_OBO.getGrantType()), authn -> {
+        keycloak.authenticate(new Oauth2Credentials().setAssertion("xyz").setFlow(OAuth2FlowType.AAD_OBO), authn -> {
           should.assertTrue(authn.failed());
           should.assertEquals("Provided flow is not supported by provider", authn.cause().getMessage());
           test.complete();

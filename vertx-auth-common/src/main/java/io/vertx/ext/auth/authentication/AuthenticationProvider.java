@@ -38,63 +38,6 @@ public interface AuthenticationProvider {
   /**
    * Authenticate a user.
    * <p>
-   * The first argument is a JSON object containing information for authenticating the user. What this actually contains
-   * depends on the specific implementation. In the case of a simple username/password based
-   * authentication it is likely to contain a JSON object with the following structure:
-   * <pre>
-   *   {
-   *     "username": "tim",
-   *     "password": "mypassword"
-   *   }
-   * </pre>
-   * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
-   * <p>
-   * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
-   * The user object can then be used for authorisation.
-   *
-   * @deprecated For type safety this method should be avoided and {@link #authenticate(Credentials, Handler)} should be
-   * used instead.
-   *
-   * @param credentials  The credentials
-   * @param resultHandler  The result handler
-   */
-  @Deprecated
-  void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler);
-
-  /**
-   * Authenticate a user.
-   * <p>
-   * The first argument is a JSON object containing information for authenticating the user. What this actually contains
-   * depends on the specific implementation. In the case of a simple username/password based
-   * authentication it is likely to contain a JSON object with the following structure:
-   * <pre>
-   *   {
-   *     "username": "tim",
-   *     "password": "mypassword"
-   *   }
-   * </pre>
-   * For other types of authentication it contain different information - for example a JWT token or OAuth bearer token.
-   * <p>
-   * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
-   * The user object can then be used for authorisation.
-   *
-   * @deprecated For type safety this method should be avoided and {@link #authenticate(Credentials)} should be
-   * used instead.
-   *
-   * @see AuthenticationProvider#authenticate(JsonObject, Handler)
-   * @param credentials  The credentials
-   * @return The result future
-   */
-  @Deprecated
-  default Future<User> authenticate(JsonObject credentials) {
-    Promise<User> promise = Promise.promise();
-    authenticate(credentials, promise);
-    return promise.future();
-  }
-
-  /**
-   * Authenticate a user.
-   * <p>
    * The first argument is a Credentials object containing information for authenticating the user.
    * What this actually contains depends on the specific implementation.
    *
@@ -121,8 +64,5 @@ public interface AuthenticationProvider {
    * @param credentials  The credentials
    * @return The result future
    */
-  @GenIgnore(GenIgnore.PERMITTED_TYPE)
-  default Future<User> authenticate(Credentials credentials) {
-    return authenticate(credentials.toJson());
-  }
+  Future<User> authenticate(Credentials credentials);
 }

@@ -33,10 +33,8 @@ import java.util.List;
 public class JWTAuthOptions {
 
   // Defaults
-  private static final String PERMISSIONS_CLAIM_KEY = "permissions";
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
 
-  private String permissionsClaimKey;
   private KeyStoreOptions keyStore;
   private List<PubSecKeyOptions> pubSecKeys;
   private JWTOptions jwtOptions;
@@ -55,7 +53,6 @@ public class JWTAuthOptions {
    * @param other the options to copy
    */
   public JWTAuthOptions(JWTAuthOptions other) {
-    permissionsClaimKey = other.getPermissionsClaimKey();
     keyStore = other.getKeyStore();
     pubSecKeys = other.getPubSecKeys();
     jwtOptions = other.getJWTOptions();
@@ -63,7 +60,6 @@ public class JWTAuthOptions {
   }
 
   private void init() {
-    permissionsClaimKey = PERMISSIONS_CLAIM_KEY;
     jwtOptions = JWT_OPTIONS;
   }
 
@@ -77,24 +73,6 @@ public class JWTAuthOptions {
     JWTAuthOptionsConverter.fromJson(json, this);
   }
 
-  /**
-   * @deprecated AuthN and AuthZ have been split in vert.x 4.0.0 in order to specify where
-   * authorization will happen see {@link io.vertx.ext.auth.jwt.authorization.JWTAuthorization}.
-   */
-  @Deprecated
-  public String getPermissionsClaimKey() {
-    return permissionsClaimKey;
-  }
-
-  /**
-   * @deprecated AuthN and AuthZ have been split in vert.x 4.0.0 in order to specify where
-   * authorization will happen see {@link io.vertx.ext.auth.jwt.authorization.JWTAuthorization}.
-   */
-  @Deprecated
-  public JWTAuthOptions setPermissionsClaimKey(String permissionsClaimKey) {
-    this.permissionsClaimKey = permissionsClaimKey;
-    return this;
-  }
 
   public KeyStoreOptions getKeyStore() {
     return keyStore;

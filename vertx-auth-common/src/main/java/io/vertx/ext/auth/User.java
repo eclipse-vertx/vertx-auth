@@ -297,90 +297,6 @@ public interface User {
   }
 
   /**
-   * Is the user authorised to
-   *
-   * @param authority     the authority - what this really means is determined by the specific implementation. It might
-   *                      represent a permission to access a resource e.g. `printers:printer34` or it might represent
-   *                      authority to a role in a roles based model, e.g. `role:admin`.
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                      `true` if the they has the authority or `false` otherwise.
-   * @return the User to enable fluent use
-   */
-  @Fluent
-  @Deprecated
-  User isAuthorized(Authorization authority, Handler<AsyncResult<Boolean>> resultHandler);
-
-  /**
-   * Is the user authorised to
-   *
-   * @param authority     the authority - what this really means is determined by the specific implementation. It might
-   *                      represent a permission to access a resource e.g. `printers:printer34` or it might represent
-   *                      authority to a role in a roles based model, e.g. `role:admin`.
-   * @param resultHandler handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   *                      `true` if the they has the authority or `false` otherwise.
-   * @return the User to enable fluent use
-   * @deprecated Use typed alternative {@link #isAuthorized(Authorization, Handler)}
-   */
-  @Fluent
-  @Deprecated
-  default User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-    return isAuthorized(
-      authority.startsWith("role:") ?
-        RoleBasedAuthorization.create(authority.substring(5))
-        : WildcardPermissionBasedAuthorization.create(authority), resultHandler);
-  }
-
-  /**
-   * Is the user authorised to
-   *
-   * @param authority the authority - what this really means is determined by the specific implementation. It might
-   *                  represent a permission to access a resource e.g. `printers:printer34` or it might represent
-   *                  authority to a role in a roles based model, e.g. `role:admin`.
-   * @return Future handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   * `true` if the they has the authority or `false` otherwise.
-   * @see User#isAuthorized(Authorization, Handler)
-   */
-  @Deprecated
-  default Future<Boolean> isAuthorized(Authorization authority) {
-    Promise<Boolean> promise = Promise.promise();
-    isAuthorized(authority, promise);
-    return promise.future();
-  }
-
-  /**
-   * Is the user authorised to
-   *
-   * @param authority the authority - what this really means is determined by the specific implementation. It might
-   *                  represent a permission to access a resource e.g. `printers:printer34` or it might represent
-   *                  authority to a role in a roles based model, e.g. `role:admin`.
-   * @return Future handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
-   * `true` if the they has the authority or `false` otherwise.
-   * @see User#isAuthorized(String, Handler)
-   * @deprecated Use typed alternative {@link #isAuthorized(Authorization)}
-   */
-  @Deprecated
-  default Future<Boolean> isAuthorized(String authority) {
-    return isAuthorized(
-      authority.startsWith("role:") ?
-        RoleBasedAuthorization.create(authority.substring(5))
-        : WildcardPermissionBasedAuthorization.create(authority));
-  }
-
-  /**
-   * The User object will cache any authorities that it knows it has to avoid hitting the
-   * underlying auth provider each time.  Use this method if you want to clear this cache.
-   *
-   * @return the User to enable fluent use
-   * @deprecated This method will be removed. Use {@link Authorizations#clear()}
-   */
-  @Fluent
-  @Deprecated
-  default User clearCache() {
-    authorizations().clear();
-    return this;
-  }
-
-  /**
    * Get the underlying principal for the User. What this actually returns depends on the implementation.
    * For a simple user/password based auth, it's likely to contain a JSON object with the following structure:
    * <pre>
@@ -392,15 +308,6 @@ public interface User {
    * @return JSON representation of the Principal
    */
   JsonObject principal();
-
-  /**
-   * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
-   * after it has been deserialized.
-   *
-   * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
-   */
-  @Deprecated
-  void setAuthProvider(AuthProvider authProvider);
 
   /**
    * Merge the principal and attributes of a second user into this object properties.

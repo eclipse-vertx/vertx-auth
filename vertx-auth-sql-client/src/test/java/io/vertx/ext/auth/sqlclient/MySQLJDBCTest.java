@@ -3,6 +3,8 @@ package io.vertx.ext.auth.sqlclient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -61,8 +63,7 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopus").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.succeeded());
@@ -78,8 +79,7 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopus").put("password", "s3cr3t");
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "s3cr3t");
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.failed());
@@ -95,8 +95,7 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopes").put("password", "s3cr3t");
+    Credentials authInfo = new UsernamePasswordCredentials("lopes", "s3cr3t");
 
     authn.authenticate(authInfo, authenticate -> {
       should.assertTrue(authenticate.failed());
@@ -110,8 +109,7 @@ public class MySQLJDBCTest {
   public void testAuthoriseHasRole(TestContext should) {
     final Async test = should.async();
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopus").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
@@ -133,8 +131,7 @@ public class MySQLJDBCTest {
   public void testAuthoriseNotHasRole(TestContext should) {
     final Async test = should.async();
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopus").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
@@ -156,8 +153,7 @@ public class MySQLJDBCTest {
   public void testAuthoriseHasPermission(TestContext should) {
     final Async test = should.async();
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopus").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
@@ -179,8 +175,7 @@ public class MySQLJDBCTest {
   public void testAuthoriseNotHasPermission(TestContext should) {
     final Async test = should.async();
 
-    JsonObject authInfo = new JsonObject();
-    authInfo.put("username", "lopus").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 

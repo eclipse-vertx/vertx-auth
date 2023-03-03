@@ -3,6 +3,8 @@ package io.vertx.ext.auth.test.jwt;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
@@ -22,9 +24,7 @@ public class RaceTest {
     .setType("jceks")
     .setPassword("secret");
 
-  private static final JsonObject CREDENTIALS = new JsonObject()
-    .put("token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiaWF0IjoxNjI5ODE3NDI5fQ.frtNqWYEeFsO4N_IT4WkjhDo0Tqx_gfaLrPYQwpfRf0")
-    .put("options", new JsonObject());
+  private static final Credentials CREDENTIALS = new TokenCredentials("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiaWF0IjoxNjI5ODE3NDI5fQ.frtNqWYEeFsO4N_IT4WkjhDo0Tqx_gfaLrPYQwpfRf0");
 
   private static final JsonObject CLAIMS = new JsonObject().put("field", "value");
 

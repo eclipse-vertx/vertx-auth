@@ -160,98 +160,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
     return config;
   }
 
-  @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-
-    if (authInfo.containsKey("access_token")) {
-      TokenCredentials cred = new TokenCredentials(authInfo.getString("access_token"));
-      if (authInfo.containsKey("scopes")) {
-        for (Object scope : authInfo.getJsonArray("scopes")) {
-          cred.addScope((String) scope);
-        }
-      }
-      return authenticate(cred);
-    }
-
-    final Oauth2Credentials cred;
-
-    final OAuth2FlowType flow;
-
-    if (authInfo.getString("flow") != null && !authInfo.getString("flow").isEmpty()) {
-      flow = OAuth2FlowType.getFlow(authInfo.getString("flow"));
-    } else {
-      flow = config.getFlow();
-    }
-
-    switch (flow) {
-      case AUTH_CODE:
-        if (authInfo.containsKey("code")) {
-          cred = new Oauth2Credentials()
-            .setCode(authInfo.getString("code"))
-            .setCodeVerifier(authInfo.getString("codeVerifier"))
-            .setRedirectUri(authInfo.getString("redirectUri"))
-            .setFlow(flow);
-
-          return authenticate(cred);
-        }
-        break;
-      case CLIENT:
-        cred = new Oauth2Credentials()
-          .setFlow(flow);
-
-        if (authInfo.containsKey("scopes")) {
-          for (Object scope : authInfo.getJsonArray("scopes")) {
-            cred.addScope((String) scope);
-          }
-        }
-
-        return authenticate(cred);
-      case PASSWORD:
-        if (authInfo.containsKey("username") && authInfo.containsKey("password")) {
-
-          cred = new Oauth2Credentials()
-            .setUsername(authInfo.getString("username"))
-            .setPassword(authInfo.getString("password"))
-            .setFlow(flow);
-
-          if (authInfo.containsKey("scopes")) {
-            for (Object scope : authInfo.getJsonArray("scopes")) {
-              cred.addScope((String) scope);
-            }
-          }
-
-          return authenticate(cred);
-        }
-        break;
-      case AUTH_JWT:
-      case AAD_OBO:
-        if (authInfo.containsKey("assertion")) {
-          cred = new Oauth2Credentials()
-            .setAssertion(authInfo.getString("assertion"))
-            .setFlow(flow);
-
-          return authenticate(cred);
-        }
-
-        cred = new Oauth2Credentials()
-          .setJwt(authInfo)
-          .setFlow(flow);
-
-        return authenticate(cred);
-      case IMPLICIT:
-      default:
-        break;
-    }
-    // fallback
-    return Future.failedFuture("can't parse token: " + authInfo);
-  }
-
   /**
    * OAuth2/OIDC authentication. Authentication in this object means, checking if the given credentials are valid by
    * verifying them with the IdP or doing a cryptographic check of the credentials.
@@ -381,20 +289,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
       // the authInfo object does not contain a token, so rely on the
       // configured flow to retrieve a token for the user
       // depending on the flow type the authentication will behave in different ways
-      final JsonObject params = new JsonObject();
-      final OAuth2FlowType flow;
-      if (oauth2Credentials.getFlow() != null) {
-        flow = oauth2Credentials.getFlow();
-      } else {
-        flow = config.getFlow();
-      }
-
-      oauth2Credentials.checkValid(flow);
+      oauth2Credentials.checkValid(config.getSupportedGrantTypes());
+      final OAuth2FlowType flow = oauth2Credentials.getFlow();
 
       if (config.getSupportedGrantTypes() != null && !config.getSupportedGrantTypes().isEmpty() &&
         !config.getSupportedGrantTypes().contains(flow.getGrantType())) {
         return Future.failedFuture("Provided flow is not supported by provider");
       }
+
+      final JsonObject params = new JsonObject();
 
       switch (flow) {
         case AUTH_CODE:
@@ -467,11 +370,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
     } catch (ClassCastException | CredentialValidationException e) {
       return Future.failedFuture(e);
     }
-  }
-
-  @Override
-  public String authorizeURL(JsonObject params) {
-    return api.authorizeURL(params);
   }
 
   @Override

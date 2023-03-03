@@ -120,17 +120,6 @@ public class OAuth2API {
   public String authorizeURL(JsonObject params) {
     final JsonObject query = params.copy();
 
-    final OAuth2FlowType flow;
-    if (params.getString("flow") != null && !params.getString("flow").isEmpty()) {
-      flow = OAuth2FlowType.getFlow(params.getString("flow"));
-    } else {
-      flow = config.getFlow();
-    }
-
-    if (flow != OAuth2FlowType.AUTH_CODE) {
-      throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
-    }
-
     if (query.containsKey("scopes")) {
       // scopes have been passed as a list so the provider must generate the correct string for it
       query.put("scope", String.join(config.getScopeSeparator(), query.getJsonArray("scopes").getList()));

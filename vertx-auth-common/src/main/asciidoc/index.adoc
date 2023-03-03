@@ -60,9 +60,9 @@ To find out what a particular {@link io.vertx.ext.auth.authorization.Authorizati
 
 == Authentication
 
-To authenticate a user you use {@link io.vertx.ext.auth.authentication.AuthenticationProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
+To authenticate a user you use {@link io.vertx.ext.auth.authentication.AuthenticationProvider#authenticate(io.vertx.ext.auth.authentication.Credentials)}.
 
-The first argument is a JSON object which contains authentication information. What this actually contains depends
+The first argument is a Credentials object which contains authentication information. What this actually contains depends
 on the specific implementation; for a simple username/password based authentication it might contain something like:
 
 ----

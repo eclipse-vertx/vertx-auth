@@ -53,7 +53,6 @@ public interface FoursquareAuth {
         .setHttpClientOptions(httpClientOptions)
         .setClientId(clientId)
         .setClientSecret(clientSecret)
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setSite("https://foursquare.com")
         .setTokenPath("/oauth2/access_token")
         .setAuthorizationPath("/oauth2/authenticate")

@@ -20,6 +20,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.*;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -31,8 +33,8 @@ public class AuthCommonExamples {
 
   public void example1(AuthenticationProvider authProvider) {
 
-    JsonObject authInfo = new JsonObject()
-      .put("username", "tim").put("password", "mypassword");
+    Credentials authInfo =
+      new UsernamePasswordCredentials("tim", "mypassword");
 
     authProvider.authenticate(authInfo)
       .onSuccess(user -> {

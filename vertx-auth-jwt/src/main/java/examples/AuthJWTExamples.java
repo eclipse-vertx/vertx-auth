@@ -23,6 +23,7 @@ import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -79,58 +80,61 @@ public class AuthJWTExamples {
   public void example9(JWTAuth jwtAuth) {
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
-    jwtAuth.authenticate(new JsonObject().put("token", "BASE64-ENCODED-STRING"))
+    jwtAuth.authenticate(new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!
       });
   }
 
-  public void example10(JWTAuth jwtAuth) {
+  public void example10(Vertx vertx) {
+
+    JWTAuth jwtAuth = JWTAuth
+      .create(vertx, new JWTAuthOptions()
+        .setJWTOptions(new JWTOptions().setIgnoreExpiration(true)));
 
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
 
     // In this case we are forcing the provider to ignore the `exp` field
     jwtAuth.authenticate(
-      new JsonObject()
-        .put("token", "BASE64-ENCODED-STRING")
-        .put("options", new JsonObject()
-          .put("ignoreExpiration", true)))
+      new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!
       });
   }
 
-  public void example11(JWTAuth jwtAuth) {
+  public void example11(Vertx vertx) {
+
+    JWTAuth jwtAuth = JWTAuth
+      .create(vertx, new JWTAuthOptions()
+        .setJWTOptions(new JWTOptions().addAudience("my-service")));
 
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
 
     // In this case we are forcing the provider to verify the aud field
     jwtAuth.authenticate(
-      new JsonObject()
-        .put("token", "BASE64-ENCODED-STRING")
-        .put("options", new JsonObject()
-          .put("audience", new JsonArray().add("paulo@server.com"))))
+      new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!
       });
   }
 
-  public void example12(JWTAuth jwtAuth) {
+  public void example12(Vertx vertx) {
+
+    JWTAuth jwtAuth = JWTAuth
+      .create(vertx, new JWTAuthOptions()
+        .setJWTOptions(new JWTOptions().setIssuer("my-corp.com")));
 
     // This string is what you see after the string "Bearer" in the
     // HTTP Authorization header
 
     // In this case we are forcing the provider to verify the issuer
     jwtAuth.authenticate(
-      new JsonObject()
-        .put("token", "BASE64-ENCODED-STRING")
-        .put("options", new JsonObject()
-          .put("issuer", "mycorp.com")))
+      new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!

@@ -21,6 +21,7 @@ import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -152,7 +153,10 @@ public class Oauth2Credentials implements Credentials {
 
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
-    OAuth2FlowType flow = (OAuth2FlowType) arg;
+    List<String> supported = Collections.emptyList();
+    if (arg != null) {
+      supported = (List<String>) arg;
+    }
     if (flow == null) {
       throw new CredentialValidationException("flow cannot be null");
     }
@@ -171,7 +175,7 @@ public class Oauth2Credentials implements Credentials {
         break;
       case AUTH_JWT:
         if (jwt == null) {
-          throw new CredentialValidationException("json cannot be null");
+          throw new CredentialValidationException("jwt cannot be null");
         }
         break;
       case AAD_OBO:

@@ -17,11 +17,6 @@ public class PubSecKeyOptions {
   private Buffer buffer;
   private String id;
 
-  private boolean certificate;
-  private Boolean symmetric;
-  private String publicKey;
-  private String secretKey;
-
   /**
    * Default constructor
    */
@@ -37,10 +32,6 @@ public class PubSecKeyOptions {
     algorithm = other.getAlgorithm();
     buffer = other.getBuffer();
     id = other.getId();
-    publicKey = other.getPublicKey();
-    secretKey = other.getSecretKey();
-    symmetric = other.isSymmetric();
-    certificate = other.isCertificate();
   }
 
   /**
@@ -107,82 +98,6 @@ public class PubSecKeyOptions {
 
   public PubSecKeyOptions setId(String id) {
     this.id = id;
-    return this;
-  }
-
-  @Deprecated
-  public String getPublicKey() {
-    return publicKey;
-  }
-
-  /**
-   * @deprecated This setter ignored the PEM prefix and suffix which would assume the key to be RSA.
-   *
-   * Use {@link #setBuffer(String)} with the full content of your OpenSSL pem file. A PEM file must
-   * contain at least 3 lines:
-   *
-   * <pre>
-   *   -----BEGIN PUBLIC KEY----
-   *   ...
-   *   -----END PUBLIC KEY---
-   * </pre>
-   * @param publicKey the naked public key
-   * @return self
-   */
-  @Deprecated
-  public PubSecKeyOptions setPublicKey(String publicKey) {
-    this.publicKey = publicKey;
-    return this;
-  }
-
-  @Deprecated
-  public String getSecretKey() {
-    return secretKey;
-  }
-
-  /**
-   * @deprecated This setter ignored the PEM prefix and suffix which would assume the key to be RSA.
-   *
-   * Use {@link #setBuffer(String)} with the full content of your OpenSSL pem file. A PEM file must
-   * contain at least 3 lines:
-   *
-   * <pre>
-   *   -----BEGIN PRIVATE KEY----
-   *   ...
-   *   -----END PRIVATE KEY---
-   * </pre>
-   * @param secretKey the naked public key
-   * @return self
-   */
-  @Deprecated
-  public PubSecKeyOptions setSecretKey(String secretKey) {
-    this.secretKey = secretKey;
-    return this;
-  }
-
-  @Deprecated
-  public boolean isSymmetric() {
-    if (symmetric == null) {
-      // attempt to derive the kind of key
-      return algorithm.startsWith("HS") && publicKey == null && secretKey != null;
-    }
-    return symmetric;
-  }
-
-  @Deprecated
-  public PubSecKeyOptions setSymmetric(boolean symmetric) {
-    this.symmetric = symmetric;
-    return this;
-  }
-
-  @Deprecated
-  public boolean isCertificate() {
-    return certificate;
-  }
-
-  @Deprecated
-  public PubSecKeyOptions setCertificate(boolean certificate) {
-    this.certificate = certificate;
     return this;
   }
 }

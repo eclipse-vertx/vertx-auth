@@ -12,19 +12,12 @@
  ********************************************************************************/
 package io.vertx.ext.auth.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.ClusterSerializable;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 
 import java.util.Collections;
@@ -84,23 +77,8 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   @Override
-  public User isAuthorized(Authorization authorization, Handler<AsyncResult<Boolean>> resultHandler) {
-    Objects.requireNonNull(authorization);
-    Objects.requireNonNull(resultHandler);
-
-    AuthorizationContext context = new AuthorizationContextImpl(this);
-    resultHandler.handle(Future.succeededFuture(authorization.match(context)));
-    return this;
-  }
-
-  @Override
   public JsonObject principal() {
     return principal;
-  }
-
-  @Override
-  public void setAuthProvider(AuthProvider authProvider) {
-    // do nothing for now
   }
 
   @Override

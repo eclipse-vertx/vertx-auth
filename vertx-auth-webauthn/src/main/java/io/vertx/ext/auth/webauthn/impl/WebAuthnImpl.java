@@ -27,6 +27,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
@@ -174,7 +175,6 @@ public class WebAuthnImpl implements WebAuthn {
         // put non null values for RelyingParty
         putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
         putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
-        putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
 
         // put non null values for User
         putOpt(json.getJsonObject("user"), "id", uUIDtoBase64Url(UUID.randomUUID()));
@@ -283,21 +283,15 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-    return authenticate(new WebAuthnCredentials(authInfo));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     try {
       // cast
-      WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
+      WebAuthnCredentials authInfo;
+      try {
+        authInfo = (WebAuthnCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       // check
       authInfo.checkValid(null);
       // The basic data supplied with any kind of validation is:

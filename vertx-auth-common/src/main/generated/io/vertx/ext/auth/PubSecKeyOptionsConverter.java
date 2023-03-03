@@ -30,29 +30,9 @@ public class PubSecKeyOptionsConverter {
             obj.setBuffer(io.vertx.core.buffer.Buffer.buffer(BASE64_DECODER.decode((String)member.getValue())));
           }
           break;
-        case "certificate":
-          if (member.getValue() instanceof Boolean) {
-            obj.setCertificate((Boolean)member.getValue());
-          }
-          break;
         case "id":
           if (member.getValue() instanceof String) {
             obj.setId((String)member.getValue());
-          }
-          break;
-        case "publicKey":
-          if (member.getValue() instanceof String) {
-            obj.setPublicKey((String)member.getValue());
-          }
-          break;
-        case "secretKey":
-          if (member.getValue() instanceof String) {
-            obj.setSecretKey((String)member.getValue());
-          }
-          break;
-        case "symmetric":
-          if (member.getValue() instanceof Boolean) {
-            obj.setSymmetric((Boolean)member.getValue());
           }
           break;
       }
@@ -70,16 +50,8 @@ public class PubSecKeyOptionsConverter {
     if (obj.getBuffer() != null) {
       json.put("buffer", BASE64_ENCODER.encodeToString(obj.getBuffer().getBytes()));
     }
-    json.put("certificate", obj.isCertificate());
     if (obj.getId() != null) {
       json.put("id", obj.getId());
     }
-    if (obj.getPublicKey() != null) {
-      json.put("publicKey", obj.getPublicKey());
-    }
-    if (obj.getSecretKey() != null) {
-      json.put("secretKey", obj.getSecretKey());
-    }
-    json.put("symmetric", obj.isSymmetric());
   }
 }

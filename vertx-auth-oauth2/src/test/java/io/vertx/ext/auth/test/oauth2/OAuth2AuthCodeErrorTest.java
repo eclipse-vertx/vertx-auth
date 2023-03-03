@@ -3,10 +3,12 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -31,9 +33,9 @@ public class OAuth2AuthCodeErrorTest {
       "  \"error_description\": \"bad verification code\"" +
       "}");
 
-  private static final JsonObject tokenConfig = new JsonObject()
-    .put("code", "code")
-    .put("redirectUri", "http://callback.com");
+  private static final Credentials tokenConfig = new Oauth2Credentials()
+    .setCode("code")
+    .setRedirectUri("http://callback.com");
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("code", "code")
@@ -74,7 +76,6 @@ public class OAuth2AuthCodeErrorTest {
       }
 
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort()));

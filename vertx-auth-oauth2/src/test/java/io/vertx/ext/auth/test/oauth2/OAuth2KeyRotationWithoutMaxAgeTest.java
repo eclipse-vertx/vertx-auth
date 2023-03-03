@@ -5,6 +5,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -56,7 +57,6 @@ public class OAuth2KeyRotationWithoutMaxAgeTest {
     final Async test = should.async();
 
     oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientId("client-id")
       .setClientSecret("client-secret")
       .setJwkPath("/oauth/jwks")
@@ -149,7 +149,7 @@ public class OAuth2KeyRotationWithoutMaxAgeTest {
       .onFailure(should::fail)
       .onSuccess(ok ->
         oauth2
-          .authenticate(new JsonObject().put("access_token", jwt))
+          .authenticate(new TokenCredentials(jwt))
           .onSuccess(user -> should.fail()));
   }
 }

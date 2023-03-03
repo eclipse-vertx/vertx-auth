@@ -86,11 +86,11 @@ public class NavigatorCredentialsGet {
         .put("signature", "MEUCIFXjL0ONRuLP1hkdlRJ8d0ofuRAS12c6w8WgByr-0yQZAiEAw-C6UZ8U8pi8irAcD6jXXaZMtezbzVwZXLGqY3sbFyA")
         .put("userHandle", ""));
 
-    webAuthN.authenticate(new JsonObject()
-      .put("webauthn", body)
-      .put("username", "paulo")
-      .put("origin", "https://192.168.178.206.xip.io:8443")
-      .put("challenge", "zNaIWnCmwVF7A5aZDF04_jthPmZTdziI7sXDkYEJxLDH1d1Eycc6kE_Rf1LZiSD0FGCrjzrYq9NmYrBmcDFF_g"))
+    webAuthN.authenticate(new WebAuthnCredentials()
+      .setWebauthn(body)
+      .setUsername("paulo")
+      .setOrigin("https://192.168.178.206.xip.io:8443")
+      .setChallenge("zNaIWnCmwVF7A5aZDF04_jthPmZTdziI7sXDkYEJxLDH1d1Eycc6kE_Rf1LZiSD0FGCrjzrYq9NmYrBmcDFF_g"))
       .onFailure(should::fail)
       .onSuccess(user -> {
         assertNotNull(user);

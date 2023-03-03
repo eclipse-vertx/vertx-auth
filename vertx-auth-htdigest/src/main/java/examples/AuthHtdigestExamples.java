@@ -18,7 +18,9 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.htdigest.HtdigestAuth;
+import io.vertx.ext.auth.htdigest.HtdigestCredentials;
 
 /**
  * @author Paulo Lopes
@@ -30,13 +32,13 @@ public class AuthHtdigestExamples {
   }
 
   public void example2(HtdigestAuth authProvider) {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "Mufasa")
-      .put("realm", "testrealm@host.com")
-      .put("nonce", "dcd98b7102dd2f0e8b11d0f600bfb0c093")
-      .put("method", "GET")
-      .put("uri", "/dir/index.html")
-      .put("response", "6629fae49393a05397450978507c4ef1");
+    Credentials authInfo = new HtdigestCredentials()
+      .setUsername("Mufasa")
+      .setRealm("testrealm@host.com")
+      .setNonce("dcd98b7102dd2f0e8b11d0f600bfb0c093")
+      .setMethod("GET")
+      .setUri("/dir/index.html")
+      .setResponse("6629fae49393a05397450978507c4ef1");
 
     authProvider.authenticate(authInfo)
       .onSuccess(user -> System.out.println("User: " + user.principal()))

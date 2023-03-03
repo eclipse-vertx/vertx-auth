@@ -15,10 +15,7 @@
  */
 package io.vertx.ext.auth.jwt.impl;
 
-import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
@@ -31,9 +28,9 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
-import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -59,15 +56,13 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWTAuthProviderImpl.class);
 
-  private static final JsonArray EMPTY_ARRAY = new JsonArray();
+  private static final JsonArray EMPTY_ARRAY = new JsonArray(Collections.emptyList());
 
   private final JWT jwt = new JWT();
 
-  private final String permissionsClaimKey;
   private final JWTOptions jwtOptions;
 
   public JWTAuthProviderImpl(Vertx vertx, JWTAuthOptions config) {
-    this.permissionsClaimKey = config.getPermissionsClaimKey();
     this.jwtOptions = config.getJWTOptions();
     // set the nonce algorithm
     jwt.nonceAlgorithm(jwtOptions.getNonceAlgorithm());
@@ -131,22 +126,15 @@ public class JWTAuthProviderImpl implements JWTAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-    return authenticate(new TokenCredentials(authInfo.getString("token")));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     final TokenCredentials authInfo;
     try {
       // cast
-      authInfo = (TokenCredentials) credentials;
+      try {
+        authInfo = (TokenCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       // check
       authInfo.checkValid(null);
     } catch (RuntimeException e) {
@@ -179,7 +167,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
       }
     }
 
-    final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
+    final User user = createUser(authInfo.getToken(), payload);
 
     if (user.expired(jwtOptions.getLeeway())) {
       if (!jwtOptions.isIgnoreExpiration()) {
@@ -192,14 +180,7 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   @Override
   public String generateToken(JsonObject claims, final JWTOptions options) {
-    final JsonObject _claims = claims.copy();
-
-    // we do some "enhancement" of the claims to support roles and permissions
-    if (options.getPermissions() != null && !_claims.containsKey(permissionsClaimKey)) {
-      _claims.put(permissionsClaimKey, new JsonArray(options.getPermissions()));
-    }
-
-    return jwt.sign(_claims, options);
+    return jwt.sign(claims, options);
   }
 
   @Override
@@ -207,22 +188,9 @@ public class JWTAuthProviderImpl implements JWTAuth {
     return generateToken(claims, jwtOptions);
   }
 
-  private static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
-    if (permissionsClaimKey.contains("/")) {
-      return getNestedJsonValue(jwtToken, permissionsClaimKey);
-    }
-    return jwtToken.getJsonArray(permissionsClaimKey, null);
-  }
-
   private static final Collection<String> SPECIAL_KEYS = Arrays.asList("access_token", "exp", "iat", "nbf");
 
-  /**
-   * @deprecated This method is deprecated as it introduces an exception to the internal representation of {@link User}
-   * object data.
-   * In the future a simple call to User.create() should be used
-   */
-  @Deprecated
-  private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
+  private User createUser(String accessToken, JsonObject jwtToken) {
     User result = User.fromToken(accessToken);
 
     if (jwtToken.containsKey("amr")) {
@@ -248,15 +216,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
     result.attributes()
       .put("rootClaim", "accessToken");
 
-    JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
-    if (jsonPermissions != null) {
-      for (Object item : jsonPermissions) {
-        if (item instanceof String) {
-          String permission = (String) item;
-          result.authorizations().add("jwt-authentication", PermissionBasedAuthorization.create(permission));
-        }
-      }
-    }
     return result;
   }
 
@@ -268,24 +227,5 @@ public class JWTAuthProviderImpl implements JWTAuth {
         }
       }
     }
-  }
-
-  private static @Nullable JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
-    String[] keys = permissionsClaimKey.split("/");
-    JsonObject obj = null;
-    for (int i = 0; i < keys.length; i++) {
-      if (i == 0) {
-        obj = jwtToken.getJsonObject(keys[i]);
-      } else if (i == keys.length - 1) {
-        if (obj != null) {
-          return obj.getJsonArray(keys[i]);
-        }
-      } else {
-        if (obj != null) {
-          obj = obj.getJsonObject(keys[i]);
-        }
-      }
-    }
-    return null;
   }
 }

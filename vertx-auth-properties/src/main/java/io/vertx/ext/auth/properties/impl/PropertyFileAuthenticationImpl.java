@@ -18,6 +18,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.Authorization;
@@ -148,21 +149,14 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<io.vertx.ext.auth.User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<io.vertx.ext.auth.User> authenticate(JsonObject authInfo) {
-    return authenticate(new UsernamePasswordCredentials(authInfo));
-  }
-
-  @Override
   public Future<io.vertx.ext.auth.User> authenticate(Credentials credentials) {
     final UsernamePasswordCredentials authInfo;
     try {
-      authInfo = (UsernamePasswordCredentials) credentials;
+      try {
+        authInfo = (UsernamePasswordCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       authInfo.checkValid(null);
     } catch (RuntimeException e) {
       return Future.failedFuture(e);

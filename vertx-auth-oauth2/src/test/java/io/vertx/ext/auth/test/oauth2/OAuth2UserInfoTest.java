@@ -66,7 +66,6 @@ public class OAuth2UserInfoTest {
         throw new RuntimeException(ready.cause());
       }
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort())
