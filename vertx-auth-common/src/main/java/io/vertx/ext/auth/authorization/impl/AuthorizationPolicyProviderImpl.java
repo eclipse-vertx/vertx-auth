@@ -12,14 +12,15 @@ import java.util.*;
 
 public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvider {
 
-  private final String id;
-  private final AuthorizationProvider parent;
-  private final Map<Authorization, List<Authorization>> policy;
+  private final String[] principalPath;
+  private final Map<String, List<Authorization>> policy;
 
-  public AuthorizationPolicyProviderImpl(AuthorizationProvider parent, JsonObject policy) {
-    this.parent = parent;
-    this.id = parent.getId() + "-policy";
-    Map<Authorization, List<Authorization>> tmp = new HashMap<>();
+  public AuthorizationPolicyProviderImpl(String principalPath, JsonObject policy) {
+    Objects.requireNonNull(principalPath);
+    Objects.requireNonNull(policy);
+
+    this.principalPath = principalPath.split("/");
+    Map<String, List<Authorization>> tmp = new HashMap<>();
     for (String key : policy.fieldNames()) {
       Object value = policy.getValue(key);
       if (value instanceof JsonArray) {
@@ -31,9 +32,9 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
             throw new IllegalArgumentException("Invalid policy definition");
           }
         }
-        tmp.put(WildcardPermissionBasedAuthorization.create(key), lst);
+        tmp.put(key, lst);
       } else if (value instanceof JsonObject) {
-        tmp.put(WildcardPermissionBasedAuthorization.create(key), Collections.singletonList(AuthorizationConverter.decode(policy.getJsonObject(key))));
+        tmp.put(key, Collections.singletonList(AuthorizationConverter.decode(policy.getJsonObject(key))));
       } else {
         throw new IllegalArgumentException("Invalid policy definition");
       }
@@ -43,7 +44,7 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
 
   @Override
   public String getId() {
-    return id;
+    return "policy";
   }
 
   @Override
@@ -54,21 +55,32 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
 
   @Override
   public Future<Void> getAuthorizations(User user) {
-    return parent
-      .getAuthorizations(user)
-      .onSuccess(v -> {
-        Set<Authorization> authorizations = null;
-        for (Authorization authn : user.authorizations().get(parent.getId())) {
-          if (policy.containsKey(authn)) {
-            if (authorizations == null) {
-              authorizations = new HashSet<>();
-            }
-            authorizations.addAll(policy.get(authn));
+    Object claims = user.principal();
+    for (String segment : principalPath) {
+      if (segment.equals("")) {
+        continue;
+      }
+      if (claims instanceof JsonObject) {
+        claims = ((JsonObject) claims).getValue(segment);
+      } else {
+        return Future.failedFuture("Missing principal path");
+      }
+    }
+    if (claims instanceof JsonArray) {
+      Set<Authorization> authorizations = new HashSet<>();
+      for (Object claim : (JsonArray) claims) {
+        if (claim instanceof String) {
+          List<Authorization> authz = policy.get(claim);
+          if (authz != null) {
+            authorizations.addAll(authz);
           }
         }
-        if (authorizations != null) {
-          user.authorizations().add(id, authorizations);
-        }
-      });
+      }
+      user.authorizations().add(getId(), authorizations);
+      return Future.succeededFuture();
+    } else {
+      // nothing can be extracted
+      return Future.succeededFuture();
+    }
   }
 }

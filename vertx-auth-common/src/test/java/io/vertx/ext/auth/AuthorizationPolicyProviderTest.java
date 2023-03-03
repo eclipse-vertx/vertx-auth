@@ -12,10 +12,6 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.*;
@@ -23,40 +19,15 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.security.Permission;
-import java.util.HashSet;
-import java.util.Set;
 
 @RunWith(VertxUnitRunner.class)
 public class AuthorizationPolicyProviderTest {
 
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
-
-  final AuthorizationProvider dummy = new AuthorizationPolicyProvider() {
-    @Override
-    public String getId() {
-      return "dummy";
-    }
-
-    @Override
-    public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-      // collect the authorizations from the user attributes and convert them to Authorizations according to the policy
-      JsonArray claims = user.getOrDefault("claims", new JsonArray());
-      Set<Authorization> authzs = new HashSet<>();
-      for (Object claim : claims) {
-        authzs.add(WildcardPermissionBasedAuthorization.create(claim.toString()));
-      }
-      user.authorizations().add(getId(), authzs);
-      handler.handle(Future.succeededFuture());
-    }
-  };
-
 
   @Test
   public void generatePolicy(TestContext should) {
@@ -79,7 +50,7 @@ public class AuthorizationPolicyProviderTest {
     final Async test = should.async();
 
     AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create(dummy, new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
 
     // This is a user that was decoded from a token...
     User paulo = User.create(new JsonObject(
@@ -114,7 +85,7 @@ public class AuthorizationPolicyProviderTest {
     final Async test = should.async();
 
     AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create(dummy, new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
 
     // This is a user that was decoded from a token...
     User admin = User.create(new JsonObject(
@@ -149,7 +120,7 @@ public class AuthorizationPolicyProviderTest {
     final Async test = should.async();
 
     AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create(dummy, new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
 
     // This is a user that was decoded from a token...
     User reader = User.create(new JsonObject(
@@ -190,7 +161,7 @@ public class AuthorizationPolicyProviderTest {
     final Async test = should.async();
 
     AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create(dummy, new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
 
     // This is a user that was decoded from a token...
     User admin = User.create(new JsonObject(
@@ -230,7 +201,7 @@ public class AuthorizationPolicyProviderTest {
     final Async test = should.async();
 
     AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create(dummy, new JsonObject()
+      .create("/claims", new JsonObject()
         .put("support-cashier", new JsonArray()
           .add(WildcardPermissionBasedAuthorization.create("txo.shop:*").toJson())
           .add(WildcardPermissionBasedAuthorization.create("view.cart:eu").toJson())));
@@ -261,6 +232,77 @@ public class AuthorizationPolicyProviderTest {
         .addAuthorization(WildcardPermissionBasedAuthorization.create("txo.shop:nl"))
         .addAuthorization(WildcardPermissionBasedAuthorization.create("view.cart:eu"));
 
+
+    // simulate the authz flow
+    policyAuthz
+      .getAuthorizations(paulo)
+      .onFailure(should::fail)
+      .onSuccess(v -> {
+        // create the authorization context
+        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+
+        if (authorization.match(authorizationContext)) {
+          test.complete();
+        } else {
+          should.fail("Authorization should match");
+        }
+      });
+  }
+
+  @Test
+  public void testPolicyMissingClaims(TestContext should) throws Exception {
+
+    final Async test = should.async();
+
+    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
+      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+
+    // This is a user that was decoded from a token...
+    User paulo = User.create(new JsonObject(
+      "{\n" +
+        "  \"sub\" : \"paulo\"\n" +
+        "}\n"
+    ));
+
+    // required authz
+    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
+
+    // simulate the authz flow
+    policyAuthz
+      .getAuthorizations(paulo)
+      .onFailure(should::fail)
+      .onSuccess(v -> {
+        // create the authorization context
+        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+
+        if (authorization.match(authorizationContext)) {
+          should.fail("Authorization should not match");
+        } else {
+          test.complete();
+        }
+      });
+  }
+
+  @Test
+  public void testPolicyDeepClaims(TestContext should) throws Exception {
+
+    final Async test = should.async();
+
+    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
+      .create("prop/claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+
+    // This is a user that was decoded from a token...
+    User paulo = User.create(new JsonObject(
+      "{\n" +
+        "  \"sub\" : \"paulo\",\n" +
+        "  \"prop\" : {\n" +
+        "    \"claims\" : [ \"cashier-shop-nl\" ]\n" +
+        "  }\n" +
+        "}\n"
+    ));
+
+    // required authz
+    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
 
     // simulate the authz flow
     policyAuthz

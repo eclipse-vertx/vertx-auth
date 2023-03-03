@@ -7,7 +7,7 @@ import io.vertx.ext.auth.authorization.impl.AuthorizationPolicyProviderImpl;
 @VertxGen
 public interface AuthorizationPolicyProvider extends AuthorizationProvider {
 
-  static AuthorizationPolicyProvider create(AuthorizationProvider parent, JsonObject policy) {
-    return new AuthorizationPolicyProviderImpl(parent, policy);
+  static AuthorizationPolicyProvider create(String principalPath, JsonObject policy) {
+    return new AuthorizationPolicyProviderImpl(principalPath, policy);
   }
 }
