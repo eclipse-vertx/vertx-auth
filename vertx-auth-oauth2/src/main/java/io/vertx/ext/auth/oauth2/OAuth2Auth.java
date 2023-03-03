@@ -72,6 +72,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
+  @Deprecated
   default OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
     jWKSet()
       .onComplete(handler);
@@ -160,6 +161,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
+  @Deprecated
   default OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
     refresh(user)
       .onComplete(handler);
@@ -185,6 +187,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
+  @Deprecated
   default OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
     revoke(user, tokenType)
       .onComplete(handler);
@@ -200,6 +203,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
+  @Deprecated
   default OAuth2Auth revoke(User user, Handler<AsyncResult<Void>> handler) {
     revoke(user, "access_token")
       .onComplete(handler);
@@ -236,6 +240,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
+  @Deprecated
   default OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
     userInfo(user)
       .onComplete(handler);

@@ -64,6 +64,7 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
+  @Deprecated
   default SqlUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler) {
     createUser(username, password)
       .onComplete(resultHandler);
@@ -88,6 +89,7 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
+  @Deprecated
   default SqlUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler) {
     createHashedUser(username, hash)
       .onComplete(resultHandler);
@@ -112,6 +114,7 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
+  @Deprecated
   default SqlUserUtil createUserRole(String username, String role, Handler<AsyncResult<Void>> resultHandler) {
     createUserRole(username, role)
       .onComplete(resultHandler);
@@ -136,6 +139,7 @@ public interface SqlUserUtil {
    * @return fluent self
    */
   @Fluent
+  @Deprecated
   default SqlUserUtil createRolePermission(String role, String permission, Handler<AsyncResult<Void>> resultHandler) {
     createRolePermission(role, permission)
       .onComplete(resultHandler);

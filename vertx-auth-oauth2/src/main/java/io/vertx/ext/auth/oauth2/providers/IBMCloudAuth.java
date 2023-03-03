@@ -82,6 +82,7 @@ public interface IBMCloudAuth extends OpenIDConnectAuth {
    * @param config  the initial config
    * @param handler the instantiated Oauth2 provider instance handler
    */
+  @Deprecated
   static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
     discover(vertx, config)
       .onComplete(handler);

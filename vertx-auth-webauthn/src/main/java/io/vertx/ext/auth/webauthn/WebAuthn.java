@@ -64,6 +64,7 @@ public interface WebAuthn extends AuthenticationProvider {
    * @return fluent self
    */
   @Fluent
+  @Deprecated
   default WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
     createCredentialsOptions(user)
       .onComplete(handler);
@@ -88,6 +89,7 @@ public interface WebAuthn extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
+  @Deprecated
   default WebAuthn getCredentialsOptions(@Nullable String name, Handler<AsyncResult<JsonObject>> handler) {
     getCredentialsOptions(name)
       .onComplete(handler);

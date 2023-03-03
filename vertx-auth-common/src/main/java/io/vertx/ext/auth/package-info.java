@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-@ModuleGen(name = "vertx-auth-common", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-auth-common", groupPackage = "io.vertx", checkCallbackDeprecation = true)
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.ModuleGen;
