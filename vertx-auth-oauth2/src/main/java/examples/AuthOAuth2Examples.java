@@ -436,7 +436,8 @@ public class AuthOAuth2Examples {
       // 1. we can inspect the key id, does it make sense?
       if (keyId.equals("the-new-id")) {
         // 2. refresh the keys
-        oauth2.jWKSet(res -> {
+        oauth2.jWKSet()
+          .onSuccess(v -> {
           // ...
         });
       }

@@ -135,12 +135,13 @@ public class OAuth2KeyRotationWithoutMaxAgeTest {
       .missingKeyHandler(keyId -> {
         if (updating.compareAndSet(false, true)) {
           System.out.println("Refreshing JWKs due missing key [" + keyId + "]");
-          oauth2.jWKSet(done -> {
-            updating.compareAndSet(true, false);
-            if (done.failed()) {
-              System.out.println("Refresh JWKs failed: " + done.cause());
-            }
-          });
+          oauth2.jWKSet()
+            .onComplete(done -> {
+              updating.compareAndSet(true, false);
+              if (done.failed()) {
+                System.out.println("Refresh JWKs failed: " + done.cause());
+              }
+            });
         }
       })
 

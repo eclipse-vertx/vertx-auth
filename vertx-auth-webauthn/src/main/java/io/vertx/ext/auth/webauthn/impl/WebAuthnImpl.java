@@ -451,7 +451,7 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Verify credentials creation from client
    *
-   * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
+   * @param request        - The request as received by the {@link #authenticate(Credentials)} method.
    * @param clientDataJSON - Binary session data
    */
   private Authenticator verifyWebAuthNCreate(WebAuthnCredentials request, byte[] clientDataJSON) throws AttestationException, IOException, NoSuchAlgorithmException {
@@ -552,7 +552,7 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Verify navigator.credentials.get response
    *
-   * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
+   * @param request        - The request as received by the {@link #authenticate(Credentials)} method.
    * @param clientDataJSON - The extracted clientDataJSON
    * @param credential     - Credential from Database
    */

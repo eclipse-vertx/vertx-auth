@@ -178,7 +178,10 @@ public class OAuth2KeycloakIT {
         discover -> {
           should.assertTrue(discover.succeeded());
           OAuth2Auth confidential = discover.result();
-          try { Thread.sleep(5000L); } catch (InterruptedException e) {}
+          try {
+            Thread.sleep(5000L);
+          } catch (InterruptedException e) {
+          }
           confidential.authenticate(new TokenCredentials(token.principal().getString("access_token")), introspect -> {
             should.assertTrue(introspect.failed());
             should.assertEquals("Inactive Token", introspect.cause().getMessage());
@@ -295,13 +298,14 @@ public class OAuth2KeycloakIT {
       // generate a access token from the user
       User token = authn.result();
 
-      keycloak.userInfo(token, userinfo -> {
-        should.assertTrue(userinfo.succeeded());
-        should.assertNotNull(userinfo.result());
+      keycloak.userInfo(token)
+        .onComplete(userinfo -> {
+          should.assertTrue(userinfo.succeeded());
+          should.assertNotNull(userinfo.result());
 
-        should.assertEquals("test-user", userinfo.result().getString("preferred_username"));
-        test.complete();
-      });
+          should.assertEquals("test-user", userinfo.result().getString("preferred_username"));
+          test.complete();
+        });
     });
   }
 
@@ -309,42 +313,46 @@ public class OAuth2KeycloakIT {
   public void shouldRefreshAToken(TestContext should) {
     final Async test = should.async();
 
-    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
-      should.assertTrue(authn.succeeded());
-      should.assertNotNull(authn.result());
-
-      // generate a access token from the user
-      User token = authn.result();
-
-      final String origToken = token.principal().getString("access_token");
-
-      keycloak.refresh(token, refresh -> {
-        should.assertTrue(refresh.succeeded());
-
-        should.assertNotEquals(origToken, refresh.result().principal().getString("access_token"));
-        test.complete();
-      });
-    });
-  }
-
-  @Test
-  public void shouldReloadJWK(TestContext should) {
-    final Async test = should.async();
-
-    keycloak.jWKSet(load -> {
-      should.assertTrue(load.succeeded());
-
-      keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"), authn -> {
+    keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"))
+      .onComplete(authn -> {
         should.assertTrue(authn.succeeded());
         should.assertNotNull(authn.result());
 
         // generate a access token from the user
         User token = authn.result();
 
-        should.assertNotNull(token.attributes().getJsonObject("accessToken"));
-        test.complete();
+        final String origToken = token.principal().getString("access_token");
+
+        keycloak.refresh(token)
+          .onComplete(refresh -> {
+            should.assertTrue(refresh.succeeded());
+
+            should.assertNotEquals(origToken, refresh.result().principal().getString("access_token"));
+            test.complete();
+          });
       });
-    });
+  }
+
+  @Test
+  public void shouldReloadJWK(TestContext should) {
+    final Async test = should.async();
+
+    keycloak.jWKSet()
+      .onComplete(load -> {
+        should.assertTrue(load.succeeded());
+
+        keycloak.authenticate(new UsernamePasswordCredentials("test-user", "tiger"))
+          .onComplete(authn -> {
+            should.assertTrue(authn.succeeded());
+            should.assertNotNull(authn.result());
+
+            // generate a access token from the user
+            User token = authn.result();
+
+            should.assertNotNull(token.attributes().getJsonObject("accessToken"));
+            test.complete();
+          });
+      });
   }
 
   @Test
@@ -363,15 +371,16 @@ public class OAuth2KeycloakIT {
     options.getHttpClientOptions().setTrustAll(true);
 
     KeycloakAuth.discover(
-      rule.vertx(),
-      options,
-      discover -> {
+        rule.vertx(),
+        options)
+      .onComplete(discover -> {
         should.assertTrue(discover.succeeded());
         OAuth2Auth keycloak = discover.result();
-        keycloak.authenticate(new Oauth2Credentials().setUsername("test-user").setPassword("tiger").setFlow(OAuth2FlowType.PASSWORD), authn -> {
-          should.assertTrue(authn.succeeded());
-          test.complete();
-        });
+        keycloak.authenticate(new Oauth2Credentials().setUsername("test-user").setPassword("tiger").setFlow(OAuth2FlowType.PASSWORD))
+          .onComplete(authn -> {
+            should.assertTrue(authn.succeeded());
+            test.complete();
+          });
       });
   }
 
@@ -391,16 +400,17 @@ public class OAuth2KeycloakIT {
     options.getHttpClientOptions().setTrustAll(true);
 
     KeycloakAuth.discover(
-      rule.vertx(),
-      options,
-      discover -> {
+        rule.vertx(),
+        options)
+      .onComplete(discover -> {
         should.assertTrue(discover.succeeded());
         OAuth2Auth keycloak = discover.result();
-        keycloak.authenticate(new Oauth2Credentials().setAssertion("xyz").setFlow(OAuth2FlowType.AAD_OBO), authn -> {
-          should.assertTrue(authn.failed());
-          should.assertEquals("Provided flow is not supported by provider", authn.cause().getMessage());
-          test.complete();
-        });
+        keycloak.authenticate(new Oauth2Credentials().setAssertion("xyz").setFlow(OAuth2FlowType.AAD_OBO))
+          .onComplete(authn -> {
+            should.assertTrue(authn.failed());
+            should.assertEquals("Provided flow is not supported by provider", authn.cause().getMessage());
+            test.complete();
+          });
       });
   }
 }

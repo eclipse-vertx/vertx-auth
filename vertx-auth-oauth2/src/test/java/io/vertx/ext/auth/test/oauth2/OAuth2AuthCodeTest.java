@@ -141,23 +141,18 @@ public class OAuth2AuthCodeTest {
     final Async test = should.async();
 
     config = oauthConfig;
-    oauth2.jWKSet(res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
-        oauth2.authenticate(tokenConfig, res2 -> {
-          if (res2.failed()) {
-            should.fail(res2.cause().getMessage());
-          } else {
-            User token = res2.result();
+    oauth2.jWKSet()
+      .onFailure(should::fail)
+      .onSuccess(v -> {
+        oauth2.authenticate(tokenConfig)
+          .onFailure(should::fail)
+          .onSuccess(token -> {
             should.assertNotNull(token);
             should.assertNotNull(token.principal());
             should.assertNotNull(token.principal().getString("access_token"));
             test.complete();
-          }
-        });
-      }
-    });
+          });
+      });
   }
 
   @Test
@@ -180,8 +175,8 @@ public class OAuth2AuthCodeTest {
 
   Future<Void> auth() {
     config = oauthConfig;
-    Promise<User> promise = Promise.promise();
-    oauth2.authenticate(tokenConfig, promise);
-    return promise.future().mapEmpty();
+    return oauth2
+      .authenticate(tokenConfig)
+      .mapEmpty();
   }
 }

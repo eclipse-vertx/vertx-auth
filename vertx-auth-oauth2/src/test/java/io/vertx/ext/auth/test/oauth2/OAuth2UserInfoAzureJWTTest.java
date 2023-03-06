@@ -93,7 +93,8 @@ public class OAuth2UserInfoAzureJWTTest {
 
     fixture = fixtureV1;
 
-    oauth2.userInfo(user, userInfo -> {
+    oauth2.userInfo(user)
+      .onComplete(userInfo -> {
       if (userInfo.failed()) {
         should.fail(userInfo.cause().getMessage());
       } else {
@@ -115,7 +116,8 @@ public class OAuth2UserInfoAzureJWTTest {
 
     fixture = fixtureV2;
 
-    oauth2.userInfo(user, userInfo -> {
+    oauth2.userInfo(user)
+      .onComplete(userInfo -> {
       if (userInfo.failed()) {
         should.fail(userInfo.cause().getMessage());
       } else {
