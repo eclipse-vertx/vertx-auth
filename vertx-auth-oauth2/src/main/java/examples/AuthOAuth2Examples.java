@@ -30,8 +30,6 @@ import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
 import io.vertx.ext.auth.oauth2.providers.*;
 
-import java.util.Arrays;
-
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */

@@ -240,12 +240,49 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // Not all providers support this so we need to check if the call is possible
         if (config.getIntrospectionPath() == null) {
           // this provider doesn't allow introspection, this means we are not able to perform
-          // any authentication,
-          if (user.attributes().containsKey("missing-kid")) {
-            return Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid")));
-          } else {
-            return Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection");
+          // any authentication, unless the userinfo endpoint is available. In this case, we shall
+          // call that endpoint and the result should be handled as a decoded id_token
+
+          if (config.getUserInfoPath() == null) {
+            if (user.attributes().containsKey("missing-kid")) {
+              return Future.failedFuture(new NoSuchKeyIdException(user.attributes().getString("missing-kid")));
+            } else {
+              return Future.failedFuture("Can't authenticate access_token: Provider doesn't support token introspection or userinfo");
+            }
           }
+
+          // perform the introspection
+          return api
+            .userInfo(tokenCredentials.getToken(), jwt)
+            .compose(json -> {
+              // RFC7662 dictates that there is a boolean active field (however tokeninfo implementations may not return this)
+              if (json.containsKey("active") && !json.getBoolean("active", false)) {
+                return Future.failedFuture("Inactive Token");
+              }
+
+              // attempt to create a user from the json object
+              final User newUser = createUser(
+                new JsonObject()
+                  .put("access_token", tokenCredentials.getToken())
+                , user.attributes().containsKey("missing-kid"));
+
+              // replace the user info with the user attributes
+              newUser.attributes().put("idToken", json);
+
+              // copy the userInfo basic properties to the root
+              copyProperties(json, user.attributes(), false, "sub", "name", "email", "picture");
+              // copy amr to the principal
+              copyProperties(json, user.principal(), true, "amr");
+
+              // final step, verify if the user is not expired
+              // this may happen if the user tokens have been issued for future use for example
+              if (newUser.expired(config.getJWTOptions().getLeeway())) {
+                return Future.failedFuture("Used is expired.");
+              } else {
+                // basic validation passed, the token is not expired
+                return Future.succeededFuture(newUser);
+              }
+            });
         }
 
         // perform the introspection

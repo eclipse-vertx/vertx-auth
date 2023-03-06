@@ -46,7 +46,8 @@ public interface MetaDataService {
   @Fluent
   @Deprecated
   default MetaDataService fetchTOC(String url, Handler<AsyncResult<Boolean>> handler) {
-    fetchTOC(url).onComplete(handler);
+    fetchTOC(url)
+      .onComplete(handler);
     return this;
   }
 
@@ -64,7 +65,8 @@ public interface MetaDataService {
   @Fluent
   @Deprecated
   default MetaDataService fetchTOC(Handler<AsyncResult<Boolean>> handler) {
-    fetchTOC().onComplete(handler);
+    fetchTOC()
+      .onComplete(handler);
     return this;
   }
 

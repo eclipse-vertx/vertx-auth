@@ -1,8 +1,6 @@
 package io.vertx.ext.auth.sqlclient.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
@@ -65,12 +63,6 @@ public class SqlAuthorizationImpl implements SqlAuthorization {
     } else {
       return Future.succeededFuture(Collections.emptySet());
     }
-  }
-
-  @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizations(user)
-      .onComplete(handler);
   }
 
   @Override
