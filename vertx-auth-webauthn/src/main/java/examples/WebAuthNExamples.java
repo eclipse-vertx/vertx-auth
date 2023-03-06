@@ -18,10 +18,7 @@ package examples;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.Authenticator;
-import io.vertx.ext.auth.webauthn.RelyingParty;
-import io.vertx.ext.auth.webauthn.WebAuthn;
-import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.*;
 
 import java.util.List;
 
@@ -91,16 +88,16 @@ public class WebAuthNExamples {
 
     webAuthN
       .authenticate(
-        new JsonObject()
+        new WebAuthnCredentials()
           // the username you want to link to
-          .put("username", "paulo")
+          .setUsername("paulo")
           // the server origin
-          .put("origin", "https://192.168.178.206.xip.io:8443")
+          .setOrigin("https://192.168.178.206.xip.io:8443")
           // the server domain
-          .put("domain", "192.168.178.206.xip.io")
+          .setDomain("192.168.178.206.xip.io")
           // the challenge given on the previous step
-          .put("challenge", "BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UX...")
-          .put("webauthn", request))
+          .setChallenge("BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UX...")
+          .setWebauthn(request))
       .onSuccess(user -> {
         // success!
       });
@@ -159,16 +156,16 @@ public class WebAuthNExamples {
         .put("signature", "MEUCIFXjL0ONRuLP1hkdlRJ8d0ofuRAS12c6w8WgByr-0yQZA...")
         .put("userHandle", ""));
 
-    webAuthN.authenticate(new JsonObject()
+    webAuthN.authenticate(new WebAuthnCredentials()
       // the username you want to link to
-      .put("username", "paulo")
+      .setUsername("paulo")
       // the server origin
-      .put("origin", "https://192.168.178.206.xip.io:8443")
+      .setOrigin("https://192.168.178.206.xip.io:8443")
       // the server domain
-      .put("domain", "192.168.178.206.xip.io")
+      .setDomain("192.168.178.206.xip.io")
       // the challenge given on the previous step
-      .put("challenge", "BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UX...")
-      .put("webauthn", body))
+      .setChallenge("BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UX...")
+      .setWebauthn(body))
       .onSuccess(user -> {
         // success!
       });

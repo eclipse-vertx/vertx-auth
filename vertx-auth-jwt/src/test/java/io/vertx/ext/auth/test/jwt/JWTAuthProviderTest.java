@@ -21,6 +21,7 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -90,7 +91,7 @@ public class JWTAuthProviderTest {
     final Async test = should.async();
 
     authProvider
-      .authenticate(new JsonObject().put("username", "username").put("password", "password"))
+      .authenticate(new UsernamePasswordCredentials("username", "password"))
       .onSuccess(user -> should.fail("Should have failed"))
       .onFailure(err -> {
         should.assertNotNull(err);
@@ -174,8 +175,8 @@ public class JWTAuthProviderTest {
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
-    String token0 = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
-    String token1 = authProvider.generateToken(payload, new JWTOptions().addPermission("admin"));
+    String token0 = authProvider.generateToken(payload.copy().put("permissions", new JsonArray().add("user")));
+    String token1 = authProvider.generateToken(payload.copy().put("permissions", new JsonArray().add("admin")));
 
     assertNotEquals(token0, token1);
   }
@@ -652,7 +653,7 @@ public class JWTAuthProviderTest {
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo");
 
-    String token = authProvider.generateToken(payload, new JWTOptions().addPermission("user"));
+    String token = authProvider.generateToken(payload.copy().put("permissions", new JsonArray().add("user")));
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
@@ -660,12 +661,6 @@ public class JWTAuthProviderTest {
       .onFailure(should::fail)
       .onSuccess(res -> {
         should.assertNotNull(res);
-        // the permission has been properly decoded from the legacy token
-        should.assertTrue(PermissionBasedAuthorization.create("user").match(res));
-
-        res.clearCache();
-
-        // overwrite with the JWT decoder
         JWTAuthorization.create("permissions").getAuthorizations(res, permissions -> {
           should.assertTrue(permissions.succeeded());
           should.assertTrue(PermissionBasedAuthorization.create("user").match(res));

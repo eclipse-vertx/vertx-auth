@@ -2,13 +2,14 @@ package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -35,7 +36,7 @@ public class OAuth2ClientTest {
       "  \"expires_in\": 7200" +
       "}");
 
-  private static final JsonObject tokenConfig = new JsonObject();
+  private static final Credentials tokenConfig = new Oauth2Credentials().setFlow(OAuth2FlowType.CLIENT);
 
   private static final JsonObject oauthConfig = new JsonObject()
     .put("grant_type", "client_credentials");
@@ -72,7 +73,6 @@ public class OAuth2ClientTest {
       }
 
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.CLIENT)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort()));
@@ -110,7 +110,7 @@ public class OAuth2ClientTest {
   public void getTokenWithScopes(TestContext should) {
     final Async test = should.async();
     config = oauthConfigWithScopes;
-    oauth2.authenticate(new JsonObject().put("scopes", new JsonArray().add("scopeA")), res -> {
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.CLIENT).addScope("scopeA"), res -> {
       if (res.failed()) {
         should.fail(res.cause().getMessage());
       } else {

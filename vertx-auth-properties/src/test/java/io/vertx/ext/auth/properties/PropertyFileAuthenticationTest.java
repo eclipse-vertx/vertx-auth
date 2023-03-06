@@ -12,9 +12,10 @@
  ********************************************************************************/
 package io.vertx.ext.auth.properties;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -43,7 +44,7 @@ public class PropertyFileAuthenticationTest {
   @Test
   public void testSimpleAuthenticate(TestContext should) {
     final Async test = should.async();
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+    Credentials authInfo = new UsernamePasswordCredentials("tim", "sausages");
     authn.authenticate(authInfo)
       .onFailure(should::fail)
       .onSuccess(user -> {
@@ -55,7 +56,7 @@ public class PropertyFileAuthenticationTest {
   @Test
   public void testSimpleAuthenticateFailWrongPassword(TestContext should) {
     final Async test = should.async();
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "wrongpassword");
+    Credentials authInfo = new UsernamePasswordCredentials("tim", "wrongpassword");
     authn.authenticate(authInfo)
       .onSuccess(user -> should.fail("Not Expected"))
       .onFailure(thr -> {
@@ -67,7 +68,7 @@ public class PropertyFileAuthenticationTest {
   @Test
   public void testSimpleAuthenticateFailWrongUser(TestContext should) {
     final Async test = should.async();
-    JsonObject authInfo = new JsonObject().put("username", "frank").put("password", "sausages");
+    Credentials authInfo = new UsernamePasswordCredentials("frank", "sausages");
     authn.authenticate(authInfo)
       .onSuccess(user -> should.fail("Not Expected"))
       .onFailure(thr -> {
@@ -145,7 +146,7 @@ public class PropertyFileAuthenticationTest {
   }
 
   private void loginThen(TestContext should, Consumer<User> runner) {
-    JsonObject authInfo = new JsonObject().put("username", "tim").put("password", "sausages");
+    Credentials authInfo = new UsernamePasswordCredentials("tim", "sausages");
     authn.authenticate(authInfo)
       .onFailure(should::fail)
       .onSuccess(user -> {
@@ -163,7 +164,7 @@ public class PropertyFileAuthenticationTest {
   @Test
   public void testHasWildcardPermission(TestContext should) {
     final Async test = should.async();
-    JsonObject authInfo = new JsonObject().put("username", "paulo").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("paulo", "secret");
     authn.authenticate(authInfo)
       .onFailure(should::fail)
       .onSuccess(user -> {
@@ -183,7 +184,7 @@ public class PropertyFileAuthenticationTest {
   @Test
   public void testHasWildcardMatchPermission(TestContext should) {
     final Async test = should.async();
-    JsonObject authInfo = new JsonObject().put("username", "editor").put("password", "secret");
+    Credentials authInfo = new UsernamePasswordCredentials("editor", "secret");
     authn.authenticate(authInfo)
       .onFailure(should::fail)
       .onSuccess(user -> {

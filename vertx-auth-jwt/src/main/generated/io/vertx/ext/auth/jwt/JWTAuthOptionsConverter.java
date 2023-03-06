@@ -40,11 +40,6 @@ public class JWTAuthOptionsConverter {
             obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
-        case "permissionsClaimKey":
-          if (member.getValue() instanceof String) {
-            obj.setPermissionsClaimKey((String)member.getValue());
-          }
-          break;
         case "pubSecKeys":
           if (member.getValue() instanceof JsonArray) {
             java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
@@ -71,9 +66,6 @@ public class JWTAuthOptionsConverter {
     }
     if (obj.getJWTOptions() != null) {
       json.put("jwtOptions", obj.getJWTOptions().toJson());
-    }
-    if (obj.getPermissionsClaimKey() != null) {
-      json.put("permissionsClaimKey", obj.getPermissionsClaimKey());
     }
     if (obj.getPubSecKeys() != null) {
       JsonArray array = new JsonArray();

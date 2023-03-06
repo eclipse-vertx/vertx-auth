@@ -32,7 +32,6 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
 
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
 import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;

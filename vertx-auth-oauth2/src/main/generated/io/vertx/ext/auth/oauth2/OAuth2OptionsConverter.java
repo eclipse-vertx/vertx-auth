@@ -35,11 +35,6 @@ public class OAuth2OptionsConverter {
             obj.setClientAssertionType((String)member.getValue());
           }
           break;
-        case "clientID":
-          if (member.getValue() instanceof String) {
-            obj.setClientID((String)member.getValue());
-          }
-          break;
         case "clientId":
           if (member.getValue() instanceof String) {
             obj.setClientId((String)member.getValue());
@@ -53,11 +48,6 @@ public class OAuth2OptionsConverter {
         case "extraParameters":
           if (member.getValue() instanceof JsonObject) {
             obj.setExtraParameters(((JsonObject)member.getValue()).copy());
-          }
-          break;
-        case "flow":
-          if (member.getValue() instanceof String) {
-            obj.setFlow(io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf((String)member.getValue()));
           }
           break;
         case "headers":
@@ -108,11 +98,6 @@ public class OAuth2OptionsConverter {
         case "revocationPath":
           if (member.getValue() instanceof String) {
             obj.setRevocationPath((String)member.getValue());
-          }
-          break;
-        case "rotateJWKs":
-          if (member.getValue() instanceof Boolean) {
-            obj.setRotateJWKs((Boolean)member.getValue());
           }
           break;
         case "scopeSeparator":
@@ -183,9 +168,6 @@ public class OAuth2OptionsConverter {
     if (obj.getClientAssertionType() != null) {
       json.put("clientAssertionType", obj.getClientAssertionType());
     }
-    if (obj.getClientID() != null) {
-      json.put("clientID", obj.getClientID());
-    }
     if (obj.getClientId() != null) {
       json.put("clientId", obj.getClientId());
     }
@@ -194,9 +176,6 @@ public class OAuth2OptionsConverter {
     }
     if (obj.getExtraParameters() != null) {
       json.put("extraParameters", obj.getExtraParameters());
-    }
-    if (obj.getFlow() != null) {
-      json.put("flow", obj.getFlow().name());
     }
     if (obj.getHeaders() != null) {
       json.put("headers", obj.getHeaders());
@@ -225,7 +204,6 @@ public class OAuth2OptionsConverter {
     if (obj.getRevocationPath() != null) {
       json.put("revocationPath", obj.getRevocationPath());
     }
-    json.put("rotateJWKs", obj.isRotateJWKs());
     if (obj.getScopeSeparator() != null) {
       json.put("scopeSeparator", obj.getScopeSeparator());
     }

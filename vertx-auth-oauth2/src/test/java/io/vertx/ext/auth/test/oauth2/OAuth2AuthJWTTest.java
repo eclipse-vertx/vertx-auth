@@ -6,6 +6,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -93,7 +95,7 @@ public class OAuth2AuthJWTTest {
     JsonObject jwt = new JsonObject()
       .put("scope", "https://www.googleapis.com/auth/devstorage.readonly");
 
-    oauth2.authenticate(jwt, res -> {
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AUTH_JWT).setJwt(jwt), res -> {
       if (res.failed()) {
         should.fail(res.cause());
       } else {

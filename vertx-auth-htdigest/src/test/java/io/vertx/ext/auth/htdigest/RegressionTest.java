@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.htdigest;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -20,13 +20,13 @@ public class RegressionTest {
   public void authTest(TestContext should) {
     final Async test = should.async();
     HtdigestAuth authProvider = HtdigestAuth.create(rule.vertx(), "regression.htdigest");
-    JsonObject authInfo = new JsonObject()
-      .put("username", "usain")
-      .put("realm", "jcrealm@host.com")
-      .put("nonce", "28ee8d494b645014eefcd66ac3ddcade")
-      .put("method", "GET")
-      .put("uri", "/private/private_page.html")
-      .put("response", "373408962ca454892aba7c236af6d7a9");
+    Credentials authInfo = new HtdigestCredentials()
+      .setUsername("usain")
+      .setRealm("jcrealm@host.com")
+      .setNonce("28ee8d494b645014eefcd66ac3ddcade")
+      .setMethod("GET")
+      .setUri("/private/private_page.html")
+      .setResponse("373408962ca454892aba7c236af6d7a9");
     authProvider.authenticate(authInfo, res -> {
       if (res.succeeded()) {
         User user = res.result();

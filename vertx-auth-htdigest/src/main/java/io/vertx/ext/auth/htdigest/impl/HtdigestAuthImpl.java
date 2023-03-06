@@ -16,12 +16,11 @@
 
 package io.vertx.ext.auth.htdigest.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.htdigest.HtdigestAuth;
 import io.vertx.ext.auth.htdigest.HtdigestCredentials;
@@ -95,21 +94,14 @@ public class HtdigestAuthImpl implements HtdigestAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-    return authenticate(new HtdigestCredentials(authInfo));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     final HtdigestCredentials authInfo;
     try {
-      authInfo = (HtdigestCredentials) credentials;
+      try {
+        authInfo = (HtdigestCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       authInfo.checkValid(null);
     } catch (RuntimeException e) {
       return Future.failedFuture(e);
@@ -152,7 +144,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
       digest = md5(ha1 + ":" + authInfo.getNonce() + ":" + authInfo.getNc() + ":" + authInfo.getCnonce() + ":" + authInfo.getQop() + ":" + ha2);
     }
 
-    if (digest.equals(authInfo.getResponse())) {
+    if (isEqual(digest, authInfo.getResponse())) {
       User user = User.create(new JsonObject().put("username", credential.username).put("realm", credential.realm));
       // metadata "amr"
       user.principal().put("amr", Collections.singletonList("pwd"));
@@ -166,5 +158,27 @@ public class HtdigestAuthImpl implements HtdigestAuth {
   private static synchronized String md5(String payload) {
     MD5.reset();
     return base16Encode(MD5.digest(payload.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  private static boolean isEqual(String digesta, String digestb) {
+    if (digesta != null && digestb != null) {
+      int lenA = digesta.length();
+      int lenB = digestb.length();
+      if (lenB == 0) {
+        return lenA == 0;
+      } else {
+        int result = 0;
+        result |= lenA - lenB;
+
+        for(int i = 0; i < lenA; ++i) {
+          int indexB = (i - lenB >>> 31) * i;
+          result |= digesta.charAt(i) ^ digestb.charAt(indexB);
+        }
+
+        return result == 0;
+      }
+    } else {
+      return false;
+    }
   }
 }

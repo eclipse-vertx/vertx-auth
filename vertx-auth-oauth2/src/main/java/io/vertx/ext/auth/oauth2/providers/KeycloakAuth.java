@@ -72,8 +72,6 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
     final OAuth2Options options = new OAuth2Options()
       .setHttpClientOptions(httpClientOptions);
 
-    options.setFlow(flow);
-
     if (config.containsKey("resource")) {
       options.setClientId(config.getString("resource"));
     }

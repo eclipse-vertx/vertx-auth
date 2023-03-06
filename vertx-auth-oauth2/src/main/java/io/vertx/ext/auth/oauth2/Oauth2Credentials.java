@@ -152,7 +152,6 @@ public class Oauth2Credentials implements Credentials {
 
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
-    OAuth2FlowType flow = (OAuth2FlowType) arg;
     if (flow == null) {
       throw new CredentialValidationException("flow cannot be null");
     }
@@ -171,7 +170,7 @@ public class Oauth2Credentials implements Credentials {
         break;
       case AUTH_JWT:
         if (jwt == null) {
-          throw new CredentialValidationException("json cannot be null");
+          throw new CredentialValidationException("jwt cannot be null");
         }
         break;
       case AAD_OBO:

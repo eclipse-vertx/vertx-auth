@@ -17,7 +17,6 @@ package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.Fluent;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 import java.security.KeyStore;
@@ -43,8 +42,6 @@ public class KeyStoreOptions {
   private String provider;
   private String password;
   private String path;
-  @Deprecated
-  private Buffer value;
   private Map<String, String> passwordProtection;
 
   /**
@@ -66,7 +63,6 @@ public class KeyStoreOptions {
     }
     password = other.getPassword();
     path = other.getPath();
-    value = other.getValue();
     passwordProtection = other.getPasswordProtection();
     provider = other.getProvider();
   }
@@ -105,13 +101,6 @@ public class KeyStoreOptions {
   }
 
   @Fluent
-  @Deprecated
-  public KeyStoreOptions setValue(Buffer value) {
-    this.value = value;
-    return this;
-  }
-
-  @Fluent
   public KeyStoreOptions setPasswordProtection(Map<String, String> passwordProtection) {
     this.passwordProtection = passwordProtection;
     return this;
@@ -131,11 +120,6 @@ public class KeyStoreOptions {
 
   public String getPath() {
     return path;
-  }
-
-  @Deprecated
-  public Buffer getValue() {
-    return value;
   }
 
   public Map<String, String> getPasswordProtection() {

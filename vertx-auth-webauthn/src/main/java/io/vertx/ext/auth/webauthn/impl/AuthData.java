@@ -23,7 +23,6 @@ import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static io.vertx.ext.auth.impl.Codec.base16Encode;
 

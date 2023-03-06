@@ -3,9 +3,11 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -16,17 +18,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.CountDownLatch;
-
 @RunWith(VertxUnitRunner.class)
 public class OAuth2ErrorsTest {
 
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
 
-  private static final JsonObject tokenConfig = new JsonObject()
-      .put("code", "code")
-      .put("redirect_uri", "http://callback.com");
+  private static final Credentials tokenConfig = new Oauth2Credentials()
+    .setFlow(OAuth2FlowType.AUTH_CODE)
+    .setCode("code")
+    .setRedirectUri("http://callback.com");
 
   private OAuth2Auth oauth2;
   private HttpServer server;
@@ -48,7 +49,6 @@ public class OAuth2ErrorsTest {
         throw new RuntimeException(ready.cause());
       }
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort()));

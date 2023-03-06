@@ -69,7 +69,6 @@ public class OAuth2OBOTest {
 
       // mock AzureAD
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AAD_OBO)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setTenant("resource")
@@ -95,7 +94,7 @@ public class OAuth2OBOTest {
   @Test
   public void getToken(TestContext should) {
     final Async test = should.async();
-    oauth2.authenticate(new Oauth2Credentials().setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AAD_OBO).setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
       if (res.failed()) {
         should.fail(res.cause());
       } else {

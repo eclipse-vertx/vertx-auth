@@ -19,7 +19,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 /**
@@ -59,7 +58,6 @@ public interface AmazonCognitoAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setTenant(userPoolId)

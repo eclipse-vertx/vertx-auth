@@ -15,10 +15,7 @@
  */
 package io.vertx.ext.auth.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.ChainAuth;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
@@ -44,31 +41,21 @@ public class ChainAuthImpl implements ChainAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     try {
       credentials.checkValid(null);
     } catch (CredentialValidationException e) {
       return Future.failedFuture(e);
     }
-    return authenticate(credentials.toJson());
-  }
 
-  @Override
-  public Future<User> authenticate(final JsonObject authInfo) {
     if (providers.size() == 0) {
       return Future.failedFuture("No providers in the auth chain.");
     } else {
-      return iterate(0, authInfo, null);
+      return iterate(0, credentials, null);
     }
   }
 
-  private Future<User> iterate(final int idx, final JsonObject authInfo, final User previousUser) {
+  private Future<User> iterate(final int idx, final Credentials credentials, final User previousUser) {
     // stop condition
     if (idx >= providers.size()) {
       if (!all) {
@@ -82,21 +69,21 @@ public class ChainAuthImpl implements ChainAuth {
 
     // attempt to perform operation
     return providers.get(idx)
-      .authenticate(authInfo)
+      .authenticate(credentials)
       .compose(user -> {
         if (!all) {
           // if ANY then a success completes
           return Future.succeededFuture(user);
         } else {
           // if ALL then a success check the next one
-          return iterate(idx + 1, authInfo, previousUser == null ? user : previousUser.merge(user));
+          return iterate(idx + 1, credentials, previousUser == null ? user : previousUser.merge(user));
         }
       })
       .recover(err -> {
         // try again with next provider
         if (!all) {
           // try again with next provider
-          return iterate(idx + 1, authInfo, null);
+          return iterate(idx + 1, credentials, null);
         } else {
           // short circuit when ALL is used a failure is enough to terminate
           // no more providers, means that we failed to find a provider capable of performing this operation

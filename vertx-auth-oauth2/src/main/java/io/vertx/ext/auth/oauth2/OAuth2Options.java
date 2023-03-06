@@ -17,7 +17,6 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.impl.logging.Logger;
@@ -26,9 +25,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.JWTOptions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +40,6 @@ public class OAuth2Options {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2Options.class);
 
   // Defaults
-  private static final OAuth2FlowType FLOW = OAuth2FlowType.AUTH_CODE;
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOCATION_PATH = "/oauth/revoke";
@@ -53,7 +49,6 @@ public class OAuth2Options {
   //seconds of JWK's default age (-1 means no rotation)
   private static final long JWK_DEFAULT_AGE = -1L;
 
-  private OAuth2FlowType flow;
   private List<String> supportedGrantTypes;
   private String authorizationPath;
   private String tokenPath;
@@ -113,7 +108,6 @@ public class OAuth2Options {
     clientAssertionType = other.getClientAssertionType();
     clientAssertion = other.getClientAssertion();
     validateIssuer = other.isValidateIssuer();
-    flow = other.getFlow();
     authorizationPath = other.getAuthorizationPath();
     tokenPath = other.getTokenPath();
     revocationPath = other.getRevocationPath();
@@ -156,7 +150,6 @@ public class OAuth2Options {
   }
 
   private void init() {
-    flow = FLOW;
     validateIssuer = VALIDATE_ISSUER;
     authorizationPath = AUTHORIZATION_PATH;
     tokenPath = TOKEN_PATH;
@@ -235,22 +228,6 @@ public class OAuth2Options {
   public OAuth2Options setSite(String site) {
     this.site = site;
     return this;
-  }
-
-  /**
-   * @deprecated see {@link #getClientId()}
-   */
-  @Deprecated
-  public String getClientID() {
-    return getClientId();
-  }
-
-  /**
-   * @deprecated see {@link #setClientId(String)}
-   */
-  @Deprecated
-  public OAuth2Options setClientID(String clientID) {
-    return setClientId(clientID);
   }
 
   /**
@@ -511,23 +488,6 @@ public class OAuth2Options {
     return this;
   }
 
-  /**
-   * @deprecated see {@link Oauth2Credentials#getFlow()}
-   */
-  @Deprecated
-  public OAuth2FlowType getFlow() {
-    return flow;
-  }
-
-  /**
-   * @deprecated see {@link Oauth2Credentials#setFlow(OAuth2FlowType)}
-   */
-  @Deprecated
-  public OAuth2Options setFlow(OAuth2FlowType flow) {
-    this.flow = flow;
-    return this;
-  }
-
   public boolean isValidateIssuer() {
     return validateIssuer;
   }
@@ -552,23 +512,6 @@ public class OAuth2Options {
    */
   public OAuth2Options setTenant(String tenant) {
     this.tenant = tenant;
-    return this;
-  }
-
-  @Deprecated
-  public boolean isRotateJWKs() {
-    return jwkMaxAge != -1L;
-  }
-
-  /**
-   * Enable/Disable the JWKs rotation.
-   *
-   * @param rotateJWKs {@code true} to rotate keys as described in {@link OAuth2Auth#jWKSet(Handler)}.
-   * @return self
-   * @deprecated use {@link #setJwkMaxAgeInSeconds(long)} instead
-   */
-  @Deprecated
-  public OAuth2Options setRotateJWKs(boolean rotateJWKs) {
     return this;
   }
 
@@ -647,39 +590,45 @@ public class OAuth2Options {
   }
 
   public void validate() throws IllegalStateException {
-    if (flow == null) {
-      throw new IllegalStateException("Missing OAuth2 flow [e.g.: AUTH_CODE]");
+    List<String> supportedGrantTypes = getSupportedGrantTypes();
+    if (supportedGrantTypes == null) {
+      // we default to AUTH_CODE and IMPLICIT as defined in the OpenID Connect spec
+      supportedGrantTypes = Arrays.asList(OAuth2FlowType.AUTH_CODE.getGrantType(), OAuth2FlowType.IMPLICIT.getGrantType());
     }
-
-    switch (flow) {
-      case AUTH_CODE:
-      case AUTH_JWT:
-      case AAD_OBO:
-        if (clientAssertion == null && clientAssertionType == null) {
-          // not using client assertions
-          if (clientId == null) {
-            throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
+    for (OAuth2FlowType flow : OAuth2FlowType.values()) {
+      if (!supportedGrantTypes.contains(flow.getGrantType())) {
+        continue;
+      }
+      switch (flow) {
+        case AUTH_CODE:
+        case AUTH_JWT:
+        case AAD_OBO:
+          if (clientAssertion == null && clientAssertionType == null) {
+            // not using client assertions
+            if (clientId == null) {
+              throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
+            }
+          } else {
+            if (clientAssertion == null || clientAssertionType == null) {
+              throw new IllegalStateException(
+                "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+            }
           }
-        } else {
-          if (clientAssertion == null || clientAssertionType == null) {
-            throw new IllegalStateException(
-              "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+          break;
+        case PASSWORD:
+          if (clientAssertion == null && clientAssertionType == null) {
+            // not using client assertions
+            if (clientId == null) {
+              LOG.debug("If you are using Client Oauth2 Resource Owner flow. You need to specify [clientId]");
+            }
+          } else {
+            if (clientAssertion == null || clientAssertionType == null) {
+              throw new IllegalStateException(
+                "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
+            }
           }
-        }
-        break;
-      case PASSWORD:
-        if (clientAssertion == null && clientAssertionType == null) {
-          // not using client assertions
-          if (clientId == null) {
-            LOG.debug("If you are using Client Oauth2 Resource Owner flow. You need to specify [clientId]");
-          }
-        } else {
-          if (clientAssertion == null || clientAssertionType == null) {
-            throw new IllegalStateException(
-              "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
-          }
-        }
-        break;
+          break;
+      }
     }
   }
 

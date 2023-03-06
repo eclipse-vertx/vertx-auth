@@ -8,7 +8,6 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -63,7 +62,6 @@ public class OAuth2UserInfoAzureJWTTest {
       }
 
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort())
@@ -95,7 +93,8 @@ public class OAuth2UserInfoAzureJWTTest {
 
     fixture = fixtureV1;
 
-    oauth2.userInfo(user, userInfo -> {
+    oauth2.userInfo(user)
+      .onComplete(userInfo -> {
       if (userInfo.failed()) {
         should.fail(userInfo.cause().getMessage());
       } else {
@@ -117,7 +116,8 @@ public class OAuth2UserInfoAzureJWTTest {
 
     fixture = fixtureV2;
 
-    oauth2.userInfo(user, userInfo -> {
+    oauth2.userInfo(user)
+      .onComplete(userInfo -> {
       if (userInfo.failed()) {
         should.fail(userInfo.cause().getMessage());
       } else {

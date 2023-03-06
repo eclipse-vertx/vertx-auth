@@ -79,7 +79,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("public")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}")
@@ -124,7 +123,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("public")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}")
@@ -168,7 +166,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("confidential")
       .setClientSecret("51321e70-b1f3-45bf-aec2-d6bfbb9327e3")
       .setTenant("vertx-it")
@@ -214,7 +211,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("own-audience")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}");
@@ -244,7 +240,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("multiple-audience")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}");
@@ -274,7 +269,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("multiple-audience")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}")
@@ -307,7 +301,6 @@ public class OAuth2Keycloak14IT {
     final Async test = should.async();
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("public")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}")
@@ -355,7 +348,6 @@ public class OAuth2Keycloak14IT {
     // then we use that token to authenticate on client "backend" which should be accepted as the audience is correct.
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("frontend")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}");
@@ -367,7 +359,7 @@ public class OAuth2Keycloak14IT {
       .onSuccess(oauth2 -> {
 
         oauth2
-          .authenticate(new Oauth2Credentials().setUsername("alice").setPassword("password").addScope("backend"))
+          .authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.PASSWORD).setUsername("alice").setPassword("password").addScope("backend"))
           .onFailure(should::fail)
           .onSuccess(alice -> {
             should.assertNotNull(alice);
@@ -415,7 +407,6 @@ public class OAuth2Keycloak14IT {
     // audience will not match.
 
     OAuth2Options options = new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("frontend")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}");
@@ -428,6 +419,7 @@ public class OAuth2Keycloak14IT {
         oauth2
           .authenticate(
             new Oauth2Credentials()
+              .setFlow(OAuth2FlowType.PASSWORD)
               .setUsername("alice")
               .setPassword("password")
               // this is a client scope that will add the "backend" audience to the token
@@ -464,7 +456,7 @@ public class OAuth2Keycloak14IT {
     final Promise<User> promise = Promise.promise();
 
     oauth2
-      .authenticate(new Oauth2Credentials().setUsername(username).setPassword("password").setScopes(scopes))
+      .authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.PASSWORD).setUsername(username).setPassword("password").setScopes(scopes))
       .onFailure(should::fail)
       .onSuccess(user -> {
         should.assertNotNull(user);
@@ -480,7 +472,7 @@ public class OAuth2Keycloak14IT {
     final Promise<User> promise = Promise.promise();
 
     oauth2
-      .authenticate(new Oauth2Credentials().setUsername(username).setPassword("password").setScopes(scopes))
+      .authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.PASSWORD).setUsername(username).setPassword("password").setScopes(scopes))
       .onFailure(should::fail)
       .onSuccess(user -> {
         should.assertNotNull(user);

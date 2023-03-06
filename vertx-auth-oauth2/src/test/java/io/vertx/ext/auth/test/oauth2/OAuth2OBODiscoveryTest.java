@@ -5,7 +5,6 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -51,7 +50,6 @@ public class OAuth2OBODiscoveryTest {
     AzureADAuth.discover(
       rule.vertx(),
       new OAuth2Options()
-        .setFlow(OAuth2FlowType.AAD_OBO)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setTenant("common")
@@ -112,7 +110,7 @@ public class OAuth2OBODiscoveryTest {
     final Async test = should.async();
 
     // Given that we want to trade an existing token for a new one (On-Behalf-Of) we **must** user OAuth2Credentials
-    oauth2.authenticate(new Oauth2Credentials().setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AAD_OBO).setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
       if (res.failed()) {
         should.fail(res.cause());
       } else {

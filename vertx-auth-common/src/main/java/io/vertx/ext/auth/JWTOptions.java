@@ -145,40 +145,6 @@ public class JWTOptions {
     return this;
   }
 
-  /**
-   * @deprecated See {@code JWTAuthorization} for a correct way to handle permissions.
-   * The permissions of this token.
-   *
-   * @param permissions the permissions for this token that will be used for AuthZ
-   * @return fluent API
-   */
-  @Deprecated
-  public JWTOptions setPermissions(List<String> permissions) {
-    this.permissions = permissions;
-    return this;
-  }
-
-  /**
-   * @deprecated See {@code JWTAuthorization} for a correct way to handle permissions.
-   * Add a permission to this token.
-   *
-   * @param permission permission for this token that will be used for AuthZ
-   * @return fluent API
-   */
-  @Deprecated
-  public JWTOptions addPermission(String permission) {
-    if (this.permissions == null) {
-      this.permissions = new ArrayList<>();
-    }
-    this.permissions.add(permission);
-    return this;
-  }
-
-  @Deprecated
-  public List<String> getPermissions() {
-    return permissions;
-  }
-
   public String getNonceAlgorithm() {
     return nonceAlgorithm;
   }

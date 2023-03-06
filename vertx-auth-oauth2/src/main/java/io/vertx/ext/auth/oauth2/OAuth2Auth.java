@@ -66,8 +66,6 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
    * positive leeway, it will be used to request the refresh ahead of time.
    *
-   * Key rotation can be controled by {@link OAuth2Options#setRotateJWKs(boolean)}.
-   *
    * @param handler the handler success/failure.
    * @return fluent self.
    */
@@ -128,20 +126,6 @@ public interface OAuth2Auth extends AuthenticationProvider {
    */
   @Fluent
   OAuth2Auth missingKeyHandler(Handler<String> handler);
-
-  /**
-   * The client sends the end-user's browser to this endpoint to request their
-   * authentication and consent. This endpoint is used in the code and implicit
-   * OAuth 2.0 flows which require end-user interaction.
-   *
-   * @deprecated For type safety this method should be avoided and {@link #authorizeURL(OAuth2AuthorizationURL)} should be
-   * used instead.
-   *
-   * @param params extra params to be included in the final URL.
-   * @return the url to be used to authorize the user.
-   */
-  @Deprecated
-  String authorizeURL(JsonObject params);
 
   /**
    * The client sends the end-user's browser to this endpoint to request their

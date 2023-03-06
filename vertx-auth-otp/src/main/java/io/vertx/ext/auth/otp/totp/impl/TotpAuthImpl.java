@@ -11,11 +11,10 @@
 
 package io.vertx.ext.auth.otp.totp.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.OtpCredentials;
@@ -48,21 +47,14 @@ public class TotpAuthImpl implements TotpAuth {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject credentials) {
-    return authenticate(new OtpCredentials(credentials));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     final OtpCredentials authInfo;
     try {
-      authInfo = (OtpCredentials) credentials;
+      try {
+        authInfo = (OtpCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       authInfo.checkValid(totpAuthOptions);
     } catch (RuntimeException e) {
       return Future.failedFuture(e);

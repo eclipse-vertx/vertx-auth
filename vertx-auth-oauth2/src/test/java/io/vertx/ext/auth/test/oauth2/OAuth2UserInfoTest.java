@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -66,7 +65,6 @@ public class OAuth2UserInfoTest {
         throw new RuntimeException(ready.cause());
       }
       oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort())
@@ -91,13 +89,14 @@ public class OAuth2UserInfoTest {
     final Async test = should.async();
     final User accessToken = User.fromToken("eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdXRob3JpemF0aW9uIjp7InBlcm1pc3Npb25zIjpbeyJyZXNvdXJjZV9zZXRfaWQiOiJkMmZlOTg0My02NDYyLTRiZmMtYmFiYS1iNTc4N2JiNmUwZTciLCJyZXNvdXJjZV9zZXRfbmFtZSI6IkhlbGxvIFdvcmxkIFJlc291cmNlIn1dfSwianRpIjoiZDYxMDlhMDktNzhmZC00OTk4LWJmODktOTU3MzBkZmQwODkyLTE0NjQ5MDY2Nzk0MDUiLCJleHAiOjk5OTk5OTk5OTksIm5iZiI6MCwiaWF0IjoxNDY0OTA2NjcxLCJzdWIiOiJmMTg4OGY0ZC01MTcyLTQzNTktYmUwYy1hZjMzODUwNWQ4NmMiLCJ0eXAiOiJrY19ldHQiLCJhenAiOiJoZWxsby13b3JsZC1hdXRoei1zZXJ2aWNlIn0");
 
-    oauth2.userInfo(accessToken, userInfo -> {
-      if (userInfo.failed()) {
-        should.fail(userInfo.cause().getMessage());
-      } else {
-        test.complete();
-      }
-    });
+    oauth2.userInfo(accessToken)
+      .onComplete(userInfo -> {
+        if (userInfo.failed()) {
+          should.fail(userInfo.cause().getMessage());
+        } else {
+          test.complete();
+        }
+      });
   }
 
   @Test
@@ -105,13 +104,14 @@ public class OAuth2UserInfoTest {
     final Async test = should.async();
     final User accessToken = User.fromToken("eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdXRob3JpemF0aW9uIjp7InBlcm1pc3Npb25zIjpbeyJyZXNvdXJjZV9zZXRfaWQiOiJkMmZlOTg0My02NDYyLTRiZmMtYmFiYS1iNTc4N2JiNmUwZTciLCJyZXNvdXJjZV9zZXRfbmFtZSI6IkhlbGxvIFdvcmxkIFJlc291cmNlIn1dfSwianRpIjoiZDYxMDlhMDktNzhmZC00OTk4LWJmODktOTU3MzBkZmQwODkyLTE0NjQ5MDY2Nzk0MDUiLCJleHAiOjk5OTk5OTk5OTksIm5iZiI6MCwiaWF0IjoxNDY0OTA2NjcxLCJzdWIiOiJmMTg4OGY0ZC01MTcyLTQzNTktYmUwYy1hZjMzODUwNWQ4NmMiLCJ0eXAiOiJrY19ldHQiLCJhenAiOiJoZWxsby13b3JsZC1hdXRoei1zZXJ2aWNlIn0");
 
-    oauth2.userInfo(accessToken, userInfo -> {
-      if (userInfo.failed()) {
-        should.fail(userInfo.cause().getMessage());
-      } else {
-        should.assertEquals(fixture, userInfo.result());
-        test.complete();
-      }
-    });
+    oauth2.userInfo(accessToken)
+      .onComplete(userInfo -> {
+        if (userInfo.failed()) {
+          should.fail(userInfo.cause().getMessage());
+        } else {
+          should.assertEquals(fixture, userInfo.result());
+          test.complete();
+        }
+      });
   }
 }

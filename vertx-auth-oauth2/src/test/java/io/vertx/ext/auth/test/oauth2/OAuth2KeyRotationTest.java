@@ -5,8 +5,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
 import io.vertx.ext.unit.Async;
@@ -84,7 +84,6 @@ public class OAuth2KeyRotationTest {
         }
 
         oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
-          .setFlow(OAuth2FlowType.AUTH_CODE)
           .setClientId("client-id")
           .setClientSecret("client-secret")
           .setJwkPath("/oauth/jwks")
@@ -110,10 +109,9 @@ public class OAuth2KeyRotationTest {
     final Async test = should.async();
     OAuth2Auth oauth2 = GoogleAuth.create(rule.vertx(), "", "");
 
-    oauth2.jWKSet(load -> {
-      should.assertFalse(load.failed());
-      test.complete();
-    });
+    oauth2.jWKSet()
+      .onFailure(should::fail)
+      .onSuccess(load -> test.complete());
   }
 
   @Test
@@ -131,11 +129,8 @@ public class OAuth2KeyRotationTest {
       }
     };
 
-    oauth2.jWKSet(res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      }
-    });
+    oauth2.jWKSet()
+      .onFailure(should::fail);
   }
 
   @Test
@@ -155,10 +150,9 @@ public class OAuth2KeyRotationTest {
 
     String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIifQ.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NYY8FXsouaKSuMafoNshtQ997X4x1Jta0GEtl3BAJGY";
 
-    oauth2.jWKSet(res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
+    oauth2.jWKSet()
+      .onFailure(should::fail)
+      .onSuccess(res -> {
         oauth2
           .missingKeyHandler(kid -> {
             if ("HS256#<null>".equals(kid)) {
@@ -167,13 +161,9 @@ public class OAuth2KeyRotationTest {
               should.fail("wrong key id");
             }
           })
-          .authenticate(new JsonObject().put("access_token", jwt), authenticate -> {
-            if (authenticate.succeeded()) {
-              should.fail("we don't have such key");
-            }
-          });
-      }
-    });
+          .authenticate(new TokenCredentials(jwt))
+          .onSuccess(user -> should.fail("we don't have such key"));
+      });
   }
 
   @Test
@@ -183,13 +173,11 @@ public class OAuth2KeyRotationTest {
       should.fail("wrong timing: " + (System.currentTimeMillis() - then.get()));
     };
 
-    oauth2.jWKSet(res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
+    oauth2.jWKSet()
+      .onFailure(should::fail)
+        .onSuccess(res -> {
         oauth2.close();
         rule.vertx().setTimer(5500L, v -> test.complete());
-      }
     });
   }
 }

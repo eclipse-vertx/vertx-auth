@@ -82,12 +82,12 @@ public class NavigatorCredentialsCreate {
 
     webAuthN
       .authenticate(
-        new JsonObject()
-          .put("username", "paulo")
-          .put("origin", "https://192.168.178.206.xip.io:8443")
-          .put("domain", "192.168.178.206.xip.io")
-          .put("challenge", "BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UXMQY4qN9ag5yDNmLI7vFRslkQbbj0JZWJxGVfMugXg")
-          .put("webauthn", request))
+        new WebAuthnCredentials()
+          .setUsername("paulo")
+          .setOrigin("https://192.168.178.206.xip.io:8443")
+          .setDomain("192.168.178.206.xip.io")
+          .setChallenge("BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UXMQY4qN9ag5yDNmLI7vFRslkQbbj0JZWJxGVfMugXg")
+          .setWebauthn(request))
       .onFailure(should::fail)
       .onSuccess(response -> {
         assertNotNull(response);

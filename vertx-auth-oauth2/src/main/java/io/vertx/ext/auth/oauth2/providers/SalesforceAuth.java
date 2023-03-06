@@ -20,7 +20,6 @@ import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 
 /**
  * Simplified factory to create an {@link OAuth2Auth} for Salesforce.
@@ -51,7 +50,6 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://login.salesforce.com")

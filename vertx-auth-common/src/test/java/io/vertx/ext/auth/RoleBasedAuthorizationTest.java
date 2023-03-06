@@ -14,7 +14,6 @@ package io.vertx.ext.auth;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;

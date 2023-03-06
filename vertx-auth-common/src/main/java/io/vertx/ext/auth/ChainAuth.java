@@ -28,16 +28,6 @@ import io.vertx.ext.auth.impl.ChainAuthImpl;
 public interface ChainAuth extends AuthenticationProvider {
 
   /**
-   * Create a Chainable Auth Provider auth provider
-   *
-   * @return the auth provider
-   */
-  @Deprecated
-  static ChainAuth create() {
-    return any();
-  }
-
-  /**
    * Create a Chainable Auth Provider auth provider that will resolve if all auth providers are successful.
    *
    * @return the auth provider

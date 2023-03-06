@@ -12,7 +12,6 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Objects;
@@ -23,9 +22,8 @@ import javax.naming.ldap.LdapContext;
 
 import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.ldap.LdapAuthentication;
@@ -47,21 +45,14 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<io.vertx.ext.auth.User> authenticate(JsonObject credentials) {
-    return authenticate(new UsernamePasswordCredentials(credentials));
-  }
-
-  @Override
-  public Future<io.vertx.ext.auth.User> authenticate(Credentials credentials) {
+  public Future<User> authenticate(Credentials credentials) {
     final UsernamePasswordCredentials authInfo;
     try {
-      authInfo = (UsernamePasswordCredentials) credentials;
+      try {
+        authInfo = (UsernamePasswordCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       authInfo.checkValid(null);
     } catch (RuntimeException e) {
       return Future.failedFuture(e);

@@ -20,14 +20,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
 import io.vertx.ext.auth.oauth2.providers.*;
-
-import java.util.Arrays;
 
 /**
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -37,7 +38,6 @@ public class AuthOAuth2Examples {
   public void example1(Vertx vertx) {
 
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientId("YOUR_CLIENT_ID")
       .setClientSecret("YOUR_CLIENT_SECRET")
       .setSite("https://github.com/login")
@@ -51,7 +51,7 @@ public class AuthOAuth2Examples {
 
     String authorization_uri = oauth2.authorizeURL(new OAuth2AuthorizationURL()
       .setRedirectUri("http://localhost:8080/callback")
-      .setScopes(Arrays.asList("notifications"))
+      .addScope("notifications")
       .setState("3(#0/!~"));
 
     // when working with web application use the above string as a redirect url
@@ -63,9 +63,9 @@ public class AuthOAuth2Examples {
     String code = "xxxxxxxxxxxxxxxxxxxxxxxx";
 
     oauth2.authenticate(
-      new JsonObject()
-        .put("code", code)
-        .put("redirectUri", "http://localhost:8080/callback"))
+      new Oauth2Credentials()
+        .setCode(code)
+        .setRedirectUri("http://localhost:8080/callback"))
       .onSuccess(user -> {
         // save the token and continue...
       })
@@ -78,7 +78,6 @@ public class AuthOAuth2Examples {
 
     // Set the client credentials and the OAuth2 server
     OAuth2Options credentials = new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientId("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
@@ -90,7 +89,7 @@ public class AuthOAuth2Examples {
     // Authorization oauth2 URI
     String authorization_uri = oauth2.authorizeURL(new OAuth2AuthorizationURL()
       .setRedirectUri("http://localhost:8080/callback")
-      .setScopes(Arrays.asList("<scope>"))
+      .addScope("<scope>")
       .setState("<state>"));
 
     // Redirect example using Vert.x
@@ -98,9 +97,9 @@ public class AuthOAuth2Examples {
       .setStatusCode(302)
       .end();
 
-    JsonObject tokenConfig = new JsonObject()
-      .put("code", "<code>")
-      .put("redirectUri", "http://localhost:3000/callback");
+    Credentials tokenConfig = new Oauth2Credentials()
+      .setCode("<code>")
+      .setRedirectUri("http://localhost:3000/callback");
 
     // Callbacks
     // Save the access token
@@ -117,14 +116,10 @@ public class AuthOAuth2Examples {
   public void example3(Vertx vertx) {
 
     // Initialize the OAuth2 Library
-    OAuth2Auth oauth2 = OAuth2Auth.create(
-      vertx,
-      new OAuth2Options()
-        .setFlow(OAuth2FlowType.PASSWORD));
+    OAuth2Auth oauth2 = OAuth2Auth.create(vertx);
 
-    JsonObject tokenConfig = new JsonObject()
-      .put("username", "username")
-      .put("password", "password");
+    Credentials tokenConfig = new UsernamePasswordCredentials(
+      "username", "password");
 
     oauth2.authenticate(tokenConfig)
       .onSuccess(user -> {
@@ -146,7 +141,6 @@ public class AuthOAuth2Examples {
 
     // Set the client credentials and the OAuth2 server
     OAuth2Options credentials = new OAuth2Options()
-      .setFlow(OAuth2FlowType.CLIENT)
       .setClientId("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
@@ -155,7 +149,7 @@ public class AuthOAuth2Examples {
     // Initialize the OAuth2 Library
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
 
-    JsonObject tokenConfig = new JsonObject();
+    Credentials tokenConfig = new TokenCredentials("<token>");
 
     oauth2.authenticate(tokenConfig)
       .onSuccess(user -> {
@@ -211,9 +205,7 @@ public class AuthOAuth2Examples {
 
     // first get a token (authenticate)
     oauth2.authenticate(
-      new JsonObject()
-        .put("username", "user")
-        .put("password", "secret"))
+      new UsernamePasswordCredentials("user", "secret"))
       .onSuccess(user -> {
         // now check for permissions
         AuthorizationProvider authz = KeycloakAuthorization.create();
@@ -242,13 +234,13 @@ public class AuthOAuth2Examples {
 
   public void example15(OAuth2Auth oauth2, User user) {
     // OAuth2Auth level
-    oauth2.authenticate(new JsonObject().put("access_token", "opaque string"))
+    oauth2.authenticate(new TokenCredentials("opaque string"))
       .onSuccess(theUser -> {
         // token is valid!
       });
 
     // User level
-    oauth2.authenticate(user.principal())
+    oauth2.authenticate(new TokenCredentials(user.<String>get("access_token")))
       .onSuccess(authenticatedUser -> {
         // Token is valid!
       });
@@ -256,7 +248,7 @@ public class AuthOAuth2Examples {
 
   public void example16(OAuth2Auth oauth2) {
     // OAuth2Auth level
-    oauth2.authenticate(new JsonObject().put("access_token", "jwt-token"))
+    oauth2.authenticate(new TokenCredentials("jwt-token"))
       .onSuccess(theUser -> {
         // token is valid!
       });
@@ -327,7 +319,7 @@ public class AuthOAuth2Examples {
   }
 
   public void example24(OAuth2Auth oauth2, User user) {
-    oauth2.authenticate(user.principal())
+    oauth2.authenticate(new TokenCredentials(user.<String>get("access_token")))
       .onSuccess(validUser -> {
         // the introspection call succeeded
       })
@@ -444,7 +436,8 @@ public class AuthOAuth2Examples {
       // 1. we can inspect the key id, does it make sense?
       if (keyId.equals("the-new-id")) {
         // 2. refresh the keys
-        oauth2.jWKSet(res -> {
+        oauth2.jWKSet()
+          .onSuccess(v -> {
           // ...
         });
       }

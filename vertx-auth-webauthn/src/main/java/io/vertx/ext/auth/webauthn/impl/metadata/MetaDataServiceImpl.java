@@ -31,7 +31,6 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
-  private final VertxInternal vertx;
   private final WebAuthnOptions options;
   private final SimpleHttpClient httpClient;
   private final JWT jwt;
@@ -39,7 +38,7 @@ public class MetaDataServiceImpl implements MetaDataService {
   private final MetaData metadata;
 
   public MetaDataServiceImpl(Vertx vertx, WebAuthnOptions options) {
-    this.vertx = (VertxInternal) vertx;
+    VertxInternal vertx1 = (VertxInternal) vertx;
     this.options = options;
     this.httpClient = new SimpleHttpClient(vertx, "vertx-auth", new HttpClientOptions());
     this.jwt = new JWT().allowEmbeddedKey(true);
@@ -111,9 +110,7 @@ public class MetaDataServiceImpl implements MetaDataService {
             final List<Future> futures = new ArrayList<>(entries.size());
             final String e = error;
 
-            entries.forEach(el -> {
-              futures.add(addEntry(e, (JsonObject) el));
-            });
+            entries.forEach(el -> futures.add(addEntry(e, (JsonObject) el)));
 
             return CompositeFuture
               .all(futures)

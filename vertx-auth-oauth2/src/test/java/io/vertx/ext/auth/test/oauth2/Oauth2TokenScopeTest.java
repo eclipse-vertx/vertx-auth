@@ -54,7 +54,6 @@ public class Oauth2TokenScopeTest {
         "}");
 
     oauthConfig = new OAuth2Options()
-      .setFlow(OAuth2FlowType.AUTH_CODE)
       .setClientId("client-id")
       .setClientSecret("client-secret");
 

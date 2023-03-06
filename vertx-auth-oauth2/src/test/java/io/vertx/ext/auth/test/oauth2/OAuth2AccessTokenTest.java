@@ -5,10 +5,12 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -47,9 +49,10 @@ public class OAuth2AccessTokenTest {
       "  \"nbf\": 7200" +
       "}");
 
-  private static final JsonObject tokenConfig = new JsonObject()
-    .put("code", "code")
-    .put("redirectUri", "http://callback.com");
+  private static final Credentials tokenConfig = new Oauth2Credentials()
+    .setFlow(OAuth2FlowType.AUTH_CODE)
+    .setCode("code")
+    .setRedirectUri("http://callback.com");
 
   private static final JsonObject refreshConfig = new JsonObject()
     .put("refresh_token", "ec1a59d298")
@@ -118,7 +121,6 @@ public class OAuth2AccessTokenTest {
       }
 
       oauth2 = OAuth2Auth.create(vertx, new OAuth2Options()
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId("client-id")
         .setClientSecret("client-secret")
         .setSite("http://localhost:" + ready.result().actualPort())

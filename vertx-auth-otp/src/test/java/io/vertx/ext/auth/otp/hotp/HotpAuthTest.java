@@ -11,9 +11,10 @@
 
 package io.vertx.ext.auth.otp.hotp;
 
-import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.otp.Authenticator;
 import io.vertx.ext.auth.otp.DummyDatabase;
+import io.vertx.ext.auth.otp.OtpCredentials;
 import io.vertx.ext.auth.otp.hotp.HotpAuth;
 import io.vertx.ext.auth.otp.hotp.HotpAuthOptions;
 import io.vertx.ext.unit.TestContext;
@@ -43,9 +44,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "698956");
+    Credentials credentials = new OtpCredentials("user1", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
       long counter = user1.get("counter");
@@ -67,16 +66,12 @@ public class HotpAuthTest {
       .authenticatorUpdater(db::upsert);
 
     // Attempt auth with invalid code
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "718330");
+    Credentials credentials = new OtpCredentials("user1", "718330");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
 
     // attempt auth with valid code
-    credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "698956");
+    credentials = new OtpCredentials("user1", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
       long counter = user1.get("counter");
@@ -98,30 +93,22 @@ public class HotpAuthTest {
       .authenticatorUpdater(db::upsert);
 
     // Attempt auth with invalid code
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "296103");
+    Credentials credentials = new OtpCredentials("user1", "296103");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
 
     // Attempt auth with invalid code
-    credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "571931");
+    credentials = new OtpCredentials("user1", "571931");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
 
     // Attempt auth with invalid code
-    credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "881695");
+    credentials = new OtpCredentials("user1", "881695");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
 
     // Attempt auth with valid code
-    credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "142559");
+    credentials = new OtpCredentials("user1", "142559");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
       long counter = user1.get("counter");
@@ -141,9 +128,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "651075");
+    Credentials credentials = new OtpCredentials("user1", "651075");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
   }
@@ -159,9 +144,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "698956");
+    Credentials credentials = new OtpCredentials("user1", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(user1 -> {
       long counter = user1.get("counter");
@@ -184,9 +167,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "651075");
+    Credentials credentials = new OtpCredentials("user1", "651075");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
   }
@@ -203,9 +184,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject user1Credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "974712");
+    Credentials user1Credentials = new OtpCredentials("user1", "974712");
 
     authProvider.authenticate(user1Credentials, should.asyncAssertSuccess(user -> {
       long counter = user.get("counter");
@@ -214,9 +193,7 @@ public class HotpAuthTest {
       should.assertNull(authAttempt);
     }));
 
-    JsonObject user2Credentials = new JsonObject()
-      .put("identifier", "user2")
-      .put("code", "054804");
+    Credentials user2Credentials = new OtpCredentials("user2", "054804");
 
     authProvider.authenticate(user2Credentials, should.asyncAssertSuccess(user -> {
       long counter = user.get("counter");
@@ -238,9 +215,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject user1Credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "974712");
+    Credentials user1Credentials = new OtpCredentials("user1", "974712");
 
     authProvider.authenticate(user1Credentials, should.asyncAssertSuccess(user -> {
       long counter = user.get("counter");
@@ -249,9 +224,7 @@ public class HotpAuthTest {
       should.assertNull(authAttempt);
     }));
 
-    JsonObject user2Credentials = new JsonObject()
-      .put("identifier", "user2")
-      .put("code", "302344");
+    Credentials user2Credentials = new OtpCredentials("user2", "302344");
 
     authProvider.authenticate(user2Credentials, should.asyncAssertFailure());
   }
@@ -268,9 +241,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "698956");
+    Credentials credentials = new OtpCredentials("user1", "698956");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
   }
@@ -287,9 +258,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "29403113451");
+    Credentials credentials = new OtpCredentials("user1", "29403113451");
 
     authProvider.authenticate(credentials, should.asyncAssertFailure());
   }
@@ -307,9 +276,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "738419");
+    Credentials credentials = new OtpCredentials("user1", "738419");
 
     for (int i = 0; i < 10; i++) {
       int finalI = i;
@@ -337,9 +304,7 @@ public class HotpAuthTest {
       .authenticatorFetcher(db::fetch)
       .authenticatorUpdater(db::upsert);
 
-    JsonObject credentials = new JsonObject()
-      .put("identifier", "user1")
-      .put("code", "203646");
+    Credentials credentials = new OtpCredentials("user1", "203646");
 
     authProvider.authenticate(credentials, should.asyncAssertSuccess(res -> {
       long counter = res.get("counter");

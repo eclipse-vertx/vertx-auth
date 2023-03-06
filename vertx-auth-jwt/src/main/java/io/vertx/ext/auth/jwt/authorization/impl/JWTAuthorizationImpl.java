@@ -16,9 +16,7 @@
 package io.vertx.ext.auth.jwt.authorization.impl;
 
 import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -41,12 +39,6 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
   @Override
   public String getId() {
     return "jwt";
-  }
-
-  @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizations(user)
-      .onComplete(handler);
   }
 
   @Override

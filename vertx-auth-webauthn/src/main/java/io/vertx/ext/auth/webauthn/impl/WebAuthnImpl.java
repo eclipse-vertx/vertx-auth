@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth.webauthn.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -27,6 +26,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.cose.CWK;
 import io.vertx.ext.auth.impl.jose.JWK;
@@ -174,7 +174,6 @@ public class WebAuthnImpl implements WebAuthn {
         // put non null values for RelyingParty
         putOpt(json.getJsonObject("rp"), "id", options.getRelyingParty().getId());
         putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
-        putOpt(json.getJsonObject("rp"), "icon", options.getRelyingParty().getIcon());
 
         // put non null values for User
         putOpt(json.getJsonObject("user"), "id", uUIDtoBase64Url(UUID.randomUUID()));
@@ -283,21 +282,15 @@ public class WebAuthnImpl implements WebAuthn {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-    return authenticate(new WebAuthnCredentials(authInfo));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     try {
       // cast
-      WebAuthnCredentials authInfo = (WebAuthnCredentials) credentials;
+      WebAuthnCredentials authInfo;
+      try {
+        authInfo = (WebAuthnCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       // check
       authInfo.checkValid(null);
       // The basic data supplied with any kind of validation is:
@@ -458,7 +451,7 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Verify credentials creation from client
    *
-   * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
+   * @param request        - The request as received by the {@link #authenticate(Credentials)} method.
    * @param clientDataJSON - Binary session data
    */
   private Authenticator verifyWebAuthNCreate(WebAuthnCredentials request, byte[] clientDataJSON) throws AttestationException, IOException, NoSuchAlgorithmException {
@@ -559,7 +552,7 @@ public class WebAuthnImpl implements WebAuthn {
   /**
    * Verify navigator.credentials.get response
    *
-   * @param request        - The request as received by the {@link #authenticate(Credentials, Handler)} method.
+   * @param request        - The request as received by the {@link #authenticate(Credentials)} method.
    * @param clientDataJSON - The extracted clientDataJSON
    * @param credential     - Credential from Database
    */

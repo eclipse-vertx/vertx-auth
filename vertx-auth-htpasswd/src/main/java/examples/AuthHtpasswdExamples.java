@@ -17,7 +17,8 @@
 package examples;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 
@@ -32,9 +33,8 @@ public class AuthHtpasswdExamples {
   }
 
   public void example2(HtpasswdAuth authProvider) {
-    JsonObject authInfo = new JsonObject()
-      .put("username", "someUser")
-      .put("password", "somePassword");
+    Credentials authInfo = new UsernamePasswordCredentials(
+      "someUser", "somePassword");
 
     authProvider.authenticate(authInfo)
       .onSuccess(user -> {

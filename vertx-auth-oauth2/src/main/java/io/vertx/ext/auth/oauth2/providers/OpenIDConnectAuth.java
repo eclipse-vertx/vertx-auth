@@ -18,7 +18,6 @@ package io.vertx.ext.auth.oauth2.providers;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
@@ -156,14 +155,10 @@ public interface OpenIDConnectAuth {
         // reset config
         config.setSupportedGrantTypes(null);
 
-        if (json.containsKey("grant_types_supported") && config.getFlow() != null) {
+        if (json.containsKey("grant_types_supported")) {
           // optional config
           JsonArray flows = json.getJsonArray("grant_types_supported");
           flows.forEach(el -> config.addSupportedGrantType((String) el));
-
-          if (!flows.contains(config.getFlow().getGrantType())) {
-            return Future.failedFuture("unsupported flow: " + config.getFlow().getGrantType() + ", allowed: " + flows);
-          }
         }
 
         try {

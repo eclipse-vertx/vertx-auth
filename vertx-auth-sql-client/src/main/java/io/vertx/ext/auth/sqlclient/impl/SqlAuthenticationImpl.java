@@ -20,12 +20,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.HashingStrategy;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.sqlclient.SqlAuthentication;
@@ -49,22 +47,15 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
   }
 
   @Override
-  public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  @Override
-  public Future<User> authenticate(JsonObject authInfo) {
-    return authenticate(new UsernamePasswordCredentials(authInfo));
-  }
-
-  @Override
   public Future<User> authenticate(Credentials credentials) {
     final UsernamePasswordCredentials authInfo;
 
     try {
-      authInfo = (UsernamePasswordCredentials) credentials;
+      try {
+        authInfo = (UsernamePasswordCredentials) credentials;
+      } catch (ClassCastException e) {
+        throw new CredentialValidationException("Invalid credentials type", e);
+      }
       authInfo.checkValid(null);
     } catch (RuntimeException e) {
       return Future.failedFuture(e);

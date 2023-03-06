@@ -20,11 +20,6 @@ public class RelyingPartyConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, RelyingParty obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "icon":
-          if (member.getValue() instanceof String) {
-            obj.setIcon((String)member.getValue());
-          }
-          break;
         case "id":
           if (member.getValue() instanceof String) {
             obj.setId((String)member.getValue());
@@ -44,9 +39,6 @@ public class RelyingPartyConverter {
   }
 
   public static void toJson(RelyingParty obj, java.util.Map<String, Object> json) {
-    if (obj.getIcon() != null) {
-      json.put("icon", obj.getIcon());
-    }
     if (obj.getId() != null) {
       json.put("id", obj.getId());
     }

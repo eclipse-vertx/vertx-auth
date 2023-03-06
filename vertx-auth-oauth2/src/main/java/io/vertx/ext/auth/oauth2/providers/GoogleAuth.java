@@ -22,7 +22,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.JWTOptions;
 
 /**
@@ -54,7 +53,6 @@ public interface GoogleAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setFlow(OAuth2FlowType.AUTH_CODE)
         .setClientId(clientId)
         .setClientSecret(clientSecret)
         .setSite("https://accounts.google.com")
@@ -130,7 +128,6 @@ public interface GoogleAuth extends OpenIDConnectAuth {
     return
       OAuth2Auth.create(vertx, new OAuth2Options()
         .setHttpClientOptions(httpClientOptions)
-        .setFlow(OAuth2FlowType.AUTH_JWT)
         .setClientId(serviceAccountJson.getString("client_id"))
         .setSite("https://accounts.google.com")
         .setTokenPath(serviceAccountJson.getString("token_uri"))
