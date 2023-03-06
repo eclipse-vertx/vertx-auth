@@ -110,9 +110,7 @@ public class MetaDataServiceImpl implements MetaDataService {
             final List<Future> futures = new ArrayList<>(entries.size());
             final String e = error;
 
-            entries.forEach(el -> {
-              futures.add(addEntry(e, (JsonObject) el));
-            });
+            entries.forEach(el -> futures.add(addEntry(e, (JsonObject) el)));
 
             return CompositeFuture
               .all(futures)

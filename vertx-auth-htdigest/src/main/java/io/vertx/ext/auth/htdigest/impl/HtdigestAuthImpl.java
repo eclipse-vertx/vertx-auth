@@ -144,7 +144,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
       digest = md5(ha1 + ":" + authInfo.getNonce() + ":" + authInfo.getNc() + ":" + authInfo.getCnonce() + ":" + authInfo.getQop() + ":" + ha2);
     }
 
-    if (digest.equals(authInfo.getResponse())) {
+    if (isEqual(digest, authInfo.getResponse())) {
       User user = User.create(new JsonObject().put("username", credential.username).put("realm", credential.realm));
       // metadata "amr"
       user.principal().put("amr", Collections.singletonList("pwd"));
@@ -158,5 +158,27 @@ public class HtdigestAuthImpl implements HtdigestAuth {
   private static synchronized String md5(String payload) {
     MD5.reset();
     return base16Encode(MD5.digest(payload.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  private static boolean isEqual(String digesta, String digestb) {
+    if (digesta != null && digestb != null) {
+      int lenA = digesta.length();
+      int lenB = digestb.length();
+      if (lenB == 0) {
+        return lenA == 0;
+      } else {
+        int result = 0;
+        result |= lenA - lenB;
+
+        for(int i = 0; i < lenA; ++i) {
+          int indexB = (i - lenB >>> 31) * i;
+          result |= digesta.charAt(i) ^ digestb.charAt(indexB);
+        }
+
+        return result == 0;
+      }
+    } else {
+      return false;
+    }
   }
 }

@@ -146,9 +146,7 @@ public class OAuth2API {
     }
 
     if (query.containsKey("additionalParameters")) {
-      query.getJsonObject("additionalParameters").forEach(entry -> {
-        query.put(entry.getKey(), entry.getValue());
-      });
+      query.getJsonObject("additionalParameters").forEach(entry -> query.put(entry.getKey(), entry.getValue()));
       query.remove("additionalParameters");
     }
 

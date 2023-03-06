@@ -53,7 +53,7 @@ public class AuthOAuth2Examples {
 
     String authorization_uri = oauth2.authorizeURL(new OAuth2AuthorizationURL()
       .setRedirectUri("http://localhost:8080/callback")
-      .setScopes(Arrays.asList("notifications"))
+      .addScope("notifications")
       .setState("3(#0/!~"));
 
     // when working with web application use the above string as a redirect url
@@ -91,7 +91,7 @@ public class AuthOAuth2Examples {
     // Authorization oauth2 URI
     String authorization_uri = oauth2.authorizeURL(new OAuth2AuthorizationURL()
       .setRedirectUri("http://localhost:8080/callback")
-      .setScopes(Arrays.asList("<scope>"))
+      .addScope("<scope>")
       .setState("<state>"));
 
     // Redirect example using Vert.x

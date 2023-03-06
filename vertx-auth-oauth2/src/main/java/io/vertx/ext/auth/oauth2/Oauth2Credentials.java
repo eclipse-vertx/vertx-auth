@@ -21,7 +21,6 @@ import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -153,10 +152,6 @@ public class Oauth2Credentials implements Credentials {
 
   @Override
   public <V> void checkValid(V arg) throws CredentialValidationException {
-    List<String> supported = Collections.emptyList();
-    if (arg != null) {
-      supported = (List<String>) arg;
-    }
     if (flow == null) {
       throw new CredentialValidationException("flow cannot be null");
     }
