@@ -50,6 +50,11 @@ public class WebAuthnOptionsConverter {
             obj.setPubKeyCredParams(list);
           }
           break;
+        case "relaxedSafetyNetIntegrityVeridict":
+          if (member.getValue() instanceof Boolean) {
+            obj.setRelaxedSafetyNetIntegrityVeridict((Boolean)member.getValue());
+          }
+          break;
         case "relyingParty":
           if (member.getValue() instanceof JsonObject) {
             obj.setRelyingParty(new io.vertx.ext.auth.webauthn.RelyingParty((io.vertx.core.json.JsonObject)member.getValue()));
@@ -124,6 +129,7 @@ public class WebAuthnOptionsConverter {
       obj.getPubKeyCredParams().forEach(item -> array.add(item.name()));
       json.put("pubKeyCredParams", array);
     }
+    json.put("relaxedSafetyNetIntegrityVeridict", obj.isRelaxedSafetyNetIntegrityVeridict());
     if (obj.getRelyingParty() != null) {
       json.put("relyingParty", obj.getRelyingParty().toJson());
     }

@@ -173,20 +173,20 @@ public final class JWT {
       .put("signature", signatureSeg);
   }
 
-  public JsonObject decode(final String token) {
+  public JsonObject decode(final String token) throws SignatureException {
     return decode(token, false, null);
   }
 
-  public JsonObject decode(final String token, List<X509CRL> crls) {
+  public JsonObject decode(final String token, List<X509CRL> crls) throws SignatureException {
     return decode(token, false, crls);
   }
 
-  public JsonObject decode(final String token, boolean full, List<X509CRL> crls) {
+  public JsonObject decode(final String token, boolean full, List<X509CRL> crls) throws SignatureException {
     // lock the secure state
     String[] segments = token.split("\\.");
 
     if (segments.length < 2) {
-      throw new IllegalStateException("Invalid format for JWT");
+      throw new IllegalArgumentException("Invalid format for JWT");
     }
 
     // All segment should be base64
@@ -230,7 +230,7 @@ public final class JWT {
     if (allowEmbeddedKey && header.containsKey("x5c")) {
       // if signatureSeg is null fail
       if (signatureSeg == null) {
-        throw new IllegalStateException("missing signature segment");
+        throw new SignatureException("missing signature segment");
       }
 
       try {
@@ -238,7 +238,7 @@ public final class JWT {
         List<X509Certificate> certChain = new ArrayList<>();
 
         if (chain == null || chain.size() == 0) {
-          throw new IllegalStateException("x5c chain is null or empty");
+          throw new IllegalArgumentException("x5c chain is null or empty");
         }
 
         for (int i = 0; i < chain.size(); i++) {
@@ -261,11 +261,10 @@ public final class JWT {
           // ok
           return full ? new JsonObject().put("header", header).put("payload", payload) : payload;
         } else {
-          throw new RuntimeException("Signature verification failed");
+          throw new SignatureException("Signature verification failed");
         }
-      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException |
-               InvalidAlgorithmParameterException | NoSuchProviderException e) {
-        throw new RuntimeException("Signature verification failed", e);
+      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+        throw new SignatureException("Signature verification failed", e);
       }
     }
 
@@ -279,7 +278,7 @@ public final class JWT {
 
       // if signatureSeg is null fail
       if (signatureSeg == null) {
-        throw new IllegalStateException("missing signature segment");
+        throw new SignatureException("missing signature segment");
       }
       byte[] payloadInput = base64UrlDecode(signatureSeg);
       if (nonceDigest != null && header.containsKey("nonce")) {
@@ -310,7 +309,7 @@ public final class JWT {
       }
 
       if (hasKey) {
-        throw new RuntimeException("Signature verification failed");
+        throw new SignatureException("Signature verification failed");
       } else {
         throw new NoSuchKeyIdException(alg, kid);
       }

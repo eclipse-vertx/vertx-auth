@@ -20,6 +20,7 @@ import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
@@ -34,7 +35,8 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.oauth2.*;
 
-import java.util.List;
+import java.security.SignatureException;
+import java.util.Collections;
 
 import static java.lang.Math.max;
 
@@ -72,7 +74,21 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
-        jwt.addJWK(new JWK(pubSecKey));
+        try {
+          jwt.addJWK(new JWK(pubSecKey));
+        } catch (RuntimeException e) {
+          LOG.warn("Unsupported JWK", e);
+        }
+      }
+    }
+
+    if (config.getJwks() != null) {
+      for (JsonObject jwk : config.getJwks()) {
+        try {
+          jwt.addJWK(new JWK(jwk));
+        } catch (RuntimeException e) {
+          LOG.warn("Unsupported JWK", e);
+        }
       }
     }
   }
@@ -259,8 +275,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               // attempt to create a user from the json object
               final User newUser = createUser(
                 new JsonObject()
-                  .put("access_token", tokenCredentials.getToken())
-                , user.attributes().containsKey("missing-kid"));
+                  .put("access_token", tokenCredentials.getToken()),
+                user.attributes().containsKey("missing-kid"));
 
               // replace the user info with the user attributes
               newUser.attributes().put("idToken", json);
@@ -303,7 +319,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             }
 
             // attempt to create a user from the json object
-            final User newUser = createUser(json, user.attributes().containsKey("missing-kid"));
+            final User newUser = createUser(
+              json,
+              user.attributes().containsKey("missing-kid"));
 
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
@@ -390,7 +408,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
       return api.token(flow.getGrantType(), params)
         .compose(json -> {
           // attempt to create a user from the json object
-          final User newUser = createUser(json, false);
+          final User newUser = createUser(
+            json,
+            false);
+
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
@@ -423,7 +444,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           .put("refresh_token", user.principal().getString("refresh_token")))
       .compose(json -> {
         // attempt to create a user from the json object
-        final User newUser = createUser(json, false);
+        final User newUser = createUser(
+          json,
+          false);
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (newUser.expired(config.getJWTOptions().getLeeway())) {
@@ -517,6 +540,10 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           user.attributes()
             .put("rootClaim", "accessToken");
 
+        } catch (SignatureException | IllegalArgumentException e) {
+          // mark the token as opaque
+          user.principal()
+            .put("opaque", true);
         } catch (NoSuchKeyIdException e) {
           if (!skipMissingKeyNotify) {
             // tag the user attributes that we don't have the required key too
@@ -572,7 +599,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               }
             }
           }
-        } catch (DecodeException | IllegalStateException e) {
+        } catch (SignatureException | DecodeException | IllegalArgumentException | IllegalStateException e) {
           // explicitly catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
           // or invalid JWT key setup, in that case we fall back to opaque token
@@ -615,11 +642,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           throw new IllegalStateException("Invalid JWT audience. expected: " + config.getClientId());
         }
       } else {
-        final List<String> aud = jwtOptions.getAudience();
-        for (String el : aud) {
-          if (!target.contains(el)) {
-            throw new IllegalStateException("Invalid JWT audience. expected: " + el);
-          }
+        if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
+          throw new IllegalStateException("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
         }
       }
     }

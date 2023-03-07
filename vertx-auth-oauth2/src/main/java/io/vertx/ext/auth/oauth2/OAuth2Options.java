@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.impl.logging.Logger;
@@ -87,6 +88,7 @@ public class OAuth2Options {
   private JsonObject extraParams;
   // client config
   private HttpClientOptions httpClientOptions = new HttpClientOptions();
+  private List<JsonObject> jwks;
 
   public String getSite() {
     return site;
@@ -147,6 +149,12 @@ public class OAuth2Options {
     httpClientOptions = other.getHttpClientOptions();
     userAgent = other.getUserAgent();
     supportedGrantTypes = other.getSupportedGrantTypes();
+    final List<JsonObject> jwks = other.getJwks();
+    if (jwks != null) {
+      this.jwks = new ArrayList<>(jwks);
+    } else {
+      this.jwks = null;
+    }
     // compute paths with variables, at this moment it is only relevant that
     // the paths and site are properly computed
     replaceVariables(false);
@@ -666,5 +674,35 @@ public class OAuth2Options {
    */
   public void setJwkMaxAgeInSeconds(long jwkMaxAgeInSeconds) {
     this.jwkMaxAge = jwkMaxAgeInSeconds;
+  }
+
+  public List<JsonObject> getJwks() {
+    return jwks;
+  }
+
+  /**
+   * Sets the initial local JWKs
+   * @param jwks a json array as defined in https://tools.ietf.org/html/rfc7517#section-5
+   * @return self
+   */
+  @Fluent
+  public OAuth2Options setJwks(List<JsonObject> jwks) {
+    this.jwks = jwks;
+    return this;
+  }
+
+  /**
+   * Adds a local JWKs
+   * @param jwk a single keyas defined in https://tools.ietf.org/html/rfc7517#section-5
+   * @return self
+   */
+  @Fluent
+  public OAuth2Options addJwk(JsonObject jwk) {
+    if (this.jwks == null) {
+      this.jwks = new ArrayList<>();
+    }
+
+    this.jwks.add(jwk);
+    return this;
   }
 }
