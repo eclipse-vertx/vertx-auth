@@ -143,7 +143,7 @@ public class JWKTest {
     try {
       jwt.decode("eyJhbGciOiJSUzI1NiIsImtpZCI6Ijc0MjQzMGI2ZDRkZjQxMzVlM2JkOTgyYWM2YmVjNDNhMTE4ODhkMWIifQ.eyJhenAiOiI1ODUyMDUyMjk1NzctZGlxZ2l1NWkwbjNoN2hzZmF0cG91MzY0OXVvaGduOWkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI1ODUyMDUyMjk1NzctZGlxZ2l1NWkwbjNoN2hzZmF0cG91MzY0OXVvaGduOWkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDI1ODI3NDEyNjA5NDc1ODQxNDQiLCJhdF9oYXNoIjoicGJWZE1Nb3l6UDl5UU9sMk54bkJDUSIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE1MDc1NzgyMDMsImV4cCI6MTUwNzU4MTgwM30.cU21Gu1jEcAONlQ0vf0ju8W7gsdyzPo-U3U6JCFaVqYqF5J2JmhCSk_-kJcY19WKyg8iwibOSNuuQE8PP0eCiIWDY-fq_3wOoO4IBUa5zlmTMNdz9Af4vH2h-optaG89tXE89J_-D2TjkKDdu1nPVLefX6E95vjb3P9LP5LfFJV53zT_deacFn4XiyCVMBl7sfNE0A6YG3PmZkVNgyIYJCv21bB5N_YtWTSEV_8YSFaJwDcEihqBGiFe3fO3k9-A237HuKevBRfo_xAyIQXnCHiLg8eETGTK3sfRh_ugxMI0jvgt4hBZQTioGjnaMRmQxaiJ_3IOrpSJeMu_JIg8-g");
       fail("Should not decode because the certificates are expired");
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       // OK
     }
   }
@@ -172,7 +172,7 @@ public class JWKTest {
   }
 
   @Test
-  public void loadAzure() {
+  public void loadAzure() throws Exception {
     Vertx vertx = Vertx.vertx();
     JsonObject azure = new JsonObject(vertx.fileSystem()
       .readFileBlocking("azure.json"));
@@ -210,7 +210,7 @@ public class JWKTest {
   }
 
   @Test
-  public void testOKP() {
+  public void testOKP() throws Exception {
     assumeTrue("JVM doesn't support EdDSA", getVersion() >= 15);
     JsonObject jwk = new JsonObject()
       .put("kty", "OKP")
@@ -229,7 +229,7 @@ public class JWKTest {
   }
 
   @Test
-  public void testOKPInterop() {
+  public void testOKPInterop() throws Exception {
     assumeTrue("JVM doesn't support EdDSA", getVersion() >= 15);
 
     // this key and token were generated from
@@ -270,7 +270,7 @@ public class JWKTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void publicECKSignZero() {
+  public void publicECKSignZero() throws Exception {
     JsonObject jwk = new JsonObject()
       .put("kty", "EC")
       .put("crv", "P-256")

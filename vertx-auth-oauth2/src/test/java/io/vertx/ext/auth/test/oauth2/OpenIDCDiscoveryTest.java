@@ -110,7 +110,6 @@ public class OpenIDCDiscoveryTest {
         // should merge not override!
         JWTOptions jwtOptions = config.getJWTOptions();
         should.assertEquals("api://client-id", jwtOptions.getAudience().get(0));
-        System.out.println(jwtOptions.getAudience());
         test.complete();
       });
   }

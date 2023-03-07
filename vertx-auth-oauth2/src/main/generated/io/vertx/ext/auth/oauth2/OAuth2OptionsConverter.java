@@ -75,6 +75,16 @@ public class OAuth2OptionsConverter {
             obj.setJwkPath((String)member.getValue());
           }
           break;
+        case "jwks":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<io.vertx.core.json.JsonObject> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof JsonObject)
+                list.add(((JsonObject)item).copy());
+            });
+            obj.setJwks(list);
+          }
+          break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
             obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
@@ -189,6 +199,11 @@ public class OAuth2OptionsConverter {
     json.put("jwkMaxAgeInSeconds", obj.getJwkMaxAgeInSeconds());
     if (obj.getJwkPath() != null) {
       json.put("jwkPath", obj.getJwkPath());
+    }
+    if (obj.getJwks() != null) {
+      JsonArray array = new JsonArray();
+      obj.getJwks().forEach(item -> array.add(item));
+      json.put("jwks", array);
     }
     if (obj.getJWTOptions() != null) {
       json.put("jwtOptions", obj.getJWTOptions().toJson());

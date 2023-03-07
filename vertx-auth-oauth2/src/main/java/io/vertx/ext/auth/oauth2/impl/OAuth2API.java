@@ -30,6 +30,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -389,7 +390,7 @@ public class OAuth2API {
           try {
             // userInfo is expected to be a JWT
             userInfo = jwt.decode(body.toString(StandardCharsets.UTF_8));
-          } catch (RuntimeException e) {
+          } catch (SignatureException | RuntimeException e) {
             return Future.failedFuture(e);
           }
         } else if (reply.is("application/x-www-form-urlencoded") || reply.is("text/plain")) {
