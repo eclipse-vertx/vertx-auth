@@ -91,10 +91,19 @@ public class AndroidSafetynetAttestation implements Attestation {
       if (!MessageDigest.isEqual(hash("SHA-256", nonceBase.getBytes()), base64Decode(token.getJsonObject("payload").getString("nonce")))) {
         throw new AttestationException("JWS nonce does not contains expected nonce!");
       }
-      // 5. Check that “ctsProfileMatch” is set to true. If its not set to true, that means that device has been rooted
-      // and so can not be trusted to provide trustworthy attestation.
-      if (!token.getJsonObject("payload").getBoolean("ctsProfileMatch")) {
-        throw new AttestationException("JWS ctsProfileMatch is false!");
+      // 5. Check that “ctsProfileMatch/basicIntegrity” is set to true. If its not set to true, that means that device
+      // has been rooted and so can not be trusted to provide trustworthy attestation.
+      final String integrityVeridict = options.isRelaxedSafetyNetIntegrityVeridict() ?
+        "basicIntegrity" : "ctsProfileMatch";
+
+      if (!token
+        .getJsonObject("payload")
+        .getBoolean(
+          // if the options are relaxed we only check for basicIntegrity (meaning the device is not rooted,
+          // yet it can be running a custom ROM or the bootloader is unlocked)
+          // https://developer.android.com/training/safetynet/attestation#potential-integrity-verdicts
+          integrityVeridict, false)) {
+        throw new AttestationException("JWS " + integrityVeridict + " is false!");
       }
       // 6. Verify the timestamp
       long timestampMs = token.getJsonObject("payload").getLong("timestampMs", 0L);

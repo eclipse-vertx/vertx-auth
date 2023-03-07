@@ -204,6 +204,8 @@ public class WebAuthnOptions {
   private Map<String, X509Certificate> rootCertificates;
   private List<X509CRL> rootCrls;
 
+  private boolean relaxedSafetyNetIntegrityVeridict;
+
   public WebAuthnOptions() {
     init();
   }
@@ -467,6 +469,30 @@ public class WebAuthnOptions {
     } catch (CRLException e) {
       throw new IllegalArgumentException("Invalid root crl", e);
     }
+  }
+
+  public boolean isRelaxedSafetyNetIntegrityVeridict() {
+    return relaxedSafetyNetIntegrityVeridict;
+  }
+
+  /**
+   * Set to true to allow SafetyNet attestation with a relaxed integrity veridict.
+   *
+   * When the relaxed value is {@code true}, the SafetyNet attestation will be accepted even if:
+   *
+   * <ul>
+   *   <li>Certified, genuine device that passes CTS</li>
+   *   <li>Certified device with unlocked bootloader</li>
+   *   <li>Genuine but uncertified device, such as when the manufacturer doesn't apply for certification</li>
+   *   <li>Device with custom ROM (not rooted)</li>
+   * </ul>
+   *
+   * @param relaxedSafetyNetIntegrityVeridict {@code false} will verify {@code ctsProfileMatch}, {@code basicIntegrity} otherwise.
+   * @return self.
+   */
+  public WebAuthnOptions setRelaxedSafetyNetIntegrityVeridict(boolean relaxedSafetyNetIntegrityVeridict) {
+    this.relaxedSafetyNetIntegrityVeridict = relaxedSafetyNetIntegrityVeridict;
+    return this;
   }
 
   public JsonObject toJson() {
