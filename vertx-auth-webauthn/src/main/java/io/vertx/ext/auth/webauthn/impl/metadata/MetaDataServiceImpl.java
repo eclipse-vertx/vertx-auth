@@ -200,11 +200,11 @@ public class MetaDataServiceImpl implements MetaDataService {
   }
 
   private static List<X509Certificate> parseX5c(List<String> x5c) throws CertificateException {
-    List<X509Certificate> certChain = new ArrayList<>();
-
     if (x5c == null || x5c.size() == 0) {
-      return certChain;
+      return null;
     }
+
+    List<X509Certificate> certChain = new ArrayList<>();
 
     for (String s : x5c) {
       certChain.add(JWS.parseX5c(BASE64_DECODER.decode(s)));

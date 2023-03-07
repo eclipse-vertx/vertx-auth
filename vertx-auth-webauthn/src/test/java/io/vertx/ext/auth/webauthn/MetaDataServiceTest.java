@@ -30,6 +30,20 @@ public class MetaDataServiceTest {
   }
 
   @Test
+  public void testVerifyPackedWithEmptyX5C() {
+
+    // defaults
+    MetaDataService mds = new MetaDataServiceImpl(rule.vertx(), new WebAuthnOptions());
+
+    JsonObject packed = new JsonObject(data);
+    packed.getJsonObject("attestationCertificates").remove("x5c");
+
+    Authenticator authenticator = new Authenticator(packed);
+    // doesn't throw
+    mds.verify(authenticator);
+  }
+
+  @Test
   public void testMDS3(TestContext should) {
     final Async test = should.async();
     // defaults
