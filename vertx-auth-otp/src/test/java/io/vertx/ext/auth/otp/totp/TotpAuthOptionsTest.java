@@ -19,13 +19,15 @@ public class TotpAuthOptionsTest {
       new TotpAuthOptions()
         .setPasswordLength(0);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
         .setPasswordLength(5);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
@@ -52,48 +54,56 @@ public class TotpAuthOptionsTest {
       new TotpAuthOptions()
         .setPasswordLength(9);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
         .setPasswordLength(10);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
         .setPasswordLength(Integer.MAX_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
         .setPasswordLength(Integer.MIN_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
         .setAuthAttemptsLimit(-1);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new TotpAuthOptions()
         .setAuthAttemptsLimit(Integer.MIN_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       final TotpAuthOptions hotpAuthOptions = new TotpAuthOptions()
         .setAuthAttemptsLimit(5);
       should.assertTrue(hotpAuthOptions.isUsingAttemptsLimit());
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       final TotpAuthOptions hotpAuthOptions = new TotpAuthOptions()
         .setAuthAttemptsLimit(0);
       should.assertFalse(hotpAuthOptions.isUsingAttemptsLimit());
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
   }
 }

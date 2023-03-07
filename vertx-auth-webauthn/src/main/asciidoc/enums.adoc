@@ -13,9 +13,12 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[NONE]]`NONE`|-
-|[[INDIRECT]]`INDIRECT`|-
-|[[DIRECT]]`DIRECT`|-
+|
+[[NONE]]`NONE`|-
+|
+[[INDIRECT]]`INDIRECT`|-
+|
+[[DIRECT]]`DIRECT`|-
 |===
 
 [[AuthenticatorAttachment]]
@@ -31,8 +34,10 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[PLATFORM]]`PLATFORM`|-
-|[[CROSS_PLATFORM]]`CROSS_PLATFORM`|-
+|
+[[PLATFORM]]`PLATFORM`|-
+|
+[[CROSS_PLATFORM]]`CROSS_PLATFORM`|-
 |===
 
 [[AuthenticatorTransport]]
@@ -48,10 +53,14 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[USB]]`USB`|-
-|[[NFC]]`NFC`|-
-|[[BLE]]`BLE`|-
-|[[INTERNAL]]`INTERNAL`|-
+|
+[[USB]]`USB`|-
+|
+[[NFC]]`NFC`|-
+|
+[[BLE]]`BLE`|-
+|
+[[INTERNAL]]`INTERNAL`|-
 |===
 
 [[PublicKeyCredential]]
@@ -67,18 +76,30 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[ES256]]`ES256`|-
-|[[ES384]]`ES384`|-
-|[[ES512]]`ES512`|-
-|[[PS256]]`PS256`|-
-|[[PS384]]`PS384`|-
-|[[PS512]]`PS512`|-
-|[[ES256K]]`ES256K`|-
-|[[RS256]]`RS256`|-
-|[[RS384]]`RS384`|-
-|[[RS512]]`RS512`|-
-|[[RS1]]`RS1`|-
-|[[EdDSA]]`EdDSA`|-
+|
+[[ES256]]`ES256`|-
+|
+[[ES384]]`ES384`|-
+|
+[[ES512]]`ES512`|-
+|
+[[PS256]]`PS256`|-
+|
+[[PS384]]`PS384`|-
+|
+[[PS512]]`PS512`|-
+|
+[[ES256K]]`ES256K`|-
+|
+[[RS256]]`RS256`|-
+|
+[[RS384]]`RS384`|-
+|
+[[RS512]]`RS512`|-
+|
+[[RS1]]`RS1`|-
+|
+[[EdDSA]]`EdDSA`|-
 |===
 
 [[UserVerification]]
@@ -94,8 +115,11 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[REQUIRED]]`REQUIRED`|-
-|[[PREFERRED]]`PREFERRED`|-
-|[[DISCOURAGED]]`DISCOURAGED`|-
+|
+[[REQUIRED]]`REQUIRED`|-
+|
+[[PREFERRED]]`PREFERRED`|-
+|
+[[DISCOURAGED]]`DISCOURAGED`|-
 |===
 

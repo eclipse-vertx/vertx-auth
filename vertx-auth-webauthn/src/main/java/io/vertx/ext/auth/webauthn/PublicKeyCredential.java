@@ -34,8 +34,7 @@ public enum PublicKeyCredential {
   RS384(-258),
   RS512(-259),
   RS1(-65535),
-  EdDSA(-8)
-  ;
+  EdDSA(-8);
 
   private final int coseId;
 

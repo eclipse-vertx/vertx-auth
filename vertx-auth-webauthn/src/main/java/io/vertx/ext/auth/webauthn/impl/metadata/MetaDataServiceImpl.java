@@ -20,9 +20,15 @@ import io.vertx.ext.auth.webauthn.MetaDataService;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.attestation.AttestationException;
 
-import java.security.*;
-import java.security.cert.*;
-import java.util.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.vertx.core.json.impl.JsonUtil.BASE64_DECODER;
 import static io.vertx.ext.auth.impl.Codec.base64Decode;
@@ -86,7 +92,8 @@ public class MetaDataServiceImpl implements MetaDataService {
 
           payload = json.getJsonObject("payload");
 
-        } catch (RuntimeException | CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchProviderException e) {
+        } catch (RuntimeException | CertificateException | NoSuchAlgorithmException | InvalidKeyException |
+                 SignatureException | NoSuchProviderException e) {
           // the toc signature is not valid.
           // decode it anyway but don't trust any of it's entries
           try {
@@ -186,7 +193,8 @@ public class MetaDataServiceImpl implements MetaDataService {
         authenticator.getAttestationCertificates().getAlg(),
         parseX5c(authenticator.getAttestationCertificates().getX5c()),
         includesRoot);
-    } catch (SignatureException | AttestationException | NoSuchAlgorithmException | CertificateException | MetaDataException | InvalidKeyException | NoSuchProviderException e) {
+    } catch (SignatureException | AttestationException | NoSuchAlgorithmException | CertificateException |
+             MetaDataException | InvalidKeyException | NoSuchProviderException e) {
       throw new RuntimeException(e);
     }
   }

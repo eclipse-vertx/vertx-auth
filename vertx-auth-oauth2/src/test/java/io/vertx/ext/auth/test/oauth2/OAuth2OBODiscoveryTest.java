@@ -30,7 +30,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2OBODiscoveryTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -48,14 +48,14 @@ public class OAuth2OBODiscoveryTest {
 
     // mock AzureAD
     AzureADAuth.discover(
-      rule.vertx(),
-      new OAuth2Options()
-        .setClientId("client-id")
-        .setClientSecret("client-secret")
-        .setTenant("common")
-        .setJWTOptions(
-          new JWTOptions()
-            .addAudience("api://resource")))
+        rule.vertx(),
+        new OAuth2Options()
+          .setClientId("client-id")
+          .setClientSecret("client-secret")
+          .setTenant("common")
+          .setJWTOptions(
+            new JWTOptions()
+              .addAudience("api://resource")))
 
       .onFailure(should::fail)
       .onSuccess(oauth2 -> {
@@ -110,53 +110,55 @@ public class OAuth2OBODiscoveryTest {
     final Async test = should.async();
 
     // Given that we want to trade an existing token for a new one (On-Behalf-Of) we **must** user OAuth2Credentials
-    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AAD_OBO).setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AAD_OBO).setAssertion("head.body.signature").addScope("a").addScope("b"))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
 
-        // mock the token
-        // with a dump from the official docs:
-        token.attributes()
-          .put("accessToken", new JsonObject(
-            "{\n" +
-            "  \"aud\": \"ef1da9d4-ff77-4c3e-a005-840c3f830745\",\n" +
-            "  \"iss\": \"https://sts.windows.net/fa15d692-e9c7-4460-a743-29f29522229/\",\n" +
-            "  \"iat\": 1537233106,\n" +
-            "  \"nbf\": 1537233106,\n" +
-            "  \"exp\": 1537237006,\n" +
-            "  \"acr\": \"1\",\n" +
-            "  \"aio\": \"AXQAi/8IAAAAFm+E/QTG+gFnVxLjWdw8K+61AGrSOuMMF6ebaMj7XO3IbmD3fGmrOyD+NvZyGn2VaT/kDKXw4MIhrgGVq6Bn8wLXoT1LkIZ+FzQVkJPPLQOV4KcXqSlCVPDS/DiCDgE222TImMvWNaEMaUOTsIGvTQ==\",\n" +
-            "  \"amr\": [\n" +
-            "    \"wia\"\n" +
-            "  ],\n" +
-            "  \"appid\": \"75dbe77f-10a3-4e59-85fd-8c127544f17c\",\n" +
-            "  \"appidacr\": \"0\",\n" +
-            "  \"email\": \"AbeLi@microsoft.com\",\n" +
-            "  \"family_name\": \"Lincoln\",\n" +
-            "  \"given_name\": \"Abe (MSFT)\",\n" +
-            "  \"idp\": \"https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd0122247/\",\n" +
-            "  \"ipaddr\": \"222.222.222.22\",\n" +
-            "  \"name\": \"abeli\",\n" +
-            "  \"oid\": \"02223b6b-aa1d-42d4-9ec0-1b2bb9194438\",\n" +
-            "  \"rh\": \"I\",\n" +
-            "  \"scp\": \"user_impersonation\",\n" +
-            "  \"sub\": \"l3_roISQU222bULS9yi2k0XpqpOiMz5H3ZACo1GeXA\",\n" +
-            "  \"tid\": \"fa15d692-e9c7-4460-a743-29f2956fd429\",\n" +
-            "  \"unique_name\": \"abeli@microsoft.com\",\n" +
-            "  \"uti\": \"FVsGxYXI30-TuikuuUoFAA\",\n" +
-            "  \"ver\": \"1.0\"\n" +
-            "}"));
+          // mock the token
+          // with a dump from the official docs:
+          token.attributes()
+            .put("accessToken", new JsonObject(
+              "{\n" +
+                "  \"aud\": \"ef1da9d4-ff77-4c3e-a005-840c3f830745\",\n" +
+                "  \"iss\": \"https://sts.windows.net/fa15d692-e9c7-4460-a743-29f29522229/\",\n" +
+                "  \"iat\": 1537233106,\n" +
+                "  \"nbf\": 1537233106,\n" +
+                "  \"exp\": 1537237006,\n" +
+                "  \"acr\": \"1\",\n" +
+                "  \"aio\": \"AXQAi/8IAAAAFm+E/QTG+gFnVxLjWdw8K+61AGrSOuMMF6ebaMj7XO3IbmD3fGmrOyD+NvZyGn2VaT/kDKXw4MIhrgGVq6Bn8wLXoT1LkIZ+FzQVkJPPLQOV4KcXqSlCVPDS/DiCDgE222TImMvWNaEMaUOTsIGvTQ==\",\n" +
+                "  \"amr\": [\n" +
+                "    \"wia\"\n" +
+                "  ],\n" +
+                "  \"appid\": \"75dbe77f-10a3-4e59-85fd-8c127544f17c\",\n" +
+                "  \"appidacr\": \"0\",\n" +
+                "  \"email\": \"AbeLi@microsoft.com\",\n" +
+                "  \"family_name\": \"Lincoln\",\n" +
+                "  \"given_name\": \"Abe (MSFT)\",\n" +
+                "  \"idp\": \"https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd0122247/\",\n" +
+                "  \"ipaddr\": \"222.222.222.22\",\n" +
+                "  \"name\": \"abeli\",\n" +
+                "  \"oid\": \"02223b6b-aa1d-42d4-9ec0-1b2bb9194438\",\n" +
+                "  \"rh\": \"I\",\n" +
+                "  \"scp\": \"user_impersonation\",\n" +
+                "  \"sub\": \"l3_roISQU222bULS9yi2k0XpqpOiMz5H3ZACo1GeXA\",\n" +
+                "  \"tid\": \"fa15d692-e9c7-4460-a743-29f2956fd429\",\n" +
+                "  \"unique_name\": \"abeli@microsoft.com\",\n" +
+                "  \"uti\": \"FVsGxYXI30-TuikuuUoFAA\",\n" +
+                "  \"ver\": \"1.0\"\n" +
+                "}"));
 
-        ScopeAuthorization.create(" ", "scp").getAuthorizations(token, authz1 -> {
-          should.assertTrue(authz1.succeeded());
-          should.assertTrue(PermissionBasedAuthorization.create("user_impersonation").match(token));
-          test.complete();
-        });
-      }
-    });
+          ScopeAuthorization.create(" ", "scp").getAuthorizations(token)
+            .onComplete(authz1 -> {
+              should.assertTrue(authz1.succeeded());
+              should.assertTrue(PermissionBasedAuthorization.create("user_impersonation").match(token));
+              test.complete();
+            });
+        }
+      });
   }
 }

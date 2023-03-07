@@ -16,8 +16,8 @@
 package io.vertx.ext.auth.oauth2.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.oauth2.authorization.impl.KeycloakAuthorizationImpl;
 
 /**

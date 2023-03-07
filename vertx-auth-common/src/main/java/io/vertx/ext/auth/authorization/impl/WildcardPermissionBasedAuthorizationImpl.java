@@ -12,13 +12,13 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.Objects;
-
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
+
+import java.util.Objects;
 
 public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermissionBasedAuthorization {
 
@@ -58,7 +58,7 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
     User user = context.user();
     if (user != null) {
       Authorization resolvedAuthorization = getResolvedAuthorization(context);
-      for (String providerId: user.authorizations().getProviderIds()) {
+      for (String providerId : user.authorizations().getProviderIds()) {
         for (Authorization authorization : user.authorizations().get(providerId)) {
           if (authorization.verify(resolvedAuthorization)) {
             return true;
@@ -79,8 +79,7 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
         }
         return getResource().equals(otherWildcardPermission.getResource());
       }
-    }
-    else if (otherAuthorization instanceof PermissionBasedAuthorization) {
+    } else if (otherAuthorization instanceof PermissionBasedAuthorization) {
       PermissionBasedAuthorization otherPermission = (PermissionBasedAuthorization) otherAuthorization;
       if (wildcardPermission.implies(otherPermission.getPermission())) {
         if (getResource() == null) {

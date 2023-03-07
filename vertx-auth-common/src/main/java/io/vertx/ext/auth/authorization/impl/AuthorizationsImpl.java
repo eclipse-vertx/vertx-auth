@@ -12,11 +12,14 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.Authorizations;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthorizationsImpl implements Authorizations {
 

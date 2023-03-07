@@ -19,7 +19,10 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * Utilities to work with Json Web Encryption. This is not fully implemented according to the RFC/spec.
@@ -58,16 +61,16 @@ public final class JWE {
   }
 
   public byte[] decrypt(byte[] payload) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-      final PrivateKey privateKey = jwk.privateKey();
-      if (privateKey == null) {
-        throw new IllegalStateException("Key doesn't contain a secKey material");
-      }
+    final PrivateKey privateKey = jwk.privateKey();
+    if (privateKey == null) {
+      throw new IllegalStateException("Key doesn't contain a secKey material");
+    }
 
-      synchronized (cipher) {
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        cipher.update(payload);
-        return cipher.doFinal();
-      }
+    synchronized (cipher) {
+      cipher.init(Cipher.DECRYPT_MODE, privateKey);
+      cipher.update(payload);
+      return cipher.doFinal();
+    }
   }
 
   public String label() {

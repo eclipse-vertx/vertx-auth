@@ -24,7 +24,6 @@ To use this project, add the following dependency to the _dependencies_ section 
 compile 'io.vertx:vertx-auth-ldap:${maven.version}'
 ----
 
-
 == Instantiation
 
 To create an instance of the Ldap auth provider, use {@link io.vertx.ext.auth.ldap.LdapAuthentication#create(io.vertx.core.Vertx, io.vertx.ext.auth.ldap.LdapAuthenticationOptions)} as follows:
@@ -33,16 +32,19 @@ To create an instance of the Ldap auth provider, use {@link io.vertx.ext.auth.ld
 
 The class {@link io.vertx.ext.auth.ldap.LdapAuthenticationOptions} is used to configure the Ldap authentication provider:
 
-`authenticationQuery`:: this query is used when looking up a user with a particular id. An example is `uid={0},ou=users,dc=foo,dc=com` - the element `{0}` is substituted with the user id to create the
-actual lookup. This setting is mandatory.
+`authenticationQuery`:: this query is used when looking up a user with a particular id.
+An example is `uid={0},ou=users,dc=foo,dc=com` - the element `{0}` is substituted with the user id to create the actual lookup.
+This setting is mandatory.
 
-`url`:: the url to the LDAP server. The url must start with `ldap://` and a port must be specified.
+`url`:: the url to the LDAP server.
+The url must start with `ldap://` and a port must be specified.
 An example is `ldap://myldapserver.mycompany.com:10389`
 
 `authenticationMechanism`:: Sets the type of LDAP authentication mechanism to use when connecting to the LDAP server.
 
-`referral`:: Sets the LDAP referral behavior when creating a connection.  Defaults to `follow`.  See the Sun/Oracle LDAP
-referral documentation for more: http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html
+`referral`:: Sets the LDAP referral behavior when creating a connection.
+Defaults to `follow`.
+See the Sun/Oracle LDAP referral documentation for more: http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html
 
 == Notes
 

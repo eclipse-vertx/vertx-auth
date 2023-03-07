@@ -125,7 +125,7 @@ public enum OAuth2FlowType {
   }
 
   public static OAuth2FlowType getFlow(String grantType) {
-    for(OAuth2FlowType flow : values()) {
+    for (OAuth2FlowType flow : values()) {
       if (flow.grantType.equals(grantType))
         return flow;
     }

@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * CBOR Object Signing and Encryption (COSE)
- *
+ * <p>
  * Concise Binary Object Representation (CBOR) is a data format designed
  * for small code size and small message size.  There is a need for the
  * ability to have basic security services defined for this data format.
@@ -34,7 +34,7 @@ import java.util.Map;
  * signatures, message authentication codes, and encryption using CBOR
  * for serialization.  This specification additionally describes how to
  * represent cryptographic keys using CBOR.
- *
+ * <p>
  * This class allows converting a COSE KEY to a JOSE KEY for ease of use.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>

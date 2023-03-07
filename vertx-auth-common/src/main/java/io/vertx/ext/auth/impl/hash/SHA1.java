@@ -28,6 +28,8 @@ public class SHA1 extends AbstractMDHash {
   }
 
   @Override
-  public String id() { return "sha1"; }
+  public String id() {
+    return "sha1";
+  }
 
 }

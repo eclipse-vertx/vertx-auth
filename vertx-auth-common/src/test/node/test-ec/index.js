@@ -2,9 +2,9 @@ var assert = require('assert');
 var fs = require('fs');
 var jwt = require('jsonwebtoken');
 
-describe('JWT', function() {
-  describe('interop', function() {
-    it('should verify a token generated from Vert.x', function() {
+describe('JWT', function () {
+  describe('interop', function () {
+    it('should verify a token generated from Vert.x', function () {
 
       // One way to create a key pair is:
       // openssl ecparam -name secp256r1 -genkey -param_enc explicit -out ecdsa-private.pem

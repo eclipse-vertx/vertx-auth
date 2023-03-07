@@ -45,13 +45,14 @@ public class MicroProfileTest {
     // assert that the user has the following roles:
     final List<String> roles = Arrays.asList("red-group", "green-group", "admin-group", "admin");
 
-    MicroProfileAuthorization.create().getAuthorizations(user, call -> {
-      should.assertTrue(call.succeeded());
-      for (String role : roles) {
-        should.assertTrue(RoleBasedAuthorization.create(role).match(user));
-      }
-      test.complete();
-    });
+    MicroProfileAuthorization.create().getAuthorizations(user)
+      .onComplete(call -> {
+        should.assertTrue(call.succeeded());
+        for (String role : roles) {
+          should.assertTrue(RoleBasedAuthorization.create(role).match(user));
+        }
+        test.complete();
+      });
   }
 
   @Test
@@ -72,10 +73,11 @@ public class MicroProfileTest {
             "      \"sub\": \"24400320\"\n" +
             "}")));
 
-    MicroProfileAuthorization.create().getAuthorizations(user, call -> {
-      should.assertTrue(call.succeeded());
-      test.complete();
-    });
+    MicroProfileAuthorization.create().getAuthorizations(user)
+      .onComplete(call -> {
+        should.assertTrue(call.succeeded());
+        test.complete();
+      });
   }
 
   @Test
@@ -98,11 +100,12 @@ public class MicroProfileTest {
             "      \"groups\": [\"red-group\", \"green-group\", \"admin-group\", \"admin\"]\n" +
             "}")));
 
-    MicroProfileAuthorization.create().getAuthorizations(user, call -> {
-      should.assertTrue(call.succeeded());
-      should.assertFalse(user.authorizations().getProviderIds().isEmpty());
-      should.assertFalse(RoleBasedAuthorization.create("unknown").match(user));
-      test.complete();
-    });
+    MicroProfileAuthorization.create().getAuthorizations(user)
+      .onComplete(call -> {
+        should.assertTrue(call.succeeded());
+        should.assertFalse(user.authorizations().getProviderIds().isEmpty());
+        should.assertFalse(RoleBasedAuthorization.create("unknown").match(user));
+        test.complete();
+      });
   }
 }

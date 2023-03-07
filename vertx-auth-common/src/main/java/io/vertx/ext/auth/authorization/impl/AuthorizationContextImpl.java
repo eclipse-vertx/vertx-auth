@@ -12,11 +12,11 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.Objects;
-
 import io.vertx.core.MultiMap;
-import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+
+import java.util.Objects;
 
 public class AuthorizationContextImpl implements AuthorizationContext {
 

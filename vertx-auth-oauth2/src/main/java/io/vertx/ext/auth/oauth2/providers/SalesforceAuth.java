@@ -16,7 +16,10 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -84,10 +87,10 @@ public interface SalesforceAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see SalesforceAuth#discover(Vertx, OAuth2Options, Handler)
-   * @param vertx   the vertx instance
-   * @param config  the initial config
+   * @param vertx  the vertx instance
+   * @param config the initial config
    * @return future with the instantiated Oauth2 provider instance handler
+   * @see SalesforceAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     // don't override if already set

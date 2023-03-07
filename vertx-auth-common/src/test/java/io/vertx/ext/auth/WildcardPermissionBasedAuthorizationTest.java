@@ -17,31 +17,31 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
+import io.vertx.ext.auth.authorization.impl.WildcardPermissionBasedAuthorizationConverter;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
-
-import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
-import io.vertx.ext.auth.authorization.impl.WildcardPermissionBasedAuthorizationConverter;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 public class WildcardPermissionBasedAuthorizationTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void testConverter() {
     TestUtils.testJsonCodec(WildcardPermissionBasedAuthorization.create("wp1"),
-        WildcardPermissionBasedAuthorizationConverter::encode, WildcardPermissionBasedAuthorizationConverter::decode);
+      WildcardPermissionBasedAuthorizationConverter::encode, WildcardPermissionBasedAuthorizationConverter::decode);
     TestUtils.testJsonCodec(WildcardPermissionBasedAuthorization.create("wp1").setResource("resource"),
-        WildcardPermissionBasedAuthorizationConverter::encode, WildcardPermissionBasedAuthorizationConverter::decode);
+      WildcardPermissionBasedAuthorizationConverter::encode, WildcardPermissionBasedAuthorizationConverter::decode);
   }
 
   @Test

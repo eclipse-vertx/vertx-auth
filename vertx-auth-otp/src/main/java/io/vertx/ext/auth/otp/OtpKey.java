@@ -29,7 +29,8 @@ public class OtpKey {
   private String key;
   private String algorithm;
 
-  public OtpKey() {}
+  public OtpKey() {
+  }
 
   public OtpKey(OtpKey other) {
     this.key = other.key;

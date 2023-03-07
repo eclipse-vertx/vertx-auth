@@ -17,7 +17,6 @@
 package io.vertx.ext.auth.webauthn.impl;
 
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.logging.Logger;
@@ -376,7 +375,7 @@ public class WebAuthnImpl implements WebAuthn {
 
             // the create challenge is complete we can finally safe this
             // new authenticator to the storage
-           return updater.apply(authrInfo)
+            return updater.apply(authrInfo)
               .compose(stored -> {
                 User user = User.create(authrInfo.toJson());
                 // metadata "amr"

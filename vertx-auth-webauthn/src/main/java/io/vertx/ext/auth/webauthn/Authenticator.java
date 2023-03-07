@@ -76,7 +76,9 @@ public class Authenticator {
 
   private int flags;
 
-  public Authenticator() {}
+  public Authenticator() {
+  }
+
   public Authenticator(JsonObject json) {
     AuthenticatorConverter.fromJson(json, this);
   }

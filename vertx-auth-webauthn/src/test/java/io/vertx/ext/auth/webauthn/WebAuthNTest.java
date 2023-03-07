@@ -25,7 +25,7 @@ public class WebAuthNTest {
   private final DummyStore database = new DummyStore();
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Before
   public void resetDatabase() {
@@ -52,12 +52,12 @@ public class WebAuthNTest {
     final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ\",\"response\":{\"attestationObject\":\"o2NmbXRoZmlkby11MmZnYXR0U3RtdKJjc2lnWEcwRQIhAOOPecQ34VN0QW-cmj-Sft9aCahqgTlFQzbQH1LpEgrTAiBWW6KoqlKbLMtGd1Y_VcQML8eugYZcrmSSCS0of2T-M2N4NWOBWQIyMIICLjCCARigAwIBAgIECmML_zALBgkqhkiG9w0BAQswLjEsMCoGA1UEAxMjWXViaWNvIFUyRiBSb290IENBIFNlcmlhbCA0NTcyMDA2MzEwIBcNMTQwODAxMDAwMDAwWhgPMjA1MDA5MDQwMDAwMDBaMCkxJzAlBgNVBAMMHll1YmljbyBVMkYgRUUgU2VyaWFsIDE3NDI2MzI5NTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKQjZF26iyPtbNnl5IuTKs_fRWTHVzHxz1IHRRBrSbqWD60PCqUJPe4zkIRFqBa4NnzdhVcS80nlZuY3ANQm0J-jJjAkMCIGCSsGAQQBgsQKAgQVMS4zLjYuMS40LjEuNDE0ODIuMS4yMAsGCSqGSIb3DQEBCwOCAQEAZTmwMqHPxEjSB64Umwq2tGDKplAcEzrwmg6kgS8KPkJKXKSu9T1H6XBM9-LAE9cN48oUirFFmDIlTbZRXU2Vm2qO9OdrSVFY-qdbF9oti8CKAmPHuJZSW6ii7qNE59dHKUaP4lDYpnhRDqttWSUalh2LPDJQUpO9bsJPkgNZAhBUQMYZXL_MQZLRYkX-ld7llTNOX5u7n_4Y5EMr-lqOyVVC9lQ6JP6xoa9q6Zp9-Y9ZmLCecrrcuH6-pLDgAzPcc8qxhC2OR1B0ZSpI9RBgcT0KqnVE0tq1KEDeokPqF3MgmDRkJ--_a2pV0wAYfPC3tC57BtBdH_UXEB8xZVFhtGhhdXRoRGF0YVjESZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NBAAAAAAAAAAAAAAAAAAAAAAAAAAAAQL6enL6EoL01kshaZ5naZtXcIrkRL7JviqsNCbdGND0H4x7BIShPNiqJqVF6hLeckCEJfWSo-i9fu9NCxmlVDKGlAQIDJiABIVgg0TT3Vc7gnmO4ptAzJ671fahlgW8CrqgiCn_fPWFeEbciWCD9wLIGCTxTxmbe6ahfYQuboizWT7Y8u3BaYKSa6XTtxA\",\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiJQZXlodVVYaVQzeG55V1pqZWNaU1NxaFVTdUttYmZPV0dGREN0OGZDUXYwIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmNyZWF0ZSJ9\"},\"id\":\"vp6cvoSgvTWSyFpnmdpm1dwiuREvsm-Kqw0Jt0Y0PQfjHsEhKE82KompUXqEt5yQIQl9ZKj6L1-700LGaVUMoQ\",\"type\":\"public-unwrap\"}");
 
     webAuthN.authenticate(
-      new WebAuthnCredentials()
-        .setWebauthn(webauthn)
-        .setChallenge("PeyhuUXiT3xnyWZjecZSSqhUSuKmbfOWGFDCt8fCQv0")
-        .setUsername("paulo")
-        .setOrigin("http://localhost:3000")
-      , fn -> {
+        new WebAuthnCredentials()
+          .setWebauthn(webauthn)
+          .setChallenge("PeyhuUXiT3xnyWZjecZSSqhUSuKmbfOWGFDCt8fCQv0")
+          .setUsername("paulo")
+          .setOrigin("http://localhost:3000"))
+      .onComplete(fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
       });
@@ -82,11 +82,11 @@ public class WebAuthNTest {
     final JsonObject webauthn = new JsonObject("{\"getClientExtensionResults\":{},\"rawId\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"response\":{\"authenticatorData\":\"SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAAFA\",\"signature\":\"MEUCIA3bv92hSE3wNz1CNGIinx27YLJgucNnBwqjV7qWqHqiAiEAjBsxBaK2nEfCilGSZ3yzoHVJilwkhOOkwZAJ52xp-h8\",\"userHandle\":\"null\",\"clientDataJSON\":\"eyJjaGFsbGVuZ2UiOiI2b2pkb19LS0c0a1hvWjVKRF9BbHY2Q2hyVXRPT3o3dXFlaWlvRmxCc3pvIiwiY2xpZW50RXh0ZW5zaW9ucyI6e30sImhhc2hBbGdvcml0aG0iOiJTSEEtMjU2Iiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidHlwZSI6IndlYmF1dGhuLmdldCJ9\"},\"id\":\"-r1iW_eHUyIpU93f77odIrdUlNVfYzN-JPCTWGtdn-1wxdLxhlS9NmzLNbYsQ7XVZlGSWbh_63E5oFHcNh4JNw\",\"type\":\"public-unwrap\"}");
 
     webAuthN.authenticate(
-      new WebAuthnCredentials()
-        .setWebauthn(webauthn)
-        .setOrigin("http://localhost:3000")
-        .setChallenge("6ojdo_KKG4kXoZ5JD_Alv6ChrUtOOz7uqeiioFlBszo")
-      , fn -> {
+        new WebAuthnCredentials()
+          .setWebauthn(webauthn)
+          .setOrigin("http://localhost:3000")
+          .setChallenge("6ojdo_KKG4kXoZ5JD_Alv6ChrUtOOz7uqeiioFlBszo"))
+      .onComplete(fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
       });
@@ -110,12 +110,12 @@ public class WebAuthNTest {
       "}");
 
     webAuthN.authenticate(
-      new WebAuthnCredentials()
-        .setWebauthn(webauthn)
-        .setOrigin("https://webauthn.org")
-        .setChallenge("YMWETf-P79iMb-BqdTkySNReOva7nK2iVC9fiC8iGvYypunEOCZGZ6-Y5OV1rvMiDgAjWfFi6UC0WyKGsjA-gA")
-        .setUsername("paulo")
-      , fn -> {
+        new WebAuthnCredentials()
+          .setWebauthn(webauthn)
+          .setOrigin("https://webauthn.org")
+          .setChallenge("YMWETf-P79iMb-BqdTkySNReOva7nK2iVC9fiC8iGvYypunEOCZGZ6-Y5OV1rvMiDgAjWfFi6UC0WyKGsjA-gA")
+          .setUsername("paulo"))
+      .onComplete(fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
       });
@@ -148,12 +148,12 @@ public class WebAuthNTest {
       "}");
 
     webAuthN.authenticate(
-      new WebAuthnCredentials()
-        .setWebauthn(webauthn)
-        .setOrigin("http://localhost:3000")
-        .setChallenge("AXkXWXPP3gLx8OLlpkJ3aRRhFWntnSENggnjDpBql1ngKol7xWwevUYvrpBDP3LEvdr2EOStOFpGGxnMvXk-Vw")
-        .setUsername("paulo")
-      , fn -> {
+        new WebAuthnCredentials()
+          .setWebauthn(webauthn)
+          .setOrigin("http://localhost:3000")
+          .setChallenge("AXkXWXPP3gLx8OLlpkJ3aRRhFWntnSENggnjDpBql1ngKol7xWwevUYvrpBDP3LEvdr2EOStOFpGGxnMvXk-Vw")
+          .setUsername("paulo"))
+      .onComplete(fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
       });
@@ -175,8 +175,8 @@ public class WebAuthNTest {
   public void testAndroidKey(TestContext should) {
     final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -198,12 +198,12 @@ public class WebAuthNTest {
       "}");
 
     webAuthN.authenticate(
-      new WebAuthnCredentials()
-        .setWebauthn(webauthn)
-        .setOrigin("https://webauthn.org")
-        .setChallenge("Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
-        .setUsername("paulo")
-      , fn -> {
+        new WebAuthnCredentials()
+          .setWebauthn(webauthn)
+          .setOrigin("https://webauthn.org")
+          .setChallenge("Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
+          .setUsername("paulo"))
+      .onComplete(fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
       });
@@ -236,12 +236,12 @@ public class WebAuthNTest {
       "}");
 
     webAuthN.authenticate(
-      new WebAuthnCredentials()
-        .setWebauthn(webauthn)
-        .setOrigin("https://webauthn.org")
-        .setChallenge("Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
-        .setUsername("paulo")
-      , fn -> {
+        new WebAuthnCredentials()
+          .setWebauthn(webauthn)
+          .setOrigin("https://webauthn.org")
+          .setChallenge("Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
+          .setUsername("paulo"))
+      .onComplete(fn -> {
         should.assertTrue(fn.succeeded());
         test.complete();
       });

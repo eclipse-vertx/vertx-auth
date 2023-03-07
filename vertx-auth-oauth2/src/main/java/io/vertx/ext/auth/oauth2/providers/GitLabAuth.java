@@ -33,7 +33,7 @@ public interface GitLabAuth {
   /**
    * Create a OAuth2Auth provider for GitLab.com.
    *
-   * @param clientId the client id given to you by GitLab
+   * @param clientId     the client id given to you by GitLab
    * @param clientSecret the client secret given to you by GitLab
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret) {
@@ -42,11 +42,11 @@ public interface GitLabAuth {
 
   /**
    * Create a OAuth2Auth provider for GitLab.
-   *
+   * <p>
    * This method allows to specify custom GitLab domain.
    *
-   * @param site root URL for the provider without trailing slashes, eg. https://gitlab.com
-   * @param clientId the client id given to you by GitLab
+   * @param site         root URL for the provider without trailing slashes, eg. https://gitlab.com
+   * @param clientId     the client id given to you by GitLab
    * @param clientSecret the client secret given to you by GitLab
    */
   static OAuth2Auth create(Vertx vertx, String site, String clientId, String clientSecret) {
@@ -56,9 +56,9 @@ public interface GitLabAuth {
   /**
    * Create a OAuth2Auth provider for GitLab.
    *
-   * @param site root URL for the provider without trailing slashes, eg. https://gitlab.com
-   * @param clientId the client id given to you by GitLab
-   * @param clientSecret the client secret given to you by GitLab
+   * @param site              root URL for the provider without trailing slashes, eg. https://gitlab.com
+   * @param clientId          the client id given to you by GitLab
+   * @param clientSecret      the client secret given to you by GitLab
    * @param httpClientOptions custom http client options
    */
   static OAuth2Auth create(Vertx vertx, String site, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {

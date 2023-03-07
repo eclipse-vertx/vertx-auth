@@ -31,11 +31,10 @@ package io.vertx.ext.auth.otp.impl.org.openauthentication.otp;
  * documentation and/or software.
  */
 
-import java.security.NoSuchAlgorithmException;
-import java.security.InvalidKeyException;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * This class contains static methods that are used to calculate the

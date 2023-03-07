@@ -30,13 +30,15 @@ public class HotpAuthOptionsTest {
       new HotpAuthOptions()
         .setPasswordLength(0);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setPasswordLength(5);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
@@ -63,72 +65,84 @@ public class HotpAuthOptionsTest {
       new HotpAuthOptions()
         .setPasswordLength(9);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
-      .setPasswordLength(10);
+        .setPasswordLength(10);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setPasswordLength(Integer.MAX_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setPasswordLength(Integer.MIN_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setLookAheadWindow(-1);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setLookAheadWindow(Integer.MIN_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       final HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
         .setLookAheadWindow(5);
       should.assertTrue(hotpAuthOptions.isUsingResynchronization());
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       final HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
         .setLookAheadWindow(0);
       should.assertFalse(hotpAuthOptions.isUsingResynchronization());
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setAuthAttemptsLimit(-1);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       new HotpAuthOptions()
         .setAuthAttemptsLimit(Integer.MIN_VALUE);
       should.fail();
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       final HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
         .setAuthAttemptsLimit(5);
       should.assertTrue(hotpAuthOptions.isUsingAttemptsLimit());
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
 
     try {
       final HotpAuthOptions hotpAuthOptions = new HotpAuthOptions()
         .setAuthAttemptsLimit(0);
       should.assertFalse(hotpAuthOptions.isUsingAttemptsLimit());
-    } catch (IllegalArgumentException ignore) {}
+    } catch (IllegalArgumentException ignore) {
+    }
   }
 }

@@ -20,7 +20,7 @@ import java.util.Base64;
 
 /**
  * A collection of simple codecs to avoid code duplication across modules.
- *
+ * <p>
  * This helper provies codecs for Base16, Base32 and Base64.
  *
  * @author Paulo Lopes

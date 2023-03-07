@@ -46,26 +46,26 @@ public class AuthCommonExamples {
     // load the authorization for the given user:
     authorizationProvider.getAuthorizations(user)
       .onSuccess(done -> {
-      // cache is populated, perform query
-      if (PermissionBasedAuthorization.create("printer1234").match(user)) {
-        System.out.println("User has the authority");
-      } else {
-        System.out.println("User does not have the authority");
-      }
-    });
+        // cache is populated, perform query
+        if (PermissionBasedAuthorization.create("printer1234").match(user)) {
+          System.out.println("User has the authority");
+        } else {
+          System.out.println("User does not have the authority");
+        }
+      });
   }
 
   public void example3(User user, AuthorizationProvider authorizationProvider) {
     // load the authorization for the given user:
     authorizationProvider.getAuthorizations(user)
       .onSuccess(done -> {
-      // cache is populated, perform query
-      if (RoleBasedAuthorization.create("admin").match(user)) {
-        System.out.println("User has the authority");
-      } else {
-        System.out.println("User does not have the authority");
-      }
-    });
+        // cache is populated, perform query
+        if (RoleBasedAuthorization.create("admin").match(user)) {
+          System.out.println("User has the authority");
+        } else {
+          System.out.println("User does not have the authority");
+        }
+      });
   }
 
   public void example4(Vertx vertx) {

@@ -18,7 +18,10 @@ package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
@@ -45,8 +48,8 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Create a OAuth2 auth provider
    *
-   * @param vertx the Vertx instance
-   * @param config  the config
+   * @param vertx  the Vertx instance
+   * @param config the config
    * @return the auth provider
    */
   static OAuth2Auth create(Vertx vertx, OAuth2Options config) {
@@ -57,11 +60,11 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
    * of issued ID and access tokens. The provider will refresh the keys according to:
    * https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
-   *
+   * <p>
    * This means that the provider will look at the cache headers and will refresh when
    * the max-age is reached. If the server does not return any cache headers it shall
    * be up to the end user to call this method to refresh.
-   *
+   * <p>
    * To avoid the refresh to happen too late, this means that they keys will be invalid,
    * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
    * positive leeway, it will be used to request the refresh ahead of time.
@@ -81,7 +84,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
    * of issued ID and access tokens.
-
+   *
    * @return Future result.
    * @see OAuth2Auth#jWKSet(Handler)
    */
@@ -91,11 +94,11 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * Handled to be called when a key (mentioned on a JWT) is missing from the current config.
    * Users are advised to call {@link OAuth2Auth#jWKSet(Handler)} but being careful to implement
    * some rate limiting function.
-   *
+   * <p>
    * This method isn't generic for several reasons. The provider is not aware of the capabilities
    * of the backend IdP in terms of max allowed API calls. Some validation could be done at the
    * key id, which only the end user is aware of.
-   *
+   * <p>
    * A base implementation for this handler is:
    *
    * <pre>{@code
@@ -115,7 +118,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    *     }
    *   });
    * }</pre>
-   *
+   * <p>
    * This handler will purely debounce calls and allow only a single request to {@link #jWKSet()}
    * at a time. No special handling is done to avoid requests on wrong key ids or prevent to many
    * requests to the IdP server. Users should probably also account for the number of errors to
@@ -140,7 +143,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Refresh the current User (access token).
    *
-   * @param user the user (access token) to be refreshed.
+   * @param user    the user (access token) to be refreshed.
    * @param handler the handler success/failure.
    * @return fluent self.
    */
@@ -165,9 +168,9 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Revoke an obtained access or refresh token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
    *
-   * @param user the user (access token) to revoke.
+   * @param user      the user (access token) to revoke.
    * @param tokenType the token type (either access_token or refresh_token).
-   * @param handler the handler success/failure.
+   * @param handler   the handler success/failure.
    * @return fluent self.
    */
   @Fluent
@@ -182,7 +185,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Revoke an obtained access token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
    *
-   * @param user the user (access token) to revoke.
+   * @param user    the user (access token) to revoke.
    * @param handler the handler success/failure.
    * @return fluent self.
    */
@@ -198,7 +201,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Revoke an obtained access or refresh token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
    *
-   * @param user the user (access token) to revoke.
+   * @param user      the user (access token) to revoke.
    * @param tokenType the token type (either access_token or refresh_token).
    * @return future result
    * @see OAuth2Auth#revoke(User, String, Handler)
@@ -219,7 +222,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Retrieve profile information and other attributes for a logged-in end-user. More info <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">https://openid.net/specs/openid-connect-core-1_0.html#UserInfo</a>
    *
-   * @param user the user (access token) to fetch the user info.
+   * @param user    the user (access token) to fetch the user info.
    * @param handler the handler success/failure.
    * @return fluent self.
    */
@@ -245,7 +248,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
    * More info: <a href="https://openid.net/specs/openid-connect-session-1_0.html">https://openid.net/specs/openid-connect-session-1_0.html</a>.
    *
-   * @param user the user to generate the url for
+   * @param user   the user to generate the url for
    * @param params extra parameters to apply to the url
    * @return the url to end the session.
    */

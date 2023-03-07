@@ -12,22 +12,21 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * The role of an AuthorizationProvider is to return a set of Authorization.
  * Note that each AuthorizationProvider must provide its own unique Id
  *
  * @author stephane bastian
- *
  */
 @VertxGen
 public interface AuthorizationProvider {
@@ -66,7 +65,7 @@ public interface AuthorizationProvider {
   /**
    * Updates the user with the set of authorizations.
    *
-   * @param user user to lookup and update
+   * @param user    user to lookup and update
    * @param handler result handler
    */
   @Deprecated

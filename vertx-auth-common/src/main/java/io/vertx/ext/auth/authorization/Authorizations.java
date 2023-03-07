@@ -12,10 +12,10 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization;
 
-import java.util.Set;
-
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
+
+import java.util.Set;
 
 @VertxGen
 public interface Authorizations {

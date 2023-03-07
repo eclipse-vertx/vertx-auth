@@ -49,14 +49,15 @@ public class RaceTest {
     for (int i = 0; i < 2500; i++) {
       jobs.add(() -> {
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        authProvider.authenticate(CREDENTIALS, res -> {
-          if (res.failed()) {
-            res.cause().printStackTrace();
-            future.completeExceptionally(res.cause());
-          } else {
-            future.complete(null);
-          }
-        });
+        authProvider.authenticate(CREDENTIALS)
+          .onComplete(res -> {
+            if (res.failed()) {
+              res.cause().printStackTrace();
+              future.completeExceptionally(res.cause());
+            } else {
+              future.complete(null);
+            }
+          });
         return future.get();
       });
 

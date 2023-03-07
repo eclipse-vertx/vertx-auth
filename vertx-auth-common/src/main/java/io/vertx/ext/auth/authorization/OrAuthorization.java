@@ -12,16 +12,15 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization;
 
-import java.util.List;
-
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authorization.impl.OrAuthorizationImpl;
+
+import java.util.List;
 
 /**
  * Allows to perform a logical 'or' between several authorizations
  *
  * @author <a href="mailto:stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- *
  */
 @VertxGen
 public interface OrAuthorization extends Authorization {

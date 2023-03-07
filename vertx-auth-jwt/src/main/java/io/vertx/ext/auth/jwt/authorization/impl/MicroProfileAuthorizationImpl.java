@@ -18,9 +18,9 @@ package io.vertx.ext.auth.jwt.authorization.impl;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 
 import java.util.HashSet;

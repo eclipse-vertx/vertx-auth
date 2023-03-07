@@ -8,13 +8,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 public class OAuth2ClientOptionsTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Test(expected = IllegalStateException.class)
   public void testMSLikeConfig() {

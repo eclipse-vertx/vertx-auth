@@ -3,14 +3,15 @@ package io.vertx.ext.auth.test.oauth2;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
-import io.vertx.ext.auth.oauth2.*;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
-import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -27,7 +28,7 @@ import java.io.UnsupportedEncodingException;
 public class Oauth2TokenScopeTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private final static String JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlQSBzY29wZUIgc2NvcGVDIiwiZXhwIjo5OTk5OTk5OTk5LCJuYmYiOjAsImlhdCI6MTQ2NDkwNjY3MSwic3ViIjoiZjE4ODhmNGQtNTE3Mi00MzU5LWJlMGMtYWYzMzg1MDVkODZjIn0.7aJYjGVe4YfdnYTlQH_FYhRCjvctcE7DtWwzxXrbLmM";
 
@@ -61,19 +62,19 @@ public class Oauth2TokenScopeTest {
 
     server = rule.vertx().createHttpServer().requestHandler(req -> {
       if (req.method() == HttpMethod.POST && "/oauth/introspect".equals(req.path())) {
-          req.setExpectMultipart(true).bodyHandler(buffer -> {
-            try {
-              JsonObject body = SimpleHttpClient.queryToJson(buffer);
-              should.assertEquals(config.getString("token"), body.getString("token"));
-              // conditional test for token_type_hint
-              if (config.containsKey("token_type_hint")) {
-                should.assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
-              }
-            } catch (UnsupportedEncodingException e) {
-              should.fail(e);
+        req.setExpectMultipart(true).bodyHandler(buffer -> {
+          try {
+            JsonObject body = SimpleHttpClient.queryToJson(buffer);
+            should.assertEquals(config.getString("token"), body.getString("token"));
+            // conditional test for token_type_hint
+            if (config.containsKey("token_type_hint")) {
+              should.assertEquals(config.getString("token_type_hint"), body.getString("token_type_hint"));
             }
-            req.response().putHeader("Content-Type", "application/json").end(fixtureIntrospect.encode());
-          });
+          } catch (UnsupportedEncodingException e) {
+            should.fail(e);
+          }
+          req.response().putHeader("Content-Type", "application/json").end(fixtureIntrospect.encode());
+        });
       } else {
         req.response().setStatusCode(400).end();
       }
@@ -117,15 +118,16 @@ public class Oauth2TokenScopeTest {
 
     oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    oauth2.authenticate(new TokenCredentials(JWT), res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
-        User token = res.result();
-        should.assertFalse(token.expired());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new TokenCredentials(JWT))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause());
+        } else {
+          User token = res.result();
+          should.assertFalse(token.expired());
+          test.complete();
+        }
+      });
   }
 
   /**
@@ -148,21 +150,23 @@ public class Oauth2TokenScopeTest {
 
     oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
-        User token = res.result();
-        should.assertFalse(token.expired());
+    oauth2.authenticate(new TokenCredentials(opaqueToken))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause());
+        } else {
+          User token = res.result();
+          should.assertFalse(token.expired());
 
-        ScopeAuthorization.create(" ").getAuthorizations(token, call -> {
-          should.assertTrue(call.succeeded());
-          should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(token));
-          should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(token));
-          test.complete();
-        });
-      }
-    });
+          ScopeAuthorization.create(" ").getAuthorizations(token)
+            .onComplete(call -> {
+              should.assertTrue(call.succeeded());
+              should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(token));
+              should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(token));
+              test.complete();
+            });
+        }
+      });
   }
 
   /**
@@ -184,16 +188,18 @@ public class Oauth2TokenScopeTest {
 
     oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    oauth2.authenticate(new TokenCredentials(JWT), res -> {
-      should.assertTrue(res.succeeded());
-      ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
-        should.assertTrue(call.succeeded());
-        // the scopes are missing
-        should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
-        should.assertFalse(PermissionBasedAuthorization.create("scopeB").match(res.result()));
-        test.complete();
+    oauth2.authenticate(new TokenCredentials(JWT))
+      .onComplete(res -> {
+        should.assertTrue(res.succeeded());
+        ScopeAuthorization.create(" ").getAuthorizations(res.result())
+          .onComplete(call -> {
+            should.assertTrue(call.succeeded());
+            // the scopes are missing
+            should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
+            should.assertFalse(PermissionBasedAuthorization.create("scopeB").match(res.result()));
+            test.complete();
+          });
       });
-    });
   }
 
   /**
@@ -216,17 +222,19 @@ public class Oauth2TokenScopeTest {
 
     oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
-      should.assertTrue(res.succeeded());
-      ScopeAuthorization.create(" ").getAuthorizations(res.result(), call -> {
-        should.assertTrue(call.succeeded());
-        should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(res.result()));
-        should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(res.result()));
-        // the scope is missing
-        should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
-        test.complete();
+    oauth2.authenticate(new TokenCredentials(opaqueToken))
+      .onComplete(res -> {
+        should.assertTrue(res.succeeded());
+        ScopeAuthorization.create(" ").getAuthorizations(res.result())
+          .onComplete(call -> {
+            should.assertTrue(call.succeeded());
+            should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(res.result()));
+            should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(res.result()));
+            // the scope is missing
+            should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
+            test.complete();
+          });
       });
-    });
   }
 
   /**
@@ -261,16 +269,17 @@ public class Oauth2TokenScopeTest {
 
     oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    oauth2.authenticate(new TokenCredentials(opaqueToken), res -> {
-      if (res.failed()) {
-        should.fail("Test should have not failed");
-      } else {
-        User token = res.result();
-        should.assertEquals("username",token.principal().getValue("username"));
-        should.assertNull(token.principal().getValue("scope"));
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new TokenCredentials(opaqueToken))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail("Test should have not failed");
+        } else {
+          User token = res.result();
+          should.assertEquals("username", token.principal().getValue("username"));
+          should.assertNull(token.principal().getValue("scope"));
+          test.complete();
+        }
+      });
   }
 
   /**
@@ -290,14 +299,15 @@ public class Oauth2TokenScopeTest {
 
     oauth2 = OAuth2Auth.create(rule.vertx(), oauthConfig);
 
-    oauth2.authenticate(new TokenCredentials(JWT), res -> {
-      if (res.failed()) {
-        should.fail("Test should have not failed");
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new TokenCredentials(JWT))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail("Test should have not failed");
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          test.complete();
+        }
+      });
   }
 }

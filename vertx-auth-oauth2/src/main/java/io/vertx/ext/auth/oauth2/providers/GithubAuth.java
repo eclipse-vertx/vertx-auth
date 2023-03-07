@@ -33,7 +33,7 @@ public interface GithubAuth {
   /**
    * Create a OAuth2Auth provider for Github
    *
-   * @param clientId the client id given to you by Github
+   * @param clientId     the client id given to you by Github
    * @param clientSecret the client secret given to you by Github
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret) {
@@ -43,8 +43,8 @@ public interface GithubAuth {
   /**
    * Create a OAuth2Auth provider for Github
    *
-   * @param clientId the client id given to you by Github
-   * @param clientSecret the client secret given to you by Github
+   * @param clientId          the client id given to you by Github
+   * @param clientSecret      the client secret given to you by Github
    * @param httpClientOptions custom http client options
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, HttpClientOptions httpClientOptions) {

@@ -7,8 +7,8 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2ClientTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -94,31 +94,33 @@ public class OAuth2ClientTest {
   public void getToken(TestContext should) {
     final Async test = should.async();
     config = oauthConfig;
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause().getMessage());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
+          test.complete();
+        }
+      });
   }
 
   @Test
   public void getTokenWithScopes(TestContext should) {
     final Async test = should.async();
     config = oauthConfigWithScopes;
-    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.CLIENT).addScope("scopeA"), res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.CLIENT).addScope("scopeA"))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause().getMessage());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
+          test.complete();
+        }
+      });
   }
 }

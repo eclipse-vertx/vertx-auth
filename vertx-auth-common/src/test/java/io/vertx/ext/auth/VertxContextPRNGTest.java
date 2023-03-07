@@ -10,13 +10,13 @@ import org.junit.runner.RunWith;
 
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(VertxUnitRunner.class)
 public class VertxContextPRNGTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void testPRNGQuarkusContextAccessNotAllowed() {
@@ -25,7 +25,7 @@ public class VertxContextPRNGTest {
 
     Context context = (Context) Proxy.newProxyInstance(
       VertxContextPRNGTest.class.getClassLoader(),
-      new Class[] { Context.class },
+      new Class[]{Context.class},
       (proxy, method, methodArgs) -> {
         switch (method.getName()) {
           case "get":

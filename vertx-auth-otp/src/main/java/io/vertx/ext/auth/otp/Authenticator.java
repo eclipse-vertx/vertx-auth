@@ -37,7 +37,8 @@ public class Authenticator {
     this.registration = registration;
   }
 
-  public Authenticator() {}
+  public Authenticator() {
+  }
 
   public Authenticator(JsonObject json) {
     AuthenticatorConverter.fromJson(json, this);

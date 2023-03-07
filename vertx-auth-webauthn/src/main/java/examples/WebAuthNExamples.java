@@ -29,9 +29,9 @@ public class WebAuthNExamples {
 
   public void example1(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
-      vertx,
-      new WebAuthnOptions()
-        .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        vertx,
+        new WebAuthnOptions()
+          .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(query -> {
         // function that fetches some authenticators from a
         // persistence storage
@@ -63,9 +63,9 @@ public class WebAuthNExamples {
 
   public void example2(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
-      vertx,
-      new WebAuthnOptions()
-        .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        vertx,
+        new WebAuthnOptions()
+          .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(query -> {
         // function that fetches some authenticators from a
         // persistence storage
@@ -105,9 +105,9 @@ public class WebAuthNExamples {
 
   public void example3(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
-      vertx,
-      new WebAuthnOptions()
-        .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        vertx,
+        new WebAuthnOptions()
+          .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(query -> {
         // function that fetches some authenticators from a
         // persistence storage
@@ -131,9 +131,9 @@ public class WebAuthNExamples {
 
   public void example4(Vertx vertx, List<Authenticator> authenticators) {
     WebAuthn webAuthN = WebAuthn.create(
-      vertx,
-      new WebAuthnOptions()
-        .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        vertx,
+        new WebAuthnOptions()
+          .setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(query -> {
         // function that fetches some authenticators from a
         // persistence storage
@@ -157,15 +157,15 @@ public class WebAuthNExamples {
         .put("userHandle", ""));
 
     webAuthN.authenticate(new WebAuthnCredentials()
-      // the username you want to link to
-      .setUsername("paulo")
-      // the server origin
-      .setOrigin("https://192.168.178.206.xip.io:8443")
-      // the server domain
-      .setDomain("192.168.178.206.xip.io")
-      // the challenge given on the previous step
-      .setChallenge("BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UX...")
-      .setWebauthn(body))
+        // the username you want to link to
+        .setUsername("paulo")
+        // the server origin
+        .setOrigin("https://192.168.178.206.xip.io:8443")
+        // the server domain
+        .setDomain("192.168.178.206.xip.io")
+        // the challenge given on the previous step
+        .setChallenge("BH7EKIDXU6Ct_96xTzG0l62qMhW_Ef_K4MQdDLoVNc1UX...")
+        .setWebauthn(body))
       .onSuccess(user -> {
         // success!
       });

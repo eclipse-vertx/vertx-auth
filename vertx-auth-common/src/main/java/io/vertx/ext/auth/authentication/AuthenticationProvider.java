@@ -24,7 +24,6 @@ import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 
 /**
- *
  * User-facing interface for authenticating users.
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -37,12 +36,12 @@ public interface AuthenticationProvider {
    * <p>
    * The first argument is a Credentials object containing information for authenticating the user.
    * What this actually contains depends on the specific implementation.
-   *
+   * <p>
    * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
    * The user object can then be used for authorisation.
    *
-   * @param credentials  The credentials
-   * @param resultHandler  The result handler
+   * @param credentials   The credentials
+   * @param resultHandler The result handler
    */
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
   @Deprecated
@@ -57,9 +56,9 @@ public interface AuthenticationProvider {
    * The first argument is a Credentials object containing information for authenticating the user.
    * What this actually contains depends on the specific implementation.
    *
-   * @see AuthenticationProvider#authenticate(Credentials, Handler)
-   * @param credentials  The credentials
+   * @param credentials The credentials
    * @return The result future
+   * @see AuthenticationProvider#authenticate(Credentials, Handler)
    */
   Future<User> authenticate(Credentials credentials);
 }

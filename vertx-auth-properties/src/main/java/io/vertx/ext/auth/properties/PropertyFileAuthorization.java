@@ -28,8 +28,8 @@ public interface PropertyFileAuthorization extends AuthorizationProvider {
   /**
    * Create a File authentication provider
    *
-   * @param vertx  the Vert.x instance
-   * @return  the authentication provider
+   * @param vertx the Vert.x instance
+   * @return the authentication provider
    */
   static PropertyFileAuthorization create(Vertx vertx, String path) {
     return new PropertyFileAuthenticationImpl(vertx, path);

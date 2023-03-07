@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 public class RegressionTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void authTest(TestContext should) {
@@ -27,15 +27,16 @@ public class RegressionTest {
       .setMethod("GET")
       .setUri("/private/private_page.html")
       .setResponse("373408962ca454892aba7c236af6d7a9");
-    authProvider.authenticate(authInfo, res -> {
-      if (res.succeeded()) {
-        User user = res.result();
-        should.assertEquals("jcrealm@host.com", user.principal().getString("realm"));
-        test.complete();
-      } else {
-        should.fail(res.cause());
-      }
-    });
+    authProvider.authenticate(authInfo)
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          User user = res.result();
+          should.assertEquals("jcrealm@host.com", user.principal().getString("realm"));
+          test.complete();
+        } else {
+          should.fail(res.cause());
+        }
+      });
   }
 
 }

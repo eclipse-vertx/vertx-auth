@@ -24,7 +24,6 @@ import java.util.List;
  * to perform its authentication
  *
  * @author Paulo Lopes
- *
  */
 @DataObject(generateConverter = true, publicConverter = false)
 public class TokenCredentials implements Credentials {
@@ -32,7 +31,8 @@ public class TokenCredentials implements Credentials {
   private String token;
   private List<String> scopes;
 
-  public TokenCredentials() {}
+  public TokenCredentials() {
+  }
 
   public TokenCredentials(String token) {
     this.token = token;

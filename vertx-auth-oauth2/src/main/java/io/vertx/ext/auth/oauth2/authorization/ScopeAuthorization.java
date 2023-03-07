@@ -26,11 +26,11 @@ import java.util.List;
  * An application can request one or more scopes, this information is then presented to the
  * user in the consent screen, and the access token issued to the application will be
  * limited to the scopes granted.
- *
+ * <p>
  * The OAuth spec allows the authorization server or user to modify the scopes granted to
  * the application compared to what is requested, although there are not many examples of
  * services doing this in practice.
- *
+ * <p>
  * OAuth2 does not define any particular values for scopes, since it is highly dependent
  * on the service's internal architecture and needs.
  *
@@ -63,7 +63,7 @@ public interface ScopeAuthorization extends AuthorizationProvider {
    * the scopes from a decoded JWT.
    *
    * @param scopeSeparator the scope separator e.g.: {@code " "}, {@code ","}, {@code "+"}
-   * @param claimKey the scope claim key e.g.: {@code "scp"}, {@code "scope"}
+   * @param claimKey       the scope claim key e.g.: {@code "scp"}, {@code "scope"}
    * @return a AuthorizationProvider
    */
   static ScopeAuthorization create(String scopeSeparator, String claimKey) {
@@ -86,6 +86,7 @@ public interface ScopeAuthorization extends AuthorizationProvider {
 
   /**
    * Returns a String with the given scopes concatenated with the given separator.
+   *
    * @param scopes a list of scopes
    * @return concatenated string.
    */

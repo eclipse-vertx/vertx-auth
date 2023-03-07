@@ -36,10 +36,10 @@ public interface MetaDataService {
    * Only valid entries will be stored. The operation will return {@code true} only if all
    * entries have been added. {@code false} if they have been processed but at least one was
    * invalid.
-   *
+   * <p>
    * The operation will only fail on network problems.
    *
-   * @param url the url to the TOC
+   * @param url     the url to the TOC
    * @param handler the async handler to process the response
    * @return fluent self
    */
@@ -56,7 +56,7 @@ public interface MetaDataService {
    * Only valid entries will be stored. The operation will return {@code true} only if all
    * entries have been added. {@code false} if they have been processed but at least one was
    * invalid.
-   *
+   * <p>
    * The operation will only fail on network problems.
    *
    * @param handler the async handler to process the response
@@ -75,7 +75,7 @@ public interface MetaDataService {
    * Only valid entries will be stored. The operation will return {@code true} only if all
    * entries have been added. {@code false} if they have been processed but at least one was
    * invalid.
-   *
+   * <p>
    * The operation will only fail on network problems.
    *
    * @param url the url to the TOC
@@ -88,7 +88,7 @@ public interface MetaDataService {
    * Only valid entries will be stored. The operation will return {@code true} only if all
    * entries have been added. {@code false} if they have been processed but at least one was
    * invalid.
-   *
+   * <p>
    * The operation will only fail on network problems.
    *
    * @return future result of the operation
@@ -118,7 +118,7 @@ public interface MetaDataService {
   /**
    * Verify the metadata for a given authenticator. The MDS will lookup the metadata by the AAGUID. If no AAGUID is
    * known, the result will be {@code null}.
-   *
+   * <p>
    * When a statement is found, the statement will be used to verify the certificate chain. A failure during this
    * verification will throw a {@link RuntimeException}.
    *

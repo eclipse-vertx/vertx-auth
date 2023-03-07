@@ -4,16 +4,15 @@ Please see the documentation for more information.
 
 == Running test
 
-Standard unit tests are run against a mock of some providers, `Google`, `Keycloak` to run
-against a real provider (`Keycloak`) the `IT` profile must be enabled, which you can do by:
+Standard unit tests are run against a mock of some providers, `Google`, `Keycloak` to run against a real provider (`Keycloak`) the `IT` profile must be enabled, which you can do by:
 
 [source]
 ----
 mvn -PIT ...
 ----
 
-Or by having the environment variable `TRAVIS` set to `true`. When running the integration
-tests you must have a local keycloak installed with the configuration file `src/test/fixtures/vertx-test-realm.json`.
+Or by having the environment variable `TRAVIS` set to `true`.
+When running the integration tests you must have a local keycloak installed with the configuration file `src/test/fixtures/vertx-test-realm.json`.
 
 And the container can be run locally as:
 

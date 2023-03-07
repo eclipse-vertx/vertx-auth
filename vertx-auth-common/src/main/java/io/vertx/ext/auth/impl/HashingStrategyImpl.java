@@ -2,9 +2,9 @@ package io.vertx.ext.auth.impl;
 
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.ext.auth.HashString;
 import io.vertx.ext.auth.HashingAlgorithm;
 import io.vertx.ext.auth.HashingStrategy;
-import io.vertx.ext.auth.HashString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class HashingStrategyImpl implements HashingStrategy {
     HashingAlgorithm algorithm = algorithms.get(id);
 
     if (algorithm == null) {
-      throw new RuntimeException(id +  " algorithm is not available.");
+      throw new RuntimeException(id + " algorithm is not available.");
     }
 
     final HashString hashString = new HashString(id, params, salt);

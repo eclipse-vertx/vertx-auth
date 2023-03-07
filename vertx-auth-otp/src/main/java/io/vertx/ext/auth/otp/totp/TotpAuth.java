@@ -32,9 +32,9 @@ public interface TotpAuth extends AuthenticationProvider {
   /**
    * Provide a {@link Function} that can fetch {@link Authenticator}s from a backend given an {@code identifier}
    * argument.
-   *
+   * <p>
    * The function signature is as follows:
-   *
+   * <p>
    * {@code (id) -> Future<Authenticator>}
    *
    * <ul>
@@ -51,14 +51,14 @@ public interface TotpAuth extends AuthenticationProvider {
   /**
    * Provide a {@link Function} that can update or insert a {@link Authenticator}.
    * The function <strong>should</strong> store a given authenticator to a persistence storage.
-   *
+   * <p>
    * When an authenticator is already present, this method <strong>must</strong> at least update
    * {@link Authenticator#getCounter()}, and is not required to perform any other update.
-   *
+   * <p>
    * For new authenticators, the whole object data <strong>must</strong> be persisted.
-   *
+   * <p>
    * The function signature is as follows:
-   *
+   * <p>
    * {@code (Authenticator) -> Future<Void>}
    *
    * <ul>
@@ -75,7 +75,7 @@ public interface TotpAuth extends AuthenticationProvider {
   /**
    * Creating authenticator from user id and key.
    *
-   * @param id id user.
+   * @param id     id user.
    * @param otpKey key of user used for auth.
    * @return {@link Authenticator} an object containing all the necessary information to authenticate a user.
    */
@@ -86,8 +86,8 @@ public interface TotpAuth extends AuthenticationProvider {
    *
    * @param otpKey user key.
    * @param issuer issuer of key.
-   * @param user display name of user account.
-   * @param label the label to identify which account a key is associated with.
+   * @param user   display name of user account.
+   * @param label  the label to identify which account a key is associated with.
    * @return uri containing the key.
    */
   String generateUri(OtpKey otpKey, String issuer, String user, String label);
@@ -97,7 +97,7 @@ public interface TotpAuth extends AuthenticationProvider {
    *
    * @param otpKey user key.
    * @param issuer issuer of key.
-   * @param user display name of user account.
+   * @param user   display name of user account.
    * @return uri containing the key.
    */
   default String generateUri(OtpKey otpKey, String issuer, String user) {
@@ -108,7 +108,7 @@ public interface TotpAuth extends AuthenticationProvider {
    * Creating URI for register in key in user device.
    *
    * @param otpKey user key.
-   * @param label the label to identify which account a key is associated with.
+   * @param label  the label to identify which account a key is associated with.
    * @return uri containing the key.
    */
   default String generateUri(OtpKey otpKey, String label) {

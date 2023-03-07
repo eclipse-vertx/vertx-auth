@@ -1,9 +1,8 @@
 = SQL Client Auth Provider
 
 We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} as well as
-{@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.sqlclient.SqlClient}
-to perform authentication and authorization against any SQL compliant database. To use this project,
-add the following dependency to the _dependencies_ section of your build descriptor:
+{@link io.vertx.ext.auth.authorization.AuthorizationProvider} which uses the Vert.x {@link io.vertx.sqlclient.SqlClient} to perform authentication and authorization against any SQL compliant database.
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
 
@@ -23,8 +22,8 @@ add the following dependency to the _dependencies_ section of your build descrip
 compile 'io.vertx:vertx-auth-sql-client:${maven.version}'
 ----
 
-To create an instance you first need an instance of {@link io.vertx.sqlclient.SqlClient}. To learn how to create one
-of those please consult the documentation for the SQL client.
+To create an instance you first need an instance of {@link io.vertx.sqlclient.SqlClient}.
+To learn how to create one of those please consult the documentation for the SQL client.
 
 Once you've got one of those you can create a {@link io.vertx.ext.auth.sqlclient.SqlAuthentication} instance as follows:
 
@@ -71,24 +70,23 @@ ALTER TABLE users_roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFERE
 
 == Hashing Strategy
 
-The provider uses the https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md[phc sf spec] to
-hash passwords.
+The provider uses the https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md[phc sf spec] to hash passwords.
 
-WARNING: If you already have a running legacy application switching the strategies will break your existing
-passwords. The new format will not for suffer from this. In order to upgrade request users to reset their password and
-update the record appropriately.
+WARNING: If you already have a running legacy application switching the strategies will break your existing passwords.
+The new format will not for suffer from this.
+In order to upgrade request users to reset their password and update the record appropriately.
 
-WARNING: It is advised to always store your passwords as hashes in your database tables which have been created
-with a salt which should be stored in the row too. A strong hashing algorithm should be used. It is strongly advised
-never to store your passwords as plain text.
+WARNING: It is advised to always store your passwords as hashes in your database tables which have been created with a salt which should be stored in the row too.
+A strong hashing algorithm should be used.
+It is strongly advised never to store your passwords as plain text.
 
 == Vertx Auth SQL Client and GDPR
 
-GDPR is a regulation from the common European Union law. It overrides/supercedes national data protection laws and
-extents the previously existing directives. This section of the manual is by no means a thorough walkthrough of the
-regulation, it is just a small summary how this component adheres to the requirements. Companies not adhering to the
-requirements can be fined on 4% of the turnover or 20 million euro. Therefore we want to make sure that as a user of
-Vert.x Auth SQL Client you're are on the good track to comply.
+GDPR is a regulation from the common European Union law.
+It overrides/supercedes national data protection laws and extents the previously existing directives.
+This section of the manual is by no means a thorough walkthrough of the regulation, it is just a small summary how this component adheres to the requirements.
+Companies not adhering to the requirements can be fined on 4% of the turnover or 20 million euro.
+Therefore we want to make sure that as a user of Vert.x Auth SQL Client you're are on the good track to comply.
 
 The law defines certain terminology:
 
@@ -109,27 +107,25 @@ GDPR defines the following functionality:
 * Age checks
 * Data destruction - Data minimization principle
 
-This module complies with the GDPR by not storing any identifiable information about a data subject. The only
-reference is the username which is not linked to any personal data.
+This module complies with the GDPR by not storing any identifiable information about a data subject.
+The only reference is the username which is not linked to any personal data.
 
-In order to add personal data to your application you should create your own data schema and use the username column
-as a foreign key to your data. As a tip you should have a boolean flag to mark the personal data as restricted to
-comply to the right to restriction of processing which means that if you need to handle the data, e.g.: send a bulk
-email from a mailing list you are not allowed to do so if the flag is true.
+In order to add personal data to your application you should create your own data schema and use the username column as a foreign key to your data.
+As a tip you should have a boolean flag to mark the personal data as restricted to comply to the right to restriction of processing which means that if you need to handle the data, e.g.: send a bulk email from a mailing list you are not allowed to do so if the flag is true.
 
-The right to erasure does not mean that you must wipe all records from your application, e.g.: in a bank this right
-cannot be used to erase a running loan or debt. You are allowed to keep your application data but must erase the
-personal data. In case of Vert.x Auth SQL you should delete your table but can still use a foreign key to the
-username as long as is not possible to link the username to the personal data.
+The right to erasure does not mean that you must wipe all records from your application, e.g.: in a bank this right cannot be used to erase a running loan or debt.
+You are allowed to keep your application data but must erase the personal data.
+In case of Vert.x Auth SQL you should delete your table but can still use a foreign key to the username as long as is not possible to link the username to the personal data.
 
-Important note is that this must survive backups! As a tip backup the data, and data erasure on different archives so
-they can be replayed individually.
+Important note is that this must survive backups!
+As a tip backup the data, and data erasure on different archives so they can be replayed individually.
 
 == Hashing passwords
 
-Like any application there will be a time where you need to store new users into the database. As you might know,
-passwords are not stored in plain text but hashed according to the hashing strategy. The same strategy is required
-to hash new password before storing it to the database. Doing it is a 3 step task.
+Like any application there will be a time where you need to store new users into the database.
+As you might know, passwords are not stored in plain text but hashed according to the hashing strategy.
+The same strategy is required to hash new password before storing it to the database.
+Doing it is a 3 step task.
 
 1. Generate a salt string
 2. Hash the password given the salt string
@@ -142,8 +138,7 @@ to hash new password before storing it to the database. Doing it is a 3 step tas
 
 == Authentication
 
-When authenticating using this implementation, it assumes `username` and `password` fields are present in the
-authentication info:
+When authenticating using this implementation, it assumes `username` and `password` fields are present in the authentication info:
 
 [source,$lang]
 ----
@@ -152,9 +147,7 @@ authentication info:
 
 == Authorisation - Permission-Role Model
 
-Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this
-implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role
-can have zero or more permissions.
+Although Vert.x auth itself does not mandate any specific model of permissions (they are just opaque strings), this implementation assumes a familiar user/role/permission model, where a user can have zero or more roles and a role can have zero or more permissions.
 
 If validating if a user has a particular permission simply match the user against a given permission as follows:
 

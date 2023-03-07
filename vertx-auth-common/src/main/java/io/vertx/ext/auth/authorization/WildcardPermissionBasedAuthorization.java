@@ -21,7 +21,6 @@ import io.vertx.ext.auth.authorization.impl.WildcardPermissionBasedAuthorization
  * Note that it can optionally be assigned to a specific resource
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- *
  */
 @VertxGen
 public interface WildcardPermissionBasedAuthorization extends Authorization {

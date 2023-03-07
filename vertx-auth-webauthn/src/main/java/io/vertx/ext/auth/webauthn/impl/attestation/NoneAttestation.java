@@ -24,7 +24,7 @@ import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 
 /**
  * Implementation of the "none" attestation check.
- *
+ * <p>
  * This is the most common kind of attestation. User Agents will recommend
  * users to use this, for privacy reasons. Most applications should use it
  * too, as trust should be build on first contact, not on the full hardware

@@ -16,13 +16,16 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 /**
  * Simplified factory to create an {@link OAuth2Auth} for Keycloak.
@@ -105,9 +108,9 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
         .setBuffer(
           // wrap the key with the right boundaries:
           "-----BEGIN PUBLIC KEY-----\n" +
-          config.getString("realm-public-key") +
-          "\n-----END PUBLIC KEY-----\n"
-      ));
+            config.getString("realm-public-key") +
+            "\n-----END PUBLIC KEY-----\n"
+        ));
     }
 
     return OAuth2Auth
@@ -140,10 +143,10 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
    *
-   * @see KeycloakAuth#discover(Vertx, OAuth2Options, Handler)
-   * @param vertx   the vertx instance
-   * @param config  the initial config
+   * @param vertx  the vertx instance
+   * @param config the initial config
    * @return promise with the instantiated Oauth2 provider instance handler
+   * @see KeycloakAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     return OpenIDConnectAuth.discover(vertx, config);

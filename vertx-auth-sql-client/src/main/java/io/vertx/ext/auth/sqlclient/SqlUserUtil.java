@@ -35,6 +35,7 @@ public interface SqlUserUtil {
 
   /**
    * Create an instance of the user helper.
+   *
    * @param client the client with write rights to the database.
    * @return the instance
    */
@@ -44,6 +45,7 @@ public interface SqlUserUtil {
 
   /**
    * Create an instance of the user helper with custom queries.
+   *
    * @param client the client with write rights to the database.
    * @return the instance
    */
@@ -54,12 +56,9 @@ public interface SqlUserUtil {
   /**
    * Insert a user into a database.
    *
-   * @param username
-   *          the username to be set
-   * @param password
-   *          the passsword in clear text, will be adapted following the definitions of the defined strategy
-   * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   * @param username      the username to be set
+   * @param password      the passsword in clear text, will be adapted following the definitions of the defined strategy
+   * @param resultHandler the ResultHandler will be provided with the result of the operation
    * @return fluent self
    */
   @Fluent
@@ -79,12 +78,9 @@ public interface SqlUserUtil {
   /**
    * Insert a user into a database.
    *
-   * @param username
-   *          the username to be set
-   * @param hash
-   *          the password hash, as result of {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
-   * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   * @param username      the username to be set
+   * @param hash          the password hash, as result of {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
+   * @param resultHandler the ResultHandler will be provided with the result of the operation
    * @return fluent self
    */
   @Fluent
@@ -104,12 +100,9 @@ public interface SqlUserUtil {
   /**
    * Insert a user role into a database.
    *
-   * @param username
-   *          the username to be set
-   * @param role
-   *          a to be set
-   * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   * @param username      the username to be set
+   * @param role          a to be set
+   * @param resultHandler the ResultHandler will be provided with the result of the operation
    * @return fluent self
    */
   @Fluent
@@ -129,12 +122,9 @@ public interface SqlUserUtil {
   /**
    * Insert a role permission into a database.
    *
-   * @param role
-   *          a to be set
-   * @param permission
-   *          the permission to be set
-   * @param resultHandler
-   *          the ResultHandler will be provided with the result of the operation
+   * @param role          a to be set
+   * @param permission    the permission to be set
+   * @param resultHandler the ResultHandler will be provided with the result of the operation
    * @return fluent self
    */
   @Fluent

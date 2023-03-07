@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNotEquals;
 public class OAuth2UserInfoAzureJWTTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final String fixtureV1 = "eyJhbGciOiJub25lIn0.eyJhdWQiOiJiMTRhNzUwNS05NmU5LTQ5MjctOTFlOC0wNjAxZDBmYzljYWEiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9mYTE1ZDY5Mi1lOWM3LTQ0NjAtYTc0My0yOWYyOTU2ZmQ0MjkvIiwiaWF0IjoxNTM2Mjc1MTI0LCJuYmYiOjE1MzYyNzUxMjQsImV4cCI6MTUzNjI3OTAyNCwiYWlvIjoiQVhRQWkvOElBQUFBcXhzdUIrUjREMnJGUXFPRVRPNFlkWGJMRDlrWjh4ZlhhZGVBTTBRMk5rTlQ1aXpmZzN1d2JXU1hodVNTajZVVDVoeTJENldxQXBCNWpLQTZaZ1o5ay9TVTI3dVY5Y2V0WGZMT3RwTnR0Z2s1RGNCdGsrTExzdHovSmcrZ1lSbXY5YlVVNFhscGhUYzZDODZKbWoxRkN3PT0iLCJhbXIiOlsicnNhIl0sImVtYWlsIjoiYWJlbGlAbWljcm9zb2Z0LmNvbSIsImZhbWlseV9uYW1lIjoiTGluY29sbiIsImdpdmVuX25hbWUiOiJBYmUiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwiaXBhZGRyIjoiMTMxLjEwNy4yMjIuMjIiLCJuYW1lIjoiYWJlbGkiLCJub25jZSI6IjEyMzUyMyIsIm9pZCI6IjA1ODMzYjZiLWFhMWQtNDJkNC05ZWMwLTFiMmJiOTE5NDQzOCIsInJoIjoiSSIsInN1YiI6IjVfSjlyU3NzOC1qdnRfSWN1NnVlUk5MOHhYYjhMRjRGc2dfS29vQzJSSlEiLCJ0aWQiOiJmYTE1ZDY5Mi1lOWM3LTQ0NjAtYTc0My0yOWYyOTU2ZmQ0MjkiLCJ1bmlxdWVfbmFtZSI6IkFiZUxpQG1pY3Jvc29mdC5jb20iLCJ1dGkiOiJMeGVfNDZHcVRrT3BHU2ZUbG40RUFBIiwidmVyIjoiMS4wIn0=";
   private static final String fixtureV2 = "eyJhbGciOiJub25lIn0.eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTEyMjA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFJa3pxRlZyU2FTYUZIeTc4MmJidGFRIiwiYXVkIjoiNmNiMDQwMTgtYTNmNS00NmE3LWI5OTUtOTQwYzc4ZjVhZWYzIiwiZXhwIjoxNTM2MzYxNDExLCJpYXQiOjE1MzYyNzQ3MTEsIm5iZiI6MTUzNjI3NDcxMSwibmFtZSI6IkFiZSBMaW5jb2xuIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiQWJlTGlAbWljcm9zb2Z0LmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC02NmYzLTMzMzJlY2E3ZWE4MSIsInRpZCI6IjkxMjIwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsIm5vbmNlIjoiMTIzNTIzIiwiYWlvIjoiRGYyVVZYTDFpeCFsTUNXTVNPSkJjRmF0emNHZnZGR2hqS3Y4cTVnMHg3MzJkUjVNQjVCaXN2R1FPN1lXQnlqZDhpUURMcSFlR2JJRGFreXA1bW5PcmNkcUhlWVNubHRlcFFtUnA2QUlaOGpZIn0";
@@ -40,7 +40,7 @@ public class OAuth2UserInfoAzureJWTTest {
   private OAuth2Auth oauth2;
   private HttpServer server;
 
- @Before
+  @Before
   public void setUp(TestContext should) {
     final Async setup = should.async();
 
@@ -95,16 +95,16 @@ public class OAuth2UserInfoAzureJWTTest {
 
     oauth2.userInfo(user)
       .onComplete(userInfo -> {
-      if (userInfo.failed()) {
-        should.fail(userInfo.cause().getMessage());
-      } else {
-        // assert that the user has now a few extra fields on the attributes
-        should.assertEquals("abeli", user.attributes().getString("name"));
-        should.assertEquals("", user.attributes().getString("picture", ""));
-        should.assertEquals("abeli@microsoft.com", user.attributes().getString("email"));
-        test.complete();
-      }
-    });
+        if (userInfo.failed()) {
+          should.fail(userInfo.cause().getMessage());
+        } else {
+          // assert that the user has now a few extra fields on the attributes
+          should.assertEquals("abeli", user.attributes().getString("name"));
+          should.assertEquals("", user.attributes().getString("picture", ""));
+          should.assertEquals("abeli@microsoft.com", user.attributes().getString("email"));
+          test.complete();
+        }
+      });
   }
 
   @Test
@@ -118,15 +118,15 @@ public class OAuth2UserInfoAzureJWTTest {
 
     oauth2.userInfo(user)
       .onComplete(userInfo -> {
-      if (userInfo.failed()) {
-        should.fail(userInfo.cause().getMessage());
-      } else {
-        // assert that the user has now a few extra fields on the attributes
-        should.assertEquals("Abe Lincoln", user.attributes().getString("name"));
-        should.assertEquals("", user.attributes().getString("picture", ""));
-        should.assertEquals("", user.attributes().getString("email", ""));
-        test.complete();
-      }
-    });
+        if (userInfo.failed()) {
+          should.fail(userInfo.cause().getMessage());
+        } else {
+          // assert that the user has now a few extra fields on the attributes
+          should.assertEquals("Abe Lincoln", user.attributes().getString("name"));
+          should.assertEquals("", user.attributes().getString("picture", ""));
+          should.assertEquals("", user.attributes().getString("email", ""));
+          test.complete();
+        }
+      });
   }
 }

@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2AuthJWTGoogleRegressionTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -95,13 +95,14 @@ public class OAuth2AuthJWTGoogleRegressionTest {
     Credentials jwt = new TokenCredentials(
       "eyJhbGciOiJSUzI1NiIsImtpZCI6ImYwNTQxNWIxM2FjYjk1OTBmNzBkZjg2Mjc2NWM2NTVmNWE3YTAxOWUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNDYyNTUwMTE3ODY3LWRyYmtwY2oxcXY0bW5rbzFqMmVrczRyYmI4Z204dm9iLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNDYyNTUwMTE3ODY3LWRyYmtwY2oxcXY0bW5rbzFqMmVrczRyYmI4Z204dm9iLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA1MTk3NjM5NzI4ODE0NzI0MjcwIiwiZW1haWwiOiJpbmplY3RlZXJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJ1M0dhMHBEVXdRYTYyQTdTUFhyWmh3IiwibmFtZSI6IktvbnN0YW50aW4gU21pcm5vdiIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS0vQU9oMTRHaXhrM1R4OEhaWnd0YlZWWEdKanE2b0c0V0otWV83N01MQ3pyd1Nvdz1zOTYtYyIsImdpdmVuX25hbWUiOiJLb25zdGFudGluIiwiZmFtaWx5X25hbWUiOiJTbWlybm92IiwibG9jYWxlIjoiZW4tR0IiLCJpYXQiOjE1OTY0NjYxMzUsImV4cCI6MTU5NjQ2OTczNSwianRpIjoiMjQ3NzkyYjI0NWNkZjE5ZDEzYTU3OTU1Nzg2MjdlNWUyN2E5ZmY1ZiJ9.LTAKctyEAkMa0AnrrJmMpi4Ifquq1zru_mg7FIqDQhrqJqlAQ5BqOjixVY194zfd3gdPGjISJKSL5TiqNg-uc7sG2d2XckdiuhRE2uawRpZlSIDTd7TfPZXJEWdPDPf9FQOFaVqyzaZGXWX4v6OzLuZ-DsL-esf2-YTkaImF0RHqoGXsPbzrULgK7LX9zV58mqurimhOF7S-eZyFX_Hqis5Nij3zvHJW6Y9KIxl-yPIO4ge6bGk6iD-A_4d5OuL5E0rL9RE4CWT783KGAPBnC1e5J8nhMhxoOJLh3eP_CSDuYDfe0WSid34JyRCd3ZW1VD3f0_PAeEMxkPyctfPQYA");
 
-    oauth2.authenticate(jwt, res -> {
-      if (res.failed()) {
-        test.complete();
-      } else {
-        should.fail("JWT mode creates own tokens");
-      }
-    });
+    oauth2.authenticate(jwt)
+      .onComplete(res -> {
+        if (res.failed()) {
+          test.complete();
+        } else {
+          should.fail("JWT mode creates own tokens");
+        }
+      });
   }
 
   @Test
@@ -111,12 +112,13 @@ public class OAuth2AuthJWTGoogleRegressionTest {
       // https://developers.google.com/identity/protocols/oauth2/service-account#httprest_1
       .put("scope", "https://www.googleapis.com/auth/devstorage.read_only");
 
-    oauth2.authenticate(new Oauth2Credentials().setJwt(jwt).setFlow(OAuth2FlowType.AUTH_JWT), res -> {
-      if (res.failed()) {
-        should.fail("JWT mode creates own tokens");
-      } else {
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new Oauth2Credentials().setJwt(jwt).setFlow(OAuth2FlowType.AUTH_JWT))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail("JWT mode creates own tokens");
+        } else {
+          test.complete();
+        }
+      });
   }
 }

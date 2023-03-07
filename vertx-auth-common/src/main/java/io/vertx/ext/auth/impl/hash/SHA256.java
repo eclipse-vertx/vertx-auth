@@ -28,6 +28,8 @@ public class SHA256 extends AbstractMDHash {
   }
 
   @Override
-  public String id() { return "sha256"; }
+  public String id() {
+    return "sha256";
+  }
 
 }

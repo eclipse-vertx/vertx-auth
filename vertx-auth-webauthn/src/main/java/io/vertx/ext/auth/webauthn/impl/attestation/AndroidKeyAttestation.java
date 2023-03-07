@@ -19,23 +19,26 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
-import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 
 import java.security.*;
-import java.security.cert.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
-import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
-import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.*;
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.parseX5c;
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.verifySignature;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.ATTESTATION_ANONCA;
+import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.statementAttestationTypesContains;
 
 /**
  * Implementation of the "android-key" attestation check.
@@ -179,7 +182,8 @@ public class AndroidKeyAttestation implements Attestation {
         .setAlg(PublicKeyCredential.valueOf(attStmt.getInteger("alg")))
         .setX5c(attStmt.getJsonArray("x5c"));
 
-    } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+    } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException |
+             NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
       throw new AttestationException(e);
     }
   }

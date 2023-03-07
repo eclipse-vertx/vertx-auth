@@ -17,11 +17,11 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
-import io.vertx.ext.auth.JWTOptions;
 
 /**
  * Factory interface for creating JWT based {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances.
@@ -34,8 +34,8 @@ public interface JWTAuth extends AuthenticationProvider {
   /**
    * Create a JWT auth provider
    *
-   * @param vertx the Vertx instance
-   * @param config  the config
+   * @param vertx  the Vertx instance
+   * @param config the config
    * @return the auth provider
    */
   static JWTAuth create(Vertx vertx, JWTAuthOptions config) {
@@ -45,11 +45,10 @@ public interface JWTAuth extends AuthenticationProvider {
   /**
    * Generate a new JWT token.
    *
-   * @param claims Json with user defined claims for a list of official claims
-   *               @see <a href="http://www.iana.org/assignments/jwt/jwt.xhtml">www.iana.org/assignments/jwt/jwt.xhtml</a>
+   * @param claims  Json with user defined claims for a list of official claims
    * @param options extra options for the generation
-   *
    * @return JWT encoded token
+   * @see <a href="http://www.iana.org/assignments/jwt/jwt.xhtml">www.iana.org/assignments/jwt/jwt.xhtml</a>
    */
   String generateToken(JsonObject claims, JWTOptions options);
 
@@ -57,9 +56,8 @@ public interface JWTAuth extends AuthenticationProvider {
    * Generate a new JWT token.
    *
    * @param claims Json with user defined claims for a list of official claims
-   *               @see <a href="http://www.iana.org/assignments/jwt/jwt.xhtml">www.iana.org/assignments/jwt/jwt.xhtml</a>
-   *
    * @return JWT encoded token
+   * @see <a href="http://www.iana.org/assignments/jwt/jwt.xhtml">www.iana.org/assignments/jwt/jwt.xhtml</a>
    */
   String generateToken(JsonObject claims);
 }

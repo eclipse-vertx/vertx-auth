@@ -10,7 +10,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Objects;
 
 /**
  * Provides a decoder capable of handling CBOR encoded data from a {@link InputStream}.

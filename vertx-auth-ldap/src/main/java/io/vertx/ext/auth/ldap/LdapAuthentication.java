@@ -28,9 +28,9 @@ public interface LdapAuthentication extends AuthenticationProvider {
   /**
    * Create a LDAP authentication provider
    *
-   * @param vertx  the Vert.x instance
-   * @param options  the ldap options
-   * @return  the authentication provider
+   * @param vertx   the Vert.x instance
+   * @param options the ldap options
+   * @return the authentication provider
    */
   static LdapAuthentication create(Vertx vertx, LdapAuthenticationOptions options) {
     return new LdapAuthenticationImpl(vertx, options);

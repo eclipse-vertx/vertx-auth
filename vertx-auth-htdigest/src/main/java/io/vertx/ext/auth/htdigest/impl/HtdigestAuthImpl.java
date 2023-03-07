@@ -170,7 +170,7 @@ public class HtdigestAuthImpl implements HtdigestAuth {
         int result = 0;
         result |= lenA - lenB;
 
-        for(int i = 0; i < lenA; ++i) {
+        for (int i = 0; i < lenA; ++i) {
           int indexB = (i - lenB >>> 31) * i;
           result |= digesta.charAt(i) ^ digestb.charAt(indexB);
         }

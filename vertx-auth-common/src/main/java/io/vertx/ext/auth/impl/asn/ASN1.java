@@ -119,33 +119,33 @@ public class ASN1 {
     public String oid(int index) {
       byte[] bytes = object(index, ASN1.OBJECT_IDENTIFIER).binary(0);
 
-        StringBuilder oid = new StringBuilder();
+      StringBuilder oid = new StringBuilder();
 
-        for (int i = 0; i < bytes.length; i++) {
-          int uint8 = Byte.toUnsignedInt(bytes[i]);
+      for (int i = 0; i < bytes.length; i++) {
+        int uint8 = Byte.toUnsignedInt(bytes[i]);
 
-          if (i == 0) {
-            int b = uint8 % 40;
-            int a = (uint8 - b) / 40;
+        if (i == 0) {
+          int b = uint8 % 40;
+          int a = (uint8 - b) / 40;
+          oid
+            .append(a)
+            .append('.')
+            .append(b);
+        } else {
+          if (uint8 < 128) {
             oid
-              .append(a)
               .append('.')
-              .append(b);
+              .append(uint8);
           } else {
-            if (uint8 < 128) {
-              oid
-                .append('.')
-                .append(uint8);
-            } else {
-              oid
-                .append('.')
-                .append(((uint8 - 128) * 128) + Byte.toUnsignedInt(bytes[i + 1]));
-              i++;
-            }
+            oid
+              .append('.')
+              .append(((uint8 - 128) * 128) + Byte.toUnsignedInt(bytes[i + 1]));
+            i++;
           }
         }
+      }
 
-        return oid.toString();
+      return oid.toString();
     }
 
     public int length() {

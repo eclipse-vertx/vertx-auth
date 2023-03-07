@@ -1,7 +1,6 @@
 = property file Auth provider
 
-This auth provider implementation reads users, roles and permissions from a property file that is compatible
-with the format used by http://shiro.apache.org/static/1.3.2/apidocs/org/apache/shiro/realm/text/PropertiesRealm.html[Apache Shiro Properties Realm].
+This auth provider implementation reads users, roles and permissions from a property file that is compatible with the format used by http://shiro.apache.org/static/1.3.2/apidocs/org/apache/shiro/realm/text/PropertiesRealm.html[Apache Shiro Properties Realm].
 
 Note that there is no dependency on Apache Shiro as this is a new implementation that is simply compatible with the Apache Shiro format
 
@@ -18,6 +17,7 @@ For a role line it should be of the form:
  role.{roleName}={permissionName1},{permissionName2},...,{permissionNameN}
 
 Here's an example:
+
 ----
 user.tim = mypassword,administrator,developer
 user.bob = hispassword,developer
