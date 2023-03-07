@@ -143,6 +143,7 @@ public class OAuth2IntrospectTest {
           // clean time specific value
           principal.remove("expires_at");
           principal.remove("access_token");
+          principal.remove("opaque");
 
           final JsonObject assertion = fixtureIntrospect.copy();
 
@@ -178,6 +179,8 @@ public class OAuth2IntrospectTest {
           should.assertNotNull(token);
           // make a copy because later we need to original data
           JsonObject principal = token.principal().copy();
+          // clean time specific value
+          principal.remove("opaque");
 
           // clean up control
           final JsonObject assertion = fixtureGoogle.copy();
