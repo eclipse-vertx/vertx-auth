@@ -63,9 +63,9 @@ public class AuthOAuth2Examples {
     String code = "xxxxxxxxxxxxxxxxxxxxxxxx";
 
     oauth2.authenticate(
-      new Oauth2Credentials()
-        .setCode(code)
-        .setRedirectUri("http://localhost:8080/callback"))
+        new Oauth2Credentials()
+          .setCode(code)
+          .setRedirectUri("http://localhost:8080/callback"))
       .onSuccess(user -> {
         // save the token and continue...
       })
@@ -205,7 +205,7 @@ public class AuthOAuth2Examples {
 
     // first get a token (authenticate)
     oauth2.authenticate(
-      new UsernamePasswordCredentials("user", "secret"))
+        new UsernamePasswordCredentials("user", "secret"))
       .onSuccess(user -> {
         // now check for permissions
         AuthorizationProvider authz = KeycloakAuthorization.create();
@@ -333,11 +333,11 @@ public class AuthOAuth2Examples {
   public void example25(Vertx vertx) {
 
     OpenIDConnectAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setClientSecret("clientSecret")
-        .setSite("https://accounts.google.com"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setClientSecret("clientSecret")
+          .setSite("https://accounts.google.com"))
       .onSuccess(oauth2 -> {
         // the setup call succeeded.
         // at this moment your auth is ready to use and
@@ -351,55 +351,55 @@ public class AuthOAuth2Examples {
   public void example25b(Vertx vertx) {
     // keycloak example
     KeycloakAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setClientSecret("clientSecret")
-        .setSite("https://keycloakhost:keycloakport/auth/realms/{realm}")
-        .setTenant("your-realm"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setClientSecret("clientSecret")
+          .setSite("https://keycloakhost:keycloakport/auth/realms/{realm}")
+          .setTenant("your-realm"))
       .onSuccess(oauth2 -> {
         // ...
       });
 
     // Google example
     GoogleAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setClientSecret("clientSecret"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setClientSecret("clientSecret"))
       .onSuccess(oauth2 -> {
         // ...
       });
 
     // Salesforce example
     SalesforceAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setClientSecret("clientSecret"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setClientSecret("clientSecret"))
       .onSuccess(oauth2 -> {
         // ...
       });
 
     // Azure AD example
     AzureADAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setClientSecret("clientSecret")
-        .setTenant("your-app-guid"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setClientSecret("clientSecret")
+          .setTenant("your-app-guid"))
       .onSuccess(oauth2 -> {
         // ...
       });
 
     // IBM Cloud example
     IBMCloudAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setClientSecret("clientSecret")
-        .setSite("https://<region-id>.appid.cloud.ibm.com/oauth/v4/{tenant}")
-        .setTenant("your-tenant-id"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setClientSecret("clientSecret")
+          .setSite("https://<region-id>.appid.cloud.ibm.com/oauth/v4/{tenant}")
+          .setTenant("your-tenant-id"))
       .onSuccess(oauth2 -> {
         // ...
       });
@@ -408,11 +408,11 @@ public class AuthOAuth2Examples {
   public void example26(Vertx vertx) {
 
     OpenIDConnectAuth.discover(
-      vertx,
-      new OAuth2Options()
-        .setClientId("clientId")
-        .setTenant("your_realm")
-        .setSite("https://server:port/auth/realms/{tenant}"))
+        vertx,
+        new OAuth2Options()
+          .setClientId("clientId")
+          .setTenant("your_realm")
+          .setSite("https://server:port/auth/realms/{tenant}"))
       .onSuccess(oauth2 -> {
         // the setup call succeeded.
         // at this moment your auth is ready to use
@@ -438,8 +438,8 @@ public class AuthOAuth2Examples {
         // 2. refresh the keys
         oauth2.jWKSet()
           .onSuccess(v -> {
-          // ...
-        });
+            // ...
+          });
       }
     });
   }

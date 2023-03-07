@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2UserInfoTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   // according to https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
   private static final JsonObject fixture = new JsonObject()

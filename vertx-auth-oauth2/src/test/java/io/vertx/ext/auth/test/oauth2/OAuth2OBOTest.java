@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2OBOTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -94,15 +94,16 @@ public class OAuth2OBOTest {
   @Test
   public void getToken(TestContext should) {
     final Async test = should.async();
-    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AAD_OBO).setAssertion("head.body.signature").addScope("a").addScope("b"), res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AAD_OBO).setAssertion("head.body.signature").addScope("a").addScope("b"))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
+          test.complete();
+        }
+      });
   }
 }

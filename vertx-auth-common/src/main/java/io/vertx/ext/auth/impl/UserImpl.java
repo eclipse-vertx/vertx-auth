@@ -16,8 +16,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.ClusterSerializable;
-import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 
 import java.util.Collections;

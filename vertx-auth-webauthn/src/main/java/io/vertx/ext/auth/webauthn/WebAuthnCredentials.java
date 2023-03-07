@@ -29,7 +29,8 @@ public class WebAuthnCredentials implements Credentials {
   private String origin;
   private String domain;
 
-  public WebAuthnCredentials() {}
+  public WebAuthnCredentials() {
+  }
 
   public WebAuthnCredentials(JsonObject json) {
     WebAuthnCredentialsConverter.fromJson(json, this);

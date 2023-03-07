@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * Utility class to encode/decode hashed strings to be stored on a persistent storage.
- *
+ * <p>
  * This follows as close as possible the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a>.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -77,7 +77,7 @@ public final class HashString {
         hash = parts[3];
         break;
       case 5:
-      // fallback if there are more segments (just ignore)
+        // fallback if there are more segments (just ignore)
       default:
         id = parts[1];
         params = new HashMap<>();

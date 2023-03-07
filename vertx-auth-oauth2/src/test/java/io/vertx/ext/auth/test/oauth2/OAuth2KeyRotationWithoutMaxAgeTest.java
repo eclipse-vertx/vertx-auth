@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OAuth2KeyRotationWithoutMaxAgeTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixtureJwks = new JsonObject(
     "{\"keys\":" +

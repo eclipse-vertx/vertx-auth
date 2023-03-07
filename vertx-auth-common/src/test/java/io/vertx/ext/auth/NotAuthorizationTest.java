@@ -22,19 +22,19 @@ public class NotAuthorizationTest {
   @Test
   public void testImpliesOk1() {
     Assert.assertEquals(true, NotAuthorization.create(PermissionBasedAuthorization.create("p1"))
-        .verify(NotAuthorization.create(PermissionBasedAuthorization.create("p1"))));
+      .verify(NotAuthorization.create(PermissionBasedAuthorization.create("p1"))));
   }
 
   @Test
   public void testImpliesKo1() {
     Assert.assertEquals(false, NotAuthorization.create(PermissionBasedAuthorization.create("p1"))
-        .verify(NotAuthorization.create(PermissionBasedAuthorization.create("p2"))));
+      .verify(NotAuthorization.create(PermissionBasedAuthorization.create("p2"))));
   }
 
   @Test
   public void testImpliesKo2() {
     Assert.assertEquals(false, NotAuthorization.create(PermissionBasedAuthorization.create("p1"))
-        .verify(PermissionBasedAuthorization.create("p2")));
+      .verify(PermissionBasedAuthorization.create("p2")));
   }
 
 }

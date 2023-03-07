@@ -18,7 +18,7 @@ public class AttestationTest {
   private final DummyStore database = new DummyStore();
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Before
   public void resetDatabase() {

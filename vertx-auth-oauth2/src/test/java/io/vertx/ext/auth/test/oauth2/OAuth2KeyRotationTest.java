@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OAuth2KeyRotationTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixtureJwks = new JsonObject(
     "{\"keys\":" +
@@ -175,9 +175,9 @@ public class OAuth2KeyRotationTest {
 
     oauth2.jWKSet()
       .onFailure(should::fail)
-        .onSuccess(res -> {
+      .onSuccess(res -> {
         oauth2.close();
         rule.vertx().setTimer(5500L, v -> test.complete());
-    });
+      });
   }
 }

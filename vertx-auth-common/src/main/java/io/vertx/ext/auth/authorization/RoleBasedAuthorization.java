@@ -21,7 +21,6 @@ import io.vertx.ext.auth.authorization.impl.RoleBasedAuthorizationImpl;
  * specific resource
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- *
  */
 @VertxGen
 public interface RoleBasedAuthorization extends Authorization {

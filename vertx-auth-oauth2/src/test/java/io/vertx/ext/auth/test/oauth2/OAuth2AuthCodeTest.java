@@ -1,8 +1,9 @@
 package io.vertx.ext.auth.test.oauth2;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
+import io.vertx.core.Future;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.*;
@@ -14,20 +15,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import org.junit.runner.RunWith;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 @RunWith(VertxUnitRunner.class)
 public class OAuth2AuthCodeTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixtureTokens = new JsonObject(
     "{" +

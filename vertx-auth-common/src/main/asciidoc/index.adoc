@@ -1,7 +1,6 @@
 = Common Authentication and Authorization
 
-This Vert.x component provides interfaces for authentication and authorization that can be used from
-your Vert.x applications and can be backed by different providers.
+This Vert.x component provides interfaces for authentication and authorization that can be used from your Vert.x applications and can be backed by different providers.
 
 Vert.x auth is also used by vertx-web to handle its authentication and authorization.
 
@@ -34,10 +33,8 @@ _Authorization_ means verifying a user is authorized to perform a specific task
 To support many models and keep things very flexible, all authorization operations are performed on the type
 {@link io.vertx.ext.auth.authorization.Authorization}.
 
-In some case, an authorization might represent a permission, for example the authorization to access all printers,
-or a specific printer. In others cases, an authorization might be a role (ie: `admin', 'manager', etc.)
-In order to provide a small set of implementation the following factories
-are available:
+In some case, an authorization might represent a permission, for example the authorization to access all printers, or a specific printer.
+In others cases, an authorization might be a role (ie: `admin', 'manager', etc.) In order to provide a small set of implementation the following factories are available:
 
 * {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization} Role based authorization.
 * {@link io.vertx.ext.auth.authorization.PermissionBasedAuthorization} Permission based authorization.
@@ -62,8 +59,8 @@ To find out what a particular {@link io.vertx.ext.auth.authorization.Authorizati
 
 To authenticate a user you use {@link io.vertx.ext.auth.authentication.AuthenticationProvider#authenticate(io.vertx.ext.auth.authentication.Credentials)}.
 
-The first argument is a Credentials object which contains authentication information. What this actually contains depends
-on the specific implementation; for a simple username/password based authentication it might contain something like:
+The first argument is a Credentials object which contains authentication information.
+What this actually contains depends on the specific implementation; for a simple username/password based authentication it might contain something like:
 
 ----
 {
@@ -74,15 +71,12 @@ on the specific implementation; for a simple username/password based authenticat
 
 For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
 
-Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in
-the call. The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated
-user.
+Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in the call.
+The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated user.
 
-The authentication user object has no context or information on which authorizations the object is entitled. The reason
-why authorization and authentication are decoupled is because, authentication and authorization are two distinguished
-operations that are not required to be performed on the same provider. A simple example would be, a user authenticating
-with plain `OAuth2.0` can use a `JWT` authorization provider to match the token for a given authority, or any other
-scenario such as authenticating using `LDAP` and perform authorization using `MongoDB`.
+The authentication user object has no context or information on which authorizations the object is entitled.
+The reason why authorization and authentication are decoupled is because, authentication and authorization are two distinguished operations that are not required to be performed on the same provider.
+A simple example would be, a user authenticating with plain `OAuth2.0` can use a `JWT` authorization provider to match the token for a given authority, or any other scenario such as authenticating using `LDAP` and perform authorization using `MongoDB`.
 
 Here's an example of authenticating a user using a simple username/password implementation:
 
@@ -93,8 +87,9 @@ Here's an example of authenticating a user using a simple username/password impl
 
 == Authorization
 
-Once you have an {@link io.vertx.ext.auth.User} instance you can call {@link io.vertx.ext.auth.User#authorizations} to get its authorizations. A newly created
-user will contain no authorizations. You can directly add authorization on the {@link io.vertx.ext.auth.User} itself or via an {@link io.vertx.ext.auth.authorization.AuthorizationProvider}.
+Once you have an {@link io.vertx.ext.auth.User} instance you can call {@link io.vertx.ext.auth.User#authorizations} to get its authorizations.
+A newly created user will contain no authorizations.
+You can directly add authorization on the {@link io.vertx.ext.auth.User} itself or via an {@link io.vertx.ext.auth.authorization.AuthorizationProvider}.
 
 The results of all the above are provided asynchronously in the handler.
 
@@ -107,13 +102,11 @@ Here's an example adding authorizations via an {@link io.vertx.ext.auth.authoriz
 
 And another example of authorizing in a roles based model which uses the the interface {@link io.vertx.ext.auth.authorization.RoleBasedAuthorization}.
 
-Please note, as discussed above how the authority string is interpreted is completely determined by the underlying
-implementation and Vert.x makes no assumptions here.
+Please note, as discussed above how the authority string is interpreted is completely determined by the underlying implementation and Vert.x makes no assumptions here.
 
 === Listing authorizations
 
-The user object holds a list of authorizations so subsequently calls should check if it has the same authorizations and it
-will result in avoiding one more IO operation to the underlying authorization provider to load the authorizations.
+The user object holds a list of authorizations so subsequently calls should check if it has the same authorizations and it will result in avoiding one more IO operation to the underlying authorization provider to load the authorizations.
 
 In order to clear the list of authorizations you can use {@link io.vertx.ext.auth.authorization.Authorizations#clear()}.
 
@@ -121,10 +114,10 @@ In order to clear the list of authorizations you can use {@link io.vertx.ext.aut
 
 You can get the Principal corresponding to the authenticated user with {@link io.vertx.ext.auth.User#principal()}.
 
-What this returns depends on the underlying implementation. The principal map is the source data that was used to create
-the user instance. The attributes are extra properties, that were **not** provided during the creation of the of the
-instance but are the result of the processing of the user data. The distinction is there to ensure that processing of
-the principal will not tamper or over write existing data.
+What this returns depends on the underlying implementation.
+The principal map is the source data that was used to create the user instance.
+The attributes are extra properties, that were **not** provided during the creation of the of the instance but are the result of the processing of the user data.
+The distinction is there to ensure that processing of the principal will not tamper or over write existing data.
 
 In order to simplify the usage, two helper methods can be used to lookup and read values on both sources:
 
@@ -140,41 +133,37 @@ If you wish to create your own auth provider you should implement the one or bot
 * {@link io.vertx.ext.auth.authentication.AuthenticationProvider}
 * {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
 
-The user factory can create a {@link io.vertx.ext.auth.User} object with the given `principal` JSON content. Optionally
-a second argument `attributes` can be provided to provide extra meta data for later usage. One example are the following
-attributes:
+The user factory can create a {@link io.vertx.ext.auth.User} object with the given `principal` JSON content.
+Optionally a second argument `attributes` can be provided to provide extra meta data for later usage.
+One example are the following attributes:
 
 * `exp` - Expires at in seconds.
 * `iat` - Issued at in seconds.
 * `nbf` - Not before in seconds.
 * `leeway` - clock drift leeway in seconds.
 
-While the first 3 control how the {@link io.vertx.ext.auth.User#expired()} method will compute the expiration of the
-user, the last can be used to allow clock drifting compensation while computing the expiration time.
+While the first 3 control how the {@link io.vertx.ext.auth.User#expired()} method will compute the expiration of the user, the last can be used to allow clock drifting compensation while computing the expiration time.
 
 == Pseudo Random Number Generator
 
-Since Secure Random from java can block during the acquisition of entropy from the system, we provide a simple wrapper
-around it that can be used without the danger of blocking the event loop.
+Since Secure Random from java can block during the acquisition of entropy from the system, we provide a simple wrapper around it that can be used without the danger of blocking the event loop.
 
-By default this PRNG uses a mixed mode, blocking for seeding, non blocking for generating. The PRNG will also reseed
-every 5 minutes with 64bits of new entropy. However this can all be configured using the system properties:
+By default this PRNG uses a mixed mode, blocking for seeding, non blocking for generating.
+The PRNG will also reseed every 5 minutes with 64bits of new entropy.
+However this can all be configured using the system properties:
 
 * io.vertx.ext.auth.prng.algorithm e.g.: SHA1PRNG
 * io.vertx.ext.auth.prng.seed.interval e.g.: 1000 (every second)
 * io.vertx.ext.auth.prng.seed.bits e.g.: 128
 
-Most users should not need to configure these values unless if you notice that the performance of your application is
-being affected by the PRNG algorithm.
+Most users should not need to configure these values unless if you notice that the performance of your application is being affected by the PRNG algorithm.
 
 === Sharing Pseudo Random Number Generator
 
-Since the Pseudo Random Number Generator objects are expensive in resources, they consume system entropy which is a
-scarce resource it can be wise to share the PRNG's across all your handlers. In order to do this and to make this
-available to all languages supported by Vert.x you should look into the {@link io.vertx.ext.auth.VertxContextPRNG}.
+Since the Pseudo Random Number Generator objects are expensive in resources, they consume system entropy which is a scarce resource it can be wise to share the PRNG's across all your handlers.
+In order to do this and to make this available to all languages supported by Vert.x you should look into the {@link io.vertx.ext.auth.VertxContextPRNG}.
 
-This interface relaxes the lifecycle management of PRNG's for the end user and ensures it can be reused across all
-your application, for example:
+This interface relaxes the lifecycle management of PRNG's for the end user and ensures it can be reused across all your application, for example:
 
 [source,$lang]
 ----
@@ -183,9 +172,9 @@ your application, for example:
 
 == Working with Keys
 
-When working with security you will face the need to load security keys. There are many formats and standards for
-security keys which makes it quite a complex task. In order to simplify the work on the developer side, this module
-contains 2 abstractions:
+When working with security you will face the need to load security keys.
+There are many formats and standards for security keys which makes it quite a complex task.
+In order to simplify the work on the developer side, this module contains 2 abstractions:
 
 1. {@link io.vertx.ext.auth.KeyStoreOptions} that abstract the JVM keystore common format.
 2. {@link io.vertx.ext.auth.PubSecKeyOptions} that abstract the PEM common format.
@@ -197,11 +186,10 @@ To load a local keystore modules shall ask for an options object like:
 {@link examples.AuthCommonExamples#example5}
 ----
 
-The type is quite important as it varies with the JVM version used. Before 9, the default is `jks` which is JVM specific
-after it `pkcs12` which is a common standard.
+The type is quite important as it varies with the JVM version used.
+Before 9, the default is `jks` which is JVM specific after it `pkcs12` which is a common standard.
 
-Non JVM keystore keys can be imported to a `pkcs12` file, even without the need of the `keytool` command, for example
-this is how it can be done with `OpenSSL`:
+Non JVM keystore keys can be imported to a `pkcs12` file, even without the need of the `keytool` command, for example this is how it can be done with `OpenSSL`:
 
 ----
 openssl pkcs12 -export -in mykeycertificate.pem -out mykeystore.pkcs12 -name myAlias -noiter -nomaciter
@@ -210,7 +198,8 @@ openssl pkcs12 -export -in mykeycertificate.pem -out mykeystore.pkcs12 -name myA
 The command above will convert an existing pem file to a pkcs12 keystore and put the given key under the name `myAlias`.
 The extra arguments `-noiter -nomaciter` are required in order to make the file compatible with the JVM loader.
 
-To load a `PEM` file you should be aware that there are a few limitations. The default JVM classes only support keys in
+To load a `PEM` file you should be aware that there are a few limitations.
+The default JVM classes only support keys in
 `PKCS8` format, so if you have a different PEM file you need to convert it with `OpenSSL` like:
 
 ----
@@ -228,15 +217,15 @@ PEM files are common and easy to use but are not password protected, so private 
 
 === JSON Web Keys
 
-JWKs are a standard used by OpenID connect and JWT providers. They represent a key as a JSON object. Usually these JSON
-documents are provided by an identity provider server like Google, Microsoft, etc... but you can also generate your own
-keys using the online application <a href="https://mkjwk.org/">https://mkjwk.org</a>. For an offline experience there is
-also the tool: <a href="https://connect2id.com/products/nimbus-jose-jwt/generator">https://connect2id.com/products/nimbus-jose-jwt/generator</a>.
+JWKs are a standard used by OpenID connect and JWT providers.
+They represent a key as a JSON object.
+Usually these JSON documents are provided by an identity provider server like Google, Microsoft, etc... but you can also generate your own keys using the online application <a href="https://mkjwk.org/">https://mkjwk.org</a>.
+For an offline experience there is also the tool: <a href="https://connect2id.com/products/nimbus-jose-jwt/generator">https://connect2id.com/products/nimbus-jose-jwt/generator</a>.
 
 == Chaining authentication providers
 
-There are cases where it might be interesting to have support for chaining authentication providers, for example look up
-users on LDAP or properties files. This can be achieved with the {@link io.vertx.ext.auth.ChainAuth}.
+There are cases where it might be interesting to have support for chaining authentication providers, for example look up users on LDAP or properties files.
+This can be achieved with the {@link io.vertx.ext.auth.ChainAuth}.
 
 [source,$lang]
 ----

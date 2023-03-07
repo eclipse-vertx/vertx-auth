@@ -29,6 +29,7 @@ public interface JWTAuthorization extends AuthorizationProvider {
 
   /**
    * Factory method to create a Authorization provider for JWT tokens.
+   *
    * @param rootClaim slash separated string to the json array with the claims.
    * @return a AuthorizationProvider
    */

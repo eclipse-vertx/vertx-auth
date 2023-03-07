@@ -18,6 +18,7 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
@@ -28,7 +29,6 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
-import io.vertx.ext.auth.JWTOptions;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -97,7 +97,7 @@ public class AuthJWTExamples {
 
     // In this case we are forcing the provider to ignore the `exp` field
     jwtAuth.authenticate(
-      new TokenCredentials("BASE64-ENCODED-STRING"))
+        new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!
@@ -115,7 +115,7 @@ public class AuthJWTExamples {
 
     // In this case we are forcing the provider to verify the aud field
     jwtAuth.authenticate(
-      new TokenCredentials("BASE64-ENCODED-STRING"))
+        new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!
@@ -133,7 +133,7 @@ public class AuthJWTExamples {
 
     // In this case we are forcing the provider to verify the issuer
     jwtAuth.authenticate(
-      new TokenCredentials("BASE64-ENCODED-STRING"))
+        new TokenCredentials("BASE64-ENCODED-STRING"))
       .onSuccess(user -> System.out.println("User: " + user.principal()))
       .onFailure(err -> {
         // Failed!

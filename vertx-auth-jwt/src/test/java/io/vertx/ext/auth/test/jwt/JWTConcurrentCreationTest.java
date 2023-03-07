@@ -15,7 +15,8 @@
  */
 package io.vertx.ext.auth.test.jwt;
 
-import io.vertx.core.*;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.VertxOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -28,7 +29,7 @@ import org.junit.runner.RunWith;
 public class JWTConcurrentCreationTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext(new VertxOptions().setEventLoopPoolSize(16));
+  public final RunTestOnContext rule = new RunTestOnContext(new VertxOptions().setEventLoopPoolSize(16));
 
   @Test
   public void testParallelCreation(TestContext should) {

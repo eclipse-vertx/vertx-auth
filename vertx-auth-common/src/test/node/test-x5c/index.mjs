@@ -2,7 +2,7 @@ import fs from 'fs'
 import jose from 'node-jose'
 import pem from 'pem'
 
-async function run () {
+async function run() {
   try {
     // keystore to stick our node-jose keys before we do signing
     let keystore = jose.JWK.createKeyStore()
@@ -29,7 +29,7 @@ async function run () {
     })
 
     // and signing options
-    let signoptions = { fields: { x5c: x5cChain } }
+    let signoptions = {fields: {x5c: x5cChain}}
 
     // sign 'message' with the 'privatekey', include the 'x5c' chain in the headers
     let signed = await jose.JWS.createSign(signoptions, privatekey).update(message, 'utf8').final()
@@ -45,7 +45,7 @@ run()
 
 // taken from (MIT licensed):
 // https://github.com/hildjj/node-posh/blob/master/lib/index.js
-function cert_to_x5c (cert, maxdepth) {
+function cert_to_x5c(cert, maxdepth) {
   if (maxdepth == null) {
     maxdepth = 0;
   }
@@ -58,7 +58,7 @@ function cert_to_x5c (cert, maxdepth) {
    */
 
   cert = cert.replace(/-----[^\n]+\n?/gm, ',').replace(/\n/g, '');
-  cert = cert.split(',').filter(function(c) {
+  cert = cert.split(',').filter(function (c) {
     return c.length > 0;
   });
   if (maxdepth > 0) {

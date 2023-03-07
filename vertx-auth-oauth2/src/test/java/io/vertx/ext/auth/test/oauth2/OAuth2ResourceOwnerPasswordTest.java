@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2ResourceOwnerPasswordTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -90,15 +90,16 @@ public class OAuth2ResourceOwnerPasswordTest {
   public void getToken(TestContext should) {
     final Async test = should.async();
     config = oauthConfig;
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause().getMessage());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
+          test.complete();
+        }
+      });
   }
 }

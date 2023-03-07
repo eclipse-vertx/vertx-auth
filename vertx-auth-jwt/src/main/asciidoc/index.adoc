@@ -1,7 +1,7 @@
 = JWT Auth provider
 
-This component contains an out of the box a JWT implementation. To use this project, add the following
-dependency to the _dependencies_ section of your build descriptor:
+This component contains an out of the box a JWT implementation.
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
 
@@ -21,18 +21,16 @@ dependency to the _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-auth-jwt:${maven.version}'
 ----
 
-JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be
-verified to
-be trusted. JWT are well suited for scenarios as:
+JSON Web Token is a simple way to send information in the clear (usually in a URL) whose contents can be verified to be trusted.
+JWT are well suited for scenarios as:
 
-* In a Single Sign-On scenario where you want a separate authentication server that can then send user
-information in a trusted way.
+* In a Single Sign-On scenario where you want a separate authentication server that can then send user information in a trusted way.
 * Stateless API servers, very well suited for single page applications.
 * etc...
 
-Before deciding on using JWT, it's important to note that JWT does not encrypt the payload, it only signs it. You
-should not send any secret information using JWT, rather you should send information that is not secret but needs to
-be verified. For instance, sending a signed user id to indicate the user that should be logged in would work great!
+Before deciding on using JWT, it's important to note that JWT does not encrypt the payload, it only signs it.
+You should not send any secret information using JWT, rather you should send information that is not secret but needs to be verified.
+For instance, sending a signed user id to indicate the user that should be logged in would work great!
 Sending a user's password would be very, very bad.
 
 Its main advantages are:
@@ -41,8 +39,8 @@ Its main advantages are:
 * It has a json body to contain any variable amount of data you want.
 * It's completely stateless.
 
-To create an instance of the provider you use {@link io.vertx.ext.auth.jwt.JWTAuth}. You specify the configuration
-in a JSON object.
+To create an instance of the provider you use {@link io.vertx.ext.auth.jwt.JWTAuth}.
+You specify the configuration in a JSON object.
 
 Here's an example of creating a JWT auth provider:
 
@@ -51,9 +49,7 @@ Here's an example of creating a JWT auth provider:
 {@link examples.AuthJWTExamples#example6}
 ----
 
-A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point
-should be running in SSL mode, there after you verify the request user, say by its username and password you would
-do:
+A typical flow of JWT usage is that in your application you have one end point that issues tokens, this end point should be running in SSL mode, there after you verify the request user, say by its username and password you would do:
 
 [source,java]
 ----
@@ -72,25 +68,25 @@ Loading keys can be performed in 3 different ways:
 
 The default signature method for JWT's is known as `HS256`. `HS` stands in this case for `HMAC Signature using SHA256`.
 
-This is the simplest key to load. All you need is a secret that is shared between you and the 3rd party, for example
-assume that the secret is: `keyboard cat` then you can configure your Auth as:
+This is the simplest key to load.
+All you need is a secret that is shared between you and the 3rd party, for example assume that the secret is: `keyboard cat` then you can configure your Auth as:
 
 [source,java]
 ----
 {@link examples.AuthJWTExamples#example16}
 ----
 
-In this case the secret is configured as a public key, as it is a token that is known to both parties and you configure
-your PubSec key as being symmetric.
+In this case the secret is configured as a public key, as it is a token that is known to both parties and you configure your PubSec key as being symmetric.
 
 ==== Using RSA keys
 
-This section is by no means a manual on OpenSSL and a read on OpenSSL command line usage is advised. We will cover
-how to generate the most common keys and how to use them with JWT auth.
+This section is by no means a manual on OpenSSL and a read on OpenSSL command line usage is advised.
+We will cover how to generate the most common keys and how to use them with JWT auth.
 
-Imagine that you would like to protect your application using the very common `RS256` JWT algorithm. Contrary to some
-belief, 256 is not the key length but the hashing algorithm signature length. Any RSA key can be used with this JWT
-algorithm. Here is an information table:
+Imagine that you would like to protect your application using the very common `RS256` JWT algorithm.
+Contrary to some belief, 256 is not the key length but the hashing algorithm signature length.
+Any RSA key can be used with this JWT algorithm.
+Here is an information table:
 
 [width="80%",cols="e,>s",options="header"]
 |=========================================================
@@ -104,8 +100,7 @@ algorithm. Here is an information table:
 
 |=========================================================
 
-If you would like to generate a 2048bit RSA key pair, then you would do (please remember **not** to add a passphrase
-otherwise you will not be able to read the private key in the JWT auth):
+If you would like to generate a 2048bit RSA key pair, then you would do (please remember **not** to add a passphrase otherwise you will not be able to read the private key in the JWT auth):
 
 ----
 openssl genrsa -out private.pem 2048
@@ -137,8 +132,8 @@ MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDE9JsJBjmYEoUM
 -----END PRIVATE KEY-----
 ----
 
-If we are verifying tokens only (you will only need the private_key.pem file) however at some point you will need to
-issue tokens too, so you will a public key. In this case you need to extract the public key from the private key file:
+If we are verifying tokens only (you will only need the private_key.pem file) however at some point you will need to issue tokens too, so you will a public key.
+In this case you need to extract the public key from the private key file:
 
 ----
 openssl rsa -in private.pem -outform PEM -pubout -out public.pem
@@ -226,11 +221,11 @@ If you prefer to use Java Keystores, then you can do it either.
 
 This auth provider requires a keystore in the classpath or in the filesystem with either a
 `https://docs.oracle.com/javase/8/docs/api/javax/crypto/Mac.html[javax.crypto.Mac]`
-or a `https://docs.oracle.com/javase/8/docs/api/java/security/Signature.html[java.security.Signature]` in order to
-sign and verify the generated tokens.
+or a `https://docs.oracle.com/javase/8/docs/api/java/security/Signature.html[java.security.Signature]` in order to sign and verify the generated tokens.
 
-The implementation will, by default, look for the following aliases, however not all are required to be present. As
-a good practice `HS256` should be present:
+The implementation will, by default, look for the following aliases, however not all are required to be present.
+As a good practice `HS256` should be present:
+
 ----
 `HS256`:: HMAC using SHA-256 hash algorithm
 `HS384`:: HMAC using SHA-384 hash algorithm
@@ -243,19 +238,17 @@ a good practice `HS256` should be present:
 `ES512`:: ECDSA using P-521 curve and SHA-512 hash algorithm
 ----
 
-When no keystore is provided the implementation falls back in unsecure mode and signatures will not be verified, this
-is useful for the cases where the payload if signed and or encrypted by external means.
+When no keystore is provided the implementation falls back in unsecure mode and signatures will not be verified, this is useful for the cases where the payload if signed and or encrypted by external means.
 
-Key pairs stored on a keystore always include a certificate. The validity of the certificate is tested on load and keys
-will not be loaded if either expired or not yet valid to be use.
+Key pairs stored on a keystore always include a certificate.
+The validity of the certificate is tested on load and keys will not be loaded if either expired or not yet valid to be use.
 
-All keys algorithms will be checked if can be matched to the given alias. For example an `RS256` key will not be loaded
-if issued with a `EC` algorithm, or if issued with `RSA` but signature `SHA1WithRSA` instead of `SHA256WithRSA`.
+All keys algorithms will be checked if can be matched to the given alias.
+For example an `RS256` key will not be loaded if issued with a `EC` algorithm, or if issued with `RSA` but signature `SHA1WithRSA` instead of `SHA256WithRSA`.
 
 ===== Generate a new Keystore file
 
-The only required tool to generate a keystore file is `keytool`, you can now specify which algorithms you need by
-running:
+The only required tool to generate a keystore file is `keytool`, you can now specify which algorithms you need by running:
 
 ----
 keytool -genseckey -keystore keystore.jceks -storetype jceks -storepass secret -keyalg HMacSHA256 -keysize 2048 -alias HS256 -keypass secret
@@ -269,13 +262,11 @@ keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret 
 keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret -keyalg EC -keysize 521 -alias ES512 -keypass secret -sigalg SHA512withECDSA -dname "CN=,OU=,O=,L=,ST=,C=" -validity 360
 ----
 
-For more information on keystores and how to use the `PKCS12` format (Default from Java >=9) please see the documentation
-of the common module.
+For more information on keystores and how to use the `PKCS12` format (Default from Java >=9) please see the documentation of the common module.
 
 === Read only tokens
 
-If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that
-case all you need to have is a public key im PEM format.
+If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that case all you need to have is a public key im PEM format.
 
 [source,$lang]
 ----
@@ -284,19 +275,16 @@ case all you need to have is a public key im PEM format.
 
 == AuthN/AuthZ with JWT
 
-A common scenario when developing for example micro services is that you want you application to consume APIs. These
-api's are not meant to be consumed by humans so we should remove all the interactive part of authenticating the
-consumer out of the picture.
+A common scenario when developing for example micro services is that you want you application to consume APIs.
+These api's are not meant to be consumed by humans so we should remove all the interactive part of authenticating the consumer out of the picture.
 
-In this scenario one can use HTTP as the protocol to consume this API and the HTTP protocol already defines that there
-is a header `Authorization` that should be used for passing authorization information. In most cases you will see that
-tokens are sent as bearer tokens, i.e.: `Authorization: Bearer some+base64+string`.
+In this scenario one can use HTTP as the protocol to consume this API and the HTTP protocol already defines that there is a header `Authorization` that should be used for passing authorization information.
+In most cases you will see that tokens are sent as bearer tokens, i.e.: `Authorization: Bearer some+base64+string`.
 
 === Authenticating (AuthN)
 
 For this provider a user is authenticated if the token passes the signature checks and that the token is not expired.
-For this reason it is imperative that private keys are kept private and not copy pasted across project since it would
-be a security hole.
+For this reason it is imperative that private keys are kept private and not copy pasted across project since it would be a security hole.
 
 [source,$lang]
 ----
@@ -333,9 +321,10 @@ And the same for the issuer:
 
 === Authorizing (AuthZ)
 
-Once a token is parsed and is valid we can use it to perform authorization tasks. The most simple is to verify if a
-user has a specific authority. Authorization will follow the common {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
-API. Choose the provider that generated your token and evaluate.
+Once a token is parsed and is valid we can use it to perform authorization tasks.
+The most simple is to verify if a user has a specific authority.
+Authorization will follow the common {@link io.vertx.ext.auth.authorization.AuthorizationProvider} API.
+Choose the provider that generated your token and evaluate.
 
 Currently there are 2 factories:
 
@@ -349,52 +338,50 @@ The typical usage is to extract the permissions form the user object using the p
 {@link examples.AuthJWTExamples#example13}
 ----
 
-By default the provider will lookup under the key `permissions` but like the other providers one can extend the
-concept to authorities to roles by using the `:` as a splitter, so `role:authority` can be used to lookup the token.
+By default the provider will lookup under the key `permissions` but like the other providers one can extend the concept to authorities to roles by using the `:` as a splitter, so `role:authority` can be used to lookup the token.
 
-Since JWT are quite free form and there is no standard on where to lookup for the claims the location can be
-configured to use something else than `permissions`, for example one can even lookup under a path like this:
+Since JWT are quite free form and there is no standard on where to lookup for the claims the location can be configured to use something else than `permissions`, for example one can even lookup under a path like this:
 
 [source,$lang]
 ----
 {@link examples.AuthJWTExamples#example14}
 ----
 
-So in this example we configure the JWT to work with Keycloak token format. In this case the claims will be checked
-under the path `realm_access/roles` rather than `permissions`.
+So in this example we configure the JWT to work with Keycloak token format.
+In this case the claims will be checked under the path `realm_access/roles` rather than `permissions`.
 
 === Validating Tokens
 
-When the method `authenticate` is invoked, the token is validated against the `JWTOptions` provided during the
-initialization. The validation performs the following steps:
+When the method `authenticate` is invoked, the token is validated against the `JWTOptions` provided during the initialization.
+The validation performs the following steps:
 
-1. if `ignoreExpiration` (default is false) is false then the token is checked for expiration, this will check the
-   fields: `exp`, `iat` and `nbf`. Since sometimes clocks are not reliable, it is possible to configure some `leeway`
-   to be applied to the dates so we allow some grace period if the dates are outside the required limits.
-2. if `audience` is provided, then the token `aud` is checked against the configured one and all configured audiences
-   must be in the token.
+1. if `ignoreExpiration` (default is false) is false then the token is checked for expiration, this will check the fields: `exp`, `iat` and `nbf`.
+Since sometimes clocks are not reliable, it is possible to configure some `leeway`
+to be applied to the dates so we allow some grace period if the dates are outside the required limits.
+2. if `audience` is provided, then the token `aud` is checked against the configured one and all configured audiences must be in the token.
 3. if `issuer` is configured, then the tokens `iss` is checked against the configured one.
 
-Once these validations complete a JWTUser object is then returned, the object is configured with a reference to the
-permission claims key provided in the configuration. This value is used later when doing authorization. The value
-corresponds to the json path where authorities should be checked.
+Once these validations complete a JWTUser object is then returned, the object is configured with a reference to the permission claims key provided in the configuration.
+This value is used later when doing authorization.
+The value corresponds to the json path where authorities should be checked.
 
 === Customizing Token Generation
 
 In the same way tokens are validated, the generation is initially configured during the initialization.
 
 When generating a token an optional extra parameter can be supplied to control the token generation, this is a
-`JWTOptions` object. The token signature algorithm (default HS256) can be configured using the property `algorithm`.
+`JWTOptions` object.
+The token signature algorithm (default HS256) can be configured using the property `algorithm`.
 In this case a lookup for a key that corresponds to the algorithm is performed and used to sign.
 
 Token headers can be added by specifying any extra headers to be merged with the default ones using the options `headers`
 property.
 
-Sometimes it might be useful to issue tokens without a timestamp (test, development time for example) in this case the
-property `noTimestamp` should be set to true (default false). This means that there is no `iat` field in the token.
+Sometimes it might be useful to issue tokens without a timestamp (test, development time for example) in this case the property `noTimestamp` should be set to true (default false).
+This means that there is no `iat` field in the token.
 
-Token expiration is controlled by the property `expiresInSeconds`, by default there is no expiration. Other control
-fields `audience`, `issuer` and `subject` are then picked from the config is available and added to the token metadata.
+Token expiration is controlled by the property `expiresInSeconds`, by default there is no expiration.
+Other control fields `audience`, `issuer` and `subject` are then picked from the config is available and added to the token metadata.
 
 Finally the token is signed and encoded in the correct format.
 

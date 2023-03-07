@@ -29,10 +29,11 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static io.vertx.ext.auth.webauthn.Attestation.*;
+import static io.vertx.ext.auth.webauthn.Attestation.NONE;
 import static io.vertx.ext.auth.webauthn.AuthenticatorTransport.*;
-import static io.vertx.ext.auth.webauthn.PublicKeyCredential.*;
-import static io.vertx.ext.auth.webauthn.UserVerification.*;
+import static io.vertx.ext.auth.webauthn.PublicKeyCredential.ES256;
+import static io.vertx.ext.auth.webauthn.PublicKeyCredential.RS256;
+import static io.vertx.ext.auth.webauthn.UserVerification.DISCOURAGED;
 
 /**
  * Configuration for the webauthn object
@@ -117,9 +118,9 @@ public class WebAuthnOptions {
 
   /**
    * Apple WebAuthn Root CA PEM
-   *
+   * <p>
    * Downloaded from https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem
-   *
+   * <p>
    * Valid until 03/14/2045 @ 5:00 PM PST
    */
   private static final String APPLE_WEBAUTHN_ROOT_CA =
@@ -157,9 +158,9 @@ public class WebAuthnOptions {
 
   /**
    * Default FIDO2 MDS3 ROOT Certificate
-   *
+   * <p>
    * Downloaded from https://valid.r3.roots.globalsign.com/
-   *
+   * <p>
    * Valid until 18 March 2029
    */
   private static final String FIDO_MDS3_ROOT_CERTIFICATE =

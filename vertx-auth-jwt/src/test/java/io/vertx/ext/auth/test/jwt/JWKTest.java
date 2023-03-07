@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class JWKTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Test
   public void testJWK(TestContext should) {

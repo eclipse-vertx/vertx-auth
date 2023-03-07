@@ -41,7 +41,7 @@ public interface HashingAlgorithm {
    *
    * @return set of param names.
    */
-  default Set<String> params()  {
+  default Set<String> params() {
     return Collections.emptySet();
   }
 
@@ -55,6 +55,7 @@ public interface HashingAlgorithm {
 
   /**
    * Should the encoded string use the default separator to split fields.
+   *
    * @return true by default.
    */
   default boolean needsSeparator() {

@@ -12,15 +12,9 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap.impl;
 
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Objects;
-
-import javax.naming.Context;
-import javax.naming.ldap.InitialLdapContext;
-import javax.naming.ldap.LdapContext;
-
-import io.vertx.core.*;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
@@ -28,6 +22,13 @@ import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.ldap.LdapAuthentication;
 import io.vertx.ext.auth.ldap.LdapAuthenticationOptions;
+
+import javax.naming.Context;
+import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.LdapContext;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Objects;
 
 /**
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>

@@ -22,13 +22,13 @@ import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
  * authorizations.
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
- *
  */
 @VertxGen
 public interface AuthorizationContext {
 
   /**
    * Factory for Authorization Context
+   *
    * @param user a user
    * @return a AuthorizationContext instance
    */
@@ -45,7 +45,7 @@ public interface AuthorizationContext {
 
   /**
    * @return a Multimap containing variable names and values that can be resolved
-   *         at runtime by {@link Authorization}Authorizations
+   * at runtime by {@link Authorization}Authorizations
    */
   MultiMap variables();
 

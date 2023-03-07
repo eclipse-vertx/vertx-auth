@@ -28,6 +28,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(Parameterized.class)
@@ -35,7 +36,7 @@ import java.util.List;
 public class OAuth2Keycloak14IT {
 
   @ClassRule
-  public static GenericContainer<?> container = new GenericContainer<>("jboss/keycloak:14.0.0")
+  public static final GenericContainer<?> container = new GenericContainer<>("jboss/keycloak:14.0.0")
     .withEnv("KEYCLOAK_USER", "admin")
     .withEnv("KEYCLOAK_PASSWORD", "secret")
     .withEnv("DB_VENDOR", "H2")
@@ -51,7 +52,7 @@ public class OAuth2Keycloak14IT {
   }
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private final String proto;
   private String site;
@@ -64,10 +65,10 @@ public class OAuth2Keycloak14IT {
   public void setUp() {
     switch (proto) {
       case "http":
-        site = proto + "://" + container.getContainerIpAddress() + ":" + container.getMappedPort(8080);
+        site = proto + "://" + container.getHost() + ":" + container.getMappedPort(8080);
         break;
       case "https":
-        site = proto + "://" + container.getContainerIpAddress() + ":" + container.getMappedPort(8443);
+        site = proto + "://" + container.getHost() + ":" + container.getMappedPort(8443);
         break;
       default:
         throw new IllegalArgumentException("Invalid proto: " + proto);
@@ -92,7 +93,7 @@ public class OAuth2Keycloak14IT {
       .onFailure(should::fail)
       .onSuccess(oauth2 -> {
 
-        loginAs(oauth2, should, "alice", "account", Arrays.asList("openid"))
+        loginAs(oauth2, should, "alice", "account", Collections.singletonList("openid"))
           .onSuccess(alice -> {
 
             should.assertNotNull(alice.attributes().getJsonObject("idToken"));
@@ -180,7 +181,7 @@ public class OAuth2Keycloak14IT {
       .onFailure(should::fail)
       .onSuccess(oauth2 -> {
 
-        loginAs(oauth2, should, "alice", "account", Arrays.asList("openid"))
+        loginAs(oauth2, should, "alice", "account", Collections.singletonList("openid"))
           .onSuccess(alice -> {
 
             should.assertNotNull(alice.attributes().getJsonObject("idToken"));
@@ -221,7 +222,7 @@ public class OAuth2Keycloak14IT {
       .onFailure(should::fail)
       .onSuccess(oauth2 -> {
 
-        loginAs(oauth2, should, "alice", options.getClientId(), Arrays.asList("openid"))
+        loginAs(oauth2, should, "alice", options.getClientId(), Collections.singletonList("openid"))
           .onSuccess(alice -> {
 
             should.assertNotNull(alice.attributes().getJsonObject("idToken"));
@@ -250,7 +251,7 @@ public class OAuth2Keycloak14IT {
       .onFailure(should::fail)
       .onSuccess(oauth2 -> {
 
-        loginAs(oauth2, should, "alice", Arrays.asList(options.getClientId(), "account"), Arrays.asList("openid"))
+        loginAs(oauth2, should, "alice", Arrays.asList(options.getClientId(), "account"), Collections.singletonList("openid"))
           .onSuccess(alice -> {
 
             should.assertNotNull(alice.attributes().getJsonObject("idToken"));
@@ -282,7 +283,7 @@ public class OAuth2Keycloak14IT {
       .onFailure(should::fail)
       .onSuccess(oauth2 -> {
 
-        loginAs(oauth2, should, "alice", options.getJWTOptions().getAudience(), Arrays.asList("openid"))
+        loginAs(oauth2, should, "alice", options.getJWTOptions().getAudience(), Collections.singletonList("openid"))
           .onSuccess(alice -> {
 
             should.assertNotNull(alice.attributes().getJsonObject("idToken"));

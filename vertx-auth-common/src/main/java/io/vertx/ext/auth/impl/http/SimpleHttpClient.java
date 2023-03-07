@@ -16,7 +16,8 @@
 package io.vertx.ext.auth.impl.http;
 
 import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.*;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
@@ -138,15 +139,15 @@ public final class SimpleHttpClient {
           // read the body regardless
           return res.body()
             .compose(value -> {
-                if (res.statusCode() < 200 || res.statusCode() >= 300) {
-                  if (value == null || value.length() == 0) {
-                    return Future.failedFuture(res.statusMessage());
-                  } else {
-                    return Future.failedFuture(res.statusMessage() + ": " + value);
-                  }
+              if (res.statusCode() < 200 || res.statusCode() >= 300) {
+                if (value == null || value.length() == 0) {
+                  return Future.failedFuture(res.statusMessage());
                 } else {
-                  return Future.succeededFuture(new SimpleHttpResponse(res.statusCode(), res.headers(), value));
+                  return Future.failedFuture(res.statusMessage() + ": " + value);
                 }
+              } else {
+                return Future.succeededFuture(new SimpleHttpResponse(res.statusCode(), res.headers(), value));
+              }
             });
         };
 

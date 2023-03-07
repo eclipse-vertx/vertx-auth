@@ -18,7 +18,7 @@ public class NavigatorCredentialsCreate {
   private final DummyStore database = new DummyStore();
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Before
   public void resetDatabase() {
@@ -30,9 +30,9 @@ public class NavigatorCredentialsCreate {
     final Async test = should.async();
 
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation"))
-    .setAttestation(Attestation.of("direct")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation"))
+          .setAttestation(Attestation.of("direct")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -66,8 +66,8 @@ public class NavigatorCredentialsCreate {
     final Async test = should.async();
 
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 

@@ -12,11 +12,11 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.Objects;
-
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.NotAuthorization;
+
+import java.util.Objects;
 
 public class NotAuthorizationImpl implements NotAuthorization {
 

@@ -44,7 +44,7 @@ import static org.junit.Assert.assertNotEquals;
 public class JWTAuthProviderTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private JWTAuth authProvider;
 
@@ -123,11 +123,12 @@ public class JWTAuthProviderTest {
       .onFailure(should::fail)
       .onSuccess(user -> {
         should.assertNotNull(user);
-        JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
-          should.assertTrue(res.succeeded());
-          should.assertTrue(PermissionBasedAuthorization.create("write").match(user));
-          test.complete();
-        });
+        JWTAuthorization.create("permissions").getAuthorizations(user)
+          .onComplete(res -> {
+            should.assertTrue(res.succeeded());
+            should.assertTrue(PermissionBasedAuthorization.create("write").match(user));
+            test.complete();
+          });
       });
   }
 
@@ -140,11 +141,12 @@ public class JWTAuthProviderTest {
       .onFailure(should::fail)
       .onSuccess(user -> {
         should.assertNotNull(user);
-        JWTAuthorization.create("permissions").getAuthorizations(user, res -> {
-          should.assertTrue(res.succeeded());
-          should.assertFalse(PermissionBasedAuthorization.create("drop").match(user));
-          test.complete();
-        });
+        JWTAuthorization.create("permissions").getAuthorizations(user)
+          .onComplete(res -> {
+            should.assertTrue(res.succeeded());
+            should.assertFalse(PermissionBasedAuthorization.create("drop").match(user));
+            test.complete();
+          });
       });
   }
 
@@ -359,15 +361,16 @@ public class JWTAuthProviderTest {
 
     TokenCredentials authInfo = new TokenCredentials(token);
 
-    authProvider.authenticate(authInfo, res -> {
-      if (res.failed()) {
-        res.cause().printStackTrace();
-        should.fail();
-      }
+    authProvider.authenticate(authInfo)
+      .onComplete(res -> {
+        if (res.failed()) {
+          res.cause().printStackTrace();
+          should.fail();
+        }
 
-      should.assertNotNull(res.result());
-      test.complete();
-    });
+        should.assertNotNull(res.result());
+        test.complete();
+      });
   }
 
   @Test
@@ -661,11 +664,12 @@ public class JWTAuthProviderTest {
       .onFailure(should::fail)
       .onSuccess(res -> {
         should.assertNotNull(res);
-        JWTAuthorization.create("permissions").getAuthorizations(res, permissions -> {
-          should.assertTrue(permissions.succeeded());
-          should.assertTrue(PermissionBasedAuthorization.create("user").match(res));
-          test.complete();
-        });
+        JWTAuthorization.create("permissions").getAuthorizations(res)
+          .onComplete(permissions -> {
+            should.assertTrue(permissions.succeeded());
+            should.assertTrue(PermissionBasedAuthorization.create("user").match(res));
+            test.complete();
+          });
       });
   }
 

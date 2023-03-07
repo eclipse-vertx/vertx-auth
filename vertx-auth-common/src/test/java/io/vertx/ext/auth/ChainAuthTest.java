@@ -1,5 +1,7 @@
 package io.vertx.ext.auth;
 
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -7,9 +9,6 @@ import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
-
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
@@ -23,13 +22,14 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.any();
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        should.fail();
-      } else {
-        test.complete();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          should.fail();
+        } else {
+          test.complete();
+        }
+      });
   }
 
   @Test
@@ -37,13 +37,14 @@ public class ChainAuthTest {
     final Async test = should.async();
     ChainAuth auth = ChainAuth.all();
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        should.fail();
-      } else {
-        test.complete();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          should.fail();
+        } else {
+          test.complete();
+        }
+      });
   }
 
   @Test
@@ -56,13 +57,14 @@ public class ChainAuthTest {
       return Future.succeededFuture(createUser(new JsonObject()));
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        test.complete();
-      } else {
-        should.fail();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          test.complete();
+        } else {
+          should.fail();
+        }
+      });
   }
 
   @Test
@@ -75,13 +77,14 @@ public class ChainAuthTest {
       return Future.succeededFuture(createUser(new JsonObject()));
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        test.complete();
-      } else {
-        should.fail();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          test.complete();
+        } else {
+          should.fail();
+        }
+      });
   }
 
   @Test
@@ -99,14 +102,15 @@ public class ChainAuthTest {
       return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        should.assertEquals(2, res.result().principal().getInteger("provider"));
-        test.complete();
-      } else {
-        should.fail();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          should.assertEquals(2, res.result().principal().getInteger("provider"));
+          test.complete();
+        } else {
+          should.fail();
+        }
+      });
   }
 
   @Test
@@ -124,14 +128,15 @@ public class ChainAuthTest {
       return Future.succeededFuture(createUser(new JsonObject().put("provider", 2)));
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        should.assertEquals(2, res.result().principal().getInteger("provider"));
-        should.fail();
-      } else {
-        test.complete();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          should.assertEquals(2, res.result().principal().getInteger("provider"));
+          should.fail();
+        } else {
+          test.complete();
+        }
+      });
   }
 
   @Test
@@ -153,14 +158,15 @@ public class ChainAuthTest {
       return Future.failedFuture("should not be called");
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        should.assertEquals(2, res.result().principal().getInteger("provider"));
-        test.complete();
-      } else {
-        should.fail();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          should.assertEquals(2, res.result().principal().getInteger("provider"));
+          test.complete();
+        } else {
+          should.fail();
+        }
+      });
   }
 
   @Test
@@ -178,18 +184,19 @@ public class ChainAuthTest {
       return Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attributeTwo", "two")));
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        User result = res.result();
-        should.assertNotNull(result);
-        should.assertEquals(2, res.result().principal().getInteger("provider"));
-        should.assertEquals("one",res.result().attributes().getString("attributeOne"));
-        should.assertEquals("two",res.result().attributes().getString("attributeTwo"));
-        test.complete();
-      } else {
-        should.fail();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          User result = res.result();
+          should.assertNotNull(result);
+          should.assertEquals(2, res.result().principal().getInteger("provider"));
+          should.assertEquals("one", res.result().attributes().getString("attributeOne"));
+          should.assertEquals("two", res.result().attributes().getString("attributeTwo"));
+          test.complete();
+        } else {
+          should.fail();
+        }
+      });
   }
 
   private User createUser(final JsonObject principal) {
@@ -211,16 +218,17 @@ public class ChainAuthTest {
       return Future.succeededFuture(User.create(new JsonObject().put("provider", 2), new JsonObject().put("attribute", "two")));
     });
 
-    auth.authenticate(new TokenCredentials("xyz"), res -> {
-      if (res.succeeded()) {
-        User result = res.result();
-        should.assertNotNull(result);
-        should.assertEquals(2, res.result().principal().getInteger("provider"));
-        should.assertEquals("[\"one\",\"two\"]",res.result().attributes().getValue("attribute").toString());
-        test.complete();
-      } else {
-        should.fail();
-      }
-    });
+    auth.authenticate(new TokenCredentials("xyz"))
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          User result = res.result();
+          should.assertNotNull(result);
+          should.assertEquals(2, res.result().principal().getInteger("provider"));
+          should.assertEquals("[\"one\",\"two\"]", res.result().attributes().getValue("attribute").toString());
+          test.complete();
+        } else {
+          should.fail();
+        }
+      });
   }
 }

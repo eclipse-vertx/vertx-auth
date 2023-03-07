@@ -12,6 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth.ldap;
 
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -26,8 +27,6 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import org.junit.runner.RunWith;
 
 @CreateDS(name = "myDS", partitions = {@CreatePartition(name = "test", suffix = "dc=myorg,dc=com")})
@@ -37,10 +36,10 @@ import org.junit.runner.RunWith;
 public class LdapAuthenticationTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @ClassRule
-  public static CreateLdapServerRule serverRule = new CreateLdapServerRule();
+  public static final CreateLdapServerRule serverRule = new CreateLdapServerRule();
   private LdapAuthentication authProvider;
 
   @Test

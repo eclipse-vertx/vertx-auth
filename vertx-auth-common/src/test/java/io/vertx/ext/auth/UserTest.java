@@ -13,12 +13,11 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.*;
+import io.vertx.ext.auth.impl.UserConverter;
 import org.junit.Assert;
 import org.junit.Test;
-
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.impl.UserConverter;
 
 import java.util.Collections;
 
@@ -58,16 +57,16 @@ public class UserTest {
     user.authorizations().add("providerId", NotAuthorization.create(PermissionBasedAuthorization.create("permission1")));
     user.authorizations().add("providerId", AndAuthorization.create());
     user.authorizations()
-        .add("providerId", AndAuthorization.create().addAuthorization(PermissionBasedAuthorization.create("permission1"))
-            .addAuthorization(RoleBasedAuthorization.create("role1"))
-            .addAuthorization(PermissionBasedAuthorization.create("permission2"))
-            .addAuthorization(RoleBasedAuthorization.create("role2")));
+      .add("providerId", AndAuthorization.create().addAuthorization(PermissionBasedAuthorization.create("permission1"))
+        .addAuthorization(RoleBasedAuthorization.create("role1"))
+        .addAuthorization(PermissionBasedAuthorization.create("permission2"))
+        .addAuthorization(RoleBasedAuthorization.create("role2")));
     user.authorizations().add("providerId", OrAuthorization.create());
     user.authorizations()
-        .add("providerId", OrAuthorization.create().addAuthorization(PermissionBasedAuthorization.create("permission1"))
-            .addAuthorization(RoleBasedAuthorization.create("role1"))
-            .addAuthorization(PermissionBasedAuthorization.create("permission2"))
-            .addAuthorization(RoleBasedAuthorization.create("role2")));
+      .add("providerId", OrAuthorization.create().addAuthorization(PermissionBasedAuthorization.create("permission1"))
+        .addAuthorization(RoleBasedAuthorization.create("role1"))
+        .addAuthorization(PermissionBasedAuthorization.create("permission2"))
+        .addAuthorization(RoleBasedAuthorization.create("role2")));
     testReadWriteUser(user);
   }
 

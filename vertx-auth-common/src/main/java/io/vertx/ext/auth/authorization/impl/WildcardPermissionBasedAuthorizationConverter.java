@@ -12,11 +12,11 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.Objects;
-
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
+
+import java.util.Objects;
 
 import static io.vertx.ext.auth.authorization.impl.AuthorizationConverter.FIELD_TYPE;
 

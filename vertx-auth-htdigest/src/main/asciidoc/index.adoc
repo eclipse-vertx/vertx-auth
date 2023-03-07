@@ -1,11 +1,10 @@
 = .htdigest Auth Provider
 
-We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the `.digest` file format
-to perform authentication. The provider will not watch for updates to the file after loading. If you need dynamic
-user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the `.digest` file format to perform authentication.
+The provider will not watch for updates to the file after loading.
+If you need dynamic user management it would be more convenient to use dynamic providers such as jdbc or mongo providers.
 
-To use this project, add the following
-dependency to the _dependencies_ section of your build descriptor:
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
 
@@ -25,7 +24,8 @@ dependency to the _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-auth-htdigest:${maven.version}'
 ----
 
-To create an instance you first need an .htdigest file. This file is created using the apache htdigest tool.
+To create an instance you first need an .htdigest file.
+This file is created using the apache htdigest tool.
 
 Once you've got one of these you can create a {@link io.vertx.ext.auth.htdigest.HtdigestAuth} instance as follows:
 
@@ -40,8 +40,7 @@ The out of the box config assumes the usage of the file .htdigest in the root of
 
 == Authentication
 
-When authenticating using this implementation, it assumes that the digest authorization header is parsed as a JSON
-object which we refer from now on as authentication info:
+When authenticating using this implementation, it assumes that the digest authorization header is parsed as a JSON object which we refer from now on as authentication info:
 
 [source,$lang]
 ----
@@ -50,14 +49,12 @@ object which we refer from now on as authentication info:
 
 == Provider internal behavior
 
-The provider will load the specified `.htdigest` file at start time and will not watch for modifications. If you
-require dynamic reloads, you will need to restart the provider.
+The provider will load the specified `.htdigest` file at start time and will not watch for modifications.
+If you require dynamic reloads, you will need to restart the provider.
 
-The implementation does not have any other state than the digest file itself, this means that validation and
-generation of `nonce` strings and counters must be handled outside this provider.
+The implementation does not have any other state than the digest file itself, this means that validation and generation of `nonce` strings and counters must be handled outside this provider.
 
-Finally `auth-int` `qop` is not supported to avoid having to consume potential large blobs of data in order to
-validate the hash of the full request. This is usually also not present on modern web browsers.
+Finally `auth-int` `qop` is not supported to avoid having to consume potential large blobs of data in order to validate the hash of the full request.
+This is usually also not present on modern web browsers.
 
-When validating a user for a particular permission it will always return false since the htdigest file is a pure
-authentication mechanism and not authorization.
+When validating a user for a particular permission it will always return false since the htdigest file is a pure authentication mechanism and not authorization.

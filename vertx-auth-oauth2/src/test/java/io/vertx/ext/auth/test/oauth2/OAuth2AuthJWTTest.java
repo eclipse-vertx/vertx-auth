@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2AuthJWTTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -95,15 +95,16 @@ public class OAuth2AuthJWTTest {
     JsonObject jwt = new JsonObject()
       .put("scope", "https://www.googleapis.com/auth/devstorage.readonly");
 
-    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AUTH_JWT).setJwt(jwt), res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new Oauth2Credentials().setFlow(OAuth2FlowType.AUTH_JWT).setJwt(jwt))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
+          test.complete();
+        }
+      });
   }
 }

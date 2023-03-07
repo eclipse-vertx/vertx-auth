@@ -18,7 +18,7 @@ public class NavigatorCredentialsGet {
   private final DummyStore database = new DummyStore();
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   @Before
   public void resetDatabase() {
@@ -30,8 +30,8 @@ public class NavigatorCredentialsGet {
     final Async test = should.async();
 
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -61,8 +61,8 @@ public class NavigatorCredentialsGet {
     final Async test = should.async();
 
     WebAuthn webAuthN = WebAuthn.create(
-      rule.vertx(),
-      new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
       .authenticatorFetcher(database::fetch)
       .authenticatorUpdater(database::store);
 
@@ -87,10 +87,10 @@ public class NavigatorCredentialsGet {
         .put("userHandle", ""));
 
     webAuthN.authenticate(new WebAuthnCredentials()
-      .setWebauthn(body)
-      .setUsername("paulo")
-      .setOrigin("https://192.168.178.206.xip.io:8443")
-      .setChallenge("zNaIWnCmwVF7A5aZDF04_jthPmZTdziI7sXDkYEJxLDH1d1Eycc6kE_Rf1LZiSD0FGCrjzrYq9NmYrBmcDFF_g"))
+        .setWebauthn(body)
+        .setUsername("paulo")
+        .setOrigin("https://192.168.178.206.xip.io:8443")
+        .setChallenge("zNaIWnCmwVF7A5aZDF04_jthPmZTdziI7sXDkYEJxLDH1d1Eycc6kE_Rf1LZiSD0FGCrjzrYq9NmYrBmcDFF_g"))
       .onFailure(should::fail)
       .onSuccess(user -> {
         assertNotNull(user);

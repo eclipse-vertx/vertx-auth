@@ -36,6 +36,7 @@ public interface Attestation {
 
   /**
    * The unique identifier for the attestation
+   *
    * @return String
    */
   String fmt();
@@ -43,12 +44,11 @@ public interface Attestation {
   /**
    * The implementation of the Attestation verification.
    *
-   * @param options the runtime configuration options
-   * @param metadata the Metadata holder to perform MDS queries
+   * @param options        the runtime configuration options
+   * @param metadata       the Metadata holder to perform MDS queries
    * @param clientDataJSON the binary client data json
-   * @param attestation the JSON representation of the attestation
-   * @param authData the authenticator data
-   *
+   * @param attestation    the JSON representation of the attestation
+   * @param authData       the authenticator data
    * @throws AttestationException if the validation fails
    */
   AttestationCertificates validate(WebAuthnOptions options, MetaData metadata, byte[] clientDataJSON, JsonObject attestation, AuthData authData) throws AttestationException;
@@ -85,6 +85,7 @@ public interface Attestation {
 
   /**
    * Parses a JsonArray of certificates to a X509Certificate list
+   *
    * @param x5c the json array
    * @return list of X509Certificates
    */

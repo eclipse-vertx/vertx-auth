@@ -18,7 +18,7 @@ public class HashingStrategyTest {
   @Rule
   public RunTestOnContext rule = new RunTestOnContext();
 
-  String salt = Codec.base64Encode("keyboard.cat".getBytes(StandardCharsets.UTF_8));
+  final String salt = Codec.base64Encode("keyboard.cat".getBytes(StandardCharsets.UTF_8));
 
   @Test
   public void testHashSimple() {

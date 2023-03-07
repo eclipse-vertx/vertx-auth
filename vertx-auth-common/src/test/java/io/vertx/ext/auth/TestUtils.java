@@ -12,12 +12,11 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
-import java.util.function.Function;
-
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import org.junit.Assert;
 
-import io.vertx.core.json.JsonObject;
+import java.util.function.Function;
 
 public class TestUtils {
 

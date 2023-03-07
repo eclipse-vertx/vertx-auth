@@ -16,7 +16,10 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -103,8 +106,8 @@ public interface AmazonCognitoAuth extends OpenIDConnectAuth {
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     return OpenIDConnectAuth.discover(
-        vertx,
-        new OAuth2Options(config)
-          .setScopeSeparator("+"));
+      vertx,
+      new OAuth2Options(config)
+        .setScopeSeparator("+"));
   }
 }

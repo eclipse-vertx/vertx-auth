@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2AuthCodeErrorTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final JsonObject fixture = new JsonObject(
     "{" +
@@ -97,13 +97,14 @@ public class OAuth2AuthCodeErrorTest {
     final Async test = should.async();
 
     config = oauthConfig;
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertNotNull(res.cause());
-        test.complete();
-      } else {
-        should.fail("Should fail with bad verification code");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertNotNull(res.cause());
+          test.complete();
+        } else {
+          should.fail("Should fail with bad verification code");
+        }
+      });
   }
 }

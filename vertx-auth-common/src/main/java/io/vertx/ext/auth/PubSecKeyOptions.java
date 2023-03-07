@@ -73,6 +73,7 @@ public class PubSecKeyOptions {
    * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
    * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
    * payload.
+   *
    * @return self.
    */
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
@@ -85,6 +86,7 @@ public class PubSecKeyOptions {
    * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
    * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
    * payload.
+   *
    * @return self.
    */
   public PubSecKeyOptions setBuffer(Buffer buffer) {

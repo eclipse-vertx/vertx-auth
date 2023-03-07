@@ -2,7 +2,8 @@ package io.vertx.ext.auth.webauthn.impl.attestation.tpm;
 
 import io.vertx.core.buffer.Buffer;
 
-import static io.vertx.ext.auth.webauthn.impl.attestation.TPMAttestation.*;
+import static io.vertx.ext.auth.webauthn.impl.attestation.TPMAttestation.TPM_ALG_ECC;
+import static io.vertx.ext.auth.webauthn.impl.attestation.TPMAttestation.TPM_ALG_RSA;
 
 public class PubArea {
 
@@ -45,30 +46,30 @@ public class PubArea {
     if (type == TPM_ALG_RSA) {
       // read 10 bytes
       symmetric = pubBuffer.getUnsignedShort(pos);
-      pos+=2;
+      pos += 2;
       scheme = pubBuffer.getUnsignedShort(pos);
-      pos+=2;
+      pos += 2;
       keyBits = pubBuffer.getUnsignedShort(pos);
-      pos+=2;
+      pos += 2;
       exponent = pubBuffer.getUnsignedInt(pos);
-      pos+=4;
+      pos += 4;
     } else if (type == TPM_ALG_ECC) {
       // read 8 bytes
       symmetric = pubBuffer.getUnsignedShort(pos);
-      pos+=2;
+      pos += 2;
       scheme = pubBuffer.getUnsignedShort(pos);
-      pos+=2;
+      pos += 2;
       curveID = pubBuffer.getUnsignedShort(pos);
-      pos+=4;
+      pos += 4;
       kdf = pubBuffer.getUnsignedShort(pos);
-      pos+=2;
+      pos += 2;
     } else {
       throw new IllegalArgumentException("Unexpected type: " + type);
     }
 
     // Slice out unique of dynamic length
     len = pubBuffer.getUnsignedShort(pos);
-    pos+=2;
+    pos += 2;
     unique = pubBuffer.getBytes(pos, pos + len);
   }
 

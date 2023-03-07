@@ -24,7 +24,7 @@ import java.util.ServiceLoader;
 
 /**
  * Hashing Strategy manager.
- *
+ * <p>
  * This class will load system provided hashing strategies and algorithms.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
@@ -51,9 +51,9 @@ public interface HashingStrategy {
   /**
    * Hashes a password.
    *
-   * @param id the algorithm id
-   * @param params the algorithm specific parameters
-   * @param salt the given salt
+   * @param id       the algorithm id
+   * @param params   the algorithm specific parameters
+   * @param salt     the given salt
    * @param password the given password
    * @return the hashed string
    */
@@ -63,7 +63,7 @@ public interface HashingStrategy {
    * Time constant password check. Regardless of the check, this algorithm executes the same number of
    * checks regardless of the correctly number of characters
    *
-   * @param hash the hash to verify
+   * @param hash     the hash to verify
    * @param password the password to test against
    * @return boolean
    */
@@ -71,6 +71,7 @@ public interface HashingStrategy {
 
   /**
    * Get an algorithm interface by its Id
+   *
    * @param id the algorithm id
    * @return the algorithm
    */
@@ -79,7 +80,7 @@ public interface HashingStrategy {
   /**
    * Put or replace an algorithm into the list of system loaded algorithms.
    *
-   * @param id the algorithm id
+   * @param id        the algorithm id
    * @param algorithm the implementation
    * @return self
    */

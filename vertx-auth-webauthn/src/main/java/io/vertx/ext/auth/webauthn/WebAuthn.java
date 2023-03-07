@@ -18,7 +18,10 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.webauthn.impl.WebAuthnImpl;
@@ -47,7 +50,7 @@ public interface WebAuthn extends AuthenticationProvider {
   /**
    * Create a WebAuthN auth provider
    *
-   * @param vertx the Vertx instance.
+   * @param vertx   the Vertx instance.
    * @param options the custom options to the provider.
    * @return the auth provider.
    */
@@ -57,8 +60,9 @@ public interface WebAuthn extends AuthenticationProvider {
 
   /**
    * Gets a challenge and any other parameters for the {@code navigator.credentials.create()} call.
-   *
+   * <p>
    * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
+   *
    * @param user    - the user object with name and optionally displayName and icon
    * @param handler server encoded make credentials request
    * @return fluent self
@@ -81,10 +85,10 @@ public interface WebAuthn extends AuthenticationProvider {
    * Creates an assertion challenge and any other parameters for the {@code navigator.credentials.get()} call.
    * If the auth provider is configured with {@code RequireResidentKey} and the username is null then the
    * generated assertion will be a RK assertion (Usernameless).
-   *
+   * <p>
    * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
    *
-   * @param name the unique user identified
+   * @param name    the unique user identified
    * @param handler server encoded get assertion request
    * @return fluent self.
    */
@@ -105,18 +109,18 @@ public interface WebAuthn extends AuthenticationProvider {
   /**
    * Provide a {@link Function} that can fetch {@link Authenticator}s from a backend given the incomplete
    * {@link Authenticator} argument.
-   *
+   * <p>
    * The implementation must consider the following fields <strong>exclusively</strong>, while performing the lookup:
    * <ul>
    *   <li>{@link Authenticator#getUserName()}</li>
    *   <li>{@link Authenticator#getCredID()} ()}</li>
    * </ul>
-   *
+   * <p>
    * It may return more than 1 result, for example when a user can be identified using different modalities.
    * To signal that a user is not allowed/present on the system, a failure should be returned, not {@code null}.
-   *
+   * <p>
    * The function signature is as follows:
-   *
+   * <p>
    * {@code (Authenticator) -> Future<List<Authenticator>>>}
    *
    * <ul>
@@ -133,14 +137,14 @@ public interface WebAuthn extends AuthenticationProvider {
   /**
    * Provide a {@link Function} that can update or insert a {@link Authenticator}.
    * The function <strong>should</strong> store a given authenticator to a persistence storage.
-   *
+   * <p>
    * When an authenticator is already present, this method <strong>must</strong> at least update
    * {@link Authenticator#getCounter()}, and is not required to perform any other update.
-   *
+   * <p>
    * For new authenticators, the whole object data <strong>must</strong> be persisted.
-   *
+   * <p>
    * The function signature is as follows:
-   *
+   * <p>
    * {@code (Authenticator) -> Future<Void>}
    *
    * <ul>
@@ -156,6 +160,7 @@ public interface WebAuthn extends AuthenticationProvider {
 
   /**
    * Getter to the instance FIDO2 Meta Data Service.
+   *
    * @return the MDS instance.
    */
   MetaDataService metaDataService();

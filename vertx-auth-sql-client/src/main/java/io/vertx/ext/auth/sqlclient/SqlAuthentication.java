@@ -34,8 +34,8 @@ public interface SqlAuthentication extends AuthenticationProvider {
   /**
    * Create a JDBC auth provider implementation
    *
-   * @param client  the JDBC client instance
-   * @return  the auth provider
+   * @param client the JDBC client instance
+   * @return the auth provider
    */
   static SqlAuthentication create(SqlClient client) {
     return create(client, new SqlAuthenticationOptions());
@@ -46,7 +46,7 @@ public interface SqlAuthentication extends AuthenticationProvider {
    *
    * @param client  the JDBC client instance
    * @param options authentication options
-   * @return  the auth provider
+   * @return the auth provider
    */
   static SqlAuthentication create(SqlClient client, SqlAuthenticationOptions options) {
     return new SqlAuthenticationImpl(client, options);
@@ -54,14 +54,14 @@ public interface SqlAuthentication extends AuthenticationProvider {
 
   /**
    * Hashes a password to be stored.
-   *
+   * <p>
    * See: {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
    */
   String hash(String id, Map<String, String> params, String salt, String password);
 
   /**
    * Hashes a password to be stored.
-   *
+   * <p>
    * See: {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
    */
   default String hash(String id, String salt, String password) {

@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 public class HtdigestAuthTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   protected HtdigestAuth authProvider;
 

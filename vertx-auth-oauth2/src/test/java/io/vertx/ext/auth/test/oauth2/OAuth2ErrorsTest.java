@@ -5,8 +5,8 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 public class OAuth2ErrorsTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final Credentials tokenConfig = new Oauth2Credentials()
     .setFlow(OAuth2FlowType.AUTH_CODE)
@@ -75,14 +75,15 @@ public class OAuth2ErrorsTest {
         .put("type", "OAuthException")
         .put("code", 190));
 
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertEquals("Error validating access token: User USER_ID has not authorized application APP_ID.", res.cause().getMessage());
-        test.complete();
-      } else {
-        should.fail("Should fail");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertEquals("Error validating access token: User USER_ID has not authorized application APP_ID.", res.cause().getMessage());
+          test.complete();
+        } else {
+          should.fail("Should fail");
+        }
+      });
   }
 
   @Test
@@ -94,14 +95,15 @@ public class OAuth2ErrorsTest {
       .put("error_description", "The client_id and/or client_secret passed are incorrect.")
       .put("error_uri", "https://developer.github.com/v3/oauth/#incorrect-client-credentials");
 
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertEquals("The client_id and/or client_secret passed are incorrect.", res.cause().getMessage());
-        test.complete();
-      } else {
-        should.fail("Should fail");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertEquals("The client_id and/or client_secret passed are incorrect.", res.cause().getMessage());
+          test.complete();
+        } else {
+          should.fail("Should fail");
+        }
+      });
   }
 
   @Test
@@ -110,14 +112,15 @@ public class OAuth2ErrorsTest {
     fixture = new JsonObject()
       .put("error", "incorrect_client_credentials");
 
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertEquals("incorrect_client_credentials", res.cause().getMessage());
-        test.complete();
-      } else {
-        should.fail("Should fail");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertEquals("incorrect_client_credentials", res.cause().getMessage());
+          test.complete();
+        } else {
+          should.fail("Should fail");
+        }
+      });
   }
 
   @Test
@@ -126,13 +129,14 @@ public class OAuth2ErrorsTest {
     fixture = new JsonObject()
       .put("error", 190);
 
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertEquals("190", res.cause().getMessage());
-        test.complete();
-      } else {
-        should.fail("Should fail");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertEquals("190", res.cause().getMessage());
+          test.complete();
+        } else {
+          should.fail("Should fail");
+        }
+      });
   }
 }

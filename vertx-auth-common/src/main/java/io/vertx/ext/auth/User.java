@@ -37,7 +37,7 @@ public interface User {
   /**
    * Factory for user instances that are single string. The credentials will be added to the principal
    * of this instance. As nothing can be said about the credentials no validation will be done.
-   *
+   * <p>
    * Will create a principal with a property {@code "username"} with the name as value.
    *
    * @param username the value for this user
@@ -50,7 +50,7 @@ public interface User {
   /**
    * Factory for user instances that are single string. The credentials will be added to the principal
    * of this instance. As nothing can be said about the credentials no validation will be done.
-   *
+   * <p>
    * Will create a principal with a property {@code "access_token"} with the name as value.
    *
    * @param token the value for this user
@@ -75,7 +75,7 @@ public interface User {
    * Factory for user instances that are free form. The credentials will be added to the principal
    * of this instance. As nothing can be said about the credentials no validation will be done.
    *
-   * @param principal the free form json principal
+   * @param principal  the free form json principal
    * @param attributes the free form json attributes that further describe the principal
    * @return user instance
    */
@@ -85,7 +85,7 @@ public interface User {
 
   /**
    * The user subject. Usually a human representation that identifies this user.
-   *
+   * <p>
    * The lookup for this information will take place in several places in the following order:
    *
    * <ol>
@@ -190,6 +190,7 @@ public interface User {
    *   <li>If exists the value will be returned from the {@link #principal()}</li>
    *   <li>Otherwise it will be {@code null}</li>
    * </ol>
+   *
    * @param key the key to look up
    * @param <T> the expected type
    * @return the value or null if missing
@@ -225,9 +226,10 @@ public interface User {
    *   <li>If exists the value will be returned from the {@link #principal()}</li>
    *   <li>Otherwise it will be {@code null}</li>
    * </ol>
-   * @param key the key to look up
+   *
+   * @param key          the key to look up
    * @param defaultValue default value to return if missing
-   * @param <T> the expected type
+   * @param <T>          the expected type
    * @return the value or null if missing
    * @throws ClassCastException if the value cannot be casted to {@code T}
    */
@@ -261,6 +263,7 @@ public interface User {
    *   <li>If exists the value will be returned from the {@link #principal()}</li>
    *   <li>Otherwise it will be {@code null}</li>
    * </ol>
+   *
    * @param key the key to look up
    * @return the value or null if missing
    */
@@ -304,10 +307,10 @@ public interface User {
 
   /**
    * Merge the principal and attributes of a second user into this object properties.
-   *
+   * <p>
    * It is important to notice that the principal merges by replacing existing keys with the new values, while the
    * attributes (as they represent decoded data) are accumulated at the root level.
-   *
+   * <p>
    * This means that given:
    *
    * <pre>{@code
@@ -323,7 +326,7 @@ public interface User {
    *   }
    * }
    * }</pre>
-   *
+   * <p>
    * When performing a merge of {@code userA} with {@code userB}, you will get:
    *
    * <pre>{@code

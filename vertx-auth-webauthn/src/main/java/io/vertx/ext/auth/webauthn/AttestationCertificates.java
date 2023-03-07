@@ -38,7 +38,8 @@ public class AttestationCertificates {
    */
   private List<String> x5c;
 
-  public AttestationCertificates() {}
+  public AttestationCertificates() {
+  }
 
   public AttestationCertificates(JsonObject json) {
     AttestationCertificatesConverter.fromJson(json, this);

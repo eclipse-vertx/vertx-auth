@@ -24,7 +24,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.asn.ASN1;
 
-import javax.crypto.*;
+import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -187,7 +187,8 @@ public final class JWK {
         // algorithm is valid
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, passwordProtection == null ? keyStorePassword.toCharArray() : passwordProtection.get(alias).toCharArray());
         keys.add(new JWK(alias, certificate, privateKey));
-      } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+      } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException |
+               NoSuchAlgorithmException | UnrecoverableKeyException e) {
         LOG.warn("Failed to load key for algorithm: " + alias, e);
       }
     }
@@ -460,7 +461,8 @@ public final class JWK {
 
       label = kid != null ? kid : alg + "#" + json.hashCode();
 
-    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException | CertificateException | NoSuchProviderException | SignatureException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException |
+             CertificateException | NoSuchProviderException | SignatureException e) {
       throw new RuntimeException(e);
     }
   }

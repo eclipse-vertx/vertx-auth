@@ -6,14 +6,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
@@ -23,7 +26,7 @@ import java.net.UnknownHostException;
 public class OAuth2FailureTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private static final Credentials tokenConfig = new Oauth2Credentials()
     .setFlow(OAuth2FlowType.AUTH_CODE)
@@ -85,14 +88,15 @@ public class OAuth2FailureTest {
     final Async test = should.async();
     config = oauthConfig;
     code = 401;
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertEquals("Unauthorized", res.cause().getMessage());
-        test.complete();
-      } else {
-        should.fail("Should have failed");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertEquals("Unauthorized", res.cause().getMessage());
+          test.complete();
+        } else {
+          should.fail("Should have failed");
+        }
+      });
   }
 
   @Test
@@ -100,14 +104,15 @@ public class OAuth2FailureTest {
     final Async test = should.async();
     config = oauthConfig;
     code = 500;
-    oauth2.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertEquals("Internal Server Error", res.cause().getMessage());
-        test.complete();
-      } else {
-        should.fail("Should have failed");
-      }
-    });
+    oauth2.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertEquals("Internal Server Error", res.cause().getMessage());
+          test.complete();
+        } else {
+          should.fail("Should have failed");
+        }
+      });
   }
 
   @Test
@@ -117,13 +122,14 @@ public class OAuth2FailureTest {
       .setClientId("client-id")
       .setClientSecret("client-secret")
       .setSite("http://zlouklfoux.net.com.info.pimpo.molo"));
-    auth.authenticate(tokenConfig, res -> {
-      if (res.failed()) {
-        should.assertTrue(res.cause() instanceof UnknownHostException);
-        test.complete();
-      } else {
-        should.fail("Should have failed");
-      }
-    });
+    auth.authenticate(tokenConfig)
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.assertTrue(res.cause() instanceof UnknownHostException);
+          test.complete();
+        } else {
+          should.fail("Should have failed");
+        }
+      });
   }
 }

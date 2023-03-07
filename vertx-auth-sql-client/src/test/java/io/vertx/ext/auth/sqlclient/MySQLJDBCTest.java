@@ -23,7 +23,7 @@ import org.testcontainers.containers.GenericContainer;
 public class MySQLJDBCTest {
 
   @ClassRule
-  public static GenericContainer<?> container = new GenericContainer<>("mysql:5.7")
+  public static final GenericContainer<?> container = new GenericContainer<>("mysql:5.7")
     .withEnv("MYSQL_USER", "mysql")
     .withEnv("MYSQL_PASSWORD", "password")
     .withEnv("MYSQL_ROOT_PASSWORD", "password")
@@ -32,7 +32,7 @@ public class MySQLJDBCTest {
     .withClasspathResourceMapping("mysql-auth-ddl-test.sql", "/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY);
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private JDBCPool mysql;
 
@@ -43,7 +43,7 @@ public class MySQLJDBCTest {
       rule.vertx(),
       // default config
       new JDBCConnectOptions()
-        .setJdbcUrl("jdbc:mysql://" + container.getContainerIpAddress() + ":" + container.getMappedPort(3306) + "/testschema?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false")
+        .setJdbcUrl("jdbc:mysql://" + container.getHost() + ":" + container.getMappedPort(3306) + "/testschema?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false")
         .setUser("mysql")
         .setPassword("password"),
       // default pool config
@@ -64,12 +64,13 @@ public class MySQLJDBCTest {
 
     Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.succeeded());
-      should.assertNotNull(authenticate.result());
-      should.assertEquals("lopus", authenticate.result().principal().getString("username"));
-      test.complete();
-    });
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.succeeded());
+        should.assertNotNull(authenticate.result());
+        should.assertEquals("lopus", authenticate.result().principal().getString("username"));
+        test.complete();
+      });
   }
 
   @Test
@@ -80,12 +81,13 @@ public class MySQLJDBCTest {
 
     Credentials authInfo = new UsernamePasswordCredentials("lopus", "s3cr3t");
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.failed());
-      should.assertNull(authenticate.result());
-      should.assertEquals("Invalid username/password", authenticate.cause().getMessage());
-      test.complete();
-    });
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.failed());
+        should.assertNull(authenticate.result());
+        should.assertEquals("Invalid username/password", authenticate.cause().getMessage());
+        test.complete();
+      });
   }
 
   @Test
@@ -96,12 +98,13 @@ public class MySQLJDBCTest {
 
     Credentials authInfo = new UsernamePasswordCredentials("lopes", "s3cr3t");
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.failed());
-      should.assertNull(authenticate.result());
-      should.assertEquals("Invalid username/password", authenticate.cause().getMessage());
-      test.complete();
-    });
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.failed());
+        should.assertNull(authenticate.result());
+        should.assertEquals("Invalid username/password", authenticate.cause().getMessage());
+        test.complete();
+      });
   }
 
   @Test
@@ -112,18 +115,20 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.succeeded());
-      final User user = authenticate.result();
-      should.assertNotNull(user);
-      AuthorizationProvider authz = SqlAuthorization.create(mysql);
-      authz.getAuthorizations(user, getAuthorizations -> {
-        should.assertTrue(getAuthorizations.succeeded());
-        // attest
-        should.assertTrue(RoleBasedAuthorization.create("dev").match(user));
-        test.complete();
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.succeeded());
+        final User user = authenticate.result();
+        should.assertNotNull(user);
+        AuthorizationProvider authz = SqlAuthorization.create(mysql);
+        authz.getAuthorizations(user)
+          .onComplete(getAuthorizations -> {
+            should.assertTrue(getAuthorizations.succeeded());
+            // attest
+            should.assertTrue(RoleBasedAuthorization.create("dev").match(user));
+            test.complete();
+          });
       });
-    });
   }
 
   @Test
@@ -134,18 +139,20 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.succeeded());
-      final User user = authenticate.result();
-      should.assertNotNull(user);
-      AuthorizationProvider authz = SqlAuthorization.create(mysql);
-      authz.getAuthorizations(user, getAuthorizations -> {
-        should.assertTrue(getAuthorizations.succeeded());
-        // attest
-        should.assertFalse(RoleBasedAuthorization.create("manager").match(user));
-        test.complete();
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.succeeded());
+        final User user = authenticate.result();
+        should.assertNotNull(user);
+        AuthorizationProvider authz = SqlAuthorization.create(mysql);
+        authz.getAuthorizations(user)
+          .onComplete(getAuthorizations -> {
+            should.assertTrue(getAuthorizations.succeeded());
+            // attest
+            should.assertFalse(RoleBasedAuthorization.create("manager").match(user));
+            test.complete();
+          });
       });
-    });
   }
 
   @Test
@@ -156,18 +163,20 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.succeeded());
-      final User user = authenticate.result();
-      should.assertNotNull(user);
-      AuthorizationProvider authz = SqlAuthorization.create(mysql);
-      authz.getAuthorizations(user, getAuthorizations -> {
-        should.assertTrue(getAuthorizations.succeeded());
-        // attest
-        should.assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
-        test.complete();
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.succeeded());
+        final User user = authenticate.result();
+        should.assertNotNull(user);
+        AuthorizationProvider authz = SqlAuthorization.create(mysql);
+        authz.getAuthorizations(user)
+          .onComplete(getAuthorizations -> {
+            should.assertTrue(getAuthorizations.succeeded());
+            // attest
+            should.assertTrue(PermissionBasedAuthorization.create("commit_code").match(user));
+            test.complete();
+          });
       });
-    });
   }
 
   @Test
@@ -178,17 +187,19 @@ public class MySQLJDBCTest {
 
     AuthenticationProvider authn = SqlAuthentication.create(mysql);
 
-    authn.authenticate(authInfo, authenticate -> {
-      should.assertTrue(authenticate.succeeded());
-      final User user = authenticate.result();
-      should.assertNotNull(user);
-      AuthorizationProvider authz = SqlAuthorization.create(mysql);
-      authz.getAuthorizations(user, getAuthorizations -> {
-        should.assertTrue(getAuthorizations.succeeded());
-        // attest
-        should.assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));
-        test.complete();
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.succeeded());
+        final User user = authenticate.result();
+        should.assertNotNull(user);
+        AuthorizationProvider authz = SqlAuthorization.create(mysql);
+        authz.getAuthorizations(user)
+          .onComplete(getAuthorizations -> {
+            should.assertTrue(getAuthorizations.succeeded());
+            // attest
+            should.assertFalse(PermissionBasedAuthorization.create("eat_sandwich").match(user));
+            test.complete();
+          });
       });
-    });
   }
 }

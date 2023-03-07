@@ -18,17 +18,12 @@
  */
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The following code has been adapted from the class WildcardPermission from
  * Apache Shiro
- *
+ * <p>
  * A <code>WildcardPermission</code> is a very flexible permission construct
  * supporting multiple levels of permission matching. However, most people will
  * probably follow some standard conventions as explained below.
@@ -121,7 +116,6 @@ import java.util.Set;
  * application. However, the Shiro team likes to standardize some common usages
  * shown above to help people get started and provide consistency in the Shiro
  * community.
- *
  */
 class WildcardExpression {
 
@@ -232,14 +226,14 @@ class WildcardExpression {
       Set<String> subparts = new LinkedHashSet<>(Arrays.asList(part.split(SUBPART_DIVIDER_TOKEN)));
       if (subparts.isEmpty()) {
         throw new IllegalArgumentException(
-            "Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
+          "Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
       }
       this.parts.add(subparts);
     }
 
     if (this.parts.isEmpty()) {
       throw new IllegalArgumentException(
-          "Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
+        "Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
     }
   }
 

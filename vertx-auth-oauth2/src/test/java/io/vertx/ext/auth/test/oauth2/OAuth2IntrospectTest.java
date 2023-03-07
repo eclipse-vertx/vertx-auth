@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException;
 public class OAuth2IntrospectTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   // according to RFC
   private static final JsonObject fixtureIntrospect = new JsonObject(
@@ -131,35 +131,37 @@ public class OAuth2IntrospectTest {
 
     config = oauthIntrospect;
     fixture = fixtureIntrospect;
-    oauth2.authenticate(new TokenCredentials(token), res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
-        User token2 = res.result();
-        should.assertNotNull(token2);
-        JsonObject principal = token2.principal().copy();
+    oauth2.authenticate(new TokenCredentials(token))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause().getMessage());
+        } else {
+          User token2 = res.result();
+          should.assertNotNull(token2);
+          JsonObject principal = token2.principal().copy();
 
-        // clean time specific value
-        principal.remove("expires_at");
-        principal.remove("access_token");
+          // clean time specific value
+          principal.remove("expires_at");
+          principal.remove("access_token");
 
-        final JsonObject assertion = fixtureIntrospect.copy();
+          final JsonObject assertion = fixtureIntrospect.copy();
 
-        should.assertEquals(assertion.getMap(), principal.getMap());
+          should.assertEquals(assertion.getMap(), principal.getMap());
 
-        ScopeAuthorization.create(" ").getAuthorizations(token2, res0 -> {
-          if (res0.failed()) {
-            should.fail(res0.cause().getMessage());
-          } else {
-            if (PermissionBasedAuthorization.create("scopeB").match(token2)) {
-              test.complete();
-            } else {
-              should.fail("Should be allowed");
-            }
-          }
-        });
-      }
-    });
+          ScopeAuthorization.create(" ").getAuthorizations(token2)
+            .onComplete(res0 -> {
+              if (res0.failed()) {
+                should.fail(res0.cause().getMessage());
+              } else {
+                if (PermissionBasedAuthorization.create("scopeB").match(token2)) {
+                  test.complete();
+                } else {
+                  should.fail("Should be allowed");
+                }
+              }
+            });
+        }
+      });
   }
 
   @Test
@@ -167,46 +169,49 @@ public class OAuth2IntrospectTest {
     final Async test = should.async();
     config = oauthIntrospect;
     fixture = fixtureGoogle;
-    oauth2.authenticate(new TokenCredentials(token), res -> {
-      if (res.failed()) {
-        should.fail(res.cause().getMessage());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        // make a copy because later we need to original data
-        JsonObject principal = token.principal().copy();
+    oauth2.authenticate(new TokenCredentials(token))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause().getMessage());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          // make a copy because later we need to original data
+          JsonObject principal = token.principal().copy();
 
-        // clean up control
-        final JsonObject assertion = fixtureGoogle.copy();
+          // clean up control
+          final JsonObject assertion = fixtureGoogle.copy();
 
-        should.assertEquals(assertion.getMap(), principal.getMap());
+          should.assertEquals(assertion.getMap(), principal.getMap());
 
-        ScopeAuthorization.create(" ").getAuthorizations(token, res0 -> {
-          if (res0.failed()) {
-            should.fail(res0.cause().getMessage());
-          } else {
-            if (PermissionBasedAuthorization.create("profile").match(token)) {
-              // Issue #142
+          ScopeAuthorization.create(" ").getAuthorizations(token)
+            .onComplete(res0 -> {
+              if (res0.failed()) {
+                should.fail(res0.cause().getMessage());
+              } else {
+                if (PermissionBasedAuthorization.create("profile").match(token)) {
+                  // Issue #142
 
-              // the test is a replay of the same test so all checks have
-              // been done above.
+                  // the test is a replay of the same test so all checks have
+                  // been done above.
 
-              // the replay shows that the api can be used from the user object
-              // directly too
-              oauth2.authenticate(new TokenCredentials(OAuth2IntrospectTest.token), v -> {
-                if (v.failed()) {
-                  should.fail(v.cause());
+                  // the replay shows that the api can be used from the user object
+                  // directly too
+                  oauth2.authenticate(new TokenCredentials(OAuth2IntrospectTest.token))
+                    .onComplete(v -> {
+                      if (v.failed()) {
+                        should.fail(v.cause());
+                      } else {
+                        test.complete();
+                      }
+                    });
                 } else {
-                  test.complete();
+                  should.fail("Should be allowed");
                 }
-              });
-            } else {
-              should.fail("Should be allowed");
-            }
-          }
-        });
-      }
-    });
+              }
+            });
+        }
+      });
   }
 
   @Test
@@ -214,15 +219,16 @@ public class OAuth2IntrospectTest {
     final Async test = should.async();
     config = oauthIntrospect;
     fixture = fixtureKeycloak;
-    oauth2.authenticate(new TokenCredentials(token), res -> {
-      if (res.failed()) {
-        should.fail(res.cause());
-      } else {
-        User token = res.result();
-        should.assertNotNull(token);
-        should.assertNotNull(token.principal());
-        test.complete();
-      }
-    });
+    oauth2.authenticate(new TokenCredentials(token))
+      .onComplete(res -> {
+        if (res.failed()) {
+          should.fail(res.cause());
+        } else {
+          User token = res.result();
+          should.assertNotNull(token);
+          should.assertNotNull(token.principal());
+          test.complete();
+        }
+      });
   }
 }

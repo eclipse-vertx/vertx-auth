@@ -263,7 +263,8 @@ public final class JWT {
         } else {
           throw new RuntimeException("Signature verification failed");
         }
-      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+      } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | SignatureException |
+               InvalidAlgorithmParameterException | NoSuchProviderException e) {
         throw new RuntimeException("Signature verification failed", e);
       }
     }

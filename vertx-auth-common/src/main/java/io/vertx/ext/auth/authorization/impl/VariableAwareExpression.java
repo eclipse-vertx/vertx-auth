@@ -12,13 +12,13 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
+import io.vertx.ext.auth.authorization.AuthorizationContext;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-
-import io.vertx.ext.auth.authorization.AuthorizationContext;
 
 class VariableAwareExpression {
   private final String value;

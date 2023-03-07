@@ -4,7 +4,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author <a href="mailto:david@davidafsilva.pt">david</a>

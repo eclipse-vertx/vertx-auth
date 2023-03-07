@@ -19,10 +19,10 @@ package io.vertx.ext.auth.webauthn.impl.attestation;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.CertificateHelper;
+import io.vertx.ext.auth.impl.asn.ASN1;
 import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import io.vertx.ext.auth.webauthn.WebAuthnOptions;
-import io.vertx.ext.auth.impl.asn.ASN1;
 import io.vertx.ext.auth.webauthn.impl.AuthData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaData;
 import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
@@ -30,10 +30,11 @@ import io.vertx.ext.auth.webauthn.impl.metadata.MetaDataException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.List;
 
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
-import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.*;
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.hash;
+import static io.vertx.ext.auth.webauthn.impl.attestation.Attestation.parseX5c;
 import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.ATTESTATION_ANONCA;
 import static io.vertx.ext.auth.webauthn.impl.metadata.MetaData.statementAttestationTypesContains;
 
@@ -126,7 +127,8 @@ public class AppleAttestation implements Attestation {
         .setAlg(alg)
         .setX5c(attStmt.getJsonArray("x5c"));
 
-    } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException | NoSuchProviderException e) {
+    } catch (MetaDataException | CertificateException | InvalidKeyException | SignatureException |
+             NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }
   }

@@ -12,13 +12,13 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import io.vertx.ext.auth.authorization.AndAuthorization;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class AndAuthorizationImpl implements AndAuthorization {
 

@@ -34,7 +34,7 @@ public interface CloudFoundryAuth {
    *
    * @param clientId     the client id given to you by CloudFoundry UAA
    * @param clientSecret the client secret given to you by CloudFoundry UAA
-   * @param uuaURL         the url to your UUA server instance
+   * @param uuaURL       the url to your UUA server instance
    */
   static OAuth2Auth create(Vertx vertx, String clientId, String clientSecret, String uuaURL) {
     return create(vertx, clientId, clientSecret, uuaURL, new HttpClientOptions());

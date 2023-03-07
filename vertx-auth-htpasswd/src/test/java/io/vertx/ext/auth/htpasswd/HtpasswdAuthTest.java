@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
 public class HtpasswdAuthTest {
 
   @Rule
-  public RunTestOnContext rule = new RunTestOnContext();
+  public final RunTestOnContext rule = new RunTestOnContext();
 
   private HtpasswdAuth authProviderCrypt;
   private HtpasswdAuth authProviderPlainText;

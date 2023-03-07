@@ -34,6 +34,7 @@ public final class NoSuchKeyIdException extends RuntimeException {
 
   /**
    * Returns the missing key with the format {@code ALGORITHM + '#' + KEY_ID}.
+   *
    * @return the id of the missing key
    */
   public String id() {
