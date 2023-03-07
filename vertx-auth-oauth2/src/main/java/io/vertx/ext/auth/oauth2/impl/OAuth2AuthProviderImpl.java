@@ -235,13 +235,15 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
         final User user = createUser(new JsonObject().put("access_token", tokenCredentials.getToken()), false);
 
-        if (user.attributes().containsKey("accessToken") && !jwt.isUnsecure()) {
-          final JWTOptions jwtOptions = config.getJWTOptions();
-          // a valid JWT token should have the access token value decoded
-          // the token might be valid, but expired
-          if (!user.expired(jwtOptions.getLeeway())) {
-            // basic validation passed, the token is not expired
-            return Future.succeededFuture(user);
+        if (!user.principal().getBoolean("opaque", false)) {
+          if (user.attributes().containsKey("accessToken")) {
+            final JWTOptions jwtOptions = config.getJWTOptions();
+            // a valid JWT token should have the access token value decoded
+            // the token might be valid, but expired
+            if (!user.expired(jwtOptions.getLeeway())) {
+              // basic validation passed, the token is not expired
+              return Future.succeededFuture(user);
+            }
           }
         }
 
@@ -540,11 +542,18 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           user.attributes()
             .put("rootClaim", "accessToken");
 
-        } catch (SignatureException | IllegalArgumentException e) {
-          // mark the token as opaque
+        } catch (DecodeException | IllegalArgumentException e) {
+          // This set of exceptions here are a valid cases
+          // the reason is that it can be for several factors,
+          // such as bad token or invalid JWT key setup, in
+          // that case we fall back to opaque token which is
+          // the default operational mode for OAuth2.
           user.principal()
             .put("opaque", true);
         } catch (NoSuchKeyIdException e) {
+          user.principal()
+            .put("opaque", true);
+
           if (!skipMissingKeyNotify) {
             // tag the user attributes that we don't have the required key too
             user.attributes()
@@ -558,16 +567,11 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // shall be executed, otherwise just log as a typical validation
             if (missingKeyHandler != null) {
               context.runOnContext(v -> missingKeyHandler.handle(e.id()));
-            } else {
-              LOG.trace("Cannot decode access token:", e);
             }
           }
-        } catch (DecodeException | IllegalStateException e) {
-          // explicitly catch and log. The exception here is a valid case
-          // the reason is that it can be for several factors, such as bad token
-          // or invalid JWT key setup, in that case we fall back to opaque token
-          // which is the default operational mode for OAuth2.
-          LOG.trace("Cannot decode access token:", e);
+        } catch (SignatureException | IllegalStateException e) {
+          // The token is a JWT but validation failed
+          LOG.trace("Invalid JWT access_token:", e);
         }
       }
 
@@ -594,19 +598,19 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               // shall be executed, otherwise just log as a typical validation
               if (missingKeyHandler != null) {
                 context.runOnContext(v -> missingKeyHandler.handle(e.id()));
-              } else {
-                LOG.trace("Cannot decode access token:", e);
               }
             }
           }
         } catch (SignatureException | DecodeException | IllegalArgumentException | IllegalStateException e) {
           // explicitly catch and log. The exception here is a valid case
           // the reason is that it can be for several factors, such as bad token
-          // or invalid JWT key setup, in that case we fall back to opaque token
-          // which is the default operational mode for OAuth2.
-          LOG.trace("Cannot decode id token:", e);
+          // or invalid JWT key setup, in that case we can't decode the token.
+          LOG.trace("Invalid JWT id_token:", e);
         }
       }
+    } else {
+      user.principal()
+        .put("opaque", true);
     }
 
     return user;
