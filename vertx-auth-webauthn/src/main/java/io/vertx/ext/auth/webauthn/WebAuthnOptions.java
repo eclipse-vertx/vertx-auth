@@ -204,6 +204,8 @@ public class WebAuthnOptions {
   private Map<String, X509Certificate> rootCertificates;
   private List<X509CRL> rootCrls;
 
+  private boolean relaxedSafetyNetIntegrityVeridict;
+
   public WebAuthnOptions() {
     init();
   }
@@ -467,6 +469,15 @@ public class WebAuthnOptions {
     } catch (CRLException e) {
       throw new IllegalArgumentException("Invalid root crl", e);
     }
+  }
+
+  public boolean isRelaxedSafetyNetIntegrityVeridict() {
+    return relaxedSafetyNetIntegrityVeridict;
+  }
+
+  public WebAuthnOptions setRelaxedSafetyNetIntegrityVeridict(boolean relaxedSafetyNetIntegrityVeridict) {
+    this.relaxedSafetyNetIntegrityVeridict = relaxedSafetyNetIntegrityVeridict;
+    return this;
   }
 
   public JsonObject toJson() {
