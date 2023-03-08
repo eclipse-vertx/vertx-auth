@@ -1,6 +1,7 @@
 = Vert.x Auth
 
-image:https://github.com/eclipse-vertx/vertx-auth/workflows/CI/badge.svg?branch=master["Build Status",link="https://github.com/eclipse-vertx/vertx-auth/actions?query=workflow%3ACI"]
+image:https://github.com/eclipse-vertx/vertx-auth/actions/workflows/ci-5.x.yml/badge.svg["Build Status (5.x)",link="https://github.com/eclipse-vertx/vertx-auth/actions/workflows/ci-5.x.yml"]
+image:https://github.com/eclipse-vertx/vertx-auth/actions/workflows/ci-4.x.yml/badge.svg["Build Status (4.x)",link="https://github.com/eclipse-vertx/vertx-auth/actions/workflows/ci-4.x.yml"]
 
 This module contains auth implementations for Vert.x and common auth interfaces
 
