@@ -51,7 +51,7 @@ public class ChainAuthImpl implements ChainAuth {
     if (providers.size() == 0) {
       return Future.failedFuture("No providers in the auth chain.");
     } else {
-      return iterate(0, credentials, null).andThen(AUDIT_LOG.handle(Marker.SECURITY, new StructuredData(authInfo)));
+      return iterate(0, credentials, null);
     }
   }
 
