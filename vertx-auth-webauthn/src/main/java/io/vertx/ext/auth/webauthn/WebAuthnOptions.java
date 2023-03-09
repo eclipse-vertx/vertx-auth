@@ -189,7 +189,8 @@ public class WebAuthnOptions {
   private RelyingParty relyingParty;
 
   private AuthenticatorAttachment authenticatorAttachment;
-  private boolean requireResidentKey;
+  @Deprecated private Boolean requireResidentKey;
+  private ResidentKey residentKey;
   private UserVerification userVerification;
 
   private Long timeout;
@@ -219,7 +220,7 @@ public class WebAuthnOptions {
   private void init() {
     userVerification = DISCOURAGED;
     attestation = NONE;
-    requireResidentKey = false;
+    residentKey = ResidentKey.DISCOURAGED;
     extensions = new JsonObject()
       .put("txAuthSimple", "");
 
@@ -308,6 +309,19 @@ public class WebAuthnOptions {
     return this;
   }
 
+  public ResidentKey getResidentKey() {
+    return residentKey;
+  }
+
+  public WebAuthnOptions setResidentKey(ResidentKey residentKey) {
+    this.residentKey = residentKey;
+    // Backwards compatibility
+    if (residentKey == ResidentKey.REQUIRED) {
+      requireResidentKey = true;
+    }
+    return this;
+  }
+
   public List<PublicKeyCredential> getPubKeyCredParams() {
     return pubKeyCredParams;
   }
@@ -343,12 +357,17 @@ public class WebAuthnOptions {
     return this;
   }
 
-  public boolean getRequireResidentKey() {
+  public Boolean getRequireResidentKey() {
     return requireResidentKey;
   }
 
-  public WebAuthnOptions setRequireResidentKey(boolean requireResidentKey) {
+  public WebAuthnOptions setRequireResidentKey(Boolean requireResidentKey) {
     this.requireResidentKey = requireResidentKey;
+    if (requireResidentKey == null || !requireResidentKey) {
+      this.residentKey = ResidentKey.DISCOURAGED;
+    } else {
+      this.residentKey = ResidentKey.REQUIRED;
+    }
     return this;
   }
 

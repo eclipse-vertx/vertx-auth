@@ -211,8 +211,9 @@ public class WebAuthnImpl implements WebAuthn {
           putOpt(json, "excludeCredentials", excludeCredentials);
         }
         // optional authenticator selection
-        putOpt(json.getJsonObject("authenticatorSelection"), "requireResidentKey", options.getRequireResidentKey());
         putOpt(json.getJsonObject("authenticatorSelection"), "authenticatorAttachment", options.getAuthenticatorAttachment());
+        putOpt(json.getJsonObject("authenticatorSelection"), "residentKey", options.getResidentKey());
+        putOpt(json.getJsonObject("authenticatorSelection"), "requireResidentKey", options.getRequireResidentKey());
         putOpt(json.getJsonObject("authenticatorSelection"), "userVerification", options.getUserVerification());
         // optional attestation
         putOpt(json, "attestation", options.getAttestation());
@@ -236,12 +237,18 @@ public class WebAuthnImpl implements WebAuthn {
 
     // we allow Resident Credentials or (RK) requests
     // this means that name is not required
-    if (options.getRequireResidentKey()) {
-      if (name == null) {
+    switch (options.getResidentKey()) {
+      case REQUIRED:
+      case PREFERRED:
+        // we prefer RK, so we don't need a name
         return Future.succeededFuture(json);
-      }
+      case DISCOURAGED:
+        // we don't want RK, so we need a name
+        if (name == null) {
+          return Future.failedFuture("Name is required for non RK requests");
+        }
+        break;
     }
-
     // fallback to non RK requests
     return fetcher
       .apply(new Authenticator().setUserName(name))
@@ -393,15 +400,24 @@ public class WebAuthnImpl implements WebAuthn {
           }
         case "webauthn.get":
           Authenticator query = new Authenticator();
-          if (options.getRequireResidentKey()) {
-            // username are not provided (RK) we now need to lookup by id
-            query.setCredID(webauthn.getString("id"));
-          } else {
-            // username can't be null
-            if (username == null) {
-              return Future.failedFuture("username can't be null!");
-            }
-            query.setUserName(username);
+
+          switch (options.getResidentKey()) {
+            case REQUIRED:
+              // username are not provided (RK) we now need to lookup by id
+              query.setCredID(webauthn.getString("id"));
+              break;
+            case PREFERRED:
+              // username can be null
+              query.setUserName(username);
+              query.setCredID(webauthn.getString("id"));
+              break;
+            case DISCOURAGED:
+              // username can't be null
+              if (username == null) {
+                return Future.failedFuture("username can't be null!");
+              }
+              query.setUserName(username);
+              break;
           }
 
           return fetcher.apply(query)
