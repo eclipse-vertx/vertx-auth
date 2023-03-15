@@ -113,10 +113,10 @@ public class WildcardPermissionBasedAuthorizationTest {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertTrue(WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(0, "localhost", should.asyncAssertSuccess(s -> {
-      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1", should.asyncAssertSuccess(req -> {
-        req.send(should.asyncAssertSuccess(res -> {
-          server.close(close -> test.complete());
+    }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
+      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
+        req.send().onComplete(should.asyncAssertSuccess(res -> {
+          server.close().onComplete(close -> test.complete());
         }));
       }));
     }));
@@ -132,10 +132,10 @@ public class WildcardPermissionBasedAuthorizationTest {
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertFalse(WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
-    }).listen(0, "localhost", should.asyncAssertSuccess(s -> {
-      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2", should.asyncAssertSuccess(req -> {
-        req.send(should.asyncAssertSuccess(res -> {
-          server.close(close -> test.complete());
+    }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
+      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
+        req.send().onComplete(should.asyncAssertSuccess(res -> {
+          server.close().onComplete(close -> test.complete());
         }));
       }));
     }));

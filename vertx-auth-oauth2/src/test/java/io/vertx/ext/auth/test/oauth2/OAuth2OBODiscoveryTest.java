@@ -81,7 +81,8 @@ public class OAuth2OBODiscoveryTest {
           } else {
             req.response().setStatusCode(400).end();
           }
-        }).listen(8080, ready -> {
+        });
+        server.listen(8080).onComplete(ready -> {
           if (ready.failed()) {
             throw new RuntimeException(ready.cause());
           }

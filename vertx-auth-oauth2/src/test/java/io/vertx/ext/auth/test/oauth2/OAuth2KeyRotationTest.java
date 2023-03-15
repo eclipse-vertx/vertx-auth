@@ -77,8 +77,8 @@ public class OAuth2KeyRotationTest {
         } else {
           req.response().setStatusCode(400).end();
         }
-      })
-      .listen(0, ready -> {
+      });
+    server.listen(0).onComplete(ready -> {
         if (ready.failed()) {
           throw new RuntimeException(ready.cause());
         }
