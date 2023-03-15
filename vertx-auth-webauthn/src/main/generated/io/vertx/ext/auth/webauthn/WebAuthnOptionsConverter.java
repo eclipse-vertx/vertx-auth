@@ -65,6 +65,11 @@ public class WebAuthnOptionsConverter {
             obj.setRequireResidentKey((Boolean)member.getValue());
           }
           break;
+        case "residentKey":
+          if (member.getValue() instanceof String) {
+            obj.setResidentKey(io.vertx.ext.auth.webauthn.ResidentKey.valueOf((String)member.getValue()));
+          }
+          break;
         case "rootCertificates":
           if (member.getValue() instanceof JsonObject) {
             java.util.Map<String, java.lang.String> map = new java.util.LinkedHashMap<>();
@@ -133,7 +138,12 @@ public class WebAuthnOptionsConverter {
     if (obj.getRelyingParty() != null) {
       json.put("relyingParty", obj.getRelyingParty().toJson());
     }
-    json.put("requireResidentKey", obj.getRequireResidentKey());
+    if (obj.getRequireResidentKey() != null) {
+      json.put("requireResidentKey", obj.getRequireResidentKey());
+    }
+    if (obj.getResidentKey() != null) {
+      json.put("residentKey", obj.getResidentKey().name());
+    }
     if (obj.getTimeoutInMilliseconds() != null) {
       json.put("timeoutInMilliseconds", obj.getTimeoutInMilliseconds());
     }
