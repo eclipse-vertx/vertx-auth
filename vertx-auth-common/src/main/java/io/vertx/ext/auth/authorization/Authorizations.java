@@ -16,6 +16,8 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -26,10 +28,15 @@ import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 public interface Authorizations {
 
   @Fluent
-  Authorizations add(String providerId, Authorization authorization);
+  Authorizations put(String providerId, Set<Authorization> authorizations);
 
   @Fluent
-  Authorizations put(String providerId, Set<Authorization> authorizations);
+  @GenIgnore(PERMITTED_TYPE)
+  default Authorizations put(String providerId, Authorization... authorizations) {
+    Set<Authorization> set = new HashSet<>();
+    Collections.addAll(set, authorizations);
+    return put(providerId, set);
+  }
 
   boolean isEmpty();
 

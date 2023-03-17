@@ -24,22 +24,6 @@ public class AuthorizationsImpl implements Authorizations {
   private Map<String, Set<Authorization>> authorizations;
 
   @Override
-  public synchronized Authorizations add(String providerId, Authorization authorization) {
-    Objects.requireNonNull(authorization);
-
-    if (this.authorizations == null) {
-      this.authorizations = new HashMap<>();
-    } else {
-      this.authorizations = new HashMap<>(this.authorizations);
-    }
-    authorizations
-      .computeIfAbsent(providerId, k -> new HashSet<>())
-      .add(authorization);
-
-    return this;
-  }
-
-  @Override
   public synchronized Authorizations put(String providerId, Set<Authorization> authorizations) {
     Objects.requireNonNull(providerId);
     if (this.authorizations == null) {
@@ -54,11 +38,6 @@ public class AuthorizationsImpl implements Authorizations {
     }
 
     return this;
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return authorizations == null || authorizations.isEmpty();
   }
 
   @Override
@@ -78,7 +57,15 @@ public class AuthorizationsImpl implements Authorizations {
   }
 
   @Override
+  public boolean isEmpty() {
+    final Map<String, Set<Authorization>> authorizations = this.authorizations;
+    return authorizations == null || authorizations.isEmpty();
+  }
+
+  @Override
   public boolean equals(Object obj) {
+    final Map<String, Set<Authorization>> authorizations = this.authorizations;
+
     if (this == obj)
       return true;
     if (!(obj instanceof AuthorizationsImpl))
@@ -90,6 +77,8 @@ public class AuthorizationsImpl implements Authorizations {
 
   @Override
   public int hashCode() {
+    final Map<String, Set<Authorization>> authorizations = this.authorizations;
+
     final int prime = 31;
     int result = 1;
     result = prime * result + Objects.hashCode(authorizations);
@@ -98,6 +87,8 @@ public class AuthorizationsImpl implements Authorizations {
 
   @Override
   public boolean verify(Authorization resolvedAuthorization) {
+    final Map<String, Set<Authorization>> authorizations = this.authorizations;
+
     if (authorizations == null) {
       return false;
     }
@@ -114,6 +105,8 @@ public class AuthorizationsImpl implements Authorizations {
 
   @Override
   public Authorizations forEach(BiConsumer<String, Authorization> consumer) {
+    final Map<String, Set<Authorization>> authorizations = this.authorizations;
+
     if (authorizations == null) {
       return this;
     }
@@ -128,6 +121,8 @@ public class AuthorizationsImpl implements Authorizations {
 
   @Override
   public Authorizations forEach(String providerId, Consumer<Authorization> consumer) {
+    final Map<String, Set<Authorization>> authorizations = this.authorizations;
+
     if (authorizations == null) {
       return this;
     }

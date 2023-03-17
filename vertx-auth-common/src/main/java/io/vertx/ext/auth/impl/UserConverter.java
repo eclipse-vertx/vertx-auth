@@ -18,7 +18,9 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class UserConverter {
 
@@ -57,10 +59,11 @@ public class UserConverter {
     JsonObject jsonAuthorizations = json.getJsonObject(FIELD_AUTHORIZATIONS);
     for (String fieldName : jsonAuthorizations.fieldNames()) {
       JsonArray jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(fieldName);
+      Set<Authorization> authorizations = new HashSet<>();
       for (int i = 0; i < jsonAuthorizationByProvider.size(); i++) {
-        JsonObject jsonAuthorization = jsonAuthorizationByProvider.getJsonObject(i);
-        user.authorizations().add(fieldName, AuthorizationConverter.decode(jsonAuthorization));
+        authorizations.add(AuthorizationConverter.decode(jsonAuthorizationByProvider.getJsonObject(i)));
       }
+      user.authorizations().put(fieldName, authorizations);
     }
     user.attributes().mergeIn(json.getJsonObject(FIELD_ATTRIBUTES, new JsonObject()));
     return user;
