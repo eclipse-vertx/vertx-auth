@@ -24,34 +24,38 @@ public class AuthorizationsImpl implements Authorizations {
   private Map<String, Set<Authorization>> authorizations;
 
   @Override
-  public synchronized Authorizations put(String providerId, Set<Authorization> authorizations) {
+  public synchronized Authorizations put(String providerId, Set<Authorization> _authorizations) {
     Objects.requireNonNull(providerId);
-    if (this.authorizations == null) {
-      this.authorizations = new HashMap<>();
-    } else {
-      this.authorizations = new HashMap<>(this.authorizations);
-    }
+    Map<String, Set<Authorization>> authorizations = this.authorizations;
     if (authorizations == null) {
-      this.authorizations.remove(providerId);
+      if (_authorizations != null) {
+        authorizations = new HashMap<>();
+      }
     } else {
-      this.authorizations.put(providerId, Collections.unmodifiableSet(authorizations));
-    }
-
-    return this;
-  }
-
-  @Override
-  public synchronized Authorizations clear(String providerId) {
-    Objects.requireNonNull(providerId);
-    if (authorizations != null) {
       authorizations = new HashMap<>(authorizations);
-      authorizations.remove(providerId);
+      if (_authorizations == null) {
+        authorizations.remove(providerId);
+      }
     }
+    if (_authorizations != null) {
+      authorizations
+        .put(providerId, Collections.unmodifiableSet(_authorizations));
+    }
+
+    // swap
+    this.authorizations = authorizations;
     return this;
   }
 
   @Override
-  public synchronized Authorizations clearAll() {
+  public synchronized Authorizations putAll(Map<String, Set<Authorization>> authorizations) {
+    Objects.requireNonNull(authorizations);
+    this.authorizations = authorizations;
+    return this;
+  }
+
+  @Override
+  public synchronized Authorizations clear() {
     authorizations = null;
     return this;
   }

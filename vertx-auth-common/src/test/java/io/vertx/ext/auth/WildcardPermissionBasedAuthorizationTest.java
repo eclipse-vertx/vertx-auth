@@ -111,7 +111,7 @@ public class WildcardPermissionBasedAuthorizationTest {
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.fromName("dummy user");
-      user.authorizations().put("providerId", Collections.singleton(WildcardPermissionBasedAuthorization.create("p1").setResource("r1")));
+      user.authorizations().put("providerId", WildcardPermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertTrue(WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
@@ -130,7 +130,7 @@ public class WildcardPermissionBasedAuthorizationTest {
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.fromName("dummy user");
-      user.authorizations().put("providerId", Collections.singleton(WildcardPermissionBasedAuthorization.create("p1").setResource("r1")));
+      user.authorizations().put("providerId", WildcardPermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertFalse(WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
