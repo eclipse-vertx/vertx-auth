@@ -49,16 +49,19 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
         user.principal().getString("scope") :
         user.attributes().getJsonObject("accessToken", EMPTY).getString(claimKey);
 
-    final Set<Authorization> authorizations = new HashSet<>();
+    final Set<Authorization> authorizations;
 
     // avoid the case when scope is the literal "null" value.
     if (scopes != null) {
+      authorizations = new HashSet<>();
       String sep = user.attributes().getString("scope_separator", scopeSeparator);
       for (String scope : scopes.split(Pattern.quote(sep))) {
         authorizations.add(PermissionBasedAuthorization.create(scope));
       }
+    } else {
+      authorizations = Collections.emptySet();
     }
-    user.authorizations().add(getId(), authorizations);
+    user.authorizations().put(getId(), authorizations);
     // return
     return Future.succeededFuture();
   }
