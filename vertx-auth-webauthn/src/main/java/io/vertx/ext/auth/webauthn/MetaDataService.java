@@ -18,7 +18,6 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -30,45 +29,6 @@ import io.vertx.core.json.JsonObject;
  */
 @VertxGen
 public interface MetaDataService {
-
-  /**
-   * Fetches the FIDO2 TOC for the given URL and process the entries to the metadata store.
-   * Only valid entries will be stored. The operation will return {@code true} only if all
-   * entries have been added. {@code false} if they have been processed but at least one was
-   * invalid.
-   * <p>
-   * The operation will only fail on network problems.
-   *
-   * @param url     the url to the TOC
-   * @param handler the async handler to process the response
-   * @return fluent self
-   */
-  @Fluent
-  @Deprecated
-  default MetaDataService fetchTOC(String url, Handler<AsyncResult<Boolean>> handler) {
-    fetchTOC(url)
-      .onComplete(handler);
-    return this;
-  }
-
-  /**
-   * Fetches the FIDO2 MDS3 TOC and process the entries to the metadata store.
-   * Only valid entries will be stored. The operation will return {@code true} only if all
-   * entries have been added. {@code false} if they have been processed but at least one was
-   * invalid.
-   * <p>
-   * The operation will only fail on network problems.
-   *
-   * @param handler the async handler to process the response
-   * @return fluent self
-   */
-  @Fluent
-  @Deprecated
-  default MetaDataService fetchTOC(Handler<AsyncResult<Boolean>> handler) {
-    fetchTOC()
-      .onComplete(handler);
-    return this;
-  }
 
   /**
    * Fetches the FIDO2 TOC for the given URL and process the entries to the metadata store.

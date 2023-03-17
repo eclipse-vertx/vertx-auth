@@ -18,7 +18,6 @@ package io.vertx.ext.auth.webauthn;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -64,20 +63,7 @@ public interface WebAuthn extends AuthenticationProvider {
    * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
    *
    * @param user    - the user object with name and optionally displayName and icon
-   * @param handler server encoded make credentials request
-   * @return fluent self
-   */
-  @Fluent
-  @Deprecated
-  default WebAuthn createCredentialsOptions(JsonObject user, Handler<AsyncResult<JsonObject>> handler) {
-    createCredentialsOptions(user)
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Same as {@link #createCredentialsOptions(JsonObject, Handler)} but returning a Future.
+   * @return a future notified with the encoded make credentials request
    */
   Future<JsonObject> createCredentialsOptions(JsonObject user);
 
@@ -88,21 +74,8 @@ public interface WebAuthn extends AuthenticationProvider {
    * <p>
    * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
    *
-   * @param name    the unique user identified
-   * @param handler server encoded get assertion request
-   * @return fluent self.
-   */
-  @Fluent
-  @Deprecated
-  default WebAuthn getCredentialsOptions(@Nullable String name, Handler<AsyncResult<JsonObject>> handler) {
-    getCredentialsOptions(name)
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Same as {@link #getCredentialsOptions(String, Handler)} but returning a Future.
+   * @param username    the unique user identified
+   * @return a future notified with the server encoded get assertion request
    */
   Future<JsonObject> getCredentialsOptions(@Nullable String username);
 

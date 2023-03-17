@@ -58,41 +58,15 @@ public interface OAuth2Auth extends AuthenticationProvider {
 
   /**
    * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
-   * of issued ID and access tokens. The provider will refresh the keys according to:
-   * https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
-   * <p>
-   * This means that the provider will look at the cache headers and will refresh when
-   * the max-age is reached. If the server does not return any cache headers it shall
-   * be up to the end user to call this method to refresh.
-   * <p>
-   * To avoid the refresh to happen too late, this means that they keys will be invalid,
-   * if the {@link OAuth2Options} {@link io.vertx.ext.auth.JWTOptions} config contains a
-   * positive leeway, it will be used to request the refresh ahead of time.
-   *
-   * @param handler the handler success/failure.
-   * @return fluent self.
-   */
-  @Fluent
-  @Deprecated
-  default OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
-    jWKSet()
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Retrieve the public server JSON Web Key (JWK) required to verify the authenticity
    * of issued ID and access tokens.
    *
    * @return Future result.
-   * @see OAuth2Auth#jWKSet(Handler)
    */
   Future<Void> jWKSet();
 
   /**
    * Handled to be called when a key (mentioned on a JWT) is missing from the current config.
-   * Users are advised to call {@link OAuth2Auth#jWKSet(Handler)} but being careful to implement
+   * Users are advised to call {@link OAuth2Auth#jWKSet()} but being careful to implement
    * some rate limiting function.
    * <p>
    * This method isn't generic for several reasons. The provider is not aware of the capabilities
@@ -143,25 +117,9 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Refresh the current User (access token).
    *
-   * @param user    the user (access token) to be refreshed.
-   * @param handler the handler success/failure.
-   * @return fluent self.
-   */
-  @Fluent
-  @Deprecated
-  default OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
-    refresh(user)
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Refresh the current User (access token).
-   *
    * @param user the user (access token) to be refreshed.
    * @return future result
-   * @see OAuth2Auth#userInfo(User, Handler)
+   * @see OAuth2Auth#userInfo(User)
    */
   Future<User> refresh(User user);
 
@@ -170,41 +128,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    *
    * @param user      the user (access token) to revoke.
    * @param tokenType the token type (either access_token or refresh_token).
-   * @param handler   the handler success/failure.
-   * @return fluent self.
-   */
-  @Fluent
-  @Deprecated
-  default OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
-    revoke(user, tokenType)
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Revoke an obtained access token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
-   *
-   * @param user    the user (access token) to revoke.
-   * @param handler the handler success/failure.
-   * @return fluent self.
-   */
-  @Fluent
-  @Deprecated
-  default OAuth2Auth revoke(User user, Handler<AsyncResult<Void>> handler) {
-    revoke(user, "access_token")
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Revoke an obtained access or refresh token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
-   *
-   * @param user      the user (access token) to revoke.
-   * @param tokenType the token type (either access_token or refresh_token).
    * @return future result
-   * @see OAuth2Auth#revoke(User, String, Handler)
    */
   Future<Void> revoke(User user, String tokenType);
 
@@ -213,7 +137,6 @@ public interface OAuth2Auth extends AuthenticationProvider {
    *
    * @param user the user (access token) to revoke.
    * @return future result
-   * @see OAuth2Auth#revoke(User, Handler)
    */
   default Future<Void> revoke(User user) {
     return revoke(user, "access_token");
@@ -222,25 +145,8 @@ public interface OAuth2Auth extends AuthenticationProvider {
   /**
    * Retrieve profile information and other attributes for a logged-in end-user. More info <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">https://openid.net/specs/openid-connect-core-1_0.html#UserInfo</a>
    *
-   * @param user    the user (access token) to fetch the user info.
-   * @param handler the handler success/failure.
-   * @return fluent self.
-   */
-  @Fluent
-  @Deprecated
-  default OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
-    userInfo(user)
-      .onComplete(handler);
-
-    return this;
-  }
-
-  /**
-   * Retrieve profile information and other attributes for a logged-in end-user. More info <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">https://openid.net/specs/openid-connect-core-1_0.html#UserInfo</a>
-   *
    * @param user the user (access token) to fetch the user info.
    * @return future result
-   * @see OAuth2Auth#userInfo(User, Handler)
    */
   Future<JsonObject> userInfo(User user);
 

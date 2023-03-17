@@ -17,9 +17,7 @@ package io.vertx.ext.auth.sqlclient;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.sqlclient.impl.SqlUserUtilImpl;
 import io.vertx.sqlclient.SqlClient;
 
@@ -58,20 +56,7 @@ public interface SqlUserUtil {
    *
    * @param username      the username to be set
    * @param password      the passsword in clear text, will be adapted following the definitions of the defined strategy
-   * @param resultHandler the ResultHandler will be provided with the result of the operation
-   * @return fluent self
-   */
-  @Fluent
-  @Deprecated
-  default SqlUserUtil createUser(String username, String password, Handler<AsyncResult<Void>> resultHandler) {
-    createUser(username, password)
-      .onComplete(resultHandler);
-
-    return this;
-  }
-
-  /**
-   * @see #createUser(String, String, Handler).
+   * @return a future notified with the result of the operation
    */
   Future<Void> createUser(String username, String password);
 
@@ -80,20 +65,7 @@ public interface SqlUserUtil {
    *
    * @param username      the username to be set
    * @param hash          the password hash, as result of {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
-   * @param resultHandler the ResultHandler will be provided with the result of the operation
-   * @return fluent self
-   */
-  @Fluent
-  @Deprecated
-  default SqlUserUtil createHashedUser(String username, String hash, Handler<AsyncResult<Void>> resultHandler) {
-    createHashedUser(username, hash)
-      .onComplete(resultHandler);
-
-    return this;
-  }
-
-  /**
-   * @see #createHashedUser(String, String, Handler).
+   * @return a future notified with the result of the operation
    */
   Future<Void> createHashedUser(String username, String hash);
 
@@ -102,42 +74,16 @@ public interface SqlUserUtil {
    *
    * @param username      the username to be set
    * @param role          a to be set
-   * @param resultHandler the ResultHandler will be provided with the result of the operation
-   * @return fluent self
+   * @return a future notified with the result of the operation
    */
-  @Fluent
-  @Deprecated
-  default SqlUserUtil createUserRole(String username, String role, Handler<AsyncResult<Void>> resultHandler) {
-    createUserRole(username, role)
-      .onComplete(resultHandler);
-
-    return this;
-  }
-
-  /**
-   * @see #createUserRole(String, String, Handler).
-   */
-  Future<Void> createUserRole(String user, String role);
+  Future<Void> createUserRole(String username, String role);
 
   /**
    * Insert a role permission into a database.
    *
    * @param role          a to be set
    * @param permission    the permission to be set
-   * @param resultHandler the ResultHandler will be provided with the result of the operation
-   * @return fluent self
-   */
-  @Fluent
-  @Deprecated
-  default SqlUserUtil createRolePermission(String role, String permission, Handler<AsyncResult<Void>> resultHandler) {
-    createRolePermission(role, permission)
-      .onComplete(resultHandler);
-
-    return this;
-  }
-
-  /**
-   * @see #createRolePermission(String, String, Handler).
+   * @return a future notified with the result of the operation
    */
   Future<Void> createRolePermission(String role, String permission);
 }

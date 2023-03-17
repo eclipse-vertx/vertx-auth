@@ -13,9 +13,7 @@
 package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 
 import java.util.HashSet;
@@ -61,18 +59,6 @@ public interface AuthorizationProvider {
    * @return
    */
   String getId();
-
-  /**
-   * Updates the user with the set of authorizations.
-   *
-   * @param user    user to lookup and update
-   * @param handler result handler
-   */
-  @Deprecated
-  default void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizations(user)
-      .onComplete(handler);
-  }
 
   /**
    * Updates the user with the set of authorizations.

@@ -16,14 +16,11 @@
 package io.vertx.ext.auth.oauth2.providers;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 /**
@@ -75,33 +72,10 @@ public interface AzureADAuth extends OpenIDConnectAuth {
    * <p>
    * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
    * into the OAuth provider so tokens can be decoded.
-   * <p>
-   * With this provider, if the given configuration is using the flow type {@link OAuth2FlowType#AAD_OBO} then
-   * the extra parameters object will include {@code requested_token_use = on_behalf_of} as required by
-   * <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-on-behalf-of-flow">https://docs.microsoft.com/en-us/azure/active-directory</a>.
-   *
-   * @param vertx   the vertx instance
-   * @param config  the initial config
-   * @param handler the instantiated Oauth2 provider instance handler
-   */
-  @Deprecated
-  static void discover(final Vertx vertx, final OAuth2Options config, final Handler<AsyncResult<OAuth2Auth>> handler) {
-    discover(vertx, config)
-      .onComplete(handler);
-  }
-
-  /**
-   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the default site in the
-   * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
-   * running on a custom instance) that site will be used to do the lookup.
-   * <p>
-   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
-   * into the OAuth provider so tokens can be decoded.
    *
    * @param vertx  the vertx instance
    * @param config the initial config
    * @return future with instantiated Oauth2 provider instance handler
-   * @see AzureADAuth#discover(Vertx, OAuth2Options, Handler)
    */
   static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
     // don't override if already set

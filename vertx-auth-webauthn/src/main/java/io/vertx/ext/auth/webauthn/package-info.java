@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-@ModuleGen(name = "vertx-auth-webauthn", groupPackage = "io.vertx", checkCallbackDeprecation = true)
+@ModuleGen(name = "vertx-auth-webauthn", groupPackage = "io.vertx", useFutures = true)
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.ModuleGen;

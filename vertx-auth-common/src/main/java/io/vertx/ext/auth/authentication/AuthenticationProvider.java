@@ -16,11 +16,8 @@
 
 package io.vertx.ext.auth.authentication;
 
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 
 /**
@@ -36,29 +33,9 @@ public interface AuthenticationProvider {
    * <p>
    * The first argument is a Credentials object containing information for authenticating the user.
    * What this actually contains depends on the specific implementation.
-   * <p>
-   * If the user is successfully authenticated a {@link User} object is passed to the handler in an {@link AsyncResult}.
-   * The user object can then be used for authorisation.
-   *
-   * @param credentials   The credentials
-   * @param resultHandler The result handler
-   */
-  @GenIgnore(GenIgnore.PERMITTED_TYPE)
-  @Deprecated
-  default void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
-    authenticate(credentials)
-      .onComplete(resultHandler);
-  }
-
-  /**
-   * Authenticate a user.
-   * <p>
-   * The first argument is a Credentials object containing information for authenticating the user.
-   * What this actually contains depends on the specific implementation.
    *
    * @param credentials The credentials
    * @return The result future
-   * @see AuthenticationProvider#authenticate(Credentials, Handler)
    */
   Future<User> authenticate(Credentials credentials);
 }
