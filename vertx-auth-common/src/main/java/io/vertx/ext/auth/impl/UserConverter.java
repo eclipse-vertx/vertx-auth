@@ -32,13 +32,17 @@ public class UserConverter {
     JsonObject json = new JsonObject();
     json.put(FIELD_PRINCIPAL, value.principal());
     JsonObject jsonAuthorizations = new JsonObject();
-    for (String providerId : value.authorizations().getProviderIds()) {
-      JsonArray jsonAuthorizationByProvider = new JsonArray();
-      jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
-      for (Authorization authorization : value.authorizations().get(providerId)) {
+    value.authorizations()
+      .forEach((providerId, authorization) -> {
+        final JsonArray jsonAuthorizationByProvider;
+        if (jsonAuthorizations.containsKey(providerId)) {
+          jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(providerId);
+        } else {
+          jsonAuthorizationByProvider = new JsonArray();
+          jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
+        }
         jsonAuthorizationByProvider.add(AuthorizationConverter.encode(authorization));
-      }
-    }
+      });
     json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
     json.put(FIELD_ATTRIBUTES, value.attributes());
     return json;

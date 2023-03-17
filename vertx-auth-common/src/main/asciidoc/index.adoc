@@ -108,7 +108,7 @@ Please note, as discussed above how the authority string is interpreted is compl
 
 The user object holds a list of authorizations so subsequently calls should check if it has the same authorizations and it will result in avoiding one more IO operation to the underlying authorization provider to load the authorizations.
 
-In order to clear the list of authorizations you can use {@link io.vertx.ext.auth.authorization.Authorizations#clear()}.
+In order to clear the list of authorizations you can use {@link io.vertx.ext.auth.authorization.Authorizations#clearAll()}.
 
 === The User Principal and Attributes
 

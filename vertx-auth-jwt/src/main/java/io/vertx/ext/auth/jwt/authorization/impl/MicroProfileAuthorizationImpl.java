@@ -65,7 +65,7 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
       }
     }
 
-    user.authorizations().add(getId(), authorizations);
+    user.authorizations().put(getId(), authorizations);
     // return
     return Future.succeededFuture();
   }

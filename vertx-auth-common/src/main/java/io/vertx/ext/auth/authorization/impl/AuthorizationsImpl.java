@@ -15,53 +15,65 @@ package io.vertx.ext.auth.authorization.impl;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.Authorizations;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class AuthorizationsImpl implements Authorizations {
 
-  private final Map<String, Set<Authorization>> authorizations;
-
-  public AuthorizationsImpl() {
-    // store the authorizations as a concurrent hash map, mainly because this
-    // will be linked to a user object. In this case, we can't guarantee that
-    // concurrent access is safe.
-    this.authorizations = new ConcurrentHashMap<>();
-  }
+  private Map<String, Set<Authorization>> authorizations;
 
   @Override
-  public Authorizations add(String providerId, Authorization authorization) {
+  public synchronized Authorizations add(String providerId, Authorization authorization) {
     Objects.requireNonNull(authorization);
-    return add(providerId, Collections.singleton(authorization));
-  }
 
-  @Override
-  public Authorizations add(String providerId, Set<Authorization> authorizations) {
-    Objects.requireNonNull(providerId);
-    Objects.requireNonNull(authorizations);
+    if (this.authorizations == null) {
+      this.authorizations = new HashMap<>();
+    } else {
+      this.authorizations = new HashMap<>(this.authorizations);
+    }
+    authorizations
+      .computeIfAbsent(providerId, k -> new HashSet<>())
+      .add(authorization);
 
-    ConcurrentHashMap.KeySetView<Authorization, Boolean> concurrentAuthorizations = ConcurrentHashMap.newKeySet();
-    concurrentAuthorizations.addAll(authorizations);
-
-    getOrCreateAuthorizations(providerId)
-      .addAll(concurrentAuthorizations);
     return this;
   }
 
   @Override
-  public Authorizations clear(String providerId) {
+  public synchronized Authorizations put(String providerId, Set<Authorization> authorizations) {
     Objects.requireNonNull(providerId);
+    if (this.authorizations == null) {
+      this.authorizations = new HashMap<>();
+    } else {
+      this.authorizations = new HashMap<>(this.authorizations);
+    }
+    if (authorizations == null) {
+      this.authorizations.remove(providerId);
+    } else {
+      this.authorizations.put(providerId, Collections.unmodifiableSet(authorizations));
+    }
 
-    authorizations.remove(providerId);
     return this;
   }
 
   @Override
-  public Authorizations clear() {
-    authorizations.clear();
+  public boolean isEmpty() {
+    return authorizations == null || authorizations.isEmpty();
+  }
+
+  @Override
+  public synchronized Authorizations clear(String providerId) {
+    Objects.requireNonNull(providerId);
+    if (authorizations != null) {
+      authorizations = new HashMap<>(authorizations);
+      authorizations.remove(providerId);
+    }
+    return this;
+  }
+
+  @Override
+  public synchronized Authorizations clearAll() {
+    authorizations = null;
     return this;
   }
 
@@ -73,36 +85,56 @@ public class AuthorizationsImpl implements Authorizations {
       return false;
     AuthorizationsImpl other = (AuthorizationsImpl) obj;
 
-    return authorizations.equals(other.authorizations);
-  }
-
-  @Override
-  public Set<Authorization> get(String providerId) {
-    Objects.requireNonNull(providerId);
-
-    final Set<Authorization> set = authorizations.get(providerId);
-    if (set == null) {
-      return Collections.emptySet();
-    }
-
-    return set;
-  }
-
-  private Set<Authorization> getOrCreateAuthorizations(String providerId) {
-    return authorizations.computeIfAbsent(providerId, k -> ConcurrentHashMap.newKeySet());
-  }
-
-  @Override
-  public Set<String> getProviderIds() {
-    return authorizations.keySet();
+    return Objects.equals(authorizations, other.authorizations);
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + authorizations.hashCode();
+    result = prime * result + Objects.hashCode(authorizations);
     return result;
   }
 
+  @Override
+  public boolean verify(Authorization resolvedAuthorization) {
+    if (authorizations == null) {
+      return false;
+    }
+
+    for (Map.Entry<String, Set<Authorization>> kv : authorizations.entrySet()) {
+      for (Authorization authorization : kv.getValue()) {
+        if (authorization.verify(resolvedAuthorization)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public Authorizations forEach(BiConsumer<String, Authorization> consumer) {
+    if (authorizations == null) {
+      return this;
+    }
+
+    for (Map.Entry<String, Set<Authorization>> kv : authorizations.entrySet()) {
+      for (Authorization authorization : kv.getValue()) {
+        consumer.accept(kv.getKey(), authorization);
+      }
+    }
+    return this;
+  }
+
+  @Override
+  public Authorizations forEach(String providerId, Consumer<Authorization> consumer) {
+    if (authorizations == null) {
+      return this;
+    }
+
+    authorizations
+      .getOrDefault(providerId, Collections.emptySet())
+      .forEach(consumer);
+    return this;
+  }
 }

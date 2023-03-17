@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -87,7 +88,9 @@ public class UserTest {
     user.authorizations().add("providerId", PermissionBasedAuthorization.create("permission1"));
     user.authorizations().add("providerId", RoleBasedAuthorization.create("role1"));
     user.authorizations().add("providerId", RoleBasedAuthorization.create("role1"));
-    Assert.assertEquals(2, user.authorizations().get("providerId").size());
+    final AtomicInteger cnt = new AtomicInteger();
+    user.authorizations().forEach("providerId", auth -> cnt.incrementAndGet());
+    Assert.assertEquals(2, cnt.get());
   }
 
   @Test

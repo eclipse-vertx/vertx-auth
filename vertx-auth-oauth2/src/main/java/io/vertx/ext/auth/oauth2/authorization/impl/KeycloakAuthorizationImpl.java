@@ -60,7 +60,7 @@ public class KeycloakAuthorizationImpl implements KeycloakAuthorization {
       return Future.failedFuture(e);
     }
 
-    user.authorizations().add(getId(), authorizations);
+    user.authorizations().put(getId(), authorizations);
     // return
     return Future.succeededFuture();
   }

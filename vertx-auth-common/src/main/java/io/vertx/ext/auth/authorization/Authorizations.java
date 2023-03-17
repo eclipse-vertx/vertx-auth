@@ -13,27 +13,39 @@
 package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 @VertxGen
 public interface Authorizations {
 
   @Fluent
-  Authorizations add(String providerId, Set<Authorization> authorizations);
+  Authorizations add(String providerId, Authorization authorization);
 
   @Fluent
-  Authorizations add(String providerId, Authorization authorization);
+  Authorizations put(String providerId, Set<Authorization> authorizations);
+
+  boolean isEmpty();
 
   @Fluent
   Authorizations clear(String providerId);
 
   @Fluent
-  Authorizations clear();
+  Authorizations clearAll();
 
-  Set<Authorization> get(String providerId);
+  boolean verify(Authorization resolvedAuthorization);
 
-  Set<String> getProviderIds();
+  @Fluent
+  @GenIgnore(PERMITTED_TYPE)
+  Authorizations forEach(BiConsumer<String, Authorization> consumer);
 
+  @Fluent
+  @GenIgnore(PERMITTED_TYPE)
+  Authorizations forEach(String providerId, Consumer<Authorization> consumer);
 }
