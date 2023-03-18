@@ -53,8 +53,14 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
     User user = context.user();
     if (user != null) {
       final Authorization resolvedAuthorization = getResolvedAuthorization(context);
-      return user.authorizations()
-        .verify(resolvedAuthorization);
+      final Authorizations authorizations = user.authorizations();
+      for (String providerId : authorizations.getProviderIds()) {
+        for (Authorization authorization : authorizations.get(providerId)) {
+          if (authorization.verify(resolvedAuthorization)) {
+            return true;
+          }
+        }
+      }
     }
     return false;
   }
@@ -101,4 +107,5 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
     this.resource = new VariableAwareExpression(resource);
     return this;
   }
+
 }

@@ -55,8 +55,13 @@ public class RoleBasedAuthorizationImpl implements RoleBasedAuthorization {
     User user = context.user();
     if (user != null) {
       Authorization resolvedAuthorization = getResolvedAuthorization(context);
-      return user.authorizations()
-        .verify(resolvedAuthorization);
+      for (String providerId : user.authorizations().getProviderIds()) {
+        for (Authorization authorization : user.authorizations().get(providerId)) {
+          if (authorization.verify(resolvedAuthorization)) {
+            return true;
+          }
+        }
+      }
     }
     return false;
   }

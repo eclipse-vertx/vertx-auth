@@ -20,9 +20,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -53,26 +50,23 @@ public class UserTest {
     // principal + authorizations
     User user = createTestUser();
     User.create(new JsonObject().put("name", "name1").put("value1", "a value"));
+    user.authorizations().add("providerId", PermissionBasedAuthorization.create("permission1"));
+    user.authorizations().add("providerId", RoleBasedAuthorization.create("role1"));
+    user.authorizations().add("providerId", WildcardPermissionBasedAuthorization.create("orders:edit:1234"));
+    user.authorizations().add("providerId", WildcardPermissionBasedAuthorization.create("billing:*"));
+    user.authorizations().add("providerId", NotAuthorization.create(PermissionBasedAuthorization.create("permission1")));
+    user.authorizations().add("providerId", AndAuthorization.create());
     user.authorizations()
-      .put(
-        "providerId",
-        PermissionBasedAuthorization.create("permission1"),
-        RoleBasedAuthorization.create("role1"),
-        WildcardPermissionBasedAuthorization.create("orders:edit:1234"),
-        WildcardPermissionBasedAuthorization.create("billing:*"),
-        NotAuthorization.create(PermissionBasedAuthorization.create("permission1")),
-        AndAuthorization.create(),
-        AndAuthorization.create()
-          .addAuthorization(PermissionBasedAuthorization.create("permission1"))
-          .addAuthorization(RoleBasedAuthorization.create("role1"))
-          .addAuthorization(PermissionBasedAuthorization.create("permission2"))
-          .addAuthorization(RoleBasedAuthorization.create("role2")),
-        OrAuthorization.create(),
-        OrAuthorization.create()
-          .addAuthorization(PermissionBasedAuthorization.create("permission1"))
-          .addAuthorization(RoleBasedAuthorization.create("role1"))
-          .addAuthorization(PermissionBasedAuthorization.create("permission2"))
-          .addAuthorization(RoleBasedAuthorization.create("role2")));
+      .add("providerId", AndAuthorization.create().addAuthorization(PermissionBasedAuthorization.create("permission1"))
+        .addAuthorization(RoleBasedAuthorization.create("role1"))
+        .addAuthorization(PermissionBasedAuthorization.create("permission2"))
+        .addAuthorization(RoleBasedAuthorization.create("role2")));
+    user.authorizations().add("providerId", OrAuthorization.create());
+    user.authorizations()
+      .add("providerId", OrAuthorization.create().addAuthorization(PermissionBasedAuthorization.create("permission1"))
+        .addAuthorization(RoleBasedAuthorization.create("role1"))
+        .addAuthorization(PermissionBasedAuthorization.create("permission2"))
+        .addAuthorization(RoleBasedAuthorization.create("role2")));
     testReadWriteUser(user);
   }
 
@@ -80,10 +74,8 @@ public class UserTest {
   public void testReadWriteUser3() {
     // principal + authorizations + attributes
     User user = createTestUser();
-    user.authorizations().put("providerId",
-      RoleBasedAuthorization.create("role1"),
-      RoleBasedAuthorization.create("role2"));
-
+    user.authorizations().add("providerId", RoleBasedAuthorization.create("role1"));
+    user.authorizations().add("providerId", RoleBasedAuthorization.create("role2"));
     testReadWriteUser(user);
   }
 
@@ -91,17 +83,11 @@ public class UserTest {
   public void testUniqueAuthorizations() {
     // principal + authorizations
     User user = createTestUser();
-    Set<Authorization> authorizations = new HashSet<>();
-
-    authorizations.add(PermissionBasedAuthorization.create("permission1"));
-    authorizations.add(PermissionBasedAuthorization.create("permission1"));
-    authorizations.add(RoleBasedAuthorization.create("role1"));
-    authorizations.add(RoleBasedAuthorization.create("role1"));
-
-    user.authorizations().put("providerId", authorizations);
-    final AtomicInteger cnt = new AtomicInteger();
-    user.authorizations().forEach("providerId", auth -> cnt.incrementAndGet());
-    Assert.assertEquals(2, cnt.get());
+    user.authorizations().add("providerId", PermissionBasedAuthorization.create("permission1"));
+    user.authorizations().add("providerId", PermissionBasedAuthorization.create("permission1"));
+    user.authorizations().add("providerId", RoleBasedAuthorization.create("role1"));
+    user.authorizations().add("providerId", RoleBasedAuthorization.create("role1"));
+    Assert.assertEquals(2, user.authorizations().get("providerId").size());
   }
 
   @Test

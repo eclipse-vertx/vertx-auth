@@ -13,96 +13,27 @@
 package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.Fluent;
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
-
-/**
- * Represents a cache map of authorizations per provider.
- *
- * Authorizations are immutable and can be shared between users.
- *
- * @author Stephane Bastian
- */
 @VertxGen
 public interface Authorizations {
 
-  /**
-   * Replaces the current authorizations with the given authorizations.
-   * The map is expected to be immutable.
-   *
-   * @param authorizations the new map of authorizations.
-   * @return fluent self.
-   */
   @Fluent
-  @GenIgnore
-  Authorizations putAll(Map<String, Set<Authorization>> authorizations);
+  Authorizations add(String providerId, Set<Authorization> authorizations);
 
-  /**
-   * Replaces the current authorizations with the given authorizations for the given provider.
-   *
-   * @param providerId the provider.
-   * @param authorizations the new map of authorizations. {@code null} is equivalent to remove all authorizations for
-   *                      the given provider.
-   * @return fluent self.
-   */
   @Fluent
-  Authorizations put(String providerId, Set<Authorization> authorizations);
+  Authorizations add(String providerId, Authorization authorization);
 
-  /**
-   * Replaces the current authorizations with the given authorizations for the given provider.
-   *
-   * @param providerId the provider.
-   * @param authorizations the new array of authorizations.
-   * @return fluent self.
-   */
   @Fluent
-  @GenIgnore
-  default Authorizations put(String providerId, Authorization... authorizations) {
-    Set<Authorization> set = new HashSet<>();
-    Collections.addAll(set, authorizations);
-    return put(providerId, set);
-  }
+  Authorizations clear(String providerId);
 
-  /**
-   * {@code true} if the authorizations contains at least one provider.
-   */
-  boolean isEmpty();
-
-  /**
-   * Clears the authorizations.
-   */
   @Fluent
   Authorizations clear();
 
-  /**
-   * Verifies that the given authorization is present in the authorizations.
-   * @param resolvedAuthorization the authorization to verify.
-   * @return {@code true} if the authorization is present.
-   */
-  boolean verify(Authorization resolvedAuthorization);
+  Set<Authorization> get(String providerId);
 
-  /**
-   * Walk all the authorizations and call the consumer for each authorization.
-   * @param consumer the consumer to call.
-   */
-  @Fluent
-  @GenIgnore(PERMITTED_TYPE)
-  Authorizations forEach(BiConsumer<String, Authorization> consumer);
+  Set<String> getProviderIds();
 
-  /**
-   * Walk all the authorizations for the given provider and call the consumer for each authorization.
-   * @param consumer the consumer to call.
-   */
-  @Fluent
-  @GenIgnore(PERMITTED_TYPE)
-  Authorizations forEach(String providerId, Consumer<Authorization> consumer);
 }

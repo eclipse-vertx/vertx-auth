@@ -16,10 +16,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
 
-import java.util.*;
+import java.util.Objects;
 
 public class UserConverter {
 
@@ -32,22 +31,15 @@ public class UserConverter {
 
     JsonObject json = new JsonObject();
     json.put(FIELD_PRINCIPAL, value.principal());
-    Authorizations authorizations = value.authorizations();
-    if (!authorizations.isEmpty()) {
-      JsonObject jsonAuthorizations = new JsonObject();
-      authorizations
-        .forEach((providerId, authorization) -> {
-          final JsonArray jsonAuthorizationByProvider;
-          if (jsonAuthorizations.containsKey(providerId)) {
-            jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(providerId);
-          } else {
-            jsonAuthorizationByProvider = new JsonArray();
-            jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
-          }
-          jsonAuthorizationByProvider.add(AuthorizationConverter.encode(authorization));
-        });
-      json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
+    JsonObject jsonAuthorizations = new JsonObject();
+    for (String providerId : value.authorizations().getProviderIds()) {
+      JsonArray jsonAuthorizationByProvider = new JsonArray();
+      jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
+      for (Authorization authorization : value.authorizations().get(providerId)) {
+        jsonAuthorizationByProvider.add(AuthorizationConverter.encode(authorization));
+      }
     }
+    json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
     json.put(FIELD_ATTRIBUTES, value.attributes());
     return json;
   }
@@ -59,29 +51,14 @@ public class UserConverter {
     User user = User.create(principal);
     // authorizations
     JsonObject jsonAuthorizations = json.getJsonObject(FIELD_AUTHORIZATIONS);
-    final Map<String, Set<Authorization>> decodedAuthorizations;
-    if (jsonAuthorizations != null) {
-      decodedAuthorizations = new HashMap<>(jsonAuthorizations.size());
-      for (String fieldName : jsonAuthorizations.fieldNames()) {
-        JsonArray jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(fieldName);
-        final Set<Authorization> authorizations;
-        if (jsonAuthorizationByProvider == null) {
-          authorizations = Collections.emptySet();
-        } else {
-          authorizations = new HashSet<>(jsonAuthorizationByProvider.size());
-          for (int i = 0; i < jsonAuthorizationByProvider.size(); i++) {
-            authorizations.add(AuthorizationConverter.decode(jsonAuthorizationByProvider.getJsonObject(i)));
-          }
-        }
-        decodedAuthorizations.put(fieldName, authorizations);
+    for (String fieldName : jsonAuthorizations.fieldNames()) {
+      JsonArray jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(fieldName);
+      for (int i = 0; i < jsonAuthorizationByProvider.size(); i++) {
+        JsonObject jsonAuthorization = jsonAuthorizationByProvider.getJsonObject(i);
+        user.authorizations().add(fieldName, AuthorizationConverter.decode(jsonAuthorization));
       }
-      user.authorizations()
-        .putAll(decodedAuthorizations);
     }
-
-    user.attributes()
-      .mergeIn(json.getJsonObject(FIELD_ATTRIBUTES, new JsonObject()));
-
+    user.attributes().mergeIn(json.getJsonObject(FIELD_ATTRIBUTES, new JsonObject()));
     return user;
   }
 

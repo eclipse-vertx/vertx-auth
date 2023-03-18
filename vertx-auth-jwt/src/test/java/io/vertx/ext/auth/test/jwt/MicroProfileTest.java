@@ -103,7 +103,7 @@ public class MicroProfileTest {
     MicroProfileAuthorization.create().getAuthorizations(user)
       .onComplete(call -> {
         should.assertTrue(call.succeeded());
-        should.assertFalse(user.authorizations().isEmpty());
+        should.assertFalse(user.authorizations().getProviderIds().isEmpty());
         should.assertFalse(RoleBasedAuthorization.create("unknown").match(user));
         test.complete();
       });
