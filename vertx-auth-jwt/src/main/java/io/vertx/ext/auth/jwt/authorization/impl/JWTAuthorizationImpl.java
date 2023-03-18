@@ -73,7 +73,7 @@ public class JWTAuthorizationImpl implements JWTAuthorization {
         }
       }
     }
-    user.authorizations().put(getId(), authorizations);
+    user.authorizations().add(getId(), authorizations);
     // return
     return Future.succeededFuture();
   }

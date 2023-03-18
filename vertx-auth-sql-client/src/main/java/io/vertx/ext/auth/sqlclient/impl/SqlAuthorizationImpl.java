@@ -75,7 +75,7 @@ public class SqlAuthorizationImpl implements SqlAuthorization {
           return getPermissions(username)
             .onSuccess(permissions -> {
               authorizations.addAll(permissions);
-              user.authorizations().put(getId(), authorizations);
+              user.authorizations().add(getId(), authorizations);
             })
             .mapEmpty();
         });

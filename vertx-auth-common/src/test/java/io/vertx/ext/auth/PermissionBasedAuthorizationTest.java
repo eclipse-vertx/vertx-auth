@@ -27,8 +27,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Collections;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -85,7 +83,7 @@ public class PermissionBasedAuthorizationTest {
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.fromName("dummy user");
-      user.authorizations().put("providerId", PermissionBasedAuthorization.create("p1").setResource("r1"));
+      user.authorizations().add("providerId", PermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertEquals(true, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
@@ -105,7 +103,7 @@ public class PermissionBasedAuthorizationTest {
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
       User user = User.fromName("dummy user");
-      user.authorizations().put("providerId", PermissionBasedAuthorization.create("p1").setResource("r1"));
+      user.authorizations().add("providerId", PermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertEquals(false, PermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
