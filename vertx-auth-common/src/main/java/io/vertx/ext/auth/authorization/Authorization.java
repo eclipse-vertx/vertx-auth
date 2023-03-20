@@ -41,7 +41,7 @@ import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-@VertxGen
+@VertxGen(concrete = false)
 public interface Authorization {
 
   /**

@@ -78,4 +78,16 @@ public class OrAuthorizationImpl implements OrAuthorization {
     return false;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("OR(");
+    for (int i = 0; i < authorizations.size(); i++) {
+      if (i > 0)
+        sb.append(", ");
+      sb.append(authorizations.get(i).toString());
+    }
+    sb.append(")");
+    return sb.toString();
+  }
 }

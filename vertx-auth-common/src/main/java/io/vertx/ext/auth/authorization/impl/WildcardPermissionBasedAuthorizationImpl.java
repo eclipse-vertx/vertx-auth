@@ -104,4 +104,8 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
     return this;
   }
 
+  @Override
+  public String toString() {
+    return "PERMISSION*[" + permission + "]";
+  }
 }
