@@ -58,7 +58,7 @@ public class ScopeAuthorizationImpl implements ScopeAuthorization {
         authorizations.add(PermissionBasedAuthorization.create(scope));
       }
     }
-    user.authorizations().add(getId(), authorizations);
+    user.authorizations().put(getId(), authorizations);
     // return
     return Future.succeededFuture();
   }

@@ -189,7 +189,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
             result.add(WildcardPermissionBasedAuthorization.create(permission));
           }
         }
-        user.authorizations().add(getId(), result);
+        user.authorizations().put(getId(), result);
       })
       .mapEmpty();
   }

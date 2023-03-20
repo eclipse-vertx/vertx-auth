@@ -16,6 +16,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +38,9 @@ public interface AuthorizationProvider {
    * @return
    */
   static AuthorizationProvider create(String id, Set<Authorization> authorizations) {
-    Set<Authorization> _authorizations = new HashSet<>(Objects.requireNonNull(authorizations));
+    Set<Authorization> _authorizations =
+      Collections.unmodifiableSet(new HashSet<>(Objects.requireNonNull(authorizations)));
+
     return new AuthorizationProvider() {
 
       @Override
@@ -47,7 +50,7 @@ public interface AuthorizationProvider {
 
       @Override
       public Future<Void> getAuthorizations(User user) {
-        user.authorizations().add(getId(), _authorizations);
+        user.authorizations().put(getId(), _authorizations);
         return Future.succeededFuture();
       }
     };
