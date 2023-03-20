@@ -11,7 +11,6 @@ import io.vertx.ext.auth.audit.Marker;
 import io.vertx.ext.auth.audit.SecurityAudit;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.Authorizations;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -247,12 +246,6 @@ public final class SecurityAuditLogger implements SecurityAudit {
             escapeNLFChars(sb, sub);
             sb.append('"');
           }
-          Authorizations authorizations = user.authorizations();
-          if (authorizations != null) {
-            sb.append(" authorizations=\"");
-            escapeNLFChars(sb, authorizations.toString());
-            sb.append('"');
-          }
         }
         if (authorization != null) {
           sb.append(" authorization=\"");
@@ -316,10 +309,6 @@ public final class SecurityAuditLogger implements SecurityAudit {
           String sub = user.subject();
           if (sub != null) {
             json.put("subject", sub);
-          }
-          Authorizations authorizations = user.authorizations();
-          if (authorizations != null) {
-            json.put("authorizations", authorizations.toString());
           }
         }
         if (authorization != null) {

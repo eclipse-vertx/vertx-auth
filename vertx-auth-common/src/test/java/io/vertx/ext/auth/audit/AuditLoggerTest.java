@@ -32,7 +32,7 @@ public class AuditLoggerTest {
         .addAuthorization(RoleBasedAuthorization.create("role2")));
 
     audit.audit(Marker.AUTHORIZATION, false);
-    // [AUTHORIZATION epoch="1674814080617" source="localhost" destination="localhost" subject="paulo" authorizations="{}" authorization="AND(PERMISSION[permission1], ROLE[role1], PERMISSION[permission2], ROLE[role2])"] FAIL
+    // [AUTHORIZATION epoch="1674814080617" source="localhost" destination="localhost" subject="paulo" authorization="AND(PERMISSION[permission1], ROLE[role1], PERMISSION[permission2], ROLE[role2])"] FAIL
 
     audit.status(403);
     audit.audit(Marker.REQUEST, true);

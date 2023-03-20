@@ -144,6 +144,8 @@ public class AuthorizationsImpl implements Authorizations {
 
   @Override
   public String toString() {
-    return authorizations.toString();
+    return authorizations == null ?
+      "<empty>" :
+      authorizations.toString();
   }
 }
