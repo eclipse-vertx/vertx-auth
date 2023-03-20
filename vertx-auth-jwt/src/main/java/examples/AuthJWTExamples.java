@@ -40,7 +40,8 @@ public class AuthJWTExamples {
     JWTAuthOptions config = new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("keystore.jceks")
-        .setPassword("secret"));
+        .setPassword("secret")
+        .setType("jceks"));
 
     AuthenticationProvider provider = JWTAuth.create(vertx, config);
   }
@@ -50,7 +51,8 @@ public class AuthJWTExamples {
     JWTAuthOptions config = new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("keystore.jceks")
-        .setPassword("secret"));
+        .setPassword("secret")
+        .setType("jceks"));
 
     JWTAuth provider = JWTAuth.create(vertx, config);
 
