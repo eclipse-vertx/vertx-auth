@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -28,10 +29,9 @@ import java.util.Map;
  *
  * @author <a href="mailto:lazarbulic@gmail.com">Lazar Bulic</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
 public class OAuth2AuthorizationURL {
 
-  private String redirectUri;
   private List<String> scopes;
   private String state;
   private Map<String, String> additionalParameters;
@@ -48,7 +48,15 @@ public class OAuth2AuthorizationURL {
    * @param json the JSON
    */
   public OAuth2AuthorizationURL(JsonObject json) {
-    OAuth2AuthorizationURLConverter.fromJson(json, this);
+    setState(json.getString("state"));
+    JsonArray scopes = json.getJsonArray("scopes");
+    if (scopes != null) {
+      scopes.forEach(scope -> addScope((String) scope));
+    }
+    JsonObject additionalParameters = json.getJsonObject("additionalParameters");
+    if (additionalParameters != null) {
+      additionalParameters.forEach(entry -> putAdditionalParameter(entry.getKey(), (String) entry.getValue()));
+    }
   }
 
   /**
@@ -57,8 +65,8 @@ public class OAuth2AuthorizationURL {
    * @param other the existing one to clone
    */
   public OAuth2AuthorizationURL(OAuth2AuthorizationURL other) {
-    this.redirectUri = other.redirectUri;
     this.state = other.state;
+
     if (other.scopes != null) {
       this.scopes = new ArrayList<>(other.scopes);
     }
@@ -73,7 +81,9 @@ public class OAuth2AuthorizationURL {
    * @return the redirectUri
    */
   public String getRedirectUri() {
-    return redirectUri;
+    return additionalParameters == null ?
+      null :
+      getAdditionalParameters().get("redirect_uri");
   }
 
   /**
@@ -83,7 +93,8 @@ public class OAuth2AuthorizationURL {
    * @return self
    */
   public OAuth2AuthorizationURL setRedirectUri(String redirectUri) {
-    this.redirectUri = redirectUri;
+    // empty redirects are not allowed and should be considered as null
+    putAdditionalParameter("redirect_uri", "".equals(redirectUri) ? null : redirectUri);
     return this;
   }
 
@@ -142,6 +153,77 @@ public class OAuth2AuthorizationURL {
   }
 
   /**
+   * PKCE code challenge
+   */
+  public String getCodeChallenge() {
+    return additionalParameters == null ?
+      null :
+      getAdditionalParameters().get("code_challenge");
+  }
+
+  /**
+   * PKCE code challenge
+   */
+  public OAuth2AuthorizationURL setCodeChallenge(String codeChallenge) {
+    putAdditionalParameter("code_challenge", codeChallenge);
+    return this;
+  }
+
+  /**
+   * PKCE code challenge method
+   */
+  public String getCodeChallengeMethod() {
+    return additionalParameters == null ?
+      null :
+      getAdditionalParameters()
+      .get("code_challenge_method");
+  }
+
+  /**
+   * PKCE code challenge method
+   */
+  public OAuth2AuthorizationURL setCodeChallengeMethod(String codeChallengeMethod) {
+    putAdditionalParameter("code_challenge_method", codeChallengeMethod);
+    return this;
+  }
+
+  /**
+   * Hint on kind of IdP prompt
+   */
+  public String getPrompt() {
+    return additionalParameters == null ?
+      null :
+      getAdditionalParameters()
+      .get("prompt");
+  }
+
+  /**
+   * Hint on kind of IdP prompt
+   */
+  public OAuth2AuthorizationURL setPrompt(String prompt) {
+    putAdditionalParameter("prompt", prompt);
+    return this;
+  }
+
+  /**
+   * Hint on login name for IdP UI
+   */
+  public String getLoginHint() {
+    return additionalParameters == null ?
+      null :
+      getAdditionalParameters()
+      .get("login_hint");
+  }
+
+  /**
+   * Hint on login name for IdP UI
+   */
+  public OAuth2AuthorizationURL setLoginHint(String loginHint) {
+    putAdditionalParameter("login_hint", loginHint);
+    return this;
+  }
+
+  /**
    * Get the additional parameters
    *
    * @return the additionalParameters
@@ -170,6 +252,13 @@ public class OAuth2AuthorizationURL {
    * @return self
    */
   public OAuth2AuthorizationURL putAdditionalParameter(String key, String value) {
+    if (value == null) {
+      if (this.additionalParameters != null) {
+        this.additionalParameters.remove(key);
+      }
+      return this;
+    }
+
     if (this.additionalParameters == null) {
       this.additionalParameters = new HashMap<>();
     }
@@ -179,7 +268,16 @@ public class OAuth2AuthorizationURL {
 
   public JsonObject toJson() {
     final JsonObject json = new JsonObject();
-    OAuth2AuthorizationURLConverter.toJson(this, json);
+
+    if (state != null) {
+      json.put("state", state);
+    }
+    if (scopes != null) {
+      json.put("scopes", new JsonArray(scopes));
+    }
+    if (additionalParameters != null) {
+      json.put("additionalParameters", new JsonObject((Map) additionalParameters));
+    }
     return json;
   }
 

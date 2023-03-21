@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.impl.http.SimpleHttpResponse;
 import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 
 import java.io.UnsupportedEncodingException;
@@ -117,19 +118,31 @@ public class OAuth2API {
    * <p>
    * see: https://tools.ietf.org/html/rfc6749
    */
-  public String authorizeURL(JsonObject params) {
-    final JsonObject query = params.copy();
+  public String authorizeURL(OAuth2AuthorizationURL params) {
+    final JsonObject query = new JsonObject();
 
-    if (query.containsKey("scopes")) {
-      // scopes have been passed as a list so the provider must generate the correct string for it
-      query.put("scope", String.join(config.getScopeSeparator(), query.getJsonArray("scopes").getList()));
-      query.remove("scopes");
+    if (params.getAdditionalParameters() != null) {
+      params
+        .getAdditionalParameters()
+        .forEach(query::put);
     }
 
-    query.put("response_type", "code");
+    query.put("state", params.getState());
+
+    if (params.getScopes() != null) {
+      // scopes have been passed as a list so the provider must generate the correct string for it
+      query
+        .put("scope", String.join(config.getScopeSeparator(), params.getScopes()));
+    }
+
+    query
+      .put("response_type", "code");
+
     String clientId = config.getClientId();
+
     if (clientId != null) {
-      query.put("client_id", clientId);
+      query
+        .put("client_id", clientId);
     } else {
       if (config.getClientAssertionType() != null) {
         query
@@ -139,16 +152,6 @@ public class OAuth2API {
         query
           .put("client_assertion", config.getClientAssertion());
       }
-    }
-
-    if (query.getString("redirectUri") != null && !params.getString("redirectUri").isEmpty()) {
-      query.put("redirect_uri", params.getString("redirectUri"));
-      query.remove("redirectUri");
-    }
-
-    if (query.containsKey("additionalParameters")) {
-      query.getJsonObject("additionalParameters").forEach(entry -> query.put(entry.getKey(), entry.getValue()));
-      query.remove("additionalParameters");
     }
 
     final String path = config.getAuthorizationPath();

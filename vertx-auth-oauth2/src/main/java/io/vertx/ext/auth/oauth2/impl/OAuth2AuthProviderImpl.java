@@ -430,7 +430,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
   @Override
   public String authorizeURL(OAuth2AuthorizationURL url) {
-    return api.authorizeURL(url.toJson());
+    return api.authorizeURL(url);
   }
 
   @Override

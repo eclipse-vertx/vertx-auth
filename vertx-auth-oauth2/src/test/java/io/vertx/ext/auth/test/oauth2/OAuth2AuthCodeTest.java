@@ -121,16 +121,16 @@ public class OAuth2AuthCodeTest {
 
   @Test
   public void generateAuthorizeURL(TestContext should) throws Exception {
-    String expected = "http://localhost:" + currentPort + "/oauth/authorize?state=02afe928b&scope=user&response_type=code&client_id=client-id&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8");
+    String expected = "http://localhost:" + currentPort + "/oauth/authorize?redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&state=02afe928b&scope=user&response_type=code&client_id=client-id";
     should.assertEquals(expected, oauth2.authorizeURL(authorizeConfig));
   }
 
   @Test
   public void generateAuthorizeURLTypeSafe(TestContext should) throws Exception {
-    String expected = "http://localhost:" + currentPort + "/oauth/authorize?state=02afe928b&scope=user&response_type=code&client_id=client-id&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&login_hint=my-username&prompt=none+login+consent";
+    String expected = "http://localhost:" + currentPort + "/oauth/authorize?prompt=none+login+consent&login_hint=my-username&redirect_uri=" + URLEncoder.encode("http://localhost:3000/callback", "UTF-8") + "&state=02afe928b&scope=user&response_type=code&client_id=client-id";
     should.assertEquals(expected, oauth2.authorizeURL(new OAuth2AuthorizationURL(authorizeConfig)
-      .putAdditionalParameter("login_hint", "my-username")
-      .putAdditionalParameter("prompt", "none login consent")));
+      .setLoginHint("my-username")
+      .setPrompt("none login consent")));
   }
 
   @Test
