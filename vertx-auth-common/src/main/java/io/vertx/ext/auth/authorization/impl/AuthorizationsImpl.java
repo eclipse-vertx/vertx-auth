@@ -141,4 +141,11 @@ public class AuthorizationsImpl implements Authorizations {
       .forEach(consumer);
     return this;
   }
+
+  @Override
+  public String toString() {
+    return authorizations == null ?
+      "<empty>" :
+      authorizations.toString();
+  }
 }

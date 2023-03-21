@@ -102,7 +102,7 @@ public interface Authorizations {
    * @param consumer the consumer to call.
    */
   @Fluent
-  @GenIgnore(PERMITTED_TYPE)
+  @GenIgnore
   Authorizations forEach(BiConsumer<String, Authorization> consumer);
 
   /**
@@ -110,6 +110,6 @@ public interface Authorizations {
    * @param consumer the consumer to call.
    */
   @Fluent
-  @GenIgnore(PERMITTED_TYPE)
+  @GenIgnore
   Authorizations forEach(String providerId, Consumer<Authorization> consumer);
 }
