@@ -44,7 +44,7 @@ public class OAuth2Options {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2Options.class);
 
   // Defaults
-  private static final boolean BASIC_AUTHORIZATION_HEADER = true;
+  private static final boolean BASIC_AUTHORIZATION = true;
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOCATION_PATH = "/oauth/revoke";
@@ -78,7 +78,7 @@ public class OAuth2Options {
   private String clientId;
   private String clientSecret;
 
-  private boolean useBasicAuthorizationHeader;
+  private boolean useBasicAuthorization;
 
   //https://tools.ietf.org/html/rfc7521
   private String clientAssertionType;
@@ -114,7 +114,7 @@ public class OAuth2Options {
     tenant = other.getTenant();
     clientId = other.getClientId();
     clientSecret = other.getClientSecret();
-    this.useBasicAuthorizationHeader = other.isUseBasicAuthorizationHeader();
+    useBasicAuthorization = other.isUseBasicAuthorization();
     clientAssertionType = other.getClientAssertionType();
     clientAssertion = other.getClientAssertion();
     validateIssuer = other.isValidateIssuer();
@@ -173,7 +173,7 @@ public class OAuth2Options {
     scopeSeparator = SCOPE_SEPARATOR;
     jwtOptions = JWT_OPTIONS;
     jwkMaxAge = JWK_DEFAULT_AGE;
-    useBasicAuthorizationHeader = BASIC_AUTHORIZATION_HEADER;
+    useBasicAuthorization = BASIC_AUTHORIZATION;
   }
 
   /**
@@ -287,13 +287,13 @@ public class OAuth2Options {
     return this;
   }
 
-  public OAuth2Options setUseBasicAuthorizationHeader(boolean useBasicAuthorizationHeader) {
-    this.useBasicAuthorizationHeader = useBasicAuthorizationHeader;
+  public OAuth2Options setUseBasicAuthorization(boolean useBasicAuthorization) {
+    this.useBasicAuthorization = useBasicAuthorization;
     return this;
   }
 
-  public boolean isUseBasicAuthorizationHeader() {
-    return useBasicAuthorizationHeader;
+  public boolean isUseBasicAuthorization() {
+    return useBasicAuthorization;
   }
 
   public String getClientAssertionType() {

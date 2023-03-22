@@ -417,7 +417,7 @@ public class OAuth2API {
     final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
 
     if (confidentialClient) {
-      if (config.isUseBasicAuthorizationHeader()) {
+      if (config.isUseBasicAuthorization()) {
         String basic = config.getClientId() + ":" + config.getClientSecret();
         headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
       } else {

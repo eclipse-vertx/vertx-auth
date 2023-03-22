@@ -3,8 +3,7 @@ package io.vertx.ext.auth.oauth2;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.impl.JsonUtil;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+
 import java.util.Base64;
 
 /**
@@ -142,7 +141,7 @@ public class OAuth2OptionsConverter {
           break;
         case "useBasicAuthorizationHeader":
           if (member.getValue() instanceof Boolean) {
-            obj.setUseBasicAuthorizationHeader((Boolean)member.getValue());
+            obj.setUseBasicAuthorization((Boolean)member.getValue());
           }
           break;
         case "userAgent":
@@ -241,7 +240,7 @@ public class OAuth2OptionsConverter {
     if (obj.getTokenPath() != null) {
       json.put("tokenPath", obj.getTokenPath());
     }
-    json.put("useBasicAuthorizationHeader", obj.isUseBasicAuthorizationHeader());
+    json.put("useBasicAuthorizationHeader", obj.isUseBasicAuthorization());
     if (obj.getUserAgent() != null) {
       json.put("userAgent", obj.getUserAgent());
     }

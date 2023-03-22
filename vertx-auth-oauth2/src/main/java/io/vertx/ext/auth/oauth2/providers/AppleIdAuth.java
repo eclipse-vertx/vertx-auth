@@ -117,6 +117,6 @@ public interface AppleIdAuth extends OpenIDConnectAuth {
       new OAuth2Options(config)
         .setSite(site)
         .setClientSecret(clientSecret)
-        .setUseBasicAuthorizationHeader(false));
+        .setUseBasicAuthorization(false));
   }
 }
