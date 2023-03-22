@@ -15,7 +15,6 @@ public class JWTOptions {
   private int leeway = 0;
   private boolean ignoreExpiration;
   private String algorithm = "HS256";
-  private String keyId;
   private JsonObject header = EMPTY;
   private boolean noTimestamp;
   private int expires;
@@ -32,7 +31,6 @@ public class JWTOptions {
     this.leeway = other.leeway;
     this.ignoreExpiration = other.ignoreExpiration;
     this.algorithm = other.algorithm;
-    this.keyId = other.keyId;
     this.header = other.header;
     this.noTimestamp = other.noTimestamp;
     this.expires = other.expires;
