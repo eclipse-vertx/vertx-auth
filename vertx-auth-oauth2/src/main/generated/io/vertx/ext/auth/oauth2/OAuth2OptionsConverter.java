@@ -140,6 +140,11 @@ public class OAuth2OptionsConverter {
             obj.setTokenPath((String)member.getValue());
           }
           break;
+        case "useBasicAuthorizationHeader":
+          if (member.getValue() instanceof Boolean) {
+            obj.setUseBasicAuthorizationHeader((Boolean)member.getValue());
+          }
+          break;
         case "userAgent":
           if (member.getValue() instanceof String) {
             obj.setUserAgent((String)member.getValue());
@@ -236,6 +241,7 @@ public class OAuth2OptionsConverter {
     if (obj.getTokenPath() != null) {
       json.put("tokenPath", obj.getTokenPath());
     }
+    json.put("useBasicAuthorizationHeader", obj.isUseBasicAuthorizationHeader());
     if (obj.getUserAgent() != null) {
       json.put("userAgent", obj.getUserAgent());
     }

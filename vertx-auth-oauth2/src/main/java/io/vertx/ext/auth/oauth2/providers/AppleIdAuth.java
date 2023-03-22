@@ -33,7 +33,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface AppleAuth extends OpenIDConnectAuth {
+public interface AppleIdAuth extends OpenIDConnectAuth {
 
   /**
    * Create a OAuth2Auth provider for Apple
@@ -110,13 +110,13 @@ public interface AppleAuth extends OpenIDConnectAuth {
           .put("aud", "https://appleid.apple.com")
           .put("sub", config.getClientId()),
         new JWTOptions()
-          .setAlgorithm("ES256")
-          .setHeader(new JsonObject().put("keyid", privateKey.getId())));
+          .setAlgorithm("ES256"));
 
     return OpenIDConnectAuth.discover(
       vertx,
       new OAuth2Options(config)
         .setSite(site)
-        .setClientSecret(clientSecret));
+        .setClientSecret(clientSecret)
+        .setUseBasicAuthorizationHeader(false));
   }
 }
