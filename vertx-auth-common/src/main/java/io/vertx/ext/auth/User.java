@@ -152,6 +152,10 @@ public interface User {
    * @return {@code true} if expired
    */
   default boolean expired(int leeway) {
+    if (leeway < 0) {
+      throw new IllegalArgumentException("Leeway must be greater than zero");
+    }
+
     // All dates are of type NumericDate
     // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
     // the specified UTC date/time, ignoring leap seconds
