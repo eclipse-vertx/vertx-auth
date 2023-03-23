@@ -44,6 +44,7 @@ public class OAuth2Options {
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2Options.class);
 
   // Defaults
+  private static final boolean BASIC_AUTHORIZATION = true;
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOCATION_PATH = "/oauth/revoke";
@@ -76,6 +77,9 @@ public class OAuth2Options {
   private String site;
   private String clientId;
   private String clientSecret;
+
+  private boolean useBasicAuthorization;
+
   //https://tools.ietf.org/html/rfc7521
   private String clientAssertionType;
   private String clientAssertion;
@@ -110,6 +114,7 @@ public class OAuth2Options {
     tenant = other.getTenant();
     clientId = other.getClientId();
     clientSecret = other.getClientSecret();
+    useBasicAuthorization = other.isUseBasicAuthorization();
     clientAssertionType = other.getClientAssertionType();
     clientAssertion = other.getClientAssertion();
     validateIssuer = other.isValidateIssuer();
@@ -168,6 +173,7 @@ public class OAuth2Options {
     scopeSeparator = SCOPE_SEPARATOR;
     jwtOptions = JWT_OPTIONS;
     jwkMaxAge = JWK_DEFAULT_AGE;
+    useBasicAuthorization = BASIC_AUTHORIZATION;
   }
 
   /**
@@ -279,6 +285,15 @@ public class OAuth2Options {
   public OAuth2Options setClientSecret(String clientSecret) {
     this.clientSecret = clientSecret;
     return this;
+  }
+
+  public OAuth2Options setUseBasicAuthorization(boolean useBasicAuthorization) {
+    this.useBasicAuthorization = useBasicAuthorization;
+    return this;
+  }
+
+  public boolean isUseBasicAuthorization() {
+    return useBasicAuthorization;
   }
 
   public String getClientAssertionType() {

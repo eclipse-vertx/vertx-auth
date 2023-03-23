@@ -172,27 +172,17 @@ public class OAuth2API {
     }
 
     final JsonObject headers = new JsonObject();
-
-    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
-
-    if (confidentialClient) {
-      String basic = config.getClientId() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    // Enable the system to send authorization params in the body (for example github does not require to be in the header)
     final JsonObject form = params.copy();
+    // Enable the system to send authorization params in the body (for example github does not require to be in the header)
     if (config.getExtraParameters() != null) {
       form.mergeIn(config.getExtraParameters());
     }
 
     form.put("grant_type", grantType);
 
-    if (!confidentialClient) {
+    if (!clientAuthentication(headers, form)) {
       String clientId = config.getClientId();
-      if (clientId != null) {
-        form.put("client_id", clientId);
-      } else {
+      if (clientId == null) {
         if (config.getClientAssertionType() != null) {
           form
             .put("client_assertion_type", config.getClientAssertionType());
@@ -253,21 +243,16 @@ public class OAuth2API {
    * see: https://tools.ietf.org/html/rfc7662
    */
   public Future<JsonObject> tokenIntrospection(String tokenType, String token) {
-    final JsonObject headers = new JsonObject();
-
-    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
-
-    if (confidentialClient) {
-      String basic = config.getClientId() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
-    }
+    final JsonObject headers = new JsonObject()
+      .put("Content-Type", "application/x-www-form-urlencoded");
 
     final JsonObject form = new JsonObject()
       .put("token", token)
       // optional param from RFC7662
       .put("token_type_hint", tokenType);
 
-    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    clientAuthentication(headers, form);
+
     final Buffer payload = SimpleHttpClient.jsonToQuery(form);
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
@@ -319,22 +304,14 @@ public class OAuth2API {
       return Future.failedFuture("Cannot revoke null token");
     }
 
-    final JsonObject headers = new JsonObject();
-
-    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
-
-    if (confidentialClient) {
-      String basic = config.getClientId() + ":" + config.getClientSecret();
-      headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    final JsonObject form = new JsonObject();
-
-    form
+    final JsonObject headers = new JsonObject()
+      .put("Content-Type", "application/x-www-form-urlencoded");
+    final JsonObject form = new JsonObject()
       .put("token", token)
       .put("token_type_hint", tokenType);
 
-    headers.put("Content-Type", "application/x-www-form-urlencoded");
+    clientAuthentication(headers, form);
+
     final Buffer payload = SimpleHttpClient.jsonToQuery(form);
     // specify preferred accepted accessToken type
     headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
@@ -436,35 +413,24 @@ public class OAuth2API {
     return url + '?' + SimpleHttpClient.jsonToQuery(query);
   }
 
-  /**
-   * Sign out an end-user.
-   * <p>
-   * see:
-   */
-  public Future<Void> logout(String accessToken, String refreshToken) {
-    final JsonObject headers = new JsonObject();
+  private boolean clientAuthentication(JsonObject headers, JsonObject form) {
+    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
 
-    headers.put("Authorization", "Bearer " + accessToken);
-
-    final JsonObject form = new JsonObject();
-
-    form.put("client_id", config.getClientId());
-
-    if (config.getClientSecret() != null) {
-      form.put("client_secret", config.getClientSecret());
+    if (confidentialClient) {
+      if (config.isUseBasicAuthorization()) {
+        String basic = config.getClientId() + ":" + config.getClientSecret();
+        headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
+      } else {
+        form.put("client_id", config.getClientId());
+        form.put("client_secret", config.getClientSecret());
+      }
+    } else {
+      if (config.getClientId() != null) {
+        form.put("client_id", config.getClientId());
+      }
     }
 
-    if (refreshToken != null) {
-      form.put("refresh_token", refreshToken);
-    }
-
-    headers.put("Content-Type", "application/x-www-form-urlencoded");
-    final Buffer payload = SimpleHttpClient.jsonToQuery(form);
-    // specify preferred accepted accessToken type
-    headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-    return fetch(HttpMethod.POST, config.getLogoutPath(), headers, payload)
-      .mapEmpty();
+    return confidentialClient;
   }
 
   private String extractErrorDescription(JsonObject json) {
