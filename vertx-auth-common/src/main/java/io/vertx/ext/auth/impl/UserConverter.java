@@ -33,7 +33,7 @@ public class UserConverter {
     JsonObject json = new JsonObject();
     json.put(FIELD_PRINCIPAL, value.principal());
     Authorizations authorizations = value.authorizations();
-    if (!authorizations.isEmpty()) {
+    if (authorizations != null && !authorizations.isEmpty()) {
       JsonObject jsonAuthorizations = new JsonObject();
       authorizations
         .forEach((providerId, authorization) -> {
