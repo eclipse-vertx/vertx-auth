@@ -121,25 +121,23 @@ public class OpenIDCDiscoveryTest {
     final Async test = should.async();
 
     AppleIdAuth.discover(
-      rule.vertx(),
-      new PubSecKeyOptions()
-        .setAlgorithm("ES256")
-        .setId("9K48F5P6SW")
-        .setBuffer(Buffer.buffer(
-          "-----BEGIN PRIVATE KEY-----\n" +
-            "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg2Pv8N3waHrH6WU5a\n" +
-            "87SA17FZpLtZYXFYfTnMwBiZ5Z+gCgYIKoZIzj0DAQehRANCAATECgHrChq5ccqj\n" +
-            "2sKF8BmJEKgHefk5ueM02dCrp4A/Y/5E9J84sE5e1ScJbasH3zuk2C09eGyQFyf2\n" +
-            "wT6tSjSz\n" +
-            "-----END PRIVATE KEY-----"
-        )),
-      new OAuth2Options()
-        .setClientId("ca.weblite.signindemosvc")
-        .setTenant("HRNMHC7527"))
-      .onComplete(load -> {
-        // will fail as there is no application config, but the parsing should have happened
-        test.complete();
-      });
+        rule.vertx(),
+        new PubSecKeyOptions()
+          .setAlgorithm("ES256")
+          .setId("9K48F5P6SW")
+          .setBuffer(Buffer.buffer(
+            "-----BEGIN PRIVATE KEY-----\n" +
+              "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg2Pv8N3waHrH6WU5a\n" +
+              "87SA17FZpLtZYXFYfTnMwBiZ5Z+gCgYIKoZIzj0DAQehRANCAATECgHrChq5ccqj\n" +
+              "2sKF8BmJEKgHefk5ueM02dCrp4A/Y/5E9J84sE5e1ScJbasH3zuk2C09eGyQFyf2\n" +
+              "wT6tSjSz\n" +
+              "-----END PRIVATE KEY-----"
+          )),
+        new OAuth2Options()
+          .setClientId("ca.weblite.signindemosvc")
+          .setTenant("HRNMHC7527"))
+      .onSuccess(load -> test.complete())
+      .onFailure(should::fail);
   }
 
 }
