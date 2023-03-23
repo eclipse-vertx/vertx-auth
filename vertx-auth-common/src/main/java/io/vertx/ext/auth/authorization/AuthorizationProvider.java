@@ -27,7 +27,7 @@ import java.util.Set;
  *
  * @author stephane bastian
  */
-@VertxGen
+@VertxGen(concrete = false)
 public interface AuthorizationProvider {
 
   /**
