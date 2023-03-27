@@ -26,7 +26,7 @@ import io.vertx.ext.auth.authorization.impl.AttributeImpl;
  * and a logical operator:
  *
  * <ul>
- *   <li>{@link #in(Object)} - the value must be in the JsonArray or JsonObject</li>
+ *   <li>{@link #has(Object)} - the value must be in the JsonArray or JsonObject</li>
  *   <li>{@link #eq(Object)} - the value must be equals to the pointed location</li>
  *   <li>{@link #ne(Object)} - the value must not be equals to the pointed location</li>
  * </ul>
@@ -38,12 +38,24 @@ public interface Attribute {
     return new AttributeImpl(pointer);
   }
 
+  /**
+   * Verifies wheather or not the attribute matches the specified. The value must be in the JsonArray or JsonObject
+   * referenced by the json pointer.
+   */
   @Fluent
-  Attribute in(Object value);
+  Attribute has(Object value);
 
+  /**
+   * Verifies wheather or not the attribute matches the specified. The value must be equal to the value
+   * referenced by the json pointer.
+   */
   @Fluent
   Attribute eq(Object value);
 
+  /**
+   * Verifies wheather or not the attribute matches the specified. The value must not be equal to the value
+   * referenced by the json pointer.
+   */
   @Fluent
   Attribute ne(Object value);
 

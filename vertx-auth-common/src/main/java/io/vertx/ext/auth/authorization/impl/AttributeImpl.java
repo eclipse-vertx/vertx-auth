@@ -12,7 +12,7 @@ import java.util.Objects;
 public class AttributeImpl implements Attribute {
 
   enum Type {
-    IN,
+    HAS,
     EQ,
     NE
   }
@@ -21,11 +21,13 @@ public class AttributeImpl implements Attribute {
   private Type type;
   private Object value;
 
-  public AttributeImpl(JsonObject json) {
+  public AttributeImpl(String pointer, JsonObject json) {
     Objects.requireNonNull(json, "json cannot be null");
-    this.pointer = JsonPointer.from(json.getString("pointer"));
-    this.type = json.containsKey("type") ? Type.valueOf(json.getString("type").toUpperCase()) : null;
-    this.value = json.getValue("value");
+    this.pointer = JsonPointer.from(pointer);
+    for (String key : json.fieldNames()) {
+      this.type = Type.valueOf(key.toUpperCase());
+      this.value = json.getValue(key);
+    }
   }
 
   public AttributeImpl(String pointer) {
@@ -34,9 +36,9 @@ public class AttributeImpl implements Attribute {
   }
 
   @Override
-  public Attribute in(Object value) {
+  public Attribute has(Object value) {
     Objects.requireNonNull(value, "value cannot be null");
-    this.type = Type.IN;
+    this.type = Type.HAS;
     this.value = value;
     return this;
   }
@@ -70,7 +72,7 @@ public class AttributeImpl implements Attribute {
     Object obj = pointer.queryJson(ctx);
 
     switch (type) {
-      case IN:
+      case HAS:
         if (obj instanceof JsonArray) {
           return ((JsonArray) obj).contains(value);
         }
@@ -89,19 +91,14 @@ public class AttributeImpl implements Attribute {
 
   @Override
   public JsonObject toJson() {
-    final JsonObject json = new JsonObject()
-      .put("pointer", pointer.toString());
-
-    if (type != null) {
-      json
-        .put("type", type.name().toLowerCase());
+    if (type != null && value != null) {
+      return new JsonObject()
+        .put(
+          pointer.toString(),
+          new JsonObject()
+            .put(type.name().toLowerCase(), value));
     }
 
-    if (value != null) {
-      json
-        .put("type", value);
-    }
-
-    return json;
+    return null;
   }
 }

@@ -18,6 +18,7 @@ package io.vertx.ext.auth.authorization;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.impl.AttributeImpl;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
 
@@ -26,6 +27,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Simple definition of ABAC policies.
+ */
 @DataObject
 public class Policy {
 
@@ -50,10 +54,9 @@ public class Policy {
     }
     if (json.containsKey("attributes")) {
       attributes = json
-        .getJsonArray("attributes")
+        .getJsonObject("attributes")
         .stream()
-        .map(o -> (JsonObject) o)
-        .map(AttributeImpl::new)
+        .map(kv -> new AttributeImpl(kv.getKey(), (JsonObject) kv.getValue()))
         .collect(Collectors.toSet());
     }
     if (json.containsKey("authorizations")) {
@@ -71,19 +74,35 @@ public class Policy {
     }
   }
 
+  /**
+   * Get the name of the policy
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Set the policy name. This is optional and has no effect on the policy evaluation.
+   *
+   * @param name the name.
+   */
   public Policy setName(String name) {
     this.name = name;
     return this;
   }
 
+  /**
+   * Get the subjects of the policy. This is an exact match on subject ids.
+   */
   public Set<String> getSubjects() {
     return subjects;
   }
 
+  /**
+   * Add a subject to the current policy.
+   *
+   * @param subject the subject id as in the return of {@link User#subject()}
+   */
   public Policy addSubject(String subject) {
     if (subjects == null) {
       subjects = new HashSet<>();
@@ -92,20 +111,37 @@ public class Policy {
     return this;
   }
 
+  /**
+   * Replaces all active subjects with the given set. No {@code subjects} implies that the policy applies to all users.
+   */
   public Policy setSubjects(Set<String> subjects) {
     this.subjects = subjects;
     return this;
   }
 
+  /**
+   * Get the attributes of the policy. Attributes are environmental values that are extracted from the {@link User}.
+   * Attributes are used to filter the amount of policies to be evaluated. For example, if a policy has an attribute:
+   *
+   * <pre>{/principal/amr: {"in: ["pwd"]}}</pre>
+   * <p>
+   * It will filter out any user that wasn't authenticated with a {@code username/password}.
+   */
   public Set<Attribute> getAttributes() {
     return attributes;
   }
 
+  /**
+   * Set the attributes of the policy. Attributes are environmental values that are extracted from the {@link User}.
+   */
   public Policy setAttributes(Set<Attribute> attributes) {
     this.attributes = attributes;
     return this;
   }
 
+  /**
+   * Add an attribute to the policy.
+   */
   public Policy addAttribute(Attribute attribute) {
     Objects.requireNonNull(attribute, "attribute cannot be null");
 
@@ -116,17 +152,37 @@ public class Policy {
     return this;
   }
 
+  /**
+   * Get the authorizations of the policy. Authorizations are the actual permissions that are granted to the user.
+   * If a user matches the policy (meaning the subjects and attributes match) then the authorizations applied to the
+   * user so they can be later evaluated.
+   */
   public Set<Authorization> getAuthorizations() {
     return authorizations;
   }
 
+  /**
+   * Set the authorizations of the policy. Authorizations are the actual permissions that are granted to the user.
+   * Composite authorizations ({@link AndAuthorization} and {@link OrAuthorization}) are not allowed in a policy.
+   */
   public Policy setAuthorizations(Set<Authorization> authorizations) {
-    // We can't allow OR
-    // AND need to be exploded
+    if (authorizations != null) {
+      authorizations
+        .forEach(authn -> {
+          if (authn instanceof AndAuthorization || authn instanceof OrAuthorization) {
+            throw new IllegalArgumentException("AND/OR Authorizations are not allowed in a policy");
+          }
+        });
+    }
+
     this.authorizations = authorizations;
     return this;
   }
 
+  /**
+   * Add an authorization to the policy. Composite authorizations ({@link AndAuthorization} and
+   * {@link OrAuthorization}) are not allowed in a policy.
+   */
   public Policy addAuthorization(Authorization authorization) {
     Objects.requireNonNull(authorization, "authorization cannot be null");
 
@@ -141,6 +197,9 @@ public class Policy {
     return this;
   }
 
+  /**
+   * Encode this policy as a JSON document to facilitate storage and retrieval.
+   */
   public JsonObject toJson() {
     final JsonObject json = new JsonObject();
     if (name != null) {
@@ -152,9 +211,9 @@ public class Policy {
       json.put("subjects", array);
     }
     if (attributes != null) {
-      JsonArray array = new JsonArray();
-      attributes.forEach(el -> array.add(el.toJson()));
-      json.put("attributes", array);
+      JsonObject object = new JsonObject();
+      attributes.forEach(el -> object.mergeIn(el.toJson()));
+      json.put("attributes", object);
     }
     if (authorizations != null) {
       JsonArray array = new JsonArray();

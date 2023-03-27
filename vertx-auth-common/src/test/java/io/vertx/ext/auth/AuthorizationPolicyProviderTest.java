@@ -204,7 +204,7 @@ public class AuthorizationPolicyProviderTest {
         // any user has role EU can read on /gdpr
         new Policy()
           .setName("EU users")
-          .addAttribute(Attribute.create("/attributes/location").in("EU"))
+          .addAttribute(Attribute.create("/attributes/location").has("EU"))
           .addAuthorization(WildcardPermissionBasedAuthorization.create("web:GET").setResource("/gdpr")));
 
     // This is a user that, for example, was decoded from a token...
