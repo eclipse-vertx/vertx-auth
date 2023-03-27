@@ -31,32 +31,6 @@ import java.util.Set;
 public interface AuthorizationProvider {
 
   /**
-   * create an authorization provider with the specified id and authorizations
-   *
-   * @param id
-   * @param authorizations
-   * @return
-   */
-  static AuthorizationProvider create(String id, Set<Authorization> authorizations) {
-    Set<Authorization> _authorizations =
-      Collections.unmodifiableSet(new HashSet<>(Objects.requireNonNull(authorizations)));
-
-    return new AuthorizationProvider() {
-
-      @Override
-      public String getId() {
-        return id;
-      }
-
-      @Override
-      public Future<Void> getAuthorizations(User user) {
-        user.authorizations().put(getId(), _authorizations);
-        return Future.succeededFuture();
-      }
-    };
-  }
-
-  /**
    * returns the id of the authorization provider
    *
    * @return

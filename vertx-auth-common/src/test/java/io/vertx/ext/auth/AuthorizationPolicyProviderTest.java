@@ -13,7 +13,6 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -23,60 +22,51 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @RunWith(VertxUnitRunner.class)
 public class AuthorizationPolicyProviderTest {
 
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
 
-  @Test
-  public void generatePolicy(TestContext should) {
-
-    Authorization cashierShopAdmin = WildcardPermissionBasedAuthorization.create("txo.shop:*");
-    Authorization cashierShopNl = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
-    Authorization cashierShopGlobalReader = WildcardPermissionBasedAuthorization.create("txo.shop:*").setResource("read");
-
-    JsonObject policy = new JsonObject()
-      .put("cashier-shop-admin", cashierShopAdmin.toJson())
-      .put("cashier-shop-nl", cashierShopNl.toJson())
-      .put("cashier-shop-global-reader", cashierShopGlobalReader.toJson());
-
-    should.assertEquals(rule.vertx().fileSystem().readFileBlocking("authz-policy.json").toJson(), policy);
+  private List<Policy> policies() {
+    return Arrays.asList(
+      // every user can read the web resource /public
+      new Policy()
+        .setName("public")
+        .addAuthorization(WildcardPermissionBasedAuthorization.create("web:GET").setResource("/public")),
+      // supplier can create resource /public
+      new Policy()
+        .setName("suppliers")
+        .addSubject("supplier")
+        .addAuthorization(WildcardPermissionBasedAuthorization.create("web:POST").setResource("/public")),
+      // admin can do anything on /public
+      new Policy()
+        .setName("administrator")
+        .addSubject("admin")
+        .addAuthorization(WildcardPermissionBasedAuthorization.create("web:*").setResource("/public")),
+      // "paulo" user has role EU can read on /gdpr
+      new Policy()
+        .setName("EU users")
+        .addSubject("paulo")
+        .addSubject("morre")
+        .addAuthorization(RoleBasedAuthorization.create("EU"))
+        .addAuthorization(WildcardPermissionBasedAuthorization.create("web:GET").setResource("/gdpr")));
   }
 
   @Test
-  public void testPolicy(TestContext should) throws Exception {
+  public void generatePolicy(TestContext should) {
 
-    final Async test = should.async();
+    AuthorizationPolicyProvider provider = AuthorizationPolicyProvider.create();
+    provider.setPolicies(policies());
 
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+    JsonArray array = new JsonArray();
+    policies().forEach(policy -> array.add(policy.toJson()));
 
-    // This is a user that was decoded from a token...
-    User paulo = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"paulo\",\n" +
-        "  \"claims\" : [ \"cashier-shop-nl\" ]\n" +
-        "}\n"
-    ));
-
-    // required authz
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
-
-    // simulate the authz flow
-    policyAuthz
-      .getAuthorizations(paulo)
-      .onFailure(should::fail)
-      .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
-
-        if (authorization.match(authorizationContext)) {
-          test.complete();
-        } else {
-          should.fail("Authorization should match");
-        }
-      });
+    System.out.println(array.encodePrettily());
   }
 
   @Test
@@ -84,239 +74,124 @@ public class AuthorizationPolicyProviderTest {
 
     final Async test = should.async();
 
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+      .setPolicies(policies());
 
-    // This is a user that was decoded from a token...
-    User admin = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"admin\",\n" +
-        "  \"claims\" : [ \"cashier-shop-admin\" ]\n" +
-        "}\n"
-    ));
+    // This is a user that, for example, was decoded from a token...
+    User paulo = User.fromName("admin");
 
-    // required authz
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
+    // required authz (this should be created by the application at runtime.
+    // instead of having a well-known authorization, the application can create
+    // a dynamic authorization based on the current context)
+    final String domain = "web";
+    final String operation = "DELETE";
 
-    // simulate the authz flow
-    policyAuthz
-      .getAuthorizations(admin)
-      .onFailure(should::fail)
-      .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(admin);
-
-        if (authorization.match(authorizationContext)) {
-          test.complete();
-        } else {
-          should.fail("Authorization should match");
-        }
-      });
-  }
-
-  @Test
-  public void testPolicyWithResource(TestContext should) throws Exception {
-
-    final Async test = should.async();
-
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
-
-    // This is a user that was decoded from a token...
-    User reader = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"reader\",\n" +
-        "  \"claims\" : [ \"cashier-shop-global-reader\" ]\n" +
-        "}\n"
-    ));
-
-    // required authz, yet the resource is dynamic, it will be computed at runtime (later)
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl").setResource("{action}");
+    final List<Authorization> requirements = Arrays.asList(
+      WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/public"),
+      WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/private")
+    );
 
     // simulate the authz flow
-    policyAuthz
-      .getAuthorizations(reader)
-      .onFailure(should::fail)
-      .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(reader);
-        // note that the authz doesn't know about the read resource, but we can use variables.
-        // here we instruct that during evaluation, if a policy resource is looking for a variable {action} it should pick
-        // the value "read".
-        authorizationContext.variables().add("action", "read");
-
-        // the user global reader will have the right action from the policy
-
-        if (authorization.match(authorizationContext)) {
-          test.complete();
-        } else {
-          should.fail("Authorization should match");
-        }
-      });
-  }
-
-  @Test
-  public void testPolicyWithResourceAdmin(TestContext should) throws Exception {
-
-    final Async test = should.async();
-
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
-
-    // This is a user that was decoded from a token...
-    User admin = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"admin\",\n" +
-        "  \"claims\" : [ \"cashier-shop-admin\" ]\n" +
-        "}\n"
-    ));
-
-    // required authz, yet the resource is dynamic, it will be computed at runtime (later)
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl").setResource("{action}");
-
-    // simulate the authz flow
-    policyAuthz
-      .getAuthorizations(admin)
-      .onFailure(should::fail)
-      .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(admin);
-        // note that the authz doesn't know about the read resource, but we can use variables.
-        // here we instruct that during evaluation, if a policy resource is looking for a variable {action} it should pick
-        // the value "read".
-        authorizationContext.variables().add("action", "read");
-
-        // the admin user has no restriction on resource so it will still be able to match
-        if (authorization.match(authorizationContext)) {
-          test.complete();
-        } else {
-          should.fail("Authorization should match");
-        }
-      });
-  }
-
-  @Test
-  public void testPolicyWithMultipleValues(TestContext should) throws Exception {
-
-    final Async test = should.async();
-
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("/claims", new JsonObject()
-        .put("support-cashier", new JsonArray()
-          .add(WildcardPermissionBasedAuthorization.create("txo.shop:*").toJson())
-          .add(WildcardPermissionBasedAuthorization.create("view.cart:eu").toJson())));
-
-    // same as policy:
-    // {
-    //   "support-cashier":
-    //     [ {
-    //       "type" : "wildcard",
-    //       "permission" : "txo.shop:*"
-    //       }, {
-    //       "type" : "wildcard",
-    //       "permission" : "view.cart:eu"
-    //    } ]
-    // }
-
-    // This is a user that was decoded from a token...
-    User paulo = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"paulo\",\n" +
-        "  \"claims\" : [ \"support-cashier\" ]\n" +
-        "}\n"
-    ));
-
-    // required authz (nl + view customer cart nl)
-    Authorization authorization =
-      AndAuthorization.create()
-        .addAuthorization(WildcardPermissionBasedAuthorization.create("txo.shop:nl"))
-        .addAuthorization(WildcardPermissionBasedAuthorization.create("view.cart:eu"));
-
-
-    // simulate the authz flow
-    policyAuthz
+    abac
       .getAuthorizations(paulo)
       .onFailure(should::fail)
       .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+        // perform the requirements checks
+        for (int i = 0; i < requirements.size(); i++) {
+          Authorization requirement = requirements.get(i);
 
-        if (authorization.match(authorizationContext)) {
-          test.complete();
-        } else {
-          should.fail("Authorization should match");
+          // create the authorization context
+          final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+
+          // check if the authorization matches
+          System.out.println("requirement: " + requirement + " matches: " + requirement.match(authorizationContext));
+
+          switch (i) {
+            case 0:
+              // admin can do any operation on /public
+              should.assertTrue(requirement.match(authorizationContext));
+              break;
+            case 1:
+              // admin cannot do any operation on /private
+              should.assertFalse(requirement.match(authorizationContext));
+              break;
+          }
         }
+        test.complete();
       });
   }
 
   @Test
-  public void testPolicyMissingClaims(TestContext should) throws Exception {
-
+  public void testPolicy(TestContext should) throws Exception {
     final Async test = should.async();
 
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
+    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+      .setPolicies(policies());
 
-    // This is a user that was decoded from a token...
-    User paulo = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"paulo\"\n" +
-        "}\n"
-    ));
+    // This is a user that, for example, was decoded from a token...
+    User paulo = User.fromName("paulo");
 
-    // required authz
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
+    // required authz (this should be created by the application at runtime.
+    // instead of having a well-known authorization, the application can create
+    // a dynamic authorization based on the current context)
+    final String domain = "web";
+    final String operation = "GET";
+
+    final List<Authorization> requirements = Arrays.asList(
+      WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/public"),
+      WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/gdpr"),
+      WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/private"),
+      // paulo cannot post
+      WildcardPermissionBasedAuthorization.create(domain + ":POST").setResource("/public")
+    );
 
     // simulate the authz flow
-    policyAuthz
+    abac
       .getAuthorizations(paulo)
       .onFailure(should::fail)
       .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+        // validation
 
-        if (authorization.match(authorizationContext)) {
-          should.fail("Authorization should not match");
-        } else {
-          test.complete();
+        // we know that initially there are 5 (4 declared + 1 with multiple values) policies, but 2 shall not be
+        // applicable: "admin", "supplier"
+        final AtomicInteger count = new AtomicInteger(0);
+        paulo.authorizations().forEach((providerId, authorization) -> {
+          System.out.println(providerId + " -> " + authorization);
+          count.incrementAndGet();
+        });
+
+        should.assertEquals(3, count.get());
+
+        // perform the requirements checks
+        for (int i = 0; i < requirements.size(); i++) {
+          Authorization requirement = requirements.get(i);
+
+          // create the authorization context
+          final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+
+          // check if the authorization matches
+          System.out.println("requirement: " + requirement + " matches: " + requirement.match(authorizationContext));
+
+          switch (i) {
+            case 0:
+              // any user can access public (paulo is any user)
+              should.assertTrue(requirement.match(authorizationContext));
+              break;
+            case 1:
+              // only users with role EU can access gdpr (paulo is EU)
+              should.assertTrue(requirement.match(authorizationContext));
+              break;
+            case 2:
+              // no one was allowed to access private
+              should.assertFalse(requirement.match(authorizationContext));
+              break;
+            case 3:
+              // paulo isn't a supplier so no POST
+              should.assertFalse(requirement.match(authorizationContext));
+              break;
+          }
         }
-      });
-  }
-
-  @Test
-  public void testPolicyDeepClaims(TestContext should) throws Exception {
-
-    final Async test = should.async();
-
-    AuthorizationProvider policyAuthz = AuthorizationPolicyProvider
-      .create("prop/claims", new JsonObject(rule.vertx().fileSystem().readFileBlocking("authz-policy.json")));
-
-    // This is a user that was decoded from a token...
-    User paulo = User.create(new JsonObject(
-      "{\n" +
-        "  \"sub\" : \"paulo\",\n" +
-        "  \"prop\" : {\n" +
-        "    \"claims\" : [ \"cashier-shop-nl\" ]\n" +
-        "  }\n" +
-        "}\n"
-    ));
-
-    // required authz
-    Authorization authorization = WildcardPermissionBasedAuthorization.create("txo.shop:nl");
-
-    // simulate the authz flow
-    policyAuthz
-      .getAuthorizations(paulo)
-      .onFailure(should::fail)
-      .onSuccess(v -> {
-        // create the authorization context
-        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
-
-        if (authorization.match(authorizationContext)) {
-          test.complete();
-        } else {
-          should.fail("Authorization should match");
-        }
+        test.complete();
       });
   }
 }

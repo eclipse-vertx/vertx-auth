@@ -1,45 +1,18 @@
 package io.vertx.ext.auth.authorization.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authorization.*;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.AuthorizationPolicyProvider;
+import io.vertx.ext.auth.authorization.Policy;
 
 import java.util.*;
 
 public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvider {
 
-  private final String[] principalPath;
-  private final Map<String, List<Authorization>> policy;
+  private List<Policy> policies;
 
-  public AuthorizationPolicyProviderImpl(String principalPath, JsonObject policy) {
-    Objects.requireNonNull(principalPath);
-    Objects.requireNonNull(policy);
-
-    this.principalPath = principalPath.split("/");
-    Map<String, List<Authorization>> tmp = new HashMap<>();
-    for (String key : policy.fieldNames()) {
-      Object value = policy.getValue(key);
-      if (value instanceof JsonArray) {
-        List<Authorization> lst = new ArrayList<>();
-        for (Object item : (JsonArray) value) {
-          if (item instanceof JsonObject) {
-            lst.add(AuthorizationConverter.decode((JsonObject) item));
-          } else {
-            throw new IllegalArgumentException("Invalid policy definition");
-          }
-        }
-        tmp.put(key, lst);
-      } else if (value instanceof JsonObject) {
-        tmp.put(key, Collections.singletonList(AuthorizationConverter.decode(policy.getJsonObject(key))));
-      } else {
-        throw new IllegalArgumentException("Invalid policy definition");
-      }
-    }
-    this.policy = Collections.unmodifiableMap(tmp);
+  public AuthorizationPolicyProviderImpl() {
   }
 
   @Override
@@ -48,39 +21,48 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
   }
 
   @Override
-  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
-    getAuthorizations(user)
-      .onComplete(handler);
+  public Future<Void> getAuthorizations(User user) {
+    Objects.requireNonNull(user, "user cannot be null");
+    Set<Authorization> authorizations = new HashSet<>();
+
+    final List<Policy> policies = this.policies;
+
+    if (policies != null) {
+      final int len = policies.size();
+      // not using foreach to avoid concurrency issues if policies are added
+      // while iterating
+      for (int i = 0; i < len; i++) {
+        Policy policy = policies.get(i);
+        // filter the policies, null subjects means apply all
+        // or user subject in the element
+        if (policy.getSubjects() == null || policy.getSubjects().contains(user.subject())) {
+          authorizations.addAll(policy.getAuthorizations());
+        }
+      }
+    }
+    // put all matching authorizations in the user
+    user.authorizations().put(getId(), authorizations);
+    return Future.succeededFuture();
   }
 
   @Override
-  public Future<Void> getAuthorizations(User user) {
-    Object claims = user.principal();
-    for (String segment : principalPath) {
-      if (segment.equals("")) {
-        continue;
-      }
-      if (claims instanceof JsonObject) {
-        claims = ((JsonObject) claims).getValue(segment);
-      } else {
-        return Future.failedFuture("Missing principal path");
-      }
+  public synchronized AuthorizationPolicyProvider addPolicy(Policy policy) {
+    if (policy == null) {
+      policies = new ArrayList<>();
     }
-    if (claims instanceof JsonArray) {
-      Set<Authorization> authorizations = new HashSet<>();
-      for (Object claim : (JsonArray) claims) {
-        if (claim instanceof String) {
-          List<Authorization> authz = policy.get(claim);
-          if (authz != null) {
-            authorizations.addAll(authz);
-          }
-        }
-      }
-      user.authorizations().add(getId(), authorizations);
-      return Future.succeededFuture();
-    } else {
-      // nothing can be extracted
-      return Future.succeededFuture();
-    }
+    policies.add(policy);
+    return this;
+  }
+
+  @Override
+  public synchronized AuthorizationPolicyProvider setPolicies(List<Policy> policies) {
+    this.policies = policies;
+    return this;
+  }
+
+  @Override
+  public synchronized AuthorizationPolicyProvider clear() {
+    policies = null;
+    return this;
   }
 }
