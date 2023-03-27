@@ -2,6 +2,7 @@ package io.vertx.ext.auth.authorization.impl;
 
 import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.Attribute;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationPolicyProvider;
 import io.vertx.ext.auth.authorization.Policy;
@@ -31,13 +32,22 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
       final int len = policies.size();
       // not using foreach to avoid concurrency issues if policies are added
       // while iterating
-      for (int i = 0; i < len; i++) {
+      policyLoop: for (int i = 0; i < len; i++) {
         Policy policy = policies.get(i);
         // filter the policies, null subjects means apply all
         // or user subject in the element
-        if (policy.getSubjects() == null || policy.getSubjects().contains(user.subject())) {
-          authorizations.addAll(policy.getAuthorizations());
+        if (policy.getSubjects() != null && !policy.getSubjects().contains(user.subject())) {
+          continue;
         }
+        if (policy.getAttributes() != null) {
+          // if the policy has attributes, we need to match them
+          for (Attribute attribute : policy.getAttributes()) {
+            if (!attribute.match(user)) {
+              continue policyLoop;
+            }
+          }
+        }
+        authorizations.addAll(policy.getAuthorizations());
       }
     }
     // put all matching authorizations in the user
@@ -47,7 +57,7 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
 
   @Override
   public synchronized AuthorizationPolicyProvider addPolicy(Policy policy) {
-    if (policy == null) {
+    if (policies == null) {
       policies = new ArrayList<>();
     }
     policies.add(policy);

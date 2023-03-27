@@ -191,7 +191,83 @@ public class AuthorizationPolicyProviderTest {
               break;
           }
         }
-        test.complete();
-      });
+      })
+      .onSuccess(v -> test.complete());
+  }
+
+  @Test
+  public void testEUPolicyWithoutRoleButAttribute(TestContext should) throws Exception {
+    final Async test = should.async();
+
+    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+      .addPolicy(
+        // any user has role EU can read on /gdpr
+        new Policy()
+          .setName("EU users")
+          .addAttribute(Attribute.create("/attributes/location").in("EU"))
+          .addAuthorization(WildcardPermissionBasedAuthorization.create("web:GET").setResource("/gdpr")));
+
+    // This is a user that, for example, was decoded from a token...
+    User paulo = User.fromName("paulo");
+
+    // required authz (this should be created by the application at runtime.
+    // instead of having a well-known authorization, the application can create
+    // a dynamic authorization based on the current context)
+    final String domain = "web";
+    final String operation = "GET";
+
+    Authorization requirement = WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/gdpr");
+
+    // simulate the authz flow
+    abac
+      .getAuthorizations(paulo)
+      .onFailure(should::fail)
+      .onSuccess(v -> {
+        // create the authorization context
+        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+        // check if the authorization matches
+        System.out.println("requirement: " + requirement + " matches: " + requirement.match(authorizationContext));
+        should.assertFalse(requirement.match(authorizationContext));
+      })
+      .onSuccess(v -> test.complete());
+  }
+
+  @Test
+  public void testEUPolicyWithoutRoleButAttributeNOK(TestContext should) throws Exception {
+    final Async test = should.async();
+
+    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+      .addPolicy(
+        // any user has role EU can read on /gdpr
+        new Policy()
+          .setName("EU users")
+          .addAttribute(Attribute.create("/attributes/location").eq("EU"))
+          .addAuthorization(WildcardPermissionBasedAuthorization.create("web:GET").setResource("/gdpr")));
+
+    // This is a user that, for example, was decoded from a token...
+    User paulo = User.fromName("paulo");
+    // this user is now tagged
+    paulo.attributes().put("location", "EU");
+
+    // required authz (this should be created by the application at runtime.
+    // instead of having a well-known authorization, the application can create
+    // a dynamic authorization based on the current context)
+    final String domain = "web";
+    final String operation = "GET";
+
+    Authorization requirement = WildcardPermissionBasedAuthorization.create(domain + ":" + operation).setResource("/gdpr");
+
+    // simulate the authz flow
+    abac
+      .getAuthorizations(paulo)
+      .onFailure(should::fail)
+      .onSuccess(v -> {
+        // create the authorization context
+        final AuthorizationContext authorizationContext = AuthorizationContext.create(paulo);
+        // check if the authorization matches
+        System.out.println("requirement: " + requirement + " matches: " + requirement.match(authorizationContext));
+        should.assertTrue(requirement.match(authorizationContext));
+      })
+      .onSuccess(v -> test.complete());
   }
 }
