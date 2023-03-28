@@ -63,7 +63,7 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
     if (resource == null || !resource.hasVariable()) {
       return this;
     }
-    return PermissionBasedAuthorization.create(this.permission).setResource(resource.resolve(context));
+    return PermissionBasedAuthorization.create(this.permission).setResource(resource.resolve(context.variables()));
   }
 
   @Override

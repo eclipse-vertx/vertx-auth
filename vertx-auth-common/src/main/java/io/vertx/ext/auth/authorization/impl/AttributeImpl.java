@@ -8,55 +8,31 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Attribute;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class AttributeImpl implements Attribute {
 
-  enum Type {
-    HAS,
-    EQ,
-    NE
-  }
-
   private final JsonPointer pointer;
-  private Type type;
-  private Object value;
+  private final Operator type;
+  private final Object value;
 
   public AttributeImpl(String pointer, JsonObject json) {
     Objects.requireNonNull(json, "json cannot be null");
     this.pointer = JsonPointer.from(pointer);
-    for (String key : json.fieldNames()) {
-      this.type = Type.valueOf(key.toUpperCase());
-      this.value = json.getValue(key);
+    Set<String> keys = json.fieldNames();
+    if (keys.size() != 1) {
+      throw new IllegalArgumentException("json must have exactly one field");
     }
+    String key = keys.stream().findFirst().get();
+    this.type = Operator.valueOf(key.toUpperCase());
+    this.value = json.getValue(key);
   }
 
-  public AttributeImpl(String pointer) {
+  public AttributeImpl(String pointer, Operator operator, Object value) {
     Objects.requireNonNull(pointer, "pointer cannot be null");
     this.pointer = JsonPointer.from(pointer);
-  }
-
-  @Override
-  public Attribute has(Object value) {
-    Objects.requireNonNull(value, "value cannot be null");
-    this.type = Type.HAS;
-    this.value = value;
-    return this;
-  }
-
-  @Override
-  public Attribute eq(Object value) {
-    Objects.requireNonNull(value, "value cannot be null");
-    this.type = Type.EQ;
-    this.value = value;
-    return this;
-  }
-
-  @Override
-  public Attribute ne(Object value) {
-    Objects.requireNonNull(value, "value cannot be null");
-    this.type = Type.NE;
-    this.value = value;
-    return this;
+    this.type = operator;
+    this.value = Objects.requireNonNull(value, "value cannot be null");
   }
 
   @Override

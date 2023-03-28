@@ -12,9 +12,8 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import io.vertx.ext.auth.authorization.AuthorizationContext;
+import io.vertx.core.MultiMap;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,14 +21,14 @@ import java.util.function.Function;
 
 class VariableAwareExpression {
   private final String value;
-  private final transient Function<AuthorizationContext, String>[] parts;
+  private final transient Function<MultiMap, String>[] parts;
   private transient boolean hasVariable = false;
 
   @SuppressWarnings("unchecked")
   public VariableAwareExpression(String value) {
     this.value = Objects.requireNonNull(value).trim();
 
-    List<Function<AuthorizationContext, String>> tmpParts = new ArrayList<>();
+    List<Function<MultiMap, String>> tmpParts = new ArrayList<>();
     int currentPos = 0;
     while (currentPos != -1) {
       int openingCurlyBracePos = value.indexOf("{", currentPos);
@@ -55,7 +54,7 @@ class VariableAwareExpression {
           hasVariable = true;
           tmpParts.add(ctx -> {
             // substitute parameter
-            String result = ctx.variables().get(variableName);
+            String result = ctx.get(variableName);
             if (result != null) {
               return result;
             }
@@ -65,7 +64,7 @@ class VariableAwareExpression {
         }
       }
     }
-    this.parts = (Function<AuthorizationContext, String>[]) Array.newInstance(Function.class, tmpParts.size());
+    this.parts = new Function[tmpParts.size()];
     for (int i = 0; i < tmpParts.size(); i++) {
       this.parts[i] = tmpParts.get(i);
     }
@@ -96,16 +95,17 @@ class VariableAwareExpression {
     return Objects.hash(value);
   }
 
-  public Function<AuthorizationContext, String>[] parts() {
-    return parts;
-  }
+  public String resolve(MultiMap context) {
+    // shortcut if there is no variable
+    if (!hasVariable) {
+      return value;
+    }
 
-  public String resolve(AuthorizationContext context) {
     if (parts.length == 1) {
       return parts[0].apply(context);
     } else if (parts.length > 1) {
       StringBuilder result = new StringBuilder();
-      for (Function<AuthorizationContext, String> part : parts) {
+      for (Function<MultiMap, String> part : parts) {
         result.append(part.apply(context));
       }
       return result.toString();

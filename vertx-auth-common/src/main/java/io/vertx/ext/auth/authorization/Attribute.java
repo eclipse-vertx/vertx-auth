@@ -15,49 +15,48 @@
  */
 package io.vertx.ext.auth.authorization;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.impl.AttributeImpl;
+import io.vertx.ext.auth.authorization.impl.Operator;
 
 /**
  * An attribute is a simple matcher for policies. A Attribute is created from a JsonPointer to the {@link User} object
  * and a logical operator:
  *
  * <ul>
- *   <li>{@link #has(Object)} - the value must be in the JsonArray or JsonObject</li>
- *   <li>{@link #eq(Object)} - the value must be equals to the pointed location</li>
- *   <li>{@link #ne(Object)} - the value must not be equals to the pointed location</li>
+ *   <li>{@link #has(String, Object)} - the value must be in the JsonArray or JsonObject</li>
+ *   <li>{@link #eq(String, Object)} - the value must be equals to the pointed location</li>
+ *   <li>{@link #ne(String, Object)} - the value must not be equals to the pointed location</li>
  * </ul>
  */
 @VertxGen
 public interface Attribute {
 
-  static Attribute create(String pointer) {
-    return new AttributeImpl(pointer);
-  }
-
   /**
    * Verifies wheather or not the attribute matches the specified. The value must be in the JsonArray or JsonObject
    * referenced by the json pointer.
    */
-  @Fluent
-  Attribute has(Object value);
+  static Attribute has(String pointer, Object value) {
+    return new AttributeImpl(pointer, Operator.HAS, value);
+  }
 
   /**
    * Verifies wheather or not the attribute matches the specified. The value must be equal to the value
    * referenced by the json pointer.
    */
-  @Fluent
-  Attribute eq(Object value);
+  static Attribute eq(String pointer, Object value) {
+    return new AttributeImpl(pointer, Operator.EQ, value);
+  }
 
   /**
    * Verifies wheather or not the attribute matches the specified. The value must not be equal to the value
    * referenced by the json pointer.
    */
-  @Fluent
-  Attribute ne(Object value);
+  static Attribute ne(String pointer, Object value) {
+    return new AttributeImpl(pointer, Operator.NE, value);
+  }
 
   /**
    * Verifies wheather or not the attribute matches the specified

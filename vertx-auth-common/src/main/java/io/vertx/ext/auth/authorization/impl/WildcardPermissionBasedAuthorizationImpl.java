@@ -90,7 +90,7 @@ public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermiss
     if (resource == null || !resource.hasVariable()) {
       return this;
     }
-    return WildcardPermissionBasedAuthorization.create(this.permission).setResource(resource.resolve(context));
+    return WildcardPermissionBasedAuthorization.create(this.permission).setResource(resource.resolve(context.variables()));
   }
 
   @Override

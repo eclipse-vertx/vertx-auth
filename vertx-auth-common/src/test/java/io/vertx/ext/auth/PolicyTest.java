@@ -22,7 +22,7 @@ public class PolicyTest {
   public void createPolicy() {
     Policy policy = new Policy();
 
-    policy.addAttribute(Attribute.create("/principal/amr").has("mfa"));
+    policy.addAttribute(Attribute.has("/principal/amr","mfa"));
 
     assertEquals(1, policy.getAttributes().size());
     User paulo = User.fromName("paulo");
