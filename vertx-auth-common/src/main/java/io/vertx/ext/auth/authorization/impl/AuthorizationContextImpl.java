@@ -23,10 +23,6 @@ public class AuthorizationContextImpl implements AuthorizationContext {
   private final User user;
   private final MultiMap variables;
 
-  public AuthorizationContextImpl(User user) {
-    this(user, MultiMap.caseInsensitiveMultiMap());
-  }
-
   public AuthorizationContextImpl(User user, MultiMap variables) {
     this.user = Objects.requireNonNull(user);
     this.variables = Objects.requireNonNull(variables);

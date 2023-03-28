@@ -33,7 +33,17 @@ public interface AuthorizationContext {
    * @return a AuthorizationContext instance
    */
   static AuthorizationContext create(User user) {
-    return new AuthorizationContextImpl(user);
+    return create(user, MultiMap.caseInsensitiveMultiMap());
+  }
+
+  /**
+   * Factory for Authorization Context
+   *
+   * @param user a user
+   * @return a AuthorizationContext instance
+   */
+  static AuthorizationContext create(User user, MultiMap variables) {
+    return new AuthorizationContextImpl(user, variables);
   }
 
   /**
