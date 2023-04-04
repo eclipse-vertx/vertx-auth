@@ -49,7 +49,7 @@ public class Policy {
       subjects = json
         .getJsonArray("subjects")
         .stream()
-        .map(o -> (String) o)
+        .map(String.class::cast)
         .collect(Collectors.toSet());
     }
     if (json.containsKey("attributes")) {
@@ -63,7 +63,7 @@ public class Policy {
       authorizations = json
         .getJsonArray("authorizations")
         .stream()
-        .map(o -> (JsonObject) o)
+        .map(JsonObject.class::cast)
         .map(AuthorizationConverter::decode)
         .peek(authn -> {
           if (authn instanceof AndAuthorization || authn instanceof OrAuthorization) {

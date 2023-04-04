@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(VertxUnitRunner.class)
-public class AuthorizationPolicyProviderTest {
+public class PolicyBasedAuthorizationProviderTest {
 
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
@@ -60,7 +60,7 @@ public class AuthorizationPolicyProviderTest {
   @Test
   public void generatePolicy(TestContext should) {
 
-    AuthorizationPolicyProvider provider = AuthorizationPolicyProvider.create();
+    PolicyBasedAuthorizationProvider provider = PolicyBasedAuthorizationProvider.create();
     provider.setPolicies(policies());
 
     JsonArray array = new JsonArray();
@@ -74,7 +74,7 @@ public class AuthorizationPolicyProviderTest {
 
     final Async test = should.async();
 
-    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+    final AuthorizationProvider abac = PolicyBasedAuthorizationProvider.create()
       .setPolicies(policies());
 
     // This is a user that, for example, was decoded from a token...
@@ -125,7 +125,7 @@ public class AuthorizationPolicyProviderTest {
   public void testPolicy(TestContext should) throws Exception {
     final Async test = should.async();
 
-    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+    final AuthorizationProvider abac = PolicyBasedAuthorizationProvider.create()
       .setPolicies(policies());
 
     // This is a user that, for example, was decoded from a token...
@@ -199,7 +199,7 @@ public class AuthorizationPolicyProviderTest {
   public void testEUPolicyWithoutRoleButAttribute(TestContext should) throws Exception {
     final Async test = should.async();
 
-    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+    final AuthorizationProvider abac = PolicyBasedAuthorizationProvider.create()
       .addPolicy(
         // any user has role EU can read on /gdpr
         new Policy()
@@ -236,7 +236,7 @@ public class AuthorizationPolicyProviderTest {
   public void testEUPolicyWithoutRoleButAttributeNOK(TestContext should) throws Exception {
     final Async test = should.async();
 
-    final AuthorizationProvider abac = AuthorizationPolicyProvider.create()
+    final AuthorizationProvider abac = PolicyBasedAuthorizationProvider.create()
       .addPolicy(
         // any user has role EU can read on /gdpr
         new Policy()

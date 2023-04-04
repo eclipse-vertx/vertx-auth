@@ -4,16 +4,16 @@ import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Attribute;
 import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.AuthorizationPolicyProvider;
+import io.vertx.ext.auth.authorization.PolicyBasedAuthorizationProvider;
 import io.vertx.ext.auth.authorization.Policy;
 
 import java.util.*;
 
-public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvider {
+public class PolicyBasedAuthorizationProviderImpl implements PolicyBasedAuthorizationProvider {
 
   private List<Policy> policies;
 
-  public AuthorizationPolicyProviderImpl() {
+  public PolicyBasedAuthorizationProviderImpl() {
   }
 
   @Override
@@ -56,7 +56,7 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
   }
 
   @Override
-  public synchronized AuthorizationPolicyProvider addPolicy(Policy policy) {
+  public synchronized PolicyBasedAuthorizationProvider addPolicy(Policy policy) {
     if (policies == null) {
       policies = new ArrayList<>();
     }
@@ -65,13 +65,13 @@ public class AuthorizationPolicyProviderImpl implements AuthorizationPolicyProvi
   }
 
   @Override
-  public synchronized AuthorizationPolicyProvider setPolicies(List<Policy> policies) {
+  public synchronized PolicyBasedAuthorizationProvider setPolicies(List<Policy> policies) {
     this.policies = policies;
     return this;
   }
 
   @Override
-  public synchronized AuthorizationPolicyProvider clear() {
+  public synchronized PolicyBasedAuthorizationProvider clear() {
     policies = null;
     return this;
   }
