@@ -13,13 +13,15 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.authorization;
+package io.vertx.ext.auth.abac;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authorization.impl.AttributeImpl;
-import io.vertx.ext.auth.authorization.impl.Operator;
+import io.vertx.ext.auth.abac.impl.AttributeImpl;
+import io.vertx.ext.auth.abac.impl.Operator;
+
+import java.util.function.Function;
 
 /**
  * An attribute is a simple matcher for policies. A Attribute is created from a JsonPointer to the {@link User} object
@@ -35,7 +37,7 @@ import io.vertx.ext.auth.authorization.impl.Operator;
 public interface Attribute {
 
   /**
-   * Verifies wheather or not the attribute matches the specified. The value must be in the JsonArray or JsonObject
+   * Verifies whether the attribute matches the specified. The value must be in the JsonArray or JsonObject
    * referenced by the json pointer.
    */
   static Attribute has(String pointer, Object value) {
@@ -43,7 +45,7 @@ public interface Attribute {
   }
 
   /**
-   * Verifies wheather or not the attribute matches the specified. The value must be equal to the value
+   * Verifies whether the attribute matches the specified. The value must be equal to the value
    * referenced by the json pointer.
    */
   static Attribute eq(String pointer, Object value) {
@@ -51,7 +53,7 @@ public interface Attribute {
   }
 
   /**
-   * Verifies wheather or not the attribute matches the specified. The value must not be equal to the value
+   * Verifies whether the attribute matches the specified. The value must not be equal to the value
    * referenced by the json pointer.
    */
   static Attribute ne(String pointer, Object value) {
@@ -59,7 +61,14 @@ public interface Attribute {
   }
 
   /**
-   * Verifies wheather or not the attribute matches the specified
+   * A custom function to be used during matching.
+   */
+  static Attribute create(Function<User, Boolean> function) {
+    return new AttributeImpl(function);
+  }
+
+  /**
+   * Verifies whether the attribute matches the specified
    * user.
    *
    * @param user the user.

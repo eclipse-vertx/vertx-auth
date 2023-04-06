@@ -13,13 +13,16 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.authorization;
+package io.vertx.ext.auth.abac;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authorization.impl.AttributeImpl;
+import io.vertx.ext.auth.abac.impl.AttributeImpl;
+import io.vertx.ext.auth.authorization.AndAuthorization;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.OrAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
 
 import java.util.HashSet;

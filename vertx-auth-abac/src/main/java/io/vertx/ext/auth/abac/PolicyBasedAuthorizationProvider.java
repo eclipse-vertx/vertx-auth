@@ -1,8 +1,9 @@
-package io.vertx.ext.auth.authorization;
+package io.vertx.ext.auth.abac;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.ext.auth.authorization.impl.PolicyBasedAuthorizationProviderImpl;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.ext.auth.abac.impl.PolicyBasedAuthorizationProviderImpl;
 
 import java.util.List;
 

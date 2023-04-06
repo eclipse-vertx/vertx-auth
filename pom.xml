@@ -23,6 +23,7 @@
 
   <modules>
     <module>vertx-auth-common</module>
+    <module>vertx-auth-abac</module>
     <module>vertx-auth-jwt</module>
     <module>vertx-auth-ldap</module>
     <module>vertx-auth-oauth2</module>
