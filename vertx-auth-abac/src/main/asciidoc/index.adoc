@@ -1,0 +1,72 @@
+= ABAC Auth Provider
+
+We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the a simple
+Attribute Based Access Control. The provider is backed by a Policy object which contains matches of attributes against
+the given user, and on match, the listed authorizations will be granted to the user.
+
+Once the provider returns the authorizations for the user, the mechanism for verification is the same as any other
+{@link io.vertx.ext.auth.authorization.AuthorizationProvider}.
+
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+<groupId>io.vertx</groupId>
+<artifactId>vertx-auth-abac</artifactId>
+<version>${maven.version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-abac:${maven.version}'
+----
+
+To create an instance you first need a policy object.
+
+For example:
+
+[source,json]
+----
+{
+  "name" : "Only MFA users have DELETE rights",
+  "attributes" : {
+    "/principal/amr": {
+      "eq": "mfa"
+    }
+  },
+  "authorizations" : [ {
+    "type" : "wildcard",
+    "permission" : "web:DELETE"
+  } ]
+}
+----
+
+Once you've got one of these you can create a {@link io.vertx.ext.auth.abac.PolicyBasedAuthorizationProvider} instance
+as follows:
+
+[source,$lang]
+----
+{@link examples.ABACExamples#example1()}
+----
+
+You can load a single policy from a file, or by code, and load multiple policies to the provider. When multiple policies
+are loaded, all policies are matched against the user, and all authorizations are returned.
+
+Policies make use of attributes, Vert.x only provides a simple attribute implementation for equality, negation or value
+in a collection match. Although this is not a limitation, as you can implement your own attribute using composition and
+register it with the policy.
+
+[source,$lang]
+----
+{@link examples.ABACExamples#example2()}
+----
+
+
+Once you've got your instance you can authenticate with it just like any
+{@link io.vertx.ext.auth.authentication.AuthenticationProvider}.

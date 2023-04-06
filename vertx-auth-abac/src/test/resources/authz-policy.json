@@ -1,0 +1,15 @@
+{
+  "cashier-shop-admin" : {
+    "type" : "wildcard",
+    "permission" : "txo.shop:*"
+  },
+  "cashier-shop-nl" : {
+    "type" : "wildcard",
+    "permission" : "txo.shop:nl"
+  },
+  "cashier-shop-global-reader" : {
+    "type" : "wildcard",
+    "permission" : "txo.shop:*",
+    "resource" : "read"
+  }
+}

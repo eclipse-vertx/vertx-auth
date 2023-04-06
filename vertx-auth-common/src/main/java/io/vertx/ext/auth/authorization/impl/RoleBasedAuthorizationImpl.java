@@ -65,7 +65,7 @@ public class RoleBasedAuthorizationImpl implements RoleBasedAuthorization {
     if (resource == null || !resource.hasVariable()) {
       return this;
     }
-    return RoleBasedAuthorization.create(this.role).setResource(resource.resolve(context));
+    return RoleBasedAuthorization.create(this.role).setResource(resource.resolve(context.variables()));
   }
 
   @Override

@@ -1,0 +1,5 @@
+= Vert.x Auth ABAC
+
+This module contains a simple Attribute Based Authorization Control auth interfaces.
+
+Please see the http://vertx.io/docs/#authentication_and_authorisation[documentation] for more information.
