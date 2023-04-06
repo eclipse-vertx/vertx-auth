@@ -31,7 +31,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Simple definition of ABAC policies.
+ * Simple definition of ABAC policies. A policy is a set of rules that are evaluated against a set of attributes.
+ * On successful evaluation the policy is considered to be satisfied and the listed authorizations are granted.
  */
 @DataObject
 public class Policy {
