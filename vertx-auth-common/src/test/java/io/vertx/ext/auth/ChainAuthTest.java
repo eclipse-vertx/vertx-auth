@@ -1,6 +1,7 @@
 package io.vertx.ext.auth;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.unit.Async;
@@ -224,7 +225,7 @@ public class ChainAuthTest {
           User result = res.result();
           should.assertNotNull(result);
           should.assertEquals(2, res.result().principal().getInteger("provider"));
-          should.assertEquals("[\"one\",\"two\"]", res.result().attributes().getValue("attribute").toString());
+          should.assertEquals(new JsonArray().add("one").add("two"), res.result().attributes().getValue("attribute"));
           test.complete();
         } else {
           should.fail();
