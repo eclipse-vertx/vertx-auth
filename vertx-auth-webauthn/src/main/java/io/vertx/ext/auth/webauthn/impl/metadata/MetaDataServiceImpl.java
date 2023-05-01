@@ -114,7 +114,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
             JsonArray entries = payload.getJsonArray("entries");
 
-            final List<Future> futures = new ArrayList<>(entries.size());
+            final List<Future<Void>> futures = new ArrayList<>(entries.size());
             final String e = error;
 
             entries.forEach(el -> futures.add(addEntry(e, (JsonObject) el)));
