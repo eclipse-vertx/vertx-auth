@@ -291,7 +291,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               // final step, verify if the user is not expired
               // this may happen if the user tokens have been issued for future use for example
               if (newUser.expired(config.getJWTOptions().getLeeway())) {
-                return Future.failedFuture("Used is expired.");
+                return Future.failedFuture("User token is expired.");
               } else {
                 // basic validation passed, the token is not expired
                 return Future.succeededFuture(newUser);
@@ -316,7 +316,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               String clientId = config.getClientId();
               if (clientId != null && !clientId.equals(json.getString("client_id"))) {
                 // Client identifier for the OAuth 2.0 client that requested this token.
-                LOG.info("Introspect client_id doesn't match configured client_id");
+                LOG.info("Inrospected client_id ({0}) doesn't match configured client_id ({1})", clientId, json.getString("client_id"));
               }
             }
 
@@ -328,7 +328,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
-              return Future.failedFuture("Used is expired.");
+              return Future.failedFuture("User token is expired.");
             } else {
               // basic validation passed, the token is not expired
               return Future.succeededFuture(newUser);
@@ -417,7 +417,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            return Future.failedFuture("Used is expired.");
+            return Future.failedFuture("User token is expired.");
           } else {
             // basic validation passed, the token is not expired
             return Future.succeededFuture(newUser);
@@ -452,7 +452,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (newUser.expired(config.getJWTOptions().getLeeway())) {
-          return Future.failedFuture("Used is expired.");
+          return Future.failedFuture("User token is expired.");
         } else {
           // basic validation passed, the token is not expired
           return Future.succeededFuture(newUser);
@@ -488,7 +488,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (user.expired(config.getJWTOptions().getLeeway())) {
-          return Future.failedFuture("Used is expired.");
+          return Future.failedFuture("User token is expired.");
         } else {
           // basic validation passed, the user token is not expired
           return Future.succeededFuture(json);
