@@ -316,7 +316,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               String clientId = config.getClientId();
               if (clientId != null && !clientId.equals(json.getString("client_id"))) {
                 // Client identifier for the OAuth 2.0 client that requested this token.
-                LOG.info(String.format("Introspected client_id ({0}) doesn't match configured client_id ({1})", clientId, json.getString("client_id")));
+                LOG.info(String.format("Introspected client_id (%s) doesn't match configured client_id (%s)", clientId, json.getString("client_id")));
               }
             }
 
