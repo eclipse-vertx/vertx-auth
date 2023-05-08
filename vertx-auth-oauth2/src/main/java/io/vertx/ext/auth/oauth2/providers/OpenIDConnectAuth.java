@@ -158,6 +158,10 @@ public interface OpenIDConnectAuth {
         } catch (IllegalArgumentException | IllegalStateException e) {
           return Future.failedFuture(e);
         }
+      })
+      .andThen(v -> {
+        // Close the client but also keep a reference to it, so it's not garbage collected
+        httpClient.close();
       });
   }
 }

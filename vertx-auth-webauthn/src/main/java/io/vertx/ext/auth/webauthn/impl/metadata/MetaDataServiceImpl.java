@@ -44,7 +44,6 @@ public class MetaDataServiceImpl implements MetaDataService {
   private final MetaData metadata;
 
   public MetaDataServiceImpl(Vertx vertx, WebAuthnOptions options) {
-    VertxInternal vertx1 = (VertxInternal) vertx;
     this.options = options;
     this.httpClient = new SimpleHttpClient(vertx, "vertx-auth", new HttpClientOptions());
     this.jwt = new JWT().allowEmbeddedKey(true);

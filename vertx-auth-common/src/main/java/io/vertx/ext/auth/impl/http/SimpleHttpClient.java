@@ -32,7 +32,7 @@ import java.util.function.Function;
 
 /**
  * A simple web client that does only depend on core to avoid cyclic dependencies.
- * The client is very simple, it allows fetching/storing a resource but doesn not do
+ * The client is very simple, it allows fetching/storing a resource but does not do
  * any fancy transformations.
  *
  * @author <a href="mailto:pmlopes@gmail.com>Paulo Lopes</a>
@@ -45,6 +45,10 @@ public final class SimpleHttpClient {
   public SimpleHttpClient(Vertx vertx, String userAgent, HttpClientOptions options) {
     this.client = vertx.createHttpClient(options);
     this.userAgent = userAgent;
+  }
+
+  public Future<Void> close() {
+    return client.close();
   }
 
   public Future<SimpleHttpResponse> fetch(HttpMethod method, String url, JsonObject headers, Buffer payload) {
