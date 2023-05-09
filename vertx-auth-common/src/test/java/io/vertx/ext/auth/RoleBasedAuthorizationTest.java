@@ -12,6 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth;
 
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
@@ -73,7 +74,8 @@ public class RoleBasedAuthorizationTest {
 
   @Test
   public void testMatch1(TestContext should) {
-    final Async test = should.async();
+    Async test = should.async();
+    HttpClient client = rule.vertx().createHttpClient();
 
     final HttpServer server = rule.vertx().createHttpServer();
     server.requestHandler(request -> {
@@ -83,7 +85,7 @@ public class RoleBasedAuthorizationTest {
       should.assertTrue(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
     }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
-      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
+      client.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(res -> {
           server.close().onComplete(close -> test.complete());
         }));
@@ -93,9 +95,10 @@ public class RoleBasedAuthorizationTest {
 
   @Test
   public void testMatch2(TestContext should) {
-    final Async test = should.async();
+    Async test = should.async();
 
-    final HttpServer server = rule.vertx().createHttpServer();
+    HttpServer server = rule.vertx().createHttpServer();
+    HttpClient client = rule.vertx().createHttpClient();
     server.requestHandler(request -> {
       User user = User.fromName("dummy user");
       user.authorizations().put("providerId", Collections.singleton(RoleBasedAuthorization.create("p1").setResource("r1")));
@@ -103,7 +106,7 @@ public class RoleBasedAuthorizationTest {
       should.assertFalse(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
     }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
-      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
+      client.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(res -> {
           server.close().onComplete(close -> test.complete());
         }));
