@@ -1,12 +1,10 @@
 package io.vertx.ext.auth.webauthn.impl.metadata;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
@@ -118,7 +116,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
             entries.forEach(el -> futures.add(addEntry(e, (JsonObject) el)));
 
-            return CompositeFuture
+            return Future
               .all(futures)
               .map(true)
               .otherwise(false);
