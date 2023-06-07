@@ -39,12 +39,12 @@
   </parent>
 
   <artifactId>vertx-auth-parent</artifactId>
-  <version>4.4.3-SNAPSHOT</version>
+  <version>4.4.3</version>
 
   <name>Vert.x Auth</name>
 
   <properties>
-    <stack.version>4.4.3-SNAPSHOT</stack.version>
+    <stack.version>4.4.3</stack.version>
     <doc.skip>true</doc.skip>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
   </properties>
