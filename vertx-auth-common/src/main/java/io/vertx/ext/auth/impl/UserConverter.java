@@ -12,13 +12,14 @@
  ********************************************************************************/
 package io.vertx.ext.auth.impl;
 
-import java.util.Objects;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authorization.Authorization;
+import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
+
+import java.util.Objects;
 
 public class UserConverter {
 
@@ -31,15 +32,18 @@ public class UserConverter {
 
     JsonObject json = new JsonObject();
     json.put(FIELD_PRINCIPAL, value.principal());
-    JsonObject jsonAuthorizations = new JsonObject();
-    for (String providerId: value.authorizations().getProviderIds()) {
-      JsonArray jsonAuthorizationByProvider = new JsonArray();
-      jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
-      for (Authorization authorization : value.authorizations().get(providerId)) {
-        jsonAuthorizationByProvider.add(AuthorizationConverter.encode(authorization));
+    Authorizations authorizations = value.authorizations();
+    if (authorizations != null) {
+      JsonObject jsonAuthorizations = new JsonObject();
+      for (String providerId : authorizations.getProviderIds()) {
+        JsonArray jsonAuthorizationByProvider = new JsonArray();
+        jsonAuthorizations.put(providerId, jsonAuthorizationByProvider);
+        for (Authorization authorization : authorizations.get(providerId)) {
+          jsonAuthorizationByProvider.add(AuthorizationConverter.encode(authorization));
+        }
       }
+      json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
     }
-    json.put(FIELD_AUTHORIZATIONS, jsonAuthorizations);
     json.put(FIELD_ATTRIBUTES, value.attributes());
     return json;
   }
