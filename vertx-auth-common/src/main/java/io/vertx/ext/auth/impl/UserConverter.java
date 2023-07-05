@@ -52,9 +52,16 @@ public class UserConverter {
     Objects.requireNonNull(json);
 
     JsonObject principal = json.getJsonObject(FIELD_PRINCIPAL);
+    if (principal == null) {
+      principal = new JsonObject();
+    }
+
     User user = User.create(principal);
     // authorizations
     JsonObject jsonAuthorizations = json.getJsonObject(FIELD_AUTHORIZATIONS);
+    if (jsonAuthorizations == null) {
+      jsonAuthorizations = new JsonObject();
+    }
     for (String fieldName: jsonAuthorizations.fieldNames()) {
       JsonArray jsonAuthorizationByProvider = jsonAuthorizations.getJsonArray(fieldName);
       for (int i=0; i<jsonAuthorizationByProvider.size(); i++) {
@@ -62,7 +69,13 @@ public class UserConverter {
         user.authorizations().add(fieldName, AuthorizationConverter.decode(jsonAuthorization));
       }
     }
-    user.attributes().mergeIn(json.getJsonObject(FIELD_ATTRIBUTES, new JsonObject()));
+
+    JsonObject attributes = json.getJsonObject(FIELD_ATTRIBUTES, new JsonObject());
+    if (attributes == null) {
+      attributes = new JsonObject();
+    }
+    user.attributes().mergeIn(attributes);
+
     return user;
   }
 
