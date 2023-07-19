@@ -91,14 +91,7 @@ public class LdapAuthenticationImpl implements LdapAuthentication {
 
     Promise<LdapContext> promise = ((VertxInternal) vertx).promise();
 
-    vertx.<LdapContext>executeBlocking(blockingResult -> {
-      try {
-        LdapContext context = new InitialLdapContext(environment, null);
-        blockingResult.complete(context);
-      } catch (Throwable t) {
-        blockingResult.fail(t);
-      }
-    }).onComplete(promise);
+    vertx.<LdapContext>executeBlocking(() -> new InitialLdapContext(environment, null)).onComplete(promise);
 
     return promise.future();
   }

@@ -77,7 +77,7 @@ public class PRNG implements VertxContextPRNG {
         id -> {
           if (dirty && seeding.compareAndSet(false, true)) {
             vertx.<byte[]>executeBlocking(
-              future -> future.complete(random.generateSeed(seedBits / 8)),
+              () -> random.generateSeed(seedBits / 8),
               false).onComplete(
               generateSeed -> {
                 seeding.set(false);
