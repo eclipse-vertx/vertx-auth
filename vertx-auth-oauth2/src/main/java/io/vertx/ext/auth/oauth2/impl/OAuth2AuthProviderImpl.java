@@ -326,7 +326,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
 
             // attempt to create a user from the json object
             final User newUser = createUser(
-              json,
+              json.put("access_token", tokenCredentials.getToken()),
               user.attributes().containsKey("missing-kid"));
 
             // final step, verify if the user is not expired
