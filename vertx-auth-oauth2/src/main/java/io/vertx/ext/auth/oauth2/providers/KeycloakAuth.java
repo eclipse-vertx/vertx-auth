@@ -92,7 +92,7 @@ public interface KeycloakAuth extends OpenIDConnectAuth {
 
       options.setAuthorizationPath("/realms/" + realm + "/protocol/openid-connect/auth");
       options.setTokenPath("/realms/" + realm + "/protocol/openid-connect/token");
-      options.setRevocationPath(null);
+      options.setRevocationPath("/realms/" + realm + "/protocol/openid-connect/revoke");
       options.setLogoutPath("/realms/" + realm + "/protocol/openid-connect/logout");
       options.setUserInfoPath("/realms/" + realm + "/protocol/openid-connect/userinfo");
       // keycloak follows the RFC7662
