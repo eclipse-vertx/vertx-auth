@@ -20,19 +20,24 @@ public class OAuth2OptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2Options obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
+        case "site":
+          if (member.getValue() instanceof String) {
+            obj.setSite((String)member.getValue());
+          }
+          break;
         case "authorizationPath":
           if (member.getValue() instanceof String) {
             obj.setAuthorizationPath((String)member.getValue());
           }
           break;
-        case "clientAssertion":
+        case "tokenPath":
           if (member.getValue() instanceof String) {
-            obj.setClientAssertion((String)member.getValue());
+            obj.setTokenPath((String)member.getValue());
           }
           break;
-        case "clientAssertionType":
+        case "revocationPath":
           if (member.getValue() instanceof String) {
-            obj.setClientAssertionType((String)member.getValue());
+            obj.setRevocationPath((String)member.getValue());
           }
           break;
         case "clientId":
@@ -45,54 +50,29 @@ public class OAuth2OptionsConverter {
             obj.setClientSecret((String)member.getValue());
           }
           break;
-        case "extraParameters":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setExtraParameters(((JsonObject)member.getValue()).copy());
+        case "useBasicAuthorization":
+          if (member.getValue() instanceof Boolean) {
+            obj.setUseBasicAuthorization((Boolean)member.getValue());
+          }
+          break;
+        case "clientAssertionType":
+          if (member.getValue() instanceof String) {
+            obj.setClientAssertionType((String)member.getValue());
+          }
+          break;
+        case "clientAssertion":
+          if (member.getValue() instanceof String) {
+            obj.setClientAssertion((String)member.getValue());
+          }
+          break;
+        case "userAgent":
+          if (member.getValue() instanceof String) {
+            obj.setUserAgent((String)member.getValue());
           }
           break;
         case "headers":
           if (member.getValue() instanceof JsonObject) {
             obj.setHeaders(((JsonObject)member.getValue()).copy());
-          }
-          break;
-        case "httpClientOptions":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setHttpClientOptions(new io.vertx.core.http.HttpClientOptions((io.vertx.core.json.JsonObject)member.getValue()));
-          }
-          break;
-        case "introspectionPath":
-          if (member.getValue() instanceof String) {
-            obj.setIntrospectionPath((String)member.getValue());
-          }
-          break;
-        case "jwkMaxAgeInSeconds":
-          if (member.getValue() instanceof Number) {
-            obj.setJwkMaxAgeInSeconds(((Number)member.getValue()).longValue());
-          }
-          break;
-        case "jwkPath":
-          if (member.getValue() instanceof String) {
-            obj.setJwkPath((String)member.getValue());
-          }
-          break;
-        case "jwks":
-          if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.core.json.JsonObject> list =  new java.util.ArrayList<>();
-            ((Iterable<Object>)member.getValue()).forEach( item -> {
-              if (item instanceof JsonObject)
-                list.add(((JsonObject)item).copy());
-            });
-            obj.setJwks(list);
-          }
-          break;
-        case "jwtOptions":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
-          }
-          break;
-        case "logoutPath":
-          if (member.getValue() instanceof String) {
-            obj.setLogoutPath((String)member.getValue());
           }
           break;
         case "pubSecKeys":
@@ -105,9 +85,14 @@ public class OAuth2OptionsConverter {
             obj.setPubSecKeys(list);
           }
           break;
-        case "revocationPath":
+        case "logoutPath":
           if (member.getValue() instanceof String) {
-            obj.setRevocationPath((String)member.getValue());
+            obj.setLogoutPath((String)member.getValue());
+          }
+          break;
+        case "userInfoPath":
+          if (member.getValue() instanceof String) {
+            obj.setUserInfoPath((String)member.getValue());
           }
           break;
         case "scopeSeparator":
@@ -115,9 +100,39 @@ public class OAuth2OptionsConverter {
             obj.setScopeSeparator((String)member.getValue());
           }
           break;
-        case "site":
+        case "extraParameters":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setExtraParameters(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "introspectionPath":
           if (member.getValue() instanceof String) {
-            obj.setSite((String)member.getValue());
+            obj.setIntrospectionPath((String)member.getValue());
+          }
+          break;
+        case "userInfoParameters":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setUserInfoParameters(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "jwkPath":
+          if (member.getValue() instanceof String) {
+            obj.setJwkPath((String)member.getValue());
+          }
+          break;
+        case "jwtOptions":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
+          }
+          break;
+        case "validateIssuer":
+          if (member.getValue() instanceof Boolean) {
+            obj.setValidateIssuer((Boolean)member.getValue());
+          }
+          break;
+        case "tenant":
+          if (member.getValue() instanceof String) {
+            obj.setTenant((String)member.getValue());
           }
           break;
         case "supportedGrantTypes":
@@ -130,39 +145,24 @@ public class OAuth2OptionsConverter {
             obj.setSupportedGrantTypes(list);
           }
           break;
-        case "tenant":
-          if (member.getValue() instanceof String) {
-            obj.setTenant((String)member.getValue());
-          }
-          break;
-        case "tokenPath":
-          if (member.getValue() instanceof String) {
-            obj.setTokenPath((String)member.getValue());
-          }
-          break;
-        case "useBasicAuthorization":
-          if (member.getValue() instanceof Boolean) {
-            obj.setUseBasicAuthorization((Boolean)member.getValue());
-          }
-          break;
-        case "userAgent":
-          if (member.getValue() instanceof String) {
-            obj.setUserAgent((String)member.getValue());
-          }
-          break;
-        case "userInfoParameters":
+        case "httpClientOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setUserInfoParameters(((JsonObject)member.getValue()).copy());
+            obj.setHttpClientOptions(new io.vertx.core.http.HttpClientOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
-        case "userInfoPath":
-          if (member.getValue() instanceof String) {
-            obj.setUserInfoPath((String)member.getValue());
+        case "jwkMaxAgeInSeconds":
+          if (member.getValue() instanceof Number) {
+            obj.setJwkMaxAgeInSeconds(((Number)member.getValue()).longValue());
           }
           break;
-        case "validateIssuer":
-          if (member.getValue() instanceof Boolean) {
-            obj.setValidateIssuer((Boolean)member.getValue());
+        case "jwks":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<io.vertx.core.json.JsonObject> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof JsonObject)
+                list.add(((JsonObject)item).copy());
+            });
+            obj.setJwks(list);
           }
           break;
       }
@@ -174,14 +174,17 @@ public class OAuth2OptionsConverter {
   }
 
   public static void toJson(OAuth2Options obj, java.util.Map<String, Object> json) {
+    if (obj.getSite() != null) {
+      json.put("site", obj.getSite());
+    }
     if (obj.getAuthorizationPath() != null) {
       json.put("authorizationPath", obj.getAuthorizationPath());
     }
-    if (obj.getClientAssertion() != null) {
-      json.put("clientAssertion", obj.getClientAssertion());
+    if (obj.getTokenPath() != null) {
+      json.put("tokenPath", obj.getTokenPath());
     }
-    if (obj.getClientAssertionType() != null) {
-      json.put("clientAssertionType", obj.getClientAssertionType());
+    if (obj.getRevocationPath() != null) {
+      json.put("revocationPath", obj.getRevocationPath());
     }
     if (obj.getClientId() != null) {
       json.put("clientId", obj.getClientId());
@@ -189,68 +192,65 @@ public class OAuth2OptionsConverter {
     if (obj.getClientSecret() != null) {
       json.put("clientSecret", obj.getClientSecret());
     }
-    if (obj.getExtraParameters() != null) {
-      json.put("extraParameters", obj.getExtraParameters());
+    json.put("useBasicAuthorization", obj.isUseBasicAuthorization());
+    if (obj.getClientAssertionType() != null) {
+      json.put("clientAssertionType", obj.getClientAssertionType());
+    }
+    if (obj.getClientAssertion() != null) {
+      json.put("clientAssertion", obj.getClientAssertion());
+    }
+    if (obj.getUserAgent() != null) {
+      json.put("userAgent", obj.getUserAgent());
     }
     if (obj.getHeaders() != null) {
       json.put("headers", obj.getHeaders());
-    }
-    if (obj.getHttpClientOptions() != null) {
-      json.put("httpClientOptions", obj.getHttpClientOptions().toJson());
-    }
-    if (obj.getIntrospectionPath() != null) {
-      json.put("introspectionPath", obj.getIntrospectionPath());
-    }
-    json.put("jwkMaxAgeInSeconds", obj.getJwkMaxAgeInSeconds());
-    if (obj.getJwkPath() != null) {
-      json.put("jwkPath", obj.getJwkPath());
-    }
-    if (obj.getJwks() != null) {
-      JsonArray array = new JsonArray();
-      obj.getJwks().forEach(item -> array.add(item));
-      json.put("jwks", array);
-    }
-    if (obj.getJWTOptions() != null) {
-      json.put("jwtOptions", obj.getJWTOptions().toJson());
-    }
-    if (obj.getLogoutPath() != null) {
-      json.put("logoutPath", obj.getLogoutPath());
     }
     if (obj.getPubSecKeys() != null) {
       JsonArray array = new JsonArray();
       obj.getPubSecKeys().forEach(item -> array.add(item.toJson()));
       json.put("pubSecKeys", array);
     }
-    if (obj.getRevocationPath() != null) {
-      json.put("revocationPath", obj.getRevocationPath());
+    if (obj.getLogoutPath() != null) {
+      json.put("logoutPath", obj.getLogoutPath());
+    }
+    if (obj.getUserInfoPath() != null) {
+      json.put("userInfoPath", obj.getUserInfoPath());
     }
     if (obj.getScopeSeparator() != null) {
       json.put("scopeSeparator", obj.getScopeSeparator());
     }
-    if (obj.getSite() != null) {
-      json.put("site", obj.getSite());
+    if (obj.getExtraParameters() != null) {
+      json.put("extraParameters", obj.getExtraParameters());
+    }
+    if (obj.getIntrospectionPath() != null) {
+      json.put("introspectionPath", obj.getIntrospectionPath());
+    }
+    if (obj.getUserInfoParameters() != null) {
+      json.put("userInfoParameters", obj.getUserInfoParameters());
+    }
+    if (obj.getJwkPath() != null) {
+      json.put("jwkPath", obj.getJwkPath());
+    }
+    if (obj.getJWTOptions() != null) {
+      json.put("jwtOptions", obj.getJWTOptions().toJson());
+    }
+    json.put("validateIssuer", obj.isValidateIssuer());
+    if (obj.getTenant() != null) {
+      json.put("tenant", obj.getTenant());
     }
     if (obj.getSupportedGrantTypes() != null) {
       JsonArray array = new JsonArray();
       obj.getSupportedGrantTypes().forEach(item -> array.add(item));
       json.put("supportedGrantTypes", array);
     }
-    if (obj.getTenant() != null) {
-      json.put("tenant", obj.getTenant());
+    if (obj.getHttpClientOptions() != null) {
+      json.put("httpClientOptions", obj.getHttpClientOptions().toJson());
     }
-    if (obj.getTokenPath() != null) {
-      json.put("tokenPath", obj.getTokenPath());
+    json.put("jwkMaxAgeInSeconds", obj.getJwkMaxAgeInSeconds());
+    if (obj.getJwks() != null) {
+      JsonArray array = new JsonArray();
+      obj.getJwks().forEach(item -> array.add(item));
+      json.put("jwks", array);
     }
-    json.put("useBasicAuthorization", obj.isUseBasicAuthorization());
-    if (obj.getUserAgent() != null) {
-      json.put("userAgent", obj.getUserAgent());
-    }
-    if (obj.getUserInfoParameters() != null) {
-      json.put("userInfoParameters", obj.getUserInfoParameters());
-    }
-    if (obj.getUserInfoPath() != null) {
-      json.put("userInfoPath", obj.getUserInfoPath());
-    }
-    json.put("validateIssuer", obj.isValidateIssuer());
   }
 }

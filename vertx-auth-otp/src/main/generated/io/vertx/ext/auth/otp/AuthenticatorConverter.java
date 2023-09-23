@@ -20,21 +20,6 @@ public class AuthenticatorConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Authenticator obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "algorithm":
-          if (member.getValue() instanceof String) {
-            obj.setAlgorithm((String)member.getValue());
-          }
-          break;
-        case "authAttempts":
-          if (member.getValue() instanceof Number) {
-            obj.setAuthAttempts(((Number)member.getValue()).intValue());
-          }
-          break;
-        case "counter":
-          if (member.getValue() instanceof Number) {
-            obj.setCounter(((Number)member.getValue()).longValue());
-          }
-          break;
         case "identifier":
           if (member.getValue() instanceof String) {
             obj.setIdentifier((String)member.getValue());
@@ -45,9 +30,24 @@ public class AuthenticatorConverter {
             obj.setKey((String)member.getValue());
           }
           break;
+        case "algorithm":
+          if (member.getValue() instanceof String) {
+            obj.setAlgorithm((String)member.getValue());
+          }
+          break;
+        case "counter":
+          if (member.getValue() instanceof Number) {
+            obj.setCounter(((Number)member.getValue()).longValue());
+          }
+          break;
         case "period":
           if (member.getValue() instanceof Number) {
             obj.setPeriod(((Number)member.getValue()).longValue());
+          }
+          break;
+        case "authAttempts":
+          if (member.getValue() instanceof Number) {
+            obj.setAuthAttempts(((Number)member.getValue()).intValue());
           }
           break;
       }
@@ -59,19 +59,19 @@ public class AuthenticatorConverter {
   }
 
   public static void toJson(Authenticator obj, java.util.Map<String, Object> json) {
-    if (obj.getAlgorithm() != null) {
-      json.put("algorithm", obj.getAlgorithm());
-    }
-    if (obj.getAuthAttempts() != null) {
-      json.put("authAttempts", obj.getAuthAttempts());
-    }
-    json.put("counter", obj.getCounter());
     if (obj.getIdentifier() != null) {
       json.put("identifier", obj.getIdentifier());
     }
     if (obj.getKey() != null) {
       json.put("key", obj.getKey());
     }
+    if (obj.getAlgorithm() != null) {
+      json.put("algorithm", obj.getAlgorithm());
+    }
+    json.put("counter", obj.getCounter());
     json.put("period", obj.getPeriod());
+    if (obj.getAuthAttempts() != null) {
+      json.put("authAttempts", obj.getAuthAttempts());
+    }
   }
 }

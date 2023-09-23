@@ -20,39 +20,19 @@ public class Oauth2CredentialsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Oauth2Credentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "assertion":
-          if (member.getValue() instanceof String) {
-            obj.setAssertion((String)member.getValue());
-          }
-          break;
         case "code":
           if (member.getValue() instanceof String) {
             obj.setCode((String)member.getValue());
           }
           break;
-        case "codeVerifier":
-          if (member.getValue() instanceof String) {
-            obj.setCodeVerifier((String)member.getValue());
-          }
-          break;
-        case "flow":
-          if (member.getValue() instanceof String) {
-            obj.setFlow(io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf((String)member.getValue()));
-          }
-          break;
-        case "jwt":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setJwt(((JsonObject)member.getValue()).copy());
-          }
-          break;
-        case "password":
-          if (member.getValue() instanceof String) {
-            obj.setPassword((String)member.getValue());
-          }
-          break;
         case "redirectUri":
           if (member.getValue() instanceof String) {
             obj.setRedirectUri((String)member.getValue());
+          }
+          break;
+        case "codeVerifier":
+          if (member.getValue() instanceof String) {
+            obj.setCodeVerifier((String)member.getValue());
           }
           break;
         case "scopes":
@@ -65,9 +45,29 @@ public class Oauth2CredentialsConverter {
             obj.setScopes(list);
           }
           break;
+        case "jwt":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setJwt(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "assertion":
+          if (member.getValue() instanceof String) {
+            obj.setAssertion((String)member.getValue());
+          }
+          break;
+        case "password":
+          if (member.getValue() instanceof String) {
+            obj.setPassword((String)member.getValue());
+          }
+          break;
         case "username":
           if (member.getValue() instanceof String) {
             obj.setUsername((String)member.getValue());
+          }
+          break;
+        case "flow":
+          if (member.getValue() instanceof String) {
+            obj.setFlow(io.vertx.ext.auth.oauth2.OAuth2FlowType.valueOf((String)member.getValue()));
           }
           break;
       }
@@ -79,34 +79,34 @@ public class Oauth2CredentialsConverter {
   }
 
   public static void toJson(Oauth2Credentials obj, java.util.Map<String, Object> json) {
-    if (obj.getAssertion() != null) {
-      json.put("assertion", obj.getAssertion());
-    }
     if (obj.getCode() != null) {
       json.put("code", obj.getCode());
     }
-    if (obj.getCodeVerifier() != null) {
-      json.put("codeVerifier", obj.getCodeVerifier());
-    }
-    if (obj.getFlow() != null) {
-      json.put("flow", obj.getFlow().name());
-    }
-    if (obj.getJwt() != null) {
-      json.put("jwt", obj.getJwt());
-    }
-    if (obj.getPassword() != null) {
-      json.put("password", obj.getPassword());
-    }
     if (obj.getRedirectUri() != null) {
       json.put("redirectUri", obj.getRedirectUri());
+    }
+    if (obj.getCodeVerifier() != null) {
+      json.put("codeVerifier", obj.getCodeVerifier());
     }
     if (obj.getScopes() != null) {
       JsonArray array = new JsonArray();
       obj.getScopes().forEach(item -> array.add(item));
       json.put("scopes", array);
     }
+    if (obj.getJwt() != null) {
+      json.put("jwt", obj.getJwt());
+    }
+    if (obj.getAssertion() != null) {
+      json.put("assertion", obj.getAssertion());
+    }
+    if (obj.getPassword() != null) {
+      json.put("password", obj.getPassword());
+    }
     if (obj.getUsername() != null) {
       json.put("username", obj.getUsername());
+    }
+    if (obj.getFlow() != null) {
+      json.put("flow", obj.getFlow().name());
     }
   }
 }

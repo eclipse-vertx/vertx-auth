@@ -11,8 +11,9 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
-import io.vertx.mysqlclient.MySQLPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -34,23 +35,22 @@ public class MySQLTest {
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
 
-  private MySQLPool mysql;
+  private Pool mysql;
 
   @Before
   public void before() {
     // Create the client pool
-    mysql = MySQLPool.pool(
-      rule.vertx(),
-      // default config
-      new MySQLConnectOptions()
+    mysql = MySQLBuilder.pool()
+      .with(new PoolOptions()
+      .setMaxSize(5))
+      .connectingTo(new MySQLConnectOptions()
         .setPort(container.getMappedPort(3306))
         .setHost(container.getHost())
         .setDatabase("testschema")
         .setUser("mysql")
-        .setPassword("password"),
-      // default pool config
-      new PoolOptions()
-        .setMaxSize(5));
+        .setPassword("password"))
+      .using(rule.vertx())
+      .build();
   }
 
   @After

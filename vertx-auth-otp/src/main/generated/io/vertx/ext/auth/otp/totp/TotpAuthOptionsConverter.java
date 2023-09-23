@@ -20,14 +20,14 @@ public class TotpAuthOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, TotpAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "authAttemptsLimit":
-          if (member.getValue() instanceof Number) {
-            obj.setAuthAttemptsLimit(((Number)member.getValue()).intValue());
-          }
-          break;
         case "passwordLength":
           if (member.getValue() instanceof Number) {
             obj.setPasswordLength(((Number)member.getValue()).intValue());
+          }
+          break;
+        case "authAttemptsLimit":
+          if (member.getValue() instanceof Number) {
+            obj.setAuthAttemptsLimit(((Number)member.getValue()).intValue());
           }
           break;
         case "period":
@@ -44,8 +44,8 @@ public class TotpAuthOptionsConverter {
   }
 
   public static void toJson(TotpAuthOptions obj, java.util.Map<String, Object> json) {
-    json.put("authAttemptsLimit", obj.getAuthAttemptsLimit());
     json.put("passwordLength", obj.getPasswordLength());
+    json.put("authAttemptsLimit", obj.getAuthAttemptsLimit());
     json.put("period", obj.getPeriod());
   }
 }

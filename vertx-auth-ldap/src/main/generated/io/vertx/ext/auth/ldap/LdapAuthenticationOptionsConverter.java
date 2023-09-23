@@ -25,11 +25,6 @@ public class LdapAuthenticationOptionsConverter {
             obj.setAuthenticationMechanism((String)member.getValue());
           }
           break;
-        case "authenticationQuery":
-          if (member.getValue() instanceof String) {
-            obj.setAuthenticationQuery((String)member.getValue());
-          }
-          break;
         case "referral":
           if (member.getValue() instanceof String) {
             obj.setReferral((String)member.getValue());
@@ -38,6 +33,11 @@ public class LdapAuthenticationOptionsConverter {
         case "url":
           if (member.getValue() instanceof String) {
             obj.setUrl((String)member.getValue());
+          }
+          break;
+        case "authenticationQuery":
+          if (member.getValue() instanceof String) {
+            obj.setAuthenticationQuery((String)member.getValue());
           }
           break;
       }
@@ -52,14 +52,14 @@ public class LdapAuthenticationOptionsConverter {
     if (obj.getAuthenticationMechanism() != null) {
       json.put("authenticationMechanism", obj.getAuthenticationMechanism());
     }
-    if (obj.getAuthenticationQuery() != null) {
-      json.put("authenticationQuery", obj.getAuthenticationQuery());
-    }
     if (obj.getReferral() != null) {
       json.put("referral", obj.getReferral());
     }
     if (obj.getUrl() != null) {
       json.put("url", obj.getUrl());
+    }
+    if (obj.getAuthenticationQuery() != null) {
+      json.put("authenticationQuery", obj.getAuthenticationQuery());
     }
   }
 }

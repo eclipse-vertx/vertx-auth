@@ -20,9 +20,24 @@ public class KeyStoreOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, KeyStoreOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
+        case "type":
+          if (member.getValue() instanceof String) {
+            obj.setType((String)member.getValue());
+          }
+          break;
+        case "provider":
+          if (member.getValue() instanceof String) {
+            obj.setProvider((String)member.getValue());
+          }
+          break;
         case "password":
           if (member.getValue() instanceof String) {
             obj.setPassword((String)member.getValue());
+          }
+          break;
+        case "path":
+          if (member.getValue() instanceof String) {
+            obj.setPath((String)member.getValue());
           }
           break;
         case "passwordProtection":
@@ -35,21 +50,6 @@ public class KeyStoreOptionsConverter {
             obj.setPasswordProtection(map);
           }
           break;
-        case "path":
-          if (member.getValue() instanceof String) {
-            obj.setPath((String)member.getValue());
-          }
-          break;
-        case "provider":
-          if (member.getValue() instanceof String) {
-            obj.setProvider((String)member.getValue());
-          }
-          break;
-        case "type":
-          if (member.getValue() instanceof String) {
-            obj.setType((String)member.getValue());
-          }
-          break;
       }
     }
   }
@@ -59,22 +59,22 @@ public class KeyStoreOptionsConverter {
   }
 
   public static void toJson(KeyStoreOptions obj, java.util.Map<String, Object> json) {
+    if (obj.getType() != null) {
+      json.put("type", obj.getType());
+    }
+    if (obj.getProvider() != null) {
+      json.put("provider", obj.getProvider());
+    }
     if (obj.getPassword() != null) {
       json.put("password", obj.getPassword());
+    }
+    if (obj.getPath() != null) {
+      json.put("path", obj.getPath());
     }
     if (obj.getPasswordProtection() != null) {
       JsonObject map = new JsonObject();
       obj.getPasswordProtection().forEach((key, value) -> map.put(key, value));
       json.put("passwordProtection", map);
-    }
-    if (obj.getPath() != null) {
-      json.put("path", obj.getPath());
-    }
-    if (obj.getProvider() != null) {
-      json.put("provider", obj.getProvider());
-    }
-    if (obj.getType() != null) {
-      json.put("type", obj.getType());
     }
   }
 }

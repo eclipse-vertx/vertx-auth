@@ -20,14 +20,14 @@ public class SqlAuthorizationOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, SqlAuthorizationOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "permissionsQuery":
-          if (member.getValue() instanceof String) {
-            obj.setPermissionsQuery((String)member.getValue());
-          }
-          break;
         case "rolesQuery":
           if (member.getValue() instanceof String) {
             obj.setRolesQuery((String)member.getValue());
+          }
+          break;
+        case "permissionsQuery":
+          if (member.getValue() instanceof String) {
+            obj.setPermissionsQuery((String)member.getValue());
           }
           break;
       }
@@ -39,11 +39,11 @@ public class SqlAuthorizationOptionsConverter {
   }
 
   public static void toJson(SqlAuthorizationOptions obj, java.util.Map<String, Object> json) {
-    if (obj.getPermissionsQuery() != null) {
-      json.put("permissionsQuery", obj.getPermissionsQuery());
-    }
     if (obj.getRolesQuery() != null) {
       json.put("rolesQuery", obj.getRolesQuery());
+    }
+    if (obj.getPermissionsQuery() != null) {
+      json.put("permissionsQuery", obj.getPermissionsQuery());
     }
   }
 }

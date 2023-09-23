@@ -20,9 +20,39 @@ public class JWTOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
+        case "leeway":
+          if (member.getValue() instanceof Number) {
+            obj.setLeeway(((Number)member.getValue()).intValue());
+          }
+          break;
+        case "ignoreExpiration":
+          if (member.getValue() instanceof Boolean) {
+            obj.setIgnoreExpiration((Boolean)member.getValue());
+          }
+          break;
         case "algorithm":
           if (member.getValue() instanceof String) {
             obj.setAlgorithm((String)member.getValue());
+          }
+          break;
+        case "header":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setHeader(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "noTimestamp":
+          if (member.getValue() instanceof Boolean) {
+            obj.setNoTimestamp((Boolean)member.getValue());
+          }
+          break;
+        case "expiresInSeconds":
+          if (member.getValue() instanceof Number) {
+            obj.setExpiresInSeconds(((Number)member.getValue()).intValue());
+          }
+          break;
+        case "expiresInMinutes":
+          if (member.getValue() instanceof Number) {
+            obj.setExpiresInMinutes(((Number)member.getValue()).intValue());
           }
           break;
         case "audience":
@@ -43,49 +73,19 @@ public class JWTOptionsConverter {
             });
           }
           break;
-        case "expiresInMinutes":
-          if (member.getValue() instanceof Number) {
-            obj.setExpiresInMinutes(((Number)member.getValue()).intValue());
-          }
-          break;
-        case "expiresInSeconds":
-          if (member.getValue() instanceof Number) {
-            obj.setExpiresInSeconds(((Number)member.getValue()).intValue());
-          }
-          break;
-        case "header":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setHeader(((JsonObject)member.getValue()).copy());
-          }
-          break;
-        case "ignoreExpiration":
-          if (member.getValue() instanceof Boolean) {
-            obj.setIgnoreExpiration((Boolean)member.getValue());
-          }
-          break;
         case "issuer":
           if (member.getValue() instanceof String) {
             obj.setIssuer((String)member.getValue());
           }
           break;
-        case "leeway":
-          if (member.getValue() instanceof Number) {
-            obj.setLeeway(((Number)member.getValue()).intValue());
-          }
-          break;
-        case "noTimestamp":
-          if (member.getValue() instanceof Boolean) {
-            obj.setNoTimestamp((Boolean)member.getValue());
+        case "subject":
+          if (member.getValue() instanceof String) {
+            obj.setSubject((String)member.getValue());
           }
           break;
         case "nonceAlgorithm":
           if (member.getValue() instanceof String) {
             obj.setNonceAlgorithm((String)member.getValue());
-          }
-          break;
-        case "subject":
-          if (member.getValue() instanceof String) {
-            obj.setSubject((String)member.getValue());
           }
           break;
       }
@@ -97,29 +97,29 @@ public class JWTOptionsConverter {
   }
 
   public static void toJson(JWTOptions obj, java.util.Map<String, Object> json) {
+    json.put("leeway", obj.getLeeway());
+    json.put("ignoreExpiration", obj.isIgnoreExpiration());
     if (obj.getAlgorithm() != null) {
       json.put("algorithm", obj.getAlgorithm());
     }
+    if (obj.getHeader() != null) {
+      json.put("header", obj.getHeader());
+    }
+    json.put("noTimestamp", obj.isNoTimestamp());
+    json.put("expiresInSeconds", obj.getExpiresInSeconds());
     if (obj.getAudience() != null) {
       JsonArray array = new JsonArray();
       obj.getAudience().forEach(item -> array.add(item));
       json.put("audience", array);
     }
-    json.put("expiresInSeconds", obj.getExpiresInSeconds());
-    if (obj.getHeader() != null) {
-      json.put("header", obj.getHeader());
-    }
-    json.put("ignoreExpiration", obj.isIgnoreExpiration());
     if (obj.getIssuer() != null) {
       json.put("issuer", obj.getIssuer());
     }
-    json.put("leeway", obj.getLeeway());
-    json.put("noTimestamp", obj.isNoTimestamp());
-    if (obj.getNonceAlgorithm() != null) {
-      json.put("nonceAlgorithm", obj.getNonceAlgorithm());
-    }
     if (obj.getSubject() != null) {
       json.put("subject", obj.getSubject());
+    }
+    if (obj.getNonceAlgorithm() != null) {
+      json.put("nonceAlgorithm", obj.getNonceAlgorithm());
     }
   }
 }

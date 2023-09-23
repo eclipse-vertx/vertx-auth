@@ -20,14 +20,14 @@ public class HotpAuthOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HotpAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
+        case "passwordLength":
+          if (member.getValue() instanceof Number) {
+            obj.setPasswordLength(((Number)member.getValue()).intValue());
+          }
+          break;
         case "authAttemptsLimit":
           if (member.getValue() instanceof Number) {
             obj.setAuthAttemptsLimit(((Number)member.getValue()).intValue());
-          }
-          break;
-        case "counter":
-          if (member.getValue() instanceof Number) {
-            obj.setCounter(((Number)member.getValue()).longValue());
           }
           break;
         case "lookAheadWindow":
@@ -35,9 +35,9 @@ public class HotpAuthOptionsConverter {
             obj.setLookAheadWindow(((Number)member.getValue()).intValue());
           }
           break;
-        case "passwordLength":
+        case "counter":
           if (member.getValue() instanceof Number) {
-            obj.setPasswordLength(((Number)member.getValue()).intValue());
+            obj.setCounter(((Number)member.getValue()).longValue());
           }
           break;
       }
@@ -49,9 +49,9 @@ public class HotpAuthOptionsConverter {
   }
 
   public static void toJson(HotpAuthOptions obj, java.util.Map<String, Object> json) {
-    json.put("authAttemptsLimit", obj.getAuthAttemptsLimit());
-    json.put("counter", obj.getCounter());
-    json.put("lookAheadWindow", obj.getLookAheadWindow());
     json.put("passwordLength", obj.getPasswordLength());
+    json.put("authAttemptsLimit", obj.getAuthAttemptsLimit());
+    json.put("lookAheadWindow", obj.getLookAheadWindow());
+    json.put("counter", obj.getCounter());
   }
 }

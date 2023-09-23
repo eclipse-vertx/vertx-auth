@@ -20,21 +20,6 @@ public class JWTAuthOptionsConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "jwks":
-          if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.core.json.JsonObject> list =  new java.util.ArrayList<>();
-            ((Iterable<Object>)member.getValue()).forEach( item -> {
-              if (item instanceof JsonObject)
-                list.add(((JsonObject)item).copy());
-            });
-            obj.setJwks(list);
-          }
-          break;
-        case "jwtOptions":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
-          }
-          break;
         case "keyStore":
           if (member.getValue() instanceof JsonObject) {
             obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((io.vertx.core.json.JsonObject)member.getValue()));
@@ -50,6 +35,21 @@ public class JWTAuthOptionsConverter {
             obj.setPubSecKeys(list);
           }
           break;
+        case "jwtOptions":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
+          }
+          break;
+        case "jwks":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<io.vertx.core.json.JsonObject> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof JsonObject)
+                list.add(((JsonObject)item).copy());
+            });
+            obj.setJwks(list);
+          }
+          break;
       }
     }
   }
@@ -59,18 +59,18 @@ public class JWTAuthOptionsConverter {
   }
 
   public static void toJson(JWTAuthOptions obj, java.util.Map<String, Object> json) {
-    if (obj.getJwks() != null) {
-      JsonArray array = new JsonArray();
-      obj.getJwks().forEach(item -> array.add(item));
-      json.put("jwks", array);
-    }
-    if (obj.getJWTOptions() != null) {
-      json.put("jwtOptions", obj.getJWTOptions().toJson());
-    }
     if (obj.getPubSecKeys() != null) {
       JsonArray array = new JsonArray();
       obj.getPubSecKeys().forEach(item -> array.add(item.toJson()));
       json.put("pubSecKeys", array);
+    }
+    if (obj.getJWTOptions() != null) {
+      json.put("jwtOptions", obj.getJWTOptions().toJson());
+    }
+    if (obj.getJwks() != null) {
+      JsonArray array = new JsonArray();
+      obj.getJwks().forEach(item -> array.add(item));
+      json.put("jwks", array);
     }
   }
 }

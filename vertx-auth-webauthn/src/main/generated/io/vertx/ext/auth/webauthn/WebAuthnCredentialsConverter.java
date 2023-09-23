@@ -25,14 +25,9 @@ public class WebAuthnCredentialsConverter {
             obj.setChallenge((String)member.getValue());
           }
           break;
-        case "domain":
-          if (member.getValue() instanceof String) {
-            obj.setDomain((String)member.getValue());
-          }
-          break;
-        case "origin":
-          if (member.getValue() instanceof String) {
-            obj.setOrigin((String)member.getValue());
+        case "webauthn":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setWebauthn(((JsonObject)member.getValue()).copy());
           }
           break;
         case "username":
@@ -40,9 +35,14 @@ public class WebAuthnCredentialsConverter {
             obj.setUsername((String)member.getValue());
           }
           break;
-        case "webauthn":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setWebauthn(((JsonObject)member.getValue()).copy());
+        case "origin":
+          if (member.getValue() instanceof String) {
+            obj.setOrigin((String)member.getValue());
+          }
+          break;
+        case "domain":
+          if (member.getValue() instanceof String) {
+            obj.setDomain((String)member.getValue());
           }
           break;
       }
@@ -57,17 +57,17 @@ public class WebAuthnCredentialsConverter {
     if (obj.getChallenge() != null) {
       json.put("challenge", obj.getChallenge());
     }
-    if (obj.getDomain() != null) {
-      json.put("domain", obj.getDomain());
-    }
-    if (obj.getOrigin() != null) {
-      json.put("origin", obj.getOrigin());
+    if (obj.getWebauthn() != null) {
+      json.put("webauthn", obj.getWebauthn());
     }
     if (obj.getUsername() != null) {
       json.put("username", obj.getUsername());
     }
-    if (obj.getWebauthn() != null) {
-      json.put("webauthn", obj.getWebauthn());
+    if (obj.getOrigin() != null) {
+      json.put("origin", obj.getOrigin());
+    }
+    if (obj.getDomain() != null) {
+      json.put("domain", obj.getDomain());
     }
   }
 }
