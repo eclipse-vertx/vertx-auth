@@ -141,12 +141,11 @@ public class OAuth2IntrospectTest {
           should.assertNotNull(token2);
           JsonObject principal = token2.principal().copy();
 
-          // clean time specific value
-          principal.remove("expires_at");
-          principal.remove("access_token");
-          principal.remove("opaque");
-
           final JsonObject assertion = fixtureIntrospect.copy();
+          // principal should be identified as opaque
+          assertion.put("opaque", true);
+          // access token should be present in the principal
+          assertion.put("access_token", token);
 
           should.assertEquals(assertion.getMap(), principal.getMap());
 
@@ -180,11 +179,13 @@ public class OAuth2IntrospectTest {
           should.assertNotNull(token);
           // make a copy because later we need to original data
           JsonObject principal = token.principal().copy();
-          // clean time specific value
-          principal.remove("opaque");
 
           // clean up control
           final JsonObject assertion = fixtureGoogle.copy();
+          // principal should be identified as opaque
+          assertion.put("opaque", true);
+          // access token should be present in the principal
+          assertion.put("access_token", OAuth2IntrospectTest.token);
 
           should.assertEquals(assertion.getMap(), principal.getMap());
 
@@ -230,7 +231,17 @@ public class OAuth2IntrospectTest {
         } else {
           User token = res.result();
           should.assertNotNull(token);
-          should.assertNotNull(token.principal());
+          // make a copy because later we need to original data
+          JsonObject principal = token.principal().copy();
+
+          // clean up control
+          final JsonObject assertion = fixtureKeycloak.copy();
+          // principal should be identified as opaque
+          assertion.put("opaque", true);
+          // access token should be present in the principal
+          assertion.put("access_token", OAuth2IntrospectTest.token);
+
+          should.assertEquals(assertion.getMap(), principal.getMap());
           test.complete();
         }
       });
