@@ -48,7 +48,6 @@ public class OAuth2Options {
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOCATION_PATH = "/oauth/revoke";
-  private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
   //seconds of JWK's default age (-1 means no rotation)
@@ -171,7 +170,7 @@ public class OAuth2Options {
     tokenPath = TOKEN_PATH;
     revocationPath = REVOCATION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
-    jwtOptions = JWT_OPTIONS;
+    jwtOptions = new JWTOptions();;
     jwkMaxAge = JWK_DEFAULT_AGE;
     useBasicAuthorization = BASIC_AUTHORIZATION;
   }
