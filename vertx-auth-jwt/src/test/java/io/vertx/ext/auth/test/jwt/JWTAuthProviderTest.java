@@ -68,6 +68,26 @@ public class JWTAuthProviderTest {
   }
 
   @Test
+  public void testCreateWithoutFailureWhenAliasIsNotSupported() {
+    JWTAuthOptions config = getConfig();
+    config
+      .getKeyStore()
+      .putPasswordProtection("foo", "not-so-secret");
+    JWTAuth.create(rule.vertx(), config);
+    // Just verify no exception is thrown
+  }
+
+  @Test
+  public void testCreateWithoutFailureWhenAliasDoesNotExist() {
+    JWTAuthOptions config = getConfig();
+    config
+      .getKeyStore()
+      .putPasswordProtection("HS384", "not-so-secret");
+    JWTAuth.create(rule.vertx(), config);
+    // Just verify no exception is thrown
+  }
+
+  @Test
   public void testValidJWT(TestContext should) {
     final Async test = should.async();
 
