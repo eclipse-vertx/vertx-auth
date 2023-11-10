@@ -110,13 +110,13 @@ public final class JWK {
       "1.2.840.10045.4.3.4"));
   }};
 
-  private static boolean validAlgAlias(String alg, String alias) {
+  private static boolean invalidAlgAlias(String alg, String alias) {
     for (String expected : ALG_ALIAS.get(alias)) {
       if (alg.equalsIgnoreCase(expected)) {
-        return true;
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   // JSON JWK properties
@@ -138,22 +138,21 @@ public final class JWK {
   private Mac mac;
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
-
     final List<JWK> keys = new ArrayList<>();
 
     // load MACs
     for (String alias : Arrays.asList("HS256", "HS384", "HS512")) {
       try {
-        final Key secretKey = keyStore.getKey(alias, passwordProtection == null ? keyStorePassword.toCharArray() : passwordProtection.get(alias).toCharArray());
+        char[] password = password(keyStorePassword, passwordProtection, alias);
+        final Key secretKey = keyStore.getKey(alias, password);
         // key store does not have the requested algorithm
         if (secretKey == null) {
           continue;
         }
         // test the algorithm
         String alg = secretKey.getAlgorithm();
-        // the algorithm cannot be null and it cannot be different from
-        // the alias list
-        if (!validAlgAlias(alg, alias)) {
+        // the algorithm cannot be null, and it cannot be different from the alias list
+        if (invalidAlgAlias(alg, alias)) {
           LOG.warn("The key algorithm does not match: {" + alias + ": " + alg + "}");
           continue;
         }
@@ -178,14 +177,14 @@ public final class JWK {
         certificate.checkValidity();
         // verify that the algorithms match
         String alg = certificate.getSigAlgName();
-        // the algorithm cannot be null and it cannot be different from
-        // the alias list
-        if (!validAlgAlias(alg, alias)) {
+        // the algorithm cannot be null, and it cannot be different from the alias list
+        if (invalidAlgAlias(alg, alias)) {
           LOG.warn("The key algorithm does not match: {" + alias + ": " + alg + "}");
           continue;
         }
         // algorithm is valid
-        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, passwordProtection == null ? keyStorePassword.toCharArray() : passwordProtection.get(alias).toCharArray());
+        char[] password = password(keyStorePassword, passwordProtection, alias);
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password);
         keys.add(new JWK(alias, certificate, privateKey));
       } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException |
                NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -194,6 +193,14 @@ public final class JWK {
     }
 
     return keys;
+  }
+
+  private static char[] password(String keyStorePassword, Map<String, String> passwordProtection, String alias) {
+    String password;
+    if (passwordProtection == null || (password = passwordProtection.get(alias)) == null) {
+      password = keyStorePassword;
+    }
+    return password.toCharArray();
   }
 
   /**
