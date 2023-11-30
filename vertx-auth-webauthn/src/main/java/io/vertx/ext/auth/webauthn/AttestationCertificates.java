@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -25,7 +26,8 @@ import java.util.List;
 /**
  * Data Object containing the list of certificates used during the attestation of this authenticator.
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class AttestationCertificates {
 
   /**

@@ -1,13 +1,15 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class JWTOptions {
 
   private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());

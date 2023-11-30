@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -23,7 +24,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class RelyingParty {
 
   /**

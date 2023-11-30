@@ -17,7 +17,7 @@ public class OAuth2OptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2Options obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2Options obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "site":
@@ -169,11 +169,11 @@ public class OAuth2OptionsConverter {
     }
   }
 
-  public static void toJson(OAuth2Options obj, JsonObject json) {
+   static void toJson(OAuth2Options obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(OAuth2Options obj, java.util.Map<String, Object> json) {
+   static void toJson(OAuth2Options obj, java.util.Map<String, Object> json) {
     if (obj.getSite() != null) {
       json.put("site", obj.getSite());
     }

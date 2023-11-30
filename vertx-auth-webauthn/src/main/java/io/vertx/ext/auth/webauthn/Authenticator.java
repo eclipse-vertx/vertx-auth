@@ -17,6 +17,7 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.Nullable;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
@@ -29,7 +30,8 @@ import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class Authenticator {
 
   /**

@@ -17,7 +17,7 @@ public class PubSecKeyOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, PubSecKeyOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, PubSecKeyOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "algorithm":
@@ -39,11 +39,11 @@ public class PubSecKeyOptionsConverter {
     }
   }
 
-  public static void toJson(PubSecKeyOptions obj, JsonObject json) {
+   static void toJson(PubSecKeyOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(PubSecKeyOptions obj, java.util.Map<String, Object> json) {
+   static void toJson(PubSecKeyOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAlgorithm() != null) {
       json.put("algorithm", obj.getAlgorithm());
     }

@@ -12,6 +12,7 @@
 package io.vertx.ext.auth.otp;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -23,7 +24,8 @@ import io.vertx.ext.auth.otp.totp.TotpAuth;
  *
  * @author Dmitry Novikov
  */
-@DataObject(generateConverter = true, publicConverter = false)
+@DataObject
+@JsonGen(publicConverter = false)
 public class OtpCredentials implements Credentials {
 
   private String identifier;

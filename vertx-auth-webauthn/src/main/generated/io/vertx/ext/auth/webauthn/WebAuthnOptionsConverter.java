@@ -17,7 +17,7 @@ public class WebAuthnOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthnOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, WebAuthnOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "relyingParty":
@@ -114,11 +114,11 @@ public class WebAuthnOptionsConverter {
     }
   }
 
-  public static void toJson(WebAuthnOptions obj, JsonObject json) {
+   static void toJson(WebAuthnOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(WebAuthnOptions obj, java.util.Map<String, Object> json) {
+   static void toJson(WebAuthnOptions obj, java.util.Map<String, Object> json) {
     if (obj.getRelyingParty() != null) {
       json.put("relyingParty", obj.getRelyingParty().toJson());
     }

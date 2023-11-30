@@ -13,6 +13,7 @@
 package io.vertx.ext.auth.ldap;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -20,7 +21,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class LdapAuthenticationOptions {
 
   private String authenticationMechanism;

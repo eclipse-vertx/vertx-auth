@@ -13,6 +13,7 @@
 package io.vertx.ext.auth.authentication;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
@@ -25,7 +26,8 @@ import java.util.List;
  *
  * @author Paulo Lopes
  */
-@DataObject(generateConverter = true, publicConverter = false)
+@DataObject
+@JsonGen(publicConverter = false)
 public class TokenCredentials implements Credentials {
 
   private String token;

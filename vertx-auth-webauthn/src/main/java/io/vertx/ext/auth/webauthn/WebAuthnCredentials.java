@@ -16,11 +16,13 @@
 package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class WebAuthnCredentials implements Credentials {
 
   private String challenge;
