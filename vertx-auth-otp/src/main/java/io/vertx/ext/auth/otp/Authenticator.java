@@ -13,6 +13,7 @@ package io.vertx.ext.auth.otp;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -20,7 +21,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Paulo Lopes
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class Authenticator {
 
   private String identifier;

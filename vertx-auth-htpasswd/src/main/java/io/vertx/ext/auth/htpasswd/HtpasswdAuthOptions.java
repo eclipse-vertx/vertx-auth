@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.htpasswd;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -23,7 +24,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Neven Radovanović
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class HtpasswdAuthOptions {
 
   private String htpasswdFile;

@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
@@ -29,7 +30,8 @@ import java.util.List;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class JWTAuthOptions {
 
   // Defaults

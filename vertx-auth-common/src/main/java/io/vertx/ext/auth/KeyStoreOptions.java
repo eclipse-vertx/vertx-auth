@@ -17,6 +17,7 @@ package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
@@ -33,7 +34,8 @@ import java.util.Map;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class KeyStoreOptions {
 
   // Defaults

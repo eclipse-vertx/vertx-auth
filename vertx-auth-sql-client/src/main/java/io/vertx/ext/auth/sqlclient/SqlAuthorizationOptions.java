@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.sqlclient;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -23,7 +24,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class SqlAuthorizationOptions {
   /**
    * The default query to retrieve all roles for the user

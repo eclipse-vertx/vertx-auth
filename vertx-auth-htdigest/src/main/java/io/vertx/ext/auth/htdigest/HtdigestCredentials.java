@@ -13,6 +13,7 @@
 package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -33,7 +34,8 @@ import static io.vertx.ext.auth.impl.Codec.base16Encode;
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-@DataObject(generateConverter = true, publicConverter = false)
+@DataObject
+@JsonGen(publicConverter = false)
 public class HtdigestCredentials extends UsernamePasswordCredentials implements Credentials {
 
   private static final Pattern PARSER = Pattern.compile("(\\w+)=[\"]?([^\"]*)[\"]?$");

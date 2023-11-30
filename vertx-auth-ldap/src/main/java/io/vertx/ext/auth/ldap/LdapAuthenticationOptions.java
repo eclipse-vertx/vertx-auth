@@ -13,6 +13,7 @@
 package io.vertx.ext.auth.ldap;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -20,7 +21,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class LdapAuthenticationOptions {
 
   private String authenticationMechanism;
@@ -54,7 +56,7 @@ public class LdapAuthenticationOptions {
 
   /**
    * sets the authentication mechanism. default to 'simple' if not set
-   * 
+   *
    * @param authenticationMechanism
    * @return a reference to this, so the API can be used fluently
    */
@@ -65,7 +67,7 @@ public class LdapAuthenticationOptions {
 
   /**
    * Set the referral property. Default to 'follow' if not set
-   * 
+   *
    * @param referral the referral
    * @return a reference to this, so the API can be used fluently
    */
@@ -77,7 +79,7 @@ public class LdapAuthenticationOptions {
   /**
    * Set the url to the LDAP server. The url must start with `ldap://` and a port
    * must be specified.
-   * 
+   *
    * @param url the url to the server
    * @return a reference to this, so the API can be used fluently
    */
@@ -91,7 +93,7 @@ public class LdapAuthenticationOptions {
    * actual lookup to use when looking up a user with a particular id. An example
    * is `uid={0},ou=users,dc=foo,dc=com` - Note that the element `{0}` is
    * substituted with the user id to create the actual lookup.
-   * 
+   *
    * @param authenticationQuery
    * @return a reference to this, so the API can be used fluently
    */

@@ -17,6 +17,7 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -37,7 +38,8 @@ import java.util.regex.Pattern;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class OAuth2Options {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2Options.class);

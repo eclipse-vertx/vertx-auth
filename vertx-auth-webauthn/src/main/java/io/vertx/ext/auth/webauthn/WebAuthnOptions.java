@@ -17,6 +17,7 @@ package io.vertx.ext.auth.webauthn;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -39,7 +40,8 @@ import static io.vertx.ext.auth.webauthn.UserVerification.*;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class WebAuthnOptions {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebAuthnOptions.class);

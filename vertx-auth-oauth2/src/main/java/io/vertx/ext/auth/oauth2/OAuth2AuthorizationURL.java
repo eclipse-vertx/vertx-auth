@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ import java.util.Map;
  *
  * @author <a href="mailto:lazarbulic@gmail.com">Lazar Bulic</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class OAuth2AuthorizationURL {
 
   private String redirectUri;
