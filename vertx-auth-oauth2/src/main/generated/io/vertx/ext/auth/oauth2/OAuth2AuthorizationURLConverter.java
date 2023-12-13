@@ -17,7 +17,7 @@ public class OAuth2AuthorizationURLConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2AuthorizationURL obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, OAuth2AuthorizationURL obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "additionalParameters":
@@ -54,11 +54,11 @@ public class OAuth2AuthorizationURLConverter {
     }
   }
 
-  public static void toJson(OAuth2AuthorizationURL obj, JsonObject json) {
+   static void toJson(OAuth2AuthorizationURL obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(OAuth2AuthorizationURL obj, java.util.Map<String, Object> json) {
+   static void toJson(OAuth2AuthorizationURL obj, java.util.Map<String, Object> json) {
     if (obj.getAdditionalParameters() != null) {
       JsonObject map = new JsonObject();
       obj.getAdditionalParameters().forEach((key, value) -> map.put(key, value));

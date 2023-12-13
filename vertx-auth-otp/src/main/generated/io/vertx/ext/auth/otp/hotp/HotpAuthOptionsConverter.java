@@ -17,7 +17,7 @@ public class HotpAuthOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HotpAuthOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HotpAuthOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "authAttemptsLimit":
@@ -44,11 +44,11 @@ public class HotpAuthOptionsConverter {
     }
   }
 
-  public static void toJson(HotpAuthOptions obj, JsonObject json) {
+   static void toJson(HotpAuthOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(HotpAuthOptions obj, java.util.Map<String, Object> json) {
+   static void toJson(HotpAuthOptions obj, java.util.Map<String, Object> json) {
     json.put("authAttemptsLimit", obj.getAuthAttemptsLimit());
     json.put("counter", obj.getCounter());
     json.put("lookAheadWindow", obj.getLookAheadWindow());

@@ -17,7 +17,7 @@ public class Oauth2CredentialsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Oauth2Credentials obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Oauth2Credentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "assertion":
@@ -74,11 +74,11 @@ public class Oauth2CredentialsConverter {
     }
   }
 
-  public static void toJson(Oauth2Credentials obj, JsonObject json) {
+   static void toJson(Oauth2Credentials obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(Oauth2Credentials obj, java.util.Map<String, Object> json) {
+   static void toJson(Oauth2Credentials obj, java.util.Map<String, Object> json) {
     if (obj.getAssertion() != null) {
       json.put("assertion", obj.getAssertion());
     }

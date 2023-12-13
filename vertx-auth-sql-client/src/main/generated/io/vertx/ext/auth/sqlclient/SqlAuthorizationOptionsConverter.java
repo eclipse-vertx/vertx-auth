@@ -17,7 +17,7 @@ public class SqlAuthorizationOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, SqlAuthorizationOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, SqlAuthorizationOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "permissionsQuery":
@@ -34,11 +34,11 @@ public class SqlAuthorizationOptionsConverter {
     }
   }
 
-  public static void toJson(SqlAuthorizationOptions obj, JsonObject json) {
+   static void toJson(SqlAuthorizationOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(SqlAuthorizationOptions obj, java.util.Map<String, Object> json) {
+   static void toJson(SqlAuthorizationOptions obj, java.util.Map<String, Object> json) {
     if (obj.getPermissionsQuery() != null) {
       json.put("permissionsQuery", obj.getPermissionsQuery());
     }

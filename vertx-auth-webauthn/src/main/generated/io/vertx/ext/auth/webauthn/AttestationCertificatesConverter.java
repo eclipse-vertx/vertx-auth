@@ -17,7 +17,7 @@ public class AttestationCertificatesConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, AttestationCertificates obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, AttestationCertificates obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "alg":
@@ -39,11 +39,11 @@ public class AttestationCertificatesConverter {
     }
   }
 
-  public static void toJson(AttestationCertificates obj, JsonObject json) {
+   static void toJson(AttestationCertificates obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(AttestationCertificates obj, java.util.Map<String, Object> json) {
+   static void toJson(AttestationCertificates obj, java.util.Map<String, Object> json) {
     if (obj.getAlg() != null) {
       json.put("alg", obj.getAlg().name());
     }

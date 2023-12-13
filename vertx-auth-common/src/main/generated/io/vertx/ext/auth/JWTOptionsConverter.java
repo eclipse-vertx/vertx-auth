@@ -17,7 +17,7 @@ public class JWTOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, JWTOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "algorithm":
@@ -102,11 +102,11 @@ public class JWTOptionsConverter {
     }
   }
 
-  public static void toJson(JWTOptions obj, JsonObject json) {
+   static void toJson(JWTOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(JWTOptions obj, java.util.Map<String, Object> json) {
+   static void toJson(JWTOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAlgorithm() != null) {
       json.put("algorithm", obj.getAlgorithm());
     }
