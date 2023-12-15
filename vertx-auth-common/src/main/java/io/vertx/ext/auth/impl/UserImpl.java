@@ -139,7 +139,7 @@ public class UserImpl implements User, ClusterSerializable {
           Object rhsValue = otherAttrs.getValue(key);
           // accumulate
           if (lhsValue == null) {
-            attrs.put(key, rhsValue instanceof JsonArray ? new JsonArray().add(rhsValue) : rhsValue);
+            attrs.put(key, rhsValue instanceof JsonArray ? new JsonArray().addAll((JsonArray) rhsValue) : rhsValue);
           } else if (lhsValue instanceof JsonArray) {
             if (rhsValue instanceof JsonArray) {
               ((JsonArray) lhsValue).addAll((JsonArray) rhsValue);

@@ -173,6 +173,28 @@ public class UserTest {
     // expectation
     assertEquals("B", userA.principal().getString("access_token"));
     assertEquals(new JsonArray().add("read").add("write"), userA.attributes().getJsonArray("roles"));
+
+    // or 1st is array and 2nd is null
+
+    userA = User.create(new JsonObject().put("access_token", "A"), new JsonObject().put("roles", new JsonArray().add("read")));
+    userB = User.create(new JsonObject().put("access_token", "B"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals("B", userA.principal().getString("access_token"));
+    assertEquals(new JsonArray().add("read"), userA.attributes().getJsonArray("roles"));
+
+    // or 1st is null and 2nd is array
+
+    userA = User.create(new JsonObject().put("access_token", "A"));
+    userB = User.create(new JsonObject().put("access_token", "B"), new JsonObject().put("roles", new JsonArray().add("write")));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals("B", userA.principal().getString("access_token"));
+    assertEquals(new JsonArray().add("write"), userA.attributes().getJsonArray("roles"));
   }
 
   @Test
