@@ -236,6 +236,7 @@ public class WebAuthnOptions {
     addTransport(USB);
     addTransport(NFC);
     addTransport(BLE);
+    addTransport(HYBRID);
     addTransport(INTERNAL);
     // default root certificates
     try {
