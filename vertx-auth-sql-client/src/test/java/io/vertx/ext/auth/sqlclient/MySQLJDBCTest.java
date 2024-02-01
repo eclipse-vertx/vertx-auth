@@ -13,6 +13,7 @@ import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.jdbcclient.JDBCConnectOptions;
 import io.vertx.jdbcclient.JDBCPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -34,7 +35,7 @@ public class MySQLJDBCTest {
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
 
-  private JDBCPool mysql;
+  private Pool mysql;
 
   @Before
   public void before() {
