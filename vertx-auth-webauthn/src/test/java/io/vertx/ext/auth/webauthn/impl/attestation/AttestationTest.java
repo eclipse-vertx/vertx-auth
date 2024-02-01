@@ -87,6 +87,37 @@ public class AttestationTest {
   }
 
   @Test
+  public void testNoneAttestationWithNonZeroAAGUID(TestContext should) {
+    final Async test = should.async();
+
+    WebAuthn webAuthN = WebAuthn.create(
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
+
+    JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
+      .put("rawId", "NXuPCPFpc9r3QrCL3dEQqg")
+      .put("id", "NXuPCPFpc9r3QrCL3dEQqg")
+      .put("type", "public-key")
+      .put("response", new JsonObject()
+        .put("clientDataJSON", "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoieW5CaVctWlhSdHVSTmF1OFgwRURMUSIsIm9yaWdpbiI6Imh0dHBzOlwvXC81NTlhLTEwNi0xMzktMTM4LTI0My5uZ3Jvay1mcmVlLmFwcCIsImFuZHJvaWRQYWNrYWdlTmFtZSI6ImNvbS5hbmRyb2lkLmNocm9tZSJ9")
+        .put("attestationObject", "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUHT97vfV9fOzGz3r17kQoRd6881wS7VK-SXENe6WwxcddAAAAAOqbjWZNAR0hPOS2tIy1ddQAEDV7jwjxaXPa90Kwi93REKqlAQIDJiABIVggRjiIjY-sUTXhqNi5z2Pm9irTUvJnYC865BJytjXBDdsiWCD2BScW511sKkQ28ztKs_DKTVRMcYINMRMR8lwT958G8g"));
+
+    webAuthN.authenticate(
+        new WebAuthnCredentials()
+          .setUsername("paulo")
+          .setOrigin("https://559a-106-139-138-243.ngrok-free.app")
+          .setWebauthn(packedFullAttestationWebAuthnSample)
+          .setChallenge("ynBiW-ZXRtuRNau8X0EDLQ"))
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
+  }
+
+  @Test
   public void testU2FAttestation(TestContext should) {
     final Async test = should.async();
 
