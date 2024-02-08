@@ -32,13 +32,12 @@ import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.Oauth2Credentials;
-import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
+import io.vertx.ext.auth.oauth2.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.max;
 
@@ -673,22 +672,22 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
       }
     }
 
-    if (target != null && target.size() > 0) {
-      if (idToken || jwtOptions.getAudience() == null) {
-        // https://openid.net/specs/openid-connect-core-1_0.html#  $3.1.3.7.
-        // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at the Issuer
-        // identified by the iss (issuer) Claim as an audience. The aud (audience) Claim MAY contain an array with more
-        // than one element. The ID Token MUST be rejected if the ID Token does not list the Client as a valid audience,
-        // or if it contains additional audiences not trusted by the Client.
-        if (!target.contains(config.getClientId())) {
-          throw new IllegalStateException("Invalid JWT audience. expected: " + config.getClientId());
-        }
-      } else {
-        final List<String> aud = jwtOptions.getAudience();
-        for (String el : aud) {
-          if (!target.contains(el)) {
-            throw new IllegalStateException("Invalid JWT audience. expected: " + el);
-          }
+    if (idToken && target != null && !target.isEmpty()) {
+      if (!target.contains(config.getClientId())) {
+        throw new IllegalStateException("Invalid JWT audience. expected: " + config.getClientId());
+      }
+      if (!target.isEmpty()) {
+        List<String> trustedAudiences = new ArrayList<>();
+        Optional.ofNullable(jwtOptions.getAudience())
+          .ifPresent(trustedAudiences::addAll);
+        trustedAudiences.add(config.getClientId());
+        List<String> untrustedAudiences = target.stream()
+          .filter(String.class::isInstance)
+          .map(String.class::cast)
+          .filter(additionalTarget -> !trustedAudiences.contains(additionalTarget))
+          .collect(Collectors.toList());
+        if (!untrustedAudiences.isEmpty()) {
+          throw new IllegalStateException("Invalid JWT audience. untrusted values: " + String.join(",", untrustedAudiences));
         }
       }
     }
