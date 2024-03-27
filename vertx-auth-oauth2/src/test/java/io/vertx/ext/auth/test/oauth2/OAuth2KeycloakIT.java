@@ -35,7 +35,7 @@ import java.util.List;
 public class OAuth2KeycloakIT {
 
   @ClassRule
-  public static final GenericContainer<?> container = new GenericContainer<>("jboss/keycloak:6.0.0")
+  public static final GenericContainer<?> container = new GenericContainer<>("quay.io/keycloak/keycloak:6.0.0")
     .withEnv("KEYCLOAK_USER", "user")
     .withEnv("KEYCLOAK_PASSWORD", "password")
     .withEnv("DB_VENDOR", "H2")
