@@ -31,8 +31,8 @@ public class PubSecKeyOptions {
    * @param other the options to copy
    */
   public PubSecKeyOptions(PubSecKeyOptions other) {
-    algorithm = other.getAlgorithm();
-    buffer = other.getBuffer();
+    algorithm = other.algorithm;
+    buffer = other.buffer == null ? null : other.buffer.copy();
     id = other.getId();
   }
 
