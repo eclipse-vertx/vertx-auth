@@ -5,19 +5,16 @@ import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @DataObject
 @JsonGen(publicConverter = false)
 public class JWTOptions {
 
-  private static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
-
   private int leeway = 0;
   private boolean ignoreExpiration;
   private String algorithm = "HS256";
-  private JsonObject header = EMPTY;
+  private JsonObject header;
   private boolean noTimestamp;
   private int expires;
   private List<String> audience;
@@ -27,23 +24,25 @@ public class JWTOptions {
   private String nonceAlgorithm;
 
   public JWTOptions() {
+    header = new JsonObject();
   }
 
   public JWTOptions(JWTOptions other) {
     this.leeway = other.leeway;
     this.ignoreExpiration = other.ignoreExpiration;
     this.algorithm = other.algorithm;
-    this.header = other.header;
+    this.header = other.header == null ? new JsonObject() : other.header.copy();
     this.noTimestamp = other.noTimestamp;
     this.expires = other.expires;
-    this.audience = other.audience;
+    this.audience = other.audience == null ? null : new ArrayList<>(other.audience);
     this.issuer = other.issuer;
     this.subject = other.subject;
-    this.permissions = other.permissions;
+    this.permissions = other.permissions == null ? null : new ArrayList<>(other.permissions);
     this.nonceAlgorithm = other.nonceAlgorithm;
   }
 
   public JWTOptions(JsonObject json) {
+    header = new JsonObject();
     JWTOptionsConverter.fromJson(json, this);
   }
 

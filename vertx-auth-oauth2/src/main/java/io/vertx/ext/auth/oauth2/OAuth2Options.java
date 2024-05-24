@@ -50,7 +50,6 @@ public class OAuth2Options {
   private static final String AUTHORIZATION_PATH = "/oauth/authorize";
   private static final String TOKEN_PATH = "/oauth/token";
   private static final String REVOCATION_PATH = "/oauth/revoke";
-  private static final JWTOptions JWT_OPTIONS = new JWTOptions();
   private static final String SCOPE_SEPARATOR = " ";
   private static final boolean VALIDATE_ISSUER = true;
   //seconds of JWK's default age (-1 means no rotation)
@@ -127,40 +126,33 @@ public class OAuth2Options {
     introspectionPath = other.getIntrospectionPath();
     scopeSeparator = other.getScopeSeparator();
     site = other.getSite();
-    pubSecKeys = other.getPubSecKeys();
-    jwtOptions = other.getJWTOptions();
+    if (other.pubSecKeys == null) {
+      pubSecKeys = null;
+    } else {
+      List<PubSecKeyOptions> list = new ArrayList<>(other.pubSecKeys.size());
+      for (PubSecKeyOptions pubSecKey : other.pubSecKeys) {
+        list.add(new PubSecKeyOptions(pubSecKey));
+      }
+      pubSecKeys = list;
+    }
+    jwtOptions = other.jwtOptions == null ? null : new JWTOptions(other.jwtOptions);
     logoutPath = other.getLogoutPath();
-    // extras
-    final JsonObject obj = other.getExtraParameters();
-    if (obj != null) {
-      extraParams = obj.copy();
-    } else {
-      extraParams = null;
-    }
-    // user info params
-    final JsonObject obj2 = other.getUserInfoParameters();
-    if (obj2 != null) {
-      userInfoParams = obj2.copy();
-    } else {
-      userInfoParams = null;
-    }
-    // custom headers
-    final JsonObject obj3 = other.getHeaders();
-    if (obj3 != null) {
-      headers = obj3.copy();
-    } else {
-      headers = null;
-    }
+    extraParams = other.extraParams == null ? null : other.extraParams.copy();
+    userInfoParams = other.userInfoParams == null ? null : other.userInfoParams.copy();
+    headers = other.headers == null ? null : other.headers.copy();
     jwkPath = other.getJwkPath();
     jwkMaxAge = other.getJwkMaxAgeInSeconds();
-    httpClientOptions = other.getHttpClientOptions();
+    httpClientOptions = other.httpClientOptions == null ? null : new HttpClientOptions(other.httpClientOptions);
     userAgent = other.getUserAgent();
-    supportedGrantTypes = other.getSupportedGrantTypes();
-    final List<JsonObject> jwks = other.getJwks();
-    if (jwks != null) {
-      this.jwks = new ArrayList<>(jwks);
+    supportedGrantTypes = other.supportedGrantTypes == null ? null : new ArrayList<>(other.supportedGrantTypes);
+    if (other.jwks == null) {
+      jwks = null;
     } else {
-      this.jwks = null;
+      List<JsonObject> list = new ArrayList<>(other.jwks.size());
+      for (JsonObject jwk : other.jwks) {
+        list.add(jwk.copy());
+      }
+      jwks = list;
     }
     // compute paths with variables, at this moment it is only relevant that
     // the paths and site are properly computed
@@ -173,7 +165,7 @@ public class OAuth2Options {
     tokenPath = TOKEN_PATH;
     revocationPath = REVOCATION_PATH;
     scopeSeparator = SCOPE_SEPARATOR;
-    jwtOptions = JWT_OPTIONS;
+    jwtOptions = new JWTOptions();
     jwkMaxAge = JWK_DEFAULT_AGE;
     useBasicAuthorization = BASIC_AUTHORIZATION;
   }
