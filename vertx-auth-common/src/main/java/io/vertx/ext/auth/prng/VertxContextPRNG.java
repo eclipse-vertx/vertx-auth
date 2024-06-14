@@ -13,12 +13,13 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.prng;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.PRNG;
 
 import java.util.Objects;
 
@@ -34,15 +35,13 @@ import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
  * The use of VertxContextPRNG is particularly appropriate when multiple handlers use random numbers.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
- * @deprecated instead use {@link io.vertx.ext.auth.prng.VertxContextPRNG}
  */
-@Deprecated
 @VertxGen
-public interface VertxContextPRNG extends io.vertx.ext.auth.prng.VertxContextPRNG {
+public interface VertxContextPRNG {
 
   /**
    * Get or create a secure non blocking random number generator using the current vert.x context. If there is no
-   * current context (i.e.: not running on the eventloop) then a {@link java.lang.IllegalStateException} is thrown.
+   * current context (i.e.: not running on the eventloop) then a {@link IllegalStateException} is thrown.
    *
    * Note, if a context isn't allowed to be used, for example, exceptions are thrown on getting and putting data,
    * the VertxContextPRNG falls back to instantiate a new instance of the PRNG per call.
@@ -51,12 +50,7 @@ public interface VertxContextPRNG extends io.vertx.ext.auth.prng.VertxContextPRN
    * @throws IllegalStateException when there is no {@link Context} instance available.
    */
   static VertxContextPRNG current() {
-    final Context currentContext = Vertx.currentContext();
-    if (currentContext != null) {
-      return current(currentContext);
-    }
-
-    throw new IllegalStateException("Not running in a Vert.x Context.");
+    return io.vertx.ext.auth.VertxContextPRNG.current();
   }
 
   /**
@@ -72,39 +66,7 @@ public interface VertxContextPRNG extends io.vertx.ext.auth.prng.VertxContextPRN
    */
   @GenIgnore
   static VertxContextPRNG current(final Context context) {
-    Objects.requireNonNull(context, "context can not be null");
-
-    try {
-      final String contextKey = "__vertx.VertxContextPRNG";
-      // attempt to load a PRNG from the current context
-      PRNG random = context.get(contextKey);
-
-      if (random == null) {
-        synchronized (context) {
-          // attempt to reload to avoid double creation when we were
-          // waiting for the lock
-          random = context.get(contextKey);
-          if (random == null) {
-            // there was no PRNG in the context, create one
-            random = new PRNG(context.owner());
-            // need to make the random final
-            final PRNG rand = random;
-            // save to the context
-            context.put(contextKey, rand);
-          }
-        }
-      }
-
-      return random;
-    } catch (UnsupportedOperationException e) {
-      // Access to the current context is probably blocked
-      Vertx vertx = context.owner();
-      if (vertx != null) {
-        return new PRNG(vertx);
-      }
-      // vert.x cannot be null
-      throw new IllegalStateException("Not running in a Vert.x Context.");
-    }
+    return io.vertx.ext.auth.VertxContextPRNG.current(context);
   }
 
   /**
@@ -119,14 +81,84 @@ public interface VertxContextPRNG extends io.vertx.ext.auth.prng.VertxContextPRN
    * @return A secure non blocking random number generator.
    */
   static VertxContextPRNG current(final Vertx vertx) {
-    final Context currentContext = Vertx.currentContext();
-    if (currentContext != null) {
-      return current(currentContext);
-    }
-
-    Objects.requireNonNull(vertx, "vertx can not be null");
-    // we are not running on a vert.x context, fallback to create a new instance
-    return new PRNG(vertx);
+    return io.vertx.ext.auth.VertxContextPRNG.current(vertx);
   }
 
+  /**
+   * stop seeding the PRNG
+   */
+  void close();
+
+  /**
+   * Fills the given byte array with random bytes.
+   *
+   * @param bytes a byte array.
+   */
+  @GenIgnore(PERMITTED_TYPE)
+  void nextBytes(byte[] bytes);
+
+  /**
+   * Returns a Base64 url encoded String of random data with the given length. The length parameter refers to the length
+   * of the String before the encoding step.
+   *
+   * @param length the desired string length before Base64 encoding.
+   * @return A base 64 encoded string.
+   */
+  String nextString(int length);
+
+  /**
+   * Returns a secure random int
+   *
+   * @return random int.
+   */
+  int nextInt();
+
+  /**
+   * Returns a secure random int, between 0 (inclusive) and the specified bound (exclusive).
+   *
+   * @param bound the upper bound (exclusive), which must be positive.
+   * @return random int.
+   */
+  int nextInt(int bound);
+
+
+  /**
+   * Returns a secure random boolean
+   *
+   * @return random boolean.
+   */
+  boolean nextBoolean();
+
+
+  /**
+   * Returns a secure random long
+   *
+   * @return random long.
+   */
+  long nextLong();
+
+
+  /**
+   * Returns a secure random float value. The value is uniformly distributed between 0.0 and 1.0
+   *
+   * @return random float.
+   */
+  float nextFloat();
+
+
+  /**
+   * Returns a secure random double value. The value is uniformly distributed between 0.0 and 1.0
+   *
+   * @return random double.
+   */
+  double nextDouble();
+
+
+  /**
+   * Returns a secure random double value. The value is Gaussian ("normally") distributed
+   * with mean 0.0 and standard deviation 1.0
+   *
+   * @return random double.
+   */
+  double nextGaussian();
 }
