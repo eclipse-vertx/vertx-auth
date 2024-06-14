@@ -207,7 +207,7 @@ public final class JWK {
    *
    * @param options PEM pub sec key options.
    */
-  public JWK(PubSecKeyOptions options) {
+  public JWK(io.vertx.ext.auth.jose.PubSecKeyOptions options) {
 
     alg = options.getAlgorithm();
     kid = options.getId();

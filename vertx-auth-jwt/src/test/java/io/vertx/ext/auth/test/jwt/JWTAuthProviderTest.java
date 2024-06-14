@@ -364,14 +364,27 @@ public class JWTAuthProviderTest {
   }
 
   @Test
-  public void testGenerateNewTokenES256(TestContext should) {
-    final Async test = should.async();
-
-    authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
+  public void testGenerateNewTokenES256Deprecated(TestContext should) {
+    testGenerateNewTokenES256(should, new JWTAuthOptions()
       .setKeyStore(new KeyStoreOptions()
         .setPath("es256-keystore.jceks")
         .setType("jceks")
         .setPassword("secret")));
+  }
+
+  @Test
+  public void testGenerateNewTokenES256(TestContext should) {
+    testGenerateNewTokenES256(should, new JWTAuthOptions()
+      .setKeyStore(new io.vertx.ext.auth.jose.KeyStoreOptions()
+        .setPath("es256-keystore.jceks")
+        .setType("jceks")
+        .setPassword("secret")));
+  }
+
+  private void testGenerateNewTokenES256(TestContext should, JWTAuthOptions options) {
+    final Async test = should.async();
+
+    authProvider = JWTAuth.create(rule.vertx(), options);
 
     String token = authProvider.generateToken(new JsonObject().put("sub", "paulo"), new JWTOptions().setAlgorithm("ES256"));
     should.assertNotNull(token);

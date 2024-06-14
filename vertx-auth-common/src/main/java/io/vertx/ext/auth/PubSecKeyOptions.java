@@ -10,24 +10,17 @@ import io.vertx.core.json.JsonObject;
  * Options describing Key stored in PEM format.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ * @deprecated instead use {@link io.vertx.ext.auth.jose.PubSecKeyOptions}
  */
+@Deprecated
 @DataObject
-@JsonGen(publicConverter = false)
-public class PubSecKeyOptions {
-
-  private String algorithm;
-  private Buffer buffer;
-  private String id;
-
-  private boolean certificate;
-  private Boolean symmetric;
-  private String publicKey;
-  private String secretKey;
+public class PubSecKeyOptions extends io.vertx.ext.auth.jose.PubSecKeyOptions {
 
   /**
    * Default constructor
    */
   public PubSecKeyOptions() {
+    super();
   }
 
   /**
@@ -36,13 +29,7 @@ public class PubSecKeyOptions {
    * @param other the options to copy
    */
   public PubSecKeyOptions(PubSecKeyOptions other) {
-    algorithm = other.algorithm;
-    buffer = other.buffer == null ? null : other.buffer.copy();
-    id = other.getId();
-    publicKey = other.getPublicKey();
-    secretKey = other.getSecretKey();
-    symmetric = other.isSymmetric();
-    certificate = other.isCertificate();
+    super(other);
   }
 
   /**
@@ -51,140 +38,42 @@ public class PubSecKeyOptions {
    * @param json the JSON
    */
   public PubSecKeyOptions(JsonObject json) {
-    PubSecKeyOptionsConverter.fromJson(json, this);
-  }
-
-  public JsonObject toJson() {
-    JsonObject json = new JsonObject();
-    PubSecKeyOptionsConverter.toJson(this, json);
-    return json;
-  }
-
-  public String getAlgorithm() {
-    return algorithm;
+    super(json);
   }
 
   public PubSecKeyOptions setAlgorithm(String algorithm) {
-    this.algorithm = algorithm;
-    return this;
+    return (PubSecKeyOptions) super.setAlgorithm(algorithm);
   }
 
-  /**
-   * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
-   * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
-   * payload.
-   *
-   * @return the buffer.
-   */
-  public Buffer getBuffer() {
-    return buffer;
-  }
-
-  /**
-   * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
-   * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
-   * payload.
-   * @return self.
-   */
-  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   public PubSecKeyOptions setBuffer(String buffer) {
-    this.buffer = Buffer.buffer(buffer, "UTF-8");
-    return this;
+    return (PubSecKeyOptions) super.setBuffer(buffer);
   }
 
-  /**
-   * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
-   * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
-   * payload.
-   * @return self.
-   */
   public PubSecKeyOptions setBuffer(Buffer buffer) {
-    this.buffer = buffer;
-    return this;
-  }
-
-  public String getId() {
-    return id;
+    return (PubSecKeyOptions) super.setBuffer(buffer);
   }
 
   public PubSecKeyOptions setId(String id) {
-    this.id = id;
-    return this;
+    return (PubSecKeyOptions) super.setId(id);
   }
 
-  @Deprecated
-  public String getPublicKey() {
-    return publicKey;
-  }
-
-  /**
-   * @deprecated This setter ignored the PEM prefix and suffix which would assume the key to be RSA.
-   *
-   * Use {@link #setBuffer(String)} with the full content of your OpenSSL pem file. A PEM file must
-   * contain at least 3 lines:
-   *
-   * <pre>
-   *   -----BEGIN PUBLIC KEY----
-   *   ...
-   *   -----END PUBLIC KEY---
-   * </pre>
-   * @param publicKey the naked public key
-   * @return self
-   */
   @Deprecated
   public PubSecKeyOptions setPublicKey(String publicKey) {
-    this.publicKey = publicKey;
-    return this;
+    return (PubSecKeyOptions) super.setPublicKey(publicKey);
   }
 
-  @Deprecated
-  public String getSecretKey() {
-    return secretKey;
-  }
-
-  /**
-   * @deprecated This setter ignored the PEM prefix and suffix which would assume the key to be RSA.
-   *
-   * Use {@link #setBuffer(String)} with the full content of your OpenSSL pem file. A PEM file must
-   * contain at least 3 lines:
-   *
-   * <pre>
-   *   -----BEGIN PRIVATE KEY----
-   *   ...
-   *   -----END PRIVATE KEY---
-   * </pre>
-   * @param secretKey the naked public key
-   * @return self
-   */
   @Deprecated
   public PubSecKeyOptions setSecretKey(String secretKey) {
-    this.secretKey = secretKey;
-    return this;
-  }
-
-  @Deprecated
-  public boolean isSymmetric() {
-    if (symmetric == null) {
-      // attempt to derive the kind of key
-      return algorithm.startsWith("HS") && publicKey == null && secretKey != null;
-    }
-    return symmetric;
+    return (PubSecKeyOptions) super.setSecretKey(secretKey);
   }
 
   @Deprecated
   public PubSecKeyOptions setSymmetric(boolean symmetric) {
-    this.symmetric = symmetric;
-    return this;
-  }
-
-  @Deprecated
-  public boolean isCertificate() {
-    return certificate;
+    return (PubSecKeyOptions) super.setSymmetric(symmetric);
   }
 
   @Deprecated
   public PubSecKeyOptions setCertificate(boolean certificate) {
-    this.certificate = certificate;
-    return this;
+    return (PubSecKeyOptions) super.setCertificate(certificate);
   }
 }

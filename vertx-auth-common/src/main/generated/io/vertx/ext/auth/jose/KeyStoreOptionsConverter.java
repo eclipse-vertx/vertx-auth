@@ -1,4 +1,4 @@
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.jose;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
@@ -8,8 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.KeyStoreOptions}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.KeyStoreOptions} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.jose.KeyStoreOptions}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jose.KeyStoreOptions} original class using Vert.x codegen.
  */
 public class KeyStoreOptionsConverter {
 

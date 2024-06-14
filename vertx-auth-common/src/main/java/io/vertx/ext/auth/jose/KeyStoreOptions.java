@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.jose;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.Fluent;
@@ -34,14 +34,26 @@ import java.util.Map;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-@Deprecated
 @DataObject
-public class KeyStoreOptions extends io.vertx.ext.auth.jose.KeyStoreOptions {
+@JsonGen(publicConverter = false)
+public class KeyStoreOptions {
+
+  // Defaults
+  private static final String DEFAULT_TYPE = KeyStore.getDefaultType();
+
+  private String type;
+  private String provider;
+  private String password;
+  private String path;
+  @Deprecated
+  private Buffer value;
+  private Map<String, String> passwordProtection;
 
   /**
    * Default constructor
    */
   public KeyStoreOptions() {
+    type = DEFAULT_TYPE;
   }
 
   /**
@@ -50,7 +62,15 @@ public class KeyStoreOptions extends io.vertx.ext.auth.jose.KeyStoreOptions {
    * @param other the options to copy
    */
   public KeyStoreOptions(KeyStoreOptions other) {
-    super(other);
+    type = other.getType();
+    if (type == null) {
+      type = DEFAULT_TYPE;
+    }
+    password = other.getPassword();
+    path = other.getPath();
+    value = other.getValue();
+    passwordProtection = other.getPasswordProtection();
+    provider = other.getProvider();
   }
 
   /**
@@ -59,41 +79,84 @@ public class KeyStoreOptions extends io.vertx.ext.auth.jose.KeyStoreOptions {
    * @param json the JSON
    */
   public KeyStoreOptions(JsonObject json) {
-    super(json);
+    KeyStoreOptionsConverter.fromJson(json, this);
   }
 
   @Fluent
   public KeyStoreOptions setType(String type) {
-    return (KeyStoreOptions) super.setType(type);
+    this.type = type;
+    return this;
   }
 
   @Fluent
   public KeyStoreOptions setProvider(String provider) {
-    return (KeyStoreOptions) super.setProvider(provider);
+    this.provider = provider;
+    return this;
   }
 
   @Fluent
   public KeyStoreOptions setPassword(String password) {
-    return (KeyStoreOptions) super.setPassword(password);
+    this.password = password;
+    return this;
   }
 
   @Fluent
   public KeyStoreOptions setPath(String path) {
-    return (KeyStoreOptions) super.setPath(path);
+    this.path = path;
+    return this;
   }
 
   @Fluent
   @Deprecated
   public KeyStoreOptions setValue(Buffer value) {
-    return (KeyStoreOptions) super.setValue(value);
+    this.value = value;
+    return this;
   }
 
   @Fluent
   public KeyStoreOptions setPasswordProtection(Map<String, String> passwordProtection) {
-    return (KeyStoreOptions) super.setPasswordProtection(passwordProtection);
+    this.passwordProtection = passwordProtection;
+    return this;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getProvider() {
+    return provider;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  @Deprecated
+  public Buffer getValue() {
+    return value;
+  }
+
+  public Map<String, String> getPasswordProtection() {
+    return passwordProtection;
   }
 
   public KeyStoreOptions putPasswordProtection(String alias, String password) {
-    return (KeyStoreOptions) super.putPasswordProtection(alias, password);
+    if (passwordProtection == null) {
+      passwordProtection = new HashMap<>();
+    }
+
+    this.passwordProtection.put(alias, password);
+    return this;
   }
+
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+    KeyStoreOptionsConverter.toJson(this, json);
+    return json;
+  }
+
 }
