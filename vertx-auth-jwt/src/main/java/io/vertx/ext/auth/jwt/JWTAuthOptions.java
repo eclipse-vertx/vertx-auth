@@ -18,9 +18,9 @@ package io.vertx.ext.auth.jwt;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.jose.KeyStoreOptions;
+import io.vertx.ext.auth.jose.PubSecKeyOptions;
 
 import java.util.ArrayList;
 import java.util.List;

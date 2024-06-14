@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.jose.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 

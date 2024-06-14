@@ -1,6 +1,6 @@
 package io.vertx.ext.auth.htpasswd;
 
-import io.vertx.ext.auth.HashingStrategy;
+import io.vertx.ext.auth.hashing.HashingStrategy;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

@@ -2,8 +2,8 @@ package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;

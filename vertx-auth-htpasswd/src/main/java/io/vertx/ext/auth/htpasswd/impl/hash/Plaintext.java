@@ -15,8 +15,8 @@
  */
 package io.vertx.ext.auth.htpasswd.impl.hash;
 
-import io.vertx.ext.auth.HashString;
-import io.vertx.ext.auth.HashingAlgorithm;
+import io.vertx.ext.auth.hashing.HashString;
+import io.vertx.ext.auth.hashing.HashingAlgorithm;
 
 /**
  * Implementation of the PlainText (NO-OP) Hashing algorithm

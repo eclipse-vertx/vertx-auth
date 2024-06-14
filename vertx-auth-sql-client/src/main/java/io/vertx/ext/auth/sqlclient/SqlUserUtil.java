@@ -15,9 +15,9 @@
  */
 package io.vertx.ext.auth.sqlclient;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
+import io.vertx.ext.auth.hashing.HashingStrategy;
 import io.vertx.ext.auth.sqlclient.impl.SqlUserUtilImpl;
 import io.vertx.sqlclient.SqlClient;
 
@@ -64,7 +64,7 @@ public interface SqlUserUtil {
    * Insert a user into a database.
    *
    * @param username      the username to be set
-   * @param hash          the password hash, as result of {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
+   * @param hash          the password hash, as result of {@link HashingStrategy#hash(String, Map, String, String)}
    * @return a future notified with the result of the operation
    */
   Future<Void> createHashedUser(String username, String hash);

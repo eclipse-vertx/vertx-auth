@@ -2,9 +2,9 @@ package io.vertx.ext.auth.impl;
 
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.ext.auth.HashString;
-import io.vertx.ext.auth.HashingAlgorithm;
-import io.vertx.ext.auth.HashingStrategy;
+import io.vertx.ext.auth.hashing.HashString;
+import io.vertx.ext.auth.hashing.HashingAlgorithm;
+import io.vertx.ext.auth.hashing.HashingStrategy;
 
 import java.util.HashMap;
 import java.util.Map;

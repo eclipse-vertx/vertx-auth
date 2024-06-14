@@ -2,6 +2,7 @@ package io.vertx.ext.auth;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.prng.VertxContextPRNG;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
