@@ -26,7 +26,9 @@ import java.util.Map;
  * This follows as close as possible the <a href="https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md">phc sf spec</a>.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ * @deprecated this class should not be used directly
  */
+@Deprecated
 public final class HashString {
 
   private final String id;

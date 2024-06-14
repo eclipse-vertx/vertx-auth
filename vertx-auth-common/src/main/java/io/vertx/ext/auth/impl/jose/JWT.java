@@ -20,8 +20,8 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.NoSuchKeyIdException;
+import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.jose.NoSuchKeyIdException;
 import io.vertx.ext.auth.impl.CertificateHelper;
 
 import java.nio.charset.Charset;

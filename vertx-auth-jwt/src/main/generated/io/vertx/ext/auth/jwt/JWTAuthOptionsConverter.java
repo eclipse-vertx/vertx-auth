@@ -72,6 +72,9 @@ public class JWTAuthOptionsConverter {
     if (obj.getJWTOptions() != null) {
       json.put("jwtOptions", obj.getJWTOptions().toJson());
     }
+    if (obj.getKeyStore() != null) {
+      json.put("keyStore", obj.getKeyStore().toJson());
+    }
     if (obj.getPermissionsClaimKey() != null) {
       json.put("permissionsClaimKey", obj.getPermissionsClaimKey());
     }

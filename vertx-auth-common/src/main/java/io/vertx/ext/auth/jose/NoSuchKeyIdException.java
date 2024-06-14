@@ -13,33 +13,19 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.jose;
 
 /**
  * No such KeyId exception is thrown when a JWT with a well known "kid" does not find a matching "kid" in the crypto
  * list.
- *
- * @deprecated instead catch {@link io.vertx.ext.auth.jose.NoSuchKeyIdException}
  */
-@Deprecated
-public class NoSuchKeyIdException extends RuntimeException {
-
-  private final String id;
+public class NoSuchKeyIdException extends io.vertx.ext.auth.NoSuchKeyIdException {
 
   public NoSuchKeyIdException(String alg) {
-    this(alg, "<null>");
+    super(alg);
   }
 
   public NoSuchKeyIdException(String alg, String kid) {
-    super("algorithm [" + alg + "]: " + kid);
-    this.id = alg + "#" + kid;
-  }
-
-  /**
-   * Returns the missing key with the format {@code ALGORITHM + '#' + KEY_ID}.
-   * @return the id of the missing key
-   */
-  public String id() {
-    return id;
+    super(alg, kid);
   }
 }

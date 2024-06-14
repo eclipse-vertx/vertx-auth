@@ -75,17 +75,31 @@ public class OAuth2Keycloak14IT {
   }
 
   @Test
-  public void discoverPublicOpenId(TestContext should) {
-    final Async test = should.async();
-
-    OAuth2Options options = new OAuth2Options()
+  public void discoverPublicOpenIdDeprecated(TestContext should) {
+    discoverPublicOpenId(should, new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("public")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}")
       .setJWTOptions(
         new JWTOptions()
-          .addAudience("account"));
+          .addAudience("account")));
+  }
+
+  @Test
+  public void discoverPublicOpenId(TestContext should) {
+    discoverPublicOpenId(should, new OAuth2Options()
+      .setFlow(OAuth2FlowType.PASSWORD)
+      .setClientId("public")
+      .setTenant("vertx-it")
+      .setSite(site + "/auth/realms/{tenant}")
+      .setJWTOptions(
+        new io.vertx.ext.auth.jose.JWTOptions()
+          .addAudience("account")));
+  }
+
+  private void discoverPublicOpenId(TestContext should, OAuth2Options options) {
+    final Async test = should.async();
 
     options.getHttpClientOptions().setTrustAll(true);
 

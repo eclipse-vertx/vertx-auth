@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.jwt;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
@@ -39,9 +40,9 @@ public class JWTAuthOptions {
   private static final JWTOptions JWT_OPTIONS = new JWTOptions();
 
   private String permissionsClaimKey;
-  private KeyStoreOptions keyStore;
-  private List<PubSecKeyOptions> pubSecKeys;
-  private JWTOptions jwtOptions;
+  private io.vertx.ext.auth.jose.KeyStoreOptions keyStore;
+  private List<io.vertx.ext.auth.jose.PubSecKeyOptions> pubSecKeys;
+  private io.vertx.ext.auth.jose.JWTOptions jwtOptions;
   private List<JsonObject> jwks;
 
   /**
@@ -57,9 +58,14 @@ public class JWTAuthOptions {
    * @param other the options to copy
    */
   public JWTAuthOptions(JWTAuthOptions other) {
+    List<PubSecKeyOptions> pubSecKeys = other.getPubSecKeys();
+    if (pubSecKeys != null) {
+      this.pubSecKeys = new ArrayList<>();
+      this.pubSecKeys.addAll(pubSecKeys);
+    }
+
     permissionsClaimKey = other.getPermissionsClaimKey();
     keyStore = other.getKeyStore();
-    pubSecKeys = other.getPubSecKeys();
     jwtOptions = other.getJWTOptions();
     jwks = other.getJwks();
   }
@@ -99,7 +105,13 @@ public class JWTAuthOptions {
   }
 
   public KeyStoreOptions getKeyStore() {
-    return keyStore;
+    if (keyStore == null) {
+      return null;
+    } else if (keyStore instanceof KeyStoreOptions) {
+      return (KeyStoreOptions) keyStore;
+    } else {
+      return new KeyStoreOptions(keyStore.toJson());
+    }
   }
 
   public JWTAuthOptions setKeyStore(KeyStoreOptions keyStore) {
@@ -107,16 +119,39 @@ public class JWTAuthOptions {
     return this;
   }
 
+  @GenIgnore
+  public JWTAuthOptions setKeyStore(io.vertx.ext.auth.jose.KeyStoreOptions keyStore) {
+    this.keyStore = keyStore;
+    return this;
+  }
+
   public List<PubSecKeyOptions> getPubSecKeys() {
-    return pubSecKeys;
+    if (pubSecKeys == null) {
+      return null;
+    } else {
+      List<PubSecKeyOptions> list = new ArrayList<>();
+      pubSecKeys.forEach(psk -> {
+        list.add(new PubSecKeyOptions(psk.toJson()));
+      });
+      return list;
+    }
   }
 
   public JWTAuthOptions setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
-    this.pubSecKeys = pubSecKeys;
+    if (pubSecKeys == null) {
+      this.pubSecKeys = null;
+    } else {
+      this.pubSecKeys = new ArrayList<>(pubSecKeys);
+    }
     return this;
   }
 
   public JWTAuthOptions addPubSecKey(PubSecKeyOptions pubSecKey) {
+    return addPubSecKey((io.vertx.ext.auth.jose.PubSecKeyOptions) pubSecKey);
+  }
+
+  @GenIgnore
+  public JWTAuthOptions addPubSecKey(io.vertx.ext.auth.jose.PubSecKeyOptions pubSecKey) {
     if (this.pubSecKeys == null) {
       this.pubSecKeys = new ArrayList<>();
     }
@@ -125,10 +160,22 @@ public class JWTAuthOptions {
   }
 
   public JWTOptions getJWTOptions() {
-    return jwtOptions;
+    if (jwtOptions == null) {
+      return null;
+    } else if (jwtOptions instanceof JWTOptions) {
+      return (JWTOptions) jwtOptions;
+    } else {
+      return new JWTOptions(jwtOptions.toJson());
+    }
   }
 
   public JWTAuthOptions setJWTOptions(JWTOptions jwtOptions) {
+    this.jwtOptions = jwtOptions;
+    return this;
+  }
+
+  @GenIgnore
+  public JWTAuthOptions setJWTOptions(io.vertx.ext.auth.jose.JWTOptions jwtOptions) {
     this.jwtOptions = jwtOptions;
     return this;
   }
