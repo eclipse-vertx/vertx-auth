@@ -460,8 +460,8 @@ public class OAuth2Keycloak14IT {
       });
   }
 
-  private Future<User> loginAs(OAuth2Auth oauth2, TestContext should, String username, String audience, List<String> scopes) {
-    final Promise<User> promise = Promise.promise();
+  private Future<io.vertx.ext.auth.user.User> loginAs(OAuth2Auth oauth2, TestContext should, String username, String audience, List<String> scopes) {
+    final Promise<io.vertx.ext.auth.user.User> promise = Promise.promise();
 
     oauth2
       .authenticate(new Oauth2Credentials().setUsername(username).setPassword("password").setScopes(scopes))
@@ -476,8 +476,8 @@ public class OAuth2Keycloak14IT {
     return promise.future();
   }
 
-  private Future<User> loginAs(OAuth2Auth oauth2, TestContext should, String username, List<String> audience, List<String> scopes) {
-    final Promise<User> promise = Promise.promise();
+  private Future<io.vertx.ext.auth.user.User> loginAs(OAuth2Auth oauth2, TestContext should, String username, List<String> audience, List<String> scopes) {
+    final Promise<io.vertx.ext.auth.user.User> promise = Promise.promise();
 
     oauth2
       .authenticate(new Oauth2Credentials().setUsername(username).setPassword("password").setScopes(scopes))

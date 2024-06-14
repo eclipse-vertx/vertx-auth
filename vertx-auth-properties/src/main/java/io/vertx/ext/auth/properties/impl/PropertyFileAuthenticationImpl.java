@@ -188,13 +188,13 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public void getAuthorizations(io.vertx.ext.auth.User user, Handler<AsyncResult<Void>> handler) {
+  public void getAuthorizations(io.vertx.ext.auth.user.User user, Handler<AsyncResult<Void>> handler) {
     getAuthorizations(user)
       .onComplete(handler);
   }
 
   @Override
-  public Future<Void> getAuthorizations(io.vertx.ext.auth.User user) {
+  public Future<Void> getAuthorizations(io.vertx.ext.auth.user.User user) {
     String username = user.principal().getString("username");
     return getUser(username)
       .onSuccess(record -> {
