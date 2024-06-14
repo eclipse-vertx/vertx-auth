@@ -1,8 +1,8 @@
 package io.vertx.ext.auth.test.oauth2;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.jose.PubSecKeyOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.*;

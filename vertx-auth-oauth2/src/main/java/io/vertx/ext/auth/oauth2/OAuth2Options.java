@@ -24,8 +24,8 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.jose.PubSecKeyOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;

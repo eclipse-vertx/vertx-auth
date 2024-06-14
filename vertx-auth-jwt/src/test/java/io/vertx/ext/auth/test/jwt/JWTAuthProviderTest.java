@@ -17,8 +17,8 @@ package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.jose.KeyStoreOptions;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;

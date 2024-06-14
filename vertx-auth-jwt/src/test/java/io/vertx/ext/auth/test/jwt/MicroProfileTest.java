@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 import io.vertx.ext.unit.Async;

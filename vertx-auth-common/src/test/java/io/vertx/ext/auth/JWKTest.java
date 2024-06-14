@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.jose.JWTOptions;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -14,7 +14,7 @@ package io.vertx.ext.auth.authorization;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.MultiMap;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 
 /**

@@ -1,32 +1,19 @@
 package io.vertx.ext.auth.test.oauth2;
 
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jose.JWTOptions;
 import io.vertx.ext.auth.authentication.TokenCredentials;
-import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.impl.http.SimpleHttpClient;
-import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.authorization.ScopeAuthorization;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.UnsupportedEncodingException;
 
 @RunWith(VertxUnitRunner.class)
 public class Oauth2TokenAudienceTest {

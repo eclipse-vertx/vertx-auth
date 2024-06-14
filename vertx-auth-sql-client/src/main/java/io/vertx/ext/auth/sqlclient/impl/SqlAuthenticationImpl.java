@@ -17,8 +17,8 @@
 package io.vertx.ext.auth.sqlclient.impl;
 
 import io.vertx.core.Future;
-import io.vertx.ext.auth.HashingStrategy;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.hashing.HashingStrategy;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;

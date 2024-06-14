@@ -15,7 +15,7 @@ package io.vertx.ext.auth.authorization;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;
 
 import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;

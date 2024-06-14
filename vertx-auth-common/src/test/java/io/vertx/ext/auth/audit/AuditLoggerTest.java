@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.audit;
 
 import io.vertx.core.net.SocketAddress;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.AndAuthorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;

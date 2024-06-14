@@ -17,8 +17,8 @@
 package examples;
 
 import io.vertx.core.Vertx;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.VertxContextPRNG;
+import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.prng.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;

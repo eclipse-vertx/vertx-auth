@@ -13,7 +13,7 @@
 package io.vertx.ext.auth.abac;
 
 import io.vertx.core.json.JsonArray;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authorization.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;

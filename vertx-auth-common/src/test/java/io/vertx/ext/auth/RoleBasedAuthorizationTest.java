@@ -19,6 +19,7 @@ import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.authorization.impl.RoleBasedAuthorizationConverter;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;

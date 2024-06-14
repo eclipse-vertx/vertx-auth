@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth;
+package io.vertx.ext.auth.jose;
 
 /**
  * No such KeyId exception is thrown when a JWT with a well known "kid" does not find a matching "kid" in the crypto

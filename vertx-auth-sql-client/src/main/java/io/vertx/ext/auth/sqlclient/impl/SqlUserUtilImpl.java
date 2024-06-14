@@ -16,7 +16,7 @@
 package io.vertx.ext.auth.sqlclient.impl;
 
 import io.vertx.core.Future;
-import io.vertx.ext.auth.HashingStrategy;
+import io.vertx.ext.auth.hashing.HashingStrategy;
 import io.vertx.ext.auth.sqlclient.SqlUserUtil;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;

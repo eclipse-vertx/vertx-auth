@@ -1,5 +1,6 @@
 package io.vertx.ext.auth;
 
+import io.vertx.ext.auth.hashing.HashingStrategy;
 import io.vertx.ext.auth.impl.Codec;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;

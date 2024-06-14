@@ -16,8 +16,8 @@
 package io.vertx.ext.auth.impl;
 
 import io.vertx.core.Future;
-import io.vertx.ext.auth.ChainAuth;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.chain.ChainAuth;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;

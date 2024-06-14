@@ -1,6 +1,6 @@
 package io.vertx.ext.auth.impl.jose;
 
-import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jose.PubSecKeyOptions;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertFalse;

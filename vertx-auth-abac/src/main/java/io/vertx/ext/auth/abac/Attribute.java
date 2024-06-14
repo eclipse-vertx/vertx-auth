@@ -17,7 +17,7 @@ package io.vertx.ext.auth.abac;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 import io.vertx.ext.auth.abac.impl.AttributeImpl;
 import io.vertx.ext.auth.abac.impl.Operator;
 

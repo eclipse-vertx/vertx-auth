@@ -20,22 +20,22 @@ public class JWTAuthOptionsConverter {
       switch (member.getKey()) {
         case "keyStore":
           if (member.getValue() instanceof JsonObject) {
-            obj.setKeyStore(new io.vertx.ext.auth.KeyStoreOptions((io.vertx.core.json.JsonObject)member.getValue()));
+            obj.setKeyStore(new io.vertx.ext.auth.jose.KeyStoreOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "pubSecKeys":
           if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.ext.auth.PubSecKeyOptions> list =  new java.util.ArrayList<>();
+            java.util.ArrayList<io.vertx.ext.auth.jose.PubSecKeyOptions> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                list.add(new io.vertx.ext.auth.PubSecKeyOptions((io.vertx.core.json.JsonObject)item));
+                list.add(new io.vertx.ext.auth.jose.PubSecKeyOptions((io.vertx.core.json.JsonObject)item));
             });
             obj.setPubSecKeys(list);
           }
           break;
         case "jwtOptions":
           if (member.getValue() instanceof JsonObject) {
-            obj.setJWTOptions(new io.vertx.ext.auth.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
+            obj.setJWTOptions(new io.vertx.ext.auth.jose.JWTOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
           break;
         case "jwks":

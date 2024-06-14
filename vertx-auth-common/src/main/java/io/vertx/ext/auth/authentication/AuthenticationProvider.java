@@ -18,7 +18,7 @@ package io.vertx.ext.auth.authentication;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.user.User;
 
 /**
  * User-facing interface for authenticating users.
