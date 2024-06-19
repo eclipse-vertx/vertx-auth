@@ -16,8 +16,8 @@
 package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.asn.ASN1;
 
 import javax.crypto.Mac;
