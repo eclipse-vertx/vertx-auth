@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 
@@ -159,7 +160,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  default OAuth2Auth refresh(io.vertx.ext.auth.user.User user, Handler<AsyncResult<io.vertx.ext.auth.user.User>> handler) {
+  default OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
     refresh(user)
       .onComplete(handler);
 
@@ -171,9 +172,9 @@ public interface OAuth2Auth extends AuthenticationProvider {
    *
    * @param user the user (access token) to be refreshed.
    * @return future result
-   * @see OAuth2Auth#userInfo(io.vertx.ext.auth.user.User, Handler)
+   * @see OAuth2Auth#userInfo(User, Handler)
    */
-  Future<io.vertx.ext.auth.user.User> refresh(io.vertx.ext.auth.user.User user);
+  Future<User> refresh(User user);
 
   /**
    * Revoke an obtained access or refresh token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
@@ -184,7 +185,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  default OAuth2Auth revoke(io.vertx.ext.auth.user.User user, String tokenType, Handler<AsyncResult<Void>> handler) {
+  default OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
     revoke(user, tokenType)
       .onComplete(handler);
 
@@ -199,7 +200,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  default OAuth2Auth revoke(io.vertx.ext.auth.user.User user, Handler<AsyncResult<Void>> handler) {
+  default OAuth2Auth revoke(User user, Handler<AsyncResult<Void>> handler) {
     revoke(user, "access_token")
       .onComplete(handler);
 
@@ -212,18 +213,18 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @param user the user (access token) to revoke.
    * @param tokenType the token type (either access_token or refresh_token).
    * @return future result
-   * @see OAuth2Auth#revoke(io.vertx.ext.auth.user.User, String, Handler)
+   * @see OAuth2Auth#revoke(User, String, Handler)
    */
-  Future<Void> revoke(io.vertx.ext.auth.user.User user, String tokenType);
+  Future<Void> revoke(User user, String tokenType);
 
   /**
    * Revoke an obtained access token. More info <a href="https://tools.ietf.org/html/rfc7009">https://tools.ietf.org/html/rfc7009</a>.
    *
    * @param user the user (access token) to revoke.
    * @return future result
-   * @see OAuth2Auth#revoke(io.vertx.ext.auth.user.User, Handler)
+   * @see OAuth2Auth#revoke(User, Handler)
    */
-  default Future<Void> revoke(io.vertx.ext.auth.user.User user) {
+  default Future<Void> revoke(User user) {
     return revoke(user, "access_token");
   }
 
@@ -235,7 +236,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @return fluent self.
    */
   @Fluent
-  default OAuth2Auth userInfo(io.vertx.ext.auth.user.User user, Handler<AsyncResult<JsonObject>> handler) {
+  default OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
     userInfo(user)
       .onComplete(handler);
 
@@ -247,9 +248,9 @@ public interface OAuth2Auth extends AuthenticationProvider {
    *
    * @param user the user (access token) to fetch the user info.
    * @return future result
-   * @see OAuth2Auth#userInfo(io.vertx.ext.auth.user.User, Handler)
+   * @see OAuth2Auth#userInfo(User, Handler)
    */
-  Future<JsonObject> userInfo(io.vertx.ext.auth.user.User user);
+  Future<JsonObject> userInfo(User user);
 
   /**
    * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
@@ -259,7 +260,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @param params extra parameters to apply to the url
    * @return the url to end the session.
    */
-  String endSessionURL(io.vertx.ext.auth.user.User user, JsonObject params);
+  String endSessionURL(User user, JsonObject params);
 
   /**
    * The logout (end-session) endpoint is specified in OpenID Connect Session Management 1.0.
@@ -268,7 +269,7 @@ public interface OAuth2Auth extends AuthenticationProvider {
    * @param user the user to generate the url for
    * @return the url to end the session.
    */
-  default String endSessionURL(io.vertx.ext.auth.user.User user) {
+  default String endSessionURL(User user) {
     return endSessionURL(user, new JsonObject());
   }
 

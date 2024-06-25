@@ -16,7 +16,6 @@
 
 package io.vertx.ext.auth.authentication;
 
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;

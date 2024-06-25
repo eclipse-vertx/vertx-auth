@@ -19,16 +19,16 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jose.KeyStoreOptions;
-import io.vertx.ext.auth.jose.PubSecKeyOptions;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
-import io.vertx.ext.auth.jose.JWTOptions;
+import io.vertx.ext.auth.JWTOptions;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>

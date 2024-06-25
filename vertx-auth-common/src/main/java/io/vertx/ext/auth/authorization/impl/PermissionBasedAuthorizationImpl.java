@@ -50,7 +50,7 @@ public class PermissionBasedAuthorizationImpl implements PermissionBasedAuthoriz
   public boolean match(AuthorizationContext context) {
     Objects.requireNonNull(context);
 
-    io.vertx.ext.auth.user.User user = context.user();
+    User user = context.user();
     if (user != null) {
       final Authorization resolvedAuthorization = getResolvedAuthorization(context);
       final Authorizations authorizations = user.authorizations();

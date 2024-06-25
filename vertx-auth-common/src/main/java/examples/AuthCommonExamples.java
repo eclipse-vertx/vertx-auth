@@ -22,11 +22,11 @@ import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.chain.ChainAuth;
-import io.vertx.ext.auth.jose.KeyStoreOptions;
-import io.vertx.ext.auth.jose.PubSecKeyOptions;
+import io.vertx.ext.auth.ChainAuth;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.prng.VertxContextPRNG;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>

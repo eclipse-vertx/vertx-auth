@@ -52,7 +52,7 @@ public class RoleBasedAuthorizationImpl implements RoleBasedAuthorization {
   public boolean match(AuthorizationContext context) {
     Objects.requireNonNull(context);
 
-    io.vertx.ext.auth.user.User user = context.user();
+    User user = context.user();
     if (user != null) {
       Authorization resolvedAuthorization = getResolvedAuthorization(context);
       for (String providerId: user.authorizations().getProviderIds()) {

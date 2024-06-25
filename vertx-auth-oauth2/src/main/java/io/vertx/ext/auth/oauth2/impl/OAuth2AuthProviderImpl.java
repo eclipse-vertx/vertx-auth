@@ -23,7 +23,7 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.jose.NoSuchKeyIdException;
+import io.vertx.ext.auth.NoSuchKeyIdException;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
@@ -480,7 +480,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   }
 
   @Override
-  public Future<io.vertx.ext.auth.user.User> refresh(io.vertx.ext.auth.user.User user) {
+  public Future<User> refresh(User user) {
 
     if (user.principal().getString("refresh_token") == null || user.principal().getString("refresh_token").isEmpty()) {
       return Future.failedFuture(new IllegalStateException("refresh_token is null or empty"));
@@ -505,12 +505,12 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   }
 
   @Override
-  public Future<Void> revoke(io.vertx.ext.auth.user.User user, String tokenType) {
+  public Future<Void> revoke(User user, String tokenType) {
     return api.tokenRevocation(tokenType, user.principal().getString(tokenType));
   }
 
   @Override
-  public Future<JsonObject> userInfo(io.vertx.ext.auth.user.User user) {
+  public Future<JsonObject> userInfo(User user) {
     return api.userInfo(user.principal().getString("access_token"), jwt)
       .compose(json -> {
         // validation (the subject must match)
@@ -541,7 +541,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   }
 
   @Override
-  public String endSessionURL(io.vertx.ext.auth.user.User user, JsonObject params) {
+  public String endSessionURL(User user, JsonObject params) {
     return api.endSessionURL(user.principal().getString("id_token"), params);
   }
 

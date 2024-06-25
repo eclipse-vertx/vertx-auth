@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.jose;
+package io.vertx.ext.auth;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
@@ -8,8 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 /**
- * Converter and mapper for {@link io.vertx.ext.auth.jose.JWTOptions}.
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.jose.JWTOptions} original class using Vert.x codegen.
+ * Converter and mapper for {@link io.vertx.ext.auth.JWTOptions}.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.JWTOptions} original class using Vert.x codegen.
  */
 public class JWTOptionsConverter {
 

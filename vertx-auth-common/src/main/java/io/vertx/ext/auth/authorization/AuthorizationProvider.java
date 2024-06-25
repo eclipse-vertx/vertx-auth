@@ -16,11 +16,13 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.ext.auth.User;
 
 /**
  * The role of an AuthorizationProvider is to return a set of Authorization.
@@ -49,13 +51,13 @@ public interface AuthorizationProvider {
       }
 
       @Override
-      public void getAuthorizations(io.vertx.ext.auth.user.User user, Handler<AsyncResult<Void>> handler) {
+      public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
         getAuthorizations(user)
           .onComplete(handler);
       }
 
       @Override
-      public Future<Void> getAuthorizations(io.vertx.ext.auth.user.User user) {
+      public Future<Void> getAuthorizations(User user) {
         user.authorizations().add(getId(), _authorizations);
         return Future.succeededFuture();
       }
@@ -75,7 +77,7 @@ public interface AuthorizationProvider {
    * @param user user to lookup and update
    * @param handler result handler
    */
-  void getAuthorizations(io.vertx.ext.auth.user.User user, Handler<AsyncResult<Void>> handler);
+  void getAuthorizations(User user, Handler<AsyncResult<Void>> handler);
 
   /**
    * Updates the user with the set of authorizations.
@@ -83,7 +85,7 @@ public interface AuthorizationProvider {
    * @param user user to lookup and update.
    * @return Future void to signal end of asynchronous call.
    */
-  default Future<Void> getAuthorizations(io.vertx.ext.auth.user.User user) {
+  default Future<Void> getAuthorizations(User user) {
     Promise<Void> promise = Promise.promise();
     getAuthorizations(user, promise);
     return promise.future();

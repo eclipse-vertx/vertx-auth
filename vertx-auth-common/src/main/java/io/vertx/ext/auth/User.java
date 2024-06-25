@@ -17,12 +17,18 @@
 package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.Authorizations;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
 /**
@@ -32,9 +38,8 @@ import io.vertx.ext.auth.impl.UserImpl;
  *
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-@Deprecated
 @VertxGen
-public interface User extends io.vertx.ext.auth.user.User {
+public interface User {
 
   /**
    * Factory for user instances that are single string. The credentials will be added to the principal
@@ -86,6 +91,212 @@ public interface User extends io.vertx.ext.auth.user.User {
   }
 
   /**
+   * The user subject. Usually a human representation that identifies this user.
+   *
+   * The lookup for this information will take place in several places in the following order:
+   *
+   * <ol>
+   *   <li>{@code principal.username} - Usually for username/password or webauthn authentication</li>
+   *   <li>{@code principal.userHandle} - Optional field for webauthn</li>
+   *   <li>{@code attributes.idToken.sub} - For OpenID Connect ID Tokens</li>
+   *   <li>{@code attributes.[rootClaim?]accessToken.sub} - For OpenID Connect/OAuth2 Access Tokens</li>
+   * </ol>
+   *
+   * @return the subject for this user or {@code null}.
+   */
+  default @Nullable String subject() {
+    if (principal().containsKey("username")) {
+      return principal().getString("username");
+    }
+    if (principal().containsKey("userHandle")) {
+      return principal().getString("userHandle");
+    }
+    if (attributes().containsKey("idToken")) {
+      JsonObject idToken = attributes().getJsonObject("idToken");
+      if (idToken.containsKey("sub")) {
+        return idToken.getString("sub");
+      }
+    }
+    return get("sub");
+  }
+
+  /**
+   * Gets extra attributes of the user. Attributes contain any attributes related
+   * to the outcome of authenticating a user (e.g.: issued date, metadata, etc...)
+   *
+   * @return a json object with any relevant attribute.
+   */
+  JsonObject attributes();
+
+  /**
+   * Flags this user object to be expired. A User is considered expired if it contains an expiration time and
+   * the current clock time is post the expiration date.
+   *
+   * @return {@code true} if expired
+   */
+  default boolean expired() {
+    return expired(attributes().getInteger("leeway", 0));
+  }
+
+  /**
+   * Flags this user object to be expired. Expiration takes 3 values in account:
+   *
+   * <ol>
+   *   <li>{@code exp} "expiration" timestamp in seconds.</li>
+   *   <li>{@code iat} "issued at" in seconds.</li>
+   *   <li>{@code nbf} "not before" in seconds.</li>
+   * </ol>
+   * A User is considered expired if it contains any of the above and
+   * the current clock time does not agree with the parameter value. If the {@link #attributes()} do not contain a key
+   * then {@link #principal()} properties are checked.
+   * <p>
+   * If all of the properties are not available the user will not expire.
+   * <p>
+   * Implementations of this interface might relax this rule to account for a leeway to safeguard against
+   * clock drifting.
+   *
+   * @param leeway a greater than zero leeway value.
+   * @return {@code true} if expired
+   */
+  default boolean expired(int leeway) {
+    // All dates are of type NumericDate
+    // a NumericDate is: numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until
+    // the specified UTC date/time, ignoring leap seconds
+    final long now = (System.currentTimeMillis() / 1000);
+
+    if (containsKey("exp")) {
+      if (now - leeway >= attributes().getLong("exp", principal().getLong("exp", 0L))) {
+        return true;
+      }
+    }
+
+    if (containsKey("iat")) {
+      Long iat = attributes().getLong("iat", principal().getLong("iat", 0L));
+      // issue at must be in the past
+      if (iat > now + leeway) {
+        return true;
+      }
+    }
+
+    if (containsKey("nbf")) {
+      Long nbf = attributes().getLong("nbf", principal().getLong("nbf", 0L));
+      // not before must be after now
+      if (nbf > now + leeway) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Get a value from the user object. This method will perform lookups on several places before returning a value.
+   * <ol>
+   *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
+   *   <li>If exists the value will be returned from the {@link #attributes()}</li>
+   *   <li>If exists the value will be returned from the {@link #principal()}</li>
+   *   <li>Otherwise it will be {@code null}</li>
+   * </ol>
+   * @param key the key to look up
+   * @param <T> the expected type
+   * @return the value or null if missing
+   * @throws ClassCastException if the value cannot be casted to {@code T}
+   */
+  default <T> @Nullable T get(String key) {
+    if (attributes().containsKey("rootClaim")) {
+      JsonObject rootClaim;
+      try {
+        rootClaim = attributes().getJsonObject(attributes().getString("rootClaim"));
+      } catch (ClassCastException e) {
+        // ignore
+        rootClaim = null;
+      }
+      if (rootClaim != null && rootClaim.containsKey(key)) {
+        return (T) rootClaim.getValue(key);
+      }
+    }
+    if (attributes().containsKey(key)) {
+      return (T) attributes().getValue(key);
+    }
+    if (principal().containsKey(key)) {
+      return (T) principal().getValue(key);
+    }
+    return null;
+  }
+
+  /**
+   * Get a value from the user object. This method will perform lookups on several places before returning a value.
+   * <ol>
+   *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
+   *   <li>If exists the value will be returned from the {@link #attributes()}</li>
+   *   <li>If exists the value will be returned from the {@link #principal()}</li>
+   *   <li>Otherwise it will be {@code null}</li>
+   * </ol>
+   * @param key the key to look up
+   * @param defaultValue default value to return if missing
+   * @param <T> the expected type
+   * @return the value or null if missing
+   * @throws ClassCastException if the value cannot be casted to {@code T}
+   */
+  default <T> @Nullable T getOrDefault(String key, T defaultValue) {
+    if (attributes().containsKey("rootClaim")) {
+      JsonObject rootClaim;
+      try {
+        rootClaim = attributes().getJsonObject(attributes().getString("rootClaim"));
+      } catch (ClassCastException e) {
+        // ignore
+        rootClaim = null;
+      }
+      if (rootClaim != null && rootClaim.containsKey(key)) {
+        return (T) rootClaim.getValue(key);
+      }
+    }
+    if (attributes().containsKey(key)) {
+      return (T) attributes().getValue(key);
+    }
+    if (principal().containsKey(key)) {
+      return (T) principal().getValue(key);
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Checks if a value exists on the user object. This method will perform lookups on several places before returning.
+   * <ol>
+   *   <li>If there is a {@code rootClaim} the look up will happen in the {@code attributes[rootClaim]}</li>
+   *   <li>If exists the value will be returned from the {@link #attributes()}</li>
+   *   <li>If exists the value will be returned from the {@link #principal()}</li>
+   *   <li>Otherwise it will be {@code null}</li>
+   * </ol>
+   * @param key the key to look up
+   * @return the value or null if missing
+   */
+  default boolean containsKey(String key) {
+    if (attributes().containsKey("rootClaim")) {
+      JsonObject rootClaim;
+      try {
+        rootClaim = attributes().getJsonObject(attributes().getString("rootClaim"));
+      } catch (ClassCastException e) {
+        // ignore
+        rootClaim = null;
+      }
+      if (rootClaim != null && rootClaim.containsKey(key)) {
+        return true;
+      }
+    }
+    return attributes().containsKey(key) || principal().containsKey(key);
+  }
+
+  /**
+   * Returns user's authorizations that have been previously loaded by the providers.
+   *
+   * @return authorizations holder for the user.
+   */
+  default Authorizations authorizations() {
+    return new AuthorizationsImpl();
+  }
+
+  /**
    * Is the user authorised to
    *
    * @param authority     the authority - what this really means is determined by the specific implementation. It might
@@ -113,7 +324,46 @@ public interface User extends io.vertx.ext.auth.user.User {
   @Fluent
   @Deprecated
   default User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-    return (User) io.vertx.ext.auth.user.User.super.isAuthorized(authority, resultHandler);
+    return isAuthorized(
+      authority.startsWith("role:") ?
+        RoleBasedAuthorization.create(authority.substring(5))
+        : WildcardPermissionBasedAuthorization.create(authority), resultHandler);
+  }
+
+  /**
+   * Is the user authorised to
+   *
+   * @param authority the authority - what this really means is determined by the specific implementation. It might
+   *                  represent a permission to access a resource e.g. `printers:printer34` or it might represent
+   *                  authority to a role in a roles based model, e.g. `role:admin`.
+   * @return Future handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
+   * `true` if the they has the authority or `false` otherwise.
+   * @see User#isAuthorized(Authorization, Handler)
+   */
+  @Deprecated
+  default Future<Boolean> isAuthorized(Authorization authority) {
+    Promise<Boolean> promise = Promise.promise();
+    isAuthorized(authority, promise);
+    return promise.future();
+  }
+
+  /**
+   * Is the user authorised to
+   *
+   * @param authority the authority - what this really means is determined by the specific implementation. It might
+   *                  represent a permission to access a resource e.g. `printers:printer34` or it might represent
+   *                  authority to a role in a roles based model, e.g. `role:admin`.
+   * @return Future handler that will be called with an {@link io.vertx.core.AsyncResult} containing the value
+   * `true` if the they has the authority or `false` otherwise.
+   * @see User#isAuthorized(String, Handler)
+   * @deprecated Use typed alternative {@link #isAuthorized(Authorization)}
+   */
+  @Deprecated
+  default Future<Boolean> isAuthorized(String authority) {
+    return isAuthorized(
+      authority.startsWith("role:") ?
+        RoleBasedAuthorization.create(authority.substring(5))
+        : WildcardPermissionBasedAuthorization.create(authority));
   }
 
   /**
@@ -126,8 +376,31 @@ public interface User extends io.vertx.ext.auth.user.User {
   @Fluent
   @Deprecated
   default User clearCache() {
-    return (User) io.vertx.ext.auth.user.User.super.clearCache();
+    authorizations().clear();
+    return this;
   }
+
+  /**
+   * Get the underlying principal for the User. What this actually returns depends on the implementation.
+   * For a simple user/password based auth, it's likely to contain a JSON object with the following structure:
+   * <pre>
+   *   {
+   *     "username", "tim"
+   *   }
+   * </pre>
+   *
+   * @return JSON representation of the Principal
+   */
+  JsonObject principal();
+
+  /**
+   * Set the auth provider for the User. This is typically used to reattach a detached User with an AuthProvider, e.g.
+   * after it has been deserialized.
+   *
+   * @param authProvider the AuthProvider - this must be the same type of AuthProvider that originally created the User
+   */
+  @Deprecated
+  void setAuthProvider(AuthProvider authProvider);
 
   /**
    * Merge the principal and attributes of a second user into this object properties.
@@ -167,5 +440,20 @@ public interface User extends io.vertx.ext.auth.user.User {
    * @return fluent self
    */
   @Fluent
-  User merge(io.vertx.ext.auth.user.User other);
+  User merge(User other);
+
+  /**
+   * The "amr" (Authentication Methods References) returns a unique list of claims as defined and
+   * registered in the IANA "JSON Web Token Claims" registry. The values in this collection are based
+   * on <a href="https://datatracker.ietf.org/doc/html/rfc8176">RFC8176</a>. This information can be used
+   * to filter authenticated users by their authentication mechanism.
+   *
+   * @return {@code true} if claim is present in the principal.
+   */
+  default boolean hasAmr(String value) {
+    if (principal().containsKey("amr")) {
+      return principal().getJsonArray("amr").contains(value);
+    }
+    return false;
+  }
 }

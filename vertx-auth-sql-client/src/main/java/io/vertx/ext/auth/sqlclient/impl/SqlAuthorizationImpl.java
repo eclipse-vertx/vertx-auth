@@ -3,6 +3,7 @@ package io.vertx.ext.auth.sqlclient.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
@@ -67,13 +68,13 @@ public class SqlAuthorizationImpl implements SqlAuthorization {
   }
 
   @Override
-  public void getAuthorizations(io.vertx.ext.auth.user.User user, Handler<AsyncResult<Void>> handler) {
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
     getAuthorizations(user)
       .onComplete(handler);
   }
 
   @Override
-  public Future<Void> getAuthorizations(io.vertx.ext.auth.user.User user) {
+  public Future<Void> getAuthorizations(User user) {
     String username = user.principal().getString("username");
     if (username != null) {
       return getRoles(username)

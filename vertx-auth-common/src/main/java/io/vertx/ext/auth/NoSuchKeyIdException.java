@@ -18,11 +18,8 @@ package io.vertx.ext.auth;
 /**
  * No such KeyId exception is thrown when a JWT with a well known "kid" does not find a matching "kid" in the crypto
  * list.
- *
- * @deprecated instead catch {@link io.vertx.ext.auth.jose.NoSuchKeyIdException}
  */
-@Deprecated
-public class NoSuchKeyIdException extends RuntimeException {
+public final class NoSuchKeyIdException extends RuntimeException {
 
   private final String id;
 
