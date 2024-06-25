@@ -1,4 +1,4 @@
-package io.vertx.ext.auth.jose;
+package io.vertx.ext.auth;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;

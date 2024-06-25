@@ -145,7 +145,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public Future<io.vertx.ext.auth.user.User> authenticate(Credentials credentials) {
+  public Future<io.vertx.ext.auth.User> authenticate(Credentials credentials) {
     final UsernamePasswordCredentials authInfo;
     try {
       try {
@@ -161,7 +161,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
     return getUser(authInfo.getUsername())
       .compose(propertyUser -> {
         if (Objects.equals(propertyUser.password, authInfo.getPassword())) {
-          io.vertx.ext.auth.user.User user = io.vertx.ext.auth.user.User.fromName(propertyUser.name);
+          io.vertx.ext.auth.User user = io.vertx.ext.auth.User.fromName(propertyUser.name);
           // metadata "amr"
           user.principal().put("amr", Collections.singletonList("pwd"));
           return Future.succeededFuture(user);
@@ -178,7 +178,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   }
 
   @Override
-  public Future<Void> getAuthorizations(io.vertx.ext.auth.user.User user) {
+  public Future<Void> getAuthorizations(io.vertx.ext.auth.User user) {
     String username = user.principal().getString("username");
     return getUser(username)
       .onSuccess(record -> {

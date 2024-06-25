@@ -17,17 +17,14 @@
 package examples;
 
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.*;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
-import io.vertx.ext.auth.chain.ChainAuth;
-import io.vertx.ext.auth.jose.KeyStoreOptions;
-import io.vertx.ext.auth.jose.PubSecKeyOptions;
 import io.vertx.ext.auth.prng.VertxContextPRNG;
-import io.vertx.ext.auth.user.User;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>

@@ -2,7 +2,7 @@ package io.vertx.ext.auth.test.jwt;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jose.KeyStoreOptions;
+import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;

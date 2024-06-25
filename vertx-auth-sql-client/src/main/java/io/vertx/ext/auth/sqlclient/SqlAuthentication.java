@@ -18,7 +18,6 @@ package io.vertx.ext.auth.sqlclient;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.auth.hashing.HashingStrategy;
 import io.vertx.ext.auth.sqlclient.impl.SqlAuthenticationImpl;
 import io.vertx.sqlclient.SqlClient;
 
@@ -56,14 +55,14 @@ public interface SqlAuthentication extends AuthenticationProvider {
   /**
    * Hashes a password to be stored.
    * <p>
-   * See: {@link HashingStrategy#hash(String, Map, String, String)}
+   * See: {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
    */
   String hash(String id, Map<String, String> params, String salt, String password);
 
   /**
    * Hashes a password to be stored.
    * <p>
-   * See: {@link HashingStrategy#hash(String, Map, String, String)}
+   * See: {@link io.vertx.ext.auth.HashingStrategy#hash(String, Map, String, String)}
    */
   default String hash(String id, String salt, String password) {
     return hash(id, null, salt, password);

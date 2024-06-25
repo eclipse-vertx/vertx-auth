@@ -19,7 +19,6 @@ import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.impl.AuthorizationContextImpl;
 import io.vertx.ext.auth.authorization.impl.PermissionBasedAuthorizationConverter;
-import io.vertx.ext.auth.user.User;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -27,6 +26,8 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

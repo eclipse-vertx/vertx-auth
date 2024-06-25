@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.test.oauth2;
 
-import io.vertx.ext.auth.jose.JWTOptions;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;

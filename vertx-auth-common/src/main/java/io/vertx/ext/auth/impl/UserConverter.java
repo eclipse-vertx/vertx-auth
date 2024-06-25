@@ -14,7 +14,7 @@ package io.vertx.ext.auth.impl;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.authorization.impl.AuthorizationConverter;

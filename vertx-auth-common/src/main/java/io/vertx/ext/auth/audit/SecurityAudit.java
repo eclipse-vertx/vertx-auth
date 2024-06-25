@@ -7,7 +7,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpVersion;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.audit.impl.SecurityAuditNOOP;
 import io.vertx.ext.auth.audit.impl.SecurityAuditLogger;
 import io.vertx.ext.auth.authentication.Credentials;

@@ -1,7 +1,7 @@
 package io.vertx.ext.auth.sqlclient.impl;
 
 import io.vertx.core.Future;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;

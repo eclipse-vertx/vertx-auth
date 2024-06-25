@@ -12,7 +12,7 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.*;
 
 import java.util.Objects;

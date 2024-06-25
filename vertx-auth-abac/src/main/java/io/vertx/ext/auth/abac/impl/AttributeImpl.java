@@ -18,7 +18,7 @@ package io.vertx.ext.auth.abac.impl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.pointer.JsonPointer;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.abac.Attribute;
 
 import java.util.Objects;

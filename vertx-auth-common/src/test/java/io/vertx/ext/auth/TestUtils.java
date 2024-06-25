@@ -14,7 +14,6 @@ package io.vertx.ext.auth;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
-import io.vertx.ext.auth.user.User;
 import org.junit.Assert;
 
 import java.util.function.Function;

@@ -2,7 +2,8 @@ package io.vertx.ext.auth.abac;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.abac.Policy;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Rule;

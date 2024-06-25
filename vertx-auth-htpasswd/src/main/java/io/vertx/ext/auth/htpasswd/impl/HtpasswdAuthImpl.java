@@ -18,7 +18,7 @@ package io.vertx.ext.auth.htpasswd.impl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.hashing.HashingStrategy;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;

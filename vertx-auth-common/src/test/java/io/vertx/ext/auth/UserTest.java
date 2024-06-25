@@ -16,7 +16,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.*;
 import io.vertx.ext.auth.impl.UserConverter;
-import io.vertx.ext.auth.user.User;
 import org.junit.Assert;
 import org.junit.Test;
 

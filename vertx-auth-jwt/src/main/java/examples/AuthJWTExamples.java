@@ -18,10 +18,10 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jose.JWTOptions;
-import io.vertx.ext.auth.jose.KeyStoreOptions;
-import io.vertx.ext.auth.jose.PubSecKeyOptions;
-import io.vertx.ext.auth.user.User;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;

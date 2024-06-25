@@ -72,7 +72,7 @@ What this actually contains depends on the specific implementation; for a simple
 For an implementation based on JWT token or OAuth bearer tokens it might contain the token information.
 
 Authentication occurs asynchronously and the result is passed to the user on the result handler that was provided in the call.
-The async result contains an instance of {@link io.vertx.ext.auth.user.User} which represents the authenticated user.
+The async result contains an instance of {@link io.vertx.ext.auth.User} which represents the authenticated user.
 
 The authentication user object has no context or information on which authorizations the object is entitled.
 The reason why authorization and authentication are decoupled is because, authentication and authorization are two distinguished operations that are not required to be performed on the same provider.
@@ -87,9 +87,9 @@ Here's an example of authenticating a user using a simple username/password impl
 
 == Authorization
 
-Once you have an {@link io.vertx.ext.auth.user.User} instance you can call {@link io.vertx.ext.auth.user.User#authorizations} to get its authorizations.
+Once you have an {@link io.vertx.ext.auth.User} instance you can call {@link io.vertx.ext.auth.User#authorizations} to get its authorizations.
 A newly created user will contain no authorizations.
-You can directly add authorization on the {@link io.vertx.ext.auth.user.User} itself or via an {@link io.vertx.ext.auth.authorization.AuthorizationProvider}.
+You can directly add authorization on the {@link io.vertx.ext.auth.User} itself or via an {@link io.vertx.ext.auth.authorization.AuthorizationProvider}.
 
 The results of all the above are provided asynchronously in the handler.
 
@@ -112,7 +112,7 @@ In order to clear the list of authorizations you can use {@link io.vertx.ext.aut
 
 === The User Principal and Attributes
 
-You can get the Principal corresponding to the authenticated user with {@link io.vertx.ext.auth.user.User#principal()}.
+You can get the Principal corresponding to the authenticated user with {@link io.vertx.ext.auth.User#principal()}.
 
 What this returns depends on the underlying implementation.
 The principal map is the source data that was used to create the user instance.
@@ -133,7 +133,7 @@ If you wish to create your own auth provider you should implement the one or bot
 * {@link io.vertx.ext.auth.authentication.AuthenticationProvider}
 * {@link io.vertx.ext.auth.authorization.AuthorizationProvider}
 
-The user factory can create a {@link io.vertx.ext.auth.user.User} object with the given `principal` JSON content.
+The user factory can create a {@link io.vertx.ext.auth.User} object with the given `principal` JSON content.
 Optionally a second argument `attributes` can be provided to provide extra meta data for later usage.
 One example are the following attributes:
 
@@ -142,7 +142,7 @@ One example are the following attributes:
 * `nbf` - Not before in seconds.
 * `leeway` - clock drift leeway in seconds.
 
-While the first 3 control how the {@link io.vertx.ext.auth.user.User#expired()} method will compute the expiration of the user, the last can be used to allow clock drifting compensation while computing the expiration time.
+While the first 3 control how the {@link io.vertx.ext.auth.User#expired()} method will compute the expiration of the user, the last can be used to allow clock drifting compensation while computing the expiration time.
 
 == Pseudo Random Number Generator
 
@@ -176,8 +176,8 @@ When working with security you will face the need to load security keys.
 There are many formats and standards for security keys which makes it quite a complex task.
 In order to simplify the work on the developer side, this module contains 2 abstractions:
 
-1. {@link io.vertx.ext.auth.jose.KeyStoreOptions} that abstract the JVM keystore common format.
-2. {@link io.vertx.ext.auth.jose.PubSecKeyOptions} that abstract the PEM common format.
+1. {@link io.vertx.ext.auth.KeyStoreOptions} that abstract the JVM keystore common format.
+2. {@link io.vertx.ext.auth.PubSecKeyOptions} that abstract the PEM common format.
 
 To load a local keystore modules shall ask for an options object like:
 
@@ -225,7 +225,7 @@ For an offline experience there is also the tool: <a href="https://connect2id.co
 == Chaining authentication providers
 
 There are cases where it might be interesting to have support for chaining authentication providers, for example look up users on LDAP or properties files.
-This can be achieved with the {@link io.vertx.ext.auth.chain.ChainAuth}.
+This can be achieved with the {@link io.vertx.ext.auth.ChainAuth}.
 
 [source,$lang]
 ----
