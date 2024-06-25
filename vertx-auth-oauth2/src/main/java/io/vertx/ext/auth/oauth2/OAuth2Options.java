@@ -17,7 +17,6 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
@@ -85,8 +84,8 @@ public class OAuth2Options {
 
   private String userAgent;
   private JsonObject headers;
-  private List<io.vertx.ext.auth.jose.PubSecKeyOptions> pubSecKeys;
-  private io.vertx.ext.auth.jose.JWTOptions jwtOptions;
+  private List<PubSecKeyOptions> pubSecKeys;
+  private JWTOptions jwtOptions;
   // extra parameters to be added while requesting a token
   private JsonObject extraParams;
   // client config
@@ -126,9 +125,13 @@ public class OAuth2Options {
     if (other.pubSecKeys == null) {
       pubSecKeys = null;
     } else {
-      pubSecKeys = new ArrayList<>(other.pubSecKeys);
+      List<PubSecKeyOptions> list = new ArrayList<>(other.pubSecKeys.size());
+      for (PubSecKeyOptions pubSecKey : other.pubSecKeys) {
+        list.add(new PubSecKeyOptions(pubSecKey));
+      }
+      pubSecKeys = list;
     }
-    jwtOptions = other.jwtOptions == null ? null : new io.vertx.ext.auth.jose.JWTOptions(other.jwtOptions);
+    jwtOptions = other.jwtOptions == null ? null : new JWTOptions(other.jwtOptions);
     logoutPath = other.getLogoutPath();
     extraParams = other.extraParams == null ? null : other.extraParams.copy();
     userInfoParams = other.userInfoParams == null ? null : other.userInfoParams.copy();
@@ -345,32 +348,15 @@ public class OAuth2Options {
    * @return the pub sec key options
    */
   public List<PubSecKeyOptions> getPubSecKeys() {
-    if (pubSecKeys == null) {
-      return null;
-    } else {
-      List<PubSecKeyOptions> list = new ArrayList<>();
-      pubSecKeys.forEach(psk -> {
-        list.add(new PubSecKeyOptions(psk.toJson()));
-      });
-      return list;
-    }
+    return pubSecKeys;
   }
 
   public OAuth2Options setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
-    if (pubSecKeys == null) {
-      this.pubSecKeys = null;
-    } else {
-      this.pubSecKeys = new ArrayList<>(pubSecKeys);
-    }
+    this.pubSecKeys = pubSecKeys;
     return this;
   }
 
   public OAuth2Options addPubSecKey(PubSecKeyOptions pubSecKey) {
-    return addPubSecKey((io.vertx.ext.auth.jose.PubSecKeyOptions) pubSecKey);
-  }
-
-  @GenIgnore
-  public OAuth2Options addPubSecKey(io.vertx.ext.auth.jose.PubSecKeyOptions pubSecKey) {
     if (pubSecKeys == null) {
       pubSecKeys = new ArrayList<>();
     }
@@ -508,20 +494,10 @@ public class OAuth2Options {
   }
 
   public JWTOptions getJWTOptions() {
-    if (jwtOptions instanceof JWTOptions) {
-      return (JWTOptions) jwtOptions;
-    } else {
-      return new JWTOptions(jwtOptions.toJson());
-    }
+    return jwtOptions;
   }
 
   public OAuth2Options setJWTOptions(JWTOptions jwtOptions) {
-    this.jwtOptions = jwtOptions;
-    return this;
-  }
-
-  @GenIgnore
-  public OAuth2Options setJWTOptions(io.vertx.ext.auth.jose.JWTOptions jwtOptions) {
     this.jwtOptions = jwtOptions;
     return this;
   }

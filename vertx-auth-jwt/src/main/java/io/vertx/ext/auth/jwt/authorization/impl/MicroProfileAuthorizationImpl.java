@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 
 import java.util.HashSet;
@@ -38,13 +39,13 @@ public class MicroProfileAuthorizationImpl implements MicroProfileAuthorization 
   }
 
   @Override
-  public void getAuthorizations(io.vertx.ext.auth.user.User user, Handler<AsyncResult<Void>> handler) {
+  public void getAuthorizations(User user, Handler<AsyncResult<Void>> handler) {
     getAuthorizations(user)
       .onComplete(handler);
   }
 
   @Override
-  public Future<Void> getAuthorizations(io.vertx.ext.auth.user.User user) {
+  public Future<Void> getAuthorizations(User user) {
     final JsonObject accessToken = user.attributes().getJsonObject("accessToken");
 
     if (accessToken == null) {

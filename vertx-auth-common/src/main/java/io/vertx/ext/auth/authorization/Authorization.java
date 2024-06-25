@@ -63,7 +63,7 @@ public interface Authorization {
    * @return true if there's a match
    */
   @GenIgnore(PERMITTED_TYPE)
-  default boolean match(io.vertx.ext.auth.user.User user) {
+  default boolean match(User user) {
     return match(AuthorizationContext.create(user));
   }
 

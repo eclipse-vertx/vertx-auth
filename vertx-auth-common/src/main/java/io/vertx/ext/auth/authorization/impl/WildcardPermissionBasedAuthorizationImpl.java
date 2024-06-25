@@ -12,13 +12,13 @@
  ********************************************************************************/
 package io.vertx.ext.auth.authorization.impl;
 
-import io.vertx.ext.auth.user.User;
+import java.util.Objects;
+
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationContext;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authorization.WildcardPermissionBasedAuthorization;
-
-import java.util.Objects;
 
 public class WildcardPermissionBasedAuthorizationImpl implements WildcardPermissionBasedAuthorization {
 

@@ -104,7 +104,7 @@ public class UserImpl implements User, ClusterSerializable {
   }
 
   @Override
-  public User merge(io.vertx.ext.auth.user.User other) {
+  public User merge(User other) {
     if (other == null) {
       return this;
     }

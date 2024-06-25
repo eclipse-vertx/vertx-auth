@@ -75,31 +75,17 @@ public class OAuth2Keycloak14IT {
   }
 
   @Test
-  public void discoverPublicOpenIdDeprecated(TestContext should) {
-    discoverPublicOpenId(should, new OAuth2Options()
+  public void discoverPublicOpenId(TestContext should) {
+    final Async test = should.async();
+
+    OAuth2Options options = new OAuth2Options()
       .setFlow(OAuth2FlowType.PASSWORD)
       .setClientId("public")
       .setTenant("vertx-it")
       .setSite(site + "/auth/realms/{tenant}")
       .setJWTOptions(
         new JWTOptions()
-          .addAudience("account")));
-  }
-
-  @Test
-  public void discoverPublicOpenId(TestContext should) {
-    discoverPublicOpenId(should, new OAuth2Options()
-      .setFlow(OAuth2FlowType.PASSWORD)
-      .setClientId("public")
-      .setTenant("vertx-it")
-      .setSite(site + "/auth/realms/{tenant}")
-      .setJWTOptions(
-        new io.vertx.ext.auth.jose.JWTOptions()
-          .addAudience("account")));
-  }
-
-  private void discoverPublicOpenId(TestContext should, OAuth2Options options) {
-    final Async test = should.async();
+          .addAudience("account"));
 
     options.getHttpClientOptions().setTrustAll(true);
 
@@ -474,8 +460,8 @@ public class OAuth2Keycloak14IT {
       });
   }
 
-  private Future<io.vertx.ext.auth.user.User> loginAs(OAuth2Auth oauth2, TestContext should, String username, String audience, List<String> scopes) {
-    final Promise<io.vertx.ext.auth.user.User> promise = Promise.promise();
+  private Future<User> loginAs(OAuth2Auth oauth2, TestContext should, String username, String audience, List<String> scopes) {
+    final Promise<User> promise = Promise.promise();
 
     oauth2
       .authenticate(new Oauth2Credentials().setUsername(username).setPassword("password").setScopes(scopes))
@@ -490,8 +476,8 @@ public class OAuth2Keycloak14IT {
     return promise.future();
   }
 
-  private Future<io.vertx.ext.auth.user.User> loginAs(OAuth2Auth oauth2, TestContext should, String username, List<String> audience, List<String> scopes) {
-    final Promise<io.vertx.ext.auth.user.User> promise = Promise.promise();
+  private Future<User> loginAs(OAuth2Auth oauth2, TestContext should, String username, List<String> audience, List<String> scopes) {
+    final Promise<User> promise = Promise.promise();
 
     oauth2
       .authenticate(new Oauth2Credentials().setUsername(username).setPassword("password").setScopes(scopes))

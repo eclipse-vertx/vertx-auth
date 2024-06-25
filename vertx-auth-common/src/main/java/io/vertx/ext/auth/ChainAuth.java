@@ -23,12 +23,9 @@ import io.vertx.ext.auth.impl.ChainAuthImpl;
 /**
  * Chain several authentication providers as if they were one. This is useful for cases where one want to authenticate across
  * several providers, for example, database and fallback to passwd file.
- *
- * @deprecated instead use {@link io.vertx.ext.auth.chain.ChainAuth}
  */
-@Deprecated
 @VertxGen
-public interface ChainAuth extends io.vertx.ext.auth.chain.ChainAuth {
+public interface ChainAuth extends AuthenticationProvider {
 
   /**
    * Create a Chainable Auth Provider auth provider
