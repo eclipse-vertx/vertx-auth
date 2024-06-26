@@ -14,6 +14,8 @@ package io.vertx.ext.auth.properties.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
@@ -25,14 +27,12 @@ import io.vertx.ext.auth.properties.PropertyFileAuthorization;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author <a href="mail://stephane.bastian.dev@gmail.com">Stephane Bastian</a>
  */
 public class PropertyFileAuthenticationImpl implements PropertyFileAuthentication, PropertyFileAuthorization {
-  private final static Logger logger = Logger.getLogger(PropertyFileAuthentication.class.getName());
+  private final static Logger logger = LoggerFactory.getLogger(PropertyFileAuthentication.class.getName());
 
   private static class User {
     final String name;
@@ -83,7 +83,7 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
       }
 
       if (line.startsWith("user.")) {
-        logger.log(Level.FINE, () -> "read user line: " + line);
+        logger.debug("read user line: " + line);
         String usernameAndRoles = line.substring(5);
         int index = usernameAndRoles.indexOf('=');
         String tmpName = index > 0 ? usernameAndRoles.substring(0, index).trim() : "";
@@ -107,10 +107,10 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
             roleIndex++;
           }
         } else {
-          logger.log(Level.WARNING, () -> "read blank username - " + line);
+          logger.warn("read blank username - " + line);
         }
       } else if (line.startsWith("role.")) {
-        logger.log(Level.FINE, () -> "read role line - " + line);
+        logger.debug("read role line - " + line);
         String roleAndProperties = line.substring(5);
         int index = roleAndProperties.indexOf('=');
         String tmpName = index > 0 ? roleAndProperties.substring(0, index).trim() : "";
@@ -128,10 +128,10 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
             }
           }
         } else {
-          logger.log(Level.WARNING, () -> "read blank role - " + line);
+          logger.warn("read blank role - " + line);
         }
       } else {
-        logger.log(Level.WARNING, () -> "read unknow line - " + line);
+        logger.warn("read unknown line - " + line);
       }
     }
   }

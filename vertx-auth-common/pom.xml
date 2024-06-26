@@ -53,6 +53,7 @@
               <goal>verify</goal>
             </goals>
             <configuration>
+              <useModulePath>false</useModulePath>
               <includes>
                 <include>io/vertx/ext/auth/it/JWKLegacyBase64Test.java</include>
               </includes>

@@ -90,6 +90,9 @@
                   <goal>integration-test</goal>
                   <goal>verify</goal>
                 </goals>
+                <configuration>
+                  <useModulePath>false</useModulePath>
+                </configuration>
               </execution>
             </executions>
           </plugin>
