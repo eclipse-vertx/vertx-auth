@@ -26,12 +26,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
-import static io.vertx.core.json.impl.JsonUtil.BASE64_DECODER;
 import static io.vertx.ext.auth.impl.Codec.base64Decode;
 
 public class MetaDataServiceImpl implements MetaDataService {
+
+  public static final Base64.Decoder BASE64_DECODER = Base64.getUrlDecoder();
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
