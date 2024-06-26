@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-class VariableAwareExpression {
+public class VariableAwareExpression {
   private final String value;
   private final transient Function<MultiMap, String>[] parts;
   private transient boolean hasVariable = false;
