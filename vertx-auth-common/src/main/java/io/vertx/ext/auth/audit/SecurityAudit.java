@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.audit;
 
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -49,6 +50,7 @@ public interface SecurityAudit {
 
   void audit(Marker marker, boolean success);
 
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   default <T> Handler<AsyncResult<T>> auditHandlerFor(Marker marker) {
     return event -> audit(marker, event.succeeded());
   }
