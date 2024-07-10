@@ -21,6 +21,12 @@
 
   <packaging>pom</packaging>
 
+  <scm>
+    <connection>scm:git:git@github.com:eclipse-vertx/vertx-auth.git</connection>
+    <developerConnection>scm:git:git@github.com:eclipse-vertx/vertx-auth.git</developerConnection>
+    <url>git@github.com:eclipse-vertx/vertx-auth.git</url>
+  </scm>
+
   <modules>
     <module>vertx-auth-common</module>
     <module>vertx-auth-abac</module>
@@ -47,7 +53,6 @@
   <name>Vert.x Auth</name>
 
   <properties>
-    <stack.version>5.0.0-SNAPSHOT</stack.version>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
     <test.useModulePath>true</test.useModulePath>
   </properties>
@@ -57,7 +62,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
