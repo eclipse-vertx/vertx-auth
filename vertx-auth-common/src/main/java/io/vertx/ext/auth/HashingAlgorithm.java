@@ -25,7 +25,9 @@ import java.util.Set;
  * Hashing Algorithm. A common interface to interact with any system provided algorithms.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ * @deprecated this class should not be used directly
  */
+@Deprecated
 @VertxGen
 public interface HashingAlgorithm {
 

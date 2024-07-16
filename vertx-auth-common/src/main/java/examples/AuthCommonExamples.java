@@ -18,11 +18,15 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.*;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.ChainAuth;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.prng.VertxContextPRNG;
+import io.vertx.ext.auth.User;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>

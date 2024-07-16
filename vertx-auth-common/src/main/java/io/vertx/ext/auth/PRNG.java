@@ -29,7 +29,9 @@ import static io.vertx.ext.auth.impl.Codec.base64UrlEncode;
  * of cracking the random number generator.
  *
  * @author Paulo Lopes
+ * @deprecated this class should not be used directly and should be package private
  */
+@Deprecated
 public class PRNG implements VertxContextPRNG {
 
   private static final int DEFAULT_SEED_INTERVAL_MILLIS = 300000;

@@ -28,7 +28,9 @@ import java.util.ServiceLoader;
  * This class will load system provided hashing strategies and algorithms.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
+ * @deprecated this class should not be used directly
  */
+@Deprecated
 @VertxGen
 public interface HashingStrategy {
 
