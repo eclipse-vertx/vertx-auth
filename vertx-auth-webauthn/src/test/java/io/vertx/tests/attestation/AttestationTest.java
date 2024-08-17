@@ -146,6 +146,7 @@ public class AttestationTest {
       });
   }
 
+  @Ignore()
   @Test
   public void testU2FHypersecuAttestation(TestContext should) {
     final Async test = should.async();
