@@ -59,7 +59,7 @@ public class PubArea {
       scheme = pubBuffer.getUnsignedShort(pos);
       pos+=2;
       curveID = pubBuffer.getUnsignedShort(pos);
-      pos+=4;
+      pos+=2;
       kdf = pubBuffer.getUnsignedShort(pos);
       pos+=2;
     } else {
