@@ -56,7 +56,7 @@ A typical flow of JWT usage is that in your application you have one end point t
 {@link examples.AuthJWTExamples#example7}
 ----
 
-=== Loading Keys
+== Loading Keys
 
 Loading keys can be performed in 3 different ways:
 
@@ -64,7 +64,7 @@ Loading keys can be performed in 3 different ways:
 * Using OpenSSL `pem` formatted files (pub/sec keys)
 * Using Java Keystore files (both symmetric and pub/sec keys)
 
-==== Using Symmetric Keys
+=== Using Symmetric Keys
 
 The default signature method for JWT's is known as `HS256`. `HS` stands in this case for `HMAC Signature using SHA256`.
 
@@ -78,7 +78,7 @@ All you need is a secret that is shared between you and the 3rd party, for examp
 
 In this case the secret is configured as a public key, as it is a token that is known to both parties and you configure your PubSec key as being symmetric.
 
-==== Using RSA keys
+=== Using RSA keys
 
 This section is by no means a manual on OpenSSL and a read on OpenSSL command line usage is advised.
 We will cover how to generate the most common keys and how to use them with JWT auth.
@@ -156,7 +156,7 @@ Now you can use this to issue or validate tokens:
 {@link examples.AuthJWTExamples#example15}
 ----
 
-==== Using EC keys
+=== Using EC keys
 
 Elliptic Curve keys are also supported, however the default JDK has some limitations on the features that can be used.
 
@@ -215,7 +215,7 @@ So you can do all operations with it:
 {@link examples.AuthJWTExamples#example18}
 ----
 
-==== The JWT keystore file
+=== The JWT keystore file
 
 If you prefer to use Java Keystores, then you can do it either.
 
@@ -246,7 +246,7 @@ The validity of the certificate is tested on load and keys will not be loaded if
 All keys algorithms will be checked if can be matched to the given alias.
 For example an `RS256` key will not be loaded if issued with a `EC` algorithm, or if issued with `RSA` but signature `SHA1WithRSA` instead of `SHA256WithRSA`.
 
-===== Generate a new Keystore file
+==== Generate a new Keystore file
 
 The only required tool to generate a keystore file is `keytool`, you can now specify which algorithms you need by running:
 
@@ -264,7 +264,7 @@ keytool -genkeypair -keystore keystore.jceks -storetype jceks -storepass secret 
 
 For more information on keystores and how to use the `PKCS12` format (Default from Java >=9) please see the documentation of the common module.
 
-=== Read only tokens
+== Read only tokens
 
 If you need to consume JWT tokens issues by third parties you probably won't have the private key with you, in that case all you need to have is a public key im PEM format.
 
@@ -338,7 +338,7 @@ The typical usage is to extract the permissions form the user object using the p
 {@link examples.AuthJWTExamples#example13}
 ----
 
-By default the provider will lookup under the key `permissions` but like the other providers one can extend the concept to authorities to roles by using the `:` as a splitter, so `role:authority` can be used to lookup the token.
+By default, the provider will lookup under the key `permissions` but like the other providers one can extend the concept to authorities to roles by using the `:` as a splitter, so `role:authority` can be used to lookup the token.
 
 Since JWT are quite free form and there is no standard on where to lookup for the claims the location can be configured to use something else than `permissions`, for example one can even lookup under a path like this:
 
@@ -383,5 +383,5 @@ This means that there is no `iat` field in the token.
 Token expiration is controlled by the property `expiresInSeconds`, by default there is no expiration.
 Other control fields `audience`, `issuer` and `subject` are then picked from the config is available and added to the token metadata.
 
-Finally the token is signed and encoded in the correct format.
+Finally, the token is signed and encoded in the correct format.
 
