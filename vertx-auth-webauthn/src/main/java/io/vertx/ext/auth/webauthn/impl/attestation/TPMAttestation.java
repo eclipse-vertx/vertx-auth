@@ -168,13 +168,21 @@ public class TPMAttestation implements Attestation {
         }
       } else if (pubArea.getType() == TPM_ALG_ECC) {
         // extract the RSA parameters from the COSE CBOR
-        byte[] crv = base64UrlDecode(cosePublicKey.getString("-1"));
-        byte[] x = base64UrlDecode(cosePublicKey.getString("-2"));
-        byte[] y = base64UrlDecode(cosePublicKey.getString("-3"));
-        // Do some bit shifting to get to an integer
-        if (pubArea.getCurveID() != crv[0] + (crv[1] << 8)) {
+        int crv;
+        if(cosePublicKey.getValue("-1") instanceof String){
+          byte[] byteCrv = base64UrlDecode(cosePublicKey.getString("-1"));
+          // Do some bit shifting to get to an integer
+          crv = byteCrv[0] + (byteCrv[1] << 8);
+        }
+        else{
+          crv = cosePublicKey.getInteger("-1");
+        }
+        if (mapCurveId(pubArea.getCurveID()) != crv) {
           throw new AttestationException("Unexpected public key crv");
         }
+        byte[] x = base64UrlDecode(cosePublicKey.getString("-2"));
+        byte[] y = base64UrlDecode(cosePublicKey.getString("-3"));
+
         // 4. Check that pubArea.unique is set to the same public key,
         //    as the one in “authData” struct.
         if (!MessageDigest.isEqual(pubArea.getUnique(), Buffer.buffer().appendBytes(x).appendBytes(y).getBytes())) {
@@ -409,5 +417,14 @@ public class TPMAttestation implements Attestation {
              SignatureException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
       throw new AttestationException(e);
     }
+  }
+  // TPM-2.0-1.83-Part-2-Structures. 6.4 Table10
+  private int mapCurveId(int curveId){
+    switch (curveId){
+      case 3: return 1; //ECC_NIST_P256
+      case 4: return 2; //ECC_NIST_P384
+      case 5: return 3; //ECC_NIST_P521
+    }
+    return 0;
   }
 }
