@@ -55,13 +55,13 @@
       
     <artifactId>vertx-auth-parent</artifactId>
       
-    <version>4.5.10</version>
+    <version>4.5.11-SNAPSHOT</version>
       
     <name>Vert.x Auth</name>
       
     <properties>
             
-        <stack.version>4.5.10</stack.version>
+        <stack.version>4.5.11-SNAPSHOT</stack.version>
             
         <doc.skip>true</doc.skip>
             
