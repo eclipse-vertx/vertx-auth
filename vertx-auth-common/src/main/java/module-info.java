@@ -25,6 +25,7 @@ module io.vertx.auth.common {
   exports io.vertx.ext.auth.authentication;
   exports io.vertx.ext.auth.hashing;
   exports io.vertx.ext.auth.prng;
+  exports io.vertx.ext.auth.audit;
 
   uses HashingAlgorithm;
   provides HashingAlgorithm with

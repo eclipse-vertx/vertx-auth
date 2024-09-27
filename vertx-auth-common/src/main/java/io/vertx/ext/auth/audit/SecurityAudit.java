@@ -17,12 +17,14 @@ import io.vertx.ext.auth.authorization.Authorization;
 @VertxGen
 public interface SecurityAudit {
 
+  SecurityAudit NOOP = new SecurityAuditNOOP();
+
   static SecurityAudit create() {
     if (SecurityAuditLogger.isEnabled()) {
       return new SecurityAuditLogger();
     }
     // no logging
-    return SecurityAuditNOOP.INSTANCE;
+    return NOOP;
   }
 
   @Fluent
