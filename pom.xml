@@ -54,7 +54,6 @@
 
   <properties>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-    <test.useModulePath>true</test.useModulePath>
   </properties>
 
   <dependencyManagement>
@@ -123,12 +122,6 @@
               </configuration>
             </execution>
           </executions>
-        </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <useModulePath>${test.useModulePath}</useModulePath>
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
