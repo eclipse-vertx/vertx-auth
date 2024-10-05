@@ -52,10 +52,6 @@
 
   <name>Vert.x Auth</name>
 
-  <properties>
-    <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
