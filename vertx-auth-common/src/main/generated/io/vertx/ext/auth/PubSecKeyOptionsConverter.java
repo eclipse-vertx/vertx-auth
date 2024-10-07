@@ -25,7 +25,7 @@ public class PubSecKeyOptionsConverter {
           break;
         case "buffer":
           if (member.getValue() instanceof String) {
-            obj.setBuffer(io.vertx.core.buffer.Buffer.buffer(BASE64_DECODER.decode((String)member.getValue())));
+            obj.setBuffer(io.vertx.core.buffer.Buffer.fromJson((String)member.getValue()));
           }
           break;
         case "id":
@@ -46,7 +46,7 @@ public class PubSecKeyOptionsConverter {
       json.put("algorithm", obj.getAlgorithm());
     }
     if (obj.getBuffer() != null) {
-      json.put("buffer", BASE64_ENCODER.encodeToString(obj.getBuffer().getBytes()));
+      json.put("buffer", obj.getBuffer().toJson());
     }
     if (obj.getId() != null) {
       json.put("id", obj.getId());
