@@ -4,16 +4,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.oauth2.Oauth2Credentials}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.auth.oauth2.Oauth2Credentials} original class using Vert.x codegen.
  */
 public class Oauth2CredentialsConverter {
-
-  private static final Base64.Decoder BASE64_DECODER = Base64.getUrlDecoder();
-  private static final Base64.Encoder BASE64_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
    static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Oauth2Credentials obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
