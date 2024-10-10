@@ -1,0 +1,23 @@
+= Vert.x WebAuthN4J Auth
+
+This component contains a WebAuthn authentication mechanism using https://github.com/webauthn4j/webauthn4j[WebAuthn4J].
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
+
+FIDO2 is a "passwordless" authentication mechanism and the JavaScript API is more known as WebAuthN.
+
+WebAuthN allows users to authenticate using a secure device or token and no passwords are exchange between the browser and the server (also known as Relay Party).
+
+The current implementation supports both authentication and device attestation.
+
+Device attestation is a verification of the device itself.
+Currently the following attestations are implemented:
+
+* none
+* U2F (FIDO-U2F tokens, e.g.: Yubikey's)
+* Packed
+* Android Key
+* Android Safetynet
+* TPM
+* Apple
+
+
