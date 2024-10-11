@@ -1,10 +1,7 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.DummyStore;
-import io.vertx.ext.auth.webauthn.RelyingParty;
-import io.vertx.ext.auth.webauthn.WebAuthn;
-import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
