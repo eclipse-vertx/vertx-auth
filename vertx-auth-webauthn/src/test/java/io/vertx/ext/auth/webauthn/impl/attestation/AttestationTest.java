@@ -1,10 +1,7 @@
 package io.vertx.ext.auth.webauthn.impl.attestation;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn.DummyStore;
-import io.vertx.ext.auth.webauthn.RelyingParty;
-import io.vertx.ext.auth.webauthn.WebAuthn;
-import io.vertx.ext.auth.webauthn.WebAuthnOptions;
+import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -79,6 +76,37 @@ public class AttestationTest {
           .put("origin", "https://localhost:8443")
           .put("webauthn", packedFullAttestationWebAuthnSample)
           .put("challenge", "33EHav-jZ1v9qwH783aU-j0ARx6r5o-YHh-wd7C6jPbd7Wh6ytbIZosIIACehwf9-s6hXhySHO-HHUjEwZS29w"))
+      .onFailure(should::fail)
+      .onSuccess(user -> {
+        should.assertNotNull(user);
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testNoneAttestationWithNonZeroAAGUID(TestContext should) {
+    final Async test = should.async();
+
+    WebAuthn webAuthN = WebAuthn.create(
+        rule.vertx(),
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
+
+    JsonObject packedFullAttestationWebAuthnSample = new JsonObject()
+      .put("rawId", "NXuPCPFpc9r3QrCL3dEQqg")
+      .put("id", "NXuPCPFpc9r3QrCL3dEQqg")
+      .put("type", "public-key")
+      .put("response", new JsonObject()
+        .put("clientDataJSON", "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoieW5CaVctWlhSdHVSTmF1OFgwRURMUSIsIm9yaWdpbiI6Imh0dHBzOlwvXC81NTlhLTEwNi0xMzktMTM4LTI0My5uZ3Jvay1mcmVlLmFwcCIsImFuZHJvaWRQYWNrYWdlTmFtZSI6ImNvbS5hbmRyb2lkLmNocm9tZSJ9")
+        .put("attestationObject", "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUHT97vfV9fOzGz3r17kQoRd6881wS7VK-SXENe6WwxcddAAAAAOqbjWZNAR0hPOS2tIy1ddQAEDV7jwjxaXPa90Kwi93REKqlAQIDJiABIVggRjiIjY-sUTXhqNi5z2Pm9irTUvJnYC865BJytjXBDdsiWCD2BScW511sKkQ28ztKs_DKTVRMcYINMRMR8lwT958G8g"));
+
+    webAuthN.authenticate(
+        new WebAuthnCredentials()
+          .setUsername("paulo")
+          .setOrigin("https://559a-106-139-138-243.ngrok-free.app")
+          .setWebauthn(packedFullAttestationWebAuthnSample)
+          .setChallenge("ynBiW-ZXRtuRNau8X0EDLQ"))
       .onFailure(should::fail)
       .onSuccess(user -> {
         should.assertNotNull(user);
