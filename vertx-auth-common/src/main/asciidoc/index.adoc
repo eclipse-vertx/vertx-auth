@@ -65,7 +65,7 @@ What this actually contains depends on the specific implementation; for a simple
 [source,json]
 ----
 {
-  "username": "tim"
+  "username": "tim",
   "password": "mypassword"
 }
 ----
