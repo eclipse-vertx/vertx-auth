@@ -53,6 +53,10 @@ public class PubArea {
       pos += 2;
       exponent = pubBuffer.getUnsignedInt(pos);
       pos += 4;
+      // Slice out unique of dynamic length
+      len = pubBuffer.getUnsignedShort(pos);
+      pos += 2;
+      unique = pubBuffer.getBytes(pos, pos + len);
     } else if (type == TPM_ALG_ECC) {
       // read 8 bytes
       symmetric = pubBuffer.getUnsignedShort(pos);
@@ -60,17 +64,23 @@ public class PubArea {
       scheme = pubBuffer.getUnsignedShort(pos);
       pos += 2;
       curveID = pubBuffer.getUnsignedShort(pos);
-      pos += 4;
+      pos+=2;
       kdf = pubBuffer.getUnsignedShort(pos);
       pos += 2;
+      //Unique structure: x length + x data + y length + y data
+      len = pubBuffer.getUnsignedShort(pos);
+      pos += 2;
+      byte[] uniqueX = pubBuffer.getBytes(pos, pos + len);
+      pos += len;
+      len = pubBuffer.getUnsignedShort(pos);
+      pos += 2;
+      byte[] uniqueY = pubBuffer.getBytes(pos, pos + len);
+      unique = new byte[uniqueX.length + uniqueY.length];
+      System.arraycopy(uniqueX, 0, unique, 0, uniqueX.length);
+      System.arraycopy(uniqueY, 0, unique, uniqueX.length, uniqueY.length);
     } else {
       throw new IllegalArgumentException("Unexpected type: " + type);
     }
-
-    // Slice out unique of dynamic length
-    len = pubBuffer.getUnsignedShort(pos);
-    pos += 2;
-    unique = pubBuffer.getBytes(pos, pos + len);
   }
 
   public int getType() {
