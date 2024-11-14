@@ -13,6 +13,7 @@ open module io.vertx.tests {
   requires io.vertx.auth.webauthn4j;
   requires io.vertx.testing.unit;
   requires junit;
-  requires webauthn4j.test;
+  requires com.webauthn4j.metadata.async;
+  requires com.webauthn4j.test;
   requires io.vertx.core;
 }
