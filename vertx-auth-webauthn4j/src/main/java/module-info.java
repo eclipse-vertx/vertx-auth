@@ -16,10 +16,8 @@ module io.vertx.auth.webauthn4j {
   requires static io.vertx.codegen.api;
   requires static io.vertx.codegen.json;
   requires static io.vertx.docgen;
-  requires webauthn4j.metadata.async;
-  requires webauthn4j.core.async;
-  requires webauthn4j.core;
-  requires webauthn4j.metadata;
+  requires com.webauthn4j.metadata.async;
+  requires com.webauthn4j.core.async;
 
   exports io.vertx.ext.auth.webauthn4j;
   exports io.vertx.ext.auth.webauthn4j.impl to io.vertx.tests;

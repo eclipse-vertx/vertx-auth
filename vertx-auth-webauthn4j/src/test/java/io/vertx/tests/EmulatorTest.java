@@ -7,10 +7,14 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.webauthn4j.data.*;
+import com.webauthn4j.metadata.data.statement.MetadataStatement;
+import com.webauthn4j.metadata.data.toc.StatusReport;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,21 +29,6 @@ import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter;
 import com.webauthn4j.converter.AuthenticatorDataConverter;
 import com.webauthn4j.converter.exception.DataConversionException;
 import com.webauthn4j.converter.util.ObjectConverter;
-import com.webauthn4j.data.AttestationConveyancePreference;
-import com.webauthn4j.data.AuthenticationRequest;
-import com.webauthn4j.data.AuthenticatorAssertionResponse;
-import com.webauthn4j.data.AuthenticatorAttachment;
-import com.webauthn4j.data.AuthenticatorAttestationResponse;
-import com.webauthn4j.data.AuthenticatorSelectionCriteria;
-import com.webauthn4j.data.PublicKeyCredential;
-import com.webauthn4j.data.PublicKeyCredentialCreationOptions;
-import com.webauthn4j.data.PublicKeyCredentialParameters;
-import com.webauthn4j.data.PublicKeyCredentialRequestOptions;
-import com.webauthn4j.data.PublicKeyCredentialRpEntity;
-import com.webauthn4j.data.PublicKeyCredentialType;
-import com.webauthn4j.data.PublicKeyCredentialUserEntity;
-import com.webauthn4j.data.RegistrationRequest;
-import com.webauthn4j.data.UserVerificationRequirement;
 import com.webauthn4j.data.attestation.authenticator.AAGUID;
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData;
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier;
@@ -52,8 +41,6 @@ import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientOutput
 import com.webauthn4j.data.extension.client.RegistrationExtensionClientInput;
 import com.webauthn4j.data.extension.client.RegistrationExtensionClientOutput;
 import com.webauthn4j.metadata.data.MetadataBLOBPayloadEntry;
-import com.webauthn4j.metadata.util.internal.MetadataBLOBUtil;
-import com.webauthn4j.metadata.util.internal.MetadataStatementUtil;
 import com.webauthn4j.test.EmulatorUtil;
 import com.webauthn4j.test.TestAttestationUtil;
 import com.webauthn4j.test.authenticator.webauthn.WebAuthnAuthenticatorAdaptor;
@@ -119,8 +106,8 @@ public class EmulatorTest {
 						// the following are things that are in the implementation of webauthn4j that will filter what find() returns, so make sure
 						// they pass
 						&& !entry.getMetadataStatement().getAttestationRootCertificates().isEmpty()
-                    && MetadataBLOBUtil.checkMetadataBLOBPayloadEntry(entry, something.isNotFidoCertifiedAllowed(), something.isSelfAssertionSubmittedAllowed())
-                    && MetadataStatementUtil.checkSurrogateMetadataStatementAttestationRootCertificate(entry.getMetadataStatement())) {
+                    && checkMetadataBLOBPayloadEntry(entry, something.isNotFidoCertifiedAllowed(), something.isSelfAssertionSubmittedAllowed())
+                    && checkSurrogateMetadataStatementAttestationRootCertificate(entry.getMetadataStatement())) {
 					return something.find(entry.getAaguid());
 				}
 			}
@@ -138,7 +125,65 @@ public class EmulatorTest {
 		});
 	}
 
-	@Test
+  // copied from webauthn4j as it is not exported to the outside of the module
+  private static boolean checkMetadataBLOBPayloadEntry( MetadataBLOBPayloadEntry metadataBLOBPayloadEntry, boolean notFidoCertifiedAllowed, boolean selfAssertionSubmittedAllowed) {
+    List<StatusReport> statusReports = metadataBLOBPayloadEntry.getStatusReports();
+    for (StatusReport report : statusReports) {
+      switch (report.getStatus()) {
+        //Info statuses
+        case UPDATE_AVAILABLE:
+          // UPDATE_AVAILABLE itself doesn't mean security issue. If security related update is available,
+          // corresponding status report is expected to be added to the report list.
+          break;
+
+        //Certification Related statuses
+        case FIDO_CERTIFIED:
+        case FIDO_CERTIFIED_L1:
+        case FIDO_CERTIFIED_L1_PLUS:
+        case FIDO_CERTIFIED_L2:
+        case FIDO_CERTIFIED_L2_PLUS:
+        case FIDO_CERTIFIED_L3:
+        case FIDO_CERTIFIED_L3_PLUS:
+          break;
+        case NOT_FIDO_CERTIFIED:
+          if (notFidoCertifiedAllowed) {
+            break;
+          }
+          else {
+            return false;
+          }
+        case SELF_ASSERTION_SUBMITTED:
+          if (selfAssertionSubmittedAllowed) {
+            break;
+          }
+          else {
+            return false;
+          }
+
+          // Security Notification statuses
+        case ATTESTATION_KEY_COMPROMISE:
+        case USER_VERIFICATION_BYPASS:
+        case USER_KEY_REMOTE_COMPROMISE:
+        case USER_KEY_PHYSICAL_COMPROMISE:
+        case REVOKED:
+        default:
+          return false;
+      }
+    }
+    return true;
+  }
+
+  // copied from webauthn4j as it is not exported to the outside of the module
+  private static boolean checkSurrogateMetadataStatementAttestationRootCertificate(MetadataStatement metadataStatement) {
+    boolean isSurrogate = metadataStatement != null && metadataStatement.getAttestationTypes().stream().allMatch(type -> type.equals(AuthenticatorAttestationType.BASIC_SURROGATE));
+
+    if (isSurrogate) {
+      return metadataStatement.getAttestationRootCertificates().isEmpty();
+    }
+    return true;
+  }
+
+  @Test
 	public void testDefaults(TestContext should) throws DataConversionException, InterruptedException, ExecutionException {
 		final Async test = should.async();
 
