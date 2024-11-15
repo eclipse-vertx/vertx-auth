@@ -58,7 +58,7 @@ public class AttestationTest {
 
     // we are testing all the certificates, which only happens for ENTERPRISE
     WebAuthn4JOptions options = new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation"))
-            .setAttestation(Attestation.ENTERPRISE);
+            .setAttestation(Attestation.DIRECT);
     // testing attestation validity only happens if we verify that the root CA is known, so we have to add it
     options.getRootCertificates().put("Yubico FIDO Preview CA", JWS.parseX5c(YUBICO_FIDO_PREVIEW_CA_EXPIRED_2018));
 
