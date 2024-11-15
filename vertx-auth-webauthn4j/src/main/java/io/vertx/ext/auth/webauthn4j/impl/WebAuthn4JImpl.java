@@ -141,7 +141,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
       throw new IllegalArgumentException("options.relyingParty.name cannot be null!");
     }
 
-    if(options.getAttestation() == Attestation.ENTERPRISE) {
+    if(options.getAttestation() != Attestation.NONE) {
     	TrustAnchorAsyncRepository something;
     	Set<TrustAnchor> trustAnchors = new HashSet<>();
     	try {
@@ -163,7 +163,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
     		FidoMDS3MetadataBLOBAsyncProvider blobAsyncProvider = new FidoMDS3MetadataBLOBAsyncProvider(objectConverter, FidoMDS3MetadataBLOBAsyncProvider.DEFAULT_BLOB_ENDPOINT, httpClient, trustAnchors);
     		something = new MetadataBLOBBasedTrustAnchorAsyncRepository(blobAsyncProvider);
     	}
-		
+
     	webAuthnManager = new WebAuthnAsyncManager(
     			Arrays.asList(
     					new NoneAttestationStatementAsyncVerifier(),
@@ -178,7 +178,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
     			new DefaultSelfAttestationTrustworthinessAsyncVerifier(),
     			objectConverter
     			);
-    	
+
     } else {
         webAuthnManager = WebAuthnAsyncManager.createNonStrictWebAuthnAsyncManager(objectConverter);
     }
@@ -523,7 +523,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
    * @param clientDataJSON - Binary session data
    */
   private Future<Authenticator> verifyWebAuthNCreate(JsonObject response, WebAuthn4JCredentials authInfo, byte[] clientDataJSON) {
-	  
+
 	  // client properties
 	  byte[] attestationObject = base64UrlDecode(response.getString("attestationObject"));
 	  Set<String> transports = new HashSet<>();
@@ -543,7 +543,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
 	  String clientExtensionJSON = clientExtensionResults != null ? clientExtensionResults.encode() : null;
 
 	  RegistrationRequest registrationRequest = new RegistrationRequest(attestationObject, clientDataJSON, clientExtensionJSON, transports);
-	  
+
 	  // server properties
 	  ServerProperty serverProperty = getServerProperty(authInfo);
 
@@ -656,7 +656,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
 	  boolean userVerificationRequired = options.getUserVerification() == UserVerification.REQUIRED;
 	  boolean userPresenceRequired = options.isUserPresenceRequired();
 	  CredentialRecord credentialRecord = loadCredentialRecord(authenticator);
-	  
+
 	  AuthenticationParameters authenticationParameters =
 			  new AuthenticationParameters(
 					  serverProperty,
@@ -666,7 +666,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
 					  userPresenceRequired
 					  );
 
-	  
+
 	  return Future.fromCompletionStage(webAuthnManager.verify(authenticationRequest, authenticationParameters))
 			  .map(parsedAuthenticatorData -> parsedAuthenticatorData.getAuthenticatorData().getSignCount());
   }
@@ -674,7 +674,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
   private CredentialRecord loadCredentialRecord(Authenticator authenticator) {
     // AFAICT, we could reconstruct that from the fmt and certificates, but it doesn't look like it is used
     // apparently only coseKey and counter are used for verification, not the attestation statement.
-    
+
     // important
     long counter = authenticator.getCounter();
     COSEKey coseKey = objectConverter.getCborConverter().readValue(base64UrlDecode(authenticator.getPublicKey()), COSEKey.class);
@@ -691,8 +691,8 @@ public class WebAuthn4JImpl implements WebAuthn4J {
     CollectedClientData clientData = null;
     AuthenticationExtensionsClientOutputs<RegistrationExtensionClientOutput> clientExtensions = null;
     Set<com.webauthn4j.data.AuthenticatorTransport> transports = null;
-    
-	  return new CredentialRecordImpl(attestationStatement, uvInitialized, backupEligible, backupState, counter, attestedCredentialData, 
+
+	  return new CredentialRecordImpl(attestationStatement, uvInitialized, backupEligible, backupState, counter, attestedCredentialData,
 			  authenticatorExtensions, clientData, clientExtensions, transports);
   }
 }

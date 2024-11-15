@@ -96,7 +96,7 @@ public class EmulatorTest {
 		database.clear();
 	}
 
-	
+
 	@Test
 	public void testMetadata(TestContext should) {
 		final Async test = should.async();
@@ -111,11 +111,11 @@ public class EmulatorTest {
 		}
 		FidoMDS3MetadataBLOBAsyncProvider blobAsyncProvider = new FidoMDS3MetadataBLOBAsyncProvider(objectConverter, FidoMDS3MetadataBLOBAsyncProvider.DEFAULT_BLOB_ENDPOINT, httpClient, trustAnchors);
 		MetadataBLOBBasedTrustAnchorAsyncRepository something = new MetadataBLOBBasedTrustAnchorAsyncRepository(blobAsyncProvider);
-		blobAsyncProvider.provide() 
+		blobAsyncProvider.provide()
 				.thenCompose(metadataBLOB -> {
 			Assert.assertNotEquals(0, metadataBLOB.getPayload().getEntries().size());
 			for (MetadataBLOBPayloadEntry entry : metadataBLOB.getPayload().getEntries()) {
-				if(entry.getAaguid() != null 
+				if(entry.getAaguid() != null
 						// the following are things that are in the implementation of webauthn4j that will filter what find() returns, so make sure
 						// they pass
 						&& !entry.getMetadataStatement().getAttestationRootCertificates().isEmpty()
@@ -137,7 +137,7 @@ public class EmulatorTest {
 			return null;
 		});
 	}
-	
+
 	@Test
 	public void testDefaults(TestContext should) throws DataConversionException, InterruptedException, ExecutionException {
 		final Async test = should.async();
@@ -149,7 +149,7 @@ public class EmulatorTest {
 
 		WebAuthnAuthenticatorAdaptor webAuthnAuthenticatorAdaptor = new WebAuthnAuthenticatorAdaptor(EmulatorUtil.PACKED_AUTHENTICATOR);
 		ClientPlatform clientPlatform = new ClientPlatform(origin, webAuthnAuthenticatorAdaptor);
-		
+
 		testRegistration(webAuthN, clientPlatform, should)
 		.flatMap(v -> testAuthentication(webAuthN, clientPlatform, should))
 		.onFailure(should::fail)
@@ -157,21 +157,21 @@ public class EmulatorTest {
 	}
 
 	@Test
-	public void testEnterprise(TestContext should) throws DataConversionException, InterruptedException, ExecutionException {
+	public void testDirect(TestContext should) throws DataConversionException, InterruptedException, ExecutionException {
 		final Async test = should.async();
 
 		X509Certificate rootCA = TestAttestationUtil.load3tierTestRootCACertificate();
-		
+
 		WebAuthn4J webAuthN = WebAuthn4J.create(
 				rule.vertx(),
 				new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName(rpName))
-				.setAttestation(Attestation.ENTERPRISE)
+				.setAttestation(Attestation.DIRECT)
 				.addRootCertificate(rootCA))
 	      .credentialStorage(database);
 
 		WebAuthnAuthenticatorAdaptor webAuthnAuthenticatorAdaptor = new WebAuthnAuthenticatorAdaptor(EmulatorUtil.PACKED_AUTHENTICATOR);
 		ClientPlatform clientPlatform = new ClientPlatform(origin, webAuthnAuthenticatorAdaptor);
-		
+
 		testRegistration(webAuthN, clientPlatform, should)
 		.flatMap(v -> testAuthentication(webAuthN, clientPlatform, should))
 		.onFailure(should::fail)
@@ -179,18 +179,18 @@ public class EmulatorTest {
 	}
 
 	@Test
-	public void testEnterpriseWithoutCA(TestContext should) throws DataConversionException, InterruptedException, ExecutionException {
+	public void testDirectWithoutCA(TestContext should) throws DataConversionException, InterruptedException, ExecutionException {
 		final Async test = should.async();
 
 		WebAuthn4J webAuthN = WebAuthn4J.create(
 				rule.vertx(),
 				new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName(rpName))
-				.setAttestation(Attestation.ENTERPRISE))
+				.setAttestation(Attestation.DIRECT))
 	      .credentialStorage(database);
 
 		WebAuthnAuthenticatorAdaptor webAuthnAuthenticatorAdaptor = new WebAuthnAuthenticatorAdaptor(EmulatorUtil.PACKED_AUTHENTICATOR);
 		ClientPlatform clientPlatform = new ClientPlatform(origin, webAuthnAuthenticatorAdaptor);
-		
+
 		testRegistration(webAuthN, clientPlatform, should)
 		.flatMap(v -> testAuthentication(webAuthN, clientPlatform, should))
 		.onFailure(x -> {
@@ -242,7 +242,7 @@ public class EmulatorTest {
 		});
 
 	}
-	
+
 	private RegistrationRequest createRegistrationRequest(ClientPlatform clientPlatform, String rpId, Challenge challenge, String username, String displayName, TestContext should){
 		AuthenticatorSelectionCriteria authenticatorSelectionCriteria =
 				new AuthenticatorSelectionCriteria(
@@ -353,5 +353,5 @@ public class EmulatorTest {
                 );
 
 	}
-	
+
 }
