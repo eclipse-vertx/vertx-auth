@@ -22,7 +22,7 @@ import io.vertx.codegen.annotations.VertxGen;
  * https://www.iana.org/assignments/cose/cose.xhtml#algorithms
  */
 @VertxGen
-public enum PublicKeyCredential {
+public enum COSEAlgorithm {
   ES256(-7),
   ES384(-35),
   ES512(-36),
@@ -38,11 +38,11 @@ public enum PublicKeyCredential {
 
   private final int coseId;
 
-  PublicKeyCredential(int coseId) {
+  COSEAlgorithm(int coseId) {
     this.coseId = coseId;
   }
 
-  public static PublicKeyCredential valueOf(int coseId) {
+  public static COSEAlgorithm valueOf(int coseId) {
     switch (coseId) {
       case -7:
         return ES256;
