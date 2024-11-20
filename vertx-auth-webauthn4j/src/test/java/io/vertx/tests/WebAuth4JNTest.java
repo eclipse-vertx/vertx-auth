@@ -3,6 +3,7 @@ package io.vertx.tests;
 import java.security.cert.CertificateException;
 import java.util.Base64;
 
+import io.vertx.ext.auth.webauthn4j.*;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -11,12 +12,7 @@ import org.junit.runner.RunWith;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWS;
-import io.vertx.ext.auth.webauthn4j.Authenticator;
-import io.vertx.ext.auth.webauthn4j.PublicKeyCredential;
-import io.vertx.ext.auth.webauthn4j.RelyingParty;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4J;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JOptions;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JCredentials;
+import io.vertx.ext.auth.webauthn4j.COSEAlgorithm;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -120,7 +116,7 @@ public class WebAuth4JNTest {
     WebAuthn4J webAuthN = WebAuthn4J.create(
         rule.vertx(),
         new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation"))
-        .addPubKeyCredParam(PublicKeyCredential.RS1)
+        .addPubKeyCredParam(COSEAlgorithm.RS1)
         )
         .credentialStorage(database);
 

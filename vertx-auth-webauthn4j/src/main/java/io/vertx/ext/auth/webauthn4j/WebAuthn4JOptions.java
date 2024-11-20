@@ -28,13 +28,11 @@ import io.vertx.ext.auth.impl.jose.JWS;
 
 import static io.vertx.ext.auth.webauthn4j.Attestation.NONE;
 import static io.vertx.ext.auth.webauthn4j.AuthenticatorTransport.*;
-import static io.vertx.ext.auth.webauthn4j.PublicKeyCredential.ES256;
-import static io.vertx.ext.auth.webauthn4j.PublicKeyCredential.RS256;
+import static io.vertx.ext.auth.webauthn4j.COSEAlgorithm.ES256;
+import static io.vertx.ext.auth.webauthn4j.COSEAlgorithm.RS256;
 import static io.vertx.ext.auth.webauthn4j.UserVerification.DISCOURAGED;
 
-import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -200,7 +198,7 @@ public class WebAuthn4JOptions {
   private Attestation attestation;
 
   // Needs to be a list, order is important
-  private List<PublicKeyCredential> pubKeyCredParams;
+  private List<COSEAlgorithm> pubKeyCredParams;
 
   private int challengeLength;
   private JsonObject extensions;
@@ -210,7 +208,7 @@ public class WebAuthn4JOptions {
 //  private List<X509CRL> rootCrls;
 
   private boolean relaxedSafetyNetIntegrityVeridict;
-  
+
   private boolean useMetadata;
 
   private boolean userPresenceRequired;
@@ -327,11 +325,11 @@ public class WebAuthn4JOptions {
     return this;
   }
 
-  public List<PublicKeyCredential> getPubKeyCredParams() {
+  public List<COSEAlgorithm> getPubKeyCredParams() {
     return pubKeyCredParams;
   }
 
-  public WebAuthn4JOptions addPubKeyCredParam(PublicKeyCredential pubKeyCredParam) {
+  public WebAuthn4JOptions addPubKeyCredParam(COSEAlgorithm pubKeyCredParam) {
     if (pubKeyCredParam == null) {
       throw new IllegalArgumentException("pubKeyCredParam cannot be null");
     }
@@ -345,7 +343,7 @@ public class WebAuthn4JOptions {
     return this;
   }
 
-  public WebAuthn4JOptions setPubKeyCredParams(List<PublicKeyCredential> pubKeyCredParams) {
+  public WebAuthn4JOptions setPubKeyCredParams(List<COSEAlgorithm> pubKeyCredParams) {
     if (pubKeyCredParams.size() == 0) {
       throw new IllegalArgumentException("PubKeyCredParams must have at least 1 element");
     }
@@ -540,11 +538,11 @@ public class WebAuthn4JOptions {
     this.useMetadata = useMetadata;
     return this;
   }
-  
+
   public boolean isUseMetadata() {
     return useMetadata;
   }
-  
+
   public JsonObject toJson() {
     final JsonObject json = new JsonObject();
     WebAuthn4JOptionsConverter.toJson(this, json);
@@ -559,7 +557,7 @@ public class WebAuthn4JOptions {
   public boolean isUserPresenceRequired() {
     return userPresenceRequired;
   }
-  
+
   public WebAuthn4JOptions setUserPresenceRequired(boolean userPresenceRequired) {
     this.userPresenceRequired = userPresenceRequired;
     return this;

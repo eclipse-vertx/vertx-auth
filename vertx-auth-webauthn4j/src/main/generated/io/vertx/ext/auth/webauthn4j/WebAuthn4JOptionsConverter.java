@@ -2,8 +2,6 @@ package io.vertx.ext.auth.webauthn4j;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.webauthn4j.WebAuthn4JOptions}.
@@ -41,10 +39,10 @@ public class WebAuthn4JOptionsConverter {
           break;
         case "pubKeyCredParams":
           if (member.getValue() instanceof JsonArray) {
-            java.util.ArrayList<io.vertx.ext.auth.webauthn4j.PublicKeyCredential> list =  new java.util.ArrayList<>();
+            java.util.ArrayList<COSEAlgorithm> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof String)
-                list.add(io.vertx.ext.auth.webauthn4j.PublicKeyCredential.valueOf((String)item));
+                list.add(COSEAlgorithm.valueOf((String)item));
             });
             obj.setPubKeyCredParams(list);
           }

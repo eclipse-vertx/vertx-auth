@@ -9,8 +9,6 @@ import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.tests.DummyStore;
 
-import static io.vertx.ext.auth.webauthn4j.PublicKeyCredential.RS256;
-
 import java.security.cert.CertificateException;
 
 import org.junit.Before;
@@ -619,7 +617,7 @@ public class AttestationTest {
         rule.vertx(),
         new WebAuthn4JOptions()
         .setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation"))
-        .addPubKeyCredParam(PublicKeyCredential.RS1)
+        .addPubKeyCredParam(COSEAlgorithm.RS1)
         )
         .credentialStorage(database);
 

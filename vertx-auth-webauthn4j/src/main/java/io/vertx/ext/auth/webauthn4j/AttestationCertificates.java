@@ -33,7 +33,7 @@ public class AttestationCertificates {
   /**
    * The algorithm used for the public credential
    */
-  private PublicKeyCredential alg;
+  private COSEAlgorithm alg;
 
   /**
    * The list of X509 certificates encoded as base64url.
@@ -47,11 +47,11 @@ public class AttestationCertificates {
     AttestationCertificatesConverter.fromJson(json, this);
   }
 
-  public PublicKeyCredential getAlg() {
+  public COSEAlgorithm getAlg() {
     return alg;
   }
 
-  public AttestationCertificates setAlg(PublicKeyCredential alg) {
+  public AttestationCertificates setAlg(COSEAlgorithm alg) {
     this.alg = alg;
     return this;
   }

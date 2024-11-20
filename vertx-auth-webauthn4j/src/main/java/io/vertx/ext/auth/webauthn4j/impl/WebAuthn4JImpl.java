@@ -98,18 +98,8 @@ import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.CertificateHelper.CertInfo;
 import io.vertx.ext.auth.prng.VertxContextPRNG;
-import io.vertx.ext.auth.webauthn4j.Attestation;
-import io.vertx.ext.auth.webauthn4j.AttestationCertificates;
-import io.vertx.ext.auth.webauthn4j.Authenticator;
-import io.vertx.ext.auth.webauthn4j.AuthenticatorTransport;
-import io.vertx.ext.auth.webauthn4j.CredentialStorage;
-import io.vertx.ext.auth.webauthn4j.PublicKeyCredential;
-import io.vertx.ext.auth.webauthn4j.ResidentKey;
-import io.vertx.ext.auth.webauthn4j.UserVerification;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4J;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JOptions;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JCredentials;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JException;
+import io.vertx.ext.auth.webauthn4j.*;
+import io.vertx.ext.auth.webauthn4j.COSEAlgorithm;
 
 public class WebAuthn4JImpl implements WebAuthn4J {
 
@@ -268,7 +258,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
         // put the public key credentials parameters
-        for (PublicKeyCredential pubKeyCredParam : options.getPubKeyCredParams()) {
+        for (COSEAlgorithm pubKeyCredParam : options.getPubKeyCredParams()) {
           addOpt(
             json.getJsonArray("pubKeyCredParams"),
             new JsonObject()
@@ -551,8 +541,8 @@ public class WebAuthn4JImpl implements WebAuthn4J {
 	  boolean userPresenceRequired = options.isUserPresenceRequired();
 
 	  List<PublicKeyCredentialParameters> pubKeyCredParams = new ArrayList<>(options.getPubKeyCredParams().size());
-	  for (PublicKeyCredential publicKeyCredential : options.getPubKeyCredParams()) {
-      pubKeyCredParams.add(new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.create(publicKeyCredential.coseId())));
+	  for (COSEAlgorithm COSEAlgorithm : options.getPubKeyCredParams()) {
+      pubKeyCredParams.add(new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.create(COSEAlgorithm.coseId())));
     }
 	  RegistrationParameters registrationParameters = new RegistrationParameters(serverProperty, pubKeyCredParams, userVerificationRequired, userPresenceRequired);
 
@@ -587,20 +577,20 @@ public class WebAuthn4JImpl implements WebAuthn4J {
       }
       // algo
       if(attestationStatement instanceof AndroidKeyAttestationStatement){
-        attestationCertificates.setAlg(PublicKeyCredential.valueOf((int) ((AndroidKeyAttestationStatement)attestationStatement).getAlg().getValue()));
+        attestationCertificates.setAlg(COSEAlgorithm.valueOf((int) ((AndroidKeyAttestationStatement)attestationStatement).getAlg().getValue()));
       } else if(attestationStatement instanceof AndroidSafetyNetAttestationStatement){
         // hoping the names match
-        attestationCertificates.setAlg(PublicKeyCredential.valueOf(((AndroidSafetyNetAttestationStatement)attestationStatement).getResponse().getHeader().getAlg().getName()));
+        attestationCertificates.setAlg(COSEAlgorithm.valueOf(((AndroidSafetyNetAttestationStatement)attestationStatement).getResponse().getHeader().getAlg().getName()));
       } else if(attestationStatement instanceof AppleAnonymousAttestationStatement){
         // FIXME: optional, but not read in webauthn4j?
         attestationCertificates.setAlg(null);
       } else if(attestationStatement instanceof FIDOU2FAttestationStatement){
         // seems to be fixed?
-        attestationCertificates.setAlg(PublicKeyCredential.valueOf((int) COSEAlgorithmIdentifier.ES256.getValue()));
+        attestationCertificates.setAlg(COSEAlgorithm.valueOf((int) COSEAlgorithmIdentifier.ES256.getValue()));
       } else if(attestationStatement instanceof PackedAttestationStatement){
-        attestationCertificates.setAlg(PublicKeyCredential.valueOf((int) ((PackedAttestationStatement)attestationStatement).getAlg().getValue()));
+        attestationCertificates.setAlg(COSEAlgorithm.valueOf((int) ((PackedAttestationStatement)attestationStatement).getAlg().getValue()));
       } else if(attestationStatement instanceof TPMAttestationStatement){
-        attestationCertificates.setAlg(PublicKeyCredential.valueOf((int) ((TPMAttestationStatement)attestationStatement).getAlg().getValue()));
+        attestationCertificates.setAlg(COSEAlgorithm.valueOf((int) ((TPMAttestationStatement)attestationStatement).getAlg().getValue()));
       } else {
         throw new WebAuthn4JException("Unsupported attestation statement format: "+attestationStatement.getFormat());
       }
