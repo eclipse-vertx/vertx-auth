@@ -166,7 +166,6 @@ public class WebAuthn4JImpl implements WebAuthn4J {
 
     	webAuthnManager = new WebAuthnAsyncManager(
     			Arrays.asList(
-    					new NoneAttestationStatementAsyncVerifier(),
     					new FIDOU2FAttestationStatementAsyncVerifier(),
     					new PackedAttestationStatementAsyncVerifier(),
     					new TPMAttestationStatementAsyncVerifier(),
