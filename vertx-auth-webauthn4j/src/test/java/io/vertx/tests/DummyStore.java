@@ -44,11 +44,20 @@ public class DummyStore implements CredentialStorage {
     long found = database.stream()
         .filter(entry -> authenticator.getCredID().equals(entry.getCredID()))
         .count();
-    if (found == 0) {
-      database.add(authenticator);
-      return Future.succeededFuture();
+    if (found != 0) {
+      return Future.failedFuture("Authenticator already exists");
     } else {
-      return Future.failedFuture("Duplicate authenticator");
+      // this is a new authenticator, make sure the user does not already exist, otherwise we risk adding 
+      // third-person credentials to an existing user
+      long existingUser = database.stream()
+          .filter(entry -> authenticator.getUserName().equals(entry.getUserName()))
+          .count();
+      if(existingUser == 0) {
+        database.add(authenticator);
+        return Future.succeededFuture();
+      } else {
+        return Future.failedFuture("User already exists");
+      }
     }
   }
 

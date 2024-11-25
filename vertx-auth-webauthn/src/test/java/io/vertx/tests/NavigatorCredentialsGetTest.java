@@ -1,7 +1,7 @@
 package io.vertx.tests;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn4j.*;
+import io.vertx.ext.auth.webauthn.*;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(VertxUnitRunner.class)
-public class NavigatorCredentialsGet {
+public class NavigatorCredentialsGetTest {
 
   private final DummyStore database = new DummyStore();
 
@@ -30,10 +30,11 @@ public class NavigatorCredentialsGet {
   public void testRequestLogin(TestContext should) {
     final Async test = should.async();
 
-    WebAuthn4J webAuthN = WebAuthn4J.create(
+    WebAuthn webAuthN = WebAuthn.create(
         rule.vertx(),
-        new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-        .credentialStorage(database);
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     database.add(
       new Authenticator()
@@ -60,10 +61,11 @@ public class NavigatorCredentialsGet {
   public void testLoginRequestChallenge(TestContext should) {
     final Async test = should.async();
 
-    WebAuthn4J webAuthN = WebAuthn4J.create(
+    WebAuthn webAuthN = WebAuthn.create(
         rule.vertx(),
-        new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
-        .credentialStorage(database);
+        new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+      .authenticatorFetcher(database::fetch)
+      .authenticatorUpdater(database::store);
 
     database.add(
       new Authenticator()
@@ -85,7 +87,7 @@ public class NavigatorCredentialsGet {
         .put("signature", "MEUCIFXjL0ONRuLP1hkdlRJ8d0ofuRAS12c6w8WgByr-0yQZAiEAw-C6UZ8U8pi8irAcD6jXXaZMtezbzVwZXLGqY3sbFyA")
         .put("userHandle", ""));
 
-    webAuthN.authenticate(new WebAuthn4JCredentials()
+    webAuthN.authenticate(new WebAuthnCredentials()
         .setWebauthn(body)
         .setUsername("paulo")
         .setOrigin("https://192.168.178.206.xip.io:8443")
