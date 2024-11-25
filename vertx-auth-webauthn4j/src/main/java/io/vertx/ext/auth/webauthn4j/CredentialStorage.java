@@ -32,18 +32,30 @@ public interface CredentialStorage {
 
 	/**
 	 * Persists a new credential, bound by its user name (may be <code>null</code>) and credential ID
-	 * (cannot be <code>null</code>)
+	 * (cannot be <code>null</code>, must be unique).
+	 * 
+	 * If attempting to store a credential with a <code>credId</code> that is not unique, you should return
+	 * a failed <code>Future</code>.
+   * 
+   * If attempting to store a credential with a <code>userName</code> that already exists, you should 
+   * first make sure that the current user is already logged in under the same <code>userName</code>, because
+   * this will in practice add a new credential to identify the existing user, so this must be restricted
+   * to the already existing user, otherwise you will allow anyone to gain access to existing users.
+   * 
+   * If attempting to store a credential with a <code>userName</code> that already exists, and the current
+   * user is not logged in, or the logged in user does not have the same <code>userName</code>, you should
+   * return a failed <code>Future</code>.
+	 * 
 	 * @param authenticator the new credential to persist
-	 * @return a future of nothing
+	 * @return a future of nothing, or a failed future if the <code>credId</code> already exists, or if the
+	 * <code>userName</code> already exists and does not represent the currently logged in user.
 	 */
 	Future<Void> storeCredential(Authenticator authenticator);
 
   /**
-   * Updates a credential counter, as identified by its user name (may be <code>null</code>) and credential ID
-   * (cannot be <code>null</code>).
-   * @param userName the user name (may be <code>null</code>, but must match if specified)
-   * @param credentialId the credential ID (cannot be <code>null</code>, must match)
-   * @param counter the new counter to persist
+   * Updates a previously stored credential counter, as identified by its user name (may be <code>null</code>) and credential ID
+   * (cannot be <code>null</code>, must be unique).
+   * @param authenticator the credential to update
    * @return a future of nothing
    */
   Future<Void> updateCounter(Authenticator authenticator);

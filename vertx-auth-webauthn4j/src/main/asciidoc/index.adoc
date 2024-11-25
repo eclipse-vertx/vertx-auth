@@ -127,6 +127,34 @@ This provides a root of trust for a newly generated key pair as well as being ab
 It should be noted that while attestation provides the capability for a root of trust, validating the root of trust is frequently not necessary.
 When registering an authenticator for a new account, typically a Trust On First Use (TOFU) model applies; and when adding an authenticator to an existing account, a user has already been authenticated and has established a secure session.
 
+== Security considerations
+
+=== Registration
+
+During registration, your `CredentialStorage.storeCredential` method will be called with a new authenticator to store. 
+You should not have any existing authenticator already stored with the same `credID`, because they are unique.
+
+Because users are identified using a unique _UserName_, you must make sure to refuse storing a new authenticator for a _UserName_ which already has
+stored authenticators, unless the user is already currently logged in with the same _UserName_. Otherwise you would be letting new untrusted users
+add their own authenticators to existing unrelated users, allowing them to hijack accounts trivially.
+
+Vert.x's `WebAuthn.authenticate` will not invoke your `CredentialStorage.find` to verify whether you already have authenticators
+for the given _UserName_ or not. This is up to your code to implement this check in `CredentialStorage.storeCredential` to return a _failed Future_
+when you don't want to store a new authenticator to an existing user.
+
+Naturally, if the user is already logged in, using the same _UserName_, you can allow that user to store new authenticators, all of which will
+allow this user to log in.
+
+=== Login
+
+During login, your `CredentialStorage.updateCounter` method will be called with an existing authenticator. It should
+be updated (as opposed to stored) and you should have an existing authenticator already stored with the same unique `credID`. 
+
+In this case, all you have to do is save the `counter` to the already stored authenticator.
+
+You can trust this authenticator update because `WebAuthn.authenticate` will have called your `CredentialStorage.find` with the
+looked up `credID` and verify that the signatures match.
+
 == A simple example
 
 === Create a Registration request
@@ -142,6 +170,8 @@ When registering an authenticator for a new account, typically a Trust On First 
 ----
 {@link examples.WebAuthN4JExamples#example2}
 ----
+
+Warning: See <<Security considerations>>
 
 === Create a Login request
 
