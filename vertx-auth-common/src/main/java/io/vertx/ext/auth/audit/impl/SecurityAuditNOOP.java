@@ -15,11 +15,6 @@ public final class SecurityAuditNOOP implements SecurityAudit {
 
   private static final Handler NOOP = event -> {};
 
-  public static final SecurityAudit INSTANCE = new SecurityAuditNOOP();
-
-  private SecurityAuditNOOP() {
-  }
-
   @Override
   public SecurityAudit source(SocketAddress address) {
     return this;

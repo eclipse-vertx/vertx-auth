@@ -29,6 +29,7 @@
 
   <properties>
     <doc.skip>false</doc.skip>
+    <vertx.surefire.useModulePath>false</vertx.surefire.useModulePath>
   </properties>
 
   <dependencies>
@@ -82,16 +83,4 @@
 
   </dependencies>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <useModulePath>false</useModulePath>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>

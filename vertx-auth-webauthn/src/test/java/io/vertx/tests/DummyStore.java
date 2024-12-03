@@ -38,8 +38,6 @@ public class DummyStore {
   }
 
   public Future<Void> store(Authenticator authenticator) {
-    System.out.println(authenticator);
-
     long updated = database.stream()
       .filter(entry -> authenticator.getCredID().equals(entry.getCredID()))
       .peek(entry -> {
@@ -50,8 +48,17 @@ public class DummyStore {
     if (updated > 0) {
       return Future.succeededFuture();
     } else {
-      database.add(authenticator);
-      return Future.succeededFuture();
+      // this is a new authenticator, make sure the user does not already exist, otherwise we risk adding 
+      // third-person credentials to an existing user
+      long existingUser = database.stream()
+          .filter(entry -> authenticator.getUserName().equals(entry.getUserName()))
+          .count();
+      if(existingUser == 0) {
+        database.add(authenticator);
+        return Future.succeededFuture();
+      } else {
+        return Future.failedFuture("User already exists");
+      }
     }
   }
 }

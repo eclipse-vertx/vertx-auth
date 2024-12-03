@@ -20,7 +20,7 @@ module io.vertx.auth.htpasswd {
 
   requires static io.vertx.codegen.api;
   requires static io.vertx.codegen.json;
-  requires static vertx.docgen;
+  requires static io.vertx.docgen;
 
   exports io.vertx.ext.auth.htpasswd;
 

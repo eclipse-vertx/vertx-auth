@@ -1,0 +1,226 @@
+= WebAuthn4J auth provider
+
+This component contains a WebAuthn authentication mechanism using https://github.com/webauthn4j/webauthn4j[WebAuthn4J].
+To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-webauthn4j</artifactId>
+  <version>${maven.version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-webauthn4j:${maven.version}'
+----
+
+https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API[WebAuthn (Web Authentication)] is a web standard for authenticating users to web-based applications using public/private key cryptography.
+Strictly speaking, WebAuthn is just the name of the browser API and is part of https://fidoalliance.org/fido2/[FIDO2].
+FIDO2 is the overarching term of a set of specifications, including WebAuthn and CTAP.
+FIDO2 is the successor of the FIDO Universal 2nd Factor (U2F) legacy protocol.
+
+As an application developer, we don't deal with CTAP (Client-to-Authenticator Protocol), which is the protocol that the browser uses to speak with an authenticator like a FIDO security key.
+
+FIDO2 works with public/private keys.
+The user has an authenticator, which creates public/private key pairs.
+These key pairs are different for each site.
+The public key is transferred to the server and stored in the user's account.
+The private key never leaves the authenticator.
+To login, the server first creates a random challenge (a random sequence of bytes), sends it to the authenticator.
+The authenticator signs the challenge with his private key and sends the signature back to the server.
+The server verifies the signature with the stored public key and grants access if the signature is valid.
+
+Traditionally this technology needs a hardware security token like a https://www.yubico.com/products/[Yubico key] or a key from https://www.ftsafe.com/Products/FIDO[Feitian] to name two brands.
+
+FIDO2 still supports these hardware keys, but the technology also supports alternatives.
+If you have an Android 7+ phone or a Windows 10 system, you don't need to buy a FIDO2 security key if you want to play with WebAuthn.
+
+In https://fidoalliance.org/news-your-google-android-7-phone-is-now-a-fido2-security-key/[April 2019, Google announced]
+that any phone running Android 7+ can function as a FIDO2 security key.
+In
+https://www.microsoft.com/en-us/microsoft-365/blog/2018/11/20/sign-in-to-your-microsoft-account-without-a-password-using-windows-hello-or-a-security-key/[November 2018, Microsoft announced]
+that you can use Windows Hello as a security key for FIDO2. In https://developer.apple.com/videos/play/wwdc2020/10670/[June 2020 Apple announced]
+that you can use iOS FaceID and TouchID for the web by adopting webauthn standard.
+
+WebAuthn is implemented in Edge, Firefox, Chrome, and Safari.
+Visit https://caniuse.com to check out the current state of implementations: https://caniuse.com/#search=webauthn
+
+== WebAuthn4J API
+
+The https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API[Web Authentication API] is an extension of the https://developer.mozilla.org/en-US/docs/Web/API/Credential_Management_API[Credential Management API].
+
+WebAuthn extends the two functions from the Credential Management API https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create[navigator.credentials.create()]
+and https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/get[navigator.credentials.get()] so they accept a publicKey parameter.
+
+To simplify the usage of the API a simple JavaScript client application is provided here:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-auth-webauthn4j</artifactId>
+  <classifier>client</classifier>
+  <type>js</type>
+  <version>${maven.version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-auth-webauthn4j:${maven.version}:client@js'
+----
+
+The script should be used in cooperation with vertx-web as it handles the API interaction between the web layer and the auth code in this library.
+
+== Registration
+
+Registration is the process of enrolling a new authenticator to the database and associate with the user.
+
+The process takes 2 steps:
+
+1. A call to generate a {@link io.vertx.ext.auth.webauthn4j.WebAuthn4J#createCredentialsOptions(JsonObject)}
+2. A call with the solution to the challenge to the normal `authenticate` API method.
+
+If the solution is correct, the new authenticator should be added to the storage and be usable for login purposes.
+
+== Login
+
+Like the registration, login is a 2 step process:
+
+1. A call to generate a {@link io.vertx.ext.auth.webauthn4j.WebAuthn4J#getCredentialsOptions(String)}
+2. A call with the solution to the challenge to the normal `authenticate` API method.
+
+When the challenge is correctly solved, the user is considered logged in.
+
+== Device Attestation
+
+When an authenticator registers a new key pair with a service, the authenticator signs the public key with an attestation certificate.
+The attestation certificate is built into the authenticator during manufacturing time and is specific to a device model.
+That is, all "Samsung Galaxy S8" phones, manufactured at a specific time or particular manufacturing run, have the same attestation certificate.
+
+Different devices have different attestation formats.
+The pre-defined attestation formats in WebAuthn are:
+
+* `Packed` - a generic attestation format that is commonly used by devices whose sole function is as a WebAuthn authenticator, such as security keys.
+* `TPM` - the Trusted Platform Module (TPM) is a set of specifications from the Trusted Platform Group (TPG).
+This attestation format is commonly found in desktop computers and is used by Windows Hello as its preferred attestation format.
+* `Android Key Attestation` - one of the features added in Android O was Android Key Attestation, which enables the Android operating system to attest to keys.
+* `Android SafetyNet` - prior to Android Key Attestation, the only option for Android devices was to create Android SafetyNet attestations
+* `FIDO U2F` - security keys that implement the FIDO U2F standard use this format
+* `Apple` - Verifies the Anonymous Apple device attestation.
+* `none` - browsers may prompt users whether they want a site to be allowed to see their attestation data and/or may remove attestation data from the authenticator's response if the `attestation` parameter in `navigator.credentials.create()` is set to `none`
+
+The purpose of attestation is to cryptographically prove that a newly generated key pair came from a specific device.
+This provides a root of trust for a newly generated key pair as well as being able to identify the attributes of a device being used (how the private key is protected; if / what kind of biometric is being used; whether a device has been certified; etc.).
+
+It should be noted that while attestation provides the capability for a root of trust, validating the root of trust is frequently not necessary.
+When registering an authenticator for a new account, typically a Trust On First Use (TOFU) model applies; and when adding an authenticator to an existing account, a user has already been authenticated and has established a secure session.
+
+== Security considerations
+
+=== Registration
+
+During registration, your `CredentialStorage.storeCredential` method will be called with a new authenticator to store. 
+You should not have any existing authenticator already stored with the same `credID`, because they are unique.
+
+Because users are identified using a unique _UserName_, you must make sure to refuse storing a new authenticator for a _UserName_ which already has
+stored authenticators, unless the user is already currently logged in with the same _UserName_. Otherwise you would be letting new untrusted users
+add their own authenticators to existing unrelated users, allowing them to hijack accounts trivially.
+
+Vert.x's `WebAuthn.authenticate` will not invoke your `CredentialStorage.find` to verify whether you already have authenticators
+for the given _UserName_ or not. This is up to your code to implement this check in `CredentialStorage.storeCredential` to return a _failed Future_
+when you don't want to store a new authenticator to an existing user.
+
+Naturally, if the user is already logged in, using the same _UserName_, you can allow that user to store new authenticators, all of which will
+allow this user to log in.
+
+=== Login
+
+During login, your `CredentialStorage.updateCounter` method will be called with an existing authenticator. It should
+be updated (as opposed to stored) and you should have an existing authenticator already stored with the same unique `credID`. 
+
+In this case, all you have to do is save the `counter` to the already stored authenticator.
+
+You can trust this authenticator update because `WebAuthn.authenticate` will have called your `CredentialStorage.find` with the
+looked up `credID` and verify that the signatures match.
+
+== A simple example
+
+=== Create a Registration request
+
+[source,$lang]
+----
+{@link examples.WebAuthN4JExamples#example1}
+----
+
+=== Verify the registration request
+
+[source,$lang]
+----
+{@link examples.WebAuthN4JExamples#example2}
+----
+
+Warning: See <<Security considerations>>
+
+=== Create a Login request
+
+[source,$lang]
+----
+{@link examples.WebAuthN4JExamples#example3}
+----
+
+=== Verify the Login request
+
+[source,$lang]
+----
+{@link examples.WebAuthN4JExamples#example4}
+----
+
+== Metadata Service
+
+You can use the FIDO3 Metadata service by enabling the corresponding option, which means you **can** detect tokens
+that have been marked as not trustable by the token vendor.
+For example, when a security bug allowed a private key to be extracted from a token.
+
+Simply configure the application as:
+
+[source,$lang]
+----
+{@link examples.WebAuthN4JExamples#example5}
+----
+
+== Updating Certificates
+
+Almost all device attestations are based on `X509` Certificate checks.
+This means that certificates can and will expire at some point in time.
+By default, the current "Active" certificates are hardcoded on the `WebAuthn4JOptions` object.
+
+However if your application needs to update a certificate on it's own, say for example, use a more up to date one, or another with a different cypher, then you can replace the default `root` certificates for each attestation by calling:
+`WebAuthn4JOptions.putRootCertificate(String, String)`, where the first parameter is the attestation name or "mds" for FIDO MetaData Service:
+
+* none
+* u2f
+* packed
+* android-key
+* android-safetynet
+* tpm
+* apple
+* mds
+
+And the second the PEM formatted X509 Certificate (Boundaries are not required).
+
+[source,$lang]
+----
+{@link examples.WebAuthN4JExamples#example6}
+----
