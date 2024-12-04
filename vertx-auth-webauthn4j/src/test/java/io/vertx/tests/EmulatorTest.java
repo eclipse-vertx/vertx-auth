@@ -29,7 +29,6 @@ import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter;
 import com.webauthn4j.converter.AuthenticatorDataConverter;
 import com.webauthn4j.converter.exception.DataConversionException;
 import com.webauthn4j.converter.util.ObjectConverter;
-import com.webauthn4j.data.attestation.authenticator.AAGUID;
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData;
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier;
 import com.webauthn4j.data.client.Origin;
@@ -271,7 +270,7 @@ public class EmulatorTest {
 		.flatMap(user -> {
 			assertNotNull(user);
 			// make sure we have the right user name
-			assertEquals(username, user.principal().getString("userName"));
+			assertEquals(username, user.subject());
 			// also make sure we saved the user in the DB under that username
 			return database.find(username, null);
 		})
@@ -280,7 +279,7 @@ public class EmulatorTest {
 			assertEquals(1, authenticators.size());
 			Authenticator authenticator = authenticators.get(0);
 			// Check username, credid, counter, publicKey
-			assertEquals(username, authenticator.getUserName());
+			assertEquals(username, authenticator.getUsername());
 			assertEquals(should.get("credId"), authenticator.getCredID());
 			should.put("counter", authenticator.getCounter());
 			assertEquals(should.get("publicKey"), authenticator.getPublicKey());
@@ -357,7 +356,7 @@ public class EmulatorTest {
 		.flatMap(user -> {
 			assertNotNull(user);
 			// make sure we have the right user name
-			assertEquals(username, user.principal().getString("userName"));
+			assertEquals(username, user.subject());
 			// also make sure we saved the user in the DB under that username
 			return database.find(username, null);
 		})
@@ -366,7 +365,7 @@ public class EmulatorTest {
 			assertEquals(1, authenticators.size());
 			Authenticator authenticator = authenticators.get(0);
 			// Check username, credid, counter, publicKey
-			assertEquals(username, authenticator.getUserName());
+			assertEquals(username, authenticator.getUsername());
 			assertEquals(should.get("credId"), authenticator.getCredID());
 			assertEquals(should.<Long>get("counter") + 1, authenticator.getCounter());
 			assertEquals(should.get("publicKey"), authenticator.getPublicKey());

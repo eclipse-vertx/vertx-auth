@@ -47,7 +47,6 @@ import com.webauthn4j.async.metadata.anchor.MetadataBLOBBasedTrustAnchorAsyncRep
 import com.webauthn4j.async.verifier.attestation.statement.androidkey.AndroidKeyAttestationStatementAsyncVerifier;
 import com.webauthn4j.async.verifier.attestation.statement.androidsafetynet.AndroidSafetyNetAttestationStatementAsyncVerifier;
 import com.webauthn4j.async.verifier.attestation.statement.apple.AppleAnonymousAttestationStatementAsyncVerifier;
-import com.webauthn4j.async.verifier.attestation.statement.none.NoneAttestationStatementAsyncVerifier;
 import com.webauthn4j.async.verifier.attestation.statement.packed.PackedAttestationStatementAsyncVerifier;
 import com.webauthn4j.async.verifier.attestation.statement.tpm.TPMAttestationStatementAsyncVerifier;
 import com.webauthn4j.async.verifier.attestation.statement.u2f.FIDOU2FAttestationStatementAsyncVerifier;
@@ -438,7 +437,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
         		  .compose(authrInfo -> {
         			  // by default the store can upsert if a credential is missing, the user has been verified so it is valid
         			  // the store however might disallow this operation
-        			  authrInfo.setUserName(username);
+        			  authrInfo.setUsername(username);
 
         			  // the create challenge is complete we can finally save this
         			  // new authenticator to the storage
