@@ -2,6 +2,8 @@ package io.vertx.ext.auth.webauthn4j;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.webauthn4j.AttestationCertificates}.
@@ -14,7 +16,7 @@ public class AttestationCertificatesConverter {
       switch (member.getKey()) {
         case "alg":
           if (member.getValue() instanceof String) {
-            obj.setAlg(COSEAlgorithm.valueOf((String)member.getValue()));
+            obj.setAlg(io.vertx.ext.auth.webauthn4j.COSEAlgorithm.valueOf((String)member.getValue()));
           }
           break;
         case "x5c":

@@ -37,7 +37,7 @@ public class NavigatorCredentialsGetTest {
 
     database.add(
       new Authenticator()
-        .setUserName("paulo")
+        .setUsername("paulo")
         .setCredID("O3ZJlAdXvra6PwvL4I9AP99dS1_v3DDRuB_SwTAHFbUfMtvWTOFycCeb6CkXZXiPWi9Nr0ptUnlnHP3U40ptEA")
         .setPublicKey("pQECAyYgASFYIBl0C67nFN_OwbODu_iE0hI5nM0ppUkqjhU9NhQvBaiLIlggffUTx8E6OM85huU3DcadeuaBBh8kGI8vdm3zesf3YRc")
         .setCounter(2)
@@ -67,7 +67,7 @@ public class NavigatorCredentialsGetTest {
 
     database.add(
       new Authenticator()
-        .setUserName("paulo")
+        .setUsername("paulo")
         .setCredID("rYLaf9xagyA2YnO-W3CZDW8udSg8VeMMm25nenU7nCSxUqy1pEzOdb9oFrDxZZDmrp3odfuTPuONQCiSMH-Tyg")
         .setPublicKey("pQECAyYgASFYILBNcdWmiMsmjA1QkNpG91GpEbhMIOqWLieDP6mLnGETIlggGMiqXz8BuSiPa0ovGVxxxbdUbJVm6THKNhUCifFhJCE")
         .setCounter(4)

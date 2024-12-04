@@ -99,7 +99,7 @@ public class NavigatorCredentialsCreateTest {
       });
   }
 
-  
+
   @Test
   public void testRegisterExistingUser(TestContext should) {
     final Async test = should.async();
@@ -111,7 +111,7 @@ public class NavigatorCredentialsCreateTest {
 
     database.add(
         new Authenticator()
-          .setUserName("paulo")
+          .setUsername("paulo")
           .setCredID("O3ZJlAdXvra6PwvL4I9AP99dS1_v3DDRuB_SwTAHFbUfMtvWTOFycCeb6CkXZXiPWi9Nr0ptUnlnHP3U40ptEA")
           .setPublicKey("pQECAyYgASFYIBl0C67nFN_OwbODu_iE0hI5nM0ppUkqjhU9NhQvBaiLIlggffUTx8E6OM85huU3DcadeuaBBh8kGI8vdm3zesf3YRc")
           .setCounter(2)

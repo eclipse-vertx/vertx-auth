@@ -14,9 +14,9 @@ public class AuthenticatorConverter {
    static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Authenticator obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "userName":
+        case "username":
           if (member.getValue() instanceof String) {
-            obj.setUserName((String)member.getValue());
+            obj.setUsername((String)member.getValue());
           }
           break;
         case "type":
@@ -68,8 +68,8 @@ public class AuthenticatorConverter {
   }
 
    static void toJson(Authenticator obj, java.util.Map<String, Object> json) {
-    if (obj.getUserName() != null) {
-      json.put("userName", obj.getUserName());
+    if (obj.getUsername() != null) {
+      json.put("username", obj.getUsername());
     }
     if (obj.getType() != null) {
       json.put("type", obj.getType());

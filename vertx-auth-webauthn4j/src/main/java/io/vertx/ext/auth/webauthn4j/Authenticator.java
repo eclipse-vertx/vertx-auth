@@ -37,7 +37,7 @@ public class Authenticator {
   /**
    * The username linked to this authenticator
    */
-  private String userName;
+  private String username;
 
   /**
    * The type of key (must be "public-key")
@@ -87,12 +87,12 @@ public class Authenticator {
     AuthenticatorConverter.fromJson(json, this);
   }
 
-  public String getUserName() {
-    return userName;
+  public String getUsername() {
+    return username;
   }
 
-  public Authenticator setUserName(String userName) {
-    this.userName = userName;
+  public Authenticator setUsername(String username) {
+    this.username = username;
     return this;
   }
 
