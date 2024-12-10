@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-@ModuleGen(name = "vertx-auth-abac", groupPackage = "io.vertx", useFutures = true)
+@ModuleGen(name = "vertx-auth-abac", groupPackage = "io.vertx")
 package io.vertx.ext.auth.abac;
 
 import io.vertx.codegen.annotations.ModuleGen;

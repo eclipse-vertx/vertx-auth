@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-@ModuleGen(name = "vertx-auth-ldap", groupPackage = "io.vertx", useFutures = true)
+@ModuleGen(name = "vertx-auth-ldap", groupPackage = "io.vertx")
 package io.vertx.ext.auth.ldap;
 
 import io.vertx.codegen.annotations.ModuleGen;

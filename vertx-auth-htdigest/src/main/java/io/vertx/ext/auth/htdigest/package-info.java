@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-@ModuleGen(name = "vertx-auth-htdigest", groupPackage = "io.vertx", useFutures = true)
+@ModuleGen(name = "vertx-auth-htdigest", groupPackage = "io.vertx")
 package io.vertx.ext.auth.htdigest;
 
 import io.vertx.codegen.annotations.ModuleGen;
