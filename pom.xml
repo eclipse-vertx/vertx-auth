@@ -33,7 +33,6 @@
     <module>vertx-auth-oauth2</module>
     <module>vertx-auth-htdigest</module>
     <module>vertx-auth-htpasswd</module>
-    <module>vertx-auth-webauthn</module>
     <module>vertx-auth-webauthn4j</module>
     <module>vertx-auth-properties</module>
     <module>vertx-auth-sql-client</module>
