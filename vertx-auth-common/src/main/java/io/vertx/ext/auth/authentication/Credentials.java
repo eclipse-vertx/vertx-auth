@@ -15,7 +15,7 @@
  */
 package io.vertx.ext.auth.authentication;
 
-import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
@@ -25,7 +25,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Paulo Lopes
  */
-@VertxGen(concrete = false)
+@DataObject
 public interface Credentials {
   /**
    * Implementors should override this method to perform validation. An argument is allowed to
