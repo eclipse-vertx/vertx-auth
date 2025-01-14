@@ -35,7 +35,7 @@ class VariableAwareExpression {
       int openingCurlyBracePos = value.indexOf("{", currentPos);
       if (openingCurlyBracePos == -1) {
         if (currentPos < value.length()) {
-          String authorizationPart = value.substring(currentPos, value.length() - currentPos);
+          String authorizationPart = value.substring(currentPos);
           tmpParts.add(ctx -> authorizationPart);
         }
         break;
