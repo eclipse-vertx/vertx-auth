@@ -180,19 +180,7 @@ public class OAuth2API {
 
     form.put("grant_type", grantType);
 
-    if (!clientAuthentication(headers, form)) {
-      String clientId = config.getClientId();
-      if (clientId == null) {
-        if (config.getClientAssertionType() != null) {
-          form
-            .put("client_assertion_type", config.getClientAssertionType());
-        }
-        if (config.getClientAssertion() != null) {
-          form
-            .put("client_assertion", config.getClientAssertion());
-        }
-      }
-    }
+    clientAuthentication(headers, form);
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = SimpleHttpClient.jsonToQuery(form);
@@ -427,6 +415,14 @@ public class OAuth2API {
     } else {
       if (config.getClientId() != null) {
         form.put("client_id", config.getClientId());
+      }
+      if (config.getClientAssertionType() != null) {
+        form
+          .put("client_assertion_type", config.getClientAssertionType());
+      }
+      if (config.getClientAssertion() != null) {
+        form
+          .put("client_assertion", config.getClientAssertion());
       }
     }
 
