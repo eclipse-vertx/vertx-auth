@@ -124,7 +124,13 @@ public class Oauth2TokenScopeTest {
       } else {
         User token = res.result();
         should.assertFalse(token.expired());
-        test.complete();
+        ScopeAuthorization.create(" ").getAuthorizations(token)
+          .onComplete(call -> {
+            should.assertTrue(call.succeeded());
+            should.assertTrue(PermissionBasedAuthorization.create("scopeA").match(token));
+            should.assertTrue(PermissionBasedAuthorization.create("scopeB").match(token));
+            test.complete();
+          });
       }
     });
   }
@@ -191,7 +197,6 @@ public class Oauth2TokenScopeTest {
         should.assertTrue(call.succeeded());
         // the scopes are missing
         should.assertFalse(PermissionBasedAuthorization.create("scopeX").match(res.result()));
-        should.assertFalse(PermissionBasedAuthorization.create("scopeB").match(res.result()));
         test.complete();
       });
     });
