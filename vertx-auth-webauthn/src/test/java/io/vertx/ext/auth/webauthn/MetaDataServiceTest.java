@@ -6,6 +6,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ public class MetaDataServiceTest {
   public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
+  @Ignore("Expired certificate")
   public void testVerify() {
 
     // defaults
@@ -30,6 +32,7 @@ public class MetaDataServiceTest {
   }
 
   @Test
+  @Ignore("Expired certificate")
   public void testMDS3(TestContext should) {
     final Async test = should.async();
     // defaults
