@@ -20,7 +20,7 @@ public class MetaDataServiceTest {
   public RunTestOnContext rule = new RunTestOnContext();
 
   @Test
-  @Ignore("Expired certificate")
+  @Ignore("MDS2 is deprecated and not available anymore, all certificates have expired")
   public void testVerify() {
 
     // defaults
