@@ -44,7 +44,6 @@
   <name>Vert.x Auth</name>
 
   <properties>
-    <stack.version>4.5.15-SNAPSHOT</stack.version>
     <doc.skip>true</doc.skip>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
   </properties>
@@ -54,7 +53,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
