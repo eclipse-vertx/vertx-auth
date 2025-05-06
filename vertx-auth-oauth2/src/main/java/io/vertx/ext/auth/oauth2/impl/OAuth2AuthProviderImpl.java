@@ -367,7 +367,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // final step, verify if the user is not expired
             // this may happen if the user tokens have been issued for future use for example
             if (newUser.expired(config.getJWTOptions().getLeeway())) {
-              return Future.failedFuture("user is expired.");
+              return Future.failedFuture("introspected user is expired.");
             } else {
               // basic validation passed, the token is not expired
               return Future.succeededFuture(newUser);
@@ -458,7 +458,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           // final step, verify if the user is not expired
           // this may happen if the user tokens have been issued for future use for example
           if (newUser.expired(config.getJWTOptions().getLeeway())) {
-            return Future.failedFuture("user is expired.");
+            return Future.failedFuture("user is expired on code-to-token.");
           } else {
             // basic validation passed, the token is not expired
             return Future.succeededFuture(newUser);
@@ -496,7 +496,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (newUser.expired(config.getJWTOptions().getLeeway())) {
-          return Future.failedFuture("user is expired.");
+          return Future.failedFuture("refreshed user is expired.");
         } else {
           // basic validation passed, the token is not expired
           return Future.succeededFuture(newUser);
@@ -532,7 +532,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // final step, verify if the user is not expired
         // this may happen if the user tokens have been issued for future use for example
         if (user.expired(config.getJWTOptions().getLeeway())) {
-          return Future.failedFuture("user is expired.");
+          return Future.failedFuture("user is expired on user info.");
         } else {
           // basic validation passed, the user token is not expired
           return Future.succeededFuture(json);
