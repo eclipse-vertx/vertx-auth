@@ -1,6 +1,6 @@
 = ABAC Auth Provider
 
-We provide an implementation of {@link io.vertx.ext.auth.authentication.AuthenticationProvider} which uses the a simple
+We provide an implementation of {@link io.vertx.ext.auth.authorization.AuthorizationProvider} that uses a simple
 Attribute Based Access Control. The provider is backed by a Policy object which contains matches of attributes against
 the given user, and on match, the listed authorizations will be granted to the user.
 
@@ -66,7 +66,3 @@ register it with the policy.
 ----
 {@link examples.ABACExamples#example2()}
 ----
-
-
-Once you've got your instance you can authenticate with it just like any
-{@link io.vertx.ext.auth.authentication.AuthenticationProvider}.
