@@ -704,8 +704,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   }
 
   @Override
-  public void close(Promise<Void> onClose) {
+  public void close(Completable<Void> onClose) {
     close();
-    onClose.complete();
+    onClose.succeed();
   }
 }
