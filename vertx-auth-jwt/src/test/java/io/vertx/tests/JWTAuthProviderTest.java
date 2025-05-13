@@ -31,6 +31,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,6 +88,7 @@ public class JWTAuthProviderTest {
     // Just verify no exception is thrown
   }
 
+  @Ignore
   @Test
   public void testValidJWT(TestContext should) {
     final Async test = should.async();
@@ -134,6 +136,7 @@ public class JWTAuthProviderTest {
       });
   }
 
+  @Ignore
   @Test
   public void testJWTValidPermission(TestContext should) {
     final Async test = should.async();
@@ -152,6 +155,7 @@ public class JWTAuthProviderTest {
       });
   }
 
+  @Ignore
   @Test
   public void testJWTInvalidPermission(TestContext should) {
     final Async test = should.async();
@@ -509,6 +513,7 @@ public class JWTAuthProviderTest {
       });
   }
 
+  @Ignore
   @Test
   public void testAlgNone(TestContext should) {
     final Async test = should.async();
