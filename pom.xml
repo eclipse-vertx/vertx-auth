@@ -35,7 +35,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>40</version>
+    <version>42</version>
   </parent>
 
   <artifactId>vertx-auth-parent</artifactId>
@@ -43,8 +43,13 @@
 
   <name>Vert.x Auth</name>
 
+  <scm>
+    <connection>scm:git:git@github.com:eclipse-vertx/vertx-auth.git</connection>
+    <developerConnection>scm:git:git@github.com:eclipse-vertx/vertx-auth.git</developerConnection>
+    <url>git@github.com:eclipse-vertx/vertx-auth.git</url>
+  </scm>
+
   <properties>
-    <stack.version>4.5.15-SNAPSHOT</stack.version>
     <doc.skip>true</doc.skip>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
   </properties>
@@ -54,7 +59,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
