@@ -23,6 +23,7 @@ import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
@@ -31,13 +32,24 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.crypto.Mac;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotEquals;
 
@@ -50,14 +62,18 @@ public class JWTAuthProviderTest {
   private JWTAuth authProvider;
 
   // {"sub":"Paulo","exp":1747055313,"iat":1431695313,"permissions":["read","write","execute"],"roles":["admin","developer","user"]}
-  private static final String JWT_VALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImV4cCI6MTc0NzA1NTMxMywiaWF0IjoxNDMxNjk1MzEzLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJleGVjdXRlIl0sInJvbGVzIjpbImFkbWluIiwiZGV2ZWxvcGVyIiwidXNlciJdfQ.UdA6oYDn9s_k7uogFFg8jvKmq9RgITBnlq4xV6JGsCY";
+  private static final String JWT_CLAIMS = "{\"sub\":\"Paulo\",\"exp\":1747055313,\"iat\":1431695313,\"permissions\":[\"read\",\"write\",\"execute\"],\"roles\":[\"admin\",\"developer\",\"user\"]}";
 
   // {"sub":"Paulo","iat":1400159434,"exp":1400245834,"roles":["admin","developer","user"],"permissions":["read","write","execute"]}
   private static final String JWT_INVALID = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImlhdCI6MTQwMDE1OTQzNCwiZXhwIjoxNDAwMjQ1ODM0LCJyb2xlcyI6WyJhZG1pbiIsImRldmVsb3BlciIsInVzZXIiXSwicGVybWlzc2lvbnMiOlsicmVhZCIsIndyaXRlIiwiZXhlY3V0ZSJdfQ==.NhHul0OFlmUaatFwNeGBbshVNzac2z_3twEEg57x80s=";
 
+  private final long exp = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
+  private String jwtValid;
+
   @Before
   public void setUp() throws Exception {
     authProvider = JWTAuth.create(rule.vertx(), getConfig());
+    jwtValid = authProvider.generateToken(new JsonObject(JWT_CLAIMS).put("exp", exp));
   }
 
   private JWTAuthOptions getConfig() {
@@ -88,12 +104,11 @@ public class JWTAuthProviderTest {
     // Just verify no exception is thrown
   }
 
-  @Ignore
   @Test
   public void testValidJWT(TestContext should) {
     final Async test = should.async();
 
-    TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
+    TokenCredentials authInfo = new TokenCredentials(jwtValid);
     authProvider
       .authenticate(authInfo)
       .onFailure(should::fail)
@@ -136,12 +151,11 @@ public class JWTAuthProviderTest {
       });
   }
 
-  @Ignore
   @Test
   public void testJWTValidPermission(TestContext should) {
     final Async test = should.async();
 
-    TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
+    TokenCredentials authInfo = new TokenCredentials(jwtValid);
     authProvider.authenticate(authInfo)
       .onFailure(should::fail)
       .onSuccess(user -> {
@@ -155,12 +169,11 @@ public class JWTAuthProviderTest {
       });
   }
 
-  @Ignore
   @Test
   public void testJWTInvalidPermission(TestContext should) {
     final Async test = should.async();
 
-    TokenCredentials authInfo = new TokenCredentials(JWT_VALID);
+    TokenCredentials authInfo = new TokenCredentials(jwtValid);
     authProvider.authenticate(authInfo)
       .onFailure(should::fail)
       .onSuccess(user -> {
@@ -179,7 +192,7 @@ public class JWTAuthProviderTest {
 
     JsonObject payload = new JsonObject()
       .put("sub", "Paulo")
-      .put("exp", 1747055313)
+      .put("exp", exp)
       .put("iat", 1431695313)
       .put("permissions", new JsonArray()
         .add("read")
@@ -192,7 +205,7 @@ public class JWTAuthProviderTest {
 
     String token = authProvider.generateToken(payload, new JWTOptions().setSubject("Paulo"));
     should.assertNotNull(token);
-    should.assertEquals(JWT_VALID, token);
+    should.assertEquals(jwtValid, token);
   }
 
   @Test
@@ -513,9 +526,8 @@ public class JWTAuthProviderTest {
       });
   }
 
-  @Ignore
   @Test
-  public void testAlgNone(TestContext should) {
+  public void testAlgNone(TestContext should) throws Exception {
     final Async test = should.async();
 
     JWTAuth authProvider = JWTAuth.create(rule.vertx(), new JWTAuthOptions());
@@ -524,7 +536,7 @@ public class JWTAuthProviderTest {
       .put("sub", "UserUnderTest")
       .put("aud", "OrganizationUnderTest")
       .put("iat", 1431695313)
-      .put("exp", 1747055313)
+      .put("exp", LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC))
       .put("roles", new JsonArray().add("admin").add("developer").add("user"))
       .put("permissions", new JsonArray().add("read").add("write").add("execute"));
 
