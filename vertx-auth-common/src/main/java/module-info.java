@@ -39,6 +39,6 @@ module io.vertx.auth.common {
   exports io.vertx.ext.auth.impl.cose to io.vertx.auth.webauthn, io.vertx.auth.webauthn4j, io.vertx.tests;
   exports io.vertx.ext.auth.impl.asn to io.vertx.auth.webauthn, io.vertx.auth.webauthn4j;
   exports io.vertx.ext.auth.authorization.impl to io.vertx.auth.abac;
-  exports io.vertx.ext.auth.impl.http to io.vertx.auth.oauth2, io.vertx.auth.webauthn, io.vertx.auth.webauthn4j;
+  exports io.vertx.ext.auth.impl.http to io.vertx.auth.oauth2, io.vertx.auth.webauthn, io.vertx.auth.webauthn4j, io.vertx.tests;
 
 }
