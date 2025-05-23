@@ -1,4 +1,4 @@
-name: vertx-auth-2 (5.x-stable)
+name: vertx-auth (5.x-stable)
 on:
   push:
     branches:
