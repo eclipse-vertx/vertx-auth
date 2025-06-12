@@ -663,7 +663,14 @@ public final class JWK {
   }
 
   public Mac mac() {
-    return mac;
+    if (mac == null) {
+      return null;
+    }
+    try {
+      return (Mac) mac.clone();
+    } catch (CloneNotSupportedException e) {
+      return mac;
+    }
   }
 
   public PublicKey publicKey() {

@@ -73,7 +73,6 @@ public final class JWS {
   }
 
   private final JWK jwk;
-  private final Signature signature;
   // the length of the signature. This is derived from the algorithm name
   // this will help to cope with signatures that are longer (yet valid) than
   // the expected result
@@ -85,7 +84,7 @@ public final class JWS {
     }
 
     try {
-      this.signature = getSignature(jwk.getAlgorithm());
+      getSignature(jwk.getAlgorithm()); //just validate if signature is available
       this.len = getSignatureLength(jwk.getAlgorithm(), jwk.publicKey());
     } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
       throw new RuntimeException(e);
@@ -102,9 +101,7 @@ public final class JWS {
     final Mac mac = jwk.mac();
 
     if (mac != null) {
-      synchronized (jwk) {
-        return mac.doFinal(payload);
-      }
+      return mac.doFinal(payload);
     } else {
       final PrivateKey privateKey = jwk.privateKey();
       final String kty = jwk.kty();
@@ -113,18 +110,17 @@ public final class JWS {
         throw new IllegalStateException("JWK doesn't contain secKey material");
       }
       try {
-        synchronized (signature) {
-          signature.initSign(privateKey);
-          signature.update(payload);
-          byte[] sig = signature.sign();
-          switch (kty) {
-            case "EC":
-              return JWS.toJWS(sig, len);
-            default:
-              return sig;
-          }
+        Signature signature = getSignature(jwk.getAlgorithm());
+        signature.initSign(privateKey);
+        signature.update(payload);
+        byte[] sig = signature.sign();
+        switch (kty) {
+          case "EC":
+            return JWS.toJWS(sig, len);
+          default:
+            return sig;
         }
-      } catch (SignatureException | InvalidKeyException e) {
+      } catch (SignatureException | InvalidKeyException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
         throw new RuntimeException(e);
       }
     }
@@ -141,9 +137,7 @@ public final class JWS {
     final Mac mac = jwk.mac();
 
     if (mac != null) {
-      synchronized (jwk) {
-        return MessageDigest.isEqual(expected, sign(payload));
-      }
+      return MessageDigest.isEqual(expected, sign(payload));
     } else {
       try {
         final PublicKey publicKey = jwk.publicKey();
@@ -152,29 +146,28 @@ public final class JWS {
         if (publicKey == null) {
           throw new IllegalStateException("JWK doesn't contain pubKey material");
         }
-        synchronized (signature) {
-          signature.initVerify(publicKey);
-          signature.update(payload);
-          switch (kty) {
-            case "EC":
-              // JCA EC signatures expect ASN1 formatted signatures
-              // while JWS uses it's own format (R+S), while this will be true
-              // for all JWS, it may not be true for COSE keys
-              if (!JWS.isASN1(expected)) {
-                expected = JWS.toASN1(expected);
-              }
-              break;
-          }
-          if (expected.length < len) {
-            // need to adapt the expectation to make the RSA? engine happy
-            byte[] normalized = new byte[len];
-            System.arraycopy(expected, 0, normalized, 0, expected.length);
-            return signature.verify(normalized);
-          } else {
-            return signature.verify(expected);
-          }
+        Signature signature = getSignature(jwk.getAlgorithm());
+        signature.initVerify(publicKey);
+        signature.update(payload);
+        switch (kty) {
+          case "EC":
+            // JCA EC signatures expect ASN1 formatted signatures
+            // while JWS uses it's own format (R+S), while this will be true
+            // for all JWS, it may not be true for COSE keys
+            if (!JWS.isASN1(expected)) {
+              expected = JWS.toASN1(expected);
+            }
+            break;
         }
-      } catch (SignatureException | InvalidKeyException e) {
+        if (expected.length < len) {
+          // need to adapt the expectation to make the RSA? engine happy
+          byte[] normalized = new byte[len];
+          System.arraycopy(expected, 0, normalized, 0, expected.length);
+          return signature.verify(normalized);
+        } else {
+          return signature.verify(expected);
+        }
+      } catch (SignatureException | InvalidKeyException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
         throw new RuntimeException(e);
       }
     }

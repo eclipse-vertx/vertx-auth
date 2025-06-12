@@ -19,10 +19,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 
 /**
  * Utilities to work with Json Web Encryption. This is not fully implemented according to the RFC/spec.
@@ -31,7 +28,6 @@ import java.security.PublicKey;
  */
 public final class JWE {
 
-  private final Cipher cipher;
   private final JWK jwk;
 
   public JWE(JWK jwk) {
@@ -40,7 +36,7 @@ public final class JWE {
     }
 
     try {
-      this.cipher = Cipher.getInstance(jwk.kty());
+      Cipher.getInstance(jwk.kty()); //just validate if cipher is available
     } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
       throw new RuntimeException(e);
     }
@@ -53,10 +49,13 @@ public final class JWE {
       throw new IllegalStateException("Key doesn't contain a pubKey material");
     }
 
-    synchronized (cipher) {
+    try {
+      Cipher cipher = Cipher.getInstance(jwk.kty());
       cipher.init(Cipher.ENCRYPT_MODE, publicKey);
       cipher.update(payload);
       return cipher.doFinal();
+    } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -66,10 +65,13 @@ public final class JWE {
       throw new IllegalStateException("Key doesn't contain a secKey material");
     }
 
-    synchronized (cipher) {
+    try {
+      Cipher cipher = Cipher.getInstance(jwk.kty());
       cipher.init(Cipher.DECRYPT_MODE, privateKey);
       cipher.update(payload);
       return cipher.doFinal();
+    } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
     }
   }
 
