@@ -41,7 +41,7 @@
   <artifactId>vertx-auth-parent</artifactId>
   <version>4.5.16-SNAPSHOT</version>
 
-  <name>Vert.x Auth</name>
+  <name>Vert.x Auth Parent</name>
 
   <scm>
     <connection>scm:git:git@github.com:eclipse-vertx/vertx-auth.git</connection>

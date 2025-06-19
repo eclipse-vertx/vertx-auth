@@ -25,6 +25,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vertx-auth-htdigest</artifactId>
+  <name>Vert.x Auth HT Digest</name>
 
   <properties>
     <doc.skip>false</doc.skip>

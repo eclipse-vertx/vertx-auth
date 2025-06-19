@@ -22,6 +22,7 @@
   </properties>
 
   <artifactId>vertx-auth-ldap</artifactId>
+  <name>Vert.x Auth LDAP</name>
 
   <dependencies>
     <dependency>

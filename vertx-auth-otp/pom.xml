@@ -25,6 +25,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vertx-auth-otp</artifactId>
+  <name>Vert.x Auth OTP</name>
 
   <properties>
     <doc.skip>false</doc.skip>
