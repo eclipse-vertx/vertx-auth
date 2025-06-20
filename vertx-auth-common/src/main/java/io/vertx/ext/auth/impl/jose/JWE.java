@@ -15,6 +15,10 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
+import io.netty.util.concurrent.FastThreadLocal;
+import io.netty.util.concurrent.FastThreadLocalThread;
+import io.vertx.codegen.annotations.Nullable;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -36,7 +40,7 @@ public final class JWE {
     }
 
     try {
-      Cipher.getInstance(jwk.kty()); //just validate if cipher is available
+      getCipher(jwk.kty()); //just validate if cipher is available
     } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
       throw new RuntimeException(e);
     }
@@ -50,7 +54,7 @@ public final class JWE {
     }
 
     try {
-      Cipher cipher = Cipher.getInstance(jwk.kty());
+      Cipher cipher = getCipher(jwk.kty());
       cipher.init(Cipher.ENCRYPT_MODE, publicKey);
       cipher.update(payload);
       return cipher.doFinal();
@@ -66,7 +70,7 @@ public final class JWE {
     }
 
     try {
-      Cipher cipher = Cipher.getInstance(jwk.kty());
+      Cipher cipher = getCipher(jwk.kty());
       cipher.init(Cipher.DECRYPT_MODE, privateKey);
       cipher.update(payload);
       return cipher.doFinal();
@@ -77,5 +81,18 @@ public final class JWE {
 
   public String label() {
     return jwk.label();
+  }
+
+  private static @Nullable Cipher getCipher(String algorithm) throws NoSuchAlgorithmException, NoSuchPaddingException {
+    if (FastThreadLocalThread.currentThreadHasFastThreadLocal()) {
+      return new FastThreadLocal<Cipher>() {
+        @Override
+        protected Cipher initialValue() throws NoSuchAlgorithmException, NoSuchPaddingException {
+          return Cipher.getInstance(algorithm);
+        }
+      }.get();
+    } else {
+      return Cipher.getInstance(algorithm);
+    }
   }
 }

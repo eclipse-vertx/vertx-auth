@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
+import io.netty.util.concurrent.FastThreadLocal;
+import io.netty.util.concurrent.FastThreadLocalThread;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
@@ -177,7 +179,7 @@ public final class JWS {
     return jwk;
   }
 
-  private static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  private static @Nullable Signature chooseSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     Signature sig;
 
     switch (alg) {
@@ -216,6 +218,19 @@ public final class JWS {
         return Signature.getInstance("EdDSA");
       default:
         throw new NoSuchAlgorithmException();
+    }
+  }
+
+  private static @Nullable Signature getSignature(String algorithm) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    if (FastThreadLocalThread.currentThreadHasFastThreadLocal()) {
+      return new FastThreadLocal<Signature>() {
+        @Override
+        protected Signature initialValue() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+          return chooseSignature(algorithm);
+        }
+      }.get();
+    } else {
+      return chooseSignature(algorithm);
     }
   }
 

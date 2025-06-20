@@ -19,6 +19,7 @@ module io.vertx.auth.common {
   requires static io.vertx.codegen.api;
   requires static io.vertx.codegen.json;
   requires static io.vertx.docgen;
+  requires io.netty.common;
 
   exports io.vertx.ext.auth;
   exports io.vertx.ext.auth.authorization;
