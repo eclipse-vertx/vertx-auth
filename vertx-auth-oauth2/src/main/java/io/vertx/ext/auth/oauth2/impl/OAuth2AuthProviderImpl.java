@@ -368,6 +368,9 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
           if (oauth2Credentials.getCodeVerifier() != null) {
             params.put("code_verifier", oauth2Credentials.getCodeVerifier());
           }
+          if (oauth2Credentials.getAssertion() != null) {
+            params.put("client_assertion", oauth2Credentials.getAssertion());
+          }
           break;
 
         case PASSWORD:

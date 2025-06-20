@@ -180,19 +180,7 @@ public class OAuth2API {
 
     form.put("grant_type", grantType);
 
-    if (!clientAuthentication(headers, form)) {
-      String clientId = config.getClientId();
-      if (clientId == null) {
-        if (config.getClientAssertionType() != null) {
-          form
-            .put("client_assertion_type", config.getClientAssertionType());
-        }
-        if (config.getClientAssertion() != null) {
-          form
-            .put("client_assertion", config.getClientAssertion());
-        }
-      }
-    }
+    clientAuthentication(headers, form);
 
     headers.put("Content-Type", "application/x-www-form-urlencoded");
     final Buffer payload = SimpleHttpClient.jsonToQuery(form);
@@ -414,7 +402,8 @@ public class OAuth2API {
   }
 
   private boolean clientAuthentication(JsonObject headers, JsonObject form) {
-    final boolean confidentialClient = config.getClientId() != null && config.getClientSecret() != null;
+    final boolean confidentialClient = config.getClientId() != null &&
+      (config.getClientSecret() != null || config.getClientAssertionType() != null);
 
     if (confidentialClient) {
       if (config.isUseBasicAuthorization()) {
@@ -422,7 +411,19 @@ public class OAuth2API {
         headers.put("Authorization", "Basic " + base64Encode(basic.getBytes(StandardCharsets.UTF_8)));
       } else {
         form.put("client_id", config.getClientId());
-        form.put("client_secret", config.getClientSecret());
+
+        if (config.getClientAssertionType() != null) {
+          form.put("client_assertion_type", config.getClientAssertionType());
+          if (form.getString("client_assertion") == null) {
+            if (config.getClientAssertion() != null) {
+              form.put("client_assertion", config.getClientAssertion());
+            } else {
+              throw new RuntimeException(String.format("Can not authenticate client, client_assertion_type is set to %s but client_assertion is not configured", config.getClientAssertionType()));
+            }
+          }
+        } else {
+          form.put("client_secret", config.getClientSecret());
+        }
       }
     } else {
       if (config.getClientId() != null) {
