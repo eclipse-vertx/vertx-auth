@@ -26,6 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vertx-auth-htpasswd</artifactId>
+  <name>Vert.x Auth HT Passwd</name>
 
   <properties>
     <doc.skip>false</doc.skip>

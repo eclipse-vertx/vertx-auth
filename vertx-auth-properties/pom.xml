@@ -31,6 +31,7 @@
   </properties>
 
   <artifactId>vertx-auth-properties</artifactId>
+  <name>Vert.x Auth Properties</name>
 
   <dependencies>
     <dependency>

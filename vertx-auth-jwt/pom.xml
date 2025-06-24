@@ -26,6 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vertx-auth-jwt</artifactId>
+  <name>Vert.x Auth JWT</name>
 
   <properties>
     <doc.skip>false</doc.skip>
