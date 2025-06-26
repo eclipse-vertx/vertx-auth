@@ -17,7 +17,6 @@ package io.vertx.ext.auth.impl.jose;
 
 import io.netty.util.concurrent.FastThreadLocal;
 import io.netty.util.concurrent.FastThreadLocalThread;
-import io.vertx.codegen.annotations.Nullable;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -32,6 +31,8 @@ import java.security.*;
  */
 public final class JWE {
 
+  private static final FastThreadLocal<Cipher> CURRENT_CIPHER = new FastThreadLocal<>();
+
   private final JWK jwk;
 
   public JWE(JWK jwk) {
@@ -39,11 +40,7 @@ public final class JWE {
       throw new IllegalArgumentException("JWK isn't meant to perform JWE operations");
     }
 
-    try {
-      getCipher(jwk.kty()); //just validate if cipher is available
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-      throw new RuntimeException(e);
-    }
+    getCipher(jwk.kty()); //just validate if cipher is available
     this.jwk = jwk;
   }
 
@@ -53,14 +50,10 @@ public final class JWE {
       throw new IllegalStateException("Key doesn't contain a pubKey material");
     }
 
-    try {
-      Cipher cipher = getCipher(jwk.kty());
-      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-      cipher.update(payload);
-      return cipher.doFinal();
-    } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
+    Cipher cipher = getCipher(jwk.kty());
+    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+    cipher.update(payload);
+    return cipher.doFinal();
   }
 
   public byte[] decrypt(byte[] payload) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
@@ -69,30 +62,35 @@ public final class JWE {
       throw new IllegalStateException("Key doesn't contain a secKey material");
     }
 
-    try {
-      Cipher cipher = getCipher(jwk.kty());
-      cipher.init(Cipher.DECRYPT_MODE, privateKey);
-      cipher.update(payload);
-      return cipher.doFinal();
-    } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
+    Cipher cipher = getCipher(jwk.kty());
+    cipher.init(Cipher.DECRYPT_MODE, privateKey);
+    cipher.update(payload);
+    return cipher.doFinal();
   }
 
   public String label() {
     return jwk.label();
   }
 
-  private static @Nullable Cipher getCipher(String algorithm) throws NoSuchAlgorithmException, NoSuchPaddingException {
-    if (FastThreadLocalThread.currentThreadHasFastThreadLocal()) {
-      return new FastThreadLocal<Cipher>() {
-        @Override
-        protected Cipher initialValue() throws NoSuchAlgorithmException, NoSuchPaddingException {
-          return Cipher.getInstance(algorithm);
-        }
-      }.get();
+  private static Cipher getCipher(String algorithm) {
+    Cipher cipher;
+    if (Thread.currentThread() instanceof FastThreadLocalThread) {
+      cipher = CURRENT_CIPHER.getIfExists();
+      if (cipher == null) {
+        cipher = getInstance(algorithm);
+        CURRENT_CIPHER.set(cipher);
+      }
     } else {
+      cipher = getInstance(algorithm);
+    }
+    return cipher;
+  }
+
+  private static Cipher getInstance(String algorithm) {
+    try {
       return Cipher.getInstance(algorithm);
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+      throw new RuntimeException(e);
     }
   }
 }
