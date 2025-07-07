@@ -30,6 +30,9 @@ import java.security.cert.*;
 import java.security.interfaces.RSAKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
 
@@ -64,11 +67,26 @@ public final class JWS {
   public static final String HS384 = "HS384";
   public static final String HS512 = "HS512";
 
+  private static final String[] ALGORITHMS;
+  private static final Comparator<String> ALGORITHMS_COMPARATOR = Comparator
+    .comparing(String::hashCode) // Fast but not consistent with equals so...
+    .thenComparing(String::compareTo); // ... in the worst case use character-to-character comparison
+
+  private static final FastThreadLocal<Signature[]> CURRENT_SIGNATURES = new FastThreadLocal<>() {
+    @Override
+    protected Signature[] initialValue() {
+      return new Signature[ALGORITHMS.length];
+    }
+  };
+
   private static final CertificateFactory X509;
 
-  private static final FastThreadLocal<Signature> CURRENT_SIGNATURE = new FastThreadLocal<>();
 
   static {
+    ALGORITHMS = Stream.of(EdDSA, ES256, ES384, ES512, PS256, PS384, PS512, ES256K, RS256, RS384, RS512, RS1, HS256, HS384, HS512)
+      .sorted(ALGORITHMS_COMPARATOR) // Required for binary search
+      .distinct() // Make sure we don't have any duplicates
+      .toArray(String[]::new);
     try {
       X509 = CertificateFactory.getInstance("X.509");
     } catch (CertificateException e) {
@@ -228,17 +246,17 @@ public final class JWS {
   }
 
   private static Signature getSignature(String algorithm) {
-    Signature signature;
     if (Thread.currentThread() instanceof FastThreadLocalThread) {
-      signature = CURRENT_SIGNATURE.getIfExists();
-      if (signature == null) {
-        signature = chooseSignature(algorithm);
-        CURRENT_SIGNATURE.set(signature);
+      Signature[] signatures = CURRENT_SIGNATURES.get();
+      int index;
+      if ((index = Arrays.binarySearch(ALGORITHMS, algorithm, ALGORITHMS_COMPARATOR)) >= 0) {
+        if (signatures[index] == null) {
+          signatures[index] = chooseSignature(algorithm);
+        }
+        return signatures[index];
       }
-    } else {
-      signature = chooseSignature(algorithm);
     }
-    return signature;
+    return chooseSignature(algorithm);
   }
 
   /**
