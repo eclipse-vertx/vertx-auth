@@ -25,7 +25,7 @@ import io.vertx.ext.auth.authorization.impl.AuthorizationsImpl;
 import io.vertx.ext.auth.impl.UserImpl;
 
 /**
- * Represents an authenticates User and contains operations to authorise the user.
+ * Represents an authenticated User and contains operations to authorise the user.
  * <p>
  * Please consult the documentation for a detailed explanation.
  *
@@ -143,7 +143,7 @@ public interface User {
    * the current clock time does not agree with the parameter value. If the {@link #attributes()} do not contain a key
    * then {@link #principal()} properties are checked.
    * <p>
-   * If all of the properties are not available the user will not expire.
+   * If all the properties are not available the user will not expire.
    * <p>
    * Implementations of this interface might relax this rule to account for a leeway to safeguard against
    * clock drifting.
