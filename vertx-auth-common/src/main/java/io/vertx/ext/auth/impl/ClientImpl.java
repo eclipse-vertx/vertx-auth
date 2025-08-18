@@ -24,7 +24,8 @@ public class ClientImpl implements Client {
    */
   private final AuthMethod tokenEndpointAuthMethod;
 
-  public ClientImpl(final String name, final List<GrantType> grantTypes, final AuthMethod tokenEndpointAuthMethod) {
+  public ClientImpl(final String name, final List<GrantType> grantTypes,
+    final AuthMethod tokenEndpointAuthMethod) {
     assert name != null;
     assert grantTypes != null;
     assert !grantTypes.isEmpty();

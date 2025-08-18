@@ -11,15 +11,19 @@ import java.util.List;
 
 public interface Client {
 
-  static ClientImpl create(final String name, final List<GrantType> grantTypes, final AuthMethod tokenEndpointAuthMethod) {
+  static ClientImpl create(final String name, final List<GrantType> grantTypes,
+    final AuthMethod tokenEndpointAuthMethod) {
     return new ClientImpl(name, grantTypes, tokenEndpointAuthMethod);
   }
 
-  static ClientImpl create(final String name, final GrantType grantType, final AuthMethod tokenEndpointAuthMethod) {
+  static ClientImpl create(final String name, final GrantType grantType,
+    final AuthMethod tokenEndpointAuthMethod) {
     return new ClientImpl(name, List.of(grantType), tokenEndpointAuthMethod);
   }
 
   String name();
+
   List<GrantType> grantTypes();
+
   AuthMethod authMethod();
 }
