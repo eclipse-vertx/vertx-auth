@@ -1,0 +1,20 @@
+please stop the keycloak before export
+export configs: ./kc.sh export --file master.json --realm master
+
+to generate initial access token:
+kcadm.sh config credentials --server http://localhost:8080/auth --realm master --user admin
+create long live initial access token: kcadm.sh create clients-initial-access -s expiration=157788000 -o
+
+
+
+{
+  "id" : "031d7068-4a52-4e76-b0f4-d3ae9ef575a8",
+  "token" : "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIxZmI0MjFhNy04ZGZjLTQ1OTctOTM1Ni01MGEwNTA3YjM4MmEifQ.eyJleHAiOjE5MTYyMDQ0NzEsImlhdCI6MTc1ODQxNjQ3MSwianRpIjoiMDMxZDcwNjgtNGE1Mi00ZTc2LWIwZjQtZDNhZTllZjU3NWE4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9tYXN0ZXIiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvcmVhbG1zL21hc3RlciIsInR5cCI6IkluaXRpYWxBY2Nlc3NUb2tlbiJ9.eRVfRpmKrGsaq2FowQDfMysOXdsS7rBeoB5UYkANQNHVDPoNxooEbr-MF7MPrkEMsY-Z4IAlnsCjQ837HpZbnA",
+  "timestamp" : 1758416471,
+  "expiration" : 157788000,
+  "count" : 1,
+  "remainingCount" : 1
+}
+
+mvn clean install -PIT
+
