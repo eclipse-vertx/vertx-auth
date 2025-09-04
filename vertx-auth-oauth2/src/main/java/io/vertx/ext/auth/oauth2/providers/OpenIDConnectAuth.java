@@ -135,10 +135,11 @@ public interface OpenIDConnectAuth {
         }
 
 
-        // reset config
-        config.setSupportedGrantTypes(null);
 
         if (json.containsKey("grant_types_supported")) {
+          // reset config
+          config.setSupportedGrantTypes(null);
+
           // optional config
           JsonArray flows = json.getJsonArray("grant_types_supported");
           flows.forEach(el -> config.addSupportedGrantType((String) el));
