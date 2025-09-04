@@ -644,7 +644,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
       }
     }
 
-    if (target != null && target.size() > 0) {
+    if (target != null && !target.isEmpty()) {
       if (idToken || jwtOptions.getAudience() == null) {
         // https://openid.net/specs/openid-connect-core-1_0.html#  $3.1.3.7.
         // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at the Issuer
@@ -654,7 +654,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         if (!target.contains(config.getClientId())) {
           throw new IllegalStateException("Invalid JWT audience. expected: " + config.getClientId());
         }
-      } else {
+      } else if (!jwtOptions.getAudience().isEmpty()) {
         if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
           throw new IllegalStateException("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
         }
