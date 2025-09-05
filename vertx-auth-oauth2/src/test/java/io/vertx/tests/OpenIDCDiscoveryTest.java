@@ -22,7 +22,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -212,7 +211,7 @@ public class OpenIDCDiscoveryTest {
           .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
           .setTenant("test")
           .setClientId("test-client")
-          .setSupportedGrantTypes(List.of(OAuth2FlowType.AUTH_CODE.getGrantType())))
+          .addSupportedGrantType(OAuth2FlowType.AUTH_CODE.getGrantType()))
       .onSuccess(result -> {
         var options = ((OAuth2AuthProviderImpl) result).getConfig();
 
@@ -232,7 +231,7 @@ public class OpenIDCDiscoveryTest {
           .setTenant("test")
           // This one should work without a client ID, as it is not required when only the implicit flow is supported
           //.setClientId("test-client")
-          .setSupportedGrantTypes(List.of(OAuth2FlowType.IMPLICIT.getGrantType())))
+          .addSupportedGrantType(OAuth2FlowType.IMPLICIT.getGrantType()))
       .onSuccess(result -> {
         var options = ((OAuth2AuthProviderImpl) result).getConfig();
 
@@ -273,7 +272,7 @@ public class OpenIDCDiscoveryTest {
   }
 
   @Test
-  public void testServerOverridesFlowTypes(TestContext should) {
+  public void testIntersectFlowTypes(TestContext should) {
     final Async test = should.async(2);
 
     // Setup expectations for mockserver
@@ -285,7 +284,7 @@ public class OpenIDCDiscoveryTest {
           .withMethod("GET"),
         Times.exactly(1)
       )
-      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.AUTH_CODE));
+      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.AUTH_CODE, OAuth2FlowType.IMPLICIT));
 
     mockServerClient
       .when(
@@ -295,7 +294,93 @@ public class OpenIDCDiscoveryTest {
           .withMethod("GET"),
         Times.exactly(1)
       )
-      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.IMPLICIT, OAuth2FlowType.PASSWORD));
+      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.IMPLICIT, OAuth2FlowType.PASSWORD, OAuth2FlowType.AUTH_CODE));
+
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/jwks")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET")
+      )
+      .respond(
+        response()
+          .withContentType(MediaType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8))
+          .withBody("{\"keys\": []}")
+      );
+
+    // Configured grant types should be overridden, as the server sends some
+    OpenIDConnectAuth.discover(
+        rule.vertx(),
+        new OAuth2Options()
+          .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
+          .setTenant("test")
+          // This one should work without a client ID, as it is not required when only the implicit flow is supported
+          //.setClientId("test-client")
+          .addSupportedGrantType(OAuth2FlowType.IMPLICIT.getGrantType()))
+      .onSuccess(result -> {
+        var options = ((OAuth2AuthProviderImpl) result).getConfig();
+
+        // Server sends authorization_code, implicit, so the intersection is only implicit
+        should.assertEquals(
+          new HashSet<>(options.getSupportedGrantTypes()),
+          Set.of(OAuth2FlowType.IMPLICIT.getGrantType())
+        );
+
+        test.countDown();
+
+        // Need to serialize requests this time to make the assertions reproducible
+        OpenIDConnectAuth.discover(
+            rule.vertx(),
+            new OAuth2Options()
+              .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
+              .setTenant("test")
+              .setClientId("test-client")
+              .addSupportedGrantType(OAuth2FlowType.AUTH_CODE.getGrantType())
+              .addSupportedGrantType(OAuth2FlowType.IMPLICIT.getGrantType()))
+          .onSuccess(result2 -> {
+            var options2 = ((OAuth2AuthProviderImpl) result2).getConfig();
+
+            // Server sends authorization_code, implicit, password, so the intersection is implicit, authorization_code
+            should.assertEquals(
+              new HashSet<>(options2.getSupportedGrantTypes()),
+              Set.of(
+                OAuth2FlowType.IMPLICIT.getGrantType(),
+                OAuth2FlowType.AUTH_CODE.getGrantType()
+              )
+            );
+
+            test.countDown();
+          })
+          .onFailure(should::fail);
+      })
+      .onFailure(should::fail);
+  }
+
+  @Test
+  public void testServerSupportedFlowTypes(TestContext should) {
+    final Async test = should.async(2);
+
+    // Setup expectations for mockserver
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/.well-known/openid-configuration")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET"),
+        Times.exactly(1)
+      )
+      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.AUTH_CODE, OAuth2FlowType.IMPLICIT));
+
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/.well-known/openid-configuration")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET"),
+        Times.exactly(1)
+      )
+      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.IMPLICIT, OAuth2FlowType.PASSWORD, OAuth2FlowType.AUTH_CODE));
 
     mockServerClient
       .when(
@@ -317,13 +402,14 @@ public class OpenIDCDiscoveryTest {
           .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
           .setTenant("test")
           .setClientId("test-client")
-          .setSupportedGrantTypes(List.of(OAuth2FlowType.IMPLICIT.getGrantType())))
+      )
       .onSuccess(result -> {
         var options = ((OAuth2AuthProviderImpl) result).getConfig();
 
+        // Server sends authorization_code, implicit
         should.assertEquals(
           new HashSet<>(options.getSupportedGrantTypes()),
-          Set.of(OAuth2FlowType.AUTH_CODE.getGrantType())
+          Set.of(OAuth2FlowType.AUTH_CODE.getGrantType(), OAuth2FlowType.IMPLICIT.getGrantType())
         );
 
         test.countDown();
@@ -335,15 +421,17 @@ public class OpenIDCDiscoveryTest {
               .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
               .setTenant("test")
               .setClientId("test-client")
-              .setSupportedGrantTypes(List.of(OAuth2FlowType.IMPLICIT.getGrantType())))
+          )
           .onSuccess(result2 -> {
             var options2 = ((OAuth2AuthProviderImpl) result2).getConfig();
 
+            // Server sends authorization_code, implicit, password
             should.assertEquals(
               new HashSet<>(options2.getSupportedGrantTypes()),
               Set.of(
                 OAuth2FlowType.IMPLICIT.getGrantType(),
-                OAuth2FlowType.PASSWORD.getGrantType()
+                OAuth2FlowType.PASSWORD.getGrantType(),
+                OAuth2FlowType.AUTH_CODE.getGrantType()
               )
             );
 
@@ -352,6 +440,137 @@ public class OpenIDCDiscoveryTest {
           .onFailure(should::fail);
       })
       .onFailure(should::fail);
+  }
+
+  @Test
+  public void testDefaultFlowTypes(TestContext should) {
+    final Async test = should.async(2);
+
+    // Setup expectations for mockserver
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/.well-known/openid-configuration")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET")
+        )
+      .respond(fakeAuthServerConfigurationTemplate());
+
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/jwks")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET")
+      )
+      .respond(
+        response()
+          .withContentType(MediaType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8))
+          .withBody("{\"keys\": []}")
+      );
+
+    // Configured grant types should be overridden, as the server sends some
+    OpenIDConnectAuth.discover(
+        rule.vertx(),
+        new OAuth2Options()
+          .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
+          .setTenant("test")
+          .setClientId("test-client")
+      )
+      .onSuccess(result -> {
+        var options = ((OAuth2AuthProviderImpl) result).getConfig();
+
+        // Server sends nothing, nothing is configured -> fall back to default
+        should.assertNull(options.getSupportedGrantTypes());
+
+        test.countDown();
+      })
+      .onFailure(should::fail);
+
+    OpenIDConnectAuth.discover(
+        rule.vertx(),
+        new OAuth2Options()
+          .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
+          .setTenant("test")
+          .setClientId("test-client")
+      )
+      .onSuccess(result2 -> {
+        var options2 = ((OAuth2AuthProviderImpl) result2).getConfig();
+
+        // Server sends nothing, nothing is configured -> fall back to default
+        should.assertNull(options2.getSupportedGrantTypes());
+
+        test.countDown();
+      })
+      .onFailure(should::fail);
+  }
+
+  @Test
+  public void testNoSupportedFlowTypes(TestContext should) {
+    final Async test = should.async(2);
+
+    // Setup expectations for mockserver
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/.well-known/openid-configuration")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET")
+      )
+      .respond(fakeAuthServerConfigurationTemplate(OAuth2FlowType.AUTH_CODE, OAuth2FlowType.IMPLICIT));
+
+    mockServerClient
+      .when(
+        request()
+          .withPath("/fake-auth-server/{tenant}/jwks")
+          .withPathParameter("tenant", "[a-z][a-zA-Z0-9]*")
+          .withMethod("GET")
+      )
+      .respond(
+        response()
+          .withContentType(MediaType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8))
+          .withBody("{\"keys\": []}")
+      );
+
+    // Configured grant types should be overridden, as the server sends some
+    OpenIDConnectAuth.discover(
+        rule.vertx(),
+        new OAuth2Options()
+          .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
+          .setTenant("test")
+          .setClientId("test-client")
+          .addSupportedGrantType(OAuth2FlowType.PASSWORD.getGrantType())
+      )
+      .onSuccess(result -> should.fail("Discovery should fail"))
+      .onFailure(err -> {
+        should.assertEquals(
+          "No supported grant types with this authorization provider. Supported: [authorization_code, implicit]. Configured: [password]",
+          err.getMessage()
+        );
+
+        test.countDown();
+
+        // Need to serialize requests this time to make the assertions reproducible
+        OpenIDConnectAuth.discover(
+            rule.vertx(),
+            new OAuth2Options()
+              .setSite(mockServer.getEndpoint() + "/fake-auth-server/{tenant}")
+              .setTenant("test")
+              .setClientId("test-client")
+              .addSupportedGrantType(OAuth2FlowType.CLIENT.getGrantType())
+              .addSupportedGrantType(OAuth2FlowType.PASSWORD.getGrantType())
+              .addSupportedGrantType(OAuth2FlowType.AUTH_JWT.getGrantType())
+          )
+          .onSuccess(result -> should.fail("Discovery should fail"))
+          .onFailure(err2 -> {
+            should.assertEquals(
+              "No supported grant types with this authorization provider. Supported: [authorization_code, implicit]. Configured: [client_credentials, password, urn:ietf:params:oauth:grant-type:jwt-bearer]",
+              err2.getMessage()
+            );
+
+            test.countDown();
+          });
+      });
   }
 
   private static HttpTemplate fakeAuthServerConfigurationTemplate(OAuth2FlowType... supportedGrantTypes) {
