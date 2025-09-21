@@ -1,6 +1,6 @@
 = OAuth2 auth provider
 
-This component contains an out of the box OAuth2 (and to some extent OpenID Connect) relying party implementation.
+This component contains an out of the box OAuth2 (and to some extent OpenID Connect) relying on party implementation.
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):

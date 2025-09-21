@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2025 Sanju Thomas
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ */
 package io.vertx.ext.auth.oauth2.dcr.impl;
 
 import io.vertx.core.Future;
@@ -10,16 +20,18 @@ import io.vertx.ext.auth.oauth2.DCROptions;
 import io.vertx.ext.auth.oauth2.DCRRequest;
 import io.vertx.ext.auth.oauth2.DCRResponse;
 import io.vertx.ext.auth.oauth2.dcr.KeycloakClientRegistration;
+import java.util.Objects;
 
 public final class KeycloakClientRegistrationImpl implements KeycloakClientRegistration {
 
-  private final Vertx vertx;
   private final SimpleHttpClient simpleHttpClient;
 
   private final DCROptions dcrOptions;
 
   public KeycloakClientRegistrationImpl(Vertx vertx, DCROptions dcrOptions) {
-    this.vertx = vertx;
+    Objects.requireNonNull(dcrOptions.getInitialAccessToken(), "initialAccessToken cannot be null");
+    Objects.requireNonNull(dcrOptions.getSite(), "site cannot be null");
+    Objects.requireNonNull(dcrOptions.getTenant(), "tenant cannot be null");
     this.dcrOptions = dcrOptions;
     this.simpleHttpClient = new SimpleHttpClient(vertx, "dcr-client", dcrOptions.getHttpClientOptions());
   }
@@ -33,6 +45,8 @@ public final class KeycloakClientRegistrationImpl implements KeycloakClientRegis
   }
   @Override
   public Future<DCRResponse> get(DCRRequest dcrRequest) {
+    Objects.requireNonNull(dcrRequest.getClientId(), "clientId cannot be null.");
+    Objects.requireNonNull(dcrRequest.getRegistrationAccessToken(), "registrationAccessToken cannot be null.");
     JsonObject registrationToken = JsonObject.of("Authorization", String.format("Bearer %s", dcrRequest.getRegistrationAccessToken()));
     return simpleHttpClient.fetch(HttpMethod.GET, String.format("%s/%s", dcrOptions.resourceUri(),
         dcrRequest.getClientId()), registrationToken, null)
@@ -41,6 +55,8 @@ public final class KeycloakClientRegistrationImpl implements KeycloakClientRegis
 
   @Override
   public Future<Void> delete(DCRRequest dcrRequest) {
+    Objects.requireNonNull(dcrRequest.getClientId(), "clientId cannot be null.");
+    Objects.requireNonNull(dcrRequest.getRegistrationAccessToken(), "registrationAccessToken cannot be null.");
     JsonObject registrationToken = JsonObject.of("Authorization", String.format("Bearer %s", dcrRequest.getRegistrationAccessToken()));
     return simpleHttpClient.fetch(HttpMethod.DELETE, String.format("%s/%s", dcrOptions.resourceUri(),
         dcrRequest.getClientId()), registrationToken, null)

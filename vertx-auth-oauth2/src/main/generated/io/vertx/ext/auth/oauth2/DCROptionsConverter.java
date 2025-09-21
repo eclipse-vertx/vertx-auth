@@ -1,6 +1,7 @@
 package io.vertx.ext.auth.oauth2;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.oauth2.DCROptions}.
@@ -15,8 +16,6 @@ public class DCROptionsConverter {
           if (member.getValue() instanceof JsonObject) {
             obj.setHttpClientOptions(new io.vertx.core.http.HttpClientOptions((io.vertx.core.json.JsonObject)member.getValue()));
           }
-          break;
-        case "resourceUri":
           break;
         case "initialAccessToken":
           if (member.getValue() instanceof String) {
@@ -44,9 +43,6 @@ public class DCROptionsConverter {
    static void toJson(DCROptions obj, java.util.Map<String, Object> json) {
     if (obj.getHttpClientOptions() != null) {
       json.put("httpClientOptions", obj.getHttpClientOptions().toJson());
-    }
-    if (obj.resourceUri() != null) {
-      json.put("resourceUri", obj.resourceUri());
     }
     if (obj.getInitialAccessToken() != null) {
       json.put("initialAccessToken", obj.getInitialAccessToken());
