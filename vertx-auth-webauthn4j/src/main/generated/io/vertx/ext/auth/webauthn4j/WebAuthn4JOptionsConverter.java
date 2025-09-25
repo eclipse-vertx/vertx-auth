@@ -2,8 +2,6 @@ package io.vertx.ext.auth.webauthn4j;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Converter and mapper for {@link io.vertx.ext.auth.webauthn4j.WebAuthn4JOptions}.
