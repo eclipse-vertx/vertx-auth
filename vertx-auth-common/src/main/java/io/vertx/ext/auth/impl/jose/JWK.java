@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import static io.vertx.ext.auth.impl.Codec.base64MimeDecode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
 
 /**
  * JWK https://tools.ietf.org/html/rfc7517
@@ -133,9 +134,10 @@ public final class JWK {
   private final String label;
 
   // the cryptography objects, not all will be initialized
-  private PrivateKey privateKey;
-  private PublicKey publicKey;
-  private Mac mac;
+//  private PrivateKey privateKey;
+//  private PublicKey publicKey;
+//  private Mac mac;
+  private SigningAlgorithm signingAlgorithm;
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
     final List<JWK> keys = new ArrayList<>();
@@ -220,6 +222,7 @@ public final class JWK {
 
     // Handle Mac keys
 
+    Mac mac;
     switch (alg) {
       case "HS256":
         try {
@@ -229,6 +232,7 @@ public final class JWK {
           throw new RuntimeException(e);
         }
         kty = "oct";
+        signingAlgorithm = new MacSigningAlgorithm(mac);
         return;
       case "HS384":
         try {
@@ -238,6 +242,7 @@ public final class JWK {
           throw new RuntimeException(e);
         }
         kty = "oct";
+        signingAlgorithm = new MacSigningAlgorithm(mac);
         return;
       case "HS512":
         try {
@@ -247,6 +252,7 @@ public final class JWK {
           throw new RuntimeException(e);
         }
         kty = "oct";
+        signingAlgorithm = new MacSigningAlgorithm(mac);
         return;
     }
 
@@ -322,23 +328,115 @@ public final class JWK {
       throw new IllegalArgumentException("PEM END line not found");
     }
 
+    PublicKey publicKey;
+    PrivateKey privateKey;
     switch (kind) {
       case "CERTIFICATE":
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
         publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.US_ASCII))).getPublicKey();
+        signingAlgorithm = new PubKeySigningAlgorithm(null, publicKey);
         return;
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
       case "RSA PUBLIC KEY":
         publicKey = kf.generatePublic(new X509EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
+        signingAlgorithm = new PubKeySigningAlgorithm(null, publicKey);
         return;
       case "PRIVATE KEY":
       case "PRIVATE RSA KEY":
       case "RSA PRIVATE KEY":
         privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
+        signingAlgorithm = new PubKeySigningAlgorithm(privateKey, null);
         return;
       default:
         throw new IllegalStateException("Invalid PEM content: " + kind);
+    }
+  }
+
+  static class MacSigningAlgorithm implements SigningAlgorithm {
+    private final Mac mac;
+    public MacSigningAlgorithm(Mac mac) {
+      this.mac = mac;
+    }
+    @Override
+    public Signer signer() {
+      return new Signer() {
+        @Override
+        public byte[] sign(byte[] data) {
+          synchronized (MacSigningAlgorithm.this) {
+            return mac.doFinal(data);
+          }
+        }
+        @Override
+        public synchronized boolean verify(byte[] expected, byte[] payload) {
+          synchronized (MacSigningAlgorithm.this) {
+            return MessageDigest.isEqual(expected, sign(payload));
+          }
+        }
+      };
+    }
+  }
+
+  class PubKeySigningAlgorithm implements SigningAlgorithm {
+
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
+
+    public PubKeySigningAlgorithm(PrivateKey privateKey, PublicKey publicKey) {
+      this.privateKey = privateKey;
+      this.publicKey = publicKey;
+    }
+
+    @Override
+    public Signer signer() throws GeneralSecurityException {
+      Signature signature = JWS.getSignature(JWK.this.getAlgorithm());
+      // the length of the signature. This is derived from the algorithm name
+      // this will help to cope with signatures that are longer (yet valid) than
+      // the expected result
+      int len = getSignatureLength(alg, publicKey);
+      return new Signer() {
+        @Override
+        public synchronized byte[] sign(byte[] data) throws GeneralSecurityException {
+          if (privateKey == null) {
+            throw new IllegalStateException("JWK doesn't contain secKey material");
+          }
+          signature.initSign(privateKey);
+          signature.update(data);
+          byte[] sig = signature.sign();
+          switch (kty) {
+            case "EC":
+              return JWS.toJWS(sig, len);
+            default:
+              return sig;
+          }
+        }
+        @Override
+        public synchronized boolean verify(byte[] expected, byte[] payload) throws GeneralSecurityException {
+          if (publicKey == null) {
+            throw new IllegalStateException("JWK doesn't contain pubKey material");
+          }
+          signature.initVerify(publicKey);
+          signature.update(payload);
+          switch (kty) {
+            case "EC":
+              // JCA EC signatures expect ASN1 formatted signatures
+              // while JWS uses it's own format (R+S), while this will be true
+              // for all JWS, it may not be true for COSE keys
+              if (!JWS.isASN1(expected)) {
+                expected = JWS.toASN1(expected);
+              }
+              break;
+          }
+          if (expected.length < len) {
+            // need to adapt the expectation to make the RSA? engine happy
+            byte[] normalized = new byte[len];
+            System.arraycopy(expected, 0, normalized, 0, expected.length);
+            return signature.verify(normalized);
+          } else {
+            return signature.verify(expected);
+          }
+        }
+      };
     }
   }
 
@@ -354,7 +452,7 @@ public final class JWK {
       case "HS384":
       case "HS512":
         kty = "oct";
-        this.mac = mac;
+        this.signingAlgorithm = new MacSigningAlgorithm(mac);
         break;
       default:
         throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
@@ -368,8 +466,7 @@ public final class JWK {
     label = privateKey != null ? algorithm + '#' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '#' + certificate.hashCode();
     use = null;
 
-    this.publicKey = certificate.getPublicKey();
-    this.privateKey = privateKey;
+    PublicKey publicKey = certificate.getPublicKey();
 
     switch (algorithm) {
       case "RS256":
@@ -391,6 +488,7 @@ public final class JWK {
       default:
         throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
     }
+    signingAlgorithm = new PubKeySigningAlgorithm(privateKey, publicKey);
   }
 
   public JWK(JsonObject json) {
@@ -475,6 +573,8 @@ public final class JWK {
   }
 
   private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+    PublicKey publicKey = null;
+    PrivateKey privateKey = null;
     // public key
     if (jsonHasProperties(json, "n", "e")) {
       final BigInteger n = new BigInteger(1, base64UrlDecode(json.getString("n")));
@@ -510,6 +610,10 @@ public final class JWK {
       // extract the public key
       publicKey = certificate.getPublicKey();
     }
+
+    if (publicKey != null || privateKey != null) {
+      signingAlgorithm = new PubKeySigningAlgorithm(privateKey, publicKey);
+    }
   }
 
   private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException {
@@ -517,6 +621,7 @@ public final class JWK {
     parameters.init(new ECGenParameterSpec(translateECCrv(json.getString("crv"))));
 
     // public key
+    PublicKey publicKey = null;
     if (jsonHasProperties(json, "x", "y")) {
       final BigInteger x = new BigInteger(1, base64UrlDecode(json.getString("x")));
       final BigInteger y = new BigInteger(1, base64UrlDecode(json.getString("y")));
@@ -524,9 +629,14 @@ public final class JWK {
     }
 
     // private key
+    PrivateKey privateKey = null;
     if (jsonHasProperties(json, "d")) {
       final BigInteger d = new BigInteger(1, base64UrlDecode(json.getString("d")));
       privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
+    }
+
+    if (publicKey != null || privateKey != null) {
+      signingAlgorithm = new PubKeySigningAlgorithm(privateKey, publicKey);
     }
   }
 
@@ -553,7 +663,8 @@ public final class JWK {
           .appendBytes(key)
           .getBytes());
 
-      publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
+      PublicKey publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
+      signingAlgorithm = new PubKeySigningAlgorithm(null, publicKey);
     }
 
     // private key
@@ -588,13 +699,15 @@ public final class JWK {
           .getBytes()
       );
 
-      privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
+      PrivateKey privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
+      signingAlgorithm = new PubKeySigningAlgorithm(privateKey, null);
     }
   }
 
   private void createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
-    mac = Mac.getInstance(alias);
+    Mac mac = Mac.getInstance(alias);
     mac.init(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
+    signingAlgorithm = new MacSigningAlgorithm(mac);
   }
 
   public String getAlgorithm() {
@@ -663,14 +776,18 @@ public final class JWK {
   }
 
   public Mac mac() {
-    return mac;
+    return signingAlgorithm instanceof MacSigningAlgorithm ? ((MacSigningAlgorithm)signingAlgorithm).mac : null;
+  }
+
+  public SigningAlgorithm signingAlgorithm() {
+    return signingAlgorithm;
   }
 
   public PublicKey publicKey() {
-    return publicKey;
+    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).publicKey : null;
   }
 
   public PrivateKey privateKey() {
-    return privateKey;
+    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).privateKey : null;
   }
 }
