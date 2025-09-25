@@ -6,6 +6,10 @@ public interface SigningAlgorithm {
 
   String name();
 
+  boolean canSign();
+
+  boolean canVerify();
+
   Signer signer() throws GeneralSecurityException;
 
 }
