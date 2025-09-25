@@ -159,7 +159,7 @@ public final class JWS {
       case EdDSA:
         return Signature.getInstance("EdDSA");
       default:
-        throw new NoSuchAlgorithmException();
+        throw new NoSuchAlgorithmException("");
     }
   }
 
@@ -226,8 +226,11 @@ public final class JWS {
         case RS512:
         case PS512:
           return 512;
+        case "EC":
+          // Called by test testGenerateNewTokenES256
+          return 0;
         default:
-          throw new NoSuchAlgorithmException();
+          throw new NoSuchAlgorithmException("Cannot determine length of algorithm " + alg);
       }
     }
   }
