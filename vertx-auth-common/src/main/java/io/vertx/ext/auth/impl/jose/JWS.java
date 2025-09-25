@@ -73,7 +73,6 @@ public final class JWS {
   }
 
   private final JWK jwk;
-  // private final Signature signature;
   private Signer signer;
 
   public JWS(JWK jwk) {
@@ -82,76 +81,11 @@ public final class JWS {
     }
 
     try {
-      Mac mac = jwk.mac();
-      if (mac != null) {
-        signer = new Signer() {
-          @Override
-          public byte[] sign(byte[] data) {
-            synchronized (jwk) {
-              return mac.doFinal(data);
-            }
-          }
-          @Override
-          public boolean verify(byte[] expected, byte[] payload) {
-            synchronized (jwk) {
-              return MessageDigest.isEqual(expected, sign(payload));
-            }
-          }
-        };
-      } else {
-        Signature signature = getSignature(jwk.getAlgorithm());
-        final PrivateKey privateKey = jwk.privateKey();
-        final PublicKey publicKey = jwk.publicKey();
-        final String kty = jwk.kty();
-        // the length of the signature. This is derived from the algorithm name
-        // this will help to cope with signatures that are longer (yet valid) than
-        // the expected result
-        int len = getSignatureLength(jwk.getAlgorithm(), jwk.publicKey());
-        signer = new Signer() {
-          @Override
-          public synchronized byte[] sign(byte[] data) throws GeneralSecurityException {
-            if (privateKey == null) {
-              throw new IllegalStateException("JWK doesn't contain secKey material");
-            }
-            signature.initSign(privateKey);
-            signature.update(data);
-            byte[] sig = signature.sign();
-            switch (kty) {
-              case "EC":
-                return JWS.toJWS(sig, len);
-              default:
-                return sig;
-            }
-          }
-          @Override
-          public synchronized boolean verify(byte[] expected, byte[] payload) throws GeneralSecurityException {
-            if (publicKey == null) {
-              throw new IllegalStateException("JWK doesn't contain pubKey material");
-            }
-            signature.initVerify(publicKey);
-            signature.update(payload);
-            switch (kty) {
-              case "EC":
-                // JCA EC signatures expect ASN1 formatted signatures
-                // while JWS uses it's own format (R+S), while this will be true
-                // for all JWS, it may not be true for COSE keys
-                if (!JWS.isASN1(expected)) {
-                  expected = JWS.toASN1(expected);
-                }
-                break;
-            }
-            if (expected.length < len) {
-              // need to adapt the expectation to make the RSA? engine happy
-              byte[] normalized = new byte[len];
-              System.arraycopy(expected, 0, normalized, 0, expected.length);
-              return signature.verify(normalized);
-            } else {
-              return signature.verify(expected);
-            }
-          }
-        };
+      SigningAlgorithm sa = jwk.signingAlgorithm();
+      if (sa != null) {
+        signer = sa.signer();
       }
-    } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+    } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
 
@@ -187,7 +121,7 @@ public final class JWS {
     return jwk;
   }
 
-  private static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     Signature sig;
 
     switch (alg) {
@@ -266,7 +200,7 @@ public final class JWS {
     return sig.verify(signature);
   }
 
-  private static int getSignatureLength(String alg, PublicKey publicKey) throws NoSuchAlgorithmException {
+  public static int getSignatureLength(String alg, PublicKey publicKey) throws NoSuchAlgorithmException {
     if (publicKey instanceof RSAKey) {
       return ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
     } else {
