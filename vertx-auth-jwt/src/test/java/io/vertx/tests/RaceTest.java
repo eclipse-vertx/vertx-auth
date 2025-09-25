@@ -52,7 +52,6 @@ public class RaceTest {
         authProvider.authenticate(CREDENTIALS)
           .onComplete(res -> {
             if (res.failed()) {
-              res.cause().printStackTrace();
               future.completeExceptionally(res.cause());
             } else {
               future.complete(null);
