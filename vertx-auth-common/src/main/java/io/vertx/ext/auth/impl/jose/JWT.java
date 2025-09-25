@@ -68,11 +68,11 @@ public final class JWT {
     if (jwk.use() == null || "sig".equals(jwk.use())) {
       List<JWS> current;
       synchronized (this) {
-        if (jwk.mac() != null || jwk.publicKey() != null) {
+        if (jwk.signingAlgorithm().canVerify()) {
           current = VERIFY.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
           addJWK(current, jwk);
         }
-        if (jwk.mac() != null || jwk.privateKey() != null) {
+        if (jwk.signingAlgorithm().canSign()) {
           current = SIGN.computeIfAbsent(jwk.getAlgorithm(), k -> new ArrayList<>());
           addJWK(current, jwk);
         }
