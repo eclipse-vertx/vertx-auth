@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 
 import static io.vertx.ext.auth.impl.Codec.base64MimeDecode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
-import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
 
 /**
  * JWK https://tools.ietf.org/html/rfc7517
@@ -132,7 +131,7 @@ public final class JWK {
   private final String label;
 
   // the cryptography objects, not all will be initialized
-  private SigningAlgorithm signingAlgorithm;
+  private final SigningAlgorithm signingAlgorithm;
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
     final List<JWK> keys = new ArrayList<>();
@@ -335,108 +334,6 @@ public final class JWK {
         return new PubKeySigningAlgorithm(kty, alg, privateKey, null);
       default:
         throw new IllegalStateException("Invalid PEM content: " + kind);
-    }
-  }
-
-  static class MacSigningAlgorithm implements SigningAlgorithm {
-    private final String name;
-    private final Mac mac;
-    public MacSigningAlgorithm(String name, Mac mac) {
-      this.name = name;
-      this.mac = mac;
-    }
-    @Override
-    public String name() {
-      return name;
-    }
-    @Override
-    public Signer signer() {
-      return new Signer() {
-        @Override
-        public byte[] sign(byte[] data) {
-          synchronized (MacSigningAlgorithm.this) {
-            return mac.doFinal(data);
-          }
-        }
-        @Override
-        public synchronized boolean verify(byte[] expected, byte[] payload) {
-          synchronized (MacSigningAlgorithm.this) {
-            return MessageDigest.isEqual(expected, sign(payload));
-          }
-        }
-      };
-    }
-  }
-
-  static class PubKeySigningAlgorithm implements SigningAlgorithm {
-
-    private final String kty;
-    private final String alg;
-    private final PrivateKey privateKey;
-    private final PublicKey publicKey;
-
-    public PubKeySigningAlgorithm(String kty, String alg, PrivateKey privateKey, PublicKey publicKey) {
-      this.privateKey = privateKey;
-      this.publicKey = publicKey;
-      this.kty = kty;
-      this.alg = alg;
-    }
-
-    @Override
-    public String name() {
-      return alg;
-    }
-
-    @Override
-    public Signer signer() throws GeneralSecurityException {
-      Signature signature = JWS.getSignature(alg);
-      // the length of the signature. This is derived from the algorithm name
-      // this will help to cope with signatures that are longer (yet valid) than
-      // the expected result
-      int len = getSignatureLength(alg, publicKey);
-      return new Signer() {
-        @Override
-        public synchronized byte[] sign(byte[] data) throws GeneralSecurityException {
-          if (privateKey == null) {
-            throw new IllegalStateException("JWK doesn't contain secKey material");
-          }
-          signature.initSign(privateKey);
-          signature.update(data);
-          byte[] sig = signature.sign();
-          switch (kty) {
-            case "EC":
-              return JWS.toJWS(sig, len);
-            default:
-              return sig;
-          }
-        }
-        @Override
-        public synchronized boolean verify(byte[] expected, byte[] payload) throws GeneralSecurityException {
-          if (publicKey == null) {
-            throw new IllegalStateException("JWK doesn't contain pubKey material");
-          }
-          signature.initVerify(publicKey);
-          signature.update(payload);
-          switch (kty) {
-            case "EC":
-              // JCA EC signatures expect ASN1 formatted signatures
-              // while JWS uses it's own format (R+S), while this will be true
-              // for all JWS, it may not be true for COSE keys
-              if (!JWS.isASN1(expected)) {
-                expected = JWS.toASN1(expected);
-              }
-              break;
-          }
-          if (expected.length < len) {
-            // need to adapt the expectation to make the RSA? engine happy
-            byte[] normalized = new byte[len];
-            System.arraycopy(expected, 0, normalized, 0, expected.length);
-            return signature.verify(normalized);
-          } else {
-            return signature.verify(expected);
-          }
-        }
-      };
     }
   }
 
@@ -780,12 +677,8 @@ public final class JWK {
     if (signingAlgorithm instanceof MacSigningAlgorithm) {
       return "oct";
     } else {
-      return ((PubKeySigningAlgorithm)signingAlgorithm).kty;
+      return ((PubKeySigningAlgorithm)signingAlgorithm).kty();
     }
-  }
-
-  public Mac mac() {
-    return signingAlgorithm instanceof MacSigningAlgorithm ? ((MacSigningAlgorithm)signingAlgorithm).mac : null;
   }
 
   public SigningAlgorithm signingAlgorithm() {
@@ -793,10 +686,10 @@ public final class JWK {
   }
 
   public PublicKey publicKey() {
-    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).publicKey : null;
+    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).publicKey() : null;
   }
 
   public PrivateKey privateKey() {
-    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).privateKey : null;
+    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).privateKey() : null;
   }
 }
