@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import static io.vertx.ext.auth.impl.Codec.base64MimeDecode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
 
 /**
  * JWK https://tools.ietf.org/html/rfc7517
@@ -321,17 +322,17 @@ public final class JWK {
       case "CERTIFICATE":
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
         publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.US_ASCII))).getPublicKey();
-        return new PubKeySigningAlgorithm(kty, alg, null, publicKey);
+        return createPubKeySigningAlgorithm(kty, alg, null, publicKey);
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
       case "RSA PUBLIC KEY":
         publicKey = kf.generatePublic(new X509EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
-        return new PubKeySigningAlgorithm(kty, alg, null, publicKey);
+        return createPubKeySigningAlgorithm(kty, alg, null, publicKey);
       case "PRIVATE KEY":
       case "PRIVATE RSA KEY":
       case "RSA PRIVATE KEY":
         privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
-        return new PubKeySigningAlgorithm(kty, alg, privateKey, null);
+        return createPubKeySigningAlgorithm(kty, alg, privateKey, null);
       default:
         throw new IllegalStateException("Invalid PEM content: " + kind);
     }
@@ -383,7 +384,50 @@ public final class JWK {
       default:
         throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
     }
-    signingAlgorithm = new PubKeySigningAlgorithm(kty, algorithm, privateKey, publicKey);
+    signingAlgorithm = createPubKeySigningAlgorithm(kty, algorithm, privateKey, publicKey);
+  }
+
+  private static SigningAlgorithm createPubKeySigningAlgorithm(String kty, String alg, PrivateKey privateKey, PublicKey publicKey) {
+    PubKeySigningAlgorithm signingAlgo = new PubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
+    if ("EC".equals(kty)) {
+      // JCA EC signatures expect ASN1 formatted signatures
+      // while JWS uses it's own format (R+S), while this will be true
+      // for all JWS, it may not be true for COSE keys
+      return new SigningAlgorithm() {
+        @Override
+        public String name() {
+          return signingAlgo.name();
+        }
+        @Override
+        public boolean canSign() {
+          return signingAlgo.canSign();
+        }
+        @Override
+        public boolean canVerify() {
+          return signingAlgo.canVerify();
+        }
+        @Override
+        public Signer signer() throws GeneralSecurityException {
+          Signer signer = signingAlgo.signer();
+          int len = getSignatureLength(alg, publicKey);
+          return new Signer() {
+            @Override
+            public byte[] sign(byte[] data) throws GeneralSecurityException {
+              return JWS.toJWS(signer.sign(data), len);
+            }
+            @Override
+            public boolean verify(byte[] expected, byte[] payload) throws GeneralSecurityException {
+              if (!JWS.isASN1(expected)) {
+                expected = JWS.toASN1(expected);
+              }
+              return signer.verify(expected, payload);
+            }
+          };
+        }
+      };
+    } else {
+      return signingAlgo;
+    }
   }
 
   public JWK(JsonObject json) {
@@ -469,7 +513,7 @@ public final class JWK {
     }
   }
 
-  private static PubKeySigningAlgorithm createRSA(String alg, String kty, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+  private static SigningAlgorithm createRSA(String alg, String kty, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
     PublicKey publicKey = null;
     PrivateKey privateKey = null;
     // public key
@@ -509,7 +553,7 @@ public final class JWK {
     }
 
     if (publicKey != null || privateKey != null) {
-      return new PubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
+      return createPubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
     }
     return null;
   }
@@ -534,7 +578,7 @@ public final class JWK {
     }
 
     if (publicKey != null || privateKey != null) {
-      return new PubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
+      return createPubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
     }
 
     return null;
@@ -608,7 +652,7 @@ public final class JWK {
     }
 
     if (publicKey != null || privateKey != null) {
-      return new PubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
+      return createPubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
     } else {
       return null;
     }

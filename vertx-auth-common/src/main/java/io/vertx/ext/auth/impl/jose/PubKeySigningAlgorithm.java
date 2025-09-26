@@ -81,13 +81,7 @@ class PubKeySigningAlgorithm implements SigningAlgorithm {
         }
         signature.initSign(privateKey);
         signature.update(data);
-        byte[] sig = signature.sign();
-        switch (kty) {
-          case "EC":
-            return JWS.toJWS(sig, len);
-          default:
-            return sig;
-        }
+        return signature.sign();
       }
 
       @Override
@@ -97,16 +91,6 @@ class PubKeySigningAlgorithm implements SigningAlgorithm {
         }
         signature.initVerify(publicKey);
         signature.update(payload);
-        switch (kty) {
-          case "EC":
-            // JCA EC signatures expect ASN1 formatted signatures
-            // while JWS uses it's own format (R+S), while this will be true
-            // for all JWS, it may not be true for COSE keys
-            if (!JWS.isASN1(expected)) {
-              expected = JWS.toASN1(expected);
-            }
-            break;
-        }
         if (expected.length < len) {
           // need to adapt the expectation to make the RSA? engine happy
           byte[] normalized = new byte[len];
