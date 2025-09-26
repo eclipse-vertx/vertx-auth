@@ -542,6 +542,7 @@ public final class JWK {
 
   private static SigningAlgorithm createOKP(String alg, String kty, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
     // public key
+    PublicKey publicKey;
     if (jsonHasProperties(json, "x")) {
       final byte[] key = base64UrlDecode(json.getString("x"));
       final byte bitStringTag = (byte) 0x3;
@@ -563,11 +564,13 @@ public final class JWK {
           .appendBytes(key)
           .getBytes());
 
-      PublicKey publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
-      return new PubKeySigningAlgorithm(kty, alg, null, publicKey);
+      publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
+    } else {
+      publicKey = null;
     }
 
     // private key
+    PrivateKey privateKey;
     if (jsonHasProperties(json, "d")) {
       final byte[] key = base64UrlDecode(json.getString("d"));
       final byte octetStringTag = (byte) 0x4;
@@ -599,11 +602,16 @@ public final class JWK {
           .getBytes()
       );
 
-      PrivateKey privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
-      return new PubKeySigningAlgorithm(kty, alg, privateKey, null);
+      privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
+    } else {
+      privateKey = null;
     }
 
-    return null;
+    if (publicKey != null || privateKey != null) {
+      return new PubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
+    } else {
+      return null;
+    }
   }
 
   private static SigningAlgorithm createOCT(String name, String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
