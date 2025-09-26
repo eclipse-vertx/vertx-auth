@@ -132,6 +132,7 @@ public final class JWK {
   private final String label;
 
   // the cryptography objects, not all will be initialized
+  private final String kty;
   private final SigningAlgorithm signingAlgorithm;
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
@@ -227,6 +228,7 @@ public final class JWK {
           throw new RuntimeException(e);
         }
         signingAlgorithm = new MacSigningAlgorithm(alg, mac);
+        kty = "oct";
         return;
       case "HS384":
         try {
@@ -236,6 +238,7 @@ public final class JWK {
           throw new RuntimeException(e);
         }
         signingAlgorithm = new MacSigningAlgorithm(alg, mac);
+        kty = "oct";
         return;
       case "HS512":
         try {
@@ -245,6 +248,7 @@ public final class JWK {
           throw new RuntimeException(e);
         }
         signingAlgorithm = new MacSigningAlgorithm(alg, mac);
+        kty = "oct";
         return;
     }
 
@@ -254,20 +258,24 @@ public final class JWK {
         case "RS256":
         case "RS384":
         case "RS512":
+          kty = "RSA";
           signingAlgorithm = parsePEM(alg, "RSA", KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         case "PS256":
         case "PS384":
         case "PS512":
+          kty = "RSASSA";
           signingAlgorithm = parsePEM(alg, "RSASSA", KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         case "ES256":
         case "ES384":
         case "ES512":
         case "ES256K":
+          kty = "EC";
           signingAlgorithm = parsePEM(alg, "EC", KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         case "EdDSA":
+          kty = "EdDSA";
           signingAlgorithm = parsePEM(alg, "EdDSA", KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII));
           break;
         default:
@@ -343,6 +351,7 @@ public final class JWK {
     kid = null;
     label = algorithm + "#" + mac.hashCode();
     use = null;
+    kty = "oct";
 
     switch (algorithm) {
       case "HS256":
@@ -363,7 +372,6 @@ public final class JWK {
 
     PublicKey publicKey = certificate.getPublicKey();
 
-    String kty;
     switch (algorithm) {
       case "RS256":
       case "RS384":
@@ -388,7 +396,7 @@ public final class JWK {
   }
 
   private static SigningAlgorithm createPubKeySigningAlgorithm(String kty, String alg, PrivateKey privateKey, PublicKey publicKey) {
-    PubKeySigningAlgorithm signingAlgo = new PubKeySigningAlgorithm(kty, alg, privateKey, publicKey);
+    PubKeySigningAlgorithm signingAlgo = new PubKeySigningAlgorithm(alg, privateKey, publicKey);
     if ("EC".equals(kty)) {
       // JCA EC signatures expect ASN1 formatted signatures
       // while JWS uses it's own format (R+S), while this will be true
@@ -436,7 +444,6 @@ public final class JWK {
 
     String alg;
     try {
-      String kty;
       switch (json.getString("kty")) {
         case "RSA":
         case "RSASSA":
@@ -726,11 +733,7 @@ public final class JWK {
   }
 
   public String kty() {
-    if (signingAlgorithm instanceof MacSigningAlgorithm) {
-      return "oct";
-    } else {
-      return ((PubKeySigningAlgorithm)signingAlgorithm).kty();
-    }
+    return kty;
   }
 
   public SigningAlgorithm signingAlgorithm() {

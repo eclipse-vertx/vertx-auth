@@ -27,20 +27,14 @@ import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
  */
 class PubKeySigningAlgorithm implements SigningAlgorithm {
 
-  private final String kty;
   private final String alg;
   private final PrivateKey privateKey;
   private final PublicKey publicKey;
 
-  PubKeySigningAlgorithm(String kty, String alg, PrivateKey privateKey, PublicKey publicKey) {
+  PubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
-    this.kty = kty;
     this.alg = alg;
-  }
-
-  public String kty() {
-    return kty;
   }
 
   public PrivateKey privateKey() {
