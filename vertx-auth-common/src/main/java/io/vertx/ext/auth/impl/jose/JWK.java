@@ -444,13 +444,13 @@ public final class JWK {
 
           switch (alg) {
             case "HS256":
-              signingAlgorithm = createOCT("HS256", "HMacSHA256", json);
+              signingAlgorithm = createOCT(alg, "HMacSHA256", json);
               break;
             case "HS384":
-              signingAlgorithm = createOCT("HS384", "HMacSHA384", json);
+              signingAlgorithm = createOCT(alg, "HMacSHA384", json);
               break;
             case "HS512":
-              signingAlgorithm = createOCT("HS512", "HMacSHA512", json);
+              signingAlgorithm = createOCT(alg, "HMacSHA512", json);
               break;
             default:
               throw new NoSuchAlgorithmException(alg);
