@@ -13,22 +13,32 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.impl.jose;
+package io.vertx.ext.auth.impl.jose.algo;
 
 import javax.crypto.Mac;
 import java.security.MessageDigest;
+import java.util.Objects;
 
 /**
  * @author Paulo Lopes
  */
-class MacSigningAlgorithm implements SigningAlgorithm {
+public class MacSigningAlgorithm extends SigningAlgorithm {
 
   private final String name;
   private final Mac mac;
 
-  MacSigningAlgorithm(String name, Mac mac) {
-    this.name = name;
-    this.mac = mac;
+  public MacSigningAlgorithm(String name, Mac mac) {
+    this.name = Objects.requireNonNull(name);
+    this.mac = Objects.requireNonNull(mac);
+  }
+
+  @Override
+  public String id() {
+    return "" + mac.hashCode();
+  }
+
+  public Mac mac() {
+    return mac;
   }
 
   @Override

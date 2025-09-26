@@ -19,8 +19,9 @@ import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.asn.ASN1;
+import io.vertx.ext.auth.impl.jose.algo.Signer;
+import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
 
-import javax.crypto.Mac;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -40,27 +41,6 @@ public final class JWS {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWS.class);
 
-  public static final String EdDSA = "EdDSA";
-
-  public static final String ES256 = "ES256";
-  public static final String ES384 = "ES384";
-  public static final String ES512 = "ES512";
-
-  public static final String PS256 = "PS256";
-  public static final String PS384 = "PS384";
-  public static final String PS512 = "PS512";
-
-  public static final String ES256K = "ES256K";
-
-  public static final String RS256 = "RS256";
-  public static final String RS384 = "RS384";
-  public static final String RS512 = "RS512";
-
-  public static final String RS1 = "RS1";
-
-  public static final String HS256 = "HS256";
-  public static final String HS384 = "HS384";
-  public static final String HS512 = "HS512";
 
   private static final CertificateFactory X509;
 
@@ -121,48 +101,6 @@ public final class JWS {
     return jwk;
   }
 
-  static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-    Signature sig;
-
-    switch (alg) {
-      case HS256:
-      case HS384:
-      case HS512:
-        return null;
-      case ES256:
-      case ES256K:
-        return Signature.getInstance("SHA256withECDSA");
-      case ES384:
-        return Signature.getInstance("SHA384withECDSA");
-      case ES512:
-        return Signature.getInstance("SHA512withECDSA");
-      case RS256:
-        return Signature.getInstance("SHA256withRSA");
-      case RS384:
-        return Signature.getInstance("SHA384withRSA");
-      case RS512:
-        return Signature.getInstance("SHA512withRSA");
-      case RS1:
-        return Signature.getInstance("SHA1withRSA");
-      case PS256:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-        return sig;
-      case PS384:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-        return sig;
-      case PS512:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-        return sig;
-      case EdDSA:
-        return Signature.getInstance("EdDSA");
-      default:
-        throw new NoSuchAlgorithmException("");
-    }
-  }
-
   /**
    * Verify if the data provider matches the signature based of the given certificate.
    *
@@ -177,10 +115,10 @@ public final class JWS {
     }
 
     switch (alg) {
-      case ES256:
-      case ES384:
-      case ES512:
-      case ES256K:
+      case Signer.ES256:
+      case Signer.ES384:
+      case Signer.ES512:
+      case Signer.ES256K:
         // JCA requires ASN1 encoded signatures!
         if (!isASN1(signature)) {
           signature = toASN1(signature);
@@ -188,7 +126,7 @@ public final class JWS {
         break;
     }
 
-    Signature sig = getSignature(alg);
+    Signature sig = Signer.getSignature(alg);
 
     if (sig == null) {
       throw new SignatureException("Cannot get a signature for: " + alg);
@@ -205,26 +143,26 @@ public final class JWS {
       return ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
     } else {
       switch (alg) {
-        case EdDSA:
-        case ES256:
-        case ES256K:
+        case Signer.EdDSA:
+        case Signer.ES256:
+        case Signer.ES256K:
           return 64;
-        case ES384:
+        case Signer.ES384:
           return 96;
-        case ES512:
+        case Signer.ES512:
           return 132;
-        case HS256:
-        case RS1:
-        case RS256:
-        case PS256:
+        case Signer.HS256:
+        case Signer.RS1:
+        case Signer.RS256:
+        case Signer.PS256:
           return 256;
-        case HS384:
-        case RS384:
-        case PS384:
+        case Signer.HS384:
+        case Signer.RS384:
+        case Signer.PS384:
           return 384;
-        case HS512:
-        case RS512:
-        case PS512:
+        case Signer.HS512:
+        case Signer.RS512:
+        case Signer.PS512:
           return 512;
         case "EC":
           // Called by test testGenerateNewTokenES256

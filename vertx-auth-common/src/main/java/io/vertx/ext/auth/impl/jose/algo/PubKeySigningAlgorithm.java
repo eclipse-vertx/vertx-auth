@@ -13,28 +13,49 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.auth.impl.jose;
+package io.vertx.ext.auth.impl.jose.algo;
+
+import io.vertx.ext.auth.impl.jose.JWS;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Objects;
 
 import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
 
 /**
  * @author Paulo Lopes
  */
-class PubKeySigningAlgorithm implements SigningAlgorithm {
+public class PubKeySigningAlgorithm extends SigningAlgorithm {
+
+  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id) {
+    return new PubKeySigningAlgorithm(alg, privateKey, publicKey, id);
+  }
+
+  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey) {
+    return new PubKeySigningAlgorithm(alg, privateKey, publicKey, null);
+  }
+
+  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PublicKey publicKey) {
+    return new PubKeySigningAlgorithm(alg, null, publicKey, null);
+  }
+
+  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PrivateKey privateKey) {
+    return new PubKeySigningAlgorithm(alg, privateKey, null, null);
+  }
 
   private final String alg;
   private final PrivateKey privateKey;
   private final PublicKey publicKey;
+  private final String id;
 
-  PubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey) {
+  private PubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
-    this.alg = alg;
+    this.alg = Objects.requireNonNull(alg);
+    this.id = id;
   }
 
   public PrivateKey privateKey() {
@@ -43,6 +64,11 @@ class PubKeySigningAlgorithm implements SigningAlgorithm {
 
   public PublicKey publicKey() {
     return publicKey;
+  }
+
+  @Override
+  public String id() {
+    return id;
   }
 
   @Override
@@ -62,7 +88,7 @@ class PubKeySigningAlgorithm implements SigningAlgorithm {
 
   @Override
   public Signer signer() throws GeneralSecurityException {
-    Signature signature = JWS.getSignature(alg);
+    Signature signature = Signer.getSignature(alg);
     // the length of the signature. This is derived from the algorithm name
     // this will help to cope with signatures that are longer (yet valid) than
     // the expected result
