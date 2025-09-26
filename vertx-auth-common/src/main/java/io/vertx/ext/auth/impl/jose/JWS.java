@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
+import io.netty.util.concurrent.FastThreadLocal;
+import io.netty.util.concurrent.FastThreadLocalThread;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
@@ -28,6 +30,9 @@ import java.security.cert.*;
 import java.security.interfaces.RSAKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
 
@@ -62,9 +67,26 @@ public final class JWS {
   public static final String HS384 = "HS384";
   public static final String HS512 = "HS512";
 
+  private static final String[] ALGORITHMS;
+  private static final Comparator<String> ALGORITHMS_COMPARATOR = Comparator
+    .comparing(String::hashCode) // Fast but not consistent with equals so...
+    .thenComparing(String::compareTo); // ... in the worst case use character-to-character comparison
+
+  private static final FastThreadLocal<Signature[]> CURRENT_SIGNATURES = new FastThreadLocal<>() {
+    @Override
+    protected Signature[] initialValue() {
+      return new Signature[ALGORITHMS.length];
+    }
+  };
+
   private static final CertificateFactory X509;
 
+
   static {
+    ALGORITHMS = Stream.of(EdDSA, ES256, ES384, ES512, PS256, PS384, PS512, ES256K, RS256, RS384, RS512, RS1, HS256, HS384, HS512)
+      .sorted(ALGORITHMS_COMPARATOR) // Required for binary search
+      .distinct() // Make sure we don't have any duplicates
+      .toArray(String[]::new);
     try {
       X509 = CertificateFactory.getInstance("X.509");
     } catch (CertificateException e) {
@@ -73,7 +95,6 @@ public final class JWS {
   }
 
   private final JWK jwk;
-  private final Signature signature;
   // the length of the signature. This is derived from the algorithm name
   // this will help to cope with signatures that are longer (yet valid) than
   // the expected result
@@ -85,9 +106,9 @@ public final class JWS {
     }
 
     try {
-      this.signature = getSignature(jwk.getAlgorithm());
+      getSignature(jwk.getAlgorithm()); //just validate if signature is available
       this.len = getSignatureLength(jwk.getAlgorithm(), jwk.publicKey());
-    } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+    } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
 
@@ -102,9 +123,7 @@ public final class JWS {
     final Mac mac = jwk.mac();
 
     if (mac != null) {
-      synchronized (jwk) {
-        return mac.doFinal(payload);
-      }
+      return mac.doFinal(payload);
     } else {
       final PrivateKey privateKey = jwk.privateKey();
       final String kty = jwk.kty();
@@ -113,16 +132,15 @@ public final class JWS {
         throw new IllegalStateException("JWK doesn't contain secKey material");
       }
       try {
-        synchronized (signature) {
-          signature.initSign(privateKey);
-          signature.update(payload);
-          byte[] sig = signature.sign();
-          switch (kty) {
-            case "EC":
-              return JWS.toJWS(sig, len);
-            default:
-              return sig;
-          }
+        Signature signature = getSignature(jwk.getAlgorithm());
+        signature.initSign(privateKey);
+        signature.update(payload);
+        byte[] sig = signature.sign();
+        switch (kty) {
+          case "EC":
+            return JWS.toJWS(sig, len);
+          default:
+            return sig;
         }
       } catch (SignatureException | InvalidKeyException e) {
         throw new RuntimeException(e);
@@ -141,9 +159,7 @@ public final class JWS {
     final Mac mac = jwk.mac();
 
     if (mac != null) {
-      synchronized (jwk) {
-        return MessageDigest.isEqual(expected, sign(payload));
-      }
+      return MessageDigest.isEqual(expected, sign(payload));
     } else {
       try {
         final PublicKey publicKey = jwk.publicKey();
@@ -152,27 +168,26 @@ public final class JWS {
         if (publicKey == null) {
           throw new IllegalStateException("JWK doesn't contain pubKey material");
         }
-        synchronized (signature) {
-          signature.initVerify(publicKey);
-          signature.update(payload);
-          switch (kty) {
-            case "EC":
-              // JCA EC signatures expect ASN1 formatted signatures
-              // while JWS uses it's own format (R+S), while this will be true
-              // for all JWS, it may not be true for COSE keys
-              if (!JWS.isASN1(expected)) {
-                expected = JWS.toASN1(expected);
-              }
-              break;
-          }
-          if (expected.length < len) {
-            // need to adapt the expectation to make the RSA? engine happy
-            byte[] normalized = new byte[len];
-            System.arraycopy(expected, 0, normalized, 0, expected.length);
-            return signature.verify(normalized);
-          } else {
-            return signature.verify(expected);
-          }
+        Signature signature = getSignature(jwk.getAlgorithm());
+        signature.initVerify(publicKey);
+        signature.update(payload);
+        switch (kty) {
+          case "EC":
+            // JCA EC signatures expect ASN1 formatted signatures
+            // while JWS uses it's own format (R+S), while this will be true
+            // for all JWS, it may not be true for COSE keys
+            if (!JWS.isASN1(expected)) {
+              expected = JWS.toASN1(expected);
+            }
+            break;
+        }
+        if (expected.length < len) {
+          // need to adapt the expectation to make the RSA? engine happy
+          byte[] normalized = new byte[len];
+          System.arraycopy(expected, 0, normalized, 0, expected.length);
+          return signature.verify(normalized);
+        } else {
+          return signature.verify(expected);
         }
       } catch (SignatureException | InvalidKeyException e) {
         throw new RuntimeException(e);
@@ -184,46 +199,64 @@ public final class JWS {
     return jwk;
   }
 
-  private static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  private static @Nullable Signature chooseSignature(String alg) {
     Signature sig;
 
-    switch (alg) {
-      case HS256:
-      case HS384:
-      case HS512:
-        return null;
-      case ES256:
-      case ES256K:
-        return Signature.getInstance("SHA256withECDSA");
-      case ES384:
-        return Signature.getInstance("SHA384withECDSA");
-      case ES512:
-        return Signature.getInstance("SHA512withECDSA");
-      case RS256:
-        return Signature.getInstance("SHA256withRSA");
-      case RS384:
-        return Signature.getInstance("SHA384withRSA");
-      case RS512:
-        return Signature.getInstance("SHA512withRSA");
-      case RS1:
-        return Signature.getInstance("SHA1withRSA");
-      case PS256:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-        return sig;
-      case PS384:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-        return sig;
-      case PS512:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-        return sig;
-      case EdDSA:
-        return Signature.getInstance("EdDSA");
-      default:
-        throw new NoSuchAlgorithmException();
+    try {
+      switch (alg) {
+        case HS256:
+        case HS384:
+        case HS512:
+          return null;
+        case ES256:
+        case ES256K:
+          return Signature.getInstance("SHA256withECDSA");
+        case ES384:
+          return Signature.getInstance("SHA384withECDSA");
+        case ES512:
+          return Signature.getInstance("SHA512withECDSA");
+        case RS256:
+          return Signature.getInstance("SHA256withRSA");
+        case RS384:
+          return Signature.getInstance("SHA384withRSA");
+        case RS512:
+          return Signature.getInstance("SHA512withRSA");
+        case RS1:
+          return Signature.getInstance("SHA1withRSA");
+        case PS256:
+          sig = Signature.getInstance("RSASSA-PSS");
+          sig.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
+          return sig;
+        case PS384:
+          sig = Signature.getInstance("RSASSA-PSS");
+          sig.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
+          return sig;
+        case PS512:
+          sig = Signature.getInstance("RSASSA-PSS");
+          sig.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
+          return sig;
+        case EdDSA:
+          return Signature.getInstance("EdDSA");
+        default:
+          throw new NoSuchAlgorithmException();
+      }
+    } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  private static Signature getSignature(String algorithm) {
+    if (Thread.currentThread() instanceof FastThreadLocalThread) {
+      Signature[] signatures = CURRENT_SIGNATURES.get();
+      int index;
+      if ((index = Arrays.binarySearch(ALGORITHMS, algorithm, ALGORITHMS_COMPARATOR)) >= 0) {
+        if (signatures[index] == null) {
+          signatures[index] = chooseSignature(algorithm);
+        }
+        return signatures[index];
+      }
+    }
+    return chooseSignature(algorithm);
   }
 
   /**
