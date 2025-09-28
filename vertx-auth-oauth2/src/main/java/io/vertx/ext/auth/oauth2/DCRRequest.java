@@ -37,6 +37,7 @@ public class DCRRequest {
     DCRRequestConverter.toJson(this, json);
     return json;
   }
+
   public String getClientId() {
     return clientId;
   }
@@ -48,6 +49,7 @@ public class DCRRequest {
   public String getRegistrationAccessToken() {
     return registrationAccessToken;
   }
+
   public void setRegistrationAccessToken(String registrationAccessToken) {
     this.registrationAccessToken = registrationAccessToken;
   }

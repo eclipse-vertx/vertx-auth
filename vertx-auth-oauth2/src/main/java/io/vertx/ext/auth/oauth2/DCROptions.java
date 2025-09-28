@@ -79,7 +79,6 @@ public final class DCROptions {
   }
 
   public String resourceUri() {
-    return String.format("%s/realms/%s/clients-registrations/default/", site, tenant);
+    return String.format("%s/realms/%s/clients-registrations/default", site, tenant);
   }
-
 }

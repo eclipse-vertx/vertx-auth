@@ -13,16 +13,34 @@ public class DCRResponseConverter {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "id":
+          if (member.getValue() instanceof String) {
+            obj.setId((String)member.getValue());
+          }
           break;
         case "clientId":
+          if (member.getValue() instanceof String) {
+            obj.setClientId((String)member.getValue());
+          }
           break;
         case "enabled":
+          if (member.getValue() instanceof Boolean) {
+            obj.setEnabled((Boolean)member.getValue());
+          }
           break;
-        case "clientAuthenticationType":
+        case "clientAuthenticatorType":
+          if (member.getValue() instanceof String) {
+            obj.setClientAuthenticatorType((String)member.getValue());
+          }
           break;
         case "secret":
+          if (member.getValue() instanceof String) {
+            obj.setSecret((String)member.getValue());
+          }
           break;
         case "registrationAccessToken":
+          if (member.getValue() instanceof String) {
+            obj.setRegistrationAccessToken((String)member.getValue());
+          }
           break;
       }
     }
@@ -40,8 +58,8 @@ public class DCRResponseConverter {
       json.put("clientId", obj.getClientId());
     }
     json.put("enabled", obj.isEnabled());
-    if (obj.getClientAuthenticationType() != null) {
-      json.put("clientAuthenticationType", obj.getClientAuthenticationType());
+    if (obj.getClientAuthenticatorType() != null) {
+      json.put("clientAuthenticatorType", obj.getClientAuthenticatorType());
     }
     if (obj.getSecret() != null) {
       json.put("secret", obj.getSecret());

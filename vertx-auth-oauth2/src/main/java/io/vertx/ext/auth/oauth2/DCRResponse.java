@@ -33,9 +33,9 @@ public class DCRResponse {
   private boolean enabled;
 
   /**
-   * Client authentication type, by default it is client-secret.
+   * Client authenticator type, by default it is client-secret.
    */
-  private String clientAuthenticationType;
+  private String clientAuthenticatorType;
 
   /**
    * Client secret for client_secret_post or client_secret_basic.
@@ -43,7 +43,8 @@ public class DCRResponse {
   private String secret;
 
   /**
-   * RegistrationAccessToken is used for subsequent communication with Keycloak to GET or DELETE the client.
+   * RegistrationAccessToken is used for subsequent communication with Keycloak to
+   * GET or DELETE the client.
    */
   private String registrationAccessToken;
 
@@ -61,23 +62,47 @@ public class DCRResponse {
     return id;
   }
 
+  public void setId(String id) {
+    this.id = id;
+  }
+
   public String getClientId() {
     return clientId;
+  }
+
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
   }
 
   public boolean isEnabled() {
     return enabled;
   }
 
-  public String getClientAuthenticationType() {
-    return clientAuthenticationType;
+  public void setEnabled(boolean isEnabled) {
+    this.enabled = isEnabled;
+  }
+
+  public String getClientAuthenticatorType() {
+    return clientAuthenticatorType;
+  }
+
+  public void setClientAuthenticatorType(String clientAuthenticatorType) {
+    this.clientAuthenticatorType = clientAuthenticatorType;
   }
 
   public String getSecret() {
     return secret;
   }
 
+  public void setSecret(String secret) {
+    this.secret = secret;
+  }
+
   public String getRegistrationAccessToken() {
     return registrationAccessToken;
+  }
+
+  public void setRegistrationAccessToken(String registrationAccessToken) {
+    this.registrationAccessToken = registrationAccessToken;
   }
 }

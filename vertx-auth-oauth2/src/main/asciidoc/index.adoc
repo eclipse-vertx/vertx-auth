@@ -1,6 +1,6 @@
 = OAuth2 auth provider
 
-This component contains an out of the box OAuth2 (and to some extent OpenID Connect) relying on party implementation.
+This component contains an out of the box OAuth2 (and to some extent OpenID Connect) relying party implementation.
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -400,3 +400,34 @@ In such event the server will start emitting tokens with a different kid than th
 ----
 
 A special note on this is that if a user will send many requests with a missing key, your handler should throttle the calls to refresh the new key set, or you might end up DDoS your IdP server.
+
+== Dynamic Client Registration (RFC 7591)
+[RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) was written to standardize the process of client registration in OAuth 2.0 and OpenID Connect ecosystems to address the limitations of manual, inconsistent, and non-scalable client registration methods that were common before its publication.
+The current implementation has been tested with Keycloak. If you want to enable dynamic client registration, here are the steps to follow:
+Prerequisite: Create an initial access token from the Keycloak server. You can create an initial access token using either the [admin](https://www.keycloak.org/securing-apps/client-registration#_initial_access_token) console or programmatically. 
+
+To create a client in Keycloak using the initial access token and a client ID of your choice, follow the example below.
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example23}
+----
+To read a client that you have already presented in Keycloak, follow the following example.
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example24}
+----
+To remove a client that is already present in Keycloak, follow the following example.
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example27}
+----
+To create an initial access token programmatically, refer to the following example.
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example28}
+----
+To create an admin access token programmatically, refer to the following example.
+[source,$lang]
+----
+{@link examples.AuthOAuth2Examples#example29}
+----

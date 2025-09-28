@@ -38,38 +38,42 @@ public final class KeycloakClientRegistrationImpl implements KeycloakClientRegis
 
   @Override
   public Future<DCRResponse> create(String clientId) {
-    JsonObject initialAccessToken = JsonObject.of("Authorization", String.format("Bearer %s", dcrOptions.getInitialAccessToken()));
+    JsonObject initialAccessToken = JsonObject.of("Authorization",
+        String.format("Bearer %s", dcrOptions.getInitialAccessToken()));
     JsonObject payload = JsonObject.of("clientId", clientId);
     return simpleHttpClient.fetch(HttpMethod.POST, dcrOptions.resourceUri(), initialAccessToken,
-      payload.toBuffer()).compose(response -> constructResponse(response));
+        payload.toBuffer()).compose(response -> constructResponse(response, 201));
   }
+
   @Override
   public Future<DCRResponse> get(DCRRequest dcrRequest) {
     Objects.requireNonNull(dcrRequest.getClientId(), "clientId cannot be null.");
     Objects.requireNonNull(dcrRequest.getRegistrationAccessToken(), "registrationAccessToken cannot be null.");
-    JsonObject registrationToken = JsonObject.of("Authorization", String.format("Bearer %s", dcrRequest.getRegistrationAccessToken()));
+    JsonObject registrationToken = JsonObject.of("Authorization",
+        String.format("Bearer %s", dcrRequest.getRegistrationAccessToken()));
     return simpleHttpClient.fetch(HttpMethod.GET, String.format("%s/%s", dcrOptions.resourceUri(),
         dcrRequest.getClientId()), registrationToken, null)
-      .compose(response -> constructResponse(response));
+        .compose(response -> constructResponse(response, 200));
   }
 
   @Override
   public Future<Void> delete(DCRRequest dcrRequest) {
     Objects.requireNonNull(dcrRequest.getClientId(), "clientId cannot be null.");
     Objects.requireNonNull(dcrRequest.getRegistrationAccessToken(), "registrationAccessToken cannot be null.");
-    JsonObject registrationToken = JsonObject.of("Authorization", String.format("Bearer %s", dcrRequest.getRegistrationAccessToken()));
+    JsonObject registrationToken = JsonObject.of("Authorization",
+        String.format("Bearer %s", dcrRequest.getRegistrationAccessToken()));
     return simpleHttpClient.fetch(HttpMethod.DELETE, String.format("%s/%s", dcrOptions.resourceUri(),
         dcrRequest.getClientId()), registrationToken, null)
-      .compose(response -> {
-        if (response.statusCode() != 204) {
-          return Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body());
-        }
-        return Future.succeededFuture();
-      });
+        .compose(response -> {
+          if (response.statusCode() != 204) {
+            return Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body());
+          }
+          return Future.succeededFuture();
+        });
   }
 
-  private Future<DCRResponse> constructResponse(SimpleHttpResponse response) {
-    if (response.statusCode() != 201) {
+  private Future<DCRResponse> constructResponse(SimpleHttpResponse response, int expectedStatusCode) {
+    if (response.statusCode() != expectedStatusCode) {
       return Future.failedFuture("Bad Response [" + response.statusCode() + "] " + response.body());
     }
     if (!response.is("application/json")) {
