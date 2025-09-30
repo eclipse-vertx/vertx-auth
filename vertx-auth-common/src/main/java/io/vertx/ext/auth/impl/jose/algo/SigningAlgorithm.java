@@ -14,6 +14,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,12 +50,22 @@ public abstract class SigningAlgorithm {
 
         // TODO : test all supported algo from key store
         int len;
-        switch (certificate.getSigAlgName()) {
-          case "SHA256withRSA":
-            len = 256;
-            break;
-          default:
-            throw new NoSuchAlgorithmException(certificate.getSigAlgName());
+        if (publicKey instanceof RSAKey) {
+          len = ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
+        } else {
+          switch (certificate.getSigAlgName()) {
+            case "SHA256withECDSA":
+              len = 64;
+              break;
+            case "SHA384withECDSA":
+              len = 96;
+              break;
+            case "SHA512withECDSA":
+              len = 132;
+              break;
+            default:
+              throw new NoSuchAlgorithmException(certificate.getSigAlgName());
+          }
         }
         return PubKeySigningAlgorithm.createPubKeySigningAlgorithm(certificate.getSigAlgName(), privateKey, publicKey, "" + certificate.hashCode(), signatureFactory, len);
       } else {
