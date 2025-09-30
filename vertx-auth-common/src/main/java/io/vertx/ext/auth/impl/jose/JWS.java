@@ -15,7 +15,6 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
-import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.asn.ASN1;
@@ -36,6 +35,13 @@ import static io.vertx.ext.auth.impl.asn.ASN1.*;
  * @author <a href="mailto:pmlopes@gmail.com">Paulo Lopes</a>
  */
 public final class JWS {
+
+  private static final String ES256 = "ES256";
+  private static final String ES384 = "ES384";
+  private static final String ES512 = "ES512";
+  private static final String ES256K = "ES256K";
+  private static final String RS256 = "RS256";
+  private static final String HS256 = "HS256";
 
   private static final Logger LOG = LoggerFactory.getLogger(JWS.class);
 
@@ -113,10 +119,10 @@ public final class JWS {
     }
 
     switch (alg) {
-      case Signer.ES256:
-      case Signer.ES384:
-      case Signer.ES512:
-      case Signer.ES256K:
+      case ES256:
+      case ES384:
+      case ES512:
+      case ES256K:
         // JCA requires ASN1 encoded signatures!
         if (!isASN1(signature)) {
           signature = toASN1(signature);
