@@ -128,36 +128,17 @@ public final class JWK {
 
     // Handle Mac keys
 
-    Mac mac;
     switch (alg) {
       case "HS256":
-        try {
-          mac = Mac.getInstance("HMacSHA256");
-          mac.init(new SecretKeySpec(buffer.getBytes(), "HMacSHA256"));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-          throw new RuntimeException(e);
-        }
-        signingAlgorithm = new MacSigningAlgorithm(alg, mac);
+        signingAlgorithm = new MacSigningAlgorithm(alg, new SecretKeySpec(buffer.getBytes(), "HMacSHA256"));
         kty = "oct";
         return;
       case "HS384":
-        try {
-          mac = Mac.getInstance("HMacSHA384");
-          mac.init(new SecretKeySpec(buffer.getBytes(), "HMacSHA384"));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-          throw new RuntimeException(e);
-        }
-        signingAlgorithm = new MacSigningAlgorithm(alg, mac);
+        signingAlgorithm = new MacSigningAlgorithm(alg, new SecretKeySpec(buffer.getBytes(), "HMacSHA384"));
         kty = "oct";
         return;
       case "HS512":
-        try {
-          mac = Mac.getInstance("HMacSHA512");
-          mac.init(new SecretKeySpec(buffer.getBytes(), "HMacSHA512"));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-          throw new RuntimeException(e);
-        }
-        signingAlgorithm = new MacSigningAlgorithm(alg, mac);
+        signingAlgorithm = new MacSigningAlgorithm(alg, new SecretKeySpec(buffer.getBytes(), "HMacSHA512"));
         kty = "oct";
         return;
     }
@@ -256,7 +237,7 @@ public final class JWK {
     }
   }
 
-  private JWK(MacSigningAlgorithm algo) throws NoSuchAlgorithmException {
+  private JWK(MacSigningAlgorithm algo) throws NoSuchAlgorithmException, InvalidKeyException {
 
     kid = null;
     label = algo.name() + "#" + algo.mac().hashCode();
@@ -575,9 +556,7 @@ public final class JWK {
   }
 
   private static SigningAlgorithm createOCT(String name, String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
-    Mac mac = Mac.getInstance(alias);
-    mac.init(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
-    return new MacSigningAlgorithm(name, mac);
+    return new MacSigningAlgorithm(name, new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
   }
 
   public String getAlgorithm() {

@@ -3,6 +3,7 @@ package io.vertx.ext.auth.impl.jose.algo;
 import io.vertx.core.VertxException;
 
 import javax.crypto.Mac;
+import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -118,7 +119,7 @@ public abstract class SigningAlgorithm {
       // algorithm is valid
       try {
         char[] password = password(keyStorePassword, passwordProtection, alias);
-        Key secretKey = keyStore.getKey(alias, password);
+        SecretKey secretKey = (SecretKey) keyStore.getKey(alias, password);
 
         // key store does not have the requested algorithm
         if (secretKey == null) {
@@ -133,9 +134,7 @@ public abstract class SigningAlgorithm {
           continue;
         }
 
-        Mac mac = Mac.getInstance(alg);
-        mac.init(secretKey);
-        keys.add(new Algo(new MacSigningAlgorithm(alias, mac)));
+        keys.add(new Algo(new MacSigningAlgorithm(alias, secretKey)));
       } catch (Exception e) {
         keys.add(new Failure(e));
       }

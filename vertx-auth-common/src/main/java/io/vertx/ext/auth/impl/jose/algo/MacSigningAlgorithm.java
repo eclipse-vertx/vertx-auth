@@ -15,8 +15,13 @@
  */
 package io.vertx.ext.auth.impl.jose.algo;
 
+import io.vertx.core.VertxException;
+
 import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
@@ -25,19 +30,25 @@ import java.util.Objects;
 public class MacSigningAlgorithm extends SigningAlgorithm {
 
   private final String name;
-  private final Mac mac;
+  private final SecretKey secretKey;
 
-  public MacSigningAlgorithm(String name, Mac mac) {
+  public MacSigningAlgorithm(String name, SecretKey secretKey) {
     this.name = Objects.requireNonNull(name);
-    this.mac = Objects.requireNonNull(mac);
+    this.secretKey = Objects.requireNonNull(secretKey);
   }
 
   @Override
   public String id() {
-    return "" + mac.hashCode();
+    try {
+      return "" + mac().hashCode();
+    } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+      throw new VertxException(e);
+    }
   }
 
-  public Mac mac() {
+  public Mac mac() throws InvalidKeyException, NoSuchAlgorithmException {
+    Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+    mac.init(secretKey);
     return mac;
   }
 
@@ -57,18 +68,19 @@ public class MacSigningAlgorithm extends SigningAlgorithm {
   }
 
   @Override
-  public Signer signer() {
+  public Signer signer() throws NoSuchAlgorithmException, InvalidKeyException {
+    Mac mac = mac();
     return new Signer() {
       @Override
       public byte[] sign(byte[] data) {
-        synchronized (MacSigningAlgorithm.this) {
+        synchronized (mac) {
           return mac.doFinal(data);
         }
       }
 
       @Override
       public synchronized boolean verify(byte[] expected, byte[] payload) {
-        synchronized (MacSigningAlgorithm.this) {
+        synchronized (mac) {
           return MessageDigest.isEqual(expected, sign(payload));
         }
       }
