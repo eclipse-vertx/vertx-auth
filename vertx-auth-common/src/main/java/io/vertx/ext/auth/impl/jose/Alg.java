@@ -1,13 +1,14 @@
 package io.vertx.ext.auth.impl.jose;
 
-import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
-
 import java.security.Signature;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 import java.util.concurrent.Callable;
 
-public enum Algorithm {
+/**
+ * JWT alg
+ */
+public enum Alg {
 
   HS256("HmacSHA256", "1.2.840.113549.2.9", null),
   HS384("HmacSHA384", "1.2.840.113549.2.10", null),
@@ -44,7 +45,7 @@ public enum Algorithm {
   public final String oid;
   public final Callable<Signature> signatureProvider;
 
-  Algorithm(String jce, String oid, Callable<Signature> signatureProvider) {
+  Alg(String jce, String oid, Callable<Signature> signatureProvider) {
     this.jce = jce;
     this.oid = oid;
     this.signatureProvider = signatureProvider;

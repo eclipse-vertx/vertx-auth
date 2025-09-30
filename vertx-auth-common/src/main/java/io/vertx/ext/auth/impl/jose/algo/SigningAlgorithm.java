@@ -1,8 +1,5 @@
 package io.vertx.ext.auth.impl.jose.algo;
 
-import io.vertx.core.VertxException;
-import io.vertx.ext.auth.impl.jose.Algorithm;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -15,10 +12,6 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 public abstract class SigningAlgorithm {

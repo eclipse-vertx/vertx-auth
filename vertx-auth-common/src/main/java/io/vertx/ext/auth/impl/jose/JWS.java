@@ -142,7 +142,7 @@ public final class JWS {
     return sig.verify(signature);
   }
 
-  static int getSignatureLength(Algorithm alg, PublicKey publicKey) {
+  static int getSignatureLength(Alg alg, PublicKey publicKey) {
     if (publicKey instanceof RSAKey) {
       return ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
     } else {
@@ -473,9 +473,9 @@ public final class JWS {
   }
 
   public static Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-    Algorithm algo;
+    Alg algo;
     try {
-      algo = Algorithm.valueOf(alg);
+      algo = Alg.valueOf(alg);
     } catch (IllegalArgumentException e) {
       throw new NoSuchAlgorithmException(alg);
     }
