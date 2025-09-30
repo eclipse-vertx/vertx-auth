@@ -21,9 +21,7 @@ public abstract class SigningAlgorithm {
     if (entry != null) {
       if (entry instanceof KeyStore.SecretKeyEntry) {
         KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) entry;
-        if (MacSigningAlgorithm.isValidAlgo(secretKeyEntry.getSecretKey().getAlgorithm())) {
-          return new MacSigningAlgorithm(secretKeyEntry.getSecretKey());
-        }
+        return new MacSigningAlgorithm(secretKeyEntry.getSecretKey());
       } else if (entry instanceof KeyStore.PrivateKeyEntry) {
         KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) entry;
         // Key pairs on keystores are stored with a certificate, so we use it to load a key pair
