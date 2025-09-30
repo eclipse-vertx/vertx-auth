@@ -23,8 +23,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.asn.ASN1;
+import io.vertx.ext.auth.impl.jose.algo.MacSignaingAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.DigitalSigningAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.Signer;
+import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.Verifier;
 
-import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -38,6 +42,7 @@ import java.util.regex.Pattern;
 
 import static io.vertx.ext.auth.impl.Codec.base64MimeDecode;
 import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
+import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
 
 /**
  * JWK https://tools.ietf.org/html/rfc7517
@@ -59,140 +64,19 @@ import static io.vertx.ext.auth.impl.Codec.base64UrlDecode;
  */
 public final class JWK {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JWK.class);
-
-  private static final Map<String, List<String>> ALG_ALIAS = new HashMap<String, List<String>>() {{
-    put("HS256", Arrays.asList(
-      // JCE
-      "HMacSHA256",
-      // OID
-      "1.2.840.113549.2.9"));
-    put("HS384", Arrays.asList(
-      // JCE
-      "HMacSHA384",
-      // OID
-      "1.2.840.113549.2.10"));
-    put("HS512", Arrays.asList(
-      // JCE
-      "HMacSHA512",
-      // OID
-      "1.2.840.113549.2.11"));
-    put("RS256", Arrays.asList(
-      // JCE
-      "SHA256withRSA",
-      // OID
-      "1.2.840.113549.1.1.11"));
-    put("RS384", Arrays.asList(
-      // JCE
-      "SHA384withRSA",
-      // OID
-      "1.2.840.113549.1.1.12"));
-    put("RS512", Arrays.asList(
-      // JCE
-      "SHA512withRSA",
-      // OID
-      "1.2.840.113549.1.1.13"));
-    put("ES256K", Collections.singletonList("SHA256withECDSA"));
-    put("ES256", Arrays.asList(
-      // JCE
-      "SHA256withECDSA",
-      // OID
-      "1.2.840.10045.4.3.2"));
-    put("ES384", Arrays.asList(
-      // JCE
-      "SHA384withECDSA",
-      // OID
-      "1.2.840.10045.4.3.3"));
-    put("ES512", Arrays.asList(
-      // JCE
-      "SHA512withECDSA",
-      // OID
-      "1.2.840.10045.4.3.4"));
-  }};
-
-  private static boolean invalidAlgAlias(String alg, String alias) {
-    for (String expected : ALG_ALIAS.get(alias)) {
-      if (alg.equalsIgnoreCase(expected)) {
-        return false;
-      }
-    }
-    return true;
+  private static DigitalSigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PrivateKey privateKey, PublicKey publicKey) {
+    int length = getSignatureLength(alg, publicKey);
+    return DigitalSigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), privateKey, publicKey, null, alg.signatureProvider, length);
   }
 
-  // JSON JWK properties
-  private final String kid;
-  private final String alg;
-  private final String kty;
-  private final String use;
+  private static DigitalSigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PublicKey publicKey) {
+    int length = getSignatureLength(alg, publicKey);
+    return DigitalSigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), null, publicKey, null, alg.signatureProvider, length);
+  }
 
-  // the label is a synthetic id that allows comparing 2 keys
-  // that are expected to replace each other but are not necessarily
-  // the same key cryptographically speaking.
-  // In most cases it should be the same as kid, or synthetically generated
-  // when there's no kid.
-  private final String label;
-
-  // the cryptography objects, not all will be initialized
-  private PrivateKey privateKey;
-  private PublicKey publicKey;
-  private Mac mac;
-
-  public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
-    final List<JWK> keys = new ArrayList<>();
-
-    // load MACs
-    for (String alias : Arrays.asList("HS256", "HS384", "HS512")) {
-      try {
-        char[] password = password(keyStorePassword, passwordProtection, alias);
-        final Key secretKey = keyStore.getKey(alias, password);
-        // key store does not have the requested algorithm
-        if (secretKey == null) {
-          continue;
-        }
-        // test the algorithm
-        String alg = secretKey.getAlgorithm();
-        // the algorithm cannot be null, and it cannot be different from the alias list
-        if (invalidAlgAlias(alg, alias)) {
-          LOG.warn("The key algorithm does not match: {" + alias + ": " + alg + "}");
-          continue;
-        }
-        // algorithm is valid
-        Mac mac = Mac.getInstance(alg);
-        mac.init(secretKey);
-        keys.add(new JWK(alias, mac));
-      } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | InvalidKeyException e) {
-        LOG.warn("Failed to load key for algorithm: " + alias, e);
-      }
-    }
-
-    for (String alias : Arrays.asList("RS256", "RS384", "RS512", "ES256K", "ES256", "ES384", "ES512")) {
-      try {
-        // Key pairs on keystores are stored with a certificate, so we use it to load a key pair
-        X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
-        // not found
-        if (certificate == null) {
-          continue;
-        }
-        // start validation
-        certificate.checkValidity();
-        // verify that the algorithms match
-        String alg = certificate.getSigAlgName();
-        // the algorithm cannot be null, and it cannot be different from the alias list
-        if (invalidAlgAlias(alg, alias)) {
-          LOG.warn("The key algorithm does not match: {" + alias + ": " + alg + "}");
-          continue;
-        }
-        // algorithm is valid
-        char[] password = password(keyStorePassword, passwordProtection, alias);
-        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password);
-        keys.add(new JWK(alias, certificate, privateKey));
-      } catch (ClassCastException | KeyStoreException | CertificateExpiredException | CertificateNotYetValidException |
-               NoSuchAlgorithmException | UnrecoverableKeyException e) {
-        LOG.warn("Failed to load key for algorithm: " + alias, e);
-      }
-    }
-
-    return keys;
+  private static DigitalSigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PrivateKey privateKey) {
+    int length = getSignatureLength(alg, null);
+    return DigitalSigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), privateKey, null, null, alg.signatureProvider, length);
   }
 
   private static char[] password(String keyStorePassword, Map<String, String> passwordProtection, String alias) {
@@ -203,6 +87,55 @@ public final class JWK {
     return password.toCharArray();
   }
 
+  private static boolean invalidAlgAlias(String alg, Alg alias) {
+    try {
+      return !alg.equalsIgnoreCase(alias.jce) && !alg.equalsIgnoreCase(alias.oid);
+    } catch (IllegalArgumentException e) {
+      return true;
+    }
+  }
+
+  public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
+    List<JWK> keys = new ArrayList<>();
+    for (Alg alg : List.of(Alg.HS256, Alg.HS384, Alg.HS512, Alg.RS256,
+      Alg.RS384, Alg.RS512, Alg.ES256K, Alg.ES256, Alg.ES384, Alg.ES512)) {
+      try {
+        char[] password = password(keyStorePassword, passwordProtection, alg.name());
+        KeyStore.Entry entry = keyStore.getEntry(alg.name(), new KeyStore.PasswordProtection(password));
+        if (entry != null) {
+          SigningAlgorithm signingAlgo = SigningAlgorithm.create(entry);
+          // key store does not have the requested algorithm
+          if (signingAlgo instanceof MacSignaingAlgorithm) {
+            keys.add(new JWK(alg, (MacSignaingAlgorithm) signingAlgo));
+          } else if (signingAlgo instanceof DigitalSigningAlgorithm) {
+            keys.add(new JWK(alg, (DigitalSigningAlgorithm) signingAlgo));
+          }
+        }
+      } catch (Exception e) {
+        LOG.warn("Failed to load key for algorithm", e);
+      }
+    }
+    return keys;
+  }
+
+  static final Logger LOG = LoggerFactory.getLogger(JWK.class);
+
+  // JSON JWK properties
+  private final String kid;
+  private final String use;
+
+  // the label is a synthetic id that allows comparing 2 keys
+  // that are expected to replace each other but are not necessarily
+  // the same key cryptographically speaking.
+  // In most cases it should be the same as kid, or synthetically generated
+  // when there's no kid.
+  private final String label;
+
+  // the cryptography objects, not all will be initialized
+  private final String kty;
+  private final SigningAlgorithm signingAlgorithm;
+  private final Alg alg;
+
   /**
    * Creates a Key(Pair) from pem formatted strings.
    *
@@ -210,42 +143,33 @@ public final class JWK {
    */
   public JWK(PubSecKeyOptions options) {
 
-    alg = options.getAlgorithm();
+    try {
+      alg = Alg.valueOf(options.getAlgorithm());
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Unknown algorithm: " + options.getAlgorithm());
+    }
+
     kid = options.getId();
     use = null;
 
     final Buffer buffer = Objects.requireNonNull(options.getBuffer());
 
-    label = kid == null ? alg + "#" + buffer.hashCode() : kid;
+    label = kid == null ? alg.name() + "#" + buffer.hashCode() : kid;
+
 
     // Handle Mac keys
 
     switch (alg) {
-      case "HS256":
-        try {
-          mac = Mac.getInstance("HMacSHA256");
-          mac.init(new SecretKeySpec(buffer.getBytes(), "HMacSHA256"));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-          throw new RuntimeException(e);
-        }
+      case HS256:
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256")).safe();
         kty = "oct";
         return;
-      case "HS384":
-        try {
-          mac = Mac.getInstance("HMacSHA384");
-          mac.init(new SecretKeySpec(buffer.getBytes(), "HMacSHA384"));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-          throw new RuntimeException(e);
-        }
+      case HS384:
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384")).safe();
         kty = "oct";
         return;
-      case "HS512":
-        try {
-          mac = Mac.getInstance("HMacSHA512");
-          mac.init(new SecretKeySpec(buffer.getBytes(), "HMacSHA512"));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-          throw new RuntimeException(e);
-        }
+      case HS512:
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512")).safe();
         kty = "oct";
         return;
     }
@@ -253,28 +177,28 @@ public final class JWK {
     // Handle Pub-Sec Keys
     try {
       switch (alg) {
-        case "RS256":
-        case "RS384":
-        case "RS512":
+        case RS256:
+        case RS384:
+        case RS512:
           kty = "RSA";
-          parsePEM(KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII)).safe();
           break;
-        case "PS256":
-        case "PS384":
-        case "PS512":
+        case PS256:
+        case PS384:
+        case PS512:
           kty = "RSASSA";
-          parsePEM(KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII)).safe();
           break;
-        case "ES256":
-        case "ES384":
-        case "ES512":
-        case "ES256K":
+        case ES256:
+        case ES384:
+        case ES512:
+        case ES256K:
           kty = "EC";
-          parsePEM(KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = wrapECAlgo(parsePEM(alg, KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII))).safe();
           break;
-        case "EdDSA":
+        case EdDSA:
           kty = "EdDSA";
-          parsePEM(KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII)).safe();
           break;
         default:
           throw new IllegalArgumentException("Unknown algorithm: " + alg);
@@ -285,7 +209,7 @@ public final class JWK {
     }
   }
 
-  private void parsePEM(KeyFactory kf, String pem) throws CertificateException, InvalidKeySpecException {
+  private static DigitalSigningAlgorithm parsePEM(Alg alg, KeyFactory kf, String pem) throws CertificateException, InvalidKeySpecException {
     // extract the information from the pem
     String[] lines = pem.split("\r?\n");
     // A PEM PKCS#8 formatted string shall contain on the first line the kind of content
@@ -322,151 +246,199 @@ public final class JWK {
       throw new IllegalArgumentException("PEM END line not found");
     }
 
+    PublicKey publicKey;
+    PrivateKey privateKey;
     switch (kind) {
       case "CERTIFICATE":
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
         publicKey = cf.generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.US_ASCII))).getPublicKey();
-        return;
+        return createPubKeySigningAlgorithm(alg, publicKey);
       case "PUBLIC KEY":
       case "PUBLIC RSA KEY":
       case "RSA PUBLIC KEY":
         publicKey = kf.generatePublic(new X509EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
-        return;
+        return createPubKeySigningAlgorithm(alg, publicKey);
       case "PRIVATE KEY":
       case "PRIVATE RSA KEY":
       case "RSA PRIVATE KEY":
         privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(base64MimeDecode(buffer.getBytes())));
-        return;
+        return createPubKeySigningAlgorithm(alg, privateKey);
       default:
         throw new IllegalStateException("Invalid PEM content: " + kind);
     }
   }
 
-  private JWK(String algorithm, Mac mac) throws NoSuchAlgorithmException {
+  private JWK(Alg alg_, MacSignaingAlgorithm signingAlgo) throws Exception {
 
-    alg = algorithm;
+    // the algorithm cannot be null, and it cannot be different from the alias list
+    if (invalidAlgAlias(signingAlgo.name(), alg_)) {
+      throw new Exception("The key algorithm does not match: {" + alg_ + ": " + signingAlgo.name() + "}");
+    }
+
     kid = null;
-    label = alg + "#" + mac.hashCode();
+    label = signingAlgo.name() + "#" + signingAlgo.mac().hashCode();
     use = null;
+    kty = "oct";
+    signingAlgorithm = signingAlgo.safe();
+    alg = alg_;
+  }
+
+  private JWK(Alg alg_, DigitalSigningAlgorithm signingAlgo) throws Exception {
+
+    if (invalidAlgAlias(signingAlgo.signature().getAlgorithm(), alg_)) {
+      throw new Exception("The key algorithm does not match: {" + alg_ + ": " + signingAlgo.signature().getAlgorithm() + "}");
+    }
+
+    kid = null;
+    label = signingAlgo.canSign() ? alg_.name() + '#' + signingAlgo.id() + "-" + signingAlgo.privateKey().hashCode() : alg_.name() + '#' + signingAlgo.id();
+    use = null;
+    alg = alg_;
 
     switch (alg) {
-      case "HS256":
-      case "HS384":
-      case "HS512":
-        kty = "oct";
-        this.mac = mac;
+      case RS256:
+      case RS384:
+      case RS512:
+        kty = "RSA";
+        signingAlgorithm = signingAlgo.safe();
+        break;
+      case PS256:
+      case PS384:
+      case PS512:
+        kty = "RSASSA";
+        signingAlgorithm = signingAlgo.safe();
+        break;
+      case ES256:
+      case ES384:
+      case ES512:
+      case ES256K:
+        kty = "EC";
+        signingAlgorithm = wrapECAlgo(signingAlgo).safe();
         break;
       default:
-        throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
+        throw new NoSuchAlgorithmException("Unknown algorithm: " + alg);
     }
   }
 
-  private JWK(String algorithm, X509Certificate certificate, PrivateKey privateKey) throws NoSuchAlgorithmException {
-
-    alg = algorithm;
-    kid = null;
-    label = privateKey != null ? algorithm + '#' + certificate.hashCode() + "-" + privateKey.hashCode() : algorithm + '#' + certificate.hashCode();
-    use = null;
-
-    this.publicKey = certificate.getPublicKey();
-    this.privateKey = privateKey;
-
-    switch (algorithm) {
-      case "RS256":
-      case "RS384":
-      case "RS512":
-        kty = "RSA";
-        break;
-      case "PS256":
-      case "PS384":
-      case "PS512":
-        kty = "RSASSA";
-        break;
-      case "ES256":
-      case "ES384":
-      case "ES512":
-      case "ES256K":
-        kty = "EC";
-        break;
-      default:
-        throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
-    }
+  private static SigningAlgorithm wrapECAlgo(DigitalSigningAlgorithm signingAlgo) {
+    // JCA EC signatures expect ASN1 formatted signatures
+    // while JWS uses it's own format (R+S), while this will be true
+    // for all JWS, it may not be true for COSE keys
+    return new SigningAlgorithm() {
+      @Override
+      public String name() {
+        return signingAlgo.name();
+      }
+      @Override
+      public String id() {
+        return signingAlgo.id();
+      }
+      @Override
+      public boolean canSign() {
+        return signingAlgo.canSign();
+      }
+      @Override
+      public boolean canVerify() {
+        return signingAlgo.canVerify();
+      }
+      @Override
+      public io.vertx.ext.auth.impl.jose.algo.Signer signer() throws GeneralSecurityException {
+        Signer signer = signingAlgo.signer();
+        if (signer == null) {
+          return null;
+        }
+        return data -> {
+          int len = signingAlgo.length();
+          return JWS.toJWS(signer.sign(data), len);
+        };
+      }
+      @Override
+      public Verifier verifier() throws GeneralSecurityException {
+        Verifier verifier = signingAlgo.verifier();
+        if (verifier == null) {
+          return null;
+        }
+        return (signature, payload) -> {
+          if (!JWS.isASN1(signature)) {
+            signature = JWS.toASN1(signature);
+          }
+          return verifier.verify(signature, payload);
+        };
+      }
+    };
   }
 
   public JWK(JsonObject json) {
     kid = json.getString("kid");
     use = json.getString("use");
+    kty = json.getString("kty");
 
     try {
-      switch (json.getString("kty")) {
+      String algValue;
+      switch (kty) {
         case "RSA":
         case "RSASSA":
-          kty = json.getString("kty");
           // get the alias for the algorithm
-          alg = json.getString("alg", "RS256");
-
-          switch (alg) {
-            case "RS1":
-              // special case for COSE
-            case "RS256":
-            case "RS384":
-            case "RS512":
-            case "PS256":
-            case "PS384":
-            case "PS512":
-              createRSA(json);
-              break;
-            default:
-              throw new NoSuchAlgorithmException(alg);
-          }
+          algValue = json.getString("alg", "RS256");
           break;
         case "EC":
-          kty = json.getString("kty");
           // get the alias for the algorithm
-          alg = json.getString("alg", "ES256");
-
-          switch (alg) {
-            case "ES256":
-            case "ES256K":
-            case "ES512":
-            case "ES384":
-              createEC(json);
-              break;
-            default:
-              throw new NoSuchAlgorithmException(alg);
-          }
+          algValue = json.getString("alg", "ES256");
           break;
         case "OKP":
-          kty = json.getString("kty");
           // get the alias for the algorithm
-          alg = json.getString("alg", "EdDSA");
-          createOKP(json);
+          algValue = json.getString("alg", "EdDSA");
           break;
         case "oct":
-          kty = json.getString("kty");
           // get the alias for the algorithm
-          alg = json.getString("alg", "HS256");
-
-          switch (alg) {
-            case "HS256":
-              createOCT("HMacSHA256", json);
-              break;
-            case "HS384":
-              createOCT("HMacSHA384", json);
-              break;
-            case "HS512":
-              createOCT("HMacSHA512", json);
-              break;
-            default:
-              throw new NoSuchAlgorithmException(alg);
-          }
+          algValue = json.getString("alg", "HS256");
           break;
-
         default:
           throw new RuntimeException("Unsupported key type: " + json.getString("kty"));
       }
 
-      label = kid != null ? kid : alg + "#" + json.hashCode();
+      try {
+        alg = Alg.valueOf(algValue);
+      } catch (IllegalArgumentException e) {
+        throw new NoSuchAlgorithmException("Unknown algorithm: " + algValue);
+      }
+
+      switch (alg) {
+        case RS1:
+          // special case for COSE
+        case RS256:
+        case RS384:
+        case RS512:
+        case PS256:
+        case PS384:
+        case PS512:
+          signingAlgorithm = createRSA(alg, json).safe();
+          break;
+        case ES256:
+        case ES256K:
+        case ES512:
+        case ES384:
+          signingAlgorithm = wrapECAlgo(createEC(alg, json)).safe();
+          break;
+        case HS256:
+          signingAlgorithm = createOCT(alg, "HmacSHA256", json).safe();
+          break;
+        case HS384:
+          signingAlgorithm = createOCT(alg, "HmacSHA384", json).safe();
+          break;
+        case HS512:
+          signingAlgorithm = createOCT(alg, "HmacSHA512", json).safe();
+          break;
+        case EdDSA:
+          if ("OKP".equals(kty)) {
+            signingAlgorithm = createOKP(alg, json).safe();
+            break;
+          }
+          // Pass through
+        default:
+          throw new NoSuchAlgorithmException(algValue);
+      }
+
+      label = kid != null ? kid : alg.name() + "#" + json.hashCode();
 
     } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidParameterSpecException |
              CertificateException | NoSuchProviderException | SignatureException e) {
@@ -474,7 +446,9 @@ public final class JWK {
     }
   }
 
-  private void createRSA(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+  private static DigitalSigningAlgorithm createRSA(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+    PublicKey publicKey = null;
+    PrivateKey privateKey = null;
     // public key
     if (jsonHasProperties(json, "n", "e")) {
       final BigInteger n = new BigInteger(1, base64UrlDecode(json.getString("n")));
@@ -510,13 +484,19 @@ public final class JWK {
       // extract the public key
       publicKey = certificate.getPublicKey();
     }
+
+    if (publicKey != null || privateKey != null) {
+      return createPubKeySigningAlgorithm(alg, privateKey, publicKey);
+    }
+    return null;
   }
 
-  private void createEC(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException {
+  private static DigitalSigningAlgorithm createEC(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException {
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
     parameters.init(new ECGenParameterSpec(translateECCrv(json.getString("crv"))));
 
     // public key
+    PublicKey publicKey = null;
     if (jsonHasProperties(json, "x", "y")) {
       final BigInteger x = new BigInteger(1, base64UrlDecode(json.getString("x")));
       final BigInteger y = new BigInteger(1, base64UrlDecode(json.getString("y")));
@@ -524,14 +504,22 @@ public final class JWK {
     }
 
     // private key
+    PrivateKey privateKey = null;
     if (jsonHasProperties(json, "d")) {
       final BigInteger d = new BigInteger(1, base64UrlDecode(json.getString("d")));
       privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, parameters.getParameterSpec(ECParameterSpec.class)));
     }
+
+    if (publicKey != null || privateKey != null) {
+      return createPubKeySigningAlgorithm(alg, privateKey, publicKey);
+    }
+
+    return null;
   }
 
-  private void createOKP(JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
+  private static DigitalSigningAlgorithm createOKP(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
     // public key
+    PublicKey publicKey;
     if (jsonHasProperties(json, "x")) {
       final byte[] key = base64UrlDecode(json.getString("x"));
       final byte bitStringTag = (byte) 0x3;
@@ -554,9 +542,12 @@ public final class JWK {
           .getBytes());
 
       publicKey = KeyFactory.getInstance("EdDSA").generatePublic(new X509EncodedKeySpec(spki));
+    } else {
+      publicKey = null;
     }
 
     // private key
+    PrivateKey privateKey;
     if (jsonHasProperties(json, "d")) {
       final byte[] key = base64UrlDecode(json.getString("d"));
       final byte octetStringTag = (byte) 0x4;
@@ -589,16 +580,23 @@ public final class JWK {
       );
 
       privateKey = KeyFactory.getInstance("EdDSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
+    } else {
+      privateKey = null;
+    }
+
+    if (publicKey != null || privateKey != null) {
+      return createPubKeySigningAlgorithm(alg, privateKey, publicKey);
+    } else {
+      return null;
     }
   }
 
-  private void createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
-    mac = Mac.getInstance(alias);
-    mac.init(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
+  private static SigningAlgorithm createOCT(Alg alg, String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
+    return new MacSignaingAlgorithm(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
   }
 
   public String getAlgorithm() {
-    return alg;
+    return alg.name();
   }
 
   public String getId() {
@@ -662,15 +660,17 @@ public final class JWK {
     return kty;
   }
 
-  public Mac mac() {
-    return mac;
+  public SigningAlgorithm signingAlgorithm() {
+    return signingAlgorithm;
   }
 
   public PublicKey publicKey() {
-    return publicKey;
+    SigningAlgorithm unwrapped = signingAlgorithm.unwrap();
+    return unwrapped instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)unwrapped).publicKey() : null;
   }
 
   public PrivateKey privateKey() {
-    return privateKey;
+    SigningAlgorithm unwrapped = signingAlgorithm.unwrap();
+    return unwrapped instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)unwrapped).privateKey() : null;
   }
 }
