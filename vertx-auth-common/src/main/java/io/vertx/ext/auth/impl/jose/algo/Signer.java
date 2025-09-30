@@ -1,13 +1,6 @@
 package io.vertx.ext.auth.impl.jose.algo;
 
-import io.vertx.codegen.annotations.Nullable;
-
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
 
 public interface Signer {
 
@@ -32,48 +25,6 @@ public interface Signer {
   String HS256 = "HS256";
   String HS384 = "HS384";
   String HS512 = "HS512";
-
-  static @Nullable Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-    Signature sig;
-
-    switch (alg) {
-      case HS256:
-      case HS384:
-      case HS512:
-        return null;
-      case ES256:
-      case ES256K:
-        return Signature.getInstance("SHA256withECDSA");
-      case ES384:
-        return Signature.getInstance("SHA384withECDSA");
-      case ES512:
-        return Signature.getInstance("SHA512withECDSA");
-      case RS256:
-        return Signature.getInstance("SHA256withRSA");
-      case RS384:
-        return Signature.getInstance("SHA384withRSA");
-      case RS512:
-        return Signature.getInstance("SHA512withRSA");
-      case RS1:
-        return Signature.getInstance("SHA1withRSA");
-      case PS256:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 256 / 8, 1));
-        return sig;
-      case PS384:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 384 / 8, 1));
-        return sig;
-      case PS512:
-        sig = Signature.getInstance("RSASSA-PSS");
-        sig.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
-        return sig;
-      case EdDSA:
-        return Signature.getInstance("EdDSA");
-      default:
-        throw new NoSuchAlgorithmException("");
-    }
-  }
 
 
   byte[] sign(byte[] data) throws GeneralSecurityException;

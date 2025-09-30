@@ -29,11 +29,26 @@ import java.util.Objects;
  */
 public class MacSigningAlgorithm extends SigningAlgorithm {
 
-  private final String name;
+  static boolean isValidAlgo(String algo) {
+    switch (algo) {
+      case "HmacSHA256":
+      case "1.2.840.113549.2.9":
+        // HS256
+      case "HmacSHA384":
+      case "1.2.840.113549.2.10":
+        // HS384
+      case "HmacSHA512":
+      case "1.2.840.113549.2.11":
+        // HS384
+        return true;
+      default:
+        return false;
+    }
+  }
+
   private final SecretKey secretKey;
 
-  public MacSigningAlgorithm(String name, SecretKey secretKey) {
-    this.name = Objects.requireNonNull(name);
+  public MacSigningAlgorithm(SecretKey secretKey) {
     this.secretKey = Objects.requireNonNull(secretKey);
   }
 
@@ -64,7 +79,7 @@ public class MacSigningAlgorithm extends SigningAlgorithm {
 
   @Override
   public String name() {
-    return name;
+    return secretKey.getAlgorithm();
   }
 
   @Override

@@ -15,47 +15,51 @@
  */
 package io.vertx.ext.auth.impl.jose.algo;
 
-import io.vertx.ext.auth.impl.jose.JWS;
+import io.vertx.core.VertxException;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.util.Objects;
-
-import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
+import java.util.concurrent.Callable;
 
 /**
  * @author Paulo Lopes
  */
 public class PubKeySigningAlgorithm extends SigningAlgorithm {
 
-  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id) {
-    return new PubKeySigningAlgorithm(alg, privateKey, publicKey, id);
-  }
-
-  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey) {
-    return new PubKeySigningAlgorithm(alg, privateKey, publicKey, null);
-  }
-
-  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PublicKey publicKey) {
-    return new PubKeySigningAlgorithm(alg, null, publicKey, null);
-  }
-
-  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg, PrivateKey privateKey) {
-    return new PubKeySigningAlgorithm(alg, privateKey, null, null);
+  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg,
+                                                                    PrivateKey privateKey,
+                                                                    PublicKey publicKey,
+                                                                    String id,
+                                                                    Callable<Signature> signatureFactory,
+                                                                    int length) {
+    return new PubKeySigningAlgorithm(alg, privateKey, publicKey, id, signatureFactory, length);
   }
 
   private final String alg;
   private final PrivateKey privateKey;
   private final PublicKey publicKey;
   private final String id;
+  private final Callable<Signature> signatureFactory;
 
-  private PubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id) {
+  // the length of the signature. This is derived from the algorithm name
+  // this will help to cope with signatures that are longer (yet valid) than
+  // the expected result
+  private final int length;
+
+  private PubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id, Callable<Signature> signatureFactory, int length) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
     this.alg = Objects.requireNonNull(alg);
     this.id = id;
+    this.signatureFactory = signatureFactory;
+    this.length = length;
+  }
+
+  public int length() {
+    return length;
   }
 
   public PrivateKey privateKey() {
@@ -64,6 +68,14 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
 
   public PublicKey publicKey() {
     return publicKey;
+  }
+
+  public Signature signature() {
+    try {
+      return signatureFactory.call();
+    } catch (Exception e) {
+      throw new VertxException(e);
+    }
   }
 
   @Override
@@ -81,6 +93,7 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
     return publicKey != null;
   }
 
+  // TODO : make this compliant
   @Override
   public String name() {
     return alg;
@@ -88,11 +101,12 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
 
   @Override
   public Signer signer() throws GeneralSecurityException {
-    Signature signature = Signer.getSignature(alg);
-    // the length of the signature. This is derived from the algorithm name
-    // this will help to cope with signatures that are longer (yet valid) than
-    // the expected result
-    int len = getSignatureLength(alg, publicKey);
+    Signature signature;
+    try {
+      signature = signatureFactory.call();
+    } catch (Exception e) {
+      throw new GeneralSecurityException(e);
+    }
     return new Signer() {
       @Override
       public synchronized byte[] sign(byte[] data) throws GeneralSecurityException {
@@ -111,9 +125,9 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
         }
         signature.initVerify(publicKey);
         signature.update(payload);
-        if (expected.length < len) {
+        if (expected.length < length) {
           // need to adapt the expectation to make the RSA? engine happy
-          byte[] normalized = new byte[len];
+          byte[] normalized = new byte[length];
           System.arraycopy(expected, 0, normalized, 0, expected.length);
           return signature.verify(normalized);
         } else {

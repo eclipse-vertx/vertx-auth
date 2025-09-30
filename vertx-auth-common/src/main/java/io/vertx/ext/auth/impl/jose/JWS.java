@@ -27,8 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.interfaces.RSAKey;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
 
 import static io.vertx.ext.auth.impl.asn.ASN1.*;
 
@@ -126,7 +124,7 @@ public final class JWS {
         break;
     }
 
-    Signature sig = Signer.getSignature(alg);
+    Signature sig = getSignature(alg);
 
     if (sig == null) {
       throw new SignatureException("Cannot get a signature for: " + alg);
@@ -138,37 +136,34 @@ public final class JWS {
     return sig.verify(signature);
   }
 
-  public static int getSignatureLength(String alg, PublicKey publicKey) throws NoSuchAlgorithmException {
+  static int getSignatureLength(Algorithm alg, PublicKey publicKey) {
     if (publicKey instanceof RSAKey) {
       return ((RSAKey) publicKey).getModulus().bitLength() + 7 >> 3;
     } else {
       switch (alg) {
-        case Signer.EdDSA:
-        case Signer.ES256:
-        case Signer.ES256K:
+        case EdDSA:
+        case ES256:
+        case ES256K:
           return 64;
-        case Signer.ES384:
+        case ES384:
           return 96;
-        case Signer.ES512:
+        case ES512:
           return 132;
-        case Signer.HS256:
-        case Signer.RS1:
-        case Signer.RS256:
-        case Signer.PS256:
+        case HS256:
+        case RS1:
+        case RS256:
+        case PS256:
           return 256;
-        case Signer.HS384:
-        case Signer.RS384:
-        case Signer.PS384:
+        case HS384:
+        case RS384:
+        case PS384:
           return 384;
-        case Signer.HS512:
-        case Signer.RS512:
-        case Signer.PS512:
+        case HS512:
+        case RS512:
+        case PS512:
           return 512;
-        case "EC":
-          // Called by test testGenerateNewTokenES256
-          throw new UnsupportedOperationException();
         default:
-          throw new NoSuchAlgorithmException("Cannot determine length of algorithm " + alg);
+          throw new UnsupportedOperationException("Cannot determine length of algorithm " + alg);
       }
     }
   }
@@ -471,4 +466,17 @@ public final class JWS {
         CERT_BOUNDARY_END;
   }
 
+  public static Signature getSignature(String alg) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    Algorithm algo;
+    try {
+      algo = Algorithm.valueOf(alg);
+    } catch (IllegalArgumentException e) {
+      throw new NoSuchAlgorithmException(alg);
+    }
+    try {
+      return algo.signatureProvider != null ? algo.signatureProvider.call() : null;
+    } catch (Exception e) {
+      return null;
+    }
+  }
 }
