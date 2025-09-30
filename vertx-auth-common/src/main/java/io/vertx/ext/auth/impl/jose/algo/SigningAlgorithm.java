@@ -56,7 +56,7 @@ public abstract class SigningAlgorithm {
           default:
             throw new NoSuchAlgorithmException(certificate.getSigAlgName());
         }
-        return PubKeySigningAlgorithm.createPubKeySigningAlgorithm(alias, privateKey, publicKey, "" + certificate.hashCode(), signatureFactory, len);
+        return PubKeySigningAlgorithm.createPubKeySigningAlgorithm(certificate.getSigAlgName(), privateKey, publicKey, "" + certificate.hashCode(), signatureFactory, len);
       } else {
         throw new UnrecoverableEntryException();
       }

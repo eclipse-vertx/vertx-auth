@@ -49,5 +49,4 @@ public enum Algorithm {
     this.oid = oid;
     this.signatureProvider = signatureProvider;
   }
-
 }

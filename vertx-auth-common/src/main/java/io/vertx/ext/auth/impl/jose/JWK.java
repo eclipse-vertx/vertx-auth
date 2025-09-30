@@ -91,10 +91,9 @@ public final class JWK {
     return password.toCharArray();
   }
 
-  private static boolean invalidAlgAlias(String alg, String alias) {
+  private static boolean invalidAlgAlias(String alg, Algorithm alias) {
     try {
-      Algorithm algo = Algorithm.valueOf(alias);
-      return !alg.equalsIgnoreCase(algo.jce) && !alg.equalsIgnoreCase(algo.oid);
+      return !alg.equalsIgnoreCase(alias.jce) && !alg.equalsIgnoreCase(alias.oid);
     } catch (IllegalArgumentException e) {
       return true;
     }
@@ -120,33 +119,16 @@ public final class JWK {
 
   public static List<JWK> load(KeyStore keyStore, String keyStorePassword, Map<String, String> passwordProtection) {
     List<JWK> keys = new ArrayList<>();
-    // load MACs
-    for (String alias : Arrays.asList("HS256", "HS384", "HS512")) {
-      // algorithm is valid
+    for (Algorithm algo : List.of(Algorithm.HS256, Algorithm.HS384, Algorithm.HS512, Algorithm.RS256,
+      Algorithm.RS384, Algorithm.RS512, Algorithm.ES256K, Algorithm.ES256, Algorithm.ES384, Algorithm.ES512)) {
       try {
-        char[] password = password(keyStorePassword, passwordProtection, alias);
-        MacSigningAlgorithm a = (MacSigningAlgorithm) SigningAlgorithm.create(keyStore, alias, password);
+        char[] password = password(keyStorePassword, passwordProtection, algo.name());
+        SigningAlgorithm signingAlso = SigningAlgorithm.create(keyStore, algo.name(), password);
         // key store does not have the requested algorithm
-        if (a != null) {
-          // the algorithm cannot be null, and it cannot be different from the alias list
-          if (invalidAlgAlias(a.name(), alias)) {
-            throw new Exception("The key algorithm does not match: {" + alias + ": " + a.name() + "}");
-          }
-          keys.add(new JWK(a));
-        }
-      } catch (Exception e) {
-        LOG.warn("Failed to load key for algorithm", e);
-      }
-    }
-    for (String alias : Arrays.asList("RS256", "RS384", "RS512", "ES256K", "ES256", "ES384", "ES512")) {
-      try {
-        char[] password = password(keyStorePassword, passwordProtection, alias);
-        PubKeySigningAlgorithm a = (PubKeySigningAlgorithm) SigningAlgorithm.create(keyStore, alias, password);
-        if (a != null) {
-          if (invalidAlgAlias(a.signature().getAlgorithm(), alias)) {
-            throw new Exception("The key algorithm does not match: {" + alias + ": " + a.signature().getAlgorithm() + "}");
-          }
-          keys.add(new JWK(a));
+        if (signingAlso instanceof MacSigningAlgorithm) {
+          keys.add(new JWK(algo, (MacSigningAlgorithm) signingAlso));
+        } else if (signingAlso instanceof PubKeySigningAlgorithm) {
+          keys.add(new JWK(algo, (PubKeySigningAlgorithm) signingAlso));
         }
       } catch (Exception e) {
         LOG.warn("Failed to load key for algorithm", e);
@@ -287,42 +269,31 @@ public final class JWK {
     }
   }
 
-  private JWK(MacSigningAlgorithm signingAlgo) throws NoSuchAlgorithmException, InvalidKeyException {
+  private JWK(Algorithm algo_, MacSigningAlgorithm signingAlgo) throws Exception {
+
+    // the algorithm cannot be null, and it cannot be different from the alias list
+    if (invalidAlgAlias(signingAlgo.name(), algo_)) {
+      throw new Exception("The key algorithm does not match: {" + algo_ + ": " + signingAlgo.name() + "}");
+    }
 
     kid = null;
     label = signingAlgo.name() + "#" + signingAlgo.mac().hashCode();
     use = null;
     kty = "oct";
     signingAlgorithm = signingAlgo;
-
-    switch (signingAlgo.name()) {
-      case "HmacSHA256":
-        algo = Algorithm.HS256;
-        break;
-      case "HmacSHA384":
-        algo = Algorithm.HS384;
-        break;
-      case "HmacSHA512":
-        algo = Algorithm.HS512;
-        break;
-      default:
-        throw new NoSuchAlgorithmException("Unknown algorithm: " + signingAlgo.name());
-    }
+    algo = algo_;
   }
 
-  private JWK(PubKeySigningAlgorithm signingAlgo) throws NoSuchAlgorithmException {
+  private JWK(Algorithm algo_, PubKeySigningAlgorithm signingAlgo) throws Exception {
 
-    String algorithm = signingAlgo.name();
-
-    try {
-      algo = Algorithm.valueOf(algorithm);
-    } catch (IllegalArgumentException e) {
-      throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
+    if (invalidAlgAlias(signingAlgo.signature().getAlgorithm(), algo_)) {
+      throw new Exception("The key algorithm does not match: {" + algo_ + ": " + signingAlgo.signature().getAlgorithm() + "}");
     }
 
     kid = null;
-    label = signingAlgo.canSign() ? algorithm + '#' + signingAlgo.id() + "-" + signingAlgo.privateKey().hashCode() : algorithm + '#' + signingAlgo.id();
+    label = signingAlgo.canSign() ? algo_.name() + '#' + signingAlgo.id() + "-" + signingAlgo.privateKey().hashCode() : algo_.name() + '#' + signingAlgo.id();
     use = null;
+    algo = algo_;
 
     switch (algo) {
       case RS256:
@@ -345,7 +316,7 @@ public final class JWK {
         signingAlgorithm = wrapECAlgo(signingAlgo);
         break;
       default:
-        throw new NoSuchAlgorithmException("Unknown algorithm: " + algorithm);
+        throw new NoSuchAlgorithmException("Unknown algorithm: " + algo);
     }
   }
 
