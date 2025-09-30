@@ -166,7 +166,7 @@ public final class JWS {
           return 512;
         case "EC":
           // Called by test testGenerateNewTokenES256
-          return 0;
+          throw new UnsupportedOperationException();
         default:
           throw new NoSuchAlgorithmException("Cannot determine length of algorithm " + alg);
       }
