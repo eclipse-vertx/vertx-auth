@@ -19,19 +19,22 @@ import io.vertx.core.VertxException;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
+ * Signing algorithm through Message Authentication Code (MAC)
+ *
  * @author Paulo Lopes
  */
-public class MacSigningAlgorithm extends SigningAlgorithm {
+public class MacSignaingAlgorithm extends SigningAlgorithm {
 
   private final SecretKey secretKey;
 
-  public MacSigningAlgorithm(SecretKey secretKey) {
+  public MacSignaingAlgorithm(SecretKey secretKey) {
     this.secretKey = Objects.requireNonNull(secretKey);
   }
 
@@ -68,19 +71,19 @@ public class MacSigningAlgorithm extends SigningAlgorithm {
   @Override
   public Signer signer() throws NoSuchAlgorithmException, InvalidKeyException {
     Mac mac = mac();
-    return new Signer() {
-      @Override
-      public byte[] sign(byte[] data) {
-        synchronized (mac) {
-          return mac.doFinal(data);
-        }
+    return data -> {
+      synchronized (mac) {
+        return mac.doFinal(data);
       }
+    };
+  }
 
-      @Override
-      public synchronized boolean verify(byte[] expected, byte[] payload) {
-        synchronized (mac) {
-          return MessageDigest.isEqual(expected, sign(payload));
-        }
+  @Override
+  public Verifier verifier() throws GeneralSecurityException {
+    Mac mac = mac();
+    return (expected, payload) -> {
+      synchronized (mac) {
+        return MessageDigest.isEqual(expected, mac.doFinal(payload));
       }
     };
   }

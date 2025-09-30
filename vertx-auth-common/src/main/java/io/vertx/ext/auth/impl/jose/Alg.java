@@ -6,7 +6,7 @@ import java.security.spec.PSSParameterSpec;
 import java.util.concurrent.Callable;
 
 /**
- * JWT alg
+ * JWT alg.
  */
 public enum Alg {
 

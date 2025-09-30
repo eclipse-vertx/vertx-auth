@@ -23,10 +23,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.asn.ASN1;
-import io.vertx.ext.auth.impl.jose.algo.MacSigningAlgorithm;
-import io.vertx.ext.auth.impl.jose.algo.PubKeySigningAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.MacSignaingAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.DigitalSigningAlgorithm;
 import io.vertx.ext.auth.impl.jose.algo.Signer;
 import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.Verifier;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
@@ -63,19 +64,19 @@ import static io.vertx.ext.auth.impl.jose.JWS.getSignatureLength;
  */
 public final class JWK {
 
-  private static PubKeySigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PrivateKey privateKey, PublicKey publicKey) {
+  private static DigitalSigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PrivateKey privateKey, PublicKey publicKey) {
     int length = getSignatureLength(alg, publicKey);
-    return PubKeySigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), privateKey, publicKey, null, alg.signatureProvider, length);
+    return DigitalSigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), privateKey, publicKey, null, alg.signatureProvider, length);
   }
 
-  private static PubKeySigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PublicKey publicKey) {
+  private static DigitalSigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PublicKey publicKey) {
     int length = getSignatureLength(alg, publicKey);
-    return PubKeySigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), null, publicKey, null, alg.signatureProvider, length);
+    return DigitalSigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), null, publicKey, null, alg.signatureProvider, length);
   }
 
-  private static PubKeySigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PrivateKey privateKey) {
+  private static DigitalSigningAlgorithm createPubKeySigningAlgorithm(Alg alg, PrivateKey privateKey) {
     int length = getSignatureLength(alg, null);
-    return PubKeySigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), privateKey, null, null, alg.signatureProvider, length);
+    return DigitalSigningAlgorithm.createPubKeySigningAlgorithm(alg.name(), privateKey, null, null, alg.signatureProvider, length);
   }
 
   private static char[] password(String keyStorePassword, Map<String, String> passwordProtection, String alias) {
@@ -100,12 +101,15 @@ public final class JWK {
       Alg.RS384, Alg.RS512, Alg.ES256K, Alg.ES256, Alg.ES384, Alg.ES512)) {
       try {
         char[] password = password(keyStorePassword, passwordProtection, alg.name());
-        SigningAlgorithm signingAlgo = SigningAlgorithm.create(keyStore, alg.name(), password);
-        // key store does not have the requested algorithm
-        if (signingAlgo instanceof MacSigningAlgorithm) {
-          keys.add(new JWK(alg, (MacSigningAlgorithm) signingAlgo));
-        } else if (signingAlgo instanceof PubKeySigningAlgorithm) {
-          keys.add(new JWK(alg, (PubKeySigningAlgorithm) signingAlgo));
+        KeyStore.Entry entry = keyStore.getEntry(alg.name(), new KeyStore.PasswordProtection(password));
+        if (entry != null) {
+          SigningAlgorithm signingAlgo = SigningAlgorithm.create(entry);
+          // key store does not have the requested algorithm
+          if (signingAlgo instanceof MacSignaingAlgorithm) {
+            keys.add(new JWK(alg, (MacSignaingAlgorithm) signingAlgo));
+          } else if (signingAlgo instanceof DigitalSigningAlgorithm) {
+            keys.add(new JWK(alg, (DigitalSigningAlgorithm) signingAlgo));
+          }
         }
       } catch (Exception e) {
         LOG.warn("Failed to load key for algorithm", e);
@@ -157,15 +161,15 @@ public final class JWK {
 
     switch (alg) {
       case HS256:
-        signingAlgorithm = new MacSigningAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256"));
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256"));
         kty = "oct";
         return;
       case HS384:
-        signingAlgorithm = new MacSigningAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384"));
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384"));
         kty = "oct";
         return;
       case HS512:
-        signingAlgorithm = new MacSigningAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512"));
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512"));
         kty = "oct";
         return;
     }
@@ -205,7 +209,7 @@ public final class JWK {
     }
   }
 
-  private static PubKeySigningAlgorithm parsePEM(Alg alg, KeyFactory kf, String pem) throws CertificateException, InvalidKeySpecException {
+  private static DigitalSigningAlgorithm parsePEM(Alg alg, KeyFactory kf, String pem) throws CertificateException, InvalidKeySpecException {
     // extract the information from the pem
     String[] lines = pem.split("\r?\n");
     // A PEM PKCS#8 formatted string shall contain on the first line the kind of content
@@ -264,7 +268,7 @@ public final class JWK {
     }
   }
 
-  private JWK(Alg alg_, MacSigningAlgorithm signingAlgo) throws Exception {
+  private JWK(Alg alg_, MacSignaingAlgorithm signingAlgo) throws Exception {
 
     // the algorithm cannot be null, and it cannot be different from the alias list
     if (invalidAlgAlias(signingAlgo.name(), alg_)) {
@@ -279,7 +283,7 @@ public final class JWK {
     alg = alg_;
   }
 
-  private JWK(Alg alg_, PubKeySigningAlgorithm signingAlgo) throws Exception {
+  private JWK(Alg alg_, DigitalSigningAlgorithm signingAlgo) throws Exception {
 
     if (invalidAlgAlias(signingAlgo.signature().getAlgorithm(), alg_)) {
       throw new Exception("The key algorithm does not match: {" + alg_ + ": " + signingAlgo.signature().getAlgorithm() + "}");
@@ -315,7 +319,7 @@ public final class JWK {
     }
   }
 
-  private static SigningAlgorithm wrapECAlgo(PubKeySigningAlgorithm signingAlgo) {
+  private static SigningAlgorithm wrapECAlgo(DigitalSigningAlgorithm signingAlgo) {
     // JCA EC signatures expect ASN1 formatted signatures
     // while JWS uses it's own format (R+S), while this will be true
     // for all JWS, it may not be true for COSE keys
@@ -338,20 +342,26 @@ public final class JWK {
       }
       @Override
       public io.vertx.ext.auth.impl.jose.algo.Signer signer() throws GeneralSecurityException {
-        io.vertx.ext.auth.impl.jose.algo.Signer signer = signingAlgo.signer();
-        return new Signer() {
-          @Override
-          public byte[] sign(byte[] data) throws GeneralSecurityException {
-            int len = signingAlgo.length();
-            return JWS.toJWS(signer.sign(data), len);
+        Signer signer = signingAlgo.signer();
+        if (signer == null) {
+          return null;
+        }
+        return data -> {
+          int len = signingAlgo.length();
+          return JWS.toJWS(signer.sign(data), len);
+        };
+      }
+      @Override
+      public Verifier verifier() throws GeneralSecurityException {
+        Verifier verifier = signingAlgo.verifier();
+        if (verifier == null) {
+          return null;
+        }
+        return (signature, payload) -> {
+          if (!JWS.isASN1(signature)) {
+            signature = JWS.toASN1(signature);
           }
-          @Override
-          public boolean verify(byte[] expected, byte[] payload) throws GeneralSecurityException {
-            if (!JWS.isASN1(expected)) {
-              expected = JWS.toASN1(expected);
-            }
-            return signer.verify(expected, payload);
-          }
+          return verifier.verify(signature, payload);
         };
       }
     };
@@ -436,7 +446,7 @@ public final class JWK {
     }
   }
 
-  private static PubKeySigningAlgorithm createRSA(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+  private static DigitalSigningAlgorithm createRSA(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
     PublicKey publicKey = null;
     PrivateKey privateKey = null;
     // public key
@@ -481,7 +491,7 @@ public final class JWK {
     return null;
   }
 
-  private static PubKeySigningAlgorithm createEC(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException {
+  private static DigitalSigningAlgorithm createEC(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException {
     AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
     parameters.init(new ECGenParameterSpec(translateECCrv(json.getString("crv"))));
 
@@ -507,7 +517,7 @@ public final class JWK {
     return null;
   }
 
-  private static PubKeySigningAlgorithm createOKP(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
+  private static DigitalSigningAlgorithm createOKP(Alg alg, JsonObject json) throws NoSuchAlgorithmException, InvalidKeySpecException {
     // public key
     PublicKey publicKey;
     if (jsonHasProperties(json, "x")) {
@@ -582,7 +592,7 @@ public final class JWK {
   }
 
   private static SigningAlgorithm createOCT(Alg alg, String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
-    return new MacSigningAlgorithm(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
+    return new MacSignaingAlgorithm(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
   }
 
   public String getAlgorithm() {
@@ -655,10 +665,10 @@ public final class JWK {
   }
 
   public PublicKey publicKey() {
-    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).publicKey() : null;
+    return signingAlgorithm instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)signingAlgorithm).publicKey() : null;
   }
 
   public PrivateKey privateKey() {
-    return signingAlgorithm instanceof PubKeySigningAlgorithm ? ((PubKeySigningAlgorithm)signingAlgorithm).privateKey() : null;
+    return signingAlgorithm instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)signingAlgorithm).privateKey() : null;
   }
 }

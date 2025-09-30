@@ -20,6 +20,7 @@ import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.asn.ASN1;
 import io.vertx.ext.auth.impl.jose.algo.Signer;
 import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
+import io.vertx.ext.auth.impl.jose.algo.Verifier;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -58,6 +59,7 @@ public final class JWS {
 
   private final JWK jwk;
   private Signer signer;
+  private Verifier verifier;
 
   public JWS(JWK jwk) {
     if (jwk.use() != null && !"sig".equals(jwk.use())) {
@@ -66,8 +68,11 @@ public final class JWS {
 
     try {
       SigningAlgorithm sa = jwk.signingAlgorithm();
-      if (sa != null) {
+      if (sa != null && sa.canSign()) {
         signer = sa.signer();
+      }
+      if (sa != null && sa.canVerify()) {
+        verifier = sa.verifier();
       }
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
@@ -95,7 +100,7 @@ public final class JWS {
       throw new NullPointerException("payload is missing");
     }
     try {
-      return signer.verify(expected, payload);
+      return verifier.verify(expected, payload);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
     }

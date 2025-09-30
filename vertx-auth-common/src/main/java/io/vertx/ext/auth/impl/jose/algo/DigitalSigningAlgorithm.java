@@ -25,17 +25,19 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
+ * Signing algorithm through Digital Signtature.
+ *
  * @author Paulo Lopes
  */
-public class PubKeySigningAlgorithm extends SigningAlgorithm {
+public class DigitalSigningAlgorithm extends SigningAlgorithm {
 
-  public static PubKeySigningAlgorithm createPubKeySigningAlgorithm(String alg,
-                                                                    PrivateKey privateKey,
-                                                                    PublicKey publicKey,
-                                                                    String id,
-                                                                    Callable<Signature> signatureFactory,
-                                                                    int length) {
-    return new PubKeySigningAlgorithm(alg, privateKey, publicKey, id, signatureFactory, length);
+  public static DigitalSigningAlgorithm createPubKeySigningAlgorithm(String alg,
+                                                                     PrivateKey privateKey,
+                                                                     PublicKey publicKey,
+                                                                     String id,
+                                                                     Callable<Signature> signatureFactory,
+                                                                     int length) {
+    return new DigitalSigningAlgorithm(alg, privateKey, publicKey, id, signatureFactory, length);
   }
 
   private final String alg;
@@ -49,7 +51,7 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
   // the expected result
   private final int length;
 
-  private PubKeySigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id, Callable<Signature> signatureFactory, int length) {
+  private DigitalSigningAlgorithm(String alg, PrivateKey privateKey, PublicKey publicKey, String id, Callable<Signature> signatureFactory, int length) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
     this.alg = Objects.requireNonNull(alg);
@@ -101,6 +103,9 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
 
   @Override
   public Signer signer() throws GeneralSecurityException {
+    if (privateKey == null) {
+      throw new IllegalStateException("JWK doesn't contain secKey material");
+    }
     Signature signature;
     try {
       signature = signatureFactory.call();
@@ -109,29 +114,37 @@ public class PubKeySigningAlgorithm extends SigningAlgorithm {
     }
     return new Signer() {
       @Override
-      public synchronized byte[] sign(byte[] data) throws GeneralSecurityException {
-        if (privateKey == null) {
-          throw new IllegalStateException("JWK doesn't contain secKey material");
-        }
+      public synchronized byte[] sign(byte[] payload) throws GeneralSecurityException {
         signature.initSign(privateKey);
-        signature.update(data);
+        signature.update(payload);
         return signature.sign();
       }
+    };
+  }
 
+  @Override
+  public Verifier verifier() throws GeneralSecurityException {
+    if (publicKey == null) {
+      throw new IllegalStateException("JWK doesn't contain pubKey material");
+    }
+    Signature sig;
+    try {
+      sig = signatureFactory.call();
+    } catch (Exception e) {
+      throw new GeneralSecurityException(e);
+    }
+    return new Verifier() {
       @Override
-      public synchronized boolean verify(byte[] expected, byte[] payload) throws GeneralSecurityException {
-        if (publicKey == null) {
-          throw new IllegalStateException("JWK doesn't contain pubKey material");
-        }
-        signature.initVerify(publicKey);
-        signature.update(payload);
-        if (expected.length < length) {
+      public synchronized boolean verify(byte[] signature, byte[] payload) throws GeneralSecurityException {
+        sig.initVerify(publicKey);
+        sig.update(payload);
+        if (signature.length < length) {
           // need to adapt the expectation to make the RSA? engine happy
           byte[] normalized = new byte[length];
-          System.arraycopy(expected, 0, normalized, 0, expected.length);
-          return signature.verify(normalized);
+          System.arraycopy(signature, 0, normalized, 0, signature.length);
+          return sig.verify(normalized);
         } else {
-          return signature.verify(expected);
+          return sig.verify(signature);
         }
       }
     };
