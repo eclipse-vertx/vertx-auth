@@ -423,6 +423,12 @@ public final class JWK {
         case HS512:
           signingAlgorithm = createOCT(algo, "HmacSHA512", json);
           break;
+        case EdDSA:
+          if ("OKP".equals(kty)) {
+            signingAlgorithm = createOKP(algo, json);
+            break;
+          }
+          // Pass through
         default:
           throw new NoSuchAlgorithmException(alg);
       }
