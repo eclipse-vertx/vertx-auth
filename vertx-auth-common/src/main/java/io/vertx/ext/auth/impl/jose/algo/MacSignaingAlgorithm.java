@@ -71,20 +71,12 @@ public class MacSignaingAlgorithm extends SigningAlgorithm {
   @Override
   public Signer signer() throws NoSuchAlgorithmException, InvalidKeyException {
     Mac mac = mac();
-    return data -> {
-      synchronized (mac) {
-        return mac.doFinal(data);
-      }
-    };
+    return mac::doFinal;
   }
 
   @Override
   public Verifier verifier() throws GeneralSecurityException {
     Mac mac = mac();
-    return (expected, payload) -> {
-      synchronized (mac) {
-        return MessageDigest.isEqual(expected, mac.doFinal(payload));
-      }
-    };
+    return (expected, payload) -> MessageDigest.isEqual(expected, mac.doFinal(payload));
   }
 }

@@ -161,15 +161,15 @@ public final class JWK {
 
     switch (alg) {
       case HS256:
-        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256"));
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256")).safe();
         kty = "oct";
         return;
       case HS384:
-        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384"));
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384")).safe();
         kty = "oct";
         return;
       case HS512:
-        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512"));
+        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512")).safe();
         kty = "oct";
         return;
     }
@@ -181,24 +181,24 @@ public final class JWK {
         case RS384:
         case RS512:
           kty = "RSA";
-          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII)).safe();
           break;
         case PS256:
         case PS384:
         case PS512:
           kty = "RSASSA";
-          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("RSA"), buffer.toString(StandardCharsets.US_ASCII)).safe();
           break;
         case ES256:
         case ES384:
         case ES512:
         case ES256K:
           kty = "EC";
-          signingAlgorithm = wrapECAlgo(parsePEM(alg, KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII)));
+          signingAlgorithm = wrapECAlgo(parsePEM(alg, KeyFactory.getInstance("EC"), buffer.toString(StandardCharsets.US_ASCII))).safe();
           break;
         case EdDSA:
           kty = "EdDSA";
-          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII));
+          signingAlgorithm = parsePEM(alg, KeyFactory.getInstance("EdDSA"), buffer.toString(StandardCharsets.US_ASCII)).safe();
           break;
         default:
           throw new IllegalArgumentException("Unknown algorithm: " + alg);
@@ -279,7 +279,7 @@ public final class JWK {
     label = signingAlgo.name() + "#" + signingAlgo.mac().hashCode();
     use = null;
     kty = "oct";
-    signingAlgorithm = signingAlgo;
+    signingAlgorithm = signingAlgo.safe();
     alg = alg_;
   }
 
@@ -299,20 +299,20 @@ public final class JWK {
       case RS384:
       case RS512:
         kty = "RSA";
-        signingAlgorithm = signingAlgo;
+        signingAlgorithm = signingAlgo.safe();
         break;
       case PS256:
       case PS384:
       case PS512:
         kty = "RSASSA";
-        signingAlgorithm = signingAlgo;
+        signingAlgorithm = signingAlgo.safe();
         break;
       case ES256:
       case ES384:
       case ES512:
       case ES256K:
         kty = "EC";
-        signingAlgorithm = wrapECAlgo(signingAlgo);
+        signingAlgorithm = wrapECAlgo(signingAlgo).safe();
         break;
       default:
         throw new NoSuchAlgorithmException("Unknown algorithm: " + alg);
@@ -411,26 +411,26 @@ public final class JWK {
         case PS256:
         case PS384:
         case PS512:
-          signingAlgorithm = createRSA(alg, json);
+          signingAlgorithm = createRSA(alg, json).safe();
           break;
         case ES256:
         case ES256K:
         case ES512:
         case ES384:
-          signingAlgorithm = wrapECAlgo(createEC(alg, json));
+          signingAlgorithm = wrapECAlgo(createEC(alg, json)).safe();
           break;
         case HS256:
-          signingAlgorithm = createOCT(alg, "HmacSHA256", json);
+          signingAlgorithm = createOCT(alg, "HmacSHA256", json).safe();
           break;
         case HS384:
-          signingAlgorithm = createOCT(alg, "HmacSHA384", json);
+          signingAlgorithm = createOCT(alg, "HmacSHA384", json).safe();
           break;
         case HS512:
-          signingAlgorithm = createOCT(alg, "HmacSHA512", json);
+          signingAlgorithm = createOCT(alg, "HmacSHA512", json).safe();
           break;
         case EdDSA:
           if ("OKP".equals(kty)) {
-            signingAlgorithm = createOKP(alg, json);
+            signingAlgorithm = createOKP(alg, json).safe();
             break;
           }
           // Pass through
@@ -665,10 +665,12 @@ public final class JWK {
   }
 
   public PublicKey publicKey() {
-    return signingAlgorithm instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)signingAlgorithm).publicKey() : null;
+    SigningAlgorithm unwrapped = signingAlgorithm.unwrap();
+    return unwrapped instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)unwrapped).publicKey() : null;
   }
 
   public PrivateKey privateKey() {
-    return signingAlgorithm instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)signingAlgorithm).privateKey() : null;
+    SigningAlgorithm unwrapped = signingAlgorithm.unwrap();
+    return unwrapped instanceof DigitalSigningAlgorithm ? ((DigitalSigningAlgorithm)unwrapped).privateKey() : null;
   }
 }

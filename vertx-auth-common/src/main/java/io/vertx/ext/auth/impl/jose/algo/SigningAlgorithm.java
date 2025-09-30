@@ -65,6 +65,22 @@ public abstract class SigningAlgorithm {
     }
   }
 
+  /**
+   * @return a thread safe version of this instance
+   */
+  public SigningAlgorithm safe() {
+    // Make this configurable through system properties ???
+//    return new ThreadSafeSigningAlgorithm(this);
+    return new ThreadLocalSigningAlgorithm(this);
+  }
+
+  /**
+   * @return the original instance that must be an instance of {@link DigitalSigningAlgorithm} or {@link MacSignaingAlgorithm}
+   */
+  public SigningAlgorithm unwrap() {
+    return this;
+  }
+
   public abstract String name();
 
   public abstract String id();

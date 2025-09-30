@@ -112,13 +112,10 @@ public class DigitalSigningAlgorithm extends SigningAlgorithm {
     } catch (Exception e) {
       throw new GeneralSecurityException(e);
     }
-    return new Signer() {
-      @Override
-      public synchronized byte[] sign(byte[] payload) throws GeneralSecurityException {
-        signature.initSign(privateKey);
-        signature.update(payload);
-        return signature.sign();
-      }
+    return payload -> {
+      signature.initSign(privateKey);
+      signature.update(payload);
+      return signature.sign();
     };
   }
 
@@ -133,19 +130,16 @@ public class DigitalSigningAlgorithm extends SigningAlgorithm {
     } catch (Exception e) {
       throw new GeneralSecurityException(e);
     }
-    return new Verifier() {
-      @Override
-      public synchronized boolean verify(byte[] signature, byte[] payload) throws GeneralSecurityException {
-        sig.initVerify(publicKey);
-        sig.update(payload);
-        if (signature.length < length) {
-          // need to adapt the expectation to make the RSA? engine happy
-          byte[] normalized = new byte[length];
-          System.arraycopy(signature, 0, normalized, 0, signature.length);
-          return sig.verify(normalized);
-        } else {
-          return sig.verify(signature);
-        }
+    return (signature, payload) -> {
+      sig.initVerify(publicKey);
+      sig.update(payload);
+      if (signature.length < length) {
+        // need to adapt the expectation to make the RSA? engine happy
+        byte[] normalized = new byte[length];
+        System.arraycopy(signature, 0, normalized, 0, signature.length);
+        return sig.verify(normalized);
+      } else {
+        return sig.verify(signature);
       }
     };
   }
