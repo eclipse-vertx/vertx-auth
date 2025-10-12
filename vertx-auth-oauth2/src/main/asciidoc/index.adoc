@@ -402,9 +402,9 @@ In such event the server will start emitting tokens with a different kid than th
 A special note on this is that if a user will send many requests with a missing key, your handler should throttle the calls to refresh the new key set, or you might end up DDoS your IdP server.
 
 == Dynamic Client Registration (RFC 7591)
-[RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) was written to standardize the process of client registration in OAuth 2.0 and OpenID Connect ecosystems to address the limitations of manual, inconsistent, and non-scalable client registration methods that were common before its publication.
+https://datatracker.ietf.org/doc/html/rfc7591[RFC 7591] was written to standardize the process of client registration in OAuth 2.0 and OpenID Connect ecosystems to address the limitations of manual, inconsistent, and non-scalable client registration methods that were common before its publication.
 The current implementation has been tested with Keycloak. If you want to enable dynamic client registration, here are the steps to follow:
-Prerequisite: Create an initial access token from the Keycloak server. You can create an initial access token using either the [admin](https://www.keycloak.org/securing-apps/client-registration#_initial_access_token) console or programmatically. 
+Prerequisite: Create an initial access token from the Keycloak server. You can create an initial access token using either the https://www.keycloak.org/securing-apps/client-registration#_initial_access_token[admin] console or programmatically.
 
 To create a client in Keycloak using the initial access token and a client ID of your choice, follow the example below.
 [source,$lang]
