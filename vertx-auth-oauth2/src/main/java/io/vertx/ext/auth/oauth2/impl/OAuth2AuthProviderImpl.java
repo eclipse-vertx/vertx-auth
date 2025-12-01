@@ -77,7 +77,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         try {
           jwt.addJWK(new JWK(pubSecKey));
         } catch (RuntimeException e) {
-          LOG.warn("Unsupported JWK", e);
+          LOG.warn(String.format("Unsupported JWK %s", e.getMessage()));
         }
       }
     }
@@ -87,7 +87,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         try {
           jwt.addJWK(new JWK(jwk));
         } catch (RuntimeException e) {
-          LOG.warn("Unsupported JWK", e);
+          LOG.warn(String.format("Unsupported JWK %s", e.getMessage()));
         }
       }
     }
@@ -136,7 +136,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             try {
               jwt.addJWK(new JWK((JsonObject) key));
             } catch (Exception e) {
-              LOG.warn("Unsupported JWK", e);
+              LOG.warn(String.format("Unsupported JWK %s", e.getMessage()));
             }
           }
           // swap
