@@ -124,7 +124,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             try {
               jwt.addJWK(new JWK((JsonObject) key));
             } catch (Exception e) {
-              if(LOG.isDebugEnabled()) {
+              if (LOG.isDebugEnabled()) {
                 LOG.warn("Unsupported JWK", e);
               }
             }
