@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -172,6 +173,7 @@ public class JWKTest {
     new JWK(jwk);
   }
 
+  @Ignore("Certificate expired")
   @Test
   public void loadAzure() throws Exception {
     Vertx vertx = Vertx.vertx();
