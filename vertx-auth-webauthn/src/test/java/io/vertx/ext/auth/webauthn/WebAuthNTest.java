@@ -173,8 +173,8 @@ public class WebAuthNTest {
   }
 
   @Test(timeout = 1000)
+  @Ignore("test data contains an expired certificate")
   public void testAndroidKey(TestContext should) {
-    final Async test = should.async();
     WebAuthn webAuthN = WebAuthn.create(
       rule.vertx(),
       new WebAuthnOptions().setRelyingParty(new RelyingParty().setName("FIDO Examples Corporation")))
@@ -204,10 +204,7 @@ public class WebAuthNTest {
         .put("origin", "https://webauthn.org")
         .put("challenge", "Tf65bS6D5temh2BwvptqgBPb25iZDRxjwC5ans91IIJDrcrOpnWTK4LVgFjeUV4GDMe44w8SI5NsZssIXTUvDg")
         .put("username", "paulo")
-      , fn -> {
-        should.assertTrue(fn.succeeded());
-        test.complete();
-      });
+      , should.asyncAssertSuccess());
   }
 
   @Test(timeout = 1000)
