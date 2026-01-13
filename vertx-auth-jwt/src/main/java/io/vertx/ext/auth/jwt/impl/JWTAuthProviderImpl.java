@@ -61,8 +61,6 @@ public class JWTAuthProviderImpl implements JWTAuth {
 
   public JWTAuthProviderImpl(Vertx vertx, JWTAuthOptions config) {
     this.jwtOptions = config.getJWTOptions();
-    // set the nonce algorithm
-    jwt.nonceAlgorithm(jwtOptions.getNonceAlgorithm());
 
     final KeyStoreOptions keyStore = config.getKeyStore();
 
