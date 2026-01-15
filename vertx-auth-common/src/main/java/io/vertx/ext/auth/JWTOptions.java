@@ -146,10 +146,18 @@ public class JWTOptions {
     return this;
   }
 
+  /**
+   * @deprecated as of 4.5.25, was only used for the <a href="https://techcommunity.microsoft.com/blog/microsoft-entra-blog/action-required-azure-ad-graph-api-retirement/4090533">retired Azure AD Graph API</a>
+   */
+  @Deprecated
   public String getNonceAlgorithm() {
     return nonceAlgorithm;
   }
 
+  /**
+   * @deprecated as of 4.5.25, was only used for the <a href="https://techcommunity.microsoft.com/blog/microsoft-entra-blog/action-required-azure-ad-graph-api-retirement/4090533">retired Azure AD Graph API</a>
+   */
+  @Deprecated
   public JWTOptions setNonceAlgorithm(String nonceAlgorithm) {
     this.nonceAlgorithm = nonceAlgorithm;
     return this;
