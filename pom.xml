@@ -46,7 +46,7 @@
   </parent>
 
   <artifactId>vertx-auth-parent</artifactId>
-  <version>5.0.7-SNAPSHOT</version>
+  <version>5.0.7</version>
 
   <name>Vert.x Auth</name>
 
