@@ -69,9 +69,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
     this.config.replaceVariables(true);
     this.config.validate();
 
-    // set the nonce algorithm
-    jwt.nonceAlgorithm(this.config.getJWTOptions().getNonceAlgorithm());
-
     if (config.getPubSecKeys() != null) {
       for (PubSecKeyOptions pubSecKey : config.getPubSecKeys()) {
         try {
@@ -130,10 +127,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             vertx.cancelTimer(updateTimerId);
             ((VertxInternal) vertx).removeCloseHook(this);
           }
-
-          JWT jwt = new JWT()
-            // set the nonce algorithm
-            .nonceAlgorithm(config.getJWTOptions().getNonceAlgorithm());
 
           JsonArray keys = json.getJsonArray("keys");
           for (Object key : keys) {

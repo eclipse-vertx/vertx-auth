@@ -60,9 +60,7 @@ public interface AzureADAuth extends OpenIDConnectAuth {
         .setSite("https://login.microsoftonline.com/{tenant}")
         .setTokenPath("/oauth2/token")
         .setAuthorizationPath("/oauth2/authorize")
-        .setJwkPath("/../common/discovery/keys")
-        .setJWTOptions(new JWTOptions()
-          .setNonceAlgorithm("SHA-256")));
+        .setJwkPath("/../common/discovery/keys"));
   }
 
   /**
@@ -81,10 +79,6 @@ public interface AzureADAuth extends OpenIDConnectAuth {
     // don't override if already set
     final String site = config.getSite() == null ? "https://login.microsoftonline.com/{tenant}" : config.getSite();
     final JWTOptions jwtOptions = config.getJWTOptions() == null ? new JWTOptions() : new JWTOptions(config.getJWTOptions());
-    // azure jwt options defaults
-    if (jwtOptions.getNonceAlgorithm() == null) {
-      jwtOptions.setNonceAlgorithm("SHA-256");
-    }
 
     return OpenIDConnectAuth.discover(
       vertx,

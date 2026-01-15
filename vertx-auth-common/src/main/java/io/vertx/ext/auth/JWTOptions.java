@@ -21,7 +21,6 @@ public class JWTOptions {
   private String issuer;
   private String subject;
   private List<String> permissions;
-  private String nonceAlgorithm;
 
   public JWTOptions() {
     header = new JsonObject();
@@ -38,7 +37,6 @@ public class JWTOptions {
     this.issuer = other.issuer;
     this.subject = other.subject;
     this.permissions = other.permissions == null ? null : new ArrayList<>(other.permissions);
-    this.nonceAlgorithm = other.nonceAlgorithm;
   }
 
   public JWTOptions(JsonObject json) {
@@ -143,15 +141,6 @@ public class JWTOptions {
 
   public JWTOptions setSubject(String subject) {
     this.subject = subject;
-    return this;
-  }
-
-  public String getNonceAlgorithm() {
-    return nonceAlgorithm;
-  }
-
-  public JWTOptions setNonceAlgorithm(String nonceAlgorithm) {
-    this.nonceAlgorithm = nonceAlgorithm;
     return this;
   }
 }
