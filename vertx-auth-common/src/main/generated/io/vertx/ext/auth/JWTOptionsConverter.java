@@ -75,11 +75,6 @@ public class JWTOptionsConverter {
             obj.setSubject((String)member.getValue());
           }
           break;
-        case "nonceAlgorithm":
-          if (member.getValue() instanceof String) {
-            obj.setNonceAlgorithm((String)member.getValue());
-          }
-          break;
       }
     }
   }
@@ -109,9 +104,6 @@ public class JWTOptionsConverter {
     }
     if (obj.getSubject() != null) {
       json.put("subject", obj.getSubject());
-    }
-    if (obj.getNonceAlgorithm() != null) {
-      json.put("nonceAlgorithm", obj.getNonceAlgorithm());
     }
   }
 }
