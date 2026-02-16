@@ -46,7 +46,7 @@
   </parent>
 
   <artifactId>vertx-auth-parent</artifactId>
-  <version>5.0.8-SNAPSHOT</version>
+  <version>5.0.8</version>
 
   <properties>
     <testcontainers.version>1.21.4</testcontainers.version>
