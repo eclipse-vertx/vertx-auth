@@ -15,12 +15,12 @@
  */
 package io.vertx.ext.auth.impl.jose;
 
+import io.vertx.core.internal.digest.Signer;
+import io.vertx.core.internal.digest.SigningAlgorithm;
+import io.vertx.core.internal.digest.Verifier;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.impl.asn.ASN1;
-import io.vertx.ext.auth.impl.jose.algo.Signer;
-import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
-import io.vertx.ext.auth.impl.jose.algo.Verifier;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;

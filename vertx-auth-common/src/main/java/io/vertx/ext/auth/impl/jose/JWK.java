@@ -16,6 +16,11 @@
 package io.vertx.ext.auth.impl.jose;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.internal.digest.DigitalSigningAlgorithm;
+import io.vertx.core.internal.digest.MacSigningAlgorithm;
+import io.vertx.core.internal.digest.SigningAlgorithm;
+import io.vertx.core.internal.digest.Signer;
+import io.vertx.core.internal.digest.Verifier;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
@@ -23,11 +28,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.impl.CertificateHelper;
 import io.vertx.ext.auth.impl.asn.ASN1;
-import io.vertx.ext.auth.impl.jose.algo.MacSignaingAlgorithm;
-import io.vertx.ext.auth.impl.jose.algo.DigitalSigningAlgorithm;
-import io.vertx.ext.auth.impl.jose.algo.Signer;
-import io.vertx.ext.auth.impl.jose.algo.SigningAlgorithm;
-import io.vertx.ext.auth.impl.jose.algo.Verifier;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
@@ -105,8 +105,8 @@ public final class JWK {
         if (entry != null) {
           SigningAlgorithm signingAlgo = SigningAlgorithm.create(entry);
           // key store does not have the requested algorithm
-          if (signingAlgo instanceof MacSignaingAlgorithm) {
-            keys.add(new JWK(alg, (MacSignaingAlgorithm) signingAlgo));
+          if (signingAlgo instanceof MacSigningAlgorithm) {
+            keys.add(new JWK(alg, (MacSigningAlgorithm) signingAlgo));
           } else if (signingAlgo instanceof DigitalSigningAlgorithm) {
             keys.add(new JWK(alg, (DigitalSigningAlgorithm) signingAlgo));
           }
@@ -161,15 +161,15 @@ public final class JWK {
 
     switch (alg) {
       case HS256:
-        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256")).safe();
+        signingAlgorithm = new MacSigningAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA256")).safe();
         kty = "oct";
         return;
       case HS384:
-        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384")).safe();
+        signingAlgorithm = new MacSigningAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA384")).safe();
         kty = "oct";
         return;
       case HS512:
-        signingAlgorithm = new MacSignaingAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512")).safe();
+        signingAlgorithm = new MacSigningAlgorithm(new SecretKeySpec(buffer.getBytes(), "HmacSHA512")).safe();
         kty = "oct";
         return;
     }
@@ -268,7 +268,7 @@ public final class JWK {
     }
   }
 
-  private JWK(Alg alg_, MacSignaingAlgorithm signingAlgo) throws Exception {
+  private JWK(Alg alg_, MacSigningAlgorithm signingAlgo) throws Exception {
 
     // the algorithm cannot be null, and it cannot be different from the alias list
     if (invalidAlgAlias(signingAlgo.name(), alg_)) {
@@ -341,7 +341,7 @@ public final class JWK {
         return signingAlgo.canVerify();
       }
       @Override
-      public io.vertx.ext.auth.impl.jose.algo.Signer signer() throws GeneralSecurityException {
+      public Signer signer() throws GeneralSecurityException {
         Signer signer = signingAlgo.signer();
         if (signer == null) {
           return null;
@@ -420,13 +420,13 @@ public final class JWK {
           signingAlgorithm = wrapECAlgo(createEC(alg, json)).safe();
           break;
         case HS256:
-          signingAlgorithm = createOCT(alg, "HmacSHA256", json).safe();
+          signingAlgorithm = createOCT("HmacSHA256", json).safe();
           break;
         case HS384:
-          signingAlgorithm = createOCT(alg, "HmacSHA384", json).safe();
+          signingAlgorithm = createOCT("HmacSHA384", json).safe();
           break;
         case HS512:
-          signingAlgorithm = createOCT(alg, "HmacSHA512", json).safe();
+          signingAlgorithm = createOCT("HmacSHA512", json).safe();
           break;
         case EdDSA:
           if ("OKP".equals(kty)) {
@@ -591,8 +591,8 @@ public final class JWK {
     }
   }
 
-  private static SigningAlgorithm createOCT(Alg alg, String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
-    return new MacSignaingAlgorithm(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
+  private static SigningAlgorithm createOCT(String alias, JsonObject json) throws NoSuchAlgorithmException, InvalidKeyException {
+    return new MacSigningAlgorithm(new SecretKeySpec(base64UrlDecode(json.getString("k")), alias));
   }
 
   public String getAlgorithm() {
