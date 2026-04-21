@@ -15,10 +15,7 @@ import java.util.concurrent.ExecutionException;
 import com.webauthn4j.data.*;
 import com.webauthn4j.metadata.data.statement.MetadataStatement;
 import com.webauthn4j.metadata.data.toc.StatusReport;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 
 import com.webauthn4j.async.metadata.FidoMDS3MetadataBLOBAsyncProvider;
@@ -83,7 +80,15 @@ public class EmulatorTest {
 	}
 
 
-	@Test
+	/*
+	Ignoring test for now because we need this update in WebAuthn4J:
+	https://github.com/webauthn4j/webauthn4j/pull/1318
+
+	But the fix version (0.31.3) requires Java 17+:
+	https://github.com/webauthn4j/webauthn4j/pull/1221
+	 */
+  @Test
+  @Ignore("Requires a WebAuthn4J upgrade")
 	public void testMetadata(TestContext should) {
 		final Async test = should.async();
 
