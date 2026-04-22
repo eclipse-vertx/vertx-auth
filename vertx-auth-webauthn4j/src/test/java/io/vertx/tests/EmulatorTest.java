@@ -1,7 +1,42 @@
 package io.vertx.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import com.webauthn4j.async.metadata.FidoMDS3MetadataBLOBAsyncProvider;
+import com.webauthn4j.async.metadata.HttpAsyncClient;
+import com.webauthn4j.async.metadata.anchor.MetadataBLOBBasedTrustAnchorAsyncRepository;
+import com.webauthn4j.converter.AttestedCredentialDataConverter;
+import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter;
+import com.webauthn4j.converter.AuthenticatorDataConverter;
+import com.webauthn4j.converter.exception.DataConversionException;
+import com.webauthn4j.converter.util.ObjectConverter;
+import com.webauthn4j.data.*;
+import com.webauthn4j.data.AuthenticatorAttachment;
+import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData;
+import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier;
+import com.webauthn4j.data.client.Origin;
+import com.webauthn4j.data.client.challenge.Challenge;
+import com.webauthn4j.data.client.challenge.DefaultChallenge;
+import com.webauthn4j.data.extension.client.*;
+import com.webauthn4j.metadata.data.MetadataBLOBPayloadEntry;
+import com.webauthn4j.metadata.data.statement.MetadataStatement;
+import com.webauthn4j.metadata.data.toc.StatusReport;
+import com.webauthn4j.test.EmulatorUtil;
+import com.webauthn4j.test.TestAttestationUtil;
+import com.webauthn4j.test.authenticator.webauthn.WebAuthnAuthenticatorAdaptor;
+import com.webauthn4j.test.client.ClientPlatform;
+import com.webauthn4j.util.Base64UrlUtil;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.webauthn4j.*;
+import io.vertx.ext.auth.webauthn4j.impl.VertxHttpAsyncClient;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -12,50 +47,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import com.webauthn4j.data.*;
-import com.webauthn4j.metadata.data.statement.MetadataStatement;
-import com.webauthn4j.metadata.data.toc.StatusReport;
-import org.junit.*;
-import org.junit.runner.RunWith;
-
-import com.webauthn4j.async.metadata.FidoMDS3MetadataBLOBAsyncProvider;
-import com.webauthn4j.async.metadata.HttpAsyncClient;
-import com.webauthn4j.async.metadata.anchor.MetadataBLOBBasedTrustAnchorAsyncRepository;
-import com.webauthn4j.converter.AttestedCredentialDataConverter;
-import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter;
-import com.webauthn4j.converter.AuthenticatorDataConverter;
-import com.webauthn4j.converter.exception.DataConversionException;
-import com.webauthn4j.converter.util.ObjectConverter;
-import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData;
-import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier;
-import com.webauthn4j.data.client.Origin;
-import com.webauthn4j.data.client.challenge.Challenge;
-import com.webauthn4j.data.client.challenge.DefaultChallenge;
-import com.webauthn4j.data.extension.client.AuthenticationExtensionClientOutput;
-import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientInputs;
-import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientOutputs;
-import com.webauthn4j.data.extension.client.RegistrationExtensionClientInput;
-import com.webauthn4j.data.extension.client.RegistrationExtensionClientOutput;
-import com.webauthn4j.metadata.data.MetadataBLOBPayloadEntry;
-import com.webauthn4j.test.EmulatorUtil;
-import com.webauthn4j.test.TestAttestationUtil;
-import com.webauthn4j.test.authenticator.webauthn.WebAuthnAuthenticatorAdaptor;
-import com.webauthn4j.test.client.ClientPlatform;
-import com.webauthn4j.util.Base64UrlUtil;
-
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.webauthn4j.Attestation;
-import io.vertx.ext.auth.webauthn4j.Authenticator;
-import io.vertx.ext.auth.webauthn4j.RelyingParty;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4J;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JOptions;
-import io.vertx.ext.auth.webauthn4j.WebAuthn4JCredentials;
-import io.vertx.ext.auth.webauthn4j.impl.VertxHttpAsyncClient;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(VertxUnitRunner.class)
 public class EmulatorTest {
@@ -80,15 +73,7 @@ public class EmulatorTest {
 	}
 
 
-	/*
-	Ignoring test for now because we need this update in WebAuthn4J:
-	https://github.com/webauthn4j/webauthn4j/pull/1318
-
-	But the fix version (0.31.3) requires Java 17+:
-	https://github.com/webauthn4j/webauthn4j/pull/1221
-	 */
   @Test
-  @Ignore("Requires a WebAuthn4J upgrade")
 	public void testMetadata(TestContext should) {
 		final Async test = should.async();
 

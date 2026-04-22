@@ -15,9 +15,8 @@
   ~  You may elect to redistribute this code under either of these licenses.
   -->
 
-<project xmlns="https://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>vertx-auth-parent</artifactId>
     <groupId>io.vertx</groupId>
@@ -29,7 +28,7 @@
 
   <properties>
     <doc.skip>false</doc.skip>
-    <webauthn4j.version>0.28.2.RELEASE</webauthn4j.version>
+    <webauthn4j.version>0.30.3.RELEASE</webauthn4j.version>
   </properties>
 
 
