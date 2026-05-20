@@ -21,6 +21,7 @@
     <doc.skip>false</doc.skip>
   </properties>
 
+  <name>vertx-auth-ldap</name>
   <artifactId>vertx-auth-ldap</artifactId>
 
   <dependencies>

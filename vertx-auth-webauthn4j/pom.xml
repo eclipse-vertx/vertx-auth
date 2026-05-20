@@ -24,6 +24,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>vertx-auth-webauthn4j</name>
   <artifactId>vertx-auth-webauthn4j</artifactId>
 
   <properties>

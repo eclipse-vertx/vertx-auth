@@ -25,6 +25,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>vertx-auth-common</name>
   <artifactId>vertx-auth-common</artifactId>
 
   <properties>

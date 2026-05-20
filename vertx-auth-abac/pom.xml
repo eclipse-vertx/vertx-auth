@@ -25,6 +25,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>vertx-auth-abac</name>
   <artifactId>vertx-auth-abac</artifactId>
 
   <properties>

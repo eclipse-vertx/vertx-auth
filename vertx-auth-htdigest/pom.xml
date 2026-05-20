@@ -24,6 +24,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>vertx-auth-htdigest</name>
   <artifactId>vertx-auth-htdigest</artifactId>
 
   <properties>

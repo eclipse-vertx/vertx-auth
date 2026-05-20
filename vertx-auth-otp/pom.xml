@@ -24,6 +24,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>vertx-auth-otp</name>
   <artifactId>vertx-auth-otp</artifactId>
 
   <properties>

@@ -25,6 +25,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>vertx-auth-oauth2</name>
   <artifactId>vertx-auth-oauth2</artifactId>
 
   <properties>
