@@ -21,7 +21,7 @@ public class VertxHttpAsyncClient implements HttpAsyncClient {
 	public VertxHttpAsyncClient(Vertx vertx) {
 	    this.httpClient = new SimpleHttpClient(vertx, "vertx-auth", new HttpClientOptions());
 	}
-	
+
 	@Override
 	public CompletionStage<Response> fetch(String uri) throws MDSException {
 		return httpClient

@@ -15,7 +15,6 @@
  */
 package io.vertx.ext.auth.sqlclient;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.ext.auth.sqlclient.impl.SqlUserUtilImpl;

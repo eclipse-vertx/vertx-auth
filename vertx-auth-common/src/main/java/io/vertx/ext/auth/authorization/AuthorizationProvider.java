@@ -16,10 +16,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * The role of an AuthorizationProvider is to return a set of Authorization.

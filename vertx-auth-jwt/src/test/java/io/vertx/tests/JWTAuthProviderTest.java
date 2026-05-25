@@ -23,7 +23,6 @@ import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
@@ -36,20 +35,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.crypto.Mac;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.text.SimpleDateFormat;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotEquals;
 

@@ -20,9 +20,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunnerWithParametersFactory;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.util.Arrays;
 import java.util.List;

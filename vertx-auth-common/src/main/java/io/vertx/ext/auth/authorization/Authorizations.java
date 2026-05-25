@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static io.vertx.codegen.annotations.GenIgnore.PERMITTED_TYPE;
 
 /**
  * Represents a cache map of authorizations per provider.

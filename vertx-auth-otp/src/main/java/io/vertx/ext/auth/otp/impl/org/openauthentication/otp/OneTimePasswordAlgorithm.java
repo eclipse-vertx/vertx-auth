@@ -184,4 +184,3 @@ public class OneTimePasswordAlgorithm {
     return result.toString();
   }
 }
-
