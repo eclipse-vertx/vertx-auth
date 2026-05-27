@@ -16,7 +16,11 @@
 
 package examples;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -26,8 +30,10 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.*;
 import io.vertx.ext.auth.oauth2.authorization.KeycloakAuthorization;
+import io.vertx.ext.auth.oauth2.dcr.KeycloakClientRegistration;
 import io.vertx.ext.auth.oauth2.providers.*;
 
 /**
@@ -42,8 +48,7 @@ public class AuthOAuth2Examples {
       .setClientSecret("YOUR_CLIENT_SECRET")
       .setSite("https://github.com/login")
       .setTokenPath("/oauth/access_token")
-      .setAuthorizationPath("/oauth/authorize")
-    );
+      .setAuthorizationPath("/oauth/authorize"));
 
     // when there is a need to access a protected resource
     // or call a protected method, call the authZ url for
@@ -81,7 +86,6 @@ public class AuthOAuth2Examples {
       .setClientId("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
-
 
     // Initialize the OAuth2 Library
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
@@ -144,7 +148,6 @@ public class AuthOAuth2Examples {
       .setClientId("<client-id>")
       .setClientSecret("<client-secret>")
       .setSite("https://api.oauth.com");
-
 
     // Initialize the OAuth2 Library
     OAuth2Auth oauth2 = OAuth2Auth.create(vertx, credentials);
@@ -212,10 +215,9 @@ public class AuthOAuth2Examples {
 
         authz.getAuthorizations(user)
           .onSuccess(v -> {
-            if (
-              RoleBasedAuthorization.create("manage-account")
-                .setResource("account")
-                .match(user)) {
+            if (RoleBasedAuthorization.create("manage-account")
+              .setResource("account")
+              .match(user)) {
               // this user is authorized to manage its account
             }
           });
@@ -230,7 +232,6 @@ public class AuthOAuth2Examples {
     // e.g. `preferred_username`
     String username = user.principal().getString("preferred_username");
   }
-
 
   public void example15(OAuth2Auth oauth2, User user) {
     // OAuth2Auth level
@@ -254,7 +255,6 @@ public class AuthOAuth2Examples {
       });
   }
 
-
   public void example17(User user) {
     // in this case it is assumed that the role is the current application
     if (PermissionBasedAuthorization.create("print").match(user)) {
@@ -265,10 +265,9 @@ public class AuthOAuth2Examples {
   public void example18(User user) {
     // the resource is "realm"
     // the authority is "add-user"
-    if (
-      PermissionBasedAuthorization.create("add-user")
-        .setResource("realm")
-        .match(user)) {
+    if (PermissionBasedAuthorization.create("add-user")
+      .setResource("realm")
+      .match(user)) {
       // Yes the user can add users to the application
     }
   }
@@ -276,10 +275,9 @@ public class AuthOAuth2Examples {
   public void example19(User user) {
     // the role is "finance"
     // the authority is "year-report"
-    if (
-      PermissionBasedAuthorization.create("year-report")
-        .setResource("finance")
-        .match(user)) {
+    if (PermissionBasedAuthorization.create("year-report")
+      .setResource("finance")
+      .match(user)) {
       // Yes the user can access the year report from the finance department
     }
   }
@@ -442,5 +440,82 @@ public class AuthOAuth2Examples {
           });
       }
     });
+  }
+
+  // create a dynamic client in keycloak 25.0.0
+  public void example23(Vertx vertx) {
+    JsonObject options = new JsonObject().put("site", "https://server:port")
+      .put("tenant", "master")
+      .put("initialAccessToken", "initial-access-token");
+    KeycloakClientRegistration keycloakClientRegistration = KeycloakClientRegistration.create(vertx,
+      new DCROptions(options));
+    keycloakClientRegistration.create("junit-test-client").onSuccess(v -> {
+      // ...
+    });
+  }
+
+  // get a dynamic client from keycloak 25.0.0
+  public void example24(Vertx vertx) {
+    JsonObject options = new JsonObject().put("site", "https://server:port")
+      .put("tenant", "master")
+      .put("initialAccessToken", "initial-access-token");
+    KeycloakClientRegistration keycloakClientRegistration = KeycloakClientRegistration.create(vertx,
+      new DCROptions(options));
+    // registrationAccessToken is unique for Keycloak implementation
+    JsonObject requJsonObject = new JsonObject().put("registrationAccessToken",
+        "registration-access-token")
+      .put("clientId", "junit-test-client");
+    keycloakClientRegistration.get(new DCRRequest(requJsonObject)).onSuccess(v -> {
+      // ...
+    });
+  }
+
+  // delete a dynamic client from keycloak 25.0.0
+  public void example27(Vertx vertx) {
+    JsonObject options = new JsonObject().put("site", "https://server:port")
+      .put("tenant", "master")
+      .put("initialAccessToken", "initial-access-token");
+    KeycloakClientRegistration keycloakClientRegistration = KeycloakClientRegistration.create(vertx,
+      new DCROptions(options));
+    // registrationAccessToken is unique for Keycloak implementation
+    JsonObject requJsonObject = new JsonObject().put("registrationAccessToken",
+        "registration-access-token")
+      .put("clientId", "junit-test-client");
+    keycloakClientRegistration.delete(new DCRRequest(requJsonObject)).onSuccess(v -> {
+      // ...
+    });
+  }
+
+  // create initial access token in keycloak 25.0.0
+  public void example28(Vertx vertx) {
+    JsonObject header = new JsonObject().put("Authorization",
+        String.format("Bearer %s", "admin-access-token"))
+      .put("Content-Type", "application/json");
+    JsonObject payload = new JsonObject()
+      .put("expiration", 180)
+      .put("count", 1);
+    new SimpleHttpClient(vertx, "https://server:port", new HttpClientOptions())
+      .fetch(HttpMethod.POST,
+        "https://server:port/admin/realms/master/clients-initial-access",
+        header, payload.toBuffer())
+      .onSuccess(v -> {
+        // get the initial access token from v.jsonObject().getString("token")
+        // ...
+      });
+  }
+
+  // create a admin token to create initial access token in keycloak 25.0.0
+  public void example29(Vertx vertx) {
+    JsonObject header = new JsonObject().put("Content-Type", "application/x-www-form-urlencoded");
+    Buffer body = Buffer.buffer(
+      "grant_type=password&client_id=admin-cli&username=admin&password=secret");
+    new SimpleHttpClient(vertx, "https://server:port", new HttpClientOptions())
+      .fetch(HttpMethod.POST,
+        "https://server:port/realms/master/protocol/openid-connect/token",
+        header, body)
+      .onSuccess(v -> {
+        // get the admin access token from v.jsonObject().getString("access_token")
+        // ...
+      });
   }
 }
