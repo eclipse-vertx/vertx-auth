@@ -8,130 +8,126 @@ import java.security.cert.X509Certificate;
 public enum WellKnownRootCertificates {
 
   // openssl x509 -text -in https://developer.android.com/training/articles/security-key-attestation#root_certificate
-  //Certificate:
-  //    Data:
-  //        Version: 3 (0x2)
-  //        Serial Number:
-  //            e8:fa:19:63:14:d2:fa:18
-  //        Signature Algorithm: sha256WithRSAEncryption
-  //        Issuer: serialNumber = f92009e853b6b045
-  //        Validity
-  //            Not Before: May 26 16:28:52 2016 GMT
-  //            Not After : May 24 16:28:52 2026 GMT
-  //        Subject: serialNumber = f92009e853b6b045
-  //        Subject Public Key Info:
-  //            Public Key Algorithm: rsaEncryption
-  //                Public-Key: (4096 bit)
-  //                Modulus:
-  //                    00:af:b6:c7:82:2b:b1:a7:01:ec:2b:b4:2e:8b:cc:
-  //                    54:16:63:ab:ef:98:2f:32:c7:7f:75:31:03:0c:97:
-  //                    52:4b:1b:5f:e8:09:fb:c7:2a:a9:45:1f:74:3c:bd:
-  //                    9a:6f:13:35:74:4a:a5:5e:77:f6:b6:ac:35:35:ee:
-  //                    17:c2:5e:63:95:17:dd:9c:92:e6:37:4a:53:cb:fe:
-  //                    25:8f:8f:fb:b6:fd:12:93:78:a2:2a:4c:a9:9c:45:
-  //                    2d:47:a5:9f:32:01:f4:41:97:ca:1c:cd:7e:76:2f:
-  //                    b2:f5:31:51:b6:fe:b2:ff:fd:2b:6f:e4:fe:5b:c6:
-  //                    bd:9e:c3:4b:fe:08:23:9d:aa:fc:eb:8e:b5:a8:ed:
-  //                    2b:3a:cd:9c:5e:3a:77:90:e1:b5:14:42:79:31:59:
-  //                    85:98:11:ad:9e:b2:a9:6b:bd:d7:a5:7c:93:a9:1c:
-  //                    41:fc:cd:27:d6:7f:d6:f6:71:aa:0b:81:52:61:ad:
-  //                    38:4f:a3:79:44:86:46:04:dd:b3:d8:c4:f9:20:a1:
-  //                    9b:16:56:c2:f1:4a:d6:d0:3c:56:ec:06:08:99:04:
-  //                    1c:1e:d1:a5:fe:6d:34:40:b5:56:ba:d1:d0:a1:52:
-  //                    58:9c:53:e5:5d:37:07:62:f0:12:2e:ef:91:86:1b:
-  //                    1b:0e:6c:4c:80:92:74:99:c0:e9:be:c0:b8:3e:3b:
-  //                    c1:f9:3c:72:c0:49:60:4b:bd:2f:13:45:e6:2c:3f:
-  //                    8e:26:db:ec:06:c9:47:66:f3:c1:28:23:9d:4f:43:
-  //                    12:fa:d8:12:38:87:e0:6b:ec:f5:67:58:3b:f8:35:
-  //                    5a:81:fe:ea:ba:f9:9a:83:c8:df:3e:2a:32:2a:fc:
-  //                    67:2b:f1:20:b1:35:15:8b:68:21:ce:af:30:9b:6e:
-  //                    ee:77:f9:88:33:b0:18:da:a1:0e:45:1f:06:a3:74:
-  //                    d5:07:81:f3:59:08:29:66:bb:77:8b:93:08:94:26:
-  //                    98:e7:4e:0b:cd:24:62:8a:01:c2:cc:03:e5:1f:0b:
-  //                    3e:5b:4a:c1:e4:df:9e:af:9f:f6:a4:92:a7:7c:14:
-  //                    83:88:28:85:01:5b:42:2c:e6:7b:80:b8:8c:9b:48:
-  //                    e1:3b:60:7a:b5:45:c7:23:ff:8c:44:f8:f2:d3:68:
-  //                    b9:f6:52:0d:31:14:5e:bf:9e:86:2a:d7:1d:f6:a3:
-  //                    bf:d2:45:09:59:d6:53:74:0d:97:a1:2f:36:8b:13:
-  //                    ef:66:d5:d0:a5:4a:6e:2f:5d:9a:6f:ef:44:68:32:
-  //                    bc:67:84:47:25:86:1f:09:3d:d0:e6:f3:40:5d:a8:
-  //                    96:43:ef:0f:4d:69:b6:42:00:51:fd:b9:30:49:67:
-  //                    3e:36:95:05:80:d3:cd:f4:fb:d0:8b:c5:84:83:95:
-  //                    26:00:63
-  //                Exponent: 65537 (0x10001)
-  //        X509v3 extensions:
-  //            X509v3 Subject Key Identifier:
-  //                36:61:E1:00:7C:88:05:09:51:8B:44:6C:47:FF:1A:4C:C9:EA:4F:12
-  //            X509v3 Authority Key Identifier:
-  //                36:61:E1:00:7C:88:05:09:51:8B:44:6C:47:FF:1A:4C:C9:EA:4F:12
-  //            X509v3 Basic Constraints: critical
-  //                CA:TRUE
-  //            X509v3 Key Usage: critical
-  //                Digital Signature, Certificate Sign, CRL Sign
-  //            X509v3 CRL Distribution Points:
-  //                Full Name:
-  //                  URI:https://android.googleapis.com/attestation/crl/
-  //    Signature Algorithm: sha256WithRSAEncryption
-  //    Signature Value:
-  //        20:c8:c3:8d:4b:dc:a9:57:1b:46:8c:89:2f:ff:72:aa:c6:f8:
-  //        44:a1:1d:41:a8:f0:73:6c:c3:7d:16:d6:42:6d:8e:7e:94:07:
-  //        04:4c:ea:39:e6:8b:07:c1:3d:bf:15:03:dd:5c:85:bd:af:b2:
-  //        c0:2d:5f:6c:db:4e:fa:81:27:df:8b:04:f1:82:77:0f:c4:e7:
-  //        74:5b:7f:ce:aa:87:12:9a:88:01:ce:8e:9b:c0:cb:96:37:9b:
-  //        4d:26:a8:2d:30:fd:9c:2f:8e:ed:6d:c1:be:2f:84:b6:89:e4:
-  //        d9:14:25:8b:14:4b:ba:e6:24:a1:c7:06:71:13:2e:2f:06:16:
-  //        a8:84:b2:a4:d6:a4:6f:fa:89:b6:02:bf:ba:d8:0c:12:43:71:
-  //        1f:56:eb:60:56:f6:37:c8:a0:14:1c:c5:40:94:26:8b:8c:3c:
-  //        7d:b9:94:b3:5c:0d:cd:6c:b2:ab:c2:da:fe:e2:52:02:3d:2d:
-  //        ea:0c:d6:c3:68:be:a3:e6:41:48:86:f6:b1:e5:8b:5b:d7:c7:
-  //        30:b2:68:c4:e3:c1:fb:64:24:b9:1f:eb:bd:b8:0c:58:6e:2a:
-  //        e8:36:8c:84:d5:d1:09:17:bd:a2:56:17:89:d4:68:73:93:34:
-  //        0e:2e:25:4f:56:0e:f6:4b:23:58:fc:dc:0f:bf:c6:70:09:52:
-  //        e7:08:bf:fc:c6:27:50:0c:1f:66:e8:1e:a1:7c:09:8d:7a:2e:
-  //        9b:18:80:1b:7a:b4:ac:71:58:7d:34:5d:cc:83:09:d5:b6:2a:
-  //        50:42:7a:a6:d0:3d:cb:05:99:6c:96:ba:0c:5d:71:e9:21:62:
-  //        c0:16:ca:84:9f:f3:5f:0d:52:c6:5d:05:60:5a:47:f3:ae:91:
-  //        7a:cd:2d:f9:10:ef:d2:32:66:88:59:6e:f6:9b:3b:f5:fe:31:
-  //        54:f7:ae:b8:80:a0:a7:3c:a0:4d:94:c2:ce:83:17:ee:b4:3d:
-  //        5e:ff:58:83:e3:36:f5:f2:49:da:ac:a4:89:92:37:bf:26:7e:
-  //        5c:43:ab:02:ea:44:16:24:03:72:3b:e6:aa:69:2c:61:bd:ae:
-  //        9e:d4:09:d4:63:c4:c9:7c:64:30:65:77:ee:f2:bc:75:60:b7:
-  //        57:15:cc:9c:7d:c6:7c:86:08:2d:b7:51:a8:9c:30:34:97:62:
-  //        b0:78:23:85:87:5c:f1:a3:c6:16:6e:0a:e3:c1:2d:37:4e:2d:
-  //        4f:18:46:f3:18:74:4b:d8:79:b5:87:32:9b:f0:18:21:7a:6c:
-  //        0c:77:24:1a:48:78:e4:35:c0:30:79:cb:45:12:89:c5:77:62:
-  //        06:06:9a:2f:8d:65:f8:40:e1:44:52:87:be:d8:77:ab:ae:24:
-  //        e2:44:35:16:8d:55:3c:e4
+  //  Certificate:
+  //  Data:
+  //  Version: 3 (0x2)
+  //  Serial Number:
+  //  f1:c1:72:a6:99:ea:f5:1d
+  //  Signature Algorithm: sha256WithRSAEncryption
+  //  Issuer: serialNumber=f92009e853b6b045
+  //    Validity
+  //  Not Before: Mar 20 18:07:48 2022 GMT
+  //  Not After : Mar 15 18:07:48 2042 GMT
+  //  Subject: serialNumber=f92009e853b6b045
+  //  Subject Public Key Info:
+  //  Public Key Algorithm: rsaEncryption
+  //  Public-Key: (4096 bit)
+  //  Modulus:
+  //    00:af:b6:c7:82:2b:b1:a7:01:ec:2b:b4:2e:8b:cc:
+  //    54:16:63:ab:ef:98:2f:32:c7:7f:75:31:03:0c:97:
+  //    52:4b:1b:5f:e8:09:fb:c7:2a:a9:45:1f:74:3c:bd:
+  //    9a:6f:13:35:74:4a:a5:5e:77:f6:b6:ac:35:35:ee:
+  //    17:c2:5e:63:95:17:dd:9c:92:e6:37:4a:53:cb:fe:
+  //    25:8f:8f:fb:b6:fd:12:93:78:a2:2a:4c:a9:9c:45:
+  //    2d:47:a5:9f:32:01:f4:41:97:ca:1c:cd:7e:76:2f:
+  //  b2:f5:31:51:b6:fe:b2:ff:fd:2b:6f:e4:fe:5b:c6:
+  //  bd:9e:c3:4b:fe:08:23:9d:aa:fc:eb:8e:b5:a8:ed:
+  //    2b:3a:cd:9c:5e:3a:77:90:e1:b5:14:42:79:31:59:
+  //    85:98:11:ad:9e:b2:a9:6b:bd:d7:a5:7c:93:a9:1c:
+  //    41:fc:cd:27:d6:7f:d6:f6:71:aa:0b:81:52:61:ad:
+  //    38:4f:a3:79:44:86:46:04:dd:b3:d8:c4:f9:20:a1:
+  //    9b:16:56:c2:f1:4a:d6:d0:3c:56:ec:06:08:99:04:
+  //    1c:1e:d1:a5:fe:6d:34:40:b5:56:ba:d1:d0:a1:52:
+  //    58:9c:53:e5:5d:37:07:62:f0:12:2e:ef:91:86:1b:
+  //    1b:0e:6c:4c:80:92:74:99:c0:e9:be:c0:b8:3e:3b:
+  //  c1:f9:3c:72:c0:49:60:4b:bd:2f:13:45:e6:2c:3f:
+  //    8e:26:db:ec:06:c9:47:66:f3:c1:28:23:9d:4f:43:
+  //    12:fa:d8:12:38:87:e0:6b:ec:f5:67:58:3b:f8:35:
+  //    5a:81:fe:ea:ba:f9:9a:83:c8:df:3e:2a:32:2a:fc:
+  //    67:2b:f1:20:b1:35:15:8b:68:21:ce:af:30:9b:6e:
+  //  ee:77:f9:88:33:b0:18:da:a1:0e:45:1f:06:a3:74:
+  //  d5:07:81:f3:59:08:29:66:bb:77:8b:93:08:94:26:
+  //    98:e7:4e:0b:cd:24:62:8a:01:c2:cc:03:e5:1f:0b:
+  //    3e:5b:4a:c1:e4:df:9e:af:9f:f6:a4:92:a7:7c:14:
+  //    83:88:28:85:01:5b:42:2c:e6:7b:80:b8:8c:9b:48:
+  //  e1:3b:60:7a:b5:45:c7:23:ff:8c:44:f8:f2:d3:68:
+  //  b9:f6:52:0d:31:14:5e:bf:9e:86:2a:d7:1d:f6:a3:
+  //  bf:d2:45:09:59:d6:53:74:0d:97:a1:2f:36:8b:13:
+  //  ef:66:d5:d0:a5:4a:6e:2f:5d:9a:6f:ef:44:68:32:
+  //  bc:67:84:47:25:86:1f:09:3d:d0:e6:f3:40:5d:a8:
+  //    96:43:ef:0f:4d:69:b6:42:00:51:fd:b9:30:49:67:
+  //    3e:36:95:05:80:d3:cd:f4:fb:d0:8b:c5:84:83:95:
+  //    26:00:63
+  //  Exponent: 65537 (0x10001)
+  //  X509v3 extensions:
+  //  X509v3 Subject Key Identifier:
+  //    36:61:E1:00:7C:88:05:09:51:8B:44:6C:47:FF:1A:4C:C9:EA:4F:12
+  //  X509v3 Authority Key Identifier:
+  //    36:61:E1:00:7C:88:05:09:51:8B:44:6C:47:FF:1A:4C:C9:EA:4F:12
+  //  X509v3 Basic Constraints: critical
+  //  CA:TRUE
+  //  X509v3 Key Usage: critical
+  //  Certificate Sign
+  //  Signature Algorithm: sha256WithRSAEncryption
+  //  Signature Value:
+  //    7c:70:ca:93:96:51:dc:f1:4f:aa:0a:b3:a5:83:71:fb:d7:be:
+  //    25:99:a0:ac:6e:8f:db:27:40:b5:ec:91:20:30:b6:f8:92:fa:
+  //  ea:b1:76:6c:d3:55:37:98:1f:ea:00:18:3f:d6:de:4f:77:90:
+  //    0e:44:70:11:b3:58:61:a8:62:02:5b:f9:ca:31:ab:f9:ef:87:
+  //  fd:ad:93:78:3c:2d:99:96:e7:c6:5d:be:ec:21:d2:69:1a:23:
+  //  bd:72:d4:61:88:bb:98:ba:5c:b5:d0:97:1c:51:91:84:1e:91:
+  //  d2:60:cd:86:b6:48:18:6d:96:da:ea:5b:02:3d:80:00:3f:cd:
+  //  dc:c8:35:7e:d5:a3:a4:4d:fd:51:0a:9f:e5:33:43:ca:be:6c:
+  //    58:37:5d:11:62:c2:ba:df:58:eb:95:e1:9d:71:d9:31:a1:22:
+  //  bf:fe:64:90:6e:07:16:9e:60:04:66:bc:c7:a0:5d:7f:d2:0b:
+  //    28:d4:76:60:22:7d:18:2f:35:61:2d:20:3f:89:70:97:e1:04:
+  //  f6:87:72:79:cf:7c:e7:96:e2:86:d6:7b:fc:35:07:71:7a:2d:
+  //    83:20:88:40:49:67:ee:f3:4e:02:03:de:9c:40:a4:d3:95:a6:
+  //    9e:d9:fc:1e:a9:78:dd:37:5f:ef:da:7a:8e:86:78:0d:cb:3d:
+  //    77:eb:59:85:9a:be:17:99:a2:87:fc:8b:53:c0:e7:bb:d8:d2:
+  //    3d:65:cc:12:d6:55:5a:0a:fb:08:91:30:c2:11:77:66:f6:b0:
+  //    8d:3c:06:35:d2:24:ee:9c:81:c5:5d:18:7e:ec:a3:f3:94:71:
+  //    9e:c0:2a:bf:f1:33:a8:84:14:67:d3:f3:4d:7e:1e:ee:46:c9:
+  //    4e:49:9f:f1:29:b3:7d:b4:c0:6d:c3:7e:d9:f1:dd:af:be:75:
+  //  ea:fd:85:9d:b2:6d:7e:24:b5:70:9f:ac:98:0f:fc:9a:70:d2:
+  //    41:97:0a:5d:76:56:bc:79:a5:4c:8e:c1:7a:9c:19:c8:81:03:
+  //    9f:f7:32:92:7b:4e:a7:49:3a:af:83:05:07:a2:c8:0e:10:26:
+  //    49:67:51:2e:cd:b1:f8:ca:cc:1b:b7:4d:ad:2a:d2:84:16:1c:
+  //    7e:bf:e3:93:81:ef:f4:e9:5f:a3:1a:ca:93:58:bb:1f:ac:e0:
+  //    8d:2e:e0:3c:1f:ef:b3:fa:95:04:36:6a:6a:9e:71:e8:bd:a2:
+  //    38:ee:00:be:4c:da:64:81:81:a4:90:14:fa:07:f9:bf:53:4d:
+  //    41:b8:e0:41:4f:38:48:94:c1:19:ab:da:a4:0d:6b:8c:d9:c0:
+  //    39:91:6e:55:dc:52:54:71:f1:e7:c3:52:1d:60:88:36:5b:18:
+  //    3b:c8:77:10:65:e9:85:42
   ANDROID_KEY_1(
-    "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"),
+    "MIIFHDCCAwSgAwIBAgIJAPHBcqaZ6vUdMA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNV" +
+    "BAUTEGY5MjAwOWU4NTNiNmIwNDUwHhcNMjIwMzIwMTgwNzQ4WhcNNDIwMzE1MTgw" +
+    "NzQ4WjAbMRkwFwYDVQQFExBmOTIwMDllODUzYjZiMDQ1MIICIjANBgkqhkiG9w0B" +
+    "AQEFAAOCAg8AMIICCgKCAgEAr7bHgiuxpwHsK7Qui8xUFmOr75gvMsd/dTEDDJdS" +
+    "Sxtf6An7xyqpRR90PL2abxM1dEqlXnf2tqw1Ne4Xwl5jlRfdnJLmN0pTy/4lj4/7" +
+    "tv0Sk3iiKkypnEUtR6WfMgH0QZfKHM1+di+y9TFRtv6y//0rb+T+W8a9nsNL/ggj" +
+    "nar86461qO0rOs2cXjp3kOG1FEJ5MVmFmBGtnrKpa73XpXyTqRxB/M0n1n/W9nGq" +
+    "C4FSYa04T6N5RIZGBN2z2MT5IKGbFlbC8UrW0DxW7AYImQQcHtGl/m00QLVWutHQ" +
+    "oVJYnFPlXTcHYvASLu+RhhsbDmxMgJJ0mcDpvsC4PjvB+TxywElgS70vE0XmLD+O" +
+    "JtvsBslHZvPBKCOdT0MS+tgSOIfga+z1Z1g7+DVagf7quvmag8jfPioyKvxnK/Eg" +
+    "sTUVi2ghzq8wm27ud/mIM7AY2qEORR8Go3TVB4HzWQgpZrt3i5MIlCaY504LzSRi" +
+    "igHCzAPlHws+W0rB5N+er5/2pJKnfBSDiCiFAVtCLOZ7gLiMm0jhO2B6tUXHI/+M" +
+    "RPjy02i59lINMRRev56GKtcd9qO/0kUJWdZTdA2XoS82ixPvZtXQpUpuL12ab+9E" +
+    "aDK8Z4RHJYYfCT3Q5vNAXaiWQ+8PTWm2QgBR/bkwSWc+NpUFgNPN9PvQi8WEg5Um" +
+    "AGMCAwEAAaNjMGEwHQYDVR0OBBYEFDZh4QB8iAUJUYtEbEf/GkzJ6k8SMB8GA1Ud" +
+    "IwQYMBaAFDZh4QB8iAUJUYtEbEf/GkzJ6k8SMA8GA1UdEwEB/wQFMAMBAf8wDgYD" +
+    "VR0PAQH/BAQDAgIEMA0GCSqGSIb3DQEBCwUAA4ICAQB8cMqTllHc8U+qCrOlg3H7" +
+    "174lmaCsbo/bJ0C17JEgMLb4kvrqsXZs01U3mB/qABg/1t5Pd5AORHARs1hhqGIC" +
+    "W/nKMav574f9rZN4PC2ZlufGXb7sIdJpGiO9ctRhiLuYuly10JccUZGEHpHSYM2G" +
+    "tkgYbZba6lsCPYAAP83cyDV+1aOkTf1RCp/lM0PKvmxYN10RYsK631jrleGdcdkx" +
+    "oSK//mSQbgcWnmAEZrzHoF1/0gso1HZgIn0YLzVhLSA/iXCX4QT2h3J5z3znluKG" +
+    "1nv8NQdxei2DIIhASWfu804CA96cQKTTlaae2fweqXjdN1/v2nqOhngNyz1361mF" +
+    "mr4XmaKH/ItTwOe72NI9ZcwS1lVaCvsIkTDCEXdm9rCNPAY10iTunIHFXRh+7KPz" +
+    "lHGewCq/8TOohBRn0/NNfh7uRslOSZ/xKbN9tMBtw37Z8d2vvnXq/YWdsm1+JLVw" +
+    "n6yYD/yacNJBlwpddla8eaVMjsF6nBnIgQOf9zKSe06nSTqvgwUHosgOECZJZ1Eu" +
+    "zbH4yswbt02tKtKEFhx+v+OTge/06V+jGsqTWLsfrOCNLuA8H++z+pUENmpqnnHo" +
+    "vaI47gC+TNpkgYGkkBT6B/m/U01BuOBBTzhIlMEZq9qkDWuM2cA5kW5V3FJUcfHn" +
+    "w1IdYIg2Wxg7yHcQZemFQg=="),
 
   // openssl x509 -text -in https://developer.android.com/training/articles/security-key-attestation#root_certificate
   //Certificate:
