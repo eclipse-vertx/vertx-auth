@@ -19,12 +19,17 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.impl.http.SimpleHttpClient;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Simplified factory to create an {@link io.vertx.ext.auth.oauth2.OAuth2Auth} for OpenID Connect.
@@ -134,14 +139,39 @@ public interface OpenIDConnectAuth {
           jwtOptions.setIssuer(json.getString("issuer"));
         }
 
-
-        // reset config
-        config.setSupportedGrantTypes(null);
-
         if (json.containsKey("grant_types_supported")) {
           // optional config
-          JsonArray flows = json.getJsonArray("grant_types_supported");
-          flows.forEach(el -> config.addSupportedGrantType((String) el));
+          List<String> configuredGrantTypes = config.getSupportedGrantTypes();
+          final Set<String> configured = configuredGrantTypes == null ? null : new HashSet<>(configuredGrantTypes);
+
+          // reset config
+          config.setSupportedGrantTypes(null);
+
+          Stream<String> supportedGrantTypes = json.getJsonArray("grant_types_supported")
+            .stream()
+            .map(el -> (String) el);
+
+          // If the caller configured supported grant types, use the intersection with the server-supported grant types.
+          // Otherwise, use all grant types that the server supports.
+          if (configured != null) {
+            supportedGrantTypes = supportedGrantTypes.filter(configured::contains);
+          }
+
+          supportedGrantTypes
+            .forEach(config::addSupportedGrantType);
+
+          // If the supported grant types are still null here, either the server sent an empty list of supported grant
+          // types or the intersection with the configured grant types was empty. Both cases are errors.
+          if (config.getSupportedGrantTypes() == null) {
+            return Future.failedFuture(
+              "No supported grant types with this authorization provider. Supported: " +
+                json.getJsonArray("grant_types_supported").stream()
+                  .map(el -> (String) el)
+                  .collect(Collectors.joining(", ", "[", "]")) +
+                ". Configured: " +
+                (configuredGrantTypes == null ? "<any>" : configuredGrantTypes.stream().collect(Collectors.joining(", ", "[", "]")))
+            );
+          }
         }
 
         try {
