@@ -177,6 +177,31 @@ public class UserTest {
   }
 
   @Test
+  public void testMergeArrayAttributeMissingOnOneSide() {
+    User userA, userB;
+
+    // 1st user has no attributes, the 2nd user array attribute should be kept as is
+
+    userA = User.create(new JsonObject().put("access_token", "A"));
+    userB = User.create(new JsonObject().put("access_token", "B"), new JsonObject().put("roles", new JsonArray().add("write")));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals(new JsonArray().add("write"), userA.attributes().getJsonArray("roles"));
+
+    // 2nd user has no attributes, the 1st user array attribute should be kept as is
+
+    userA = User.create(new JsonObject().put("access_token", "A"), new JsonObject().put("roles", new JsonArray().add("read")));
+    userB = User.create(new JsonObject().put("access_token", "B"));
+
+    userA.merge(userB);
+
+    // expectation
+    assertEquals(new JsonArray().add("read"), userA.attributes().getJsonArray("roles"));
+  }
+
+  @Test
   public void testMergeAmr() {
     User userA, userB;
 
