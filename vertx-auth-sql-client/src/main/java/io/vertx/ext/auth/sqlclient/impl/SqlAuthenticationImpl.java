@@ -28,9 +28,12 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -39,11 +42,17 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
 
   private final SqlClient client;
   private final SqlAuthenticationOptions options;
+  private final Function<Row, JsonObject> attributeMapper;
   private final HashingStrategy strategy = HashingStrategy.load();
 
   public SqlAuthenticationImpl(SqlClient client, SqlAuthenticationOptions options) {
+    this(client, options, null);
+  }
+
+  public SqlAuthenticationImpl(SqlClient client, SqlAuthenticationOptions options, Function<Row, JsonObject> attributeMapper) {
     this.client = Objects.requireNonNull(client);
     this.options = Objects.requireNonNull(options);
+    this.attributeMapper = attributeMapper;
   }
 
   @Override
@@ -77,6 +86,12 @@ public class SqlAuthenticationImpl implements SqlAuthentication {
               User user = User.fromName(authInfo.getUsername());
               // metadata "amr"
               user.principal().put("amr", Collections.singletonList("pwd"));
+              if (attributeMapper != null) {
+                JsonObject attributes = attributeMapper.apply(row);
+                if (attributes != null) {
+                  user.attributes().mergeIn(attributes);
+                }
+              }
               return Future.succeededFuture(user);
             } else {
               return Future.failedFuture("Invalid username/password");

@@ -17,6 +17,7 @@
 package examples;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.prng.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
@@ -44,6 +45,20 @@ public class AuthSqlExamples {
     // *. etc...
     AuthenticationProvider authenticationProvider =
       SqlAuthentication.create(sqlClient, options);
+  }
+
+  public void example10(Vertx vertx, SqlClient sqlClient) {
+
+    SqlAuthenticationOptions options = new SqlAuthenticationOptions()
+      // the password is expected in the first column, any other
+      // column is available to the attribute mapper
+      .setAuthenticationQuery(
+        "SELECT password, email FROM users WHERE username = ?");
+
+    AuthenticationProvider authenticationProvider =
+      SqlAuthentication.create(sqlClient, options, row ->
+        new JsonObject()
+          .put("email", row.getString("email")));
   }
 
   public void example6(AuthenticationProvider authProvider) {
