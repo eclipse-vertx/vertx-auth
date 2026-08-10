@@ -16,6 +16,7 @@
 package io.vertx.ext.auth.oauth2.impl;
 
 import io.vertx.core.*;
+import io.vertx.core.internal.CloseableResource;
 import io.vertx.core.internal.VertxInternal;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
@@ -36,6 +37,7 @@ import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.oauth2.*;
 
 import java.security.SignatureException;
+import java.time.Duration;
 import java.util.Collections;
 
 import static java.lang.Math.max;
@@ -43,7 +45,7 @@ import static java.lang.Math.max;
 /**
  * @author Paulo Lopes
  */
-public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
+public class OAuth2AuthProviderImpl implements OAuth2Auth {
 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthProviderImpl.class);
 
@@ -53,6 +55,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   private final OAuth2Options config;
   private final OAuth2API api;
 
+  private final CloseableResource<?> closeAction;
+
   // avoid caching, as it may swap,
   // old references are still valid though
   private volatile JWT jwt = new JWT();
@@ -60,6 +64,8 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
   private Handler<String> missingKeyHandler;
 
   public OAuth2AuthProviderImpl(Vertx vertx, OAuth2Options config) {
+
+    this.closeAction = ((VertxInternal)vertx).registerResource(this::closeImpl);
     this.vertx = vertx;
     this.context = vertx.getOrCreateContext();
     this.config = config;
@@ -94,8 +100,7 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
     }
   }
 
-  @Override
-  public void close() {
+  private Future<Void> closeImpl(Duration timeout) {
     synchronized (this) {
       if (updateTimerId != -1) {
         // cancel any running timer to avoid multiple updates
@@ -104,12 +109,17 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         // this could happen if both the user triggers the update and
         // there's a timer already in progress
         vertx.cancelTimer(updateTimerId);
-        ((VertxInternal) vertx).removeCloseHook(this);
         updateTimerId = -1;
       }
       // clear the JWT object reference too
       jwt = null;
     }
+    return Future.succeededFuture();
+  }
+
+  @Override
+  public void close() {
+    closeAction.close();
   }
 
   @Override
@@ -125,7 +135,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
             // this could happen if both the user triggers the update and
             // there's a timer already in progress
             vertx.cancelTimer(updateTimerId);
-            ((VertxInternal) vertx).removeCloseHook(this);
           }
 
           JsonArray keys = json.getJsonArray("keys");
@@ -152,7 +161,6 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
               jWKSet()
                 .onFailure(err -> LOG.warn("Failed to auto-update JWK Set", err)));
             // ensure we get a clean exit
-            ((VertxInternal) vertx).addCloseHook(this);
           } else {
             updateTimerId = -1;
           }
@@ -705,11 +713,5 @@ public class OAuth2AuthProviderImpl implements OAuth2Auth, Closeable {
         }
       }
     }
-  }
-
-  @Override
-  public void close(Completable<Void> onClose) {
-    close();
-    onClose.succeed();
   }
 }
