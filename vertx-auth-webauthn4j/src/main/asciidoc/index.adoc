@@ -89,7 +89,7 @@ Registration is the process of enrolling a new authenticator to the database and
 
 The process takes 2 steps:
 
-1. A call to generate a {@link io.vertx.ext.auth.webauthn4j.WebAuthn4J#createCredentialsOptions(JsonObject)}
+1. A call to generate a {@link io.vertx.ext.auth.webauthn4j.WebAuthn4J#createPublicKeyCredentialCreationOptions(JsonObject)}
 2. A call with the solution to the challenge to the normal `authenticate` API method.
 
 If the solution is correct, the new authenticator should be added to the storage and be usable for login purposes.
@@ -98,7 +98,7 @@ If the solution is correct, the new authenticator should be added to the storage
 
 Like the registration, login is a 2 step process:
 
-1. A call to generate a {@link io.vertx.ext.auth.webauthn4j.WebAuthn4J#getCredentialsOptions(String)}
+1. A call to generate a {@link io.vertx.ext.auth.webauthn4j.WebAuthn4J#createPublicKeyCredentialRequestOptions(String)}
 2. A call with the solution to the challenge to the normal `authenticate` API method.
 
 When the challenge is correctly solved, the user is considered logged in.
