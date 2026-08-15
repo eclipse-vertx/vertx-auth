@@ -8,6 +8,17 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * Options describing Key stored in PEM format.
+ * <p>
+ * When these options are created from JSON (for example when loading the configuration from a file), the
+ * {@code buffer} field is a {@link Buffer}, which in JSON is represented as the <b>base64</b> encoding of the key
+ * bytes, <b>not</b> the PEM text itself. Given the PEM (or secret) as a String, the JSON form can be obtained with
+ * {@code new PubSecKeyOptions().setBuffer(pem).toJson()}, e.g.:
+ * <pre>
+ * {
+ *   "algorithm": "ES256",
+ *   "buffer": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0K..."
+ * }
+ * </pre>
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
@@ -75,6 +86,9 @@ public class PubSecKeyOptions {
    * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
    * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
    * payload.
+   * <p>
+   * This setter is a convenience for Java code and takes the PEM/secret text as is. In JSON the {@code buffer}
+   * field must be the base64 encoding of these bytes, see {@link #setBuffer(Buffer)}.
    *
    * @return self.
    */
@@ -88,6 +102,9 @@ public class PubSecKeyOptions {
    * The PEM or Secret key buffer. When working with secret materials, the material is expected to be encoded in
    * {@code UTF-8}. PEM files are expected to be {@code US_ASCII} as the format uses a base64 encoding for the
    * payload.
+   * <p>
+   * This is the setter used when the options are created from JSON: the JSON value of {@code buffer} is the
+   * base64 encoding of the key bytes (the standard JSON representation of a {@link Buffer}).
    *
    * @return self.
    */

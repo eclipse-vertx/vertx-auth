@@ -215,6 +215,20 @@ So you can do all operations with it:
 {@link examples.AuthJWTExamples#example18}
 ----
 
+=== Configuring keys from JSON
+
+All the options above can also be created from JSON, for example when the configuration is loaded from a file.
+Be aware that in JSON the `buffer` of a `PubSecKeyOptions` is a `Buffer`, and Buffers are represented in JSON as
+the **base64** encoding of their bytes, **not** as the PEM text itself. Passing the raw PEM text as `buffer` fails
+with `IllegalArgumentException: Illegal base64 character`.
+
+To obtain the JSON form of a key, encode the PEM (or secret) as base64, or let the options do it for you:
+
+[source,$lang]
+----
+{@link examples.AuthJWTExamples#example19}
+----
+
 === The JWT keystore file
 
 If you prefer to use Java Keystores, then you can do it either.
