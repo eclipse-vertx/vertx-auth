@@ -4,6 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import org.junit.Test;
@@ -58,6 +59,71 @@ public class JWKTest {
       .put("kid", "1");
 
     new JWK(jwk);
+  }
+
+  @Test
+  public void publicECExposesPublicKey() {
+    JWK jwk = new JWK(new JsonObject()
+      .put("kty", "EC")
+      .put("crv", "P-256")
+      .put("x", "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4")
+      .put("y", "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM")
+      .put("kid", "1"));
+
+    assertNotNull(jwk.publicKey());
+    assertNull(jwk.privateKey());
+  }
+
+  @Test
+  public void privateECExposesKeyPair() {
+    JWK jwk = new JWK(new JsonObject()
+      .put("kty", "EC")
+      .put("crv", "P-256")
+      .put("x", "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4")
+      .put("y", "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM")
+      .put("d", "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE")
+      .put("kid", "1"));
+
+    assertNotNull(jwk.publicKey());
+    assertNotNull(jwk.privateKey());
+  }
+
+  @Test
+  public void pemECExposesKeys() {
+    JWK pub = new JWK(new PubSecKeyOptions()
+      .setAlgorithm("ES256")
+      .setBuffer(
+        "-----BEGIN PUBLIC KEY-----\n" +
+          "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEraVJ8CpkrwTPRCPluUDdwC6b8+m4\n" +
+          "dEjwl8s+Sn0GULko+H95fsTREQ1A2soCFHS4wV3/23Nebq9omY3KuK9DKw==\n" +
+          "-----END PUBLIC KEY-----"));
+
+    assertNotNull(pub.publicKey());
+    assertNull(pub.privateKey());
+
+    JWK sec = new JWK(new PubSecKeyOptions()
+      .setAlgorithm("ES256")
+      .setBuffer(
+        "-----BEGIN PRIVATE KEY-----\n" +
+          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgeRyEfU1NSHPTCuC9\n" +
+          "rwLZMukaWCH2Fk6q5w+XBYrKtLihRANCAAStpUnwKmSvBM9EI+W5QN3ALpvz6bh0\n" +
+          "SPCXyz5KfQZQuSj4f3l+xNERDUDaygIUdLjBXf/bc15ur2iZjcq4r0Mr\n" +
+          "-----END PRIVATE KEY-----\n"));
+
+    assertNotNull(sec.privateKey());
+  }
+
+  @Test
+  public void pemRSAExposesPublicKey() {
+    // control: RSA keys are not wrapped and already expose the key
+    JWK jwk = new JWK(new JsonObject()
+      .put("kty", "RSA")
+      .put("n", "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw")
+      .put("e", "AQAB")
+      .put("alg", "RS256")
+      .put("kid", "2011-04-29"));
+
+    assertNotNull(jwk.publicKey());
   }
 
   @Test
