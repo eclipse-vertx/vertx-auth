@@ -39,6 +39,18 @@ The out of the box config assumes certain queries for authentication and authori
 {@link io.vertx.ext.auth.sqlclient.SqlAuthorizationOptions#setPermissionsQuery(String)} and
 {@link io.vertx.ext.auth.sqlclient.SqlAuthorizationOptions#setRolesQuery(String)}, if you want to use them with a different database schema.
 
+When the authentication query returns more columns than the password, the extra columns can be mapped to attributes of the
+authenticated {@link io.vertx.ext.auth.User} by providing a mapping function:
+
+[source,$lang]
+----
+{@link examples.AuthSqlExamples#example10}
+----
+
+The password is always expected in the first column, any other column is available to the mapping function and the returned
+JSON object is merged into the user attributes. This avoids a second query to load user data, such as its id, right after
+authentication.
+
 The basic data definition for the storage should look like this:
 
 [source,sql]
