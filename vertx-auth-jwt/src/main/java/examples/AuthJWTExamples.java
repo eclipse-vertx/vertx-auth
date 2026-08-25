@@ -17,6 +17,7 @@
 package examples;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.KeyStoreOptions;
@@ -265,5 +266,26 @@ public class AuthJWTExamples {
     String token = provider.generateToken(
       new JsonObject(),
       new JWTOptions().setAlgorithm("ES256"));
+  }
+
+  public void example19(Vertx vertx) {
+    String publicKeyPem =
+      "-----BEGIN PUBLIC KEY-----\n" +
+        "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEraVJ8CpkrwTPRCPluUDdwC6b8+m4\n" +
+        "dEjwl8s+Sn0GULko+H95fsTREQ1A2soCFHS4wV3/23Nebq9omY3KuK9DKw==\n" +
+        "-----END PUBLIC KEY-----";
+
+    // the JSON representation of the key, "buffer" is base64 encoded:
+    // {"algorithm":"ES256","buffer":"LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0K..."}
+    JsonObject key = new PubSecKeyOptions()
+      .setAlgorithm("ES256")
+      .setBuffer(publicKeyPem)
+      .toJson();
+
+    // which can be stored in a config file and loaded back:
+    JsonObject config = new JsonObject()
+      .put("pubSecKeys", new JsonArray().add(key));
+
+    JWTAuth provider = JWTAuth.create(vertx, new JWTAuthOptions(config));
   }
 }
