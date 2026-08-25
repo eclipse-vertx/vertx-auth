@@ -56,6 +56,20 @@ public class OAuth2AuthCodeTest {
     .put("redirect_uri", "http://callback.com")
     .put("grant_type", "authorization_code");
 
+  private static final Credentials tokenConfigSecretJwt = new Oauth2Credentials()
+    .setFlow(OAuth2FlowType.AUTH_CODE)
+    .setCode("code")
+    .setRedirectUri("http://callback.com")
+    .setAssertion("eyJhb");
+
+  private static final JsonObject oauthConfigSecretJwt = new JsonObject()
+    .put("code", "code")
+    .put("redirect_uri", "http://callback.com")
+    .put("client_assertion", "eyJhb")
+    .put("grant_type", "authorization_code")
+    .put("client_id", "client-id")
+    .put("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+
   private static final OAuth2AuthorizationURL authorizeConfig = new OAuth2AuthorizationURL()
     .setRedirectUri("http://localhost:3000/callback")
     .addScope("user")
@@ -75,15 +89,26 @@ public class OAuth2AuthCodeTest {
       .connectionHandler(c -> connectionCounter++)
       .requestHandler(req -> {
         if (req.method() == HttpMethod.POST && "/oauth/token".equals(req.path())) {
-          should.assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
-          req.setExpectMultipart(true).bodyHandler(buffer -> {
-            try {
-              should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
-              req.response().putHeader("Content-Type", "application/json").end(fixtureTokens.encode());
-            } catch (UnsupportedEncodingException e) {
-              should.fail(e);
-            }
-          });
+          if (req.getHeader("Authorization") != null) {
+            should.assertEquals("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=", req.getHeader("Authorization"));
+            req.setExpectMultipart(true).bodyHandler(buffer -> {
+              try {
+                should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+                req.response().putHeader("Content-Type", "application/json").end(fixtureTokens.encode());
+              } catch (UnsupportedEncodingException e) {
+                should.fail(e);
+              }
+            });
+          } else {
+            req.setExpectMultipart(true).bodyHandler(buffer -> {
+              try {
+                should.assertEquals(config, SimpleHttpClient.queryToJson(buffer));
+                req.response().putHeader("Content-Type", "application/json").end(fixtureTokens.encode());
+              } catch (UnsupportedEncodingException e) {
+                should.fail(e);
+              }
+            });
+          }
         } else if (req.method() == HttpMethod.GET && "/oauth/jwks".equals(req.path())) {
           req.bodyHandler(buffer -> {
             req.response().putHeader("Content-Type", "application/json").end(fixtureJwks.encode());
@@ -149,6 +174,25 @@ public class OAuth2AuthCodeTest {
             should.assertNotNull(token.principal().getString("access_token"));
             test.complete();
           });
+      });
+  }
+
+  @Test
+  public void getTokenWithClientSecretJwt(TestContext should) {
+    final Async test = should.async();
+
+    config = oauthConfigSecretJwt;
+    oauth2 = OAuth2Auth.create(rule.vertx(), new OAuth2Options()
+      .setClientId(oauthConfigSecretJwt.getString("client_id"))
+      .setClientAssertionType(oauthConfigSecretJwt.getString("client_assertion_type"))
+      .setSite("http://localhost:" + currentPort));
+    oauth2.authenticate(tokenConfigSecretJwt)
+      .onFailure(should::fail)
+      .onSuccess(token -> {
+        should.assertNotNull(token);
+        should.assertNotNull(token.principal());
+        should.assertNotNull(token.principal().getString("access_token"));
+        test.complete();
       });
   }
 

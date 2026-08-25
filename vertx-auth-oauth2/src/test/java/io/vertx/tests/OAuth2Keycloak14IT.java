@@ -2,10 +2,15 @@ package io.vertx.tests;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
+import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.MicroProfileAuthorization;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
@@ -27,9 +32,12 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(Parameterized.class)
 @Parameterized.UseParametersRunnerFactory(VertxUnitRunnerWithParametersFactory.class)
@@ -450,6 +458,47 @@ public class OAuth2Keycloak14IT {
                   .onSuccess(backendAlice -> should.fail("We are on the wrong audience for a bearer client"));
               });
           });
+      });
+  }
+
+  @Test
+  public void hardTest(TestContext should) {
+    final Async test = should.async();
+
+    OAuth2Options options = new OAuth2Options()
+      .setClientId("confidential-client-authenticator-signed-jwt")
+      .setTenant("vertx-it")
+      .setClientAssertionType("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+      .setSite(site + "/auth/realms/{tenant}");
+
+    options.getHttpClientOptions().setTrustAll(true);
+
+    KeycloakAuth.discover(rule.vertx(), options)
+      .onFailure(should::fail)
+      .onSuccess(oauth2 -> {
+
+        JWTAuth provider = JWTAuth.create(rule.vertx(), new JWTAuthOptions()
+          .addPubSecKey(new PubSecKeyOptions()
+            .setAlgorithm("HS256")
+            .setBuffer("4120c155-7cd0-4c62-9dff-cfd36a1244f6"))
+          .setJWTOptions(new JWTOptions()
+            .addAudience(String.format("%s/auth/realms/%s/protocol/openid-connect/token", site, "vertx-it"))
+            .setSubject("confidential-client-authenticator-signed-jwt")
+            .setIssuer("confidential-client-authenticator-signed-jwt")
+            .setExpiresInSeconds(60)));
+        String token = provider.generateToken(new JsonObject().put("jti", UUID.randomUUID().toString()));
+
+        oauth2.authenticate(new Oauth2Credentials()
+            .setFlow(OAuth2FlowType.AUTH_CODE)
+            .setCode("testCode")
+            .setAssertion(token))
+          .onFailure(exception -> {
+             //this is a hacky way to check if authentication was successful without performing complicated code flow inside test
+            //if we get invalid code exception, it means that authentication was successful but code is invalid as expected
+            should.assertEquals("invalid_grant: Code not valid", exception.getMessage());
+            test.complete();
+          })
+          .onSuccess(result -> should.fail("This test should not succeed as we sent invalid code")) ;
       });
   }
 
