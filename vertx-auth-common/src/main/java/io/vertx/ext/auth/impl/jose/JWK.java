@@ -325,6 +325,11 @@ public final class JWK {
     // for all JWS, it may not be true for COSE keys
     return new SigningAlgorithm() {
       @Override
+      public SigningAlgorithm unwrap() {
+        // expose the underlying key material (publicKey/privateKey) like the non-wrapped algorithms do
+        return signingAlgo.unwrap();
+      }
+      @Override
       public String name() {
         return signingAlgo.name();
       }
