@@ -29,4 +29,10 @@ role.developer=do_actual_work
 
 When describing roles a wildcard `*` can be used to indicate that the role has all permissions.
 
+The provider is usually created from a file on the file system with
+{@link io.vertx.ext.auth.properties.PropertyFileAuthentication#create(io.vertx.core.Vertx, java.lang.String)}.
+When the content is not stored on the file system, e.g.: it is loaded from the classpath, a remote location or preprocessed
+in memory, the provider can be created from a {@link io.vertx.core.buffer.Buffer} with
+{@link io.vertx.ext.auth.properties.PropertyFileAuthentication#create(io.vertx.core.Vertx, io.vertx.core.buffer.Buffer)}.
+
 The implementation currently assumes that user/password based authentication is used.
