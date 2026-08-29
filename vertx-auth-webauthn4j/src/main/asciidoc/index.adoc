@@ -94,6 +94,16 @@ The process takes 2 steps:
 
 If the solution is correct, the new authenticator should be added to the storage and be usable for login purposes.
 
+The `user` object given to `createCredentialsOptions` may contain an `id`: the https://www.w3.org/TR/webauthn/#user-handle[user handle],
+a stable, non user identifiable, identifier of the account (for example the primary key of the user record) encoded as
+`base64url` (at most 64 bytes). Browsers and authenticators use it to recognise that a credential belongs to an existing
+account, so it should be the same across registrations of the same user and different across users. When no `id` is given a
+random one is generated. Pass the same value in {@link io.vertx.ext.auth.webauthn4j.WebAuthn4JCredentials#setUserId(String)}
+when calling `authenticate` with the solution: it is stored in the
+{@link io.vertx.ext.auth.webauthn4j.Authenticator#setUserId(String)} property, returned in the principal of the authenticated
+user and, at login time, checked against the `userHandle` returned by the authenticator so that a credential can only be used
+by the account it was created for.
+
 == Login
 
 Like the registration, login is a 2 step process:

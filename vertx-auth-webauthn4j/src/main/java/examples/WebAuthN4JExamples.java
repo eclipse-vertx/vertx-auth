@@ -56,9 +56,9 @@ public class WebAuthN4JExamples {
 
     // some user
     JsonObject user = new JsonObject()
-      // id is expected to be a base64url string
+      // the user handle: a stable, non user identifiable, id of the account
+      // (base64url encoded, at most 64 bytes); generated when omitted
       .put("id", "000000000000000000000000")
-      .put("rawId", "000000000000000000000000")
       .put("name", "john.doe@email.com")
       // optionally
       .put("displayName", "John Doe")
@@ -112,6 +112,8 @@ public class WebAuthN4JExamples {
         new WebAuthn4JCredentials()
           // the username you want to link to
           .setUsername("paulo")
+          // the user handle (user.id) sent on the previous step, if any
+          .setUserId("000000000000000000000000")
           // the server origin
           .setOrigin("https://192.168.178.206.xip.io:8443")
           // the server domain

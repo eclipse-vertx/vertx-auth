@@ -27,6 +27,11 @@ public class WebAuthn4JCredentialsConverter {
             obj.setUsername((String)member.getValue());
           }
           break;
+        case "userId":
+          if (member.getValue() instanceof String) {
+            obj.setUserId((String)member.getValue());
+          }
+          break;
         case "origin":
           if (member.getValue() instanceof String) {
             obj.setOrigin((String)member.getValue());
@@ -54,6 +59,9 @@ public class WebAuthn4JCredentialsConverter {
     }
     if (obj.getUsername() != null) {
       json.put("username", obj.getUsername());
+    }
+    if (obj.getUserId() != null) {
+      json.put("userId", obj.getUserId());
     }
     if (obj.getOrigin() != null) {
       json.put("origin", obj.getOrigin());

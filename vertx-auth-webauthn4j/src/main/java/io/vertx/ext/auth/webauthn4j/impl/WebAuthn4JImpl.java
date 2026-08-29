@@ -225,6 +225,43 @@ public class WebAuthn4JImpl implements WebAuthn4J {
     return base64UrlEncode(buffer.getBytes());
   }
 
+  /**
+   * A user handle is an opaque byte sequence of at most 64 bytes, and must not be empty
+   * (https://www.w3.org/TR/webauthn/#user-handle). In JSON it is carried as a base64url string.
+   *
+   * @throws IllegalArgumentException when the given value is not a valid user handle
+   */
+  private static void validateUserHandle(String userHandle) {
+    if (userHandle == null || userHandle.isEmpty()) {
+      throw new IllegalArgumentException("user handle cannot be empty");
+    }
+    final byte[] bytes;
+    try {
+      bytes = base64UrlDecode(userHandle);
+    } catch (RuntimeException e) {
+      throw new IllegalArgumentException("user handle must be base64url encoded", e);
+    }
+    if (bytes.length == 0) {
+      throw new IllegalArgumentException("user handle cannot be empty");
+    }
+    if (bytes.length > 64) {
+      throw new IllegalArgumentException("user handle cannot exceed 64 bytes");
+    }
+  }
+
+  /**
+   * Compares two base64url encoded user handles by value, so that different (padded/unpadded) encodings of the
+   * same bytes are considered equal.
+   */
+  private static boolean sameUserHandle(String a, String b) {
+    try {
+      return Arrays.equals(base64UrlDecode(a), base64UrlDecode(b));
+    } catch (RuntimeException e) {
+      // not base64url, fallback to plain comparison
+      return a.equals(b);
+    }
+  }
+
   @Override
   public WebAuthn4J credentialStorage(CredentialStorage credentialStorage) {
     if (credentialStorage == null) {
@@ -236,6 +273,19 @@ public class WebAuthn4JImpl implements WebAuthn4J {
 
   @Override
   public Future<JsonObject> createCredentialsOptions(JsonObject user) {
+
+    // the user handle: given by the relying party (base64url encoded) or generated
+    final String userId;
+    if (user.containsKey("id")) {
+      userId = user.getString("id");
+      try {
+        validateUserHandle(userId);
+      } catch (IllegalArgumentException e) {
+        return Future.failedFuture(new WebAuthn4JException("Invalid user.id: " + e.getMessage(), e));
+      }
+    } else {
+      userId = uUIDtoBase64Url(UUID.randomUUID());
+    }
 
 	  return credentialStorage.find(user.getString("name"), null)
       .map(authenticators -> {
@@ -252,7 +302,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
         putOpt(json.getJsonObject("rp"), "name", options.getRelyingParty().getName());
 
         // put non null values for User
-        putOpt(json.getJsonObject("user"), "id", uUIDtoBase64Url(UUID.randomUUID()));
+        putOpt(json.getJsonObject("user"), "id", userId);
         putOpt(json.getJsonObject("user"), "name", user.getString("name"));
         putOpt(json.getJsonObject("user"), "displayName", user.getString("displayName"));
         putOpt(json.getJsonObject("user"), "icon", user.getString("icon"));
@@ -438,6 +488,8 @@ public class WebAuthn4JImpl implements WebAuthn4J {
         			  // by default the store can upsert if a credential is missing, the user has been verified so it is valid
         			  // the store however might disallow this operation
         			  authrInfo.setUsername(username);
+        			  // the user handle sent to the browser in the creation options, if the relying party kept it
+        			  authrInfo.setUserId(authInfo.getUserId());
 
         			  // the create challenge is complete we can finally save this
         			  // new authenticator to the storage
@@ -473,6 +525,18 @@ public class WebAuthn4JImpl implements WebAuthn4J {
                 return Future.failedFuture("Cannot find authenticator with id: " + webauthn.getString("id"));
               } else if (authenticators.size() == 1) {
                 Authenticator authenticator = authenticators.get(0);
+                // https://www.w3.org/TR/webauthn/#sctn-verifying-assertion
+                // the user identified by the response userHandle (or by the relying party before the
+                // ceremony) must be the owner of the credential
+                if (authenticator.getUserId() != null) {
+                  final String userHandle = response.getString("userHandle");
+                  if (userHandle != null && !userHandle.isEmpty() && !sameUserHandle(authenticator.getUserId(), userHandle)) {
+                    return Future.failedFuture("User handle does not match the owner of credential id: " + credentialId);
+                  }
+                  if (authInfo.getUserId() != null && !sameUserHandle(authenticator.getUserId(), authInfo.getUserId())) {
+                    return Future.failedFuture("Credential id: " + credentialId + " does not belong to the expected user");
+                  }
+                }
                 return verifyWebAuthNGet(response, authInfo, clientDataJSON, authenticator)
                     .compose(counter -> {
                       // update the counter on the authenticator

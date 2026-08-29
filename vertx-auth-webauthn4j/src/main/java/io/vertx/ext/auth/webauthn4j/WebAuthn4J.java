@@ -58,7 +58,8 @@ public interface WebAuthn4J extends AuthenticationProvider {
    * <p>
    * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
    *
-   * @param user    - the user object with name and optionally displayName and icon
+   * @param user    - the user object with name and optionally id (the base64url encoded user handle, generated when
+   *                absent), displayName and icon
    * @return a future notified with the encoded make credentials request
    */
   Future<JsonObject> createCredentialsOptions(JsonObject user);
