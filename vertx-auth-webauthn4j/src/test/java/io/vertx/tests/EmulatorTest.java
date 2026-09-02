@@ -32,7 +32,10 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.security.cert.TrustAnchor;
@@ -70,11 +73,7 @@ public class EmulatorTest {
 	}
 
 
-  /**
-   * Ignoring test for now because webauthn4j suffers from same failure (invalid cert path) upstream.
-   */
   @Test
-  @Ignore("Probably requires a WebAuthn4J upgrade")
 	public void testMetadata(TestContext should) {
 		final Async test = should.async();
 
