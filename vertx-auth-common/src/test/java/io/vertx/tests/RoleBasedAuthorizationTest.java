@@ -39,6 +39,9 @@ public class RoleBasedAuthorizationTest {
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
 
+  private HttpServer httpServer;
+  private HttpClient httpClient;
+
   @Test
   public void testConverter() {
     TestUtils.testJsonCodec(RoleBasedAuthorization.create("role1"), RoleBasedAuthorizationConverter::encode,
@@ -76,19 +79,20 @@ public class RoleBasedAuthorizationTest {
   @Test
   public void testMatch1(TestContext should) {
     Async test = should.async();
-    HttpClient client = rule.vertx().createHttpClient();
 
-    final HttpServer server = rule.vertx().createHttpServer();
-    server.requestHandler(request -> {
+    httpServer = rule.vertx().createHttpServer();
+    httpClient = rule.vertx().createHttpClient();
+
+    httpServer.requestHandler(request -> {
       User user = User.fromName("dummy user");
       user.authorizations().put("providerId", Collections.singleton(RoleBasedAuthorization.create("p1").setResource("r1")));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertTrue(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
     }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
-      client.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
+      httpClient.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(res -> {
-          server.close().onComplete(close -> test.complete());
+          httpServer.close().onComplete(close -> test.complete());
         }));
       }));
     }));
@@ -98,18 +102,19 @@ public class RoleBasedAuthorizationTest {
   public void testMatch2(TestContext should) {
     Async test = should.async();
 
-    HttpServer server = rule.vertx().createHttpServer();
-    HttpClient client = rule.vertx().createHttpClient();
-    server.requestHandler(request -> {
+    httpServer = rule.vertx().createHttpServer();
+    httpClient = rule.vertx().createHttpClient();
+
+    httpServer.requestHandler(request -> {
       User user = User.fromName("dummy user");
       user.authorizations().put("providerId", Collections.singleton(RoleBasedAuthorization.create("p1").setResource("r1")));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertFalse(RoleBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
     }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
-      client.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
+      httpClient.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(res -> {
-          server.close().onComplete(close -> test.complete());
+          httpServer.close().onComplete(close -> test.complete());
         }));
       }));
     }));
