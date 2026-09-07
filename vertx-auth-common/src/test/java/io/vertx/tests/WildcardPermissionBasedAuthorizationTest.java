@@ -12,6 +12,7 @@
  ********************************************************************************/
 package io.vertx.tests;
 
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.auth.User;
@@ -36,6 +37,9 @@ public class WildcardPermissionBasedAuthorizationTest {
 
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
+
+  private HttpServer httpServer;
+  private HttpClient httpClient;
 
   @Test
   public void testConverter() {
@@ -107,17 +111,20 @@ public class WildcardPermissionBasedAuthorizationTest {
   @Test
   public void testMatch1(TestContext should) {
     final Async test = should.async();
-    final HttpServer server = rule.vertx().createHttpServer();
-    server.requestHandler(request -> {
+
+    httpServer = rule.vertx().createHttpServer();
+    httpClient = rule.vertx().createHttpClient();
+
+    httpServer.requestHandler(request -> {
       User user = User.fromName("dummy user");
       user.authorizations().put("providerId", WildcardPermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertTrue(WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
     }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
-      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
+      httpClient.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r1").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(res -> {
-          server.close().onComplete(close -> test.complete());
+          httpServer.close().onComplete(close -> test.complete());
         }));
       }));
     }));
@@ -126,17 +133,20 @@ public class WildcardPermissionBasedAuthorizationTest {
   @Test
   public void testMatch2(TestContext should) {
     final Async test = should.async();
-    final HttpServer server = rule.vertx().createHttpServer();
-    server.requestHandler(request -> {
+
+    httpServer = rule.vertx().createHttpServer();
+    httpClient = rule.vertx().createHttpClient();
+
+    httpServer.requestHandler(request -> {
       User user = User.fromName("dummy user");
       user.authorizations().put("providerId", WildcardPermissionBasedAuthorization.create("p1").setResource("r1"));
       AuthorizationContext context = new AuthorizationContextImpl(user, request.params());
       should.assertFalse(WildcardPermissionBasedAuthorization.create("p1").setResource("{variable1}").match(context));
       request.response().end();
     }).listen(0, "localhost").onComplete(should.asyncAssertSuccess(s -> {
-      rule.vertx().createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
+      httpClient.request(HttpMethod.GET, s.actualPort(), "localhost", "/?variable1=r2").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(res -> {
-          server.close().onComplete(close -> test.complete());
+          httpServer.close().onComplete(close -> test.complete());
         }));
       }));
     }));
