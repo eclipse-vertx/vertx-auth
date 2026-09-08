@@ -14,6 +14,7 @@ package io.vertx.ext.auth.properties.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
@@ -72,9 +73,20 @@ public class PropertyFileAuthenticationImpl implements PropertyFileAuthenticatio
   public PropertyFileAuthenticationImpl(Vertx vertx, String path) {
     Objects.requireNonNull(vertx);
     this.path = Objects.requireNonNull(path);
+    parse(vertx.fileSystem().readFileBlocking(path).toString(StandardCharsets.UTF_8));
+  }
+
+  public PropertyFileAuthenticationImpl(Vertx vertx, Buffer buffer) {
+    Objects.requireNonNull(vertx);
+    Objects.requireNonNull(buffer);
+    // there is no path to identify this provider
+    this.path = "properties";
+    parse(buffer.toString(StandardCharsets.UTF_8));
+  }
+
+  private void parse(String fileContent) {
     final Map<String, Role> roles = new HashMap<>();
 
-    String fileContent = vertx.fileSystem().readFileBlocking(path).toString(StandardCharsets.UTF_8);
     String[] lines = fileContent.split("\n");
     for (String line : lines) {
       if (line.length() == 0 || line.startsWith("#")) {
