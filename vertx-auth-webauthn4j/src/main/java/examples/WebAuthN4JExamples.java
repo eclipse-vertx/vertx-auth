@@ -65,7 +65,7 @@ public class WebAuthN4JExamples {
       .put("icon", "https://pics.example.com/00/p/aBjjjpqPb.png");
 
     webAuthN
-      .createCredentialsOptions(user)
+      .createPublicKeyCredentialCreationOptions(user)
       .onSuccess(challengeResponse -> {
         // return the challenge to the browser
         // for further processing
@@ -153,7 +153,7 @@ public class WebAuthN4JExamples {
     // Login only requires the username and can even be set to null if
     // resident keys are supported, in this case the authenticator remembers
     // the public key used for the relying party
-    webAuthN.getCredentialsOptions("paulo")
+    webAuthN.createPublicKeyCredentialRequestOptions("paulo")
       .onSuccess(challengeResponse -> {
         // return the challenge to the browser
         // for further processing

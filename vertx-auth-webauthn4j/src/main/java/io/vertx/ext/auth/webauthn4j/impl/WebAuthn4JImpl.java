@@ -235,7 +235,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
   }
 
   @Override
-  public Future<JsonObject> createCredentialsOptions(JsonObject user) {
+  public Future<JsonObject> createPublicKeyCredentialCreationOptions(JsonObject user) {
 
 	  return credentialStorage.find(user.getString("name"), null)
       .map(authenticators -> {
@@ -302,7 +302,7 @@ public class WebAuthn4JImpl implements WebAuthn4J {
   }
 
   @Override
-  public Future<JsonObject> getCredentialsOptions(String name) {
+  public Future<JsonObject> createPublicKeyCredentialRequestOptions(String name) {
 
     // https://w3c.github.io/webauthn/#dictionary-assertion-options
     JsonObject json = new JsonObject()

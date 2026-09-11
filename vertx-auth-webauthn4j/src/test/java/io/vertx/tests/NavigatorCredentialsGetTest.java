@@ -43,7 +43,7 @@ public class NavigatorCredentialsGetTest {
         .setCounter(2)
     );
 
-    webAuthN.getCredentialsOptions("paulo")
+    webAuthN.createPublicKeyCredentialRequestOptions("paulo")
       .onFailure(should::fail)
       .onSuccess(challengeResponse -> {
         assertNotNull(challengeResponse);
@@ -52,6 +52,35 @@ public class NavigatorCredentialsGetTest {
         assertNotNull(challengeResponse.getJsonArray("allowCredentials"));
         // ensure that challenge is base64url encoded
         assertNotNull(challengeResponse.getBinary("challenge"));
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testRequestLoginDeprecatedAlias(TestContext should) {
+    final Async test = should.async();
+
+    WebAuthn4J webAuthN = WebAuthn4J.create(
+        rule.vertx(),
+        new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        .credentialStorage(database);
+
+    database.add(
+      new Authenticator()
+        .setUsername("paulo")
+        .setCredID("O3ZJlAdXvra6PwvL4I9AP99dS1_v3DDRuB_SwTAHFbUfMtvWTOFycCeb6CkXZXiPWi9Nr0ptUnlnHP3U40ptEA")
+        .setPublicKey("pQECAyYgASFYIBl0C67nFN_OwbODu_iE0hI5nM0ppUkqjhU9NhQvBaiLIlggffUTx8E6OM85huU3DcadeuaBBh8kGI8vdm3zesf3YRc")
+        .setCounter(2)
+    );
+
+    @SuppressWarnings("deprecation")
+    io.vertx.core.Future<JsonObject> future = webAuthN.getCredentialsOptions("paulo");
+    future
+      .onFailure(should::fail)
+      .onSuccess(challengeResponse -> {
+        assertNotNull(challengeResponse);
+        assertNotNull(challengeResponse.getString("challenge"));
+        assertNotNull(challengeResponse.getJsonArray("allowCredentials"));
         test.complete();
       });
   }
