@@ -17,11 +17,14 @@
 package io.vertx.ext.auth.sqlclient;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.sqlclient.impl.SqlAuthenticationImpl;
+import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
 
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Factory interface for creating {@link io.vertx.ext.auth.authentication.AuthenticationProvider} instances that use the Vert.x SQL client.
@@ -50,6 +53,24 @@ public interface SqlAuthentication extends AuthenticationProvider {
    */
   static SqlAuthentication create(SqlClient client, SqlAuthenticationOptions options) {
     return new SqlAuthenticationImpl(client, options);
+  }
+
+  /**
+   * Create a JDBC auth provider implementation that enriches the authenticated user with
+   * attributes extracted from the authentication query row.
+   * <p>
+   * The authentication query is expected to return the password in the first column, any other
+   * column is available to the given {@code attributeMapper}. The JSON object returned by the
+   * mapper is merged into the {@link io.vertx.ext.auth.User#attributes()} of the authenticated
+   * user.
+   *
+   * @param client          the JDBC client instance
+   * @param options         authentication options
+   * @param attributeMapper maps the authenticated row to extra user attributes, may return {@code null}
+   * @return the auth provider
+   */
+  static SqlAuthentication create(SqlClient client, SqlAuthenticationOptions options, Function<Row, JsonObject> attributeMapper) {
+    return new SqlAuthenticationImpl(client, options, attributeMapper);
   }
 
   /**

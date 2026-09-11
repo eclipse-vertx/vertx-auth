@@ -1,7 +1,8 @@
 CREATE TABLE `users`
 (
   username VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL
+  password VARCHAR(255) NOT NULL,
+  email    VARCHAR(255)
 );
 
 CREATE TABLE `users_roles`
@@ -30,7 +31,8 @@ ALTER TABLE users_roles
 
 insert into users
 values ('lopus',
-        '$pbkdf2$1drH02tXcgS5ipJIf8v/AlL/qm3CjAgAp7Qt3hyJx/c$/lONU4cTa3ayMRJbHIup47nX/1HhysyzDA0dpoFpsf727LoGH2OZ+SyFCGtv/pIEZK3mQtJv+yjzD+W0quF6xg');
+        '$pbkdf2$1drH02tXcgS5ipJIf8v/AlL/qm3CjAgAp7Qt3hyJx/c$/lONU4cTa3ayMRJbHIup47nX/1HhysyzDA0dpoFpsf727LoGH2OZ+SyFCGtv/pIEZK3mQtJv+yjzD+W0quF6xg',
+        'lopus@vertx.io');
 
 insert into roles_perms
 values ('dev', 'commit_code');

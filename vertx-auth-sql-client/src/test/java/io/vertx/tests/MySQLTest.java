@@ -1,5 +1,6 @@
 package io.vertx.tests;
 
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.Credentials;
@@ -8,6 +9,7 @@ import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.sqlclient.SqlAuthentication;
+import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions;
 import io.vertx.ext.auth.sqlclient.SqlAuthorization;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -107,6 +109,28 @@ public class MySQLTest {
         should.assertTrue(authenticate.failed());
         should.assertNull(authenticate.result());
         should.assertEquals("Invalid username/password", authenticate.cause().getMessage());
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testAuthenticateWithAttributeMapper(TestContext should) {
+    final Async test = should.async();
+
+    AuthenticationProvider authn = SqlAuthentication.create(mysql,
+      new SqlAuthenticationOptions()
+        .setAuthenticationQuery("SELECT password, email FROM users WHERE username = ?"),
+      row -> new JsonObject().put("email", row.getString("email")));
+
+    Credentials authInfo = new UsernamePasswordCredentials("lopus", "secret");
+
+    authn.authenticate(authInfo)
+      .onComplete(authenticate -> {
+        should.assertTrue(authenticate.succeeded());
+        final User user = authenticate.result();
+        should.assertNotNull(user);
+        should.assertEquals("lopus", user.principal().getString("username"));
+        should.assertEquals("lopus@vertx.io", user.attributes().getString("email"));
         test.complete();
       });
   }
