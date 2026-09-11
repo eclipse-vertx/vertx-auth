@@ -21,4 +21,6 @@ module io.vertx.auth.oauth2 {
   requires static io.vertx.codegen.json;
   requires static io.vertx.docgen;
 
+  exports io.vertx.ext.auth.oauth2.impl to io.vertx.tests;
+
 }

@@ -296,6 +296,7 @@ public class OAuth2Options {
 
   public OAuth2Options setClientAssertionType(String clientAssertionType) {
     this.clientAssertionType = clientAssertionType;
+    this.useBasicAuthorization = false;
     return this;
   }
 
@@ -623,28 +624,18 @@ public class OAuth2Options {
         case AUTH_CODE:
         case AUTH_JWT:
         case AAD_OBO:
-          if (clientAssertion == null && clientAssertionType == null) {
+          if (clientAssertionType == null) {
             // not using client assertions
             if (clientId == null) {
               throw new IllegalStateException("Configuration missing. You need to specify [clientId]");
             }
-          } else {
-            if (clientAssertion == null || clientAssertionType == null) {
-              throw new IllegalStateException(
-                "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
-            }
           }
           break;
         case PASSWORD:
-          if (clientAssertion == null && clientAssertionType == null) {
+          if (clientAssertionType == null) {
             // not using client assertions
             if (clientId == null) {
               LOG.debug("If you are using Client Oauth2 Resource Owner flow. You need to specify [clientId]");
-            }
-          } else {
-            if (clientAssertion == null || clientAssertionType == null) {
-              throw new IllegalStateException(
-                "Configuration missing. You need to specify [clientAssertion] AND [clientAssertionType]");
             }
           }
           break;
