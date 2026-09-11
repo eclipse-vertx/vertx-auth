@@ -129,6 +129,9 @@ A couple of well known OpenID Connect Discovery providers are:
 * Microsoft: `https://login.windows.net/common`
 * IBM Cloud: `https://<region-id>.appid.cloud.ibm.com/oauth/v4/<tenant-id>`
 * Amazon Cognito: `"https://cognito-idp.<region>.amazonaws.com/<user-pool-id>"`
+* Okta: `https://<your-okta-domain>` (org authorization server) or `https://<your-okta-domain>/oauth2/<authorization-server-id>`
+* Ory (Ory Network / Ory Hydra): `https://<project-slug>.projects.oryapis.com`
+* Twitch: `https://id.twitch.tv/oauth2`
 
 This and the given `client id/client secret` is enough to configure your auth provider object.
 
@@ -165,6 +168,7 @@ Currently we provide:
 * Azure Active Directory {@link io.vertx.ext.auth.oauth2.providers.AzureADAuth}
 * Box.com {@link io.vertx.ext.auth.oauth2.providers.BoxAuth}
 * CloudFoundry {@link io.vertx.ext.auth.oauth2.providers.CloudFoundryAuth}
+* Discord {@link io.vertx.ext.auth.oauth2.providers.DiscordAuth}
 * Dropbox {@link io.vertx.ext.auth.oauth2.providers.DropboxAuth}
 * Facebook {@link io.vertx.ext.auth.oauth2.providers.FacebookAuth}
 * Foursquare {@link io.vertx.ext.auth.oauth2.providers.FoursquareAuth}
@@ -178,11 +182,15 @@ Currently we provide:
 * LinkedIn {@link io.vertx.ext.auth.oauth2.providers.LinkedInAuth}
 * Live.com {@link io.vertx.ext.auth.oauth2.providers.LiveAuth}
 * Mailchimp {@link io.vertx.ext.auth.oauth2.providers.MailchimpAuth}
+* Okta {@link io.vertx.ext.auth.oauth2.providers.OktaAuth}
 * OpenIDConnect {@link io.vertx.ext.auth.oauth2.providers.OpenIDConnectAuth}
+* Ory {@link io.vertx.ext.auth.oauth2.providers.OryAuth}
 * Salesforce {@link io.vertx.ext.auth.oauth2.providers.SalesforceAuth}
 * Shopify {@link io.vertx.ext.auth.oauth2.providers.ShopifyAuth}
 * Soundcloud {@link io.vertx.ext.auth.oauth2.providers.SoundcloudAuth}
+* Spotify {@link io.vertx.ext.auth.oauth2.providers.SpotifyAuth}
 * Stripe {@link io.vertx.ext.auth.oauth2.providers.StripeAuth}
+* Twitch {@link io.vertx.ext.auth.oauth2.providers.TwitchAuth}
 * Twitter {@link io.vertx.ext.auth.oauth2.providers.TwitterAuth}
 
 === JBoss Keycloak
