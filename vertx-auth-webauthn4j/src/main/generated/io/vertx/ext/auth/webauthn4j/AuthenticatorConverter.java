@@ -17,6 +17,11 @@ public class AuthenticatorConverter {
             obj.setUsername((String)member.getValue());
           }
           break;
+        case "userId":
+          if (member.getValue() instanceof String) {
+            obj.setUserId((String)member.getValue());
+          }
+          break;
         case "type":
           if (member.getValue() instanceof String) {
             obj.setType((String)member.getValue());
@@ -68,6 +73,9 @@ public class AuthenticatorConverter {
    static void toJson(Authenticator obj, java.util.Map<String, Object> json) {
     if (obj.getUsername() != null) {
       json.put("username", obj.getUsername());
+    }
+    if (obj.getUserId() != null) {
+      json.put("userId", obj.getUserId());
     }
     if (obj.getType() != null) {
       json.put("type", obj.getType());
