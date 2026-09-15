@@ -181,16 +181,16 @@ public class OAuth2API {
     form.put("grant_type", grantType);
 
     if (!clientAuthentication(headers, form)) {
-      String clientId = config.getClientId();
-      if (clientId == null) {
-        if (config.getClientAssertionType() != null) {
-          form
-            .put("client_assertion_type", config.getClientAssertionType());
-        }
-        if (config.getClientAssertion() != null) {
-          form
-            .put("client_assertion", config.getClientAssertion());
-        }
+      // client authentication with an assertion, some providers (e.g.: Microsoft Entra, Keycloak)
+      // require the client_id to be present alongside the assertion, in this case the client_id
+      // is already part of the form
+      if (config.getClientAssertionType() != null) {
+        form
+          .put("client_assertion_type", config.getClientAssertionType());
+      }
+      if (config.getClientAssertion() != null) {
+        form
+          .put("client_assertion", config.getClientAssertion());
       }
     }
 
