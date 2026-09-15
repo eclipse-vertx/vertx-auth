@@ -50,7 +50,7 @@ public class NavigatorCredentialsCreateTest {
       .put("icon", "https://pics.example.com/00/p/aBjjjpqPb.png");
 
     webAuthN
-      .createCredentialsOptions(user)
+      .createPublicKeyCredentialCreationOptions(user)
       .onFailure(should::fail)
       .onSuccess(challengeResponse -> {
         assertNotNull(challengeResponse);
@@ -62,6 +62,33 @@ public class NavigatorCredentialsCreateTest {
         // ensure that challenge and user.id are base64url encoded
         assertNotNull(challengeResponse.getBinary("challenge"));
         assertNotNull(challengeResponse.getJsonObject("user").getBinary("id"));
+        test.complete();
+      });
+  }
+
+  @Test
+  public void testRequestRegisterDeprecatedAlias(TestContext should) {
+    final Async test = should.async();
+
+    WebAuthn4J webAuthN = WebAuthn4J.create(
+        rule.vertx(),
+        new WebAuthn4JOptions().setRelyingParty(new RelyingParty().setName("ACME Corporation")))
+        .credentialStorage(database);
+
+    JsonObject user = new JsonObject()
+      .put("id", "000000000000000000000000")
+      .put("name", "john.doe@email.com")
+      .put("displayName", "John Doe")
+      .put("icon", "https://pics.example.com/00/p/aBjjjpqPb.png");
+
+    @SuppressWarnings("deprecation")
+    io.vertx.core.Future<JsonObject> future = webAuthN.createCredentialsOptions(user);
+    future
+      .onFailure(should::fail)
+      .onSuccess(challengeResponse -> {
+        assertNotNull(challengeResponse);
+        assertNotNull(challengeResponse.getString("challenge"));
+        assertNotNull(challengeResponse.getJsonObject("rp"));
         test.complete();
       });
   }

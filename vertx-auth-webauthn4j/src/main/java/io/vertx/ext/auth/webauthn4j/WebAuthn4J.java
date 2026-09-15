@@ -61,19 +61,51 @@ public interface WebAuthn4J extends AuthenticationProvider {
    * @param user    - the user object with name and optionally displayName and icon
    * @return a future notified with the encoded make credentials request
    */
-  Future<JsonObject> createCredentialsOptions(JsonObject user);
+  Future<JsonObject> createPublicKeyCredentialCreationOptions(JsonObject user);
+
+  /**
+   * Gets a challenge and any other parameters for the {@code navigator.credentials.create()} call.
+   * <p>
+   * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
+   *
+   * @param user    - the user object with name and optionally displayName and icon
+   * @return a future notified with the encoded make credentials request
+   * @deprecated the name of this method is misleading, as it creates a {@code PublicKeyCredentialCreationOptions}
+   *             object, use {@link #createPublicKeyCredentialCreationOptions(JsonObject)} instead
+   */
+  @Deprecated
+  default Future<JsonObject> createCredentialsOptions(JsonObject user) {
+    return createPublicKeyCredentialCreationOptions(user);
+  }
 
   /**
    * Creates an assertion challenge and any other parameters for the {@code navigator.credentials.get()} call.
    * If the auth provider is configured with {@code RequireResidentKey} and the username is null then the
    * generated assertion will be a RK assertion (Usernameless).
    * <p>
-   * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptions</a>
+   * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptions</a>
    *
    * @param username    the unique user identified
    * @return a future notified with the server encoded get assertion request
    */
-  Future<JsonObject> getCredentialsOptions(@Nullable String username);
+  Future<JsonObject> createPublicKeyCredentialRequestOptions(@Nullable String username);
+
+  /**
+   * Creates an assertion challenge and any other parameters for the {@code navigator.credentials.get()} call.
+   * If the auth provider is configured with {@code RequireResidentKey} and the username is null then the
+   * generated assertion will be a RK assertion (Usernameless).
+   * <p>
+   * The object being returned is described here <a href="https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptions">https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptions</a>
+   *
+   * @param username    the unique user identified
+   * @return a future notified with the server encoded get assertion request
+   * @deprecated the name of this method is misleading, as it creates a {@code PublicKeyCredentialRequestOptions}
+   *             object, use {@link #createPublicKeyCredentialRequestOptions(String)} instead
+   */
+  @Deprecated
+  default Future<JsonObject> getCredentialsOptions(@Nullable String username) {
+    return createPublicKeyCredentialRequestOptions(username);
+  }
 
   /**
    * Provide a {@link CredentialStorage} that can fetch {@link Authenticator}s from storage and update them.
