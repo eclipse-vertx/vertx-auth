@@ -27,7 +27,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
 @VertxGen
-public interface LinkedInAuth {
+public interface LinkedInAuth extends OpenIDConnectAuth {
 
   /**
    * Create a OAuth2Auth provider for LinkedIn
@@ -52,9 +52,31 @@ public interface LinkedInAuth {
         .setHttpClientOptions(httpClientOptions)
         .setClientId(clientId)
         .setClientSecret(clientSecret)
-        .setSite("https://www.linkedin.com")
-        .setTokenPath("/oauth/v2/accessToken")
-        .setAuthorizationPath("/oauth/v2/authorization")
-        .setUserInfoPath("/people/~"));
+        .setSite("https://www.linkedin.com/oauth")
+        .setTokenPath("/v2/accessToken")
+        .setAuthorizationPath("/v2/authorization")
+        .setUserInfoPath("/v2/userinfo"));
+  }
+
+  /**
+   * Create a OAuth2Auth provider for OpenID Connect Discovery. The discovery will use the default site in the
+   * configuration options and attempt to load the well known descriptor. If a site is provided (for example when
+   * running on a custom instance) that site will be used to do the lookup.
+   * <p>
+   * If the discovered config includes a json web key url, it will be also fetched and the JWKs will be loaded
+   * into the OAuth provider so tokens can be decoded.
+   *
+   * @param vertx  the vertx instance
+   * @param config the initial config
+   * @return future with the instantiated Oauth2 provider instance handler
+   * @see SalesforceAuth#discover(Vertx, OAuth2Options, Handler)
+   */
+  static Future<OAuth2Auth> discover(final Vertx vertx, final OAuth2Options config) {
+    // don't override if already set
+    final String site = config.getSite() == null ? "https://www.linkedin.com/oauth" : config.getSite();
+
+    return OpenIDConnectAuth.discover(vertx,
+      new OAuth2Options(config)
+        .setSite(site));
   }
 }
