@@ -28,6 +28,7 @@ public class WebAuthn4JCredentials implements Credentials {
   private String challenge;
   private JsonObject webauthn;
   private String username;
+  private String userId;
   private String origin;
   private String domain;
 
@@ -62,6 +63,23 @@ public class WebAuthn4JCredentials implements Credentials {
 
   public WebAuthn4JCredentials setUsername(String username) {
     this.username = username;
+    return this;
+  }
+
+  /**
+   * The user handle (base64url encoded) of the user performing the ceremony, if known.
+   * <p>
+   * At registration ({@code webauthn.create}) it is the {@code user.id} that was sent to the browser in the
+   * creation options and it is stored with the new authenticator. At authentication ({@code webauthn.get}) it
+   * is optional; when the relying party has identified the user before the ceremony, setting it ensures that
+   * the credential used belongs to that user.
+   */
+  public String getUserId() {
+    return userId;
+  }
+
+  public WebAuthn4JCredentials setUserId(String userId) {
+    this.userId = userId;
     return this;
   }
 

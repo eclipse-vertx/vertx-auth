@@ -40,6 +40,17 @@ public class Authenticator {
   private String username;
 
   /**
+   * The user handle linked to this authenticator, as a base64url encoded string.
+   * <p>
+   * This is the {@code user.id} sent in the {@code PublicKeyCredentialCreationOptions} at registration time
+   * and the {@code userHandle} returned by the authenticator in the assertion response. It is a stable,
+   * non user identifiable, identifier of the account (see
+   * <a href="https://www.w3.org/TR/webauthn/#user-handle">https://www.w3.org/TR/webauthn/#user-handle</a>) and
+   * may be {@code null} for authenticators registered before this property was introduced.
+   */
+  private String userId;
+
+  /**
    * The type of key (must be "public-key")
    */
   private String type = "public-key";
@@ -93,6 +104,15 @@ public class Authenticator {
 
   public Authenticator setUsername(String username) {
     this.username = username;
+    return this;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public Authenticator setUserId(String userId) {
+    this.userId = userId;
     return this;
   }
 
