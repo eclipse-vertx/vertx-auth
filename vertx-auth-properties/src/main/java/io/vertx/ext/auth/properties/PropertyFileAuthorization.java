@@ -14,6 +14,7 @@ package io.vertx.ext.auth.properties;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
 import io.vertx.ext.auth.properties.impl.PropertyFileAuthenticationImpl;
 
@@ -33,6 +34,19 @@ public interface PropertyFileAuthorization extends AuthorizationProvider {
    */
   static PropertyFileAuthorization create(Vertx vertx, String path) {
     return new PropertyFileAuthenticationImpl(vertx, path);
+  }
+
+  /**
+   * Create a File authorization provider from the given property file content. Use this when the
+   * content is not stored on the file system, e.g.: loaded from the classpath, a remote location
+   * or preprocessed in memory.
+   *
+   * @param vertx  the Vert.x instance
+   * @param buffer the property file content
+   * @return the authorization provider
+   */
+  static PropertyFileAuthorization create(Vertx vertx, Buffer buffer) {
+    return new PropertyFileAuthenticationImpl(vertx, buffer);
   }
 
 }
